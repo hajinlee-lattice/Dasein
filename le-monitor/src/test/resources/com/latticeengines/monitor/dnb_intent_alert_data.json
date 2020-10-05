@@ -1,0 +1,173 @@
+{
+  "date_range": "09/02/2020 - 09/08/2020",
+  "num_buy_intents": 500,
+  "num_research_intents": 150,
+  "summary_text": "You have more companies with buying intent in this week than last week",
+  "top_industries": [
+    {
+      "name": "Technology",
+      "buy_percentage": 0.32,
+      "research_percentage": 0.64,
+      "num_intents": 150
+    },
+    {
+      "name": "Distribution",
+      "buy_percentage": 0.72,
+      "research_percentage": 0,
+      "num_intents": 35
+    },
+    {
+      "name": "Education",
+      "buy_percentage": 0,
+      "research_percentage": 0.32,
+      "num_intents": 16
+    },
+    {
+      "name": "Auto",
+      "buy_percentage": 0.16,
+      "research_percentage": 0,
+      "num_intents": 10
+    },
+    {
+      "name": "Auto",
+      "buy_percentage": 0.1,
+      "research_percentage": 0,
+      "num_intents": 5
+    }
+  ],
+  "top_locations": [
+    {
+      "name": "California",
+      "buy_percentage": 0.32,
+      "research_percentage": 0.64,
+      "num_intents": 150
+    },
+    {
+      "name": "Texas",
+      "buy_percentage": 0.72,
+      "research_percentage": 0,
+      "num_intents": 35
+    }
+  ],
+  "model_pairs": [
+    [
+      {
+        "name": "Hoover",
+        "intents": [
+          {
+            "stage": "Buying",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          },
+          {
+            "stage": "Buying",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          },
+          {
+            "stage": "Buying",
+            "company_name": "Google",
+            "location": "California"
+          },
+          {
+            "stage": "Buying",
+            "company_name": "ABC Inc.",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          }
+        ]
+      },
+      {
+        "name": "Optimizer",
+        "intents": [
+          {
+            "stage": "Buying",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "ABC Inc.",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "DnB",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          }
+        ]
+      }
+    ],
+    [
+      {
+        "name": "Atlas",
+        "intents": [
+          {
+            "stage": "Buying",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "Google",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "Facebook",
+            "location": "California"
+          }
+        ]
+      },
+      {
+        "name": "Data Vision",
+        "intents": [
+          {
+            "stage": "Buying",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "ABC Inc",
+            "location": "Texas"
+          },
+          {
+            "stage": "Research",
+            "company_name": "Google",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "Facebook",
+            "location": "California"
+          },
+          {
+            "stage": "Research",
+            "company_name": "Beta Brothers",
+            "location": "California"
+          }
+        ]
+      }
+    ]
+  ]
+}
