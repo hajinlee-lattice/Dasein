@@ -8,6 +8,7 @@ import static com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel.
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -414,6 +415,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
             log.warn("IDaaS response is parsed to null entitlement: {}", idaasResponse);
             return null;
         } else {
+            domains.removeIf(domain -> domain.getRecordTypes().isEmpty());
             return new DataBlockEntitlementContainer(domains);
         }
     }
@@ -421,12 +423,12 @@ public class AppendConfigServiceImpl implements AppendConfigService {
     private static DataBlockEntitlementContainer.Domain parseProduct(JsonNode productNode) {
         String productName = productNode.get("name").asText();
         DataDomain domain = parseDataDomain(productName);
-        Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> types = new HashMap<>();
+        Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> types = new EnumMap<>(DataRecordType.class);
         if (domain != null && hasNonEmptyArray(productNode, "packages")) {
             for (JsonNode packageNode : productNode.get("packages")) {
                 String packageName = packageNode.get("name").asText();
                 DataRecordType recordType = parseDataRecordType(packageName);
-                if (recordType != null && recordType != DataRecordType.Analytical) {
+                if (recordType != null) {
                     types.put(recordType, parseEntitlements(packageNode));
                 }
             }
@@ -434,6 +436,7 @@ public class AppendConfigServiceImpl implements AppendConfigService {
         if (types.isEmpty()) {
             return null;
         } else {
+            types.remove(DataRecordType.Analytical);
             return new DataBlockEntitlementContainer.Domain(domain, types);
         }
     }

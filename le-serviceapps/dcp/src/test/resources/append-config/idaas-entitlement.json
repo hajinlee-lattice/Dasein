@@ -211,6 +211,131 @@
       "name": "D&B for Supply",
       "packages": [
         {
+          "name": "Analytical Use",
+          "RUM_limits": [
+            {
+              "region": "US-Canada Records",
+              "limit": 100,
+              "overage": [
+                {
+                  "entitlement_canonical_name": null,
+                  "overage_selling_price": 0.0
+                }
+              ]
+            }
+          ],
+          "wallet": {
+            "allowance": 0,
+            "rate_card": []
+          },
+          "meter": null,
+          "entitlements": [
+            {
+              "canonical_name": "companyentityresolution",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "companyinfo",
+              "level": "Level 2",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2"
+              ]
+            },
+            {
+              "canonical_name": "principalscontacts",
+              "level": "Level 4",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3",
+                "L4"
+              ]
+            },
+            {
+              "canonical_name": "hierarchyconnections",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "companynews",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "industryprofile",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "diversityinsight",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "companyfinancials",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "eventfilings",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "paymentinsight",
+              "level": "Level 2",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2"
+              ]
+            },
+            {
+              "canonical_name": "ownershipinsight",
+              "level": "Level 1",
+              "status": "Active",
+              "allowed_levels": [
+                "L1"
+              ]
+            },
+            {
+              "canonical_name": "financialstrengthinsight",
+              "level": "Level 3",
+              "status": "Active",
+              "allowed_levels": [
+                "L1",
+                "L2",
+                "L3"
+              ]
+            }
+          ]
+        },
+        {
           "name": "Domain Master Data Use",
           "RUM_limits": [
             {
