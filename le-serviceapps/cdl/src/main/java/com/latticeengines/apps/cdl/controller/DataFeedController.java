@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -73,9 +72,6 @@ public class DataFeedController {
     private final PAValidationUtils paValidationUtils;
     private final AtlasExportService atlasExportService;
     private final ServingStoreService servingStoreService;
-
-    @Value("${cdl.processAnalyze.retry.expired.time}")
-    private long retryExpiredTime;
 
     @Inject
     public DataFeedController(ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter,
