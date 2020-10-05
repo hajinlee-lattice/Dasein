@@ -4,8 +4,8 @@ import com.latticeengines.domain.exposed.datacloud.`match`.VboUsageConstants
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.dcp.AnalyzeUsageConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.{CSVUtils}
-import org.apache.spark.sql.functions.{col, count, lit, sum}
+import com.latticeengines.spark.util.CSVUtils
+import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -27,7 +27,7 @@ class AnalyzeUsageJob extends AbstractSparkJob[AnalyzeUsageConfig] {
     outputWithAllFields = renamed
 
     if (outputFields.nonEmpty) {
-      for (field <- outputFields) {
+      for (field <- outputFields.diff(outputWithAllFields.columns)) {
         if (field == VboUsageConstants.ATTR_DRT) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getDRTAttr).cast(StringType))
         } else if (field == VboUsageConstants.ATTR_SUBSCRIBER_COUNTRY) {
@@ -41,7 +41,7 @@ class AnalyzeUsageJob extends AbstractSparkJob[AnalyzeUsageConfig] {
         }  else if (field == VboUsageConstants.ATTR_DELIVERY_CHANNEL) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit("Web Application").cast(StringType))
         }  else if (field == VboUsageConstants.ATTR_DELIVERY_MODE) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Transactional Batch").cast(StringType))
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Batch").cast(StringType))
         }  else if (field == VboUsageConstants.ATTR_APPID) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit("157").cast(StringType))
         }  else if (field == VboUsageConstants.ATTR_CAPPID) {

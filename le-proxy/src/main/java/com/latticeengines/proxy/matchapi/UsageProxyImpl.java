@@ -15,7 +15,7 @@ import com.latticeengines.proxy.exposed.matchapi.UsageProxy;
 public class UsageProxyImpl extends BaseRestApiProxy implements UsageProxy {
 
     public UsageProxyImpl() {
-        super(PropertyUtils.getProperty("common.matchapi.url"), "/usage");
+        super(PropertyUtils.getProperty("common.matchapi.url"), "/match/usage");
     }
 
     @Override

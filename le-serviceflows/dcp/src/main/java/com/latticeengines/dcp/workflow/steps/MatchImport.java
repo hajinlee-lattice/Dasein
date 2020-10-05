@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusUsageReportConfig;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.match.MatchRuleConfiguration;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -34,6 +35,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.proxy.exposed.dcp.MatchRuleProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
+import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 import com.latticeengines.serviceflows.workflow.match.BaseMatchStep;
 
 @Lazy
@@ -86,6 +88,11 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
         matchInput.setMatchDebugEnabled(false);
+
+        DplusUsageReportConfig usageReportConfig = new DplusUsageReportConfig();
+        usageReportConfig.setEnabled(true);
+        usageReportConfig.setPoaeIdField(InterfaceName.InternalId.name());
+        matchInput.setDplusUsageReportConfig(usageReportConfig);
 
         List<String> columnIds = configuration.getAppendConfig().getElementIds();
         List<Column> columns = columnIds.stream().map(c -> new Column(c, c)).collect(Collectors.toList());
