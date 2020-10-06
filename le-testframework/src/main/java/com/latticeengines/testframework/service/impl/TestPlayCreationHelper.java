@@ -332,10 +332,6 @@ public class TestPlayCreationHelper {
         return createdLookups;
     }
 
-    public static void main(String[] args) {
-        System.out.println(new Date().toString());
-    }
-
     public PlayLaunch launchPlayWorkflow(TestPlaySetupConfig testPlaySetupConfig, boolean useSpark) {
         List<PlayLaunchChannel> channels = playProxy.getPlayLaunchChannels(tenant.getId(), play.getName(), true);
         playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channels.get(0).getId(), channels.get(0), true);
@@ -1020,7 +1016,7 @@ public class TestPlayCreationHelper {
         MultiTenantContext.setTenant(tenant);
     }
 
-    public PlayLaunch createAccountContactTableForLaunch(String s3AvroDir, String version) throws IOException {
+    public PlayLaunch createS3CampaignLaunchWithThreeTables(String s3AvroDir, String version) throws IOException {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setLaunchState(LaunchState.Queued);
         List<PlayLaunchChannel> channels = playProxy.getPlayLaunchChannels(tenant.getId(), play.getName(), true);

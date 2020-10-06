@@ -145,7 +145,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
 
     @Test(groups = "deployment-app")
     public void testS3WorkflowWithLargeAccountContactRatio() throws Exception {
-        PlayLaunch playLaunch = testPlayCreationHelper.createAccountContactTableForLaunch(S3_AVRO_DIR, S3_ACCOUNT_CONTACT_RATION_AVRO_VERSION);
+        PlayLaunch playLaunch = testPlayCreationHelper.createS3CampaignLaunchWithThreeTables(S3_AVRO_DIR, S3_ACCOUNT_CONTACT_RATION_AVRO_VERSION);
         long workflowPid = testPlayCreationHelper.kickoffWorkflowForLaunch(testPlayCreationHelper.getTenant().getId(), defaultPlay.getName(), playLaunch.getId());
         String applicationId = workflowProxy.getApplicationIdByWorkflowJobPid(testPlayCreationHelper.getTenant().getId(), workflowPid);
         log.info(String.format("PlayLaunch Workflow application id is %s", applicationId));
