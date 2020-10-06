@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.dante.DanteConfigurationDocument;
 @Entity
 @Table(name = "DanteConfiguration", //
         indexes = { @Index(name = "IX_ID", columnList = "TenantId") }, //
-        uniqueConstraints = { @UniqueConstraint(name = "UX_ID", columnNames = { "TenantId", "UUID" }) })
+        uniqueConstraints = { @UniqueConstraint(name = "UX_ID", columnNames = { "TenantId" }) })
 public class DanteConfigEntity extends BaseMultiTenantDocEntity<DanteConfigurationDocument>
         implements DocumentEntity<DanteConfigurationDocument> {
 

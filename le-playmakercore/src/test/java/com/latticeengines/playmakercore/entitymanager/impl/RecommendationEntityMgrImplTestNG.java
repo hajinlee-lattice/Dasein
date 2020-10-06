@@ -9,12 +9,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,10 +103,8 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
         tenantCnt = recommendationEntityMgr.getAllTenantIds().size();
 
-        System.out.println(String.format(
-                "LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
-                        + "T1 = %s, T2 = %s, T3 = %s, T4 = %s",
-                LAUNCH_DATE, LAUNCH_1_DATE, LAUNCH_2_DATE, T1, T2, T3, T4));
+        System.out.println(String.format("LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
+                + "T1 = %s, T2 = %s, T3 = %s, T4 = %s", LAUNCH_DATE, LAUNCH_1_DATE, LAUNCH_2_DATE, T1, T2, T3, T4));
 
         recommendationWithoutOrgInfo = createRecommendationObject(LAUNCH_ID, LAUNCH_DATE, SFDC_ACCOUNT_ID, null, null,
                 "A");
@@ -173,7 +169,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         allRecommendationsAcrossAllLaunches.stream()//
                 .forEach(rec -> testGetRecommendationWithoutPlayId(rec));
     }
-
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationWithoutPlayId" })
     public void populateMoreRecommendations() throws InterruptedException {
@@ -247,8 +242,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         verifyRecommendationCount(0, 0, 0);
     }
 
-
-
     @Test(groups = "functional", dependsOnMethods = { "testDeleteRecommendationByCutoffDate" })
     public void testDeleteRecommendationByChurnedTenant() throws InterruptedException {
         populateMoreRecommendations();
@@ -269,14 +262,12 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         testGetTenantIds(tenantCnt);
     }
 
-
-
     private void testGetTenantIds(int count) {
         List<Long> tenantIds = recommendationEntityMgr.getAllTenantIds();
-        if (count == 0){
-            Assert.assertTrue(CollectionUtils.isEmpty(tenantIds));
+        if (count == 0) {
+            Assert.assertTrue(tenantIds.isEmpty());
         } else {
-            Assert.assertTrue(CollectionUtils.isNotEmpty(tenantIds));
+            Assert.assertTrue(!tenantIds.isEmpty());
             Assert.assertEquals(tenantIds.size(), count);
         }
     }
@@ -303,7 +294,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         }
     }
 
-    private void bulkDeleteByTenantId(Long tenantId, Date expireTimestamp,boolean hardDelete) {
+    private void bulkDeleteByTenantId(Long tenantId, Date expireTimestamp, boolean hardDelete) {
         boolean shouldLoop = true;
         while (shouldLoop) {
             int updatedCount = recommendationEntityMgr.cleanupInBulkByTenantId(tenantId, hardDelete, expireTimestamp,
@@ -317,7 +308,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     private void verifyDeletingCount(int count) {
         int result = recommendationEntityMgr.findDeletedRecommendationsByTenantId(TENANT_PID).size();
-        log.info("Recommendations soft deleted: "+ result);
+        log.info("Recommendations soft deleted: " + result);
         if (count == 0) {
             Assert.assertFalse(result > 0);
         } else {
@@ -437,8 +428,8 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     private void testGetAccountIdsByLaunchIds(List<String> launchIds) {
         MultiTenantContext.setTenant(tenant);
-        List<Map<String,Object>> accountInfos = recommendationEntityMgr.findAccountIdsFromRecommendationByLaunchId(launchIds, 0, 0,
-                1000);
+        List<Map<String, Object>> accountInfos = recommendationEntityMgr
+                .findAccountIdsFromRecommendationByLaunchId(launchIds, 0, 0, 1000);
         int num = recommendationEntityMgr.findAccountIdsCountFromRecommendationByLaunchId(launchIds, 0);
         System.out.print(launchIds);
         Assert.assertNotNull(accountInfos);
@@ -592,10 +583,9 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
         // TODO - enable it once fixed
         /*
-         * recommendationCount =
-         * recommendationEntityMgr.findRecommendationCount(
-         * lastModificationDate3, //
-         * SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
+         * recommendationCount = recommendationEntityMgr.findRecommendationCount(
+         * lastModificationDate3, // SynchronizationDestinationEnum.SFDC.toString(),
+         * null, orgInfo);
          *
          * Assert.assertEquals(recommendationCount, 1);
          *
@@ -605,10 +595,10 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
          * SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
          * Assert.assertNotNull(recommendations);
          * Assert.assertTrue(recommendations.size() > 0, String.format(
-         * "lastModificationDate3 = %s, (recommendationCount - minPageSize) = %d, "
-         * + "minPageSize = %d, orgInfo = %s, recommendations.size() = %d",
-         * lastModificationDate3.toString(), (recommendationCount -
-         * minPageSize), minPageSize, orgInfo, recommendations.size()));
+         * "lastModificationDate3 = %s, (recommendationCount - minPageSize) = %d, " +
+         * "minPageSize = %d, orgInfo = %s, recommendations.size() = %d",
+         * lastModificationDate3.toString(), (recommendationCount - minPageSize),
+         * minPageSize, orgInfo, recommendations.size()));
          * compareOriginalAndExtractedRecommendations(originalRecommendation,
          * recommendations.get(0));
          */
