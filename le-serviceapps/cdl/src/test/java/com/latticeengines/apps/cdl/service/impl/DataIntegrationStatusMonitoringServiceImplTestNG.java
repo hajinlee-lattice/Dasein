@@ -364,10 +364,6 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         updateStatusMonitorMessage.setEventDetail(accountDetail);
 
         dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
-        DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
-
-        Assert.assertNotNull(statusMonitor);
-        Assert.assertEquals(DataIntegrationEventType.DestinationAccountCreation.toString(), statusMonitor.getStatus());
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(testPlayLaunch.getId(), true);
         Assert.assertEquals(changedOrgId, playLaunch.getPlayLaunchChannel().getLookupIdMap().getOrgId());
