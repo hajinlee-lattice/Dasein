@@ -95,6 +95,13 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
 
     @Override
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Long> getAllTenantIds() {
+        return recommendationDao.getAllTenantIds();
+    }
+
+
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Recommendation findByRecommendationId(String recommendationId) {
         return recommendationDao.findByRecommendationId(recommendationId);
     }
@@ -109,6 +116,12 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Recommendation> findByLaunchIds(List<String> launchIds) {
         return recommendationDao.findByLaunchIds(launchIds);
+    }
+
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Recommendation> findDeletedRecommendationsByTenantId(Long tenantId){
+        return recommendationDao.findDeletedRecommendationsByTenantId(tenantId);
     }
 
     private String generateRecommendationId() {
@@ -166,6 +179,12 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
     @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public int deleteInBulkByPlayId(String playId, Date cutoffDate, boolean hardDelete, int maxUpdateRows) {
         return recommendationDao.deleteInBulkByPlayId(playId, cutoffDate, hardDelete, maxUpdateRows);
+    }
+
+    @Override
+    @Transactional(value = "datadb", propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public int cleanupInBulkByTenantId(Long tenantId, boolean hardDelete, Date expiredDate, int maxUpdateRows) {
+        return recommendationDao.cleanupInBulkByTenantId(tenantId, hardDelete, expiredDate, maxUpdateRows);
     }
 
     @Override

@@ -36,6 +36,8 @@ public interface RecommendationEntityMgr extends BaseEntityMgr<Recommendation> {
 
     int deleteInBulkByPlayId(String playId, Date cutoffDate, boolean hardDelete, int maxUpdateRows);
 
+    int cleanupInBulkByTenantId(Long tenantId, boolean hardDelete, Date expiredDate, int maxUpdateRows);
+
     List<Map<String, Object>> findAccountIdsFromRecommendationByLaunchId(List<String> launchIds, long start, int offset, int max);
 
     int findAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds, long start);
@@ -43,4 +45,8 @@ public interface RecommendationEntityMgr extends BaseEntityMgr<Recommendation> {
     List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, long start, int offset, int max);
 
     List<Map<String, Object>> findContactsByLaunchIds(List<String> launchIds, long start, int offset, int maximum, List<String> accountIds);
+
+    List<Long> getAllTenantIds();
+
+    List<Recommendation> findDeletedRecommendationsByTenantId(Long tenantId);
 }

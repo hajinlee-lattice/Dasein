@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.hibernate.type.BigIntegerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -76,6 +77,19 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Query<Recommendation> query = session.createQuery(queryStr);
         query.setParameterList("launchIds", launchIds);
         query.setParameter("deleted", Boolean.FALSE);
+        return query.list();
+    }
+
+    @Override
+    public List<Recommendation> findDeletedRecommendationsByTenantId(Long tenantId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Recommendation> entityClz = getEntityClass();
+        String queryStr = String.format("FROM %s " //
+                + "WHERE TENANT_ID =:tenantId " //
+                + "AND deleted = :deleted ", entityClz.getSimpleName());
+        Query<Recommendation> query = session.createQuery(queryStr);
+        query.setParameter("tenantId", tenantId);
+        query.setParameter("deleted", Boolean.TRUE);
         return query.list();
     }
 
@@ -168,21 +182,6 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setParameter("deleted", Boolean.FALSE);
         return ((Long) query.uniqueResult()).intValue();
     }
-
-    // private List<String> findAccountIdsByLaunchId(List<String> launchId) {
-    // Session session = getSessionFactory().getCurrentSession();
-    // Class<Recommendation> entityClz = getEntityClass();
-    // String queryStr = String.format("FROM %s " //
-    // + "WHERE launchId = :launchId " //
-    // + "AND deleted = :deleted ", entityClz.getSimpleName());
-    // Query<Recommendation> query = session.createQuery(queryStr);
-    // query.setParameter("launchId", launchId);
-    // if (!CollectionUtils.isEmpty(playIds)) {
-    // query.setParameterList("playIds", playIds);
-    // }
-    // query.setParameter("deleted", Boolean.FALSE);
-    // return query.list();
-    // }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -373,6 +372,34 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         return query.executeUpdate();
     }
 
+    @Override
+    public int cleanupInBulkByTenantId(Long tenantId, boolean hardDelete, Date expiredDate, int maxUpdateRows) {
+        Session session = getSessionFactory().getCurrentSession();
+
+        String hardDeleteQueryStr = "DELETE FROM " + getEntityClass().getSimpleName()
+                + " WHERE TENANT_ID =:tenantId AND UNIX_TIMESTAMP(launchDate) <= :launchDate AND deleted = :deleted ";
+
+        String softDeleteQueryStr = "UPDATE " + getEntityClass().getSimpleName() + " " //
+                + "SET deleted = :deleted " //
+                + "WHERE TENANT_ID =:tenantId AND deleted = :notDeleted ";
+
+        Query<?> query;
+        if (hardDelete) {
+            query = session.createQuery(hardDeleteQueryStr);
+            query.setParameter("launchDate", new BigInteger((dateToUnixTimestamp(expiredDate).toString())),
+                    BigIntegerType.INSTANCE);
+        } else {
+            query = session.createQuery(softDeleteQueryStr);
+            query.setParameter("notDeleted", Boolean.FALSE);
+        }
+        query.setParameter("tenantId", tenantId);
+        query.setParameter("deleted", Boolean.TRUE);
+        query.setMaxResults(maxUpdateRows);
+
+        return query.executeUpdate();
+
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public int deleteInBulkByCutoffDate(Date cutoffDate, boolean hardDelete, int maxUpdateRows) {
@@ -500,5 +527,15 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             }
         });
         return contacts;
+    }
+
+    @Override
+    public List<Long> getAllTenantIds() {
+
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = "SELECT DISTINCT tenantId FROM " + getEntityClass().getSimpleName();
+        Query<Long> query = session.createQuery(queryStr);
+
+        return query.list();
     }
 }
