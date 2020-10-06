@@ -62,6 +62,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     private static final String ATTR_KEY = "key";
     private static final String ATTR_TTL = "ttl";
     private static final String ATTR_CREATED_TIME = "createTime";
+    private static final String ORIGIN = "https://connect.dnb.com";
 
     @Inject
     private DnBAuthenticationService dnBAuthenticationService;
@@ -310,6 +311,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     private HttpEntity<String> constructEntity(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        headers.add(HttpHeaders.ORIGIN, ORIGIN);
         return new HttpEntity<>("", headers);
     }
 
