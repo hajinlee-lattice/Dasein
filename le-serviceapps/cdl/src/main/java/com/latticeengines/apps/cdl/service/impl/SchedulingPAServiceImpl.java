@@ -458,8 +458,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(feed,
                     DataFeedExecutionJobType.PA);
         }
-        return new SchedulingStatus(customerSpace, schedulerEnabled, feed, execution,
-                retryValidation(execution, customerSpace));
+
+        boolean isHandHoldPATenant = isHandHoldPATenant(customerSpace);
+        SchedulingStatus status = new SchedulingStatus(customerSpace, schedulerEnabled, feed, execution,
+                !isHandHoldPATenant && retryValidation(execution, customerSpace));
+        status.setHandHoldPATenant(isHandHoldPATenant);
+        return status;
     }
 
     private ZoneId getTenantTimezone(@NotNull String tenantId) {
