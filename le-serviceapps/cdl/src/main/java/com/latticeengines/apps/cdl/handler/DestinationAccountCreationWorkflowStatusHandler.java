@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
@@ -14,7 +15,9 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
+@Component
 public class DestinationAccountCreationWorkflowStatusHandler implements WorkflowStatusHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DestinationAccountCreationWorkflowStatusHandler.class);
@@ -44,17 +47,17 @@ public class DestinationAccountCreationWorkflowStatusHandler implements Workflow
         AccountEventDetail eventDetail = (AccountEventDetail) status.getEventDetail();
 
         if (statusMonitor.getEntityName().equals("PlayLaunch")) {
-            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId(), false);
+            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId(), true);
             if (playLaunch == null) {
                 log.error("DataIntegrationStatusMonitor NOT updated: Entity " + statusMonitor.getEntityId()
                         + "is not returning the playLaunch.");
                 return statusMonitor;
             }
-
-            LookupIdMap lookupIdMap = playLaunch.getPlayLaunchChannel().getLookupIdMap();
-            String orgId = eventDetail.getAccountId();
+            PlayLaunchChannel playLaunchChannel = playLaunch.getPlayLaunchChannel();
+            LookupIdMap lookupIdMap = playLaunchChannel.getLookupIdMap();
+            String newOrgId = eventDetail.getAccountId();
             
-            lookupIdMappingService.updateLookupIdMapOrgId(lookupIdMap.getId(), orgId);
+            lookupIdMappingService.updateLookupIdMapOrgId(lookupIdMap.getId(), newOrgId);
         }
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);

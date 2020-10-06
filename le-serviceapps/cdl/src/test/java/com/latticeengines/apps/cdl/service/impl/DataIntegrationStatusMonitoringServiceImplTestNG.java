@@ -29,6 +29,7 @@ import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.domain.exposed.cdl.AccountEventDetail;
 import com.latticeengines.domain.exposed.cdl.AudienceEventDetail;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -78,6 +79,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
     private String org1 = "org1_" + CURRENT_TIME_MILLIS;
     private String org2 = "org2_" + CURRENT_TIME_MILLIS;
+    private String changedOrgId = "changedOrgId_" + CURRENT_TIME_MILLIS;
     private String orgName = "org_name";
     private List<PlayType> playTypes;
     private Set<RatingBucketName> bucketsToLaunch;
@@ -243,11 +245,13 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
         testAudienceSizeUpdateMessage(workflowRequestId, playLaunch1);
 
+        testDestinationAccountCreationMessage(workflowRequestId, playLaunch1);
+
         List<DataIntegrationStatusMessage> messages = dataIntegrationStatusMessageEntityMgr
                 .getAllStatusMessages(statusMonitor.getPid());
 
         Assert.assertNotNull(messages);
-        Assert.assertEquals(messages.size(), 4);
+        Assert.assertEquals(messages.size(), 5);
     }
 
     @Test(groups = "functional")
@@ -346,6 +350,27 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(testPlayLaunch.getId(), false);
         Assert.assertEquals(Long.valueOf(2), playLaunch.getAudienceSize());
         Assert.assertEquals(Long.valueOf(2), playLaunch.getMatchedCount());
+    }
+
+    private void testDestinationAccountCreationMessage(String workflowRequestId, PlayLaunch testPlayLaunch) {
+        DataIntegrationStatusMonitorMessage updateStatusMonitorMessage = new DataIntegrationStatusMonitorMessage();
+        updateStatusMonitorMessage.setWorkflowRequestId(workflowRequestId);
+        updateStatusMonitorMessage.setEventType(DataIntegrationEventType.DestinationAccountCreation.toString());
+        updateStatusMonitorMessage.setEventTime(new Date());
+        updateStatusMonitorMessage.setMessageType(MessageType.Event.toString());
+
+        AccountEventDetail accountDetail = new AccountEventDetail();
+        accountDetail.setAccountId(changedOrgId);
+        updateStatusMonitorMessage.setEventDetail(accountDetail);
+
+        dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
+        DataIntegrationStatusMonitor statusMonitor = findDataIntegrationMonitorByWorkflowReqId(workflowRequestId);
+
+        Assert.assertNotNull(statusMonitor);
+        Assert.assertEquals(DataIntegrationEventType.DestinationAccountCreation.toString(), statusMonitor.getStatus());
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(testPlayLaunch.getId(), true);
+        Assert.assertEquals(changedOrgId, playLaunch.getPlayLaunchChannel().getLookupIdMap().getOrgId());
     }
 
     private PlayLaunch createPlayLaunch(Play play, String launchId, LaunchState launchState, Set<RatingBucketName> bucketToLaunch,
