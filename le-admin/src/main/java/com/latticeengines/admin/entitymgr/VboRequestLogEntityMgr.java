@@ -13,7 +13,7 @@ public interface VboRequestLogEntityMgr extends BaseEntityMgrRepository<VboReque
 
     List<VboRequestLog> findByTenantId(String tenantId);
 
-    void save(VboRequestLog vboRequestLog);
+    VboRequestLog save(VboRequestLog vboRequestLog);
 
     void updateVboResponse(String traceId, VboResponse vboResponse);
 

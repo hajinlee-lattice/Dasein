@@ -10,6 +10,6 @@
     <aop:aspectj-autoproxy/>
 
     <bean id="appMultiTenancyAspect"
-          class="com.latticeengines.app.exposed.entitymanager.impl.AppMultiTenantEntityMgrAspect"/>
+          class="com.latticeengines.app.exposed.aspect.AppMultiTenantEntityMgrAspect"/>
 
 </beans>

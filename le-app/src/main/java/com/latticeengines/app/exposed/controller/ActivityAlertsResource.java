@@ -9,18 +9,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.app.exposed.service.ActivityAlertsService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityAlertsConfig;
+import com.latticeengines.domain.exposed.cdl.activity.AlertCategory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
@@ -42,6 +47,9 @@ public class ActivityAlertsResource {
     @Inject
     private ActivityStoreProxy activityStoreProxy;
 
+    @Inject
+    private ActivityAlertsService activityAlertsService;
+
     @GetMapping("/config")
     @ResponseBody
     @ApiOperation(value = "Retrieve configuration of activity alerts an tenant")
@@ -54,6 +62,22 @@ public class ActivityAlertsResource {
         }
         return activityStoreProxy
                 .getActivityAlertsConfiguration(CustomerSpace.shortenCustomerSpace(customerSpace.toString()));
+    }
+
+    @GetMapping("/accounts/{accountId:.+}")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve activity alerts for the given Account")
+    @SuppressWarnings("ConstantConditions")
+    public DataPage getActivityAlertsByAccount(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken,
+            @PathVariable String accountId, //
+            @RequestParam(value = "category") AlertCategory category,
+            @RequestParam(value = "max", required = false) int max) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
+            throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
+        }
+        return activityAlertsService.findActivityAlertsByAccountAndCategory(customerSpace.getTenantId(), accountId,
+                category, 3, getOrgInfo(authToken));
     }
 
     private Map<String, String> getOrgInfo(String token) {

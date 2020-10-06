@@ -52,24 +52,4 @@ public class BaseJpaRepositoryImpl<T, ID extends Serializable> extends SimpleJpa
     public SessionFactory getSessionFactory() {
         return sessionFactory;
     }
-
-    /*
-     * @SuppressWarnings("unchecked")
-     *
-     * @Override public <S extends T> S save(S entity) { if
-     * (entityInformation.isNew(entity)) {
-     * getSessionFactory().getCurrentSession().persist(entity); return entity; }
-     * else { return (S) getSessionFactory().getCurrentSession().merge(entity);
-     * } }
-     *
-     * @Override public void delete(T entity) { if(log.isDebugEnabled())
-     * log.debug("Deleting Entity: " + entity); if (entity == null) { return; }
-     *
-     * Session currSession = getSessionFactory().getCurrentSession();
-     * currSession.delete(currSession.contains(entity) ? entity:
-     * currSession.merge(entity)); currSession.flush(); }
-     *
-     * @Override public void flush() {
-     * getSessionFactory().getCurrentSession().flush(); }
-     */
 }

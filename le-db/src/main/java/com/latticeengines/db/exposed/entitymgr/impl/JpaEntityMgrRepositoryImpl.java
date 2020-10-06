@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 
-public abstract class JpaEntityMgrRepositoryImpl <T, ID> implements BaseEntityMgrRepository<T , ID> {
+public abstract class JpaEntityMgrRepositoryImpl<T, ID> implements BaseEntityMgrRepository<T, ID> {
 
     public abstract BaseJpaRepository<T, ID> getRepository();
 
@@ -37,9 +37,9 @@ public abstract class JpaEntityMgrRepositoryImpl <T, ID> implements BaseEntityMg
         save(entity);
     }
 
-    public void save(T entity) {
+    public T save(T entity) {
         setAuditingFields(entity);
-        getRepository().save(entity);
+        return getRepository().save(entity);
     }
 
     @Override
@@ -64,14 +64,15 @@ public abstract class JpaEntityMgrRepositoryImpl <T, ID> implements BaseEntityMg
 
     @Override
     public T findByKey(T entity) {
-        throw new UnsupportedOperationException("findByKey not implemented in JPA entity mgr yet, because we don't want to enforce Long PID.");
+        throw new UnsupportedOperationException(
+                "findByKey not implemented in JPA entity mgr yet, because we don't want to enforce Long PID.");
     }
 
     @Override
     public T findByField(String fieldName, Object value) {
         throw new UnsupportedOperationException("findByField not implemented in JPA entity mgr yet.");
     }
-    
+
     @Override
     public ParsedDependencies parse(T entity, T existingEntity) {
         return null;

@@ -66,8 +66,7 @@ public enum InterfaceName {
     Country, //
     PhoneNumber, SecondaryPhoneNumber, OtherPhoneNumber, //
     Address_Street_1, //
-    Address_Street_2,
-    ContactCity, ContactState, ContactCountry, ContactPostalCode, //
+    Address_Street_2, ContactCity, ContactState, ContactCountry, ContactPostalCode, //
     Contact_Address_Street_1, Contact_Address_Street_2, //
     PrimaryMobileDeviceID, SecondaryMobileDeviceID, OtherMobileDeviceID, //
 
@@ -167,14 +166,14 @@ public enum InterfaceName {
     Detail2, Detail1, EventTimestamp, EventType, StreamType, Source,
 
     // activity alert
-    AlertData, AlertName, CreationTimestamp, //
+    AlertData, AlertName, CreationTimestamp, AlertCategory, //
 
     PartitionKey, SortKey,
 
-    //DCP
+    // DCP
     RegistrationNumber,
 
-    //timelineExport
+    // timelineExport
     DomesticUltimateDuns, GlobalUltimateDuns, IsPrimaryDomain, EventDate, Count,
 
     // Internal
@@ -201,7 +200,7 @@ public enum InterfaceName {
      */
     public static boolean isKeyId(String id, boolean caseSensitive) {
         if (caseSensitive) {
-            // Stripe out the prefix, if it exists
+            // Strip out the prefix, if it exists
             String[] strs = id.split("__");
             return KeyIds.contains(strs[strs.length - 1]);
         } else {
