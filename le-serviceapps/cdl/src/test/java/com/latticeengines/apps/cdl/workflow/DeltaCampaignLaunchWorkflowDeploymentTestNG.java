@@ -121,7 +121,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
                 .audienceType(AudienceType.ACCOUNTS).addContactsTable(addContactsTable)
                 .removeContactsTable(removeContactsTable).build();
         liverampTestPlaySetupConfig = new TestPlaySetupConfig.Builder().mockRatingTable(false).testPlayCrud(false)
-                .addChannel(liverampTestPlayChannelSetupConfig)
+                .addChannel(liverampTestPlayChannelSetupConfig).addChannel(testPerformancePlayChannelConfig)
                 .existingTenant(testPlayCreationHelper.getCustomerSpace()).build();
         testPlayCreationHelper.setupTenantAndCreatePlay(liverampTestPlaySetupConfig);
         testBed = testPlayCreationHelper.getDeploymentTestBed();
@@ -133,6 +133,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         defaultPlay = testPlayCreationHelper.getPlay();
         defaultPlayLaunch = testPlayCreationHelper.getPlayLaunch();
         defaultPlayLaunch.setPlay(defaultPlay);
+        testPlayCreationHelper.removeExistingTenant(testBed.getMainTestTenant().getId());
     }
 
     @Override
@@ -140,6 +141,16 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
     public void testWorkflow() throws Exception {
         testLiveRampPlayLaunchWorkflow();
         verifyTest();
+    }
+
+    @Test(groups = "deployment-app")
+    public void testS3WorkflowWithLargeAccountContactRatio() throws Exception {
+        PlayLaunch playLaunch = testPlayCreationHelper.createS3CampaignLaunchWithThreeTables(S3_AVRO_DIR, S3_ACCOUNT_CONTACT_RATION_AVRO_VERSION);
+        long workflowPid = testPlayCreationHelper.kickoffWorkflowForLaunch(testPlayCreationHelper.getTenant().getId(), defaultPlay.getName(), playLaunch.getId());
+        String applicationId = workflowProxy.getApplicationIdByWorkflowJobPid(testPlayCreationHelper.getTenant().getId(), workflowPid);
+        log.info(String.format("PlayLaunch Workflow application id is %s", applicationId));
+        JobStatus completedStatus = waitForWorkflowStatus(applicationId, false);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Override

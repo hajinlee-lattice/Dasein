@@ -93,4 +93,6 @@ public interface GlobalAuthTestBed {
     void loginAD();
 
     void cleanupSession(Tenant tenant, AccessLevel level);
+
+    void removeExistingTenant(String tenantId);
 }
