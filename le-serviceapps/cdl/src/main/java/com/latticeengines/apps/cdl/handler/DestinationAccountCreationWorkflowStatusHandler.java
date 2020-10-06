@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.domain.exposed.cdl.AccountEventDetail;
@@ -28,9 +27,6 @@ public class DestinationAccountCreationWorkflowStatusHandler implements Workflow
     @Inject
     private LookupIdMappingService lookupIdMappingService;
 
-    @Inject
-    private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
-
     @Override
     public DataIntegrationEventType getEventType() {
         return DataIntegrationEventType.DestinationAccountCreation;
@@ -41,8 +37,6 @@ public class DestinationAccountCreationWorkflowStatusHandler implements Workflow
             DataIntegrationStatusMonitorMessage status) {
 
         checkStatusMonitorExists(statusMonitor, status);
-
-        statusMonitor.setStatus(DataIntegrationEventType.DestinationAccountCreation.toString());
 
         AccountEventDetail eventDetail = (AccountEventDetail) status.getEventDetail();
 
@@ -60,7 +54,7 @@ public class DestinationAccountCreationWorkflowStatusHandler implements Workflow
             lookupIdMappingService.updateLookupIdMapOrgId(lookupIdMap.getId(), newOrgId);
         }
 
-        return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
+        return statusMonitor;
     }
 
 }
