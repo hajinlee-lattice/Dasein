@@ -260,6 +260,23 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         return lookupIdMap;
     }
 
+    @Override
+    public LookupIdMap updateLookupIdMapOrgId(String id, String orgId) {
+        LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(id);
+        if (existingLookupIdMap != null) {
+            if (orgId != null) {
+                existingLookupIdMap.setOrgId(orgId);
+            } else {
+                throw new RuntimeException("Empty Org Id.");
+            }
+        } else {
+            throw new RuntimeException(String.format("No registration exists for id %s yet, update not allowed. "
+                    + "Will replace this exception with proper LEDP exception.", id));
+        }
+
+        return lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap);
+    }
+
     private String getUIFriendlyExportFolder(String exportFolderPath) {
         return exportFolderPath.replace(getProtocolPrefix(), "");
     }
