@@ -187,6 +187,10 @@ public class TestPlayCreationHelper {
         postInitializeTenantCreation(tenant.getId());
     }
 
+    public void removeExistingTenant(String tenantId) {
+        deploymentTestBed.removeExistingTenant(tenantId);
+    }
+
     private void postInitializeTenantCreation(String fullTenantId) {
         tenant = tenantEntityMgr.findByTenantId(fullTenantId);
         log.info("Tenant = " + tenant.getId());
@@ -314,7 +318,7 @@ public class TestPlayCreationHelper {
             lookupIdMap.setTenant(tenant);
             lookupIdMap.setExternalSystemType(config.getDestinationSystemType());
             lookupIdMap.setExternalSystemName(config.getDestinationSystemName());
-            lookupIdMap.setOrgName("OrgName_" + new Date().toString());
+            lookupIdMap.setOrgName("OrgName_" + new Date().getTime());
             lookupIdMap.setOrgId(config.getDestinationSystemId());
             ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
             extSysAuth.setTrayAuthenticationId(config.getTrayAuthenticationId());
@@ -1012,11 +1016,15 @@ public class TestPlayCreationHelper {
         MultiTenantContext.setTenant(tenant);
     }
 
-    public PlayLaunch createAccountContactTableForLaunch(String s3AvroDir, String version) throws IOException {
+    public PlayLaunch createS3CampaignLaunchWithThreeTables(String s3AvroDir, String version) throws IOException {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setLaunchState(LaunchState.Queued);
         List<PlayLaunchChannel> channels = playProxy.getPlayLaunchChannels(tenant.getId(), play.getName(), true);
-        playLaunch = playProxy.createNewLaunchByPlayAndChannel(tenantIdentifier, play.getName(), channels.get(0).getId(), false, playLaunch);
+        Optional<PlayLaunchChannel> optionalPlayLaunchChannel =
+                channels.stream().filter(playLaunchChannel -> CDLExternalSystemName.AWS_S3.equals(playLaunchChannel.getLookupIdMap().getExternalSystemName())).findFirst();
+        Assert.assertNotNull(optionalPlayLaunchChannel);
+        playLaunch = playProxy.createNewLaunchByPlayAndChannel(tenantIdentifier, play.getName(),
+                optionalPlayLaunchChannel.get().getId(), false, playLaunch);
         playLaunch.setAddAccountsTable(cdlTestDataService.createLaunchTable(tenantIdentifier, s3AvroDir, version, addedAccounts));
         playLaunch.setAddContactsTable(cdlTestDataService.createLaunchTable(tenantIdentifier, s3AvroDir, version, addedContacts));
         playLaunch.setCompleteContactsTable(cdlTestDataService.createLaunchTable(tenantIdentifier, s3AvroDir, version, completeContacts));

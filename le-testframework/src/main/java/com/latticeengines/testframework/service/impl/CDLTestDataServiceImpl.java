@@ -99,6 +99,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private static final String S3_DIR = "le-testframework/cdl";
     private static final Date DATE = new Date();
     private static final String POD_QA = "/Pods/QA/";
+    private static final String POD_DEFAULT = "/Pods/Default/";
     private static final String POD_PATTERN = "/Pods/%s/";
     private static final String PATH_PATTERN = "/Contracts/(.*)/Tenants/";
 
@@ -127,8 +128,8 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     @Inject
     public CDLTestDataServiceImpl(TestArtifactService testArtifactService, MetadataProxy metadataProxy,
-            DataCollectionProxy dataCollectionProxy, RedshiftPartitionService redshiftPartitionService,
-            RatingEngineProxy ratingEngineProxy, BatonService batonService) {
+                                  DataCollectionProxy dataCollectionProxy, RedshiftPartitionService redshiftPartitionService,
+                                  RatingEngineProxy ratingEngineProxy, BatonService batonService) {
         this.testArtifactService = testArtifactService;
         this.metadataProxy = metadataProxy;
         this.dataCollectionProxy = dataCollectionProxy;
@@ -376,20 +377,20 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                 && ((AIModel) re.getPublishedIteration()).getPredictionType() == PredictionType.EXPECTED_VALUE) {
             return Flux.fromIterable(ratings).map(bkt -> {
                 switch (BucketName.fromValue(bkt)) {
-                case A:
-                    return 95.0D * 1000;
-                case B:
-                    return 70.0D * 1000;
-                case C:
-                    return 40.0D * 1000;
-                case D:
-                    return 20.0D * 1000;
-                case E:
-                    return 10.0D * 1000;
-                case F:
-                    return 5.0D * 1000;
-                default:
-                    return 0.0D * 1000;
+                    case A:
+                        return 95.0D * 1000;
+                    case B:
+                        return 70.0D * 1000;
+                    case C:
+                        return 40.0D * 1000;
+                    case D:
+                        return 20.0D * 1000;
+                    case E:
+                        return 10.0D * 1000;
+                    case F:
+                        return 5.0D * 1000;
+                    default:
+                        return 0.0D * 1000;
                 }
             }).collectList().block();
         }
@@ -404,20 +405,20 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
         return Flux.fromIterable(ratings).map(bkt -> {
             switch (BucketName.fromValue(bkt)) {
-            case A:
-                return 95.0D;
-            case B:
-                return 70.0D;
-            case C:
-                return 40.0D;
-            case D:
-                return 20.0D;
-            case E:
-                return 10.0D;
-            case F:
-                return 5.0D;
-            default:
-                return 0.0D;
+                case A:
+                    return 95.0D;
+                case B:
+                    return 70.0D;
+                case C:
+                    return 40.0D;
+                case D:
+                    return 20.0D;
+                case E:
+                    return 10.0D;
+                case F:
+                    return 5.0D;
+                default:
+                    return 0.0D;
             }
         }).collectList().block();
     }
@@ -465,7 +466,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     }
 
     private List<Pair<String, Class<?>>> createRatingTable(String tenantId, String ratingTableName,
-            List<String> engineIds) {
+                                                           List<String> engineIds) {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
         schema.add(Pair.of(InterfaceName.AccountId.name(), String.class));
         for (String engineId : engineIds) {
@@ -563,7 +564,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     }
 
     private void populateServingStore(String tenantId, BusinessEntity entity, String s3Version, //
-            ConcurrentMap<String, Long> entityCounts) {
+                                      ConcurrentMap<String, Long> entityCounts) {
         if (entity.getServingStore() != null) {
             Long count = populateTableRole(tenantId, entity.getServingStore(), s3Version);
             if (count != null) {
@@ -680,12 +681,12 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
             hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
         }
-        hdfsPath = hdfsPath.replaceAll(POD_QA, String.format(POD_PATTERN, podId));
         log.info("Parse extract path {}.", hdfsPath);
         Pattern pattern = Pattern.compile(PATH_PATTERN);
         Matcher matcher = pattern.matcher(hdfsPath);
         String str = JsonUtils.serialize(jsonNode);
         str = str.replaceAll(POD_QA, String.format(POD_PATTERN, podId));
+        str = str.replaceAll(POD_DEFAULT, String.format(POD_PATTERN, podId));
         String tenantName = null;
         if (matcher.find()) {
             tenantName = matcher.group(1);
@@ -693,14 +694,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
         if (StringUtils.isNotEmpty(tenantName)) {
             String testTenant = CustomerSpace.parse(tenantId).getTenantId();
-            String hdfsPathSegment1 = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
-            String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
-            String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantName, testTenant) + hdfsPathSegment2;
-            String hdfsPathReplace = hdfsPath.replaceAll(tenantName, testTenant);
-            log.info("hdfsPathFinal is {}.", hdfsPathFinal);
-            log.info("hdfsPathReplace is {}.", hdfsPathReplace);
             str = str.replaceAll(tenantName, testTenant);
-            str = str.replaceAll(hdfsPathReplace, hdfsPathFinal);
         }
         return JsonUtils.deserialize(str, Table.class);
     }

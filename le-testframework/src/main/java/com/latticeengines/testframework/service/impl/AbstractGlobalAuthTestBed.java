@@ -312,6 +312,12 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         return tenant;
     }
 
+    @Override
+    public void removeExistingTenant(String tenantId) {
+        String fullTenantId = CustomerSpace.parse(tenantId).toString();
+        excludedCleanupTenantIds.remove(fullTenantId);
+    }
+
     /**
      * Use an already logged in UserDocument
      *

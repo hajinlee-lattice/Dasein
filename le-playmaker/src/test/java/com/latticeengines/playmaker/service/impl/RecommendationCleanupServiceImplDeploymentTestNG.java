@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -19,6 +21,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -36,6 +39,8 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 @ContextConfiguration(locations = { "classpath:test-testframework-cleanup-context.xml",
         "classpath:playmakercore-context.xml", "classpath:test-playmaker-context.xml" })
 public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
+
+    private static final Logger log = LoggerFactory.getLogger(RecommendationCleanupServiceImplDeploymentTestNG.class);
 
     @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
@@ -78,43 +83,31 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         List<Recommendation> recommendations = recommendationEntityMgr.findAll();
         Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
 
+        List<Long> tenantIds = recommendationEntityMgr.getAllTenantIds();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(tenantIds));
+
         orgInfo = new HashMap<>();
         orgInfo.put(CDLConstants.ORG_ID, "DOID");
         orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, "CRM");
 
-        createDummyRecommendations(maxUpdateRows * 2, new Date());
+        createDummyRecommendations(maxUpdateRows * 2, new Date(), tenant.getPid());
     }
 
     @Test(groups = "deployment")
     public void testCleanupRecommendationsWhenNoDeletedPlays() throws Exception {
 
-        List<Recommendation> recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
-        int countOfNonDeletedRecommendations = recommendations.size();
-        Assert.assertEquals(countOfNonDeletedRecommendations, maxUpdateRows * 2);
+        int countOfNonDeletedRecommendations = validateRecommendations(maxUpdateRows * 2);
 
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
                 .cleanupRecommendationsDueToDeletedPlays();
         Assert.assertEquals(count, 0);
 
-        recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
-
-        Assert.assertEquals(recommendations.size(), countOfNonDeletedRecommendations);
+        validateRecommendations(countOfNonDeletedRecommendations);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsWhenNoDeletedPlays" })
     public void testCleanupRecommendationsDueToDeletedPlays() throws Exception {
-        List<Recommendation> recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
-        int countOfNonDeletedRecommendations = recommendations.size();
-        Assert.assertEquals(countOfNonDeletedRecommendations, maxUpdateRows * 2);
+        int countOfNonDeletedRecommendations = validateRecommendations(maxUpdateRows * 2);
 
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
                 .cleanupRecommendationsDueToDeletedPlays(Arrays.asList(play.getName()));
@@ -125,51 +118,31 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         // Assert.assertEquals(count, countOfNonDeletedRecommendations);
         playProxy.deletePlay(tenant.getId(), play.getName(), false);
 
-        recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
+        validateRecommendations(0);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsDueToDeletedPlays" })
     public void testCleanupAfterCleanupRecommendationsDueToDeletedPlays() throws Exception {
-        createDummyRecommendations(maxUpdateRows * 2, new Date());
+        createDummyRecommendations(maxUpdateRows * 2, new Date(), tenant.getPid());
 
-        List<Recommendation> recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
-        int countOfNonDeletedRecommendations = recommendations.size();
-        Assert.assertEquals(countOfNonDeletedRecommendations, maxUpdateRows * 2);
+        int countOfNonDeletedRecommendations = validateRecommendations(maxUpdateRows * 2);
 
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
                 .cleanupRecommendationsDueToDeletedPlays();
         Assert.assertEquals(count, 0);
 
-        recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
-        Assert.assertEquals(countOfNonDeletedRecommendations, countOfNonDeletedRecommendations);
+        validateRecommendations(countOfNonDeletedRecommendations);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCleanupAfterCleanupRecommendationsDueToDeletedPlays" })
     public void testCleanupRecommendationsWhenNoVeryOldRecommendations() throws Exception {
-        List<Recommendation> recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
-        int countOfNonDeletedRecommendations = recommendations.size();
-        Assert.assertEquals(countOfNonDeletedRecommendations, maxUpdateRows * 2);
+
+        int countOfNonDeletedRecommendations = validateRecommendations(maxUpdateRows * 2);
 
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService).cleanupVeryOldRecommendations();
         Assert.assertEquals(count, 0);
 
-        recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
-        Assert.assertEquals(countOfNonDeletedRecommendations, countOfNonDeletedRecommendations);
+        validateRecommendations(countOfNonDeletedRecommendations);
 
         play.setDeleted(true);
         play.setIsCleanupDone(false);
@@ -183,30 +156,19 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         // Assert.assertEquals(count, countOfNonDeletedRecommendations);
         Assert.assertTrue(count >= countOfNonDeletedRecommendations);
 
-        recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
+        validateRecommendations(0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsWhenNoVeryOldRecommendations" })
+    @Test(groups = "deployment", dependsOnMethods = { "testCleanupRecommendationsWhenNoVeryOldRecommendations" }) //
     public void cleanupVeryOldRecommendations() throws Exception {
-        createDummyRecommendations(maxOldRecommendations, new Date(System.currentTimeMillis() / 2));
+        createDummyRecommendations(maxOldRecommendations, new Date(System.currentTimeMillis() / 2), tenant.getPid());
 
-        List<Recommendation> recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
-        int countOfNonDeletedRecommendations = recommendations.size();
-        Assert.assertEquals(countOfNonDeletedRecommendations, maxOldRecommendations);
+        int countOfNonDeletedRecommendations = validateRecommendations(maxOldRecommendations);
 
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService).cleanupVeryOldRecommendations();
         Assert.assertEquals(count, maxOldRecommendations);
 
-        recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
+        validateRecommendations(0);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "cleanupVeryOldRecommendations" })
@@ -214,13 +176,45 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService).cleanupVeryOldRecommendations();
         Assert.assertEquals(count, 0);
 
-        List<Recommendation> recommendations = recommendationEntityMgr//
-                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
-                        syncDestination, null, orgInfo);
-        Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
+        validateRecommendations(0);
     }
 
-    private void createDummyRecommendations(int newRecommendationsCount, Date launchDate) {
+    @Test(groups = "deployment", dependsOnMethods = { "cleanupAfterCleanupVeryOldRecommendations" })
+    public void cleanupRecommendationsForExpiredTenants() throws Exception {
+
+        Long nonExistTenantId = 1000000L;
+        Tenant nonExistTenant = new Tenant("TestTenantNonExist");
+        nonExistTenant.setPid(nonExistTenantId);
+        MultiTenantContext.setTenant(nonExistTenant);
+
+        createDummyRecommendations(maxUpdateRows * 2, new Date(System.currentTimeMillis() / 2), nonExistTenantId);
+        validateRecommendations(maxUpdateRows * 2);
+
+        int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
+                .cleanupRecommendationDueToExpiredTenants(false);
+        Assert.assertEquals(count, maxUpdateRows * 2);
+        validateRecommendations(0);
+
+        count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
+                .cleanupRecommendationDueToExpiredTenants(true);
+        Assert.assertEquals(count, maxUpdateRows * 2);
+        validateRecommendations(0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "cleanupRecommendationsForExpiredTenants" })
+    public void cleanupAfterCleanupRecommendationsForExpiredTenants() throws Exception {
+
+        int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
+                .cleanupRecommendationDueToExpiredTenants(false);
+        Assert.assertEquals(count, 0);
+        validateRecommendations(0);
+
+        count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
+                .cleanupRecommendationDueToExpiredTenants(true);
+        Assert.assertEquals(count, 0);
+    }
+
+    private void createDummyRecommendations(int newRecommendationsCount, Date launchDate, Long tenantId) {
         while (newRecommendationsCount-- > 0) {
             Recommendation rec = new Recommendation();
             rec.setAccountId("Acc_" + launchDate.toInstant().toEpochMilli() + "_" + newRecommendationsCount);
@@ -235,8 +229,26 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
             rec.setPlayId(play.getName());
             rec.setRecommendationId("ID_" + launchDate.toInstant().toEpochMilli() + "_" + newRecommendationsCount);
             rec.setSynchronizationDestination(syncDestination);
-            rec.setTenantId(tenant.getPid());
+            rec.setTenantId(tenantId);
             recommendationEntityMgr.create(rec);
         }
+    }
+
+    private int validateRecommendations(int expectedCount) {
+
+        List<Recommendation> recommendations = recommendationEntityMgr//
+                .findRecommendations(new Date(0), 0, maxUpdateRows * 8, //
+                        syncDestination, null, orgInfo);
+        int countOfNonDeletedRecommendations = 0;
+
+        if (expectedCount == 0) {
+            Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
+        } else {
+            Assert.assertTrue(CollectionUtils.isNotEmpty(recommendations));
+            countOfNonDeletedRecommendations = recommendations.size();
+            Assert.assertEquals(countOfNonDeletedRecommendations, expectedCount);
+        }
+
+        return countOfNonDeletedRecommendations;
     }
 }
