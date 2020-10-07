@@ -933,6 +933,8 @@ public enum LedpCode {
     LEDP_60009("Error when updating source"),//
     LEDP_60010("Upload failed because no records could be ingested successfully"),
     LEDP_60011("Match configuration is not entitled to use company entity resolution data block!"),
+    LEDP_60012("Project is not entitled to data domain {0}."),
+    LEDP_60013("Project is not entitled to record type {0} in data domain {1}."),
 
     // le-serviceflows
     LEDP_70000("No Add or Delete file"),
