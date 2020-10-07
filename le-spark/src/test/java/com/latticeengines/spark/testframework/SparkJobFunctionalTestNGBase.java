@@ -138,8 +138,17 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         conf.put("driverMemory", driverMem);
         conf.put("executorCores", executorCores);
         conf.put("executorMemory", executorMem);
+        Map<String, String> sparkConf = getSparkConf();
+        customConfig(conf, sparkConf);
         session = sessionService.startSession(this.getClass().getSimpleName(), //
-                conf, Collections.emptyMap());
+                conf, sparkConf);
+    }
+
+    protected void customConfig(Map<String, Object> conf, Map<String, String> sparkConf) {
+    }
+
+    private Map<String, String> getSparkConf() {
+        return new HashMap<String, String>();
     }
 
     @SuppressWarnings("unused")
