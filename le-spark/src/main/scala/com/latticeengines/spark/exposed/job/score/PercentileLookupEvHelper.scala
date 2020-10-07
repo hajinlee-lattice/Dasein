@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CalculateExp
 import org.apache.spark.sql.{DataFrame}
 import org.apache.spark.sql.functions.{col, udf, lit}
 import org.apache.spark.sql.types._
+import org.apache.spark.storage.StorageLevel
 
 object PercentileLookupEvHelper {
 
@@ -35,8 +36,9 @@ object PercentileLookupEvHelper {
             mergedScoreCount: DataFrame): DataFrame = {
 
         var merged: DataFrame = null
+        val mergedCache = mergedScoreCount.persist(StorageLevel.DISK_ONLY)
         for ((modelGuid, scoreField) <- originalScoreFieldMap) {
-          var node = mergedScoreCount.filter(col(modelGuidFieldName) === modelGuid) 
+          var node = mergedCache.filter(col(modelGuidFieldName) === modelGuid) 
           if (scoreDerivationMap.contains(modelGuid)) {
               val calFunc = new LookupPercentileForRevenueFunction2(scoreDerivationMap(modelGuid).get(ScoreDerivationType.EV))
               val calFuncUdf = udf((revenue : Double) => {

@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.cdl.scoring;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,24 +22,27 @@ public class CalculatePercentile2 implements Serializable {
 
     private static final long serialVersionUID = 7182390777059974450L;
     private boolean targetScoreDerivation;
-    private List<BucketRange> existingPercentiles;
+    private Map<String, List<BucketRange>> existingPercentiles = new HashMap<>();
     private SimplePercentileCalculator percentileCalculator;
 
     public CalculatePercentile2(int minPct, int maxPct, boolean targetScoreDerivation,
-            String targetScoreDerivationStr) {
+            Map<String, String> targetScoreDerivationStrs) {
         this.targetScoreDerivation = targetScoreDerivation;
         percentileCalculator = new SimplePercentileCalculator(minPct, maxPct);
-        if (targetScoreDerivation && targetScoreDerivationStr != null) {
-            ScoreDerivation scoreDerivation = JsonUtils.deserialize(targetScoreDerivationStr, ScoreDerivation.class);
-            if (scoreDerivation != null) {
-                this.existingPercentiles = scoreDerivation.percentiles;
+        if (targetScoreDerivation && targetScoreDerivationStrs != null) {
+            for (String modelId : targetScoreDerivationStrs.keySet()) {
+                ScoreDerivation scoreDerivation = JsonUtils.deserialize(targetScoreDerivationStrs.get(modelId),
+                        ScoreDerivation.class);
+                if (scoreDerivation != null) {
+                    this.existingPercentiles.put(modelId, scoreDerivation.percentiles);
+                }
             }
         }
     }
 
-    public Integer calculate(Double rawScore, long totalCount, long currentPos) {
-        if (targetScoreDerivation && existingPercentiles != null) {
-            Integer pct = lookup(rawScore);
+    public Integer calculate(String modelId, Double rawScore, long totalCount, long currentPos) {
+        if (targetScoreDerivation && existingPercentiles.containsKey(modelId)) {
+            Integer pct = lookup(modelId, rawScore);
             return pct;
         }
 
@@ -46,8 +50,9 @@ public class CalculatePercentile2 implements Serializable {
         return pct;
     }
 
-    private Integer lookup(Double score) {
-        String percentileStr = existingPercentiles.stream() //
+    private Integer lookup(String modelId, Double score) {
+        List<BucketRange> percentiles = existingPercentiles.get(modelId);
+        String percentileStr = percentiles.stream() //
                 .parallel().filter(p -> {
                     return p.lower <= score && score < p.upper;
                 }).map(p -> {
@@ -55,10 +60,10 @@ public class CalculatePercentile2 implements Serializable {
                 }).findFirst().orElse(null);
 
         if (StringUtils.isBlank(percentileStr)) {
-            if (existingPercentiles.get(0).lower >= score) {
-                percentileStr = existingPercentiles.get(0).name;
-            } else if (existingPercentiles.get(existingPercentiles.size() - 1).upper <= score) {
-                percentileStr = existingPercentiles.get(existingPercentiles.size() - 1).name;
+            if (percentiles.get(0).lower >= score) {
+                percentileStr = percentiles.get(0).name;
+            } else if (percentiles.get(percentiles.size() - 1).upper <= score) {
+                percentileStr = percentiles.get(percentiles.size() - 1).name;
             } else {
                 throw new RuntimeException(String.format("Score %d is out of bound.", score));
             }
@@ -67,8 +72,8 @@ public class CalculatePercentile2 implements Serializable {
         return lookupPercentile;
     }
 
-    public String getTargetScoreDerivationValue(Map<Integer, List<Double>> minMax) {
-        if (CollectionUtils.isNotEmpty(existingPercentiles)) {
+    public String getTargetScoreDerivationValue(String modelId, Map<Integer, List<Double>> minMax) {
+        if (CollectionUtils.isNotEmpty(existingPercentiles.get(modelId))) {
             Log.info("Target score derivation already exist!");
             return null;
         }
