@@ -32,4 +32,5 @@ public interface LookupIdMappingService {
     List<CDLExternalSystemType> getAllCDLExternalSystemType();
 
     LookupIdMap getLookupIdMapByOrgId(String orgId, CDLExternalSystemType externalSystemType);
+
 }

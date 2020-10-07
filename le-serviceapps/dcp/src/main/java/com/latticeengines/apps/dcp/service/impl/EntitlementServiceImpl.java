@@ -74,7 +74,7 @@ public class EntitlementServiceImpl implements EntitlementService {
         return result;
     }
 
-    private DataBlockEntitlementContainer filterDataBlockContainer(DataBlockEntitlementContainer container,
+    static DataBlockEntitlementContainer filterDataBlockContainer(DataBlockEntitlementContainer container,
             String domainName, String recordType) {
         if (container == null || ("ALL".equals(domainName) && "ALL".equals(recordType))) {
             return container;

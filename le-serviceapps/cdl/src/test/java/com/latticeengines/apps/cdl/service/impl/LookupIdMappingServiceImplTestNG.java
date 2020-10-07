@@ -84,6 +84,7 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         // "");
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap("some_bad_id"));
         String orgId = "ABC_s";
+        String orgIdChanged = "123_s";
         String orgName = "n1234_1";
 
         LookupIdMap extractedLookupIdMap = testRegisterDeregister(orgId, orgName, true, null);
@@ -118,7 +119,10 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         extractedLookupIdMap.setAccountId(accountId);
         String description = "some description";
         extractedLookupIdMap.setDescription(description);
+        extractedLookupIdMap.setIsRegistered(false);
+        extractedLookupIdMap.setOrgId(orgIdChanged);
         lookupIdMappingLaunchService.updateLookupIdMap(configId, extractedLookupIdMap);
+
         LookupIdMap extractedLookupIdMap2 = lookupIdMappingLaunchService.getLookupIdMap(configId);
         Assert.assertNotNull(extractedLookupIdMap2);
         Assert.assertEquals(extractedLookupIdMap2.getAccountId(), accountId);
@@ -127,7 +131,8 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(extractedLookupIdMap2.getCreated());
         Assert.assertNotNull(extractedLookupIdMap2.getUpdated());
         Assert.assertEquals(extractedLookupIdMap2.getExternalSystemType(), CDLExternalSystemType.CRM);
-        Assert.assertEquals(extractedLookupIdMap2.getOrgId(), orgId);
+        Assert.assertEquals(extractedLookupIdMap2.getOrgId(), orgIdChanged);
+        Assert.assertFalse(extractedLookupIdMap2.getIsRegistered());
         Assert.assertEquals(extractedLookupIdMap2.getOrgName(), orgName);
 
         lookupIdMappingLaunchService.deleteLookupIdMap(configId);
