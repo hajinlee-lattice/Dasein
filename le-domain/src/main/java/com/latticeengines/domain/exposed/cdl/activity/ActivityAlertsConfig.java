@@ -68,7 +68,7 @@ public class ActivityAlertsConfig implements HasPid, HasTenant, Serializable, Ha
     @JsonProperty("qualification_period_days")
     private long qualificationPeriodDays;
 
-    @Column(name = "ALERT_MESSAGE_TEMPLATE", nullable = false)
+    @Column(name = "ALERT_MESSAGE_TEMPLATE", nullable = false, length = 1000)
     @JsonProperty("alert_message_template")
     private String alertMessageTemplate;
 
