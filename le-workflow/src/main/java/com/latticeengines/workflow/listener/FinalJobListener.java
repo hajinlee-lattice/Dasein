@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -41,6 +42,9 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     private volatile LEJobCaller caller;
     private volatile Thread callerThread;
     private volatile boolean waitForCaller;
+
+    @Inject
+    private CDLProxy cdlProxy;
 
     @Inject
     private DataFeedProxy dataFeedProxy;
@@ -132,7 +136,8 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
 
         String tenantId = workflowJob.getTenant().getId();
         if (hideRetriedPA && ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME.equalsIgnoreCase(workflowJob.getType())
-                && canRetry(jobExecution, dataFeedProxy.getDataFeed(tenantId), processAnalyzeJobRetryCount)) {
+                && canRetry(cdlProxy, jobExecution, dataFeedProxy.getDataFeed(tenantId),
+                        processAnalyzeJobRetryCount)) {
             log.info("Current PA can be retried, set workflow status to {}", JobStatus.PENDING_RETRY);
             statusToUpdate = JobStatus.PENDING_RETRY;
         }
