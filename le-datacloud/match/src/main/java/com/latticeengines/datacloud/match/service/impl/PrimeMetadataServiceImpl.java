@@ -176,7 +176,7 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
         List<DataBlock> filteredDataBlocks = new ArrayList<>();
 
         for (DataBlock dataBlock : dataBlocks) {
-            if ("Company Financials".equals(dataBlock.getBlockId())) {
+            if (DataBlock.Id.companyfinancials.equals(dataBlock.getBlockId())) {
                 List<DataBlock.Level> filteredLevels = new ArrayList<>();
 
                 for (DataBlock.Level level : dataBlock.getLevels()) {

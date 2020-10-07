@@ -76,7 +76,7 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
 
         DataBlock financialBlock = null;
         for (DataBlock block : filteredDataBlocks) {
-            if ("Company Financials".equals(block.getBlockId())) {
+            if (DataBlock.Id.companyfinancials.equals(block.getBlockId())) {
                 financialBlock = block;
             }
         }
@@ -93,9 +93,9 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
         DataBlock.Level l2 = new DataBlock.Level(DataBlockLevel.L2);
         DataBlock.Level l3 = new DataBlock.Level(DataBlockLevel.L3);
 
-        DataBlock dataBlock1 = new DataBlock("Base Information", Arrays.asList(l1, l2, l3));
-        DataBlock dataBlock2 = new DataBlock("Company Entity Resolution", Arrays.asList(l1, l2, l3));
-        DataBlock dataBlock3 = new DataBlock("Company Financials", Arrays.asList(l1, l2, l3));
+        DataBlock dataBlock1 = new DataBlock(DataBlock.Id.baseinfo, Arrays.asList(l1, l2, l3));
+        DataBlock dataBlock2 = new DataBlock(DataBlock.Id.companyinfo, Arrays.asList(l1, l2, l3));
+        DataBlock dataBlock3 = new DataBlock(DataBlock.Id.companyfinancials, Arrays.asList(l1, l2, l3));
 
         blocks.add(dataBlock1);
         blocks.add(dataBlock2);
