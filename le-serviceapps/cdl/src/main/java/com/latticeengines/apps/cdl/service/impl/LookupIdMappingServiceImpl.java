@@ -143,6 +143,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                 existingLookupIdMap.setExternalAuthentication(lookupIdMap.getExternalAuthentication());
                 existingLookupIdMap.setExportFieldMappings(lookupIdMap.getExportFieldMetadataMappings());
                 existingLookupIdMap.setIsRegistered(lookupIdMap.getIsRegistered());
+                existingLookupIdMap.setOrgId(lookupIdMap.getOrgId());
             } else {
                 throw new LedpException(LedpCode.LEDP_40099);
             }
@@ -256,22 +257,6 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                 }
         }
         return lookupIdMap;
-    }
-
-    @Override
-    public LookupIdMap updateLookupIdMapOrgId(String id, String orgId) {
-        LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(id);
-        if (existingLookupIdMap != null) {
-            if (orgId != null) {
-                existingLookupIdMap.setOrgId(orgId);
-            } else {
-                throw new RuntimeException("Empty Org Id.");
-            }
-        } else {
-            throw new LedpException(LedpCode.LEDP_40098, new String[] { id });
-        }
-
-        return lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap);
     }
 
     private String getUIFriendlyExportFolder(String exportFolderPath) {
