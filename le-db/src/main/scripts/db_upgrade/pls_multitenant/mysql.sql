@@ -89,6 +89,8 @@ CREATE PROCEDURE `UpdateSchema`()
             PREVIOUS_LAUNCHED_CONTACT_UNIVERSE_TABLE_ID=CURRENT_LAUNCHED_CONTACT_UNIVERSE_TABLE_ID
         WHERE LAUNCH_TYPE='DELTA';
 
+      ALTER TABLE `PLS_MultiTenant`.`TRAY_CONNECTOR_TEST`
+        ADD COLUMN `TEST_RESULT` VARCHAR(255);
 
   END //
 -- ##############################################################

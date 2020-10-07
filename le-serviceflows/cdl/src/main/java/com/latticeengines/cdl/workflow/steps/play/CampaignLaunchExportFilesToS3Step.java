@@ -49,6 +49,8 @@ public class CampaignLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLa
 
     private String CSV = "csv";
 
+    private String FOLDER = "dropfolder";
+
     private static final String CDL_DATA_INTEGRATION_END_POINT = "/cdl/dataintegration";
 
     @Value("${cdl.atlas.export.dropfolder.tag}")
@@ -132,7 +134,7 @@ public class CampaignLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLa
         message.setExternalSystemId(lookupIdMap.getOrgId());
         String sourceFile = s3ExportFilePaths.stream().filter(path -> FilenameUtils.getExtension(path).equals(CSV))
                 .findFirst().get();
-        message.setSourceFile(sourceFile.substring(sourceFile.indexOf("dropfolder")));
+        message.setSourceFile(sourceFile.substring(sourceFile.indexOf(FOLDER)));
         message.setEventType(DataIntegrationEventType.WorkflowSubmitted.toString());
         message.setEventTime(new Date());
         message.setMessageType(MessageType.Event.toString());
