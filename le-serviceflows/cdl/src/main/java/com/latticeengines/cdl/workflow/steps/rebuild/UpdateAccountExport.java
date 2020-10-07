@@ -161,7 +161,7 @@ public class UpdateAccountExport extends BaseProcessAnalyzeSparkStep<ProcessAcco
         config.setRetainAttrs(retainAttrs);
         config.setInput(Arrays.asList(customerInput, latticeInput));
         config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-        setPartitionMultiplier(4);
+        setPartitionMultiplier(6);
         SparkJobResult result = runSparkJob(JoinAccountStores.class, config);
         setPartitionMultiplier(1);
         return result.getTargets().get(0);
