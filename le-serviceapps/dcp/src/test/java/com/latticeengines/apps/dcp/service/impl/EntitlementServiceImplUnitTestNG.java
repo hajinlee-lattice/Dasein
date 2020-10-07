@@ -7,6 +7,9 @@ import static com.latticeengines.domain.exposed.datacloud.manage.DataRecordType.
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -14,6 +17,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 
 public class EntitlementServiceImplUnitTestNG {
 
@@ -66,4 +72,44 @@ public class EntitlementServiceImplUnitTestNG {
         Assert.assertNotNull(container);
         Assert.assertTrue(container.getDomains().isEmpty());
     }
+
+    @Test(groups = "unit")
+    public void filterDataBlockLevels() throws Exception {
+        InputStream is = new ClassPathResource("append-config/idaas-entitlement.json").getInputStream();
+        String idaasStr = IOUtils.toString(is, Charset.defaultCharset());
+        DataBlockEntitlementContainer container = EntitlementServiceImpl.parseIDaaSEntitlement(idaasStr);
+        Assert.assertNotNull(container);
+        DataBlockEntitlementContainer filteredContainer = EntitlementServiceImpl
+                .filterFinancialDataBlockLevels(container);
+        Assert.assertNotNull(filteredContainer);
+
+        List<DataBlockEntitlementContainer.Block> blocks = new ArrayList<>();
+
+        for (DataBlockEntitlementContainer.Domain domain : filteredContainer.getDomains()) {
+            if (domain.getDomain().equals(DataDomain.Finance)) {
+
+                for (Map.Entry<DataRecordType, List<DataBlockEntitlementContainer.Block>> entry : domain
+                        .getRecordTypes().entrySet()) {
+
+                    for (DataBlockEntitlementContainer.Block block : entry.getValue()) {
+                        boolean includeBlock = false;
+
+                        for (DataBlockLevel level : block.getDataBlockLevels()) {
+                            if (!level.equals(DataBlockLevel.L1)) {
+                                includeBlock = true;
+                                break;
+                            }
+                        }
+
+                        if (includeBlock) {
+                            blocks.add(block);
+                        }
+                    }
+                }
+            }
+        }
+
+        Assert.assertTrue(blocks.isEmpty());
+    }
+
 }

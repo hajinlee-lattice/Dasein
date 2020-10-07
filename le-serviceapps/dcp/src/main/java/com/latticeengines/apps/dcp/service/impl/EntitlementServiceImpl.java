@@ -167,7 +167,8 @@ public class EntitlementServiceImpl implements EntitlementService {
         try {
             String response = iDaaSService.getEntitlement(subsriberNumber);
             log.info("IDaaS entitlements: " + response);
-            return parseIDaaSEntitlement(response);
+            DataBlockEntitlementContainer container = parseIDaaSEntitlement(response);
+            return filterFinancialDataBlockLevels(container);
         } catch (RemoteLedpException e) {
             if (e.getRemoteStackTrace().contains("\"code\":\"IEC-AM-0001\"")) {
                 // {"code":"IEC-AM-0001","message":"Subscriber/Contract doesnt exists in the
@@ -179,6 +180,40 @@ public class EntitlementServiceImpl implements EntitlementService {
             }
             throw e;
         }
+    }
+
+    static DataBlockEntitlementContainer filterFinancialDataBlockLevels(DataBlockEntitlementContainer container) {
+        List<DataBlockEntitlementContainer.Domain> domainList = new ArrayList<>();
+
+        for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
+            if (DataDomain.Finance.equals(domain.getDomain().getDisplayName())) {
+                EnumMap<DataRecordType, List<DataBlockEntitlementContainer.Block>> filteredMap = new EnumMap<>(
+                        DataRecordType.class);
+                for (EnumMap.Entry<DataRecordType, List<DataBlockEntitlementContainer.Block>> entry : domain
+                        .getRecordTypes().entrySet()) {
+
+                    List<DataBlockEntitlementContainer.Block> filteredBlocks = new ArrayList<>();
+                    for (DataBlockEntitlementContainer.Block block : entry.getValue()) {
+
+                        List<DataBlockLevel> filteredLevels = new ArrayList<>();
+                        for (DataBlockLevel level : block.getDataBlockLevels()) {
+                            if (level.equals(L1)) {
+                                filteredLevels.add(level);
+                            }
+                        }
+
+                        filteredBlocks.add(new DataBlockEntitlementContainer.Block(block.getBlockId(), filteredLevels));
+                    }
+
+                    filteredMap.put(entry.getKey(), filteredBlocks);
+                }
+
+                domainList.add(new DataBlockEntitlementContainer.Domain(domain.getDomain(), filteredMap));
+            } else {
+                domainList.add(domain);
+            }
+        }
+        return new DataBlockEntitlementContainer(domainList);
     }
 
     static DataBlockEntitlementContainer getDefaultEntitlement() {
