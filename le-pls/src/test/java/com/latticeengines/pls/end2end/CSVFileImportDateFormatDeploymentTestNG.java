@@ -185,7 +185,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         Assert.assertEquals(fields.length, 4);
         Assert.assertEquals(fields[0], "Field Type");
         Assert.assertEquals(fields[1], "Your Field Name");
-        Assert.assertEquals(fields[2], "Lattice Field Name");
+        Assert.assertEquals(fields[2], "Standard Field Name");
         Assert.assertEquals(fields[3], "Data Type");
     }
 

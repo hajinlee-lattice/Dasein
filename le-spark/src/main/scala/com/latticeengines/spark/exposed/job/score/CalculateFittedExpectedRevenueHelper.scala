@@ -8,17 +8,22 @@ import org.apache.spark.sql.{DataFrame}
 import scala.collection.JavaConverters._
 import org.apache.spark.sql.functions.{col, udf, lit}
 import org.apache.spark.sql.types._
+import org.apache.spark.storage.StorageLevel
 
 object CalculateFittedExpectedRevenueHelper {
   
     def calculate(context: ParsedContext, calculatePercentile: DataFrame, retainedFields: List[String]): DataFrame = {
-        var merged: DataFrame = null
+        
+        val (model, predictedModel, evModel) = NodeJobSplitter.splitEv(calculatePercentile, context.originalScoreFieldMap,
+            context.modelGuidFieldName)
+        val evModelCache = if (evModel == null) evModel else evModel.persist(StorageLevel.DISK_ONLY)
+        var mergedEv: DataFrame = null
         for ((modelGuid, scoreField) <- context.originalScoreFieldMap) {
-          var node = calculatePercentile.filter(col(context.modelGuidFieldName) === modelGuid) 
-          val evFitFunctionParamsStr = context.fitFunctionParametersMap.get(modelGuid)
-          val normalizationRatio = context.normalizationRatioMap.get(modelGuid)
-          val avgProbabilityTestDataset = getAvgProbabilityTestDataset(context, modelGuid)
           if (ScoreResultField.ExpectedRevenue.displayName == scoreField) {
+            var node = evModelCache.filter(col(context.modelGuidFieldName) === modelGuid) 
+            val evFitFunctionParamsStr = context.fitFunctionParametersMap.get(modelGuid)
+            val normalizationRatio = context.normalizationRatioMap.get(modelGuid)
+            val avgProbabilityTestDataset = getAvgProbabilityTestDataset(context, modelGuid)
             val calFunc = new CalculateFittedExpectedRevenueFunction2(
                                   normalizationRatio.orNull,
                                   avgProbabilityTestDataset,
@@ -30,19 +35,24 @@ object CalculateFittedExpectedRevenueHelper {
             node = node.withColumn("CalResult", calFuncUdf(col(context.outputPercentileFieldName), col(context.probabilityField)))
                 .withColumn(context.probabilityField, col("CalResult")(0))
                 .withColumn(context.expectedRevenueField, col("CalResult")(1)).drop("CalResult")
-          }
-          if (merged == null) {
-              merged = node
-          } else {
-              merged = merged.union(node)
+            if (mergedEv == null) {
+                mergedEv = node
+            } else {
+                mergedEv = mergedEv.union(node)
+            }
           }
         }
-        merged
-    return merged.drop(context.standardScoreField) //
-      .withColumnRenamed(
-        context.outputPercentileFieldName, //
-        context.standardScoreField) //
-      .select(retainedFields map col: _*)
+        
+        val models = List(model, predictedModel, mergedEv).filter(e => e != null)
+        var merged = models(0)
+        for (i <- 1 until models.length) {
+            merged = merged.union(models(i))
+        }
+        return merged.drop(context.standardScoreField) //
+          .withColumnRenamed(
+            context.outputPercentileFieldName, //
+            context.standardScoreField) //
+          .select(retainedFields map col: _*)
     }
 
     def getAvgProbabilityTestDataset(context: ParsedContext, modelGuid: String): Double = {

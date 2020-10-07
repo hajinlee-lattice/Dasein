@@ -378,6 +378,7 @@ public final class JobStepDisplayInfoMapping {
             "Ingestion", //
             "Match_Append", //
             "Analysis", //
+            "Analysis", //
             "Analysis" };
 
     private static final Map<String, String[]> DISPLAY_NAME = new HashMap<>();

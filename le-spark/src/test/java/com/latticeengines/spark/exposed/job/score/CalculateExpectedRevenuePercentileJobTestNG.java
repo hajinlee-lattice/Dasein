@@ -212,4 +212,10 @@ public class CalculateExpectedRevenuePercentileJobTestNG extends SparkJobFunctio
         derivationStr = output;
         System.out.println("derivationStr=" + derivationStr);
     }
+
+    @Override
+    protected void customConfig(Map<String, Object> conf, Map<String, String> sparkConf) {
+        sparkConf.put("spark.default.parallelism", String.valueOf(5));
+        sparkConf.put("spark.sql.shuffle.partitions", String.valueOf(5));
+    }
 }
