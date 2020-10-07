@@ -57,7 +57,7 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
         try (PerformanceTimer time = new PerformanceTimer(msg)) {
             List<DataBlockLevelMetadata> metadataList = levelMetadataRepository.findAll();
             Map<String, Map<DataBlockLevel, DataBlockLevelMetadata>> blockMap = new HashMap<>();
-            for (DataBlockLevelMetadata levelMetadata: metadataList) {
+            for (DataBlockLevelMetadata levelMetadata : metadataList) {
                 String block = levelMetadata.getBlock();
                 DataBlockLevel level = levelMetadata.getLevel();
                 Map<DataBlockLevel, DataBlockLevelMetadata> levelMap = blockMap.getOrDefault(block, new HashMap<>());
@@ -65,10 +65,10 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                 blockMap.put(block, levelMap);
             }
             List<DataBlock> blocks = new ArrayList<>();
-            for (String block: blockMap.keySet()) {
+            for (String block : blockMap.keySet()) {
                 Map<DataBlockLevel, DataBlockLevelMetadata> levelMap = blockMap.get(block);
                 List<DataBlock.Level> levels = new ArrayList<>();
-                for (DataBlockLevel level: levelMap.keySet()) {
+                for (DataBlockLevel level : levelMap.keySet()) {
                     levels.add(new DataBlock.Level(level));
                 }
                 levels.sort(Comparator.comparing(DataBlock.Level::getLevel));
@@ -92,7 +92,7 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                     .collect(Collectors.toMap(PrimeColumn::getPrimeColumnId, Function.identity()));
             List<Object[]> queryResults = dataBlockElementRepository.getAllBlockElements();
             Map<String, Map<DataBlockLevel, List<PrimeColumn>>> blockMap = new HashMap<>();
-            for (Object[] row: queryResults) {
+            for (Object[] row : queryResults) {
                 String block = (String) row[0];
                 DataBlockLevel level = (DataBlockLevel) row[1];
                 String columnId = (String) row[2];
@@ -106,10 +106,10 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
                 blockMap.put(block, levelMap);
             }
             List<DataBlock> blocks = new ArrayList<>();
-            for (String block: blockMap.keySet()) {
+            for (String block : blockMap.keySet()) {
                 Map<DataBlockLevel, List<PrimeColumn>> levelMap = blockMap.get(block);
                 List<DataBlock.Level> levels = new ArrayList<>();
-                for (DataBlockLevel level: levelMap.keySet()) {
+                for (DataBlockLevel level : levelMap.keySet()) {
                     String fqBlockId = String.format("%s_%s", block, level);
                     if (levelMetadataMap.containsKey(fqBlockId)) {
                         DataBlockLevelMetadata levelMetadata = levelMetadataMap.get(fqBlockId);
@@ -127,7 +127,7 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
             blocks.add(getBaseInfoBlock(true));
             blocks.add(getEntityResolutionBlock(true));
             blocks.sort(Comparator.comparing(DataBlock::getBlockId));
-            return blocks;
+            return filterFinancialDataBlockLevels(blocks);
         }
     }
 
@@ -172,6 +172,28 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
         return toReturn;
     }
 
+    static List<DataBlock> filterFinancialDataBlockLevels(List<DataBlock> dataBlocks) {
+        List<DataBlock> filteredDataBlocks = new ArrayList<>();
+
+        for (DataBlock dataBlock : dataBlocks) {
+            if ("Company Financials".equals(dataBlock.getBlockId())) {
+                List<DataBlock.Level> filteredLevels = new ArrayList<>();
+
+                for (DataBlock.Level level : dataBlock.getLevels()) {
+                    if (DataBlockLevel.L1.equals(level.getLevel())) {
+                        filteredLevels.add(level);
+                    }
+                }
+
+                filteredDataBlocks.add(new DataBlock(dataBlock.getBlockId(), filteredLevels));
+            } else {
+                filteredDataBlocks.add(dataBlock);
+            }
+        }
+
+        return filteredDataBlocks;
+    }
+
     // blockId -> list(elementId)
     static Map<String, List<String>> consolidateBlocks(Collection<DataBlockElement> blockElements) {
         // elementId -> list(dbe)
@@ -179,8 +201,8 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
         // blockId -> list(dbe) : result
         Map<String, List<DataBlockElement>> blockIdToBlockElementMap = new HashMap<>();
 
-        for (DataBlockElement blockElement: blockElements) {
-            String elmentId =  blockElement.getPrimeColumn().getPrimeColumnId();
+        for (DataBlockElement blockElement : blockElements) {
+            String elmentId = blockElement.getPrimeColumn().getPrimeColumnId();
             List<DataBlockElement> blockElementsForElement = //
                     elementIdToBlockElementMap.getOrDefault(elmentId, new ArrayList<>());
             blockElementsForElement.add(blockElement);
@@ -193,19 +215,19 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
             Set<String> singleChoiceBlocks;
             do {
                 singleChoiceBlocks = new HashSet<>();
-                for (String elementId: elementIdToBlockElementMap.keySet()) {
+                for (String elementId : elementIdToBlockElementMap.keySet()) {
                     if (elementIdToBlockElementMap.get(elementId).size() == 1) {
                         String blockId = elementIdToBlockElementMap.get(elementId).get(0).getBlock();
                         singleChoiceBlocks.add(blockId);
                     }
                 }
-                for (String blockId: singleChoiceBlocks) {
+                for (String blockId : singleChoiceBlocks) {
                     takeBlock(blockId, elementIdToBlockElementMap, blockIdToBlockElementMap);
                 }
             } while (!singleChoiceBlocks.isEmpty());
             Map<String, Integer> blockCoverageMap = new HashMap<>();
-            for (String elementId: elementIdToBlockElementMap.keySet()) {
-                for (DataBlockElement dbe: elementIdToBlockElementMap.get(elementId)) {
+            for (String elementId : elementIdToBlockElementMap.keySet()) {
+                for (DataBlockElement dbe : elementIdToBlockElementMap.get(elementId)) {
                     String blockId = dbe.getBlock();
                     int cnt = blockCoverageMap.getOrDefault(blockId, 0);
                     blockCoverageMap.put(blockId, cnt + 1);
@@ -236,10 +258,10 @@ public class PrimeMetadataServiceImpl implements PrimeMetadataService {
             Map<String, List<DataBlockElement>> blockIdToBlockElementMap) {
         List<DataBlockElement> elements = blockIdToBlockElementMap.getOrDefault(blockId, new ArrayList<>());
         Set<String> elementIdsToRemove = new HashSet<>();
-        for (String elementId: elementIdToBlockElementMap.keySet()) {
+        for (String elementId : elementIdToBlockElementMap.keySet()) {
             List<DataBlockElement> remainingDbeList = new ArrayList<>();
             boolean belongToBlock = false;
-            for (DataBlockElement dbe: elementIdToBlockElementMap.get(elementId)) {
+            for (DataBlockElement dbe : elementIdToBlockElementMap.get(elementId)) {
                 if (blockId.equals(dbe.getBlock())) {
                     elements.add(dbe);
                     belongToBlock = true;
