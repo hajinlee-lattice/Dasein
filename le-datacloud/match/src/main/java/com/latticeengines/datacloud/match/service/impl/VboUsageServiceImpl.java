@@ -155,7 +155,7 @@ public class VboUsageServiceImpl implements VboUsageService {
         List<S3ObjectSummary> objects = s3Service.listObjects(srcBucket, srcFolder);
         if (CollectionUtils.isNotEmpty(objects)) {
             Date date = new Date();
-            String bundleId = NamingUtils.randomSuffix("Lattice", 6);
+            String bundleId = NamingUtils.randomSuffix("Lattice_", 6);
             log.info("Submitting report {} as bundle {} to VBO", report.getReportId(), bundleId);
             int idx = 1;
             for (S3ObjectSummary srcObj: objects) {
