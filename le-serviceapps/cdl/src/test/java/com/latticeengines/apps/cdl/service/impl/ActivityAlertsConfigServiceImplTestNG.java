@@ -1,5 +1,12 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_ACTIVE_CONTACTS;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_ALERT_DATA;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_NUM_BUY_INTENTS;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_NUM_RESEARCH_INTENTS;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_PAGE_NAME;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_PAGE_VISITS;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +22,7 @@ import com.latticeengines.apps.cdl.service.ActivityAlertsConfigService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.TemplateUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityAlertsConfig;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
 
 public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -47,10 +55,10 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
         ActivityAlertsConfig alertConfig = defaults.stream()
                 .filter(a -> a.getAlertHeader().equals("Increased Web Activity")).findFirst().orElse(null);
         Assert.assertNotNull(alertConfig);
-        data.put("page_visits", 10);
-        data.put("page_name", "About Us");
-        data.put("active_contacts", 2);
-        input.put("alert", data);
+        data.put(COL_PAGE_VISITS, 10);
+        data.put(COL_PAGE_NAME, "About Us");
+        data.put(COL_ACTIVE_CONTACTS, 2);
+        input.put(COL_ALERT_DATA, data);
         String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
                 "There have been 10 visits to the About Us pages. Check on this interest with your 2 active contacts. This may mean they are looking to buy.");
@@ -69,18 +77,39 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(rendered,
                 "Someone from this account has visited a product page, after not visiting for more than 30 days. This may mean they are looking to reinitiate their search.");
 
-        alertConfig = defaults.stream().filter(a -> a.getAlertHeader().equals("Growing Buyer Intent")).findFirst()
-                .orElse(null);
-        Assert.assertNotNull(alertConfig);
-        rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
-        Assert.assertEquals(rendered,
-                "Growing buyer intent happening from this account in the last 10 days with 10 amount of Product URL clicks. This may mean they are looking to buy.");
+        verifyHasShownIntentAlertConfig(defaults);
+    }
 
-        alertConfig = defaults.stream().filter(a -> a.getAlertHeader().equals("Growing Research Intent")).findFirst()
+    private void verifyHasShownIntentAlertConfig(List<ActivityAlertsConfig> defaults) {
+        ActivityAlertsConfig alertConfig = defaults.stream() //
+                .filter(a -> a.getName().equals(ActivityStoreConstants.Alert.SHOWN_INTENT)) //
+                .findFirst() //
                 .orElse(null);
         Assert.assertNotNull(alertConfig);
+
+        Map<String, Object> input = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
+        input.put(COL_ALERT_DATA, data);
+
+        // have both
+        data.put(COL_NUM_BUY_INTENTS, 10L);
+        data.put(COL_NUM_RESEARCH_INTENTS, 5L);
+        String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
+        Assert.assertEquals(rendered, "We saw research intent on 5 products and buy intent "
+                + "on 10 products within the last 10 days. Check out which models in the Recent Activity section.");
+
+        // no research intent
+        data.put(COL_NUM_BUY_INTENTS, 10L);
+        data.put(COL_NUM_RESEARCH_INTENTS, 0L);
         rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
-        Assert.assertEquals(rendered,
-                "Growing research intent happening from this account in the last 10 days with 10 amount of Product URL clicks. This may mean they are looking for more product information.");
+        Assert.assertEquals(rendered, "We saw buy intent on 10 products within the last 10 days."
+                + " Check out which models in the Recent Activity section.");
+
+        // no buy intent
+        data.put(COL_NUM_BUY_INTENTS, 0L);
+        data.put(COL_NUM_RESEARCH_INTENTS, 5L);
+        rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
+        Assert.assertEquals(rendered, "We saw research intent on 5 products within the last 10 days."
+                + " Check out which models in the Recent Activity section.");
     }
 }

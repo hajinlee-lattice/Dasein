@@ -28,7 +28,7 @@
     "alert_header": "Has Shown Intent",
     "alert_category": "PEOPLE",
     "qualification_period_days": 10,
-    "alert_message_template": "We saw <#if (Data.NumResearchIntents > 0)>research intent on ${Data.NumResearchIntents} products </#if><#if (Data.NumBuyIntents > 0) && (Data.NumResearchIntents > 0)>and </#if><#if (Data.NumBuyIntents > 0)>buy intent on ${Data.NumBuyIntents} Products </#if>within the last 10 days. Check out which models in the Recent Activity section.",
+    "alert_message_template": "We saw <#if (Data.NumResearchIntents > 0)>research intent on ${Data.NumResearchIntents} products </#if><#if (Data.NumBuyIntents > 0) && (Data.NumResearchIntents > 0)>and </#if><#if (Data.NumBuyIntents > 0)>buy intent on ${Data.NumBuyIntents} products </#if>within the last 10 days. Check out which models in the Recent Activity section.",
     "is_active": true
   }
 ]
