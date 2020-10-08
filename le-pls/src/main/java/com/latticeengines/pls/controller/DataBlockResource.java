@@ -66,7 +66,7 @@ public class DataBlockResource {
             return domainName;
         } else {
             try {
-                DataDomain domain = DataDomain.valueOf(domainName);
+                DataDomain domain = DataDomain.parse(domainName);
                 String dataDomainName = domain.name();
                 log.info("Encoded domain name " + domainName + " as " + dataDomainName);
                 return dataDomainName;
@@ -86,7 +86,7 @@ public class DataBlockResource {
             return recordType;
         } else {
             try {
-                DataRecordType dataRecordType = DataRecordType.valueOf(recordType);
+                DataRecordType dataRecordType = DataRecordType.parse(recordType);
                 String recordTypeName = dataRecordType.name();
                 log.info("Encoded record type " + recordType + " as " + recordTypeName);
                 return recordTypeName;
