@@ -69,7 +69,7 @@ public class EntitlementServiceImpl implements EntitlementService {
     public DataBlockEntitlementContainer getEntitlement(String customerSpace, String domainName, String recordType) {
         String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
         log.info("Getting entitlements for Tenant " + tenantId);
-        DataBlockEntitlementContainer result =  _self.getTenantEntitlementFromCache(tenantId, domainName, recordType);
+        DataBlockEntitlementContainer result = _self.getTenantEntitlementFromCache(tenantId, domainName, recordType);
         log.info("Returning entitlements: " + JsonUtils.serialize(result));
         return result;
     }
@@ -117,7 +117,7 @@ public class EntitlementServiceImpl implements EntitlementService {
                 DataBlockEntitlementContainer entitlement = //
                         _self.getTenantEntitlementFromCache(tenantId, dataDomain.name(), dataRecordType.name());
                 if (entitlement != null) {
-                    for (DataBlockEntitlementContainer.Domain domain: entitlement.getDomains()) {
+                    for (DataBlockEntitlementContainer.Domain domain : entitlement.getDomains()) {
                         if (!dataDomain.equals(domain.getDomain())) {
                             continue;
                         }
@@ -125,7 +125,7 @@ public class EntitlementServiceImpl implements EntitlementService {
                                 CollectionUtils.isEmpty(domain.getRecordTypes().get(dataRecordType))) {
                             continue;
                         }
-                        for (DataBlockEntitlementContainer.Block block: domain.getRecordTypes().get(dataRecordType)) {
+                        for (DataBlockEntitlementContainer.Block block : domain.getRecordTypes().get(dataRecordType)) {
                             if (blockName.equals(block.getBlockId())) {
                                 return true;
                             }
@@ -186,15 +186,15 @@ public class EntitlementServiceImpl implements EntitlementService {
         List<DataBlockEntitlementContainer.Domain> domainList = new ArrayList<>();
 
         for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
-            if (DataDomain.Finance.equals(domain.getDomain().getDisplayName())) {
-                EnumMap<DataRecordType, List<DataBlockEntitlementContainer.Block>> filteredMap = new EnumMap<>(
-                        DataRecordType.class);
-                for (EnumMap.Entry<DataRecordType, List<DataBlockEntitlementContainer.Block>> entry : domain
-                        .getRecordTypes().entrySet()) {
+            EnumMap<DataRecordType, List<DataBlockEntitlementContainer.Block>> filteredMap = new EnumMap<>(
+                    DataRecordType.class);
+            for (EnumMap.Entry<DataRecordType, List<DataBlockEntitlementContainer.Block>> entry : domain
+                    .getRecordTypes().entrySet()) {
 
-                    List<DataBlockEntitlementContainer.Block> filteredBlocks = new ArrayList<>();
-                    for (DataBlockEntitlementContainer.Block block : entry.getValue()) {
+                List<DataBlockEntitlementContainer.Block> filteredBlocks = new ArrayList<>();
 
+                for (DataBlockEntitlementContainer.Block block : entry.getValue()) {
+                    if (DataBlock.Id.companyfinancials.equals(block.getBlockId())) {
                         List<DataBlockLevel> filteredLevels = new ArrayList<>();
                         for (DataBlockLevel level : block.getDataBlockLevels()) {
                             if (level.equals(L1)) {
@@ -203,15 +203,15 @@ public class EntitlementServiceImpl implements EntitlementService {
                         }
 
                         filteredBlocks.add(new DataBlockEntitlementContainer.Block(block.getBlockId(), filteredLevels));
+                    } else {
+                        filteredBlocks.add(block);
                     }
-
-                    filteredMap.put(entry.getKey(), filteredBlocks);
                 }
 
-                domainList.add(new DataBlockEntitlementContainer.Domain(domain.getDomain(), filteredMap));
-            } else {
-                domainList.add(domain);
+                filteredMap.put(entry.getKey(), filteredBlocks);
             }
+
+            domainList.add(new DataBlockEntitlementContainer.Domain(domain.getDomain(), filteredMap));
         }
         return new DataBlockEntitlementContainer(domainList);
     }
