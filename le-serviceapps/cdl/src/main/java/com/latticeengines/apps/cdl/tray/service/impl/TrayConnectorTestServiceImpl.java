@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ExportFileConfig;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationMessageBody;
+import com.latticeengines.domain.exposed.cdl.MessageType;
 import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.cdl.tray.TrayConnectorTest;
 import com.latticeengines.domain.exposed.cdl.tray.TrayConnectorTestMetadata;
@@ -48,6 +49,9 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     private static final Logger log = LoggerFactory.getLogger(TrayConnectorTestServiceImpl.class);
 
     private static final String CDL_TRAY_TEST_VERIFICATION_END_POINT = "/cdl/tray/test/verify";
+    private static final String PATH_TEMPLATE = "connectors/%s/test-scenarios/%s/input.json";
+    private static final String TEST_FILE_PATH_TEMPLATE = "tray-test/%s/%s/%s";
+
     private static final String CSV = "CSV";
     private static final String URL = "Url";
     private static final String MAPPING = "Mapping";
@@ -99,15 +103,11 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     @Value("${cdl.tray.test.data.bucket}")
     private String trayTestDataBucket;
 
-    private String pathTemplate = "connectors/%s/test-scenarios/%s/input.json";
-
-    private String testFilePathTemplate = "tray-test/%s/%s/%s";
-
     @Override
     public void triggerTrayConnectorTest(CDLExternalSystemName externalSystemName, String testScenario) {
 
         String customerSpace = MultiTenantContext.getShortTenantId();
-        String objectKey = String.format(pathTemplate, externalSystemName, testScenario);
+        String objectKey = String.format(PATH_TEMPLATE, externalSystemName, testScenario);
         log.info(String.format("Trigger test for customerSpace=%s, objectKey=%s", customerSpace, objectKey));
 
         InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
@@ -154,7 +154,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         log.info("Workflow Request ID: " + workflowRequestId);
 
         TrayConnectorTest test = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
-        String objectKey = String.format(pathTemplate, test.getExternalSystemName(), test.getTestScenario());
+        String objectKey = String.format(PATH_TEMPLATE, test.getExternalSystemName(), test.getTestScenario());
         log.info("Retrieving test metadata with objectKey: " + objectKey);
 
         InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
@@ -177,8 +177,14 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
             return;
         }
 
+        if (!DataIntegrationEventType.canTransit(test.getTestState(),
+                DataIntegrationEventType.valueOf(status.getEventType()))) {
+            log.warn(String.format("State can't change from % to %", test.getTestState().toString(), status,getEventType());
+            return;
+        }
+
         if (isExpectedStatus(status, validationMessages)) {
-            updateTestState(test, status);
+            test.setTestState(DataIntegrationEventType.valueOf(status.getEventType()));
             if (isLastStatus(status, test)) {
                 log.info("Received last expected status update. Setting test result to Succeeded");
                 test.setTestResult(TrayConnectorTestResultType.Succeeded);
@@ -199,17 +205,19 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
             messageMap.put(message.getEventType(), message);
         }
 
-        switch (status.getEventType()) {
-            case EXPORT_START:
-                return messageMap.containsKey(status.getEventType());
+        DataIntegrationEventType currEventType = DataIntegrationEventType.valueOf(status.getEventType());
 
-            case INITIATED:
-                return messageMap.containsKey(status.getEventType());
+        switch (currEventType) {
+            case ExportStart:
+                return verifyExportStartMessage(status, messageMap.get(status.getEventType());
 
-            case COMPLETED:
+            case Initiated:
+                return verifyInitiatedMessage(status, messageMap.get(status.getEventType());
+
+            case Completed:
                 return verifyCompletedMessage(status, messageMap.get(status.getEventType()));
 
-            case AUDIENCE_SIZE_UPDATE:
+            case AudienceSizeUpdate:
                 return verifyAudienceSizeUpdateMessage(status, messageMap.get(status.getEventType()));
 
             default:
@@ -217,27 +225,12 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         }
     }
 
-    private void updateTestState(TrayConnectorTest test, DataIntegrationStatusMonitorMessage status) {
-        switch (status.getEventType()) {
-            case EXPORT_START:
-                test.setTestState(DataIntegrationEventType.ExportStart);
-                break;
+    private boolean verifyExportStartMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
+        return (expected != null) && (expected.getMessageType().equals(MessageType.Event));
+    }
 
-            case INITIATED:
-                test.setTestState(DataIntegrationEventType.Initiated);
-                break;
-
-            case COMPLETED:
-                test.setTestState(DataIntegrationEventType.Completed);
-                break;
-
-            case AUDIENCE_SIZE_UPDATE:
-                test.setTestState(DataIntegrationEventType.AudienceSizeUpdate);
-                break;
-
-            default:
-                return;
-        }
+    private boolean verifyInitiatedMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
+        return (expected != null) && (expected.getMessageType().equals(MessageType.Event));
     }
 
     private boolean verifyCompletedMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
@@ -360,7 +353,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     private List<ExportFileConfig> getNewFileList(Map<String, List<ExportFileConfig>> inputFile, String tenantId, CDLExternalSystemName externalSystemName) {
         String testObjectKey = inputFile.get(CSV).get(0).getObjectPath();
         String fileName = testObjectKey.substring(testObjectKey.lastIndexOf("/")+1);
-        String objectKey = String.format(testFilePathTemplate, tenantId, externalSystemName, fileName);
+        String objectKey = String.format(TEST_FILE_PATH_TEMPLATE, tenantId, externalSystemName, fileName);
         s3Service.copyObject(trayTestDataBucket, testObjectKey, exportS3Bucket, objectKey);
         log.info("Copied tset input file in " + objectKey);
 
