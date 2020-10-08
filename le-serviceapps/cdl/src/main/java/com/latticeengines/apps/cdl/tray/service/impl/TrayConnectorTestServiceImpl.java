@@ -55,11 +55,6 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     private static final String CSV = "CSV";
     private static final String URL = "Url";
     private static final String MAPPING = "Mapping";
-    private static final String EXPORT_START = "ExportStart";
-    private static final String INITIATED = "Initiated";
-    private static final String COMPLETED = "Completed";
-    private static final String FAILED = "Failed";
-    private static final String AUDIENCE_SIZE_UPDATE = "AudienceSizeUpdate";
 
     private static final Map<CDLExternalSystemName, String> SOLUTION_INSTANCE_ID_MAP = new HashMap<>();
 
@@ -166,7 +161,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         updateTest(status, test, validationMessages);
 
         ValidationConfig validationConfig = validation.getValidationConfig();
-        cleanUp(validationConfig);
+        cleanUp(validationConfig, test);
     }
 
     private void updateTest(DataIntegrationStatusMonitorMessage status, TrayConnectorTest test,
@@ -260,7 +255,11 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         return audienceSize > 0L;
     }
 
-    private void cleanUp(ValidationConfig validationConfig) {
+    private void cleanUp(ValidationConfig validationConfig, TrayConnectorTest test) {
+        if (test.getTestResult() == null) {
+            return;
+        }
+
         if (validationConfig.getDeleteSolutionInstance()) {
             // TODO delete solution instance
         }
