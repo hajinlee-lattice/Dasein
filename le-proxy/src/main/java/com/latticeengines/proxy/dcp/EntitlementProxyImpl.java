@@ -2,9 +2,6 @@ package com.latticeengines.proxy.dcp;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,19 +19,10 @@ public class EntitlementProxyImpl extends MicroserviceRestApiProxy implements En
         super("dcp");
     }
 
-    private String encodeURLParameter(String parameter) {
-        try {
-            return URLEncoder.encode(parameter, StandardCharsets.UTF_8.toString());
-        } catch (Exception e) {
-            log.error("Unexpected error encoding URL parameter " + parameter, e);
-            return "ALL";
-        }
-    }
-
     @Override
     public DataBlockEntitlementContainer getEntitlement(String customerSpace, String domainName, String recordType) {
         String url = constructUrl("/customerspaces/{customerSpace}/entitlement/{domainName}/{recordType}", //
-                shortenCustomerSpace(customerSpace), encodeURLParameter(domainName), encodeURLParameter(recordType));
+                shortenCustomerSpace(customerSpace), domainName, recordType);
         return get("get entitlement", url, DataBlockEntitlementContainer.class);
     }
 
