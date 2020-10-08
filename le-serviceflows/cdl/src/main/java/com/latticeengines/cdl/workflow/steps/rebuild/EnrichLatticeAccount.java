@@ -508,24 +508,30 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     private void mergeChangeList() {
         log.info("EnrichLatticeAccount, merge all generated changelists during updateLatticeAccount");
 
-        HdfsDataUnit output;
-        if (changeLists.size() > 1) {
-            MergeImportsConfig config = new MergeImportsConfig();
-            config.setInput(changeLists);
-            // Since it's for appending, no dedup is needed
-            config.setDedupSrc(false);
-            config.setJoinKey(null);
-            config.setAddTimestamps(false);
-
-            SparkJobResult result = runSparkJob(MergeImportsJob.class, config);
-            output = result.getTargets().get(0);
+        if (rebuildDownstream) {
+            log.info("Decide to rebuild downstream, no need to build change list");
+            latticeAccountChangeListTable = null;
         } else {
-            output = (HdfsDataUnit) changeLists.get(0);
+            HdfsDataUnit output;
+            if (changeLists.size() > 1) {
+                MergeImportsConfig config = new MergeImportsConfig();
+                config.setInput(changeLists);
+                // Since it's for appending, no dedup is needed
+                config.setDedupSrc(false);
+                config.setJoinKey(null);
+                config.setAddTimestamps(false);
+
+                SparkJobResult result = runSparkJob(MergeImportsJob.class, config);
+                output = result.getTargets().get(0);
+            } else {
+                output = (HdfsDataUnit) changeLists.get(0);
+            }
+
+            // Save change list table
+            String tableName = NamingUtils.timestamp("LatticeAccountChangeList");
+            latticeAccountChangeListTable = toTable(tableName, output);
         }
 
-        // Save change list table
-        String tableName = NamingUtils.timestamp("LatticeAccountChangeList");
-        latticeAccountChangeListTable = toTable(tableName, output);
     }
 
     /**
@@ -533,23 +539,32 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
      */
     private void createFetchChangeList(HdfsDataUnit fetchResult, String creationMode) {
         log.info("EnrichLatticeAccount, create changelist using the fetch results");
-        List<DataUnit> inputs = new LinkedList<>();
-        inputs.add(fetchResult); // toTable: new table
-        inputs.add(oldLatticeAccountDU); // fromTable: original table
-        ChangeListConfig config = new ChangeListConfig();
-        config.setInput(inputs);
-        config.setCreationMode(creationMode);
-        config.setJoinKey(joinKey);
-        config.setExclusionColumns(Arrays.asList( //
-                InterfaceName.CDLCreatedTime.name(), //
-                InterfaceName.CDLUpdatedTime.name(), //
-                joinKey, //
-                InterfaceName.LatticeAccountId.name() //
-        ));
-        setPartitionMultiplier(6);
-        SparkJobResult result = runSparkJob(CreateChangeListJob.class, config);
-        setPartitionMultiplier(1);
-        changeLists.add(result.getTargets().get(0));
+        if (rebuildDownstream) {
+            log.info("Decide to rebuild downstream, no need to build change list");
+        } else {
+            List<DataUnit> inputs = new LinkedList<>();
+            inputs.add(fetchResult); // toTable: new table
+            inputs.add(oldLatticeAccountDU); // fromTable: original table
+            ChangeListConfig config = new ChangeListConfig();
+            config.setInput(inputs);
+            config.setCreationMode(creationMode);
+            config.setJoinKey(joinKey);
+            config.setExclusionColumns(Arrays.asList( //
+                    InterfaceName.CDLCreatedTime.name(), //
+                    InterfaceName.CDLUpdatedTime.name(), //
+                    joinKey, //
+                    InterfaceName.LatticeAccountId.name() //
+            ));
+            try {
+                setPartitionMultiplier(8);
+                SparkJobResult result = runSparkJob(CreateChangeListJob.class, config);
+                setPartitionMultiplier(1);
+                changeLists.add(result.getTargets().get(0));
+            } catch (RuntimeException e) {
+                log.warn("Failed to create change list, set rebuildDownstream to true.");
+                rebuildDownstream = true;
+            }
+        }
     }
 
     private void saveLatticeAccountChangelist() {
