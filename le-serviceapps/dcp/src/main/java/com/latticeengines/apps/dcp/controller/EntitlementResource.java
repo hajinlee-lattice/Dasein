@@ -31,12 +31,15 @@ public class EntitlementResource {
 
     private String decodeURLParameter(String parameter) {
         log.info("Attempting to decode URL parameter " + parameter);
+        String decodedParameter = null;
         try {
-            return URLDecoder.decode(parameter, StandardCharsets.UTF_8.toString());
+            decodedParameter = URLDecoder.decode(parameter, StandardCharsets.UTF_8.toString());
         } catch (Exception e) {
             log.error("Unexpected error decoding URL parameter " + parameter, e);
-            return "ALL";
+            decodedParameter = "ALL";
         }
+        log.info("Decoded parameter " + parameter + " as " + decodedParameter);
+        return decodedParameter;
     }
 
     @GetMapping("/{domainName}/{recordType}")

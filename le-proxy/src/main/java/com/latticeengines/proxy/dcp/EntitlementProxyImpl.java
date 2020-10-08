@@ -23,12 +23,16 @@ public class EntitlementProxyImpl extends MicroserviceRestApiProxy implements En
     }
 
     private String encodeURLParameter(String parameter) {
+        log.info("Attempting to encode parameter " + parameter);
+        String encodedParameter = null;
         try {
-            return URLEncoder.encode(parameter, StandardCharsets.UTF_8.toString());
+            encodedParameter = URLEncoder.encode(parameter, StandardCharsets.UTF_8.toString());
         } catch (Exception e) {
             log.error("Unexpected error encoding URL parameter " + parameter, e);
-            return "ALL";
+            encodedParameter = "ALL";
         }
+        log.info("Encoded parameter " + parameter + " as " + encodedParameter);
+        return encodedParameter;
     }
 
     @Override
