@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,8 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionCode;
@@ -31,6 +35,8 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/data-blocks")
 public class DataBlockResource {
+
+    private static final Logger log = LoggerFactory.getLogger(DataBlockResource.class);
 
     @Inject
     private PrimeMetadataProxy primeMetadataProxy;
@@ -54,6 +60,46 @@ public class DataBlockResource {
         return primeMetadataProxy.getBlockElements(blockIds);
     }
 
+    private String encodeDataDomain(String domainName) throws UIActionException {
+        log.info("Attempting to encode domain name " + domainName);
+        if ("ALL".equals(domainName)) {
+            return domainName;
+        } else {
+            try {
+                DataDomain domain = DataDomain.parse(domainName);
+                String dataDomainName = domain.name();
+                log.info("Encoded domain name " + domainName + " as " + dataDomainName);
+                return dataDomainName;
+            } catch (Exception e) {
+                log.error("Failed to parse domain name " + domainName, e);
+                String title = "Invalid Domain Name.";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_00002);
+                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                throw UIActionException.fromAction(action);
+            }
+        }
+    }
+
+    private String encodeRecordType(String recordType) throws UIActionException {
+        log.info("Attempting to encode record type " + recordType);
+        if ("ALL".equals(recordType)) {
+            return recordType;
+        } else {
+            try {
+                DataRecordType dataRecordType = DataRecordType.parse(recordType);
+                String recordTypeName = dataRecordType.name();
+                log.info("Encoded record type " + recordType + " as " + recordTypeName);
+                return recordTypeName;
+            } catch (Exception e) {
+                log.error("Failed to parse record type " + recordType, e);
+                String title = "Invalid Record Type.";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_00002);
+                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                throw UIActionException.fromAction(action);
+            }
+        }
+    }
+
     @GetMapping("/entitlement")
     @ResponseBody
     @ApiOperation(value = "Get block drt entitlement")
@@ -63,10 +109,13 @@ public class DataBlockResource {
             @RequestParam(value = "recordType", required = false, defaultValue = "ALL") String recordType,
             @RequestParam(value = "includeElements", required = false, defaultValue = "false") Boolean includeElements) {
         try {
-            DataBlockEntitlementContainer dataBlockEntitlementContainer = entitlementProxy
-                    .getEntitlement(MultiTenantContext.getShortTenantId(), domainName, recordType);
+            String encodedDomainName = encodeDataDomain(domainName);
+            String encodedRecordType = encodeRecordType(recordType);
 
-            if ((!domainName.isEmpty() || !recordType.isEmpty())
+            DataBlockEntitlementContainer dataBlockEntitlementContainer = entitlementProxy
+                    .getEntitlement(MultiTenantContext.getShortTenantId(), encodedDomainName, encodedRecordType);
+
+            if ((!"ALL".equals(domainName) || !"ALL".equals(recordType))
                     && dataBlockEntitlementContainer.getDomains().isEmpty()) {
                 String title = "Subscriber not entitled to the given domain and record type combination.";
                 UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_00002);
