@@ -16,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
@@ -86,24 +87,23 @@ public class EntitlementServiceImplUnitTestNG {
         List<DataBlockEntitlementContainer.Block> blocks = new ArrayList<>();
 
         for (DataBlockEntitlementContainer.Domain domain : filteredContainer.getDomains()) {
-            if (domain.getDomain().equals(DataDomain.Finance)) {
+            for (Map.Entry<DataRecordType, List<DataBlockEntitlementContainer.Block>> entry : domain.getRecordTypes()
+                    .entrySet()) {
 
-                for (Map.Entry<DataRecordType, List<DataBlockEntitlementContainer.Block>> entry : domain
-                        .getRecordTypes().entrySet()) {
+                for (DataBlockEntitlementContainer.Block block : entry.getValue()) {
+                    boolean includeBlock = false;
 
-                    for (DataBlockEntitlementContainer.Block block : entry.getValue()) {
-                        boolean includeBlock = false;
-
+                    if (DataBlock.Id.companyfinancials.equals(block.getBlockId())) {
                         for (DataBlockLevel level : block.getDataBlockLevels()) {
                             if (!level.equals(DataBlockLevel.L1)) {
                                 includeBlock = true;
                                 break;
                             }
                         }
+                    }
 
-                        if (includeBlock) {
-                            blocks.add(block);
-                        }
+                    if (includeBlock) {
+                        blocks.add(block);
                     }
                 }
             }
@@ -160,7 +160,7 @@ public class EntitlementServiceImplUnitTestNG {
                     break;
                 }
             }
-            if(!recordsFiltered) {
+            if (!recordsFiltered) {
                 break;
             }
         }
@@ -197,7 +197,7 @@ public class EntitlementServiceImplUnitTestNG {
                     break;
                 }
             }
-            if(!recordsFiltered) {
+            if (!recordsFiltered) {
                 break;
             }
         }
