@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.net.URLDecoder;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -109,7 +110,7 @@ public class DataBlockResource {
             @RequestParam(value = "recordType", required = false, defaultValue = "ALL") String recordType,
             @RequestParam(value = "includeElements", required = false, defaultValue = "false") Boolean includeElements) {
         try {
-            String encodedDomainName = encodeDataDomain(domainName);
+            String encodedDomainName = encodeDataDomain(URLDecoder.decode(domainName, "UTF-8"));
             String encodedRecordType = encodeRecordType(recordType);
 
             DataBlockEntitlementContainer dataBlockEntitlementContainer = entitlementProxy
