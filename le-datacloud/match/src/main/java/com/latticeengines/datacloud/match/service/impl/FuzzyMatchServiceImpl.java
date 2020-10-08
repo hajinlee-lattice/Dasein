@@ -92,9 +92,11 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     @Override
     public <T extends OutputRecord> void callMatch(List<T> matchRecords, MatchInput matchInput) throws Exception {
         checkRecordType(matchRecords);
+
         Level logLevel = setLogLevel(matchInput.getLogLevelEnum());
         matchInput.setLogLevelEnum(logLevel);
         List<Future<Object>> matchFutures = callMatchInternal(matchRecords, matchInput);
+
         fetchIdResult(matchRecords, logLevel, matchFutures);
     }
 
@@ -165,7 +167,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                             matchRecord.setDnbCacheIds(dnbCacheIds);
                         }
                     }
-                    setDnbReturnCode(traveler, matchRecord);
+                    setDnbReturnInfo(traveler, matchRecord);
                     setDebugValues(traveler, matchRecord);
                     traveler.setBatchMode(actorSystem.isBatchMode());
                     FuzzyMatchHistory history = new FuzzyMatchHistory(traveler);
@@ -293,11 +295,15 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         return matchHistory;
     }
 
-    private void setDnbReturnCode(MatchTraveler traveler, InternalOutputRecord matchRecord) {
+    /*
+     * Copy DnBCode and rawError from context stored in MatchTraveler to the InternalOutputRecord
+     */
+    private void setDnbReturnInfo(MatchTraveler traveler, InternalOutputRecord matchRecord) {
         if (CollectionUtils.isNotEmpty(traveler.getDnBMatchContexts())) {
             DnBMatchContext matchContext = traveler.getDnBMatchContexts().get(0);
             if (matchContext != null) {
                 matchRecord.setDnbCode(matchContext.getDnbCode());
+                matchRecord.setRawError(matchContext.getRawError());
             }
         }
     }
@@ -361,6 +367,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         return logLevel;
     }
 
+    /*
+     * Setup the travelers/actors for matching and initiate the process
+     * @param matchRecords - list of InternalOutputRecords
+     * @param matchInput - original MatchInput
+     * @return - Futures for the results of each traveler
+     */
     @MatchStep
     private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords,
             MatchInput matchInput) {
@@ -401,6 +413,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 matchTraveler.setMatchInput(matchInput);
                 matchRecord.setTravelerId(matchTraveler.getTravelerId());
                 matchTraveler.setTravelTimeout(actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT);
+
                 matchFutures.add(askMatchAnchor(matchTraveler));
             }
         }

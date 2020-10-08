@@ -90,6 +90,8 @@ public class BulkMatchService {
         LogManager.getLogger(BaseRestApiProxy.class).setLevel(level);
 
         if (!MatchStatus.FINISHED.equals(status)) {
+            // TODO - lucascl: matchCommand.getResultLocation() returns the folder where the batch error files are. See HdfsPathBuilder and ParallelBlockExecution::handleFailedBlock for file name/content format
+
             IllegalStateException inner = new IllegalStateException(
                     "The terminal status of match is " + status + " instead of " + MatchStatus.FINISHED);
             throw new LedpException(LedpCode.LEDP_00006, inner);

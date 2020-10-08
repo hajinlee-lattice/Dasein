@@ -76,6 +76,9 @@ public class OutputRecord {
     @JsonProperty("ErrorMessages")
     private List<String> errorMessages;
 
+    @JsonProperty("ErrorCodes")
+    private List<String> errorCodes;
+
     @JsonProperty("DebugValues")
     private List<String> debugValues;
 
@@ -238,6 +241,21 @@ public class OutputRecord {
             this.errorMessages = new ArrayList<>();
         }
         this.errorMessages.add(errorMessage);
+    }
+
+    public List<String> getErrorCodes() {
+        return errorCodes;
+    }
+
+    public void setErrorCodes(List<String> errorCodes) {
+        this.errorCodes = errorCodes;
+    }
+
+    public void addErrorCode(String code) {
+        if (this.errorCodes == null) {
+            this.errorCodes = new ArrayList<>();
+            }
+        this.errorCodes.add(code);
     }
 
     public List<String> getDebugValues() {

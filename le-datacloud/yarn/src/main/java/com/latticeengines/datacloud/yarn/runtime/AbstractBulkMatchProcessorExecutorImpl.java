@@ -183,6 +183,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         return matchInput;
     }
 
+    /*
+     * Write to Avro and merge into block output
+     */
     @MatchStep
     protected void processMatchOutput(ProcessorContext processorContext, MatchOutput groupOutput) {
         try {
@@ -270,6 +273,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     private void writeDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords)
             throws IOException {
+        // TODO: write error records
         List<GenericRecord> records = new ArrayList<>();
         for (OutputRecord outputRecord : outputRecords) {
             List<List<Object>> data = new LinkedList<>();

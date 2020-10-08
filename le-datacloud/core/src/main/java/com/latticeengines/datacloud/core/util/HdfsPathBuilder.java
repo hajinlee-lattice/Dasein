@@ -21,6 +21,9 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
+/*
+ * This class should be used to generate consistent file paths and names in HDFS
+ */
 @Component("hdfsPathBuilder")
 public class HdfsPathBuilder {
 
@@ -278,6 +281,15 @@ public class HdfsPathBuilder {
 
     public Path constructMatchErrorFile(String rootOperationUid) {
         String fileName = MATCH_PREFIX + replaceHyphenAndMakeLowercase(rootOperationUid) + ERR_FILE_EXTENSION;
+        return constructMatchOutputDir(rootOperationUid).append(fileName);
+    }
+
+    public Path constructErrorFileForBatchError(String rootOperationUid, String blockOperationUid) {
+        if (StringUtils.isBlank(blockOperationUid))
+            return constructMatchErrorFile(rootOperationUid);
+
+        String fileName = MATCH_PREFIX + replaceHyphenAndMakeLowercase(rootOperationUid) + HYPHEN
+                + replaceHyphenAndMakeLowercase(blockOperationUid) + ERR_FILE_EXTENSION;
         return constructMatchOutputDir(rootOperationUid).append(fileName);
     }
 

@@ -239,6 +239,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             matchContext.setNameLocations(new HashSet<>());
         }
 
+        // Convert InternalOutputRecords to OutputRecords
         for (InternalOutputRecord internalRecord : records) {
             if (internalRecord.isFailed()) {
                 OutputRecord outputRecord = new OutputRecord();
@@ -367,11 +368,16 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 }
             }
 
+            if (internalRecord.getRawError() != null) {
+                outputRecord.addErrorCode(internalRecord.getRawError());
+            }
+
             outputRecord.setRowNumber(internalRecord.getRowNumber());
             outputRecord.setErrorMessages(internalRecord.getErrorMessages());
             outputRecord.setMatchLogs(internalRecord.getMatchLogs());
             outputRecord.setDebugValues(internalRecord.getDebugValues());
             outputRecord.setNumFeatureValue(internalRecord.getNumFeatureValue());
+
             outputRecords.add(outputRecord);
         }
 

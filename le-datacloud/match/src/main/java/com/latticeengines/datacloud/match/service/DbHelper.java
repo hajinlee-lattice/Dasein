@@ -9,10 +9,13 @@ public interface DbHelper extends HasDataCloudVersion {
 
     MatchContext sketchExecutionPlan(MatchContext matchContext, boolean skipExecutionPlanning);
 
+    /*
+     * Perform fetch step: Enrich InternalOutputRecords with all necessary info
+     * @param context - MatchContext; internalResults contains the records to enrich
+     * @return - same context, with enriched data added to internalResults
+     */
     MatchContext fetch(MatchContext context);
-
     MatchContext fetchSync(MatchContext context);
-
     List<MatchContext> fetch(List<MatchContext> contexts);
 
     MatchContext updateInternalResults(MatchContext context);
@@ -27,6 +30,9 @@ public interface DbHelper extends HasDataCloudVersion {
 
     MatchContext fetchAsync(MatchContext context);
 
+    /*
+     * Fetch results for an async match
+     */
     void fetchIdResult(MatchContext context);
 
 }

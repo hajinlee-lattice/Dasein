@@ -116,7 +116,19 @@ public class DirectPlusRealTimeLookupServiceImpl extends BaseDnBLookupServiceImp
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
             context.setDnbCode(parseDnBHttpError(httpEx));
+
+            String response = ((HttpClientErrorException) ex).getResponseBodyAsString();
+            String errorCode = (String) retrieveJsonValueFromResponse(getErrorCodePath(), response, false);
+
+            context.setRawError(errorCode);
         } else if (ex instanceof LedpException) {
+            log.error("Base: " + ex.getCause());
+            if (ex.getCause() instanceof HttpClientErrorException) {
+                String response = ((HttpClientErrorException) ex.getCause()).getResponseBodyAsString();
+                log.error("Body: " + response);
+                String errorCode = (String) retrieveJsonValueFromResponse(getErrorCodePath(), response, false);
+                context.setRawError(errorCode);
+            }
             LedpException ledpEx = (LedpException) ex;
             // If DnB cannot find duns for match input, HttpStatus.NOT_FOUND (LedpCode.LEDP_25038) is returned.
             // Treat LedpCode.LEDP_25038 as normal response. Do not log
