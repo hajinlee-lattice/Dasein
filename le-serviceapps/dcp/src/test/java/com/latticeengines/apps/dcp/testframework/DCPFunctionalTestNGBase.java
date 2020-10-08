@@ -80,7 +80,7 @@ public class DCPFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected PurposeOfUse getPurposeOfUse() {
         PurposeOfUse purposeOfUse = new PurposeOfUse();
-        purposeOfUse.setDomain(DataDomain.Finance);
+        purposeOfUse.setDomain(DataDomain.SalesMarketing);
         purposeOfUse.setRecordType(DataRecordType.Domain);
         return purposeOfUse;
     }
