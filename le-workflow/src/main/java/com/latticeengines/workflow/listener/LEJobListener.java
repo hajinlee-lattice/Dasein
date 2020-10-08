@@ -3,6 +3,7 @@ package com.latticeengines.workflow.listener;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +13,12 @@ import org.springframework.batch.core.JobExecutionListener;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
 public abstract class LEJobListener implements JobExecutionListener {
@@ -69,9 +72,15 @@ public abstract class LEJobListener implements JobExecutionListener {
     /*-
      * evaluate whether this job can be retried (only used by PA atm)
      */
-    protected boolean canRetry(@NotNull JobExecution jobExecution, DataFeed feed, int retryLimit) {
+    protected boolean canRetry(@NotNull CDLProxy cdlProxy, @NotNull JobExecution jobExecution, DataFeed feed,
+            int retryLimit) {
         if (jobExecution.getStatus() != BatchStatus.FAILED) {
             log.info("Job status {} is not failed, no need to retry", jobExecution.getStatus());
+            return false;
+        }
+        String tenantId = getTenantId(feed);
+        if (StringUtils.isNotBlank(tenantId) && isHandHoldPATenant(cdlProxy, tenantId)) {
+            log.info("Tenant {} is a hand-hold pa tenant, job not retryable", tenantId);
             return false;
         }
 
@@ -84,6 +93,17 @@ public abstract class LEJobListener implements JobExecutionListener {
         log.info("CanRetry = {}, IsUserError = {}, ReachRetryLimit = {}, RetryLimit = {}", canRetry, userError,
                 reachRetryLimit, retryLimit);
         return canRetry;
+    }
+
+    protected boolean isHandHoldPATenant(@NotNull CDLProxy cdlProxy, @NotNull String tenantId) {
+        try {
+            SchedulingStatus status = cdlProxy.getSchedulingStatus(tenantId);
+            return status != null && status.isHandHoldPATenant();
+        } catch (Exception e) {
+            log.error("Failed to verify whether {} is a hand-hold PA tenant. error = {}", tenantId, e);
+            // fail open to allow scheduler schedule PA when zk has issue
+            return false;
+        }
     }
 
     // jobExecution.status == BatchStatus.FAILED
@@ -109,5 +129,12 @@ public abstract class LEJobListener implements JobExecutionListener {
         log.info("Error detail for job {} = {}, error category = {}, isUserError = {}", jobExecution.getId(),
                 JsonUtils.serialize(details), errorCategory, isUserError);
         return isUserError;
+    }
+
+    private String getTenantId(DataFeed feed) {
+        if (feed == null || feed.getTenant() == null) {
+            return null;
+        }
+        return feed.getTenant().getId();
     }
 }

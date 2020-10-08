@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -36,6 +37,9 @@ import com.latticeengines.workflow.listener.LEJobListener;
 public class ProcessAnalyzeListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeListener.class);
+
+    @Inject
+    private CDLProxy cdlProxy;
 
     @Inject
     private DataFeedProxy dataFeedProxy;
@@ -99,7 +103,8 @@ public class ProcessAnalyzeListener extends LEJobListener {
         }
 
         if (!hideRetriedPA
-                || !canRetry(jobExecution, dataFeedProxy.getDataFeed(customerSpace), processAnalyzeJobRetryCount)) {
+                || !canRetry(cdlProxy, jobExecution, dataFeedProxy.getDataFeed(customerSpace),
+                        processAnalyzeJobRetryCount)) {
             log.info("Sending PA notification");
             AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
             emailInfo.setUserId(userId);
