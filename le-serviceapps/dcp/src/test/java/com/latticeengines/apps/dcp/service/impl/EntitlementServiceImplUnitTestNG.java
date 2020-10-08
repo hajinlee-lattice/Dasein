@@ -128,7 +128,7 @@ public class EntitlementServiceImplUnitTestNG {
         boolean domainsFiltered = true;
 
         for (DataBlockEntitlementContainer.Domain domain : filteredContainer.getDomains()) {
-            if (!domain.getDomain().equals(DataDomain.valueOf(domainId))) {
+            if (!domain.getDomain().equals(DataDomain.parse(domainId))) {
                 domainsFiltered = false;
                 break;
             }
@@ -185,7 +185,7 @@ public class EntitlementServiceImplUnitTestNG {
         boolean recordsFiltered = true;
 
         for (DataBlockEntitlementContainer.Domain domain : filteredContainer.getDomains()) {
-            if (!domain.getDomain().equals(DataDomain.valueOf(domainId))) {
+            if (!domain.getDomain().equals(DataDomain.parse(domainId))) {
                 domainsFiltered = false;
                 break;
             }
