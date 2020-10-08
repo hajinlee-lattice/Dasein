@@ -911,6 +911,8 @@ public enum LedpCode {
     LEDP_40095("Your schedule now quota has been exhausted today. Please contact support for further assistance."), //
     LEDP_40096("Error while deleting connection for lookupmap: {0}, {1}."), //
     LEDP_40097("Cannot Launch more than {0} entities to {1} Destination "), //
+    LEDP_40098("Update for LookupIdMap with id {0} failed because it does not exist."), //
+    LEDP_40099("Incorrect input payload, cannot update to a null value."), //
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //

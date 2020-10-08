@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.avro.generic.GenericRecord;
@@ -36,6 +37,14 @@ public class CalculateExpectedRevenuePercentilePLS11356JobTestNG extends SparkJo
     @Override
     protected List<String> getInputOrder() {
         return Arrays.asList("InputTable");
+    }
+
+    @Override
+    protected void customConfig(Map<String, Object> conf, Map<String, String> sparkConf) {
+        conf.put("driverMemory", "2g");
+        sparkConf.put("spark.default.parallelism", String.valueOf(5));
+        sparkConf.put("spark.sql.shuffle.partitions", String.valueOf(5));
+        sparkConf.put("spark.driver.maxResultSize", "1g");
     }
 
     @Test(groups = "functional")

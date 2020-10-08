@@ -143,13 +143,12 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                 existingLookupIdMap.setExternalAuthentication(lookupIdMap.getExternalAuthentication());
                 existingLookupIdMap.setExportFieldMappings(lookupIdMap.getExportFieldMetadataMappings());
                 existingLookupIdMap.setIsRegistered(lookupIdMap.getIsRegistered());
+                existingLookupIdMap.setOrgId(lookupIdMap.getOrgId());
             } else {
-                throw new RuntimeException(
-                        "Incorrect input payload. Will replace this exception with proper LEDP exception.");
+                throw new LedpException(LedpCode.LEDP_40099);
             }
         } else {
-            throw new RuntimeException(String.format("No registration exists for id %s yet, update not allowed. "
-                    + "Will replace this exception with proper LEDP exception.", id));
+            throw new LedpException(LedpCode.LEDP_40098, new String[] { id });
         }
 
         return lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap);
