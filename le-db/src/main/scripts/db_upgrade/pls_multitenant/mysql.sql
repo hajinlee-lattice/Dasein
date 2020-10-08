@@ -43,7 +43,7 @@ CREATE PROCEDURE `UpdateSchema`()
           `PID`                       bigint        not null auto_increment,
           `ALERT_CATEGORY`            varchar(255)  not null,
           `ALERT_HEADER`              varchar(255)  not null,
-          `ALERT_MESSAGE_TEMPLATE`    varchar(1000) not null,
+          `ALERT_MESSAGE_TEMPLATE`    longtext not null,
           `CREATED`                   datetime      not null,
           `NAME`                      varchar(255)  not null,
           `IS_ACTIVE`                 bit           not null,

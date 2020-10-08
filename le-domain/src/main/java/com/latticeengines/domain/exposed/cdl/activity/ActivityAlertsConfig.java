@@ -21,6 +21,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -69,6 +70,7 @@ public class ActivityAlertsConfig implements HasPid, HasTenant, Serializable, Ha
     private long qualificationPeriodDays;
 
     @Column(name = "ALERT_MESSAGE_TEMPLATE", nullable = false)
+    @Type(type = "text")
     @JsonProperty("alert_message_template")
     private String alertMessageTemplate;
 

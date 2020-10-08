@@ -38,7 +38,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @Entity
 @Table(name = "ActivityAlert", //
         uniqueConstraints = @UniqueConstraint(columnNames = { "ENTITY_ID", "ENTITY_TYPE", "TENANT_ID", "VERSION",
-                "CREATION_TIMESTAMP" }), //
+                "CREATION_TIMESTAMP", "ALERT_NAME" }), //
         indexes = { @Index(name = "REC_CREATION_TIMESTAMP", columnList = "CREATION_TIMESTAMP"), //
                 @Index(name = "REC_VERSION", columnList = "VERSION"), //
                 @Index(name = "REC_CATEGORY", columnList = "CATEGORY") })
@@ -59,7 +59,7 @@ public class ActivityAlert implements HasPid, HasTenantId {
     @JsonProperty("entity_id")
     private String entityId;
 
-    @Column(name = "ENTITY_TYPE", nullable = false)
+    @Column(name = "ENTITY_TYPE", nullable = false, length = 50)
     @JsonProperty("entity_type")
     @Enumerated(EnumType.STRING)
     private BusinessEntity entityType;
@@ -77,11 +77,11 @@ public class ActivityAlert implements HasPid, HasTenantId {
     @JsonProperty("version")
     private String version;
 
-    @Column(name = "ALERT_NAME", nullable = false)
+    @Column(name = "ALERT_NAME", nullable = false, length = 100)
     @JsonProperty("alertName")
     private String alertName;
 
-    @Column(name = "CATEGORY", nullable = false)
+    @Column(name = "CATEGORY", nullable = false, length = 50)
     @JsonProperty("category")
     @Enumerated(EnumType.STRING)
     private AlertCategory category;

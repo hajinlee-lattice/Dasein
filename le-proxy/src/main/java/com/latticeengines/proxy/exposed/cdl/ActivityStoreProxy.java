@@ -156,4 +156,11 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         List<?> list = get("get_activity_alerts_configuration", url, List.class);
         return JsonUtils.convertList(list, ActivityAlertsConfig.class);
     }
+
+    public List<ActivityAlertsConfig> generateDefaultActivityAlertsConfiguration(@NotNull String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activity-alerts-config/defaults",
+                shortenCustomerSpace(customerSpace));
+        List<?> list = put("gen_default_activity_alerts_configuration", url, null, List.class);
+        return JsonUtils.convertList(list, ActivityAlertsConfig.class);
+    }
 }
