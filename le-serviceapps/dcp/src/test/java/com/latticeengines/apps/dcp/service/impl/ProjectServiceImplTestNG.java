@@ -9,11 +9,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.testframework.DCPFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
+import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ProjectServiceImplTestNG extends DCPFunctionalTestNGBase {
 
@@ -61,4 +64,55 @@ public class ProjectServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertEquals(description, project.getProjectDescription());
     }
 
+    @Test(groups = "functional")
+    public void testDontCreateWithNotEntitledDataDomain () {
+        String customerSpace = "customerSpace" + RandomStringUtils.randomAlphanumeric(4);
+        String displayName = "Display Name " + RandomStringUtils.randomAlphanumeric(4);
+        Project.ProjectType projectType = Project.ProjectType.Type1;
+        String user = "functional_test@dnb.com";
+        PurposeOfUse purposeOfUse = getNonEntitledPurposeOfUse();
+        String description = "Test Project Description " + RandomStringUtils.randomAlphanumeric(3);
+        try {
+            ProjectDetails details = projectService.createProject(customerSpace, displayName, projectType, user,
+                    purposeOfUse, description);
+            Assert.fail("Exception LedpException should have been thrown for invalid DataDomain.");
+        }
+        catch (LedpException ledpException) {
+            String msg = ledpException.getMessage();
+            Assert.assertEquals(msg, "Project is not entitled to data domain D&B for Compliance.");
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testDontCreateWithNotEntitledRecordType () {
+        String customerSpace = "customerSpace" + RandomStringUtils.randomAlphanumeric(4);
+        String displayName = "Display Name " + RandomStringUtils.randomAlphanumeric(4);
+        Project.ProjectType projectType = Project.ProjectType.Type1;
+        String user = "functional_test@dnb.com";
+        PurposeOfUse purposeOfUse = getNonEntitledRecordTypePOU();
+        String description = "Test Project Description " + RandomStringUtils.randomAlphanumeric(3);
+        try {
+            ProjectDetails details = projectService.createProject(customerSpace, displayName, projectType, user,
+                    purposeOfUse, description);
+            Assert.fail("Exception LedpException should have been thrown for invalid DataDomain.");
+        }
+        catch (LedpException ledpException) {
+            String msg = ledpException.getMessage();
+            Assert.assertEquals(msg, "Project is not entitled to record type Analytical Use in data domain D&B for Sales & Marketing.");
+        }
+    }
+
+    private PurposeOfUse getNonEntitledPurposeOfUse() {
+        PurposeOfUse purposeOfUse = new PurposeOfUse();
+        purposeOfUse.setDomain(DataDomain.Compliance);
+        purposeOfUse.setRecordType(DataRecordType.Domain);
+        return purposeOfUse;
+    }
+
+    private PurposeOfUse getNonEntitledRecordTypePOU() {
+        PurposeOfUse purposeOfUse = new PurposeOfUse();
+        purposeOfUse.setDomain(DataDomain.SalesMarketing);
+        purposeOfUse.setRecordType(DataRecordType.Analytical);
+        return purposeOfUse;
+    }
 }

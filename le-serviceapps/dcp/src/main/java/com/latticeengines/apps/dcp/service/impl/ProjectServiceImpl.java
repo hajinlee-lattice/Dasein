@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.DataReportService;
+import com.latticeengines.apps.dcp.service.EntitlementService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.apps.dcp.workflow.DCPDataReportWorkflowSubmitter;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportMode;
@@ -41,6 +43,8 @@ import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.dcp.ProjectUpdateRequest;
 import com.latticeengines.domain.exposed.dcp.PurposeOfUse;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Service("projectService")
 public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectService {
@@ -67,13 +71,17 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
     @Inject
     private DCPDataReportWorkflowSubmitter dataReportWorkflowSubmitter;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
-    public ProjectDetails createProject(String customerSpace, String displayName,
-                                        Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse, String description) {
+    public ProjectDetails createProject(String customerSpace, String displayName, Project.ProjectType projectType,
+            String user, PurposeOfUse purposeOfUse, String description) {
         String projectId = generateRandomProjectId();
         String rootPath = generateRootPath(projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath,
-                purposeOfUse, description));
+        validatePurposeOfUse(purposeOfUse);
+        projectEntityMgr.create(
+                generateProjectObject(projectId, displayName, projectType, user, rootPath, purposeOfUse, description));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -84,11 +92,12 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
 
     @Override
     public ProjectDetails createProject(String customerSpace, String projectId, String displayName,
-                                        Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse, String description) {
+            Project.ProjectType projectType, String user, PurposeOfUse purposeOfUse, String description) {
         validateProjectId(projectId);
+        validatePurposeOfUse(purposeOfUse);
         String rootPath = generateRootPath(projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath,
-                purposeOfUse, description));
+        projectEntityMgr.create(
+                generateProjectObject(projectId, displayName, projectType, user, rootPath, purposeOfUse, description));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -104,12 +113,12 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
 
     @Override
     public List<ProjectSummary> getAllProject(String customerSpace, Boolean includeSources, Boolean includeArchived,
-                                              int pageIndex, int pageSize, List<String> teamIds) {
+            int pageIndex, int pageSize, List<String> teamIds) {
         log.info("Start getAllProject!");
         try (PerformanceTimer timer = new PerformanceTimer()) {
             PageRequest pageRequest = getPageRequest(pageIndex, pageSize);
             List<ProjectInfo> projectInfoList;
-            if (teamIds == null){
+            if (teamIds == null) {
                 projectInfoList = projectEntityMgr.findAllProjectInfo(pageRequest, includeArchived);
             } else {
                 if (teamIds.isEmpty()) {
@@ -120,8 +129,10 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
             timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in page.");
             Map<String, DataReport.BasicStats> basicStatsMap = dataReportService.getDataReportBasicStats(customerSpace,
                     DataReportRecord.Level.Project);
-            return projectInfoList.stream().map(projectInfo -> getProjectSummary(customerSpace, projectInfo,
-                    basicStatsMap.get(projectInfo.getProjectId()), includeSources)).collect(Collectors.toList());
+            return projectInfoList.stream()
+                    .map(projectInfo -> getProjectSummary(customerSpace, projectInfo,
+                            basicStatsMap.get(projectInfo.getProjectId()), includeSources))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -131,12 +142,13 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
     }
 
     @Override
-    public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources, List<String> teamIds) {
+    public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId, Boolean includeSources,
+            List<String> teamIds) {
         RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRY,
                 Collections.singleton(IllegalArgumentException.class), null);
         ProjectInfo projectInfo = retryTemplate.execute(context -> {
             ProjectInfo info;
-            if (teamIds == null){
+            if (teamIds == null) {
                 info = projectEntityMgr.findProjectInfoByProjectId(projectId);
             } else {
                 if (teamIds.isEmpty()) {
@@ -159,13 +171,13 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
     @Override
     public Boolean deleteProject(String customerSpace, String projectId, List<String> teamIds) {
         Project project = projectEntityMgr.findByProjectId(projectId);
-        if (project == null || (project.getTeamId() != null && teamIds != null && !teamIds.contains(project.getTeamId()))) {
+        if (project == null
+                || (project.getTeamId() != null && teamIds != null && !teamIds.contains(project.getTeamId()))) {
             return false;
         }
 
         log.info("soft delete the data report under {}", projectId);
-        dataReportService.deleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project,
-                projectId);
+        dataReportService.deleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project, projectId);
         project.setDeleted(Boolean.TRUE);
         projectEntityMgr.update(project);
         return true;
@@ -174,15 +186,15 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
     @Override
     public Boolean hardDeleteProject(String customerSpace, String projectId, List<String> teamIds) {
         Project project = projectEntityMgr.findByProjectId(projectId);
-        if (project == null || (project.getTeamId() != null && teamIds != null && !teamIds.contains(project.getTeamId()))) {
+        if (project == null
+                || (project.getTeamId() != null && teamIds != null && !teamIds.contains(project.getTeamId()))) {
             return false;
         }
 
         sourceService.hardDeleteSourceUnderProject(customerSpace, projectId);
 
         log.info("hard delete the data report under {}", projectId);
-        dataReportService.hardDeleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project,
-                projectId);
+        dataReportService.hardDeleteDataReportUnderOwnerId(customerSpace, DataReportRecord.Level.Project, projectId);
         projectEntityMgr.delete(project);
 
         dropBoxService.removeFolder(project.getRootPath());
@@ -300,12 +312,12 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
     }
 
     private ProjectSummary getProjectSummary(String customerSpace, ProjectInfo projectInfo,
-                                             DataReport.BasicStats basicStats, Boolean includeSources) {
+            DataReport.BasicStats basicStats, Boolean includeSources) {
         ProjectSummary summary = new ProjectSummary();
         summary.setProjectId(projectInfo.getProjectId());
         summary.setProjectDisplayName(projectInfo.getProjectDisplayName());
         summary.setArchived(projectInfo.getDeleted());
-        if(includeSources) {
+        if (includeSources) {
             summary.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
             summary.setTotalSourceCount(sourceService.getSourceCount(customerSpace, projectInfo.getProjectId()));
         }
@@ -319,9 +331,8 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
         return summary;
     }
 
-    private Project generateProjectObject(String projectId, String displayName,
-                                          Project.ProjectType projectType, String user, String rootPath,
-                                          PurposeOfUse purposeOfUse, String description) {
+    private Project generateProjectObject(String projectId, String displayName, Project.ProjectType projectType,
+            String user, String rootPath, PurposeOfUse purposeOfUse, String description) {
         Project project = new Project();
         project.setCreatedBy(user);
         project.setProjectDisplayName(displayName);
@@ -364,5 +375,33 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
             retry++;
         }
         return project;
+    }
+
+    private boolean validatePurposeOfUse(PurposeOfUse purposeOfUse) {
+        String domainName = purposeOfUse.getDomain().getDisplayName();
+        String recordType = purposeOfUse.getRecordType().getDisplayName();
+        String tenantId = MultiTenantContext.getTenant().getId();
+        DataBlockEntitlementContainer dataBlockEntitlementContainer = entitlementService.getEntitlement(tenantId,
+                domainName, recordType);
+        return validateDataBlockContainer(purposeOfUse, dataBlockEntitlementContainer);
+    }
+
+    private boolean validateDataBlockContainer(PurposeOfUse purposeOfUse,
+            DataBlockEntitlementContainer dataBlockEntitlementContainer) throws LedpException {
+
+        if (!dataBlockEntitlementContainer.getDomains().isEmpty()) {
+            DataBlockEntitlementContainer.Domain domain = dataBlockEntitlementContainer.getDomains().get(0);
+            if (!domain.getRecordTypes().isEmpty()) {
+                // Tenant is entitled to this Purpose of Use
+                return true;
+            } else {
+                // Tenant is not entitled to this record type
+                throw new LedpException(LedpCode.LEDP_60013, new String[] {
+                        purposeOfUse.getRecordType().getDisplayName(), purposeOfUse.getDomain().getDisplayName() });
+            }
+        } else {
+            // Customer not entitled to the Domain
+            throw new LedpException(LedpCode.LEDP_60012, new String[] { purposeOfUse.getDomain().getDisplayName() });
+        }
     }
 }
