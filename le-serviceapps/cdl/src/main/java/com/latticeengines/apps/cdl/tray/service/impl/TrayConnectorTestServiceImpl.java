@@ -179,7 +179,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
         if (!DataIntegrationEventType.canTransit(test.getTestState(),
                 DataIntegrationEventType.valueOf(status.getEventType()))) {
-            log.warn(String.format("State can't change from % to %", test.getTestState().toString(), status,getEventType());
+            log.warn(String.format("State can't change from % to %", test.getTestState().toString(), status.getEventType()));
             return;
         }
 
@@ -209,10 +209,10 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
         switch (currEventType) {
             case ExportStart:
-                return verifyExportStartMessage(status, messageMap.get(status.getEventType());
+                return verifyExportStartMessage(status, messageMap.get(status.getEventType()));
 
             case Initiated:
-                return verifyInitiatedMessage(status, messageMap.get(status.getEventType());
+                return verifyInitiatedMessage(status, messageMap.get(status.getEventType()));
 
             case Completed:
                 return verifyCompletedMessage(status, messageMap.get(status.getEventType()));
