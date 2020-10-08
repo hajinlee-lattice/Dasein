@@ -110,7 +110,7 @@ public class TrayConnectorTestMetadata {
 
     }
 
-    private static class ValidationMetadata {
+    public static class ValidationMetadata {
 
         @JsonProperty("config")
         private ValidationConfig config;
@@ -136,12 +136,12 @@ public class TrayConnectorTestMetadata {
 
     }
 
-    private static class ValidationConfig {
+    public static class ValidationConfig {
 
         @JsonProperty("deleteSolutionInstance")
         private boolean deleteSolutionInstance;
 
-        @JsonProperty("deleteExternalAudienc")
+        @JsonProperty("deleteExternalAudience")
         private boolean deleteExternalAudience;
 
         public boolean getDeleteSolutionInstance() {
@@ -152,7 +152,7 @@ public class TrayConnectorTestMetadata {
             this.deleteSolutionInstance = deleteSolutionInstance;
         }
 
-        public boolean getGenerateExternalAudience() {
+        public boolean getDeleteExternalAudience() {
             return this.deleteExternalAudience;
         }
 
