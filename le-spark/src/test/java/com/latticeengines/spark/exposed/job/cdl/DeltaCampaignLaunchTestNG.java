@@ -201,7 +201,11 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             List<String> contactColumns = CampaignLaunchUtils.generateContactColsForS3();
             for (String contactColumn : contactColumns) {
                 Schema.Field field = schema.getField(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn);
-                Assert.assertNull(field);
+                if (InterfaceName.ContactId.name().equals(contactColumn)) {
+                    Assert.assertNotNull(field);
+                } else {
+                    Assert.assertNull(field);
+                }
             }
         }
     }
