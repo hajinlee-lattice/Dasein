@@ -1,6 +1,7 @@
 package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -209,7 +210,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
 
         // Get a Set of the blockId and level values that the tenant must have for the
         // layout to be valid.
-        Set<String> blocksContainingElements = primeMetadataProxy
+        Collection<String> blocksContainingElements = primeMetadataProxy
                 .getBlocksContainingElements(enrichmentLayout.getElements());
 
         // Get a list of the datablocks available for the dataRecordType in this tenant.
