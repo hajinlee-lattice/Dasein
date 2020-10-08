@@ -207,7 +207,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       && accountColsRecNotIncludedStd.isEmpty //
       && accountColsRecNotIncludedNonStd.isEmpty) {
       logSpark("Four categories are all empty.")
-      return finalRecommendations
+      return finalRecommendations.withColumnRenamed("ACCOUNT_ID", joinKey)
     }
 
     // 1. combine Recommendation-contained columns (including Contacts column if required)
