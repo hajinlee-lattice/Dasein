@@ -1,10 +1,10 @@
 package com.latticeengines.proxy.matchapi;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
@@ -38,7 +39,7 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     }
 
     private Map<String, DataBlock> getContainerDataBlocks(DataBlockEntitlementContainer container) {
-        List<String> blockIds = new ArrayList();
+        List<String> blockIds = new ArrayList<>();
         Map<String, DataBlock> blockIdToDataBlock = new HashMap<>();
 
         for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
@@ -95,10 +96,10 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
     }
 
     @Override
-    public Set<String> getBlocksContainingElements(List<String> elementIds) {
-        String url = constructUrl("/blocks-containing?elementIds={elementIds}", //
-                StringUtils.join(elementIds, ","));
-        return getSet("get blocks containing elements", url, String.class);
+    public Collection<String> getBlocksContainingElements(List<String> elementIds) {
+        String url = constructUrl("/blocks-containing");
+        List<?> list = post("get blocks containing elements", url, elementIds, List.class);
+        return JsonUtils.convertList(list, String.class);
     }
 
     @Override
