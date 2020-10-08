@@ -22,9 +22,6 @@ public class ActivityAlertJobConfig extends SparkJobConfig {
     public Map<String, Long> alertNameToQualificationPeriodDays = new HashMap<>();
 
     @JsonProperty
-    public Map<String, String> alertNameToAlertCategory = new HashMap<>();
-
-    @JsonProperty
     public Long currentEpochMilli;
 
     @Override
