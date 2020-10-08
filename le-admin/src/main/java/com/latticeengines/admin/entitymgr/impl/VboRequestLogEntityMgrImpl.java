@@ -18,7 +18,8 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
 
 @Component("vboRequestLogEntityMgr")
-public class VboRequestLogEntityMgrImpl extends JpaEntityMgrRepositoryImpl<VboRequestLog, Long> implements VboRequestLogEntityMgr {
+public class VboRequestLogEntityMgrImpl extends JpaEntityMgrRepositoryImpl<VboRequestLog, Long>
+        implements VboRequestLogEntityMgr {
 
     @Inject
     private VboRequestLogReaderRepository readerRepository;
@@ -33,8 +34,8 @@ public class VboRequestLogEntityMgrImpl extends JpaEntityMgrRepositoryImpl<VboRe
 
     @Override
     @Transactional(transactionManager = "vboJpaTransactionManager", propagation = Propagation.REQUIRED)
-    public void save(VboRequestLog vboRequestLog) {
-        writerRepository.save(vboRequestLog);
+    public VboRequestLog save(VboRequestLog vboRequestLog) {
+        return writerRepository.save(vboRequestLog);
     }
 
     @Override

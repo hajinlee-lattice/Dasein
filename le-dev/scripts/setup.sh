@@ -6,13 +6,11 @@ YELLOW="$(tput setaf 3)"
 GREEN="$(tput setaf 2)"
 OFF="$(tput sgr0)"
 
-function processErrors
-{
-  if [[ $? -ne 0 ]]
-  then
-      echo "[${RED}ERROR${OFF}]"
-      cat /tmp/errors.txt
-      exit 1
+function processErrors() {
+  if [[ $? -ne 0 ]]; then
+    echo "[${RED}ERROR${OFF}]"
+    cat /tmp/errors.txt
+    exit 1
   fi
 }
 
@@ -25,7 +23,7 @@ echo "You are using this python: ${PYTHON}"
 echo "You are using this java: ${JAVA_HOME}"
 
 source "${WSHOME}/le-dev/scripts/check_aws_creds_expiration.sh"
-check_aws_creds_expiration
+#check_aws_creds_expiration
 
 # Expand aliases
 echo "Expanding aliases."
@@ -39,41 +37,41 @@ cd "${WSHOME}" || exit
 
 OLD_JAVA_HOME="${JAVA_HOME}"
 if [[ -n "${J11_HOME}" ]]; then
-    export JAVA_HOME="${J11_HOME}"
+  export JAVA_HOME="${J11_HOME}"
 fi
 
 echo "Top-level compile"
-mvn -T8 -Pcheckstyle -DskipTests clean install 2> /tmp/errors.txt
+mvn -T8 -Pcheckstyle -DskipTests clean install 2>/tmp/errors.txt
 processErrors
 
 echo "Top-level shaded yarn compile"
-mvn -T6 -f shaded-pom.xml -Pshaded-yarn -DskipTests clean package 2> /tmp/errors.txt
+mvn -T6 -f shaded-pom.xml -Pshaded-yarn -DskipTests clean package 2>/tmp/errors.txt
 processErrors
 
-echo "" > /tmp/errors.txt
+echo "" >/tmp/errors.txt
 
 hdfs dfs -rm -r -f "/app/${LE_STACK}/$(leversion)" || true
 hdfs dfs -mkdir -p "/app/${LE_STACK}" || true
 pushd "${WSHOME}/le-dataplatform" || exit
 mvn -Ppkg-shaded -DskipTests package &&
-echo "Deploying artifacts to hdfs ..."
+  echo "Deploying artifacts to hdfs ..."
 hdfs dfs -copyFromLocal target/dist "/app/${LE_STACK}/$(leversion)"
 popd || exit
 
 echo "deploy properties file"
-cfgdpl 2> /tmp/errors.txt
+cfgdpl 2>/tmp/errors.txt
 processErrors
 
 if [[ -n $("${ANACONDA_HOME}/bin/conda" env list | grep p2) ]]; then
-    source "${ANACONDA_HOME}/bin/activate" p2
+  source "${ANACONDA_HOME}/bin/activate" p2
 else
-    source "${ANACONDA_HOME}/bin/activate" lattice
+  source "${ANACONDA_HOME}/bin/activate" lattice
 fi
 
 if [[ "${USE_QA_RTS}" == "true" ]]; then
-    ${PYTHON} "$WSHOME/le-dev/scripts/setup_zk.py" --qa-source-dbs
+  ${PYTHON} "$WSHOME/le-dev/scripts/setup_zk.py" --qa-source-dbs
 else
-    ${PYTHON} "$WSHOME/le-dev/scripts/setup_zk.py"
+  ${PYTHON} "$WSHOME/le-dev/scripts/setup_zk.py"
 fi
 source "${ANACONDA_HOME}/bin/deactivate"
 

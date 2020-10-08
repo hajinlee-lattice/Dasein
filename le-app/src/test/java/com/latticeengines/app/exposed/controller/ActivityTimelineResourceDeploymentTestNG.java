@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -66,7 +65,7 @@ public class ActivityTimelineResourceDeploymentTestNG extends AppDeploymentTestN
     @Inject
     private DataUnitProxy dataUnitProxy;
 
-    @Autowired
+    @Inject
     protected Oauth2RestApiProxy oauth2RestApiProxy;
 
     private OAuth2RestTemplate oAuth2RestTemplate;

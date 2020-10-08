@@ -1,66 +1,67 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>le-datadb</artifactId>
-	<name>le-${component-name}</name>
-	<description>LE Data DB</description>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-datadb</artifactId>
+    <name>le-${component-name}</name>
+    <description>LE Data DB</description>
 
-	<parent>
-		<groupId>com.latticeengines</groupId>
-		<artifactId>le-parent</artifactId>
-		<version>4.30.0-SNAPSHOT</version>
-		<relativePath>../le-parent</relativePath>
-	</parent>
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>4.30.0-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
 
-	<properties>
-		<component-name>datadb</component-name>
-	</properties>
+    <properties>
+        <component-name>datadb</component-name>
+    </properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>${maven.exec.version}</version>
-				<executions>
-					<execution>
-						<id>data_multitenant</id>
-						<phase>package</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
-							<arguments>
-								<argument>Data_MultiTenant</argument>
-								<argument>false</argument>
-								<argument>com.latticeengines.domain.exposed.playmakercore</argument>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${maven.exec.version}</version>
+                <executions>
+                    <execution>
+                        <id>data_multitenant</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
+                            <arguments>
+                                <argument>Data_MultiTenant</argument>
+                                <argument>false</argument>
+                                <argument>com.latticeengines.domain.exposed.playmakercore</argument>
+                                <argument>com.latticeengines.domain.exposed.cdl.activitydata</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.latticeengines</groupId>
-			<artifactId>le-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.latticeengines</groupId>
-			<artifactId>le-db</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.latticeengines</groupId>
-			<artifactId>le-testframework</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>
