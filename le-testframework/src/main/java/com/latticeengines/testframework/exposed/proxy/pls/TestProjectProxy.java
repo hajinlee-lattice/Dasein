@@ -85,8 +85,8 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
 
     public PurposeOfUse getPurposeOfUse() {
         PurposeOfUse purposeOfUse = new PurposeOfUse();
-        purposeOfUse.setDomain(DataDomain.EnterpriseMasterData);
-        purposeOfUse.setRecordType(DataRecordType.MasterData);
+        purposeOfUse.setDomain(DataDomain.SalesMarketing);
+        purposeOfUse.setRecordType(DataRecordType.Domain);
         return purposeOfUse;
     }
 
