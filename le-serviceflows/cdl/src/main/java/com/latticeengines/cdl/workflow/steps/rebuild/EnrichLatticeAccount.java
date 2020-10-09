@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.BaseProcessAnalyzeSparkStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -57,6 +58,8 @@ import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.FilterByJoinConfig;
 import com.latticeengines.domain.exposed.spark.common.FilterChangelistConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.cdl.SubscriptionProxy;
+import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.serviceflows.workflow.match.BulkMatchService;
 import com.latticeengines.spark.exposed.job.cdl.MergeImportsJob;
@@ -89,6 +92,12 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     @Inject
     private BatonService batonService;
 
+    @Inject
+    private TimeLineProxy timeLineProxy;
+
+    @Inject
+    private SubscriptionProxy subscriptionProxy;
+
     private Table oldLatticeAccountTable = null;
     private Table newLatticeAccountTable = null;
     private Table latticeAccountChangeListTable = null;
@@ -109,6 +118,11 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     private boolean rebuildDownstream;
     private List<DataUnit> changeLists = new ArrayList<>();
     private ColumnSelection allActiveColumns;
+
+    // Default firmographic attributes required by Intent email alert
+    private static final Set<String> DEFAULT_FIRMOGRAPHIC_ATTRIBUTES = ImmutableSet.of("GLOBAL_ULTIMATE_DUNS_NUMBER",
+            "DOMESTIC_ULTIMATE_DUNS_NUMBER", "LDC_DUNS", "LDC_Domain", "LDC_Name", "LDC_City", "STATE_PROVINCE_ABBR",
+            "LE_IS_PRIMARY_DOMAIN", "LDC_PrimaryIndustry", "LE_REVENUE_RANGE");
 
     @Override
     public void execute() {
@@ -171,9 +185,11 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         boolean enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
         boolean shouldFetchAll = //
                 hasDataCloudMajorChange || missAccountChangeList || enforceRebuild || missLatticeAccountTable;
-        log.info("hasDataCloudMajorChange={}, missAccountChangeList={}, enforceRebuild={}, missLatticeAccountTable={}: " + //
-                        "shouldFetchAll={}", //
-                hasDataCloudMajorChange, missAccountChangeList, enforceRebuild, missLatticeAccountTable, shouldFetchAll);
+        log.info("hasDataCloudMajorChange={}, missAccountChangeList={}, enforceRebuild={}, missLatticeAccountTable={}: "
+                + //
+                "shouldFetchAll={}", //
+                hasDataCloudMajorChange, missAccountChangeList, enforceRebuild, missLatticeAccountTable,
+                shouldFetchAll);
         return shouldFetchAll;
     }
 
@@ -675,14 +691,33 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         String dataCloudVersion = getConfiguration().getDataCloudVersion();
         List<ColumnMetadata> dcCols = columnMetadataProxy.getAllColumns(dataCloudVersion);
         log.info("Column size from LDC is {}, dataCloudVersion {} ", dcCols.size(), dataCloudVersion);
-        List<String> fetchAttrs = new ArrayList<>();
+        boolean isIntentAlertEnabled = isIntentAlertEnabled();
+        Set<String> fetchAttrs = new HashSet<>();
         for (ColumnMetadata cm : dcCols) {
-            if (validAttrs.contains(cm.getAttrName())) {
-                fetchAttrs.add(cm.getAttrName());
+            String attr = cm.getAttrName();
+            if (validAttrs.contains(attr)) {
+                fetchAttrs.add(attr);
+            } else if(isIntentAlertEnabled && DEFAULT_FIRMOGRAPHIC_ATTRIBUTES.contains(attr)) {
+                fetchAttrs.add(attr);
+            }
+        }
+        // If generate Intent email alert is enabled for this tenant,
+        // make sure all those default firmographic attributes are included
+        if (isIntentAlertEnabled) {
+            for (String attr : DEFAULT_FIRMOGRAPHIC_ATTRIBUTES) {
+                if (!fetchAttrs.contains(attr)) {
+                    log.error("Attribute {} is missing, which is required for Intent email alert", attr);
+                    throw new RuntimeException(
+                            String.format("Failed attribute check for Intent email alert, missing %s", attr));
+                }
             }
         }
         log.info("Found {} LDC attributes to fetch", fetchAttrs.size());
-        return fetchAttrs;
+        return new LinkedList<>(fetchAttrs);
     }
 
+    private boolean isIntentAlertEnabled() {
+        return !timeLineProxy.findAll(customerSpace.toString()).isEmpty()
+                || !subscriptionProxy.getEmailsByTenantId(customerSpace.getTenantId()).isEmpty();
+    }
 }

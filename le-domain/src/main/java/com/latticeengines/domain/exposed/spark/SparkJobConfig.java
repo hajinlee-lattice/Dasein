@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobCo
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateIntentAlertArtifactsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig;
@@ -180,10 +181,10 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = SplitTransactionConfig.class, name = SplitTransactionConfig.NAME), //
         @JsonSubTypes.Type(value = TransformTxnStreamConfig.class, name = TransformTxnStreamConfig.NAME), //
         @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME), //
-        @JsonSubTypes.Type(value = GenerateTimelineExportArtifactsJobConfig.class, name =
-                GenerateTimelineExportArtifactsJobConfig.NAME), //
+        @JsonSubTypes.Type(value = GenerateTimelineExportArtifactsJobConfig.class, name = GenerateTimelineExportArtifactsJobConfig.NAME), //
         @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME), //
-        @JsonSubTypes.Type(value = GenerateRecommendationCSVConfig.class, name = GenerateRecommendationCSVConfig.NAME) //
+        @JsonSubTypes.Type(value = GenerateRecommendationCSVConfig.class, name = GenerateRecommendationCSVConfig.NAME), //
+        @JsonSubTypes.Type(value = GenerateIntentAlertArtifactsConfig.class, name = GenerateIntentAlertArtifactsConfig.NAME) //
 })
 public abstract class SparkJobConfig implements Serializable {
 

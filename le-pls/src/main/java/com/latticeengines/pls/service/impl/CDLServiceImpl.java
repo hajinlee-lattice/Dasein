@@ -294,7 +294,8 @@ public class CDLServiceImpl implements CDLService {
             CleanupOperationType cleanupOperationType) {
         BusinessEntity entity;
         UIAction uiAction = new UIAction();
-        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)) && !batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(customerSpace))) {
+        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))
+                && !batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(customerSpace))) {
             uiAction.setTitle(DELETE_FAIL_TITLE);
             uiAction.setView(View.Modal);
             uiAction.setStatus(Status.Error);
@@ -552,8 +553,8 @@ public class CDLServiceImpl implements CDLService {
                 } else {
                     DataFeedTaskSummary taskSummary = summaryMap.get(folderName);
                     S3ImportTemplateDisplay display = new S3ImportTemplateDisplay();
-                    display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
-                            folderName));
+                    display.setPath(S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(),
+                            dropBoxSummary.getDropBox(), folderName));
                     display.setExist(Boolean.TRUE);
                     display.setLastEditedDate(taskSummary.getLastUpdated());
                     // get from data feed task
@@ -583,7 +584,7 @@ public class CDLServiceImpl implements CDLService {
                 Comparator<S3ImportTemplateDisplay> compareBySystemName = Comparator
                         .comparing((S3ImportTemplateDisplay s) -> s.getS3ImportSystem() == null ? ""
                                 : s.getS3ImportSystem().getDisplayName() == null ? ""
-                                : s.getS3ImportSystem().getDisplayName());
+                                        : s.getS3ImportSystem().getDisplayName());
                 Comparator<S3ImportTemplateDisplay> compareBySystem = compareBySystemType
                         .thenComparing(compareBySystemName);
 
@@ -600,20 +601,20 @@ public class CDLServiceImpl implements CDLService {
         return templates;
     }
 
-    // For migrated tenant, user may create the drop folder again. Need to hide these templates from UI.
+    // For migrated tenant, user may create the drop folder again. Need to hide
+    // these templates from UI.
     private boolean hideLegacyTemplate(String folderName, Map<String, DataFeedTaskSummary> summaryMap) {
         if (StringUtils.isEmpty(getSystemNameFromFeedType(folderName))) {
             if (!summaryMap.containsKey(folderName)) {
                 return summaryMap.containsKey(DEFAULT_SYSTEM + "_" + folderName);
             } else {
                 DataFeedTaskSummary currentSummary = summaryMap.get(folderName);
-                Optional<DataFeedTaskSummary> summaryWithSystem =
-                        summaryMap.values()
-                                .stream()
-                                .filter(summary -> !summary.getFeedType().equals(folderName)
-                                        && summary.getEntity().equals(currentSummary.getEntity())
-                                        && S3PathBuilder.DEFAULT_SYSTEM.equals(S3PathBuilder.getSystemNameFromFeedType(summary.getFeedType())))
-                                .findFirst();
+                Optional<DataFeedTaskSummary> summaryWithSystem = summaryMap.values().stream()
+                        .filter(summary -> !summary.getFeedType().equals(folderName)
+                                && summary.getEntity().equals(currentSummary.getEntity())
+                                && S3PathBuilder.DEFAULT_SYSTEM
+                                        .equals(S3PathBuilder.getSystemNameFromFeedType(summary.getFeedType())))
+                        .findFirst();
                 return summaryWithSystem.isPresent();
             }
         }
@@ -630,8 +631,8 @@ public class CDLServiceImpl implements CDLService {
             throw new IllegalArgumentException("Must provide path under tenant's root directory!");
         }
         // first occurrence of the dropbox
-        String relativePath =
-                s3Path.substring(s3Path.indexOf(dropBoxSummary.getDropBox()) + dropBoxSummary.getDropBox().length());
+        String relativePath = s3Path
+                .substring(s3Path.indexOf(dropBoxSummary.getDropBox()) + dropBoxSummary.getDropBox().length());
         return dropBoxProxy.getFileListForPath(customerSpace, relativePath, filter);
     }
 
@@ -681,15 +682,17 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public List<S3ImportSystem> getS3ImportSystemWithFilter(String customerSpace, boolean filterAccount,
-                                                            boolean filterContact, S3ImportTemplateDisplay templateDisplay) {
+            boolean filterContact, S3ImportTemplateDisplay templateDisplay) {
         List<S3ImportSystem> allSystems = getAllS3ImportSystem(customerSpace);
         if (filterAccount) {
-            allSystems = allSystems.stream().filter(system -> system.getAccountSystemId() != null).collect(Collectors.toList());
+            allSystems = allSystems.stream().filter(system -> system.getAccountSystemId() != null)
+                    .collect(Collectors.toList());
             if (templateDisplay != null) {
                 EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
                 // There should be 2 use cases here:
                 // 1. EntityType=Accounts, means filter out the system pointing to itself
-                // 2. EntityType=Contacts/Leads, means return all systems that have SystemAccountId.
+                // 2. EntityType=Contacts/Leads, means return all systems that have
+                // SystemAccountId.
                 if (EntityType.Accounts.equals(entityType) && CollectionUtils.isNotEmpty(allSystems)) {
                     allSystems = allSystems.stream()
                             .filter(system -> !system.getName().equals(templateDisplay.getS3ImportSystem().getName()))
@@ -698,7 +701,8 @@ public class CDLServiceImpl implements CDLService {
             }
         }
         if (filterContact) {
-            allSystems = allSystems.stream().filter(system -> system.getContactSystemId() != null).collect(Collectors.toList());
+            allSystems = allSystems.stream().filter(system -> system.getContactSystemId() != null)
+                    .collect(Collectors.toList());
             if (templateDisplay != null) {
                 EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
                 // There should be 2 use cases here:
@@ -796,8 +800,8 @@ public class CDLServiceImpl implements CDLService {
             } else {
                 appendTemplateMapptingValue(fileContent, CUSTOM);
             }
-            appendTemplateMapptingValue(fileContent, attribute.getSourceAttrName() == null ?
-                    attribute.getDisplayName() : attribute.getSourceAttrName());
+            appendTemplateMapptingValue(fileContent,
+                    attribute.getSourceAttrName() == null ? attribute.getDisplayName() : attribute.getSourceAttrName());
             appendTemplateMapptingValue(fileContent, attribute.getDisplayName());
             appendFieldType(fileContent, attribute);
             fileContent.append("\n");
@@ -1017,16 +1021,18 @@ public class CDLServiceImpl implements CDLService {
             return true;
         }
 
-        List<Action> importActionsWithoutPA =
-                actionsWithoutPA.stream().filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())
-                        && ActionStatus.ACTIVE.equals(action.getActionStatus())).collect(Collectors.toList());
+        List<Action> importActionsWithoutPA = actionsWithoutPA.stream()
+                .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType())
+                        && ActionStatus.ACTIVE.equals(action.getActionStatus()))
+                .collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(importActionsWithoutPA)) {
             return true;
         }
 
         for (Action action : importActionsWithoutPA) {
-            ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+            ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
+                    .getActionConfiguration();
             String dataFeedTaskId = importActionConfiguration.getDataFeedTaskId();
             if (dataFeedTaskId == null) {
                 continue;
@@ -1035,14 +1041,15 @@ public class CDLServiceImpl implements CDLService {
             if (dataFeedTask == null) {
                 continue;
             }
-            if (BusinessEntity.Product.name().equals(dataFeedTask.getEntity()) &&
-                    DataFeedTask.SubType.Bundle.equals(dataFeedTask.getSubType())) {
+            if (BusinessEntity.Product.name().equals(dataFeedTask.getEntity())
+                    && DataFeedTask.SubType.Bundle.equals(dataFeedTask.getSubType())) {
                 Long workflowId = importActionConfiguration.getWorkflowId();
                 Preconditions.checkNotNull(workflowId, "configuration is null for bundle");
                 Job job = workflowProxy.getJobByWorkflowJobPid(customerSpace, workflowId);
                 // forbidden user upload if status is completed, running, enqueued, pending
                 if (JobStatus.COMPLETED.equals(job.getJobStatus()) || JobStatus.RUNNING.equals(job.getJobStatus())
-                        || JobStatus.ENQUEUED.equals(job.getJobStatus()) || JobStatus.PENDING.equals(job.getJobStatus())) {
+                        || JobStatus.ENQUEUED.equals(job.getJobStatus())
+                        || JobStatus.PENDING.equals(job.getJobStatus())) {
                     return false;
                 }
             }
@@ -1056,17 +1063,17 @@ public class CDLServiceImpl implements CDLService {
             return Collections.emptyMap();
         }
         if (EntityType.isStandardEntityType(entityType)) {
-            return servingStoreProxy.getDecoratedMetadata(customerSpace, entityType.getEntity(), null,
-                    null, StoreFilter.NON_LDC)
-                    .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
-                    .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
-                    .block();
+            return servingStoreProxy
+                    .getDecoratedMetadata(customerSpace, entityType.getEntity(), null, null, StoreFilter.NON_LDC)
+                    .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName())
+                            && StringUtils.isNotEmpty(clm.getDisplayName()))
+                    .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName).block();
         } else if (EntityType.isStreamEntityType(entityType)) {
-            return servingStoreProxy.getDecoratedMetadata(customerSpace, BusinessEntity.Account, null,
-                    null, StoreFilter.NON_LDC)
-                    .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
-                    .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
-                    .block();
+            return servingStoreProxy
+                    .getDecoratedMetadata(customerSpace, BusinessEntity.Account, null, null, StoreFilter.NON_LDC)
+                    .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName())
+                            && StringUtils.isNotEmpty(clm.getDisplayName()))
+                    .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName).block();
         } else {
             return Collections.emptyMap();
         }
@@ -1074,24 +1081,24 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(String customerSpace, String systemName,
-                                                                        EntityType entityType) {
+            EntityType entityType) {
         log.info("customerSpace is {}, systemName is {}, entityType is {}.", customerSpace, systemName, entityType);
         String streamName;
         switch (entityType) {
-            case WebVisit:
-                streamName = entityType.name();
-                break;
-            case MarketingActivity:
-            case Opportunity:
-                streamName = systemName + "_" + entityType.name();
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("getDimensionMetadata() Cannot support " +
-                    "entityType %s", entityType.name()));
+        case WebVisit:
+            streamName = entityType.name();
+            break;
+        case MarketingActivity:
+        case Opportunity:
+            streamName = systemName + "_" + entityType.name();
+            break;
+        default:
+            throw new IllegalArgumentException(
+                    String.format("getDimensionMetadata() Cannot support " + "entityType %s", entityType.name()));
         }
         try {
-            Map<String, DimensionMetadata> metadataMap =
-                    activityStoreProxy.getDimensionMetadataInStream(customerSpace, streamName, null);
+            Map<String, DimensionMetadata> metadataMap = activityStoreProxy.getDimensionMetadataInStream(customerSpace,
+                    streamName, null);
             log.info("customerSpace is {}, streamName is {}, signature is {}.", customerSpace, streamName, null);
             Map<String, List<Map<String, Object>>> dimensionMetadataMap = new HashMap<>();
             log.info("dimensionMetadataMap is {}.", JsonUtils.serialize(dimensionMetadataMap));
@@ -1107,10 +1114,9 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public void downloadDimensionMetadataInStream(HttpServletRequest request, HttpServletResponse response,
-                                                  String mimeType, String fileName, String customerSpace,
-                                                  String systemName, EntityType entityType) {
-        log.info("mimeType is {}, fileName is {}, customerSpace is {}, systemName is {}, entityType is {}, ",
-                mimeType, fileName, customerSpace, systemName, entityType);
+            String mimeType, String fileName, String customerSpace, String systemName, EntityType entityType) {
+        log.info("mimeType is {}, fileName is {}, customerSpace is {}, systemName is {}, entityType is {}, ", mimeType,
+                fileName, customerSpace, systemName, entityType);
         List<Map<String, Object>> metadataValues = getMetadataValues(customerSpace, systemName, entityType);
         DataFeedTask datafeedTask = dataFeedProxy.getDataFeedTask(customerSpace, "File",
                 S3PathBuilder.getFolderName(systemName, entityType.getDefaultFeedTypeName()));
@@ -1120,41 +1126,45 @@ public class CDLServiceImpl implements CDLService {
         }
 
         TemplateFileHttpDownloader.TemplateFileHttpDownloaderBuilder builder = new TemplateFileHttpDownloader.TemplateFileHttpDownloaderBuilder();
-        builder.setMimeType(mimeType).setFileName(fileName).setFileContent(getCSVFromValues(datafeedTask.getImportTemplate(), metadataValues)).setBatonService(batonService);
+        builder.setMimeType(mimeType).setFileName(fileName)
+                .setFileContent(getCSVFromValues(datafeedTask.getImportTemplate(), metadataValues))
+                .setBatonService(batonService);
         TemplateFileHttpDownloader downloader = new TemplateFileHttpDownloader(builder);
         downloader.downloadFile(request, response);
     }
 
-    private List<Map<String, Object>> getMetadataValues(String customerSpace, String systemName, EntityType entityType) {
+    private List<Map<String, Object>> getMetadataValues(String customerSpace, String systemName,
+            EntityType entityType) {
         String dimensionName;
         EntityType streamType;
-        switch(entityType) {
-            case WebVisitPathPattern:
-                streamType = EntityType.WebVisit;
-                dimensionName = InterfaceName.PathPatternId.name();
-                break;
-            case WebVisitSourceMedium:
-                streamType = EntityType.WebVisit;
-                dimensionName = InterfaceName.SourceMediumId.name();
-                break;
-            case OpportunityStageName:
-                streamType = EntityType.Opportunity;
-                dimensionName = InterfaceName.StageNameId.name();
-                break;
-            case MarketingActivityType:
-                streamType = EntityType.MarketingActivity;
-                dimensionName = InterfaceName.ActivityTypeId.name();
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("this method cannot support this " +
-                    "entityType. entityType is %s.", entityType.name()));
+        switch (entityType) {
+        case WebVisitPathPattern:
+            streamType = EntityType.WebVisit;
+            dimensionName = InterfaceName.PathPatternId.name();
+            break;
+        case WebVisitSourceMedium:
+            streamType = EntityType.WebVisit;
+            dimensionName = InterfaceName.SourceMediumId.name();
+            break;
+        case OpportunityStageName:
+            streamType = EntityType.Opportunity;
+            dimensionName = InterfaceName.StageNameId.name();
+            break;
+        case MarketingActivityType:
+            streamType = EntityType.MarketingActivity;
+            dimensionName = InterfaceName.ActivityTypeId.name();
+            break;
+        default:
+            throw new IllegalArgumentException(String
+                    .format("this method cannot support this " + "entityType. entityType is %s.", entityType.name()));
         }
 
-        Map<String, List<Map<String, Object>>> getAllDimensionMetadataValues =
-                getDimensionMetadataInStream(customerSpace, systemName, streamType);
+        Map<String, List<Map<String, Object>>> getAllDimensionMetadataValues = getDimensionMetadataInStream(
+                customerSpace, systemName, streamType);
         if (!getAllDimensionMetadataValues.containsKey(dimensionName)) {
-            throw new IllegalArgumentException(String.format("CustomerSpace %s, cannot find dimensionName %s in " +
-                            "systemName %s, entityType is %s.", customerSpace, dimensionName, systemName, entityType));
+            throw new IllegalArgumentException(String.format(
+                    "CustomerSpace %s, cannot find dimensionName %s in " + "systemName %s, entityType is %s.",
+                    customerSpace, dimensionName, systemName, entityType));
         }
         return getAllDimensionMetadataValues.get(dimensionName);
     }
@@ -1182,14 +1192,14 @@ public class CDLServiceImpl implements CDLService {
             String name = InterfaceName.Name.name();
             if (templateAttrNameMap.containsKey(name)) {// make column "Name" in the first position.
                 Attribute attribute = templateAttrNameMap.get(name);
-                String displayName = attribute.getSourceAttrName() == null? attribute.getDisplayName() :
-                        attribute.getSourceAttrName();
+                String displayName = attribute.getSourceAttrName() == null ? attribute.getDisplayName()
+                        : attribute.getSourceAttrName();
                 appendTemplateMapptingValue(fileContent, displayName);
                 templateAttrNameMap.remove(name);
             }
             for (Attribute attribute : templateAttrNameMap.values()) {
-                String displayName = attribute.getSourceAttrName() == null? attribute.getDisplayName() :
-                        attribute.getSourceAttrName();
+                String displayName = attribute.getSourceAttrName() == null ? attribute.getDisplayName()
+                        : attribute.getSourceAttrName();
                 appendTemplateMapptingValue(fileContent, displayName);
             }
         }
@@ -1214,6 +1224,7 @@ public class CDLServiceImpl implements CDLService {
         fileContent.deleteCharAt(fileContent.length() - 1);
         return fileContent.toString();
     }
+
     private String modifyStringForCSV(String value) {
         if (value == null) {
             return "";
@@ -1226,8 +1237,8 @@ public class CDLServiceImpl implements CDLService {
         List<Action> importActions = actionProxy.getActions(customerSpace).stream()
                 .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
                 .collect(Collectors.toList());
-        return importActions.stream().map(action -> getImportFile(customerSpace, action)).
-                filter(Objects::nonNull).collect(Collectors.toList());
+        return importActions.stream().map(action -> getImportFile(customerSpace, action)).filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -1249,9 +1260,15 @@ public class CDLServiceImpl implements CDLService {
         return cdlProxy.validateAndUpdateSystemPriority(customerSpace, systemList);
     }
 
+    @Override
+    public ApplicationId generateIntentAlert(String customerSpace) {
+        return cdlProxy.generateIntentAlert(customerSpace);
+    }
+
     private ImportFileInfo getImportFile(String customerSpace, Action action) {
         ImportFileInfo importFileInfo = new ImportFileInfo();
-        ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+        ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action
+                .getActionConfiguration();
         String dataFeedTaskId = importActionConfiguration.getDataFeedTaskId();
         if (dataFeedTaskId == null) {
             return null;
@@ -1261,7 +1278,7 @@ public class CDLServiceImpl implements CDLService {
             return null;
         }
         importFileInfo.setFeedType(dataFeedTask.getFeedType());
-        if(dataFeedTask.getImportSystemName() == null) {
+        if (dataFeedTask.getImportSystemName() == null) {
             importFileInfo.setSystemName(S3PathBuilder.getSystemNameFromFeedType(dataFeedTask.getFeedType()));
         } else {
             importFileInfo.setSystemName(dataFeedTask.getImportSystemName());
@@ -1269,7 +1286,7 @@ public class CDLServiceImpl implements CDLService {
 
         importFileInfo.setTemplateName(dataFeedProxy.getTemplateName(customerSpace, dataFeedTaskId));
         Long workflowId = importActionConfiguration.getWorkflowId();
-        if(workflowId == null){
+        if (workflowId == null) {
             return null;
         }
         Job job = workflowProxy.getJobByWorkflowJobPid(customerSpace, workflowId);
@@ -1279,7 +1296,7 @@ public class CDLServiceImpl implements CDLService {
             importFileInfo.setFilePath(filePath);
         } else {
             String fileName = inputs.get(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME);
-            if(fileName == null){
+            if (fileName == null) {
                 return null;
             }
             SourceFile source = sourceFileService.findByName(fileName);
