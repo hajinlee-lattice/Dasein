@@ -110,7 +110,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = CampaignDeltaCalculationWorkflowConfiguration.class, name = "CampaignDeltaCalculationWorkflowConfiguration"),
         @Type(value = PublishDynamoWorkflowConfiguration.class, name = "PublishDynamoWorkflowConfiguration"),
         @Type(value = MigrateDynamoWorkflowConfiguration.class, name = "MigrateDynamoWorkflowConfiguration"),
-        @Type(value = PublishAccountLookupWorkflowConfiguration.class, name = PublishAccountLookupWorkflowConfiguration.NAME)
+        @Type(value = PublishAccountLookupWorkflowConfiguration.class, name = PublishAccountLookupWorkflowConfiguration.NAME),
+        @Type(value = GenerateIntentEmailAlertWorkflowConfiguration.class, name = GenerateIntentEmailAlertWorkflowConfiguration.NAME)
 })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 

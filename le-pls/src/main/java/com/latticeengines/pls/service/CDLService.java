@@ -146,4 +146,6 @@ public interface CDLService {
      * @return true if validate pass and priority updated.
      */
     boolean validateAndUpdateS3ImportSystemPriority(String customerSpace, List<S3ImportSystem> systemList);
+
+    ApplicationId generateIntentAlert(String customerSpace);
 }

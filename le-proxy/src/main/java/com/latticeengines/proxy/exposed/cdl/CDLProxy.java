@@ -61,7 +61,8 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public ApplicationId scheduleProcessAnalyze(String customerSpace, boolean runNow, ProcessAnalyzeRequest request) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze?runNow={runNow}",
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/processanalyze?runNow={runNow}",
                 shortenCustomerSpace(customerSpace), runNow);
         ResponseDocument<String> responseDoc = post("process and analyze", url, request, ResponseDocument.class);
         if (responseDoc == null) {
@@ -111,14 +112,13 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
-                                     String subType, String displayName, CDLImportConfig metadata) {
+            String subType, String displayName, CDLImportConfig metadata) {
         return createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, false, "", metadata);
     }
 
     @SuppressWarnings("unchecked")
     public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
-                                     String subType, String displayName, boolean sendEmail, String user,
-                                     CDLImportConfig metadata) {
+            String subType, String displayName, boolean sendEmail, String user, CDLImportConfig metadata) {
         String baseUrl = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/create"
                 + "?source={source}&feedtype={feedtype}&entity={entity}&sendEmail={sendEmail}";
         List<String> args = new ArrayList<>();
@@ -159,7 +159,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public ApplicationId submitImportJob(String customerSpace, String taskIdentifier, boolean onlyData,
-                                         CDLImportConfig importConfig) {
+            CDLImportConfig importConfig) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/import/internal/{taskIdentifier}?onlyData={onlyData}",
                 customerSpace, taskIdentifier, String.valueOf(onlyData));
@@ -177,9 +177,10 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public ApplicationId submitS3ImportJob(String customerSpace, S3FileToHdfsConfiguration s3FileToHdfsConfiguration) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/s3import", customerSpace);
-        ResponseDocument<String> responseDoc = post("submitS3ImportJob", url, s3FileToHdfsConfiguration, ResponseDocument.class);
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/s3import",
+                customerSpace);
+        ResponseDocument<String> responseDoc = post("submitS3ImportJob", url, s3FileToHdfsConfiguration,
+                ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }
@@ -193,8 +194,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean resetImport(String customerSpace, BusinessEntity entity) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/reset", customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/reset", customerSpace);
         if (entity != null) {
             url += "?entity=" + entity.name();
         }
@@ -220,8 +220,8 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     public ApplicationId submitOrphanRecordsExport(String customerSpace, OrphanRecordsExportRequest request) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/datafeed/exportorphanrecords", customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/exportorphanrecords",
+                customerSpace);
         ResponseDocument responseDoc = post("orphanRecordExport", url, request, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
@@ -233,7 +233,6 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
                     "Failed to submit orphanRecordsExport job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
-
 
     @SuppressWarnings("unchecked")
     public ApplicationId cleanupAll(String customerSpace, BusinessEntity entity, String initiator) {
@@ -293,8 +292,8 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
-    public void legacyDeleteByDateRange(String customerSpace, String startTime, String endTime,
-                                            BusinessEntity entity, String initiator) throws ParseException {
+    public void legacyDeleteByDateRange(String customerSpace, String startTime, String endTime, BusinessEntity entity,
+            String initiator) throws ParseException {
         String urlPattern = "/customerspaces/{customerSpace}/datacleanup/legacyDeleteByDateRangeAction";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date start = dateFormat.parse(startTime);
@@ -308,13 +307,12 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         cleanupByDateRangeConfiguration.setEntity(entity);
         cleanupByDateRangeConfiguration.setCustomerSpace(customerSpace);
         cleanupByDateRangeConfiguration.setOperationInitiator(initiator);
-        post("cleanup by time range", url, cleanupByDateRangeConfiguration,
-                ResponseDocument.class);
+        post("cleanup by time range", url, cleanupByDateRangeConfiguration, ResponseDocument.class);
     }
 
     @SuppressWarnings("unchecked")
     public ApplicationId legacyDeleteByUpload(String customerSpace, SourceFile sourceFile, BusinessEntity entity,
-                                         CleanupOperationType operationType, String initiator) {
+            CleanupOperationType operationType, String initiator) {
         CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
         configuration.setTableName(sourceFile.getTableName());
         configuration.setFilePath(sourceFile.getPath());
@@ -324,7 +322,8 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         configuration.setCleanupOperationType(operationType);
         configuration.setOperationInitiator(initiator);
 
-        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/legacyDeleteByUploadAction", customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/legacyDeleteByUploadAction",
+                customerSpace);
 
         ResponseDocument<String> responseDoc = post("cleanup by upload", url, configuration, ResponseDocument.class);
 
@@ -489,8 +488,9 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     @SuppressWarnings("unchecked")
     public ApplicationId registerDeleteData(String customerSpace, String user, String filename, boolean hardDelete) {
 
-        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/registerDeleteData" +
-                        "?user={user}&filename={filename}&hardDelete={hardDelete}",
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacleanup/registerDeleteData"
+                        + "?user={user}&filename={filename}&hardDelete={hardDelete}",
                 customerSpace, user, filename, String.valueOf(hardDelete));
 
         ResponseDocument<String> responseDoc = post("Register delete data", url, null, ResponseDocument.class);
@@ -521,7 +521,8 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public void createS3ImportSystem(String customerSpace, S3ImportSystem system) {
-        String url = constructUrl("/customerspaces/{customerSpace}/s3import/system", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/s3import/system",
+                shortenCustomerSpace(customerSpace));
         ResponseDocument<String> responseDoc = post("create s3 import system", url, system, ResponseDocument.class);
         if (responseDoc == null) {
             throw new RuntimeException("Failed to create Import System!");
@@ -544,7 +545,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     public List<S3ImportSystem> getS3ImportSystemList(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/s3import/system/list",
-                    shortenCustomerSpace(customerSpace));
+                shortenCustomerSpace(customerSpace));
         List<?> rawlist = get("get s3 import system list", url, List.class);
         return JsonUtils.convertList(rawlist, S3ImportSystem.class);
     }
@@ -614,7 +615,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean createWebVisitTemplate(String customerSpace,
-                                          List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
+            List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup/webvisit",
                 shortenCustomerSpace(customerSpace));
         ResponseDocument<Boolean> responseDoc = post("create webvisit template", url, simpleTemplateMetadataList,
@@ -628,7 +629,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean createWebVisitTemplate2(String customerSpace,
-                                          List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
+            List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup/webvisit2",
                 shortenCustomerSpace(customerSpace));
         ResponseDocument<Boolean> responseDoc = post("create webvisit template with IW 2.0", url,
@@ -642,11 +643,12 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean createDefaultOpportunityTemplate(String customerSpace, String systemName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup" +
-                "/defaultOpportunity?systemName={systemName}",
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup"
+                        + "/defaultOpportunity?systemName={systemName}",
                 shortenCustomerSpace(customerSpace), systemName);
-        ResponseDocument<Boolean> responseDoc = post("create Default Opportunity template with IW 2.0", url,
-                null, ResponseDocument.class);
+        ResponseDocument<Boolean> responseDoc = post("create Default Opportunity template with IW 2.0", url, null,
+                ResponseDocument.class);
         if (responseDoc.isSuccess()) {
             return responseDoc.getResult();
         } else {
@@ -656,11 +658,12 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean createDefaultMarketingTemplate(String customerSpace, String systemName, String systemType) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup" +
-                        "/defaultMarketing?systemName={systemName}&systemType={systemType}",
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup"
+                        + "/defaultMarketing?systemName={systemName}&systemType={systemType}",
                 shortenCustomerSpace(customerSpace), systemName, systemType);
-        ResponseDocument<Boolean> responseDoc = post("create Default Marketing template with IW 2.0", url,
-                null, ResponseDocument.class);
+        ResponseDocument<Boolean> responseDoc = post("create Default Marketing template with IW 2.0", url, null,
+                ResponseDocument.class);
         if (responseDoc.isSuccess()) {
             return responseDoc.getResult();
         } else {
@@ -670,8 +673,9 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean createOpportunityTemplate(String customerSpace, String systemName,
-                                          List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup/opportunity?systemName={systemName}",
+            List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup/opportunity?systemName={systemName}",
                 shortenCustomerSpace(customerSpace), systemName);
         ResponseDocument<Boolean> responseDoc = post("create webvisit template", url, simpleTemplateMetadataList,
                 ResponseDocument.class);
@@ -684,8 +688,9 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean createDefaultDnbIntentDataTemplate(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup" +
-                "/defaultDnbIntentData?", shortenCustomerSpace(customerSpace));
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup" + "/defaultDnbIntentData?",
+                shortenCustomerSpace(customerSpace));
         ResponseDocument<Boolean> responseDocument = post("create default dnbIntentData template", url, null,
                 ResponseDocument.class);
         if (responseDocument.isSuccess()) {
@@ -697,8 +702,8 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean createDefaultBuyingScoreDataTemplate(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup" +
-                "/defaultDnbIntentData?processBuyingScore=true", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup"
+                + "/defaultDnbIntentData?processBuyingScore=true", shortenCustomerSpace(customerSpace));
         ResponseDocument<Boolean> responseDocument = post("create default buying score template", url, null,
                 ResponseDocument.class);
         if (responseDocument.isSuccess()) {
@@ -707,7 +712,6 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return false;
         }
     }
-
 
     @SuppressWarnings("unchecked")
     public String backupTemplate(String customerSpace, String uniqueTaskId) {
@@ -730,7 +734,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (responseDoc != null && responseDoc.isSuccess()) {
             return responseDoc.getResult();
         } else {
-            throw new LedpException(LedpCode.LEDP_40072, new String[]{uniqueTaskId, backupName});
+            throw new LedpException(LedpCode.LEDP_40072, new String[] { uniqueTaskId, backupName });
         }
     }
 
@@ -758,13 +762,16 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (responseDoc.isSuccess()) {
             return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
-            throw new RuntimeException("Failed to submit migrate dynamo job: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException(
+                    "Failed to submit migrate dynamo job: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
     public boolean resetTemplate(String customerSpace, String source, String feedType, Boolean forceReset) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/resetTemplate" +
-                        "?source={source}&feedType={feedType}", shortenCustomerSpace(customerSpace), source, feedType);
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/resetTemplate"
+                        + "?source={source}&feedType={feedType}",
+                shortenCustomerSpace(customerSpace), source, feedType);
         if (Boolean.TRUE.equals(forceReset)) {
             url += "&forceReset=true";
         }
@@ -772,36 +779,52 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (rawResponse.isSuccess()) {
             return JsonUtils.deserialize(JsonUtils.serialize(rawResponse.getResult()), Boolean.class);
         } else {
-            throw new RuntimeException(String.format("Cannot reset template (source=%s, feedType=%s)", source,
-                    feedType));
+            throw new RuntimeException(
+                    String.format("Cannot reset template (source=%s, feedType=%s)", source, feedType));
         }
     }
 
     public boolean hasPAConsumedActions(String customerSpace, String source, String feedType) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/hasPAConsumedImportAction" +
-                "?source={source}&feedType={feedType}", shortenCustomerSpace(customerSpace), source, feedType);
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/hasPAConsumedImportAction"
+                        + "?source={source}&feedType={feedType}",
+                shortenCustomerSpace(customerSpace), source, feedType);
         return get("reset template", url, Boolean.class);
     }
 
     public List<String> getPAConsumedTemplateIds(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/allPAConsumedTemplates", shortenCustomerSpace(customerSpace));
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datafeed/tasks/allPAConsumedTemplates",
+                shortenCustomerSpace(customerSpace));
         List<?> rawList = get("reset template", url, List.class);
         return JsonUtils.convertList(rawList, String.class);
     }
 
     public void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, int length,
-                                            boolean nullable) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks" +
-                "/appendLengthValidator/{uniqueTaskId}?attrName={attrName}&length={length}&nullable={nullable}",
+            boolean nullable) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks"
+                + "/appendLengthValidator/{uniqueTaskId}?attrName={attrName}&length={length}&nullable={nullable}",
                 shortenCustomerSpace(customerSpace), uniqueTaskId, attrName, length, nullable);
         put("Add attribute length validator", url);
     }
 
     public void addSimpleValueFilter(String customerSpace, String uniqueTaskId, SimpleValueFilter simpleValueFilter) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks" +
-                        "/appendSimpleValueFilter/{uniqueTaskId}",
-                shortenCustomerSpace(customerSpace), uniqueTaskId);
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks"
+                + "/appendSimpleValueFilter/{uniqueTaskId}", shortenCustomerSpace(customerSpace), uniqueTaskId);
         post("Add simple value filter", url, simpleValueFilter, Void.class);
     }
-}
 
+    public ApplicationId generateIntentAlert(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/generateintentalert",
+                shortenCustomerSpace(customerSpace));
+        ResponseDocument<String> responseDoc = post("Generate Intent alert email", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
+        } else {
+            throw new RuntimeException(StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+}
