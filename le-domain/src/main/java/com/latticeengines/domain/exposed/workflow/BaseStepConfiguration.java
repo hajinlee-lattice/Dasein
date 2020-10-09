@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.Publis
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.TransformationStepExecutionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CommitEntityMatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PublishEntityMatchStagingConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
@@ -48,6 +49,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = QueuePlayLaunchesStepConfiguration.class, name = "QueuePlayLaunchesStepConfiguration"), //
         @Type(value = CalculateDeltaStepConfiguration.class, name = "CalculateDeltaStepConfiguration"), //
         @Type(value = MockActivityStoreConfiguration.class, name = "MockActivityStoreConfiguration"), //
+        @Type(value = PublishEntityMatchStagingConfiguration.class, name = "PublishEntityMatchStagingConfiguration"), //
         @Type(value = LegacyDeleteByDateRangeActionConfiguration.class, name = "LegacyDeleteByDateRangeActionConfiguration"), //
         @Type(value = GenerateTimelineExportUniverseStepConfiguration.class, name = "GenerateTimelineUniverseStepConfiguration"), //
         @Type(value = TimelineExportFileGeneratorConfiguration.class, name = "TimelineExportFileGeneratorConfiguration"), //

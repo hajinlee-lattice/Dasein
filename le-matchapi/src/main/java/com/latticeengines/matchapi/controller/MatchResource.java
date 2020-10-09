@@ -42,6 +42,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -66,7 +67,9 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PublishEntityMatchStagingConfiguration;
 import com.latticeengines.matchapi.service.BulkMatchService;
+import com.latticeengines.matchapi.service.impl.PublishEntityMatchStagingWorkflowSubmitter;
 import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
 import com.latticeengines.monitor.exposed.metrics.impl.InstrumentRegistry;
 
@@ -100,6 +103,10 @@ public class MatchResource {
 
     @Inject
     private EntityMatchInternalService entityInternalMatchService;
+
+    @Lazy
+    @Inject
+    private PublishEntityMatchStagingWorkflowSubmitter publishEntityMatchStagingWorkflowSubmitter;
 
     @Lazy
     @Inject
@@ -344,6 +351,13 @@ public class MatchResource {
             stats.put(entity.name(), stat);
         }
         return stats;
+    }
+
+    @PostMapping("/entity/publish/jobs")
+    @ResponseBody
+    @ApiOperation(value = "Submit a workflow job to publish match entries for specified tenant from staging to serving")
+    public AppSubmission submitPublishStagingJob(@RequestBody PublishEntityMatchStagingConfiguration configuration) {
+        return publishEntityMatchStagingWorkflowSubmitter.submit(configuration);
     }
 
     @PostMapping("/entity/versions")
