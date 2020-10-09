@@ -28,7 +28,6 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.common.exposed.util.EmailUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
@@ -799,9 +798,8 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 }
 
                 if (withTeam && userData.getEmail() != null) {
-                    log.info("withTeam is {}, email is {}", withTeam, userData.getEmail());
+                    log.info("email is {}", userData.getEmail());
                     teamMap.put(user.getEmail(), userRightData.getGlobalAuthTeams());
-                    log.info("teamMap put is {}", teamMap);
                     userMap.put(user.getEmail(), user);
                 }
                 Pair<User, String> uRights = Pair.of(user, userRightData.getOperationName());
@@ -1040,7 +1038,6 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             }
             globalTeams.add(globalTeam);
         });
-        log.info("globalTeams is {}", JsonUtils.serialize(globalTeams));
         return globalTeams;
     }
 }
