@@ -18,6 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineToS3StepConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
 @Component("exportTimelineToS3")
@@ -73,6 +74,7 @@ public class ExportTimelineToS3 extends BaseImportExportS3<ExportTimelineToS3Ste
     public void execute() {
         super.execute();
         tagCreatedS3Objects();
+        saveOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH,JsonUtils.serialize(s3ExportFilePaths));
     }
 
     private void tagCreatedS3Objects() {
