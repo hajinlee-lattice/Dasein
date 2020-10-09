@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.GenerateIntentEmailAlertWorkflowConfiguration;
 
 @Component
@@ -15,7 +16,7 @@ public class GenerateIntentAlertWorkflowSubmitter extends WorkflowSubmitter {
     private static final Logger log = LoggerFactory.getLogger(GenerateIntentAlertWorkflowSubmitter.class);
 
     @WithWorkflowJobPid
-    public ApplicationId submit() {
+    public ApplicationId submit(String customerSpace, WorkflowPidWrapper pidWrapper) {
 
         GenerateIntentEmailAlertWorkflowConfiguration config = new GenerateIntentEmailAlertWorkflowConfiguration.Builder()
                 .customer(getCustomerSpace()) //
@@ -23,6 +24,6 @@ public class GenerateIntentAlertWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort) //
                 .build();
 
-        return workflowJobService.submit(config);
+        return workflowJobService.submit(config, pidWrapper.getPid());
     }
 }
