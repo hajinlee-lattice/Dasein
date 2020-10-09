@@ -1,10 +1,12 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.common.exposed.util.DateTimeUtils.{toDateSecondFromMillisAndTimeZone, toDateOnlyFromMillisAndTimeZone}
+import com.latticeengines.common.exposed.util.DateTimeUtils.{toDateOnlyFromMillisAndTimeZone, toDateSecondFromMillisAndTimeZone}
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.InterfaceName._
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
+import com.latticeengines.spark.util.CSVUtils
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.LongType
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -88,5 +90,9 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
     lattice.output = outputs.map(_._2)
     // timelineId -> corresponding output index
     lattice.outputStr = Serialization.write(outputs.zipWithIndex.map(t => (t._1._1, t._2)).toMap)(org.json4s.DefaultFormats)
+  }
+
+  override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[GenerateTimelineExportArtifactsJobConfig]): List[HdfsDataUnit] = {
+    CSVUtils.dfToCSV(spark, compress = false, latticeCtx.targets, latticeCtx.output)
   }
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,10 +24,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.TimelineExportRequest;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -121,12 +122,22 @@ public class ExportTimelineStep extends RunSparkJob<ExportTimelineSparkStepConfi
         timelineOutputIdx.forEach((timelineId, outputIdx) -> {
             String exportTableName = String.format("%s_%s", timelineId,
                     NamingUtils.timestamp(EXPORT_TIMELINE_SUFFIX));
-            Table table = toTable(exportTableName, result.getTargets().get(outputIdx));
+            HdfsDataUnit hdfsDataUnit = result.getTargets().get(outputIdx);
+//            Table table = toTable(exportTableName, result.getTargets().get(outputIdx));
             log.info("Create timeline export table {} for timeline ID {}", exportTableName, timelineId);
-            tablePaths.addAll(table.getExtracts().stream().map(Extract::getPath).collect(Collectors.toSet()));
+//            tablePaths.addAll(table.getExtracts().stream().map(Extract::getPath).collect(Collectors.toSet()));
+            String outputDir = hdfsDataUnit.getPath();
+            try {
+                List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, //
+                        (HdfsUtils.HdfsFilenameFilter) filename -> //
+                                filename.endsWith(".csv.gz") || filename.endsWith(".csv"));
+                tablePaths.addAll(files);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read " + outputDir);
+            }
         });
         log.info("tablePaths is {}", tablePaths);
-        putObjectInContext(TIMELINE_EXPORT_TABLES, tablePaths);
+        putObjectInContext(TIMELINE_EXPORT_FILES, tablePaths);
     }
 
     private List<HdfsDataUnit> toDataUnits(List<String> tableNames, Map<String, Integer> inputIdx,
