@@ -301,11 +301,11 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
             Set<String> csvHeaders = parser.getHeaderMap().keySet();
             assertTrue(csvHeaders.contains("Field Type"));
             assertTrue(csvHeaders.contains("Your Field Name"));
-            assertTrue(csvHeaders.contains("Lattice Field Name"));
+            assertTrue(csvHeaders.contains("Standard Field Name"));
             assertTrue(csvHeaders.contains("Data Type"));
             for (CSVRecord record : parser.getRecords()) {
                 verifyAccountMapping(record.get("Field Type"), record.get("Your Field Name"),
-                        record.get("Lattice Field Name"), record.get("Data Type"));
+                        record.get("Standard Field Name"), record.get("Data Type"));
             }
         } catch (Exception e) {
             log.warn("failed to read csv", e);
