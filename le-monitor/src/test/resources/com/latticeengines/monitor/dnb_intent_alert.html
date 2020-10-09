@@ -44,7 +44,6 @@
             margin: 0 6px;
 
             background: rgba(10, 71, 102, 0.3);
-            border-radius: 16px;
             float: left;
             position: relative;
         }
@@ -127,17 +126,6 @@
             font-size: 14px;
             line-height: 27px;
         }
-        .flag:after {
-            content: ' ';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 0;
-            height: 0;
-            border-left: 10px solid white;
-            border-top: 14.5px solid transparent;
-            border-bottom: 14.5px solid transparent;
-        }
 
         .top-graph {
             margin-top: 10px;
@@ -174,7 +162,7 @@
         .buy-bar {
             float: left;
             position: relative;
-            background: #717ECD;
+            background: #005172;
             height: 19px;
             margin: 0 0 0 0;
         }
@@ -182,7 +170,7 @@
         .research-bar {
             float: left;
             position: relative;
-            background: #D291D6;
+            background: #00B2A9;
             height: 19px;
             margin: 0 15px 0 0;
         }
@@ -394,10 +382,10 @@
             <div class="table-row">
                 <#if model_pair[0]??>
                 <div class="row-container">
-                    <div class="flag">New Intent for ${model_pair[0].name}</div>
+                    <div class="flag">${model_pair[0].name}</div>
                     <table class="intent-table" cellspacing="0" cellpadding="0">
                         <#list model_pair[0].intents as intent>
-                        <tr <#if intent?is_odd_item> class="dark-table-row" </#if>>
+                        <tr <#if !intent?is_odd_item>class="dark-table-row" </#if>>
                             <td>${intent.stage}</td>
                             <td>${intent.company_name}</td>
                             <td>${intent.location}</td>
@@ -409,10 +397,10 @@
 
                 <#if model_pair[1]??>
                 <div class="row-container">
-                    <div class="flag">New Intent for Optimizer</div>
+                    <div class="flag">${model_pair[1].name}</div>
                     <table class="intent-table" cellspacing="0" cellpadding="0">
                         <#list model_pair[1].intents as intent>
-                        <tr <#if intent?is_odd_item> class="dark-table-row" </#if>>
+                        <tr <#if !intent?is_odd_item>class="dark-table-row" </#if>>
                             <td>${intent.stage}</td>
                             <td>${intent.company_name}</td>
                             <td>${intent.location}</td>
