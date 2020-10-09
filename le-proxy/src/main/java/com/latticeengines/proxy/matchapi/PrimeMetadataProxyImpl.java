@@ -2,9 +2,12 @@ package com.latticeengines.proxy.matchapi;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,6 +23,7 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
+import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockMetadataContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
@@ -64,13 +68,17 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
         List<DataBlockEntitlementContainer.Domain> enrichedDomains = new ArrayList<>();
 
         for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
-            Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> enrichedRecordTypes = new HashMap<>();
+            Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> enrichedRecordTypes = new EnumMap<>(DataRecordType.class);
             for (Map.Entry<DataRecordType, List<DataBlockEntitlementContainer.Block>> entry : domain.getRecordTypes()
                     .entrySet()) {
                 List<DataBlockEntitlementContainer.Block> enrichedBlocks = new ArrayList<>();
 
                 for (DataBlockEntitlementContainer.Block block : entry.getValue()) {
-                    List<DataBlock.Level> levels = blockIdToDataBlock.get(block.getBlockId()).getLevels();
+                    // levels may vary between domains and record types, but are merged in blockIdToDataBlock
+                    Set<DataBlockLevel> currentLevels = EnumSet.noneOf(DataBlockLevel.class);
+                    currentLevels.addAll(block.getDataBlockLevels());
+                    List<DataBlock.Level> levels = blockIdToDataBlock.get(block.getBlockId()).getLevels().stream()
+                            .filter(level -> currentLevels.contains(level.getLevel())).collect(Collectors.toList());
                     enrichedBlocks.add(new DataBlockEntitlementContainer.Block(block, levels));
                 }
                 enrichedRecordTypes.put(entry.getKey(), enrichedBlocks);
