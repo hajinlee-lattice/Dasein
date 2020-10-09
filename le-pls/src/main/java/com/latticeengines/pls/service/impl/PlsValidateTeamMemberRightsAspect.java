@@ -15,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.security.exposed.service.TeamService;
 
 @Aspect
 public class PlsValidateTeamMemberRightsAspect {
@@ -37,6 +39,9 @@ public class PlsValidateTeamMemberRightsAspect {
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private TeamService teamService;
 
     @Before("execution(public * com.latticeengines.pls.service.impl.MetadataSegmentServiceImpl.createOrUpdateSegment(..))")
     public void createOrUpdateSegment(JoinPoint joinPoint) {
@@ -131,6 +136,14 @@ public class PlsValidateTeamMemberRightsAspect {
                 checkTeamWithRatingEngine(ratingEngine);
             } else if (StringUtils.isNotEmpty(ratingEngine.getId())) {
                 checkTeamWithRatingEngineId(ratingEngine.getId());
+            } else {
+                List<GlobalTeam> globalTeams = teamService.getMyTeams(false);
+                if (CollectionUtils.isEmpty(globalTeams)) {
+                    throw new AccessDeniedException("Access denied.");
+                }
+                String teamId = globalTeams.get(0).getTeamId();
+                log.info("set team id to {} when creating model.", teamId);
+                ratingEngine.setTeamId(teamId);
             }
         } else if (joinPoint.getArgs()[0] instanceof String) {
             checkTeamWithRatingEngineId((String) joinPoint.getArgs()[0]);
