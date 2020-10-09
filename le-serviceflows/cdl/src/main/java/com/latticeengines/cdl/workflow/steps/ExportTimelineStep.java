@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -115,7 +116,7 @@ public class ExportTimelineStep extends RunSparkJob<ExportTimelineSparkStepConfi
     protected void postJobExecution(SparkJobResult result) {
         String outputStr = result.getOutput();
         Map<?, ?> rawMap = JsonUtils.deserialize(outputStr, Map.class);
-        List<String> tablePaths = new ArrayList<>();
+        Map<String, List<String>> tablePaths = new HashMap<>();
         Map<String, Integer> timelineOutputIdx = JsonUtils.convertMap(rawMap, String.class, Integer.class);
         Preconditions.checkArgument(MapUtils.isNotEmpty(timelineOutputIdx),
                 "timeline output index map should not be empty here");
@@ -131,7 +132,7 @@ public class ExportTimelineStep extends RunSparkJob<ExportTimelineSparkStepConfi
                 List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, //
                         (HdfsUtils.HdfsFilenameFilter) filename -> //
                                 filename.endsWith(".csv.gz") || filename.endsWith(".csv"));
-                tablePaths.addAll(files);
+                tablePaths.put(timelineId, files);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to read " + outputDir);
             }

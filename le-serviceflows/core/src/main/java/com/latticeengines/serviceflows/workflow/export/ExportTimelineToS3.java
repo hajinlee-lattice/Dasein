@@ -1,7 +1,9 @@
 package com.latticeengines.serviceflows.workflow.export;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineToS3StepConfiguration;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
 
@@ -41,19 +44,27 @@ public class ExportTimelineToS3 extends BaseImportExportS3<ExportTimelineToS3Ste
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
-        List<String> timelineExportTablePaths = getListObjectFromContext(TIMELINE_EXPORT_FILES, String.class);
+        Map<String, List> timelineExportTablePaths = getMapObjectFromContext(TIMELINE_EXPORT_FILES, String.class,
+                List.class);
         if (timelineExportTablePaths == null || timelineExportTablePaths.isEmpty()) {
             return;
         }
 
-        timelineExportTablePaths.forEach(hdfsFilePath -> {
-            ImportExportRequest request = new ImportExportRequest();
-            request.srcPath = hdfsFilePath;
-            request.tgtPath = pathBuilder.convertAtlasFileExport(hdfsFilePath, podId, tenantId, dropBoxSummary,
-                    exportS3Bucket);
-            requests.add(request);
-            // Collect all S3 FilePaths
-            s3ExportFilePaths.add(request.tgtPath);
+
+        timelineExportTablePaths.forEach((timelineId, hdfsFilePaths) -> {
+            List<String> hdfsFilePathArr = JsonUtils.convertList(hdfsFilePaths, String.class);
+            Date fileExportTime = new Date();
+            hdfsFilePathArr.forEach(hdfsFilePath -> {
+                ImportExportRequest request = new ImportExportRequest();
+                request.srcPath = hdfsFilePath;
+                String tableName = String.format("tl_export_%s_%s.csv",
+                        hdfsFilePathArr.indexOf(hdfsFilePath), fileExportTime.getTime());
+                request.tgtPath = pathBuilder.convertFileExport(tableName, dropBoxSummary, exportS3Bucket);
+                requests.add(request);
+                // Collect all S3 FilePaths
+                s3ExportFilePaths.add(request.tgtPath);
+            });
+
         });
         log.info("Uploaded S3 Files. tgtPath is {}", s3ExportFilePaths);
     }
