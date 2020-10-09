@@ -67,7 +67,13 @@ public class DataBlockResource {
             return domainName;
         } else {
             try {
-                DataDomain domain = DataDomain.parse(domainName);
+                String decoded = URLDecoder.decode(domainName, "UTF-8");
+                log.info("Decode {} into {}", domainName, decoded);
+                if (decoded.contains("&amp;")) {
+                    decoded = decoded.replaceAll("&amp;", "&");
+                    log.info("Replacing amp symbol becomes: {}", decoded);
+                }
+                DataDomain domain = DataDomain.parse(decoded);
                 String dataDomainName = domain.name();
                 log.info("Encoded domain name " + domainName + " as " + dataDomainName);
                 return dataDomainName;
@@ -110,7 +116,7 @@ public class DataBlockResource {
             @RequestParam(value = "recordType", required = false, defaultValue = "ALL") String recordType,
             @RequestParam(value = "includeElements", required = false, defaultValue = "false") Boolean includeElements) {
         try {
-            String encodedDomainName = encodeDataDomain(URLDecoder.decode(domainName, "UTF-8"));
+            String encodedDomainName = encodeDataDomain(domainName);
             String encodedRecordType = encodeRecordType(recordType);
 
             DataBlockEntitlementContainer dataBlockEntitlementContainer = entitlementProxy
