@@ -8,7 +8,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ExportTimelineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineExportUniverseStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.TimelineExportFileGeneratorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineToS3StepConfiguration;
 
 public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -19,8 +18,6 @@ public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfigur
                 new GenerateTimelineExportUniverseStepConfiguration();
         private ExportTimelineSparkStepConfiguration exportTimelineSparkStepConfiguration =
                 new ExportTimelineSparkStepConfiguration();
-        private TimelineExportFileGeneratorConfiguration timelineExportFileGeneratorConfiguration =
-                new TimelineExportFileGeneratorConfiguration();
         private ExportTimelineToS3StepConfiguration importExportS3 = new ExportTimelineToS3StepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
@@ -28,7 +25,6 @@ public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportTimelineSparkStepConfiguration.setCustomer(customerSpace.toString());
             timelineUniverseStepConfiguration.setCustomerSpace(customerSpace);
             importExportS3.setCustomerSpace(customerSpace);
-            timelineExportFileGeneratorConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -68,7 +64,6 @@ public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfigur
                     configuration.getClass().getSimpleName());
             configuration.add(exportTimelineSparkStepConfiguration);
             configuration.add(timelineUniverseStepConfiguration);
-            configuration.add(timelineExportFileGeneratorConfiguration);
             configuration.add(importExportS3);
             return configuration;
         }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.ExportTimelineStep;
 import com.latticeengines.cdl.workflow.steps.GenerateTimelineExportUniverse;
-import com.latticeengines.cdl.workflow.steps.TimelineExportFileGeneratorStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.TimelineExportWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportTimelineToS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -26,8 +25,6 @@ public class TimelineExportWorkflow extends AbstractWorkflow<TimelineExportWorkf
     @Inject
     private ExportTimelineStep exportTimelineStep;
     @Inject
-    private TimelineExportFileGeneratorStep timelineExportFileGeneratorStep;
-    @Inject
     private ExportTimelineToS3 exportTimelineToS3;
 
     @Override
@@ -35,7 +32,6 @@ public class TimelineExportWorkflow extends AbstractWorkflow<TimelineExportWorkf
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(generateTimelineExportUniverse)
                 .next(exportTimelineStep)
-                .next(timelineExportFileGeneratorStep)
                 .next(exportTimelineToS3)
                 .build();
     }

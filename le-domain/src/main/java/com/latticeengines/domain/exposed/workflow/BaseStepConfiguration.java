@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatistic
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateIntentAlertArtifactsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineExportUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MockActivityStoreConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.TimelineExportFileGeneratorConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
@@ -52,7 +51,6 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = PublishEntityMatchStagingConfiguration.class, name = "PublishEntityMatchStagingConfiguration"), //
         @Type(value = LegacyDeleteByDateRangeActionConfiguration.class, name = "LegacyDeleteByDateRangeActionConfiguration"), //
         @Type(value = GenerateTimelineExportUniverseStepConfiguration.class, name = "GenerateTimelineUniverseStepConfiguration"), //
-        @Type(value = TimelineExportFileGeneratorConfiguration.class, name = "TimelineExportFileGeneratorConfiguration"), //
         @Type(value = GenerateIntentAlertArtifactsStepConfiguration.class, name = "GenerateIntentAlertArtifactsStepConfiguration") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseStepConfiguration {

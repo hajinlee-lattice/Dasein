@@ -292,6 +292,10 @@ public class HdfsToS3PathBuilder {
                 .toString();
     }
 
+    public String convertFileExport(String fileName, DropBoxSummary dropBoxSummary, String s3Bucket) {
+        return getS3AtlasFileExportsDir(s3Bucket, dropBoxSummary.getDropBox()) + PATH_SEPARATOR + fileName;
+    }
+
     public String convertAtlasFileExport(String inputExportFileDir, DropBoxSummary dropBoxSummary, String s3Bucket, String nameSpace) {
         StringBuilder builder = new StringBuilder();
         String fileName = FilenameUtils.getName(inputExportFileDir);
