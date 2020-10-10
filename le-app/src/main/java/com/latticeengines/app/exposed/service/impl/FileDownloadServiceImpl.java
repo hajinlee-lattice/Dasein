@@ -57,5 +57,8 @@ public class FileDownloadServiceImpl implements FileDownloadService {
         MultiTenantContext.setTenant(fileDownload.getTenant());
         FileDownloader downloader = FileDownloaderRegistry.getDownloader(config.getClass());
         downloader.downloadByConfig(config, request, response);
+
+        // one time use
+        fileDownloadEntityMgr.delete(fileDownload);
     }
 }

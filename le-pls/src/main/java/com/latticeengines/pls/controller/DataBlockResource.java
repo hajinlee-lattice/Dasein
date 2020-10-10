@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.net.URLDecoder;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -66,7 +67,13 @@ public class DataBlockResource {
             return domainName;
         } else {
             try {
-                DataDomain domain = DataDomain.parse(domainName);
+                String decoded = URLDecoder.decode(domainName, "UTF-8");
+                log.info("Decode {} into {}", domainName, decoded);
+                if (decoded.contains("&amp;")) {
+                    decoded = decoded.replaceAll("&amp;", "&");
+                    log.info("Replacing amp symbol becomes: {}", decoded);
+                }
+                DataDomain domain = DataDomain.parse(decoded);
                 String dataDomainName = domain.name();
                 log.info("Encoded domain name " + domainName + " as " + dataDomainName);
                 return dataDomainName;

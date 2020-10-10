@@ -91,8 +91,8 @@ public class DataCollectionStatusDetail implements Serializable {
     private Boolean transactionRebuilt;
 
     /*
-     * temp flag to indicate a tenant's txn is built with new steps
-     * TODO remove after new steps support incremental update
+     * temp flag to indicate a tenant's txn is built with new steps TODO remove
+     * after new steps support incremental update
      */
     @JsonProperty("TransactionRebuiltWithNewSteps")
     private Boolean transactionRebuiltWithNewSteps;
@@ -100,7 +100,7 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("activityBookKeeping")
     private ActivityBookkeeping bookkeeping;
 
-    //key: timelineId -> value: timelineVersion
+    // key: timelineId -> value: timelineVersion
     @JsonProperty("timelineVersionMap")
     private Map<String, String> timelineVersionMap;
 
@@ -112,6 +112,9 @@ public class DataCollectionStatusDetail implements Serializable {
 
     @JsonProperty("ActivityAlertVersion")
     private String activityAlertVersion;
+
+    @JsonProperty("IntentAlertVersion")
+    private String intentAlertVersion;
 
     public Integer getMinTxnDate() {
         return minTxnDate;
@@ -323,5 +326,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setActivityAlertVersion(String activityAlertVersion) {
         this.activityAlertVersion = activityAlertVersion;
+    }
+
+    public String getIntentAlertVersion() {
+        return intentAlertVersion;
+    }
+
+    public void setIntentAlertVersion(String intentAlertVersion) {
+        this.intentAlertVersion = intentAlertVersion;
     }
 }

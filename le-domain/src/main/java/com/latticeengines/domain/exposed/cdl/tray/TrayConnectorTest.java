@@ -65,6 +65,11 @@ public class TrayConnectorTest implements HasPid, HasTenant {
     @Enumerated(EnumType.STRING)
     private DataIntegrationEventType testState;
 
+    @JsonProperty("testResult")
+    @Column(name = "TEST_RESULT")
+    @Enumerated(EnumType.STRING)
+    private TrayConnectorTestResultType testResult;
+
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -106,6 +111,14 @@ public class TrayConnectorTest implements HasPid, HasTenant {
 
     public void setTestState(DataIntegrationEventType testState) {
         this.testState = testState;
+    }
+
+    public TrayConnectorTestResultType getTestResult() {
+        return this.testResult;
+    }
+
+    public void setTestResult(TrayConnectorTestResultType testResult) {
+        this.testResult = testResult;
     }
 
     public String getTestScenario() {

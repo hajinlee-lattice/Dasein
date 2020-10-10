@@ -29,6 +29,7 @@ import com.latticeengines.apps.cdl.workflow.AtlasProfileReportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CDLEntityMatchMigrationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ConvertBatchStoreToImportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.EntityExportWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.GenerateIntentAlertWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.MockActivityStoreWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
@@ -68,6 +69,7 @@ public class DataFeedController {
     private final MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter;
     private final AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter;
     private final TimelineExportWorkflowSubmitter timelineExportWorkflowSubmitter;
+    private final GenerateIntentAlertWorkflowSubmitter generateIntentAlertWorkflowSubmitter;
     private final DataFeedService dataFeedService;
     private final PAValidationUtils paValidationUtils;
     private final AtlasExportService atlasExportService;
@@ -75,15 +77,16 @@ public class DataFeedController {
 
     @Inject
     public DataFeedController(ProcessAnalyzeWorkflowSubmitter processAnalyzeWorkflowSubmitter,
-                              OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter,
-                              EntityExportWorkflowSubmitter entityExportWorkflowSubmitter,
-                              ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter,
-                              CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter,
-                              MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter,
-                              AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter,
-                              TimelineExportWorkflowSubmitter timelineExportWorkflowSubmitter,
-                              DataFeedService dataFeedService, PAValidationUtils paValidationUtils,
-                              AtlasExportService atlasExportService, ServingStoreService servingStoreService) {
+            OrphanRecordsExportWorkflowSubmitter orphanRecordExportWorkflowSubmitter,
+            EntityExportWorkflowSubmitter entityExportWorkflowSubmitter,
+            ConvertBatchStoreToImportWorkflowSubmitter convertBatchStoreToImportWorkflowSubmitter,
+            CDLEntityMatchMigrationWorkflowSubmitter cdlEntityMatchMigrationWorkflowSubmitter,
+            MockActivityStoreWorkflowSubmitter mockActivityStoreWorkflowSubmitter,
+            AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter,
+            TimelineExportWorkflowSubmitter timelineExportWorkflowSubmitter, DataFeedService dataFeedService,
+            PAValidationUtils paValidationUtils, AtlasExportService atlasExportService,
+            ServingStoreService servingStoreService,
+            GenerateIntentAlertWorkflowSubmitter generateIntentAlertWorkflowSubmitter) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
         this.orphanRecordExportWorkflowSubmitter = orphanRecordExportWorkflowSubmitter;
         this.entityExportWorkflowSubmitter = entityExportWorkflowSubmitter;
@@ -92,6 +95,7 @@ public class DataFeedController {
         this.mockActivityStoreWorkflowSubmitter = mockActivityStoreWorkflowSubmitter;
         this.atlasProfileReportWorkflowSubmitter = atlasProfileReportWorkflowSubmitter;
         this.timelineExportWorkflowSubmitter = timelineExportWorkflowSubmitter;
+        this.generateIntentAlertWorkflowSubmitter = generateIntentAlertWorkflowSubmitter;
         this.dataFeedService = dataFeedService;
         this.paValidationUtils = paValidationUtils;
         this.atlasExportService = atlasExportService;
@@ -102,8 +106,8 @@ public class DataFeedController {
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace,
-                                                   @RequestParam(value = "runNow", required = false, defaultValue = "false") boolean runNow,
-                                                   @RequestBody(required = false) ProcessAnalyzeRequest request) {
+            @RequestParam(value = "runNow", required = false, defaultValue = "false") boolean runNow,
+            @RequestBody(required = false) ProcessAnalyzeRequest request) {
         customerSpace = MultiTenantContext.getCustomerSpace().toString();
         if (request == null) {
             request = defaultProcessAnalyzeRequest();
@@ -136,13 +140,13 @@ public class DataFeedController {
     @ResponseBody
     @ApiOperation(value = "Restart a previous failed processanalyze execution")
     public ResponseDocument<String> restart(@PathVariable String customerSpace,
-                                            @ApiParam(value = "Memory in MB", required = false)
-                                            @RequestParam(value = "memory", required = false) Integer memory,
-                                            @RequestParam(value = "autoRetry", required = false, defaultValue = "false") Boolean autoRetry,
-                                            @RequestParam(value = "skipMigrationCheck", required = false, defaultValue = "false") Boolean skipMigrationTrack) {
+            @ApiParam(value = "Memory in MB", required = false) @RequestParam(value = "memory", required = false) Integer memory,
+            @RequestParam(value = "autoRetry", required = false, defaultValue = "false") Boolean autoRetry,
+            @RequestParam(value = "skipMigrationCheck", required = false, defaultValue = "false") Boolean skipMigrationTrack) {
         customerSpace = MultiTenantContext.getCustomerSpace().toString();
         paValidationUtils.checkRetry(customerSpace);
-        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory, autoRetry, skipMigrationTrack);
+        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory, autoRetry,
+                skipMigrationTrack);
         return ResponseDocument.successResponse(appId.toString());
     }
 
@@ -150,11 +154,11 @@ public class DataFeedController {
     @ResponseBody
     @ApiOperation(value = "Invoke orphanRecordExport workflow. Returns the job id.")
     public ResponseDocument<String> orphanRecordExport(@PathVariable String customerSpace,
-                                                       @RequestBody OrphanRecordsExportRequest request) {
+            @RequestBody OrphanRecordsExportRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         try {
-            ApplicationId appId = orphanRecordExportWorkflowSubmitter.submit(
-                    customerSpace, request, new WorkflowPidWrapper(-1L));
+            ApplicationId appId = orphanRecordExportWorkflowSubmitter.submit(customerSpace, request,
+                    new WorkflowPidWrapper(-1L));
             if (appId == null) {
                 return null;
             }
@@ -168,11 +172,11 @@ public class DataFeedController {
     @ResponseBody
     @ApiOperation(value = "Invoke timelineExport workflow, Returns the job id.")
     public ResponseDocument<String> timelineExport(@PathVariable String customerSpace,
-                                                   @RequestBody TimelineExportRequest request) {
+            @RequestBody TimelineExportRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         try {
-            ApplicationId appId = timelineExportWorkflowSubmitter.submit(
-                    customerSpace, request, new WorkflowPidWrapper(-1L));
+            ApplicationId appId = timelineExportWorkflowSubmitter.submit(customerSpace, request,
+                    new WorkflowPidWrapper(-1L));
             if (appId == null) {
                 return null;
             }
@@ -186,14 +190,12 @@ public class DataFeedController {
     @ResponseBody
     @ApiOperation(value = "Invoke convert batch store to import workflow. Returns the job id.")
     public ResponseDocument<String> convertBatchStoreToImport(@PathVariable String customerSpace,
-                                                              @RequestBody ConvertBatchStoreToImportRequest request) {
+            @RequestBody ConvertBatchStoreToImportRequest request) {
         try {
-            ApplicationId applicationId =
-                    convertBatchStoreToImportWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace),
-                            request.getUserId(), request.getEntity(), request.getTemplateName(),
-                            request.getFeedType(), request.getSubType(), request.getRenameMap(),
-                            request.getDuplicateMap(),
-                            new WorkflowPidWrapper(-1L));
+            ApplicationId applicationId = convertBatchStoreToImportWorkflowSubmitter.submit(
+                    CustomerSpace.parse(customerSpace), request.getUserId(), request.getEntity(),
+                    request.getTemplateName(), request.getFeedType(), request.getSubType(), request.getRenameMap(),
+                    request.getDuplicateMap(), new WorkflowPidWrapper(-1L));
             if (applicationId == null) {
                 return null;
             }
@@ -208,9 +210,8 @@ public class DataFeedController {
     @ApiOperation(value = "Invoke convert batch store to import workflow. Returns the job id.")
     public ResponseDocument<String> migrateImport(@PathVariable String customerSpace, @RequestBody String userId) {
         try {
-            ApplicationId applicationId =
-                    cdlEntityMatchMigrationWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace),
-                            userId, new WorkflowPidWrapper(-1L));
+            ApplicationId applicationId = cdlEntityMatchMigrationWorkflowSubmitter
+                    .submit(CustomerSpace.parse(customerSpace), userId, new WorkflowPidWrapper(-1L));
             if (applicationId == null) {
                 return null;
             }
@@ -220,11 +221,11 @@ public class DataFeedController {
         }
     }
 
-    private ApplicationId submitWorkflow(String customerSpace, EntityExportRequest request, AtlasExportType exportType) {
+    private ApplicationId submitWorkflow(String customerSpace, EntityExportRequest request,
+            AtlasExportType exportType) {
         AtlasExport atlasExport = atlasExportService.createAtlasExport(customerSpace, exportType);
         request.setAtlasExportId(atlasExport.getUuid());
-        ApplicationId appId = entityExportWorkflowSubmitter.submit(customerSpace, request,
-                new WorkflowPidWrapper(-1L));
+        ApplicationId appId = entityExportWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
         return appId;
     }
 
@@ -232,16 +233,18 @@ public class DataFeedController {
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> entityExport(@PathVariable String customerSpace,
-                                                 @RequestBody EntityExportRequest request) {
+            @RequestBody EntityExportRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         try {
             ApplicationId appId;
-            // if export id doesn't have value, we should check attribute count and setup atlas report
+            // if export id doesn't have value, we should check attribute count and setup
+            // atlas report
             if (StringUtils.isEmpty(request.getAtlasExportId())) {
                 request.setSaveToDropfolder(true);
                 AtlasExportType exportType = request.getExportType();
                 if (exportType != null) {
-                    EntityExportUtils.checkExportAttribute(exportType, customerSpace, request.getDataCollectionVersion(), servingStoreService);
+                    EntityExportUtils.checkExportAttribute(exportType, customerSpace,
+                            request.getDataCollectionVersion(), servingStoreService);
                     appId = submitWorkflow(customerSpace, request, exportType);
                     return ResponseDocument.successResponse(appId.toString());
                 } else {
@@ -249,7 +252,8 @@ public class DataFeedController {
                     List<String> responseMessages = new ArrayList();
                     for (AtlasExportType atlasExportType : AtlasExportType.UI_EXPORT_TYPES) {
                         try {
-                            EntityExportUtils.checkExportAttribute(atlasExportType, customerSpace, request.getDataCollectionVersion(), servingStoreService);
+                            EntityExportUtils.checkExportAttribute(atlasExportType, customerSpace,
+                                    request.getDataCollectionVersion(), servingStoreService);
                         } catch (RuntimeException e) {
                             responseMessages.add(e.getMessage());
                             continue;
@@ -287,9 +291,22 @@ public class DataFeedController {
     @ResponseBody
     @ApiOperation(value = "Invoke generate profile report workflow. Returns the job id.")
     public ResponseDocument<String> generateProfileReport(@PathVariable String customerSpace,
-                                                          @RequestBody AtlasProfileReportRequest request) {
+            @RequestBody AtlasProfileReportRequest request) {
         try {
             ApplicationId appId = atlasProfileReportWorkflowSubmitter.submit(customerSpace, request,
+                    new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping("/generateintentalert")
+    @ResponseBody
+    @ApiOperation(value = "Invoke generate intent alert workflow. Returns the job id.")
+    public ResponseDocument<String> generateIntentAlert(@PathVariable String customerSpace) {
+        try {
+            ApplicationId appId = generateIntentAlertWorkflowSubmitter.submit(customerSpace,
                     new WorkflowPidWrapper(-1L));
             return ResponseDocument.successResponse(appId.toString());
         } catch (RuntimeException e) {

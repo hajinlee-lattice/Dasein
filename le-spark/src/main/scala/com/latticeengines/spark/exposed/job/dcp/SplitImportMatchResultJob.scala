@@ -1,7 +1,5 @@
 package com.latticeengines.spark.exposed.job.dcp
 
-import java.util.stream.Collectors
-
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate
 import com.latticeengines.domain.exposed.dcp.DataReport
@@ -125,9 +123,10 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val selected = input.columns.filter(attrNames.keySet)
     val filtered = input.select(selected map col: _*)
     val newNames = filtered.columns.map(c => attrNames.getOrElse(c, c))
-    val orderedNames = newNames.sortWith((n1, n2) => nameSeq.indexOf(n1) < nameSeq.indexOf(n2))
+    val renamed = filtered.toDF(newNames: _*)
+    val orderedNames = renamed.columns.sortWith((n1, n2) => nameSeq.indexOf(n1) < nameSeq.indexOf(n2))
     logSpark("the ordered names in csv are " + JsonUtils.serialize(orderedNames))
-    filtered.toDF(orderedNames: _*)
+    renamed.select(orderedNames map col: _*)
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[SplitImportMatchResultConfig]): List[HdfsDataUnit] = {

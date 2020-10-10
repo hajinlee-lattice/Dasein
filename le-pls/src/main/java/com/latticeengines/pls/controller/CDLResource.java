@@ -853,6 +853,25 @@ public class CDLResource {
         return cdlService.getAllImportFiles(customerSpace.toString());
     }
 
+    @PostMapping("/generateintentalert")
+    @ApiOperation(value = "Generate Intent email alert")
+    public ResponseDocument<String> generateIntentAlert() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Preconditions.checkNotNull(customerSpace);
+
+        try {
+            ApplicationId result = cdlService.generateIntentAlert(customerSpace.toString());
+            if (result == null) {
+                return ResponseDocument.successResponse(null);
+            } else {
+                return ResponseDocument.successResponse(result.toString());
+            }
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to submit generateIntentAlert job: %s", e.getMessage()));
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
     private String removeExceptionCode(LedpCode code, String errorMessage) {
         if (StringUtils.isEmpty(errorMessage)) {
             return errorMessage;

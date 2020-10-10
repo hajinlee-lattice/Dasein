@@ -50,7 +50,6 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class) })
 public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingFields, Serializable {
 
-
     private static final long serialVersionUID = 3180682380551859839L;
 
     @Id
@@ -421,5 +420,15 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     @JsonProperty("ActivityAlertVersion")
     public void setActivityAlertVersion(String activityAlertVersion) {
         this.detail.setActivityAlertVersion(activityAlertVersion);
+    }
+
+    @JsonProperty("IntentAlertVersion")
+    public String getIntentAlertVersion() {
+        return this.detail.getIntentAlertVersion();
+    }
+
+    @JsonProperty("IntentAlertVersion")
+    public void setIntentAlertVersion(String intentAlertVersion) {
+        this.detail.setIntentAlertVersion(intentAlertVersion);
     }
 }

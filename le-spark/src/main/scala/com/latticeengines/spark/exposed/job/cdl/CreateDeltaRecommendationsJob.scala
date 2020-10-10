@@ -76,8 +76,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
   private def createFinalRecommendationDf(deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, contactCols: Seq[String],
                                           contactNums: ListBuffer[Long], joinKey: String, recDf: DataFrame, accountTable: DataFrame, contactTable: DataFrame): DataFrame = {
-    val recDfToJoin: DataFrame = recDf.withColumnRenamed(joinKey, "ACCOUNT_ID")
-    var result: DataFrame = generateUserConfiguredDataFrame(recDfToJoin, accountTable, deltaCampaignLaunchSparkContext, joinKey)
+    var result: DataFrame = generateUserConfiguredDataFrame(recDf, accountTable, deltaCampaignLaunchSparkContext, joinKey)
     if (!contactTable.rdd.isEmpty && !contactCols.isEmpty) {
       result = joinContacts(result, contactTable, contactCols, joinKey)
       contactNums += result.filter(col(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name()).isNotNull).count()
@@ -194,7 +193,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       .withColumnRenamed("LAST_UPDATED_TIMESTAMP_DATE", "LAST_UPDATED_TIMESTAMP")
   }
 
-  private def generateUserConfiguredDataFrame(finalRecommendations: DataFrame, accountTable: DataFrame, deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, joinKey: String): DataFrame = {
+  private def generateUserConfiguredDataFrame(recommendationsDF: DataFrame, accountTable: DataFrame,
+                                              deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, joinKey: String): DataFrame = {
+    var finalRecommendations: DataFrame = recommendationsDF
     val accountColsRecIncluded: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecIncluded != null ) deltaCampaignLaunchSparkContext.getAccountColsRecIncluded.asScala else Seq.empty[String]
     val accountColsRecNotIncludedStd: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedStd != null) deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedStd.asScala else Seq.empty[String]
     val accountColsRecNotIncludedNonStd: Seq[String] = if (deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd != null) deltaCampaignLaunchSparkContext.getAccountColsRecNotIncludedNonStd.asScala else Seq.empty[String]
@@ -209,7 +210,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       logSpark("Four categories are all empty.")
       return finalRecommendations
     }
-
+    finalRecommendations = finalRecommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
     // 1. combine Recommendation-contained columns (including Contacts column if required)
     // with Recommendation-not-contained standard columns
     var userConfiguredDataFrame: DataFrame = null

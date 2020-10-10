@@ -320,6 +320,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACTIVITY_ALERT_GENERATED = "ALERT_GENERATED";
     protected static final String ACTIVITY_ALERT_MASTER_TABLE_NAME = "ALERT_MASTER_TABLE_NAME";
     protected static final String ACTIVITY_ALERT_DIFF_TABLE_NAME = "ALERT_DIFF_TABLE_NAME";
+    protected static final String INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME = "INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME";
+    protected static final String INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME = "INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME";
 
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
