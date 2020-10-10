@@ -1,10 +1,12 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.common.exposed.util.DateTimeUtils.toDataOnlyFromMillisAndTimeZone
+import com.latticeengines.common.exposed.util.DateTimeUtils.{toDateOnlyFromMillisAndTimeZone, toDateSecondFromMillisAndTimeZone}
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.InterfaceName._
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
+import com.latticeengines.spark.util.CSVUtils
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.LongType
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -34,7 +36,11 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
       }
 
     val getDate = udf {
-      (time: Long, timeZone: String) => toDataOnlyFromMillisAndTimeZone(time, timeZone)
+      (time: Long, timeZone: String) => toDateOnlyFromMillisAndTimeZone(time, timeZone)
+    }
+
+    val getDateSecond = udf {
+      (time: Long, timeZone: String) => toDateSecondFromMillisAndTimeZone(time, timeZone)
     }
 
     val timelineExportTable = immutable.Map(timelineTableNames.map{
@@ -65,9 +71,10 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
         } else {
           // TODO consider timezone and maybe consider other format
           timelineFilterTable = timelineFilterTable
-            .withColumn(EventDate.name, from_unixtime(floor(col(EventTimestamp.name) / 1000).cast(LongType), "yyyy-MM-dd HH:mm:ss"))
+            .withColumn(EventDate.name, getDateSecond(col(EventTimestamp.name), lit(timeZone)))
         }
-        timelineFilterTable = timelineFilterTable.drop(InterfaceName.Detail1.name).drop(InterfaceName.Detail2.name)
+        timelineFilterTable = timelineFilterTable.select(col(AccountId.name), col(ContactId.name), col(EventDate
+          .name), col(EventType.name), col(StreamType.name), col(Count.name))
         timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, "LDC_DUNS",
           "DOMESTIC_ULTIMATE_DUNS_NUMBER",
           "GLOBAL_ULTIMATE_DUNS_NUMBER", "LDC_DOMAIN", "LE_IS_PRIMARY_DOMAIN"), Seq(AccountId.name))
@@ -83,5 +90,9 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
     lattice.output = outputs.map(_._2)
     // timelineId -> corresponding output index
     lattice.outputStr = Serialization.write(outputs.zipWithIndex.map(t => (t._1._1, t._2)).toMap)(org.json4s.DefaultFormats)
+  }
+
+  override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[GenerateTimelineExportArtifactsJobConfig]): List[HdfsDataUnit] = {
+    CSVUtils.dfToCSV(spark, compress = false, latticeCtx.targets, latticeCtx.output)
   }
 }

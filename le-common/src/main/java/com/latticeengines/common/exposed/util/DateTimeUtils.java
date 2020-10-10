@@ -36,6 +36,7 @@ public final class DateTimeUtils {
     private static final SimpleDateFormat filePathDateFormat = new SimpleDateFormat(FILEPATH_DATE_FORMAT_STRING);
 
     public static final String DATE_ONLY_FORMAT_STRING = "yyyy-MM-dd";
+    public static final String DATE_TOSECOND_FORMATE_STRING = "yyyy-MM-dd HH:mm:ss";
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
@@ -95,13 +96,19 @@ public final class DateTimeUtils {
     }
 
     public static String toDateOnlyFromMillis(long time) {
-        return toDataOnlyFromMillisAndTimeZone(time, "UTC");
+        return toDateOnlyFromMillisAndTimeZone(time, "UTC");
     }
 
-    public static String toDataOnlyFromMillisAndTimeZone(long time, String timeZone) {
+    public static String toDateOnlyFromMillisAndTimeZone(long time, String timeZone) {
         SimpleDateFormat dateOnlyFormat = new SimpleDateFormat(DATE_ONLY_FORMAT_STRING);
         dateOnlyFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
         return dateOnlyFormat.format(new Date(time));
+    }
+
+    public static String toDateSecondFromMillisAndTimeZone(long time, String timeZone) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_TOSECOND_FORMATE_STRING);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
+        return dateFormat.format(new Date(time));
     }
 
     public static String currentTimeAsString(Date date) {
