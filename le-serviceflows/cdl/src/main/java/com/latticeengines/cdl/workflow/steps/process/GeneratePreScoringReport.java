@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
@@ -186,10 +187,14 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
             if (entity != BusinessEntity.Product && entity != BusinessEntity.PurchaseHistory) {
                 long newCnt = consolidateSummaryNode.get(ReportConstants.NEW).asLong();
                 long deleteCnt = deleteCnts.get(entity) == null ? 0L : deleteCnts.get(entity);
+                JsonNode paDeleteCnt = consolidateSummaryNode.get(ReportConstants.DELETE);
+                if (paDeleteCnt != null) {
+                    deleteCnt = paDeleteCnt.asLong();
+                }
                 log.info(String.format(
                         "For entity %s, current total count: %d, new count: %s, delete count: %d, entity has delete action attached: %b",
                         entity.name(), currentCnts.get(entity), newCnt, deleteCnt, deleteCnts.containsKey(entity)));
-                consolidateSummaryNode.put("DELETE", String.valueOf(deleteCnt));
+                consolidateSummaryNode.put(ReportConstants.DELETE, String.valueOf(deleteCnt));
                 ObjectNode entityNumberNode = JsonUtils.createObjectNode();
                 entityNumberNode.put(ReportConstants.TOTAL, String.valueOf(currentCnts.get(entity)));
                 entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
