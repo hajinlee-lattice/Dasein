@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.process;
 
 import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.Status.GENERATING;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +25,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import com.latticeengines.common.exposed.util.DateTimeUtils;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityBookkeeping;
@@ -155,7 +157,10 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
     private SparkJobResult generateIntentAlertArtifacts() {
         List<DataUnit> inputs = new ArrayList<>();
         inputs.add(toDataUnit(latticeAccountTable, "LatticeAccount"));
-        inputs.add(toDataUnit(rawStreamTable, "RawStream"));
+        // Raw stream is partitioned with StreamDateId, need to use
+        // partitionedToHdfsDataUnit to get the DataUnit
+        inputs.add(rawStreamTable.partitionedToHdfsDataUnit("RawStream",
+                Collections.singletonList(InterfaceName.StreamDateId.name())));
         inputs.add(toDataUnit(ibmTable, "MetricsGroup_ibm"));
         inputs.add(toDataUnit(bsbmTable, "MetricsGroup_bsbm"));
 
@@ -163,11 +168,9 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
         config.setDimensionMetadata(dimensionMetadata);
         config.setOutputColumns(SELECTED_ATTRIBUTES);
         config.setInput(inputs);
-
-        SparkJobResult intentAlertResult = runSparkJob(GenerateIntentAlertArtifactsJob.class, config);
-
         log.info("Generating intent alerts, spark config = {}", JsonUtils.serialize(config));
 
+        SparkJobResult intentAlertResult = runSparkJob(GenerateIntentAlertArtifactsJob.class, config);
         return intentAlertResult;
     }
 
@@ -192,33 +195,35 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
 
         // Convert all accounts for current week into CSV format
         HdfsDataUnit allAccountsDU = result.getTargets().get(1);
-        HdfsDataUnit csvDU = convertToCSV(allAccountsDU);
-        // Persist all accounts for current week into tables
-        String allAccountsTableName = customerSpace.getTenantId() + "_"
-                + NamingUtils.timestamp(DataCollectionArtifact.CURRENTWEEK_INTENT_ALLACCOUNTS);
-        Table allAccountsTable = toTable(allAccountsTableName, csvDU);
-        metadataProxy.createTable(customerSpace.toString(), allAccountsTableName, allAccountsTable);
-        exportToS3AndAddToContext(allAccountsTable, INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME);
+        String destPath = convertToCSV(allAccountsDU);
+        // Save all accounts csv path into context
+        putObjectInContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, destPath);
 
-        // Update artifacts CreateTime with intent alert version, which is the last
-        // intent import time (might be a hack for now)
+        // Set IntentAlertVersion in data collection status table
         intentAlertVersion = updateIntentAlertVersion();
-        newAccounts.setCreateTime(Long.valueOf(intentAlertVersion));
-        allAccounts.setCreateTime(Long.valueOf(intentAlertVersion));
-        // Write back to Data Collection Artifact table
-        dataCollectionProxy.updateDataCollectionArtifact(customerSpace.toString(), newAccounts);
-        dataCollectionProxy.updateDataCollectionArtifact(customerSpace.toString(), allAccounts);
-
         log.info("Done with generating intent alert artifacts, intent alert version is {}", intentAlertVersion);
     }
 
-    private HdfsDataUnit convertToCSV(HdfsDataUnit dataUnit) {
+    private String convertToCSV(HdfsDataUnit dataUnit) {
         ConvertToCSVConfig config = new ConvertToCSVConfig();
         config.setCompress(false);
         config.setInput(Collections.singletonList(dataUnit));
         SparkJobResult csvResult = runSparkJob(ConvertToCSVJob.class, config);
 
-        return csvResult.getTargets().get(0);
+        HdfsDataUnit csvDU = csvResult.getTargets().get(0);
+        String srcPath = csvDU.getPath();
+        String allAccountsTableName = customerSpace.getTenantId() + "_"
+                + NamingUtils.timestamp(DataCollectionArtifact.CURRENTWEEK_INTENT_ALLACCOUNTS);
+        String destPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(allAccountsTableName).toString();
+
+        try {
+            log.info("Moving file from {} to {}", srcPath, destPath);
+            HdfsUtils.moveFile(yarnConfiguration, srcPath, destPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to move data from " + srcPath + " to " + destPath);
+        }
+
+        return destPath;
     }
 
     private DataCollectionArtifact getOrCreateArtifact(String artifactsName) {
@@ -243,13 +248,12 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
         ActivityBookkeeping bookkeeping = dcStatus.getActivityBookkeeping();
         Map<Integer, Long> records = bookkeeping.streamRecord.get(streamId);
         Integer dateId = records.keySet().stream().sorted(Comparator.reverseOrder()).findFirst().get();
-        intentAlertVersion = DateTimeUtils.dayPeriodToDate(dateId);
-        dcStatus.setActivityAlertVersion(intentAlertVersion);
+        intentAlertVersion = String.valueOf(dateId);
+        dcStatus.setIntentAlertVersion(intentAlertVersion);
         // Write back to Data Collection Status tables
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), dcStatus, activeVersion);
 
         log.info("New intent alert version is {}", intentAlertVersion);
         return intentAlertVersion;
     }
-
 }
