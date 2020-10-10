@@ -24,8 +24,6 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.aws.elasticache.ElasticCacheService;
 
-import io.lettuce.core.RedisURI;
-
 
 @Configuration
 public class LettuceBeansConfiguration {
@@ -58,30 +56,8 @@ public class LettuceBeansConfiguration {
                     .build();
             factory = new LettuceConnectionFactory(standaloneConfiguration, clientConfig);
         } else {
-//            LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(
-//                    elastiCacheService.getDistributedCacheNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
-//
-//            ClusterTopologyRefreshOptions topologyRefreshOptions = ClusterTopologyRefreshOptions.builder() //
-//                    .enablePeriodicRefresh(Duration.ofSeconds(10)) //
-//                    .enableAllAdaptiveRefreshTriggers() //
-//                    .refreshTriggersReconnectAttempts(3) //
-//                    .build();
-//
-//            LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-//                    .readFrom(ReadFrom.SLAVE_PREFERRED)//
-//                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
-//                    .shutdownTimeout(Duration.ZERO) //
-//                    .clientOptions(ClusterClientOptions.builder().topologyRefreshOptions(topologyRefreshOptions).build()) //
-//                    .useSsl() //
-//                    .build();
-//
-//            LedpLettuceConnectionFactory lettuceFactory = new LedpLettuceConnectionFactory(masterSlave, clientConfig);
-//            lettuceFactory.afterPropertiesSet();
-//            factory = lettuceFactory;
-
-            RedisURI redisURI = RedisURI.create(elastiCacheService.getPrimaryEndpointAddress());
             RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
-            standaloneConfiguration.setHostName(redisURI.getHost());
+            standaloneConfiguration.setHostName(elastiCacheService.getPrimaryEndpointAddress());
             LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                     .commandTimeout(Duration.ofMinutes(redisTimeout))//
                     .shutdownTimeout(Duration.ZERO) //

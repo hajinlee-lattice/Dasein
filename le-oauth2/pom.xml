@@ -17,7 +17,6 @@
 
     <properties>
         <component-name>oauth2</component-name>
-        <spring-security.version>3.2.10.RELEASE</spring-security.version>
         <start-class>com.latticeengines.oauth2.authserver.OAuthServer</start-class>
     </properties>
 
@@ -78,17 +77,17 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>${spring-security.version}</version>
+            <version>${spring-security.oauth2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
-            <version>${spring-security.version}</version>
+            <version>${spring-security.oauth2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
-            <version>${spring-security.version}</version>
+            <version>${spring-security.oauth2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>

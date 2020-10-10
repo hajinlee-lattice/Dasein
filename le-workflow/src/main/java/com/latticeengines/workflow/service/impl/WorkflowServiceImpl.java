@@ -37,7 +37,6 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.core.repository.dao.JobExecutionDao;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -70,9 +69,6 @@ import com.latticeengines.workflow.listener.LEJobCallerRegister;
 public class WorkflowServiceImpl implements WorkflowService {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowServiceImpl.class);
-
-    @Value("${hadoop.yarn.timeline-service.webapp.address}")
-    private String timelineServiceUrl;
 
     private static final String WORKFLOW_SERVICE_UUID = "WorkflowServiceUUID";
     private static final String CUSTOMER_SPACE = "CustomerSpace";
