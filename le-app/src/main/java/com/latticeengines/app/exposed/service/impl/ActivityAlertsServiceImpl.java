@@ -69,6 +69,7 @@ public class ActivityAlertsServiceImpl implements ActivityAlertsService {
         String version = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, null)
                 .getActivityAlertVersion();
         log.info(String.format("Found Activity alerts version: %s for tenant: %s", version, customerSpace));
+        log.info(String.format("Found Activity alerts version: %s for tenant: %s", version, customerSpace));
 
         List<ActivityAlert> alerts = activityAlertEntityMgr.findTopNAlertsByEntityId(internalAccountId,
                 BusinessEntity.Account, version, category, max);
@@ -161,10 +162,12 @@ public class ActivityAlertsServiceImpl implements ActivityAlertsService {
             this.entityType = alert.getEntityType();
             this.isActive = alertsConfig.isActive();
             this.qualificationPeriodDays = alertsConfig.getQualificationPeriodDays();
-            this.startTimestamp = Long
-                    .valueOf((Integer) alert.getAlertData().get(ActivityStoreConstants.Alert.COL_START_TIMESTAMP));
-            this.endTimestamp = Long
-                    .valueOf((Integer) alert.getAlertData().get(ActivityStoreConstants.Alert.COL_END_TIMESTAMP));
+            this.startTimestamp = toLong(alert.getAlertData().get(ActivityStoreConstants.Alert.COL_START_TIMESTAMP));
+            this.endTimestamp = toLong(alert.getAlertData().get(ActivityStoreConstants.Alert.COL_END_TIMESTAMP));
+        }
+
+        private Long toLong(Object ts) {
+            return ts instanceof Integer ? Long.valueOf((Integer) ts) : (Long) ts;
         }
     }
 

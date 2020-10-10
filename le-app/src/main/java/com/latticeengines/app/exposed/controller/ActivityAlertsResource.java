@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.ActivityAlertsService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -70,14 +71,25 @@ public class ActivityAlertsResource {
     @SuppressWarnings("ConstantConditions")
     public DataPage getActivityAlertsByAccount(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken,
             @PathVariable String accountId, //
-            @RequestParam(value = "category") AlertCategory category,
-            @RequestParam(value = "max", required = false) int max) {
+            @RequestParam(value = "category") String categoryStr,
+            @RequestParam(value = "max", required = false, defaultValue = "3") int max) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
             throw new LedpException(LedpCode.LEDP_32002, new String[] { "Account 360", customerSpace.getTenantId() });
         }
-        return activityAlertsService.findActivityAlertsByAccountAndCategory(customerSpace.getTenantId(), accountId,
-                category, 3, getOrgInfo(authToken));
+        if (!AlertCategory.contains(categoryStr)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { String.format("Invalid value for parameter 'category' %s , Tenant=%s", categoryStr,
+                            customerSpace.getTenantId()) });
+        }
+
+        try (PerformanceTimer timer = new PerformanceTimer(
+                "AccountAlertsLookup: Retrieved AccountAlert data for accountId=" + accountId + " category="
+                        + categoryStr + " | Tenant=" + customerSpace.getTenantId())) {
+            return activityAlertsService.findActivityAlertsByAccountAndCategory(customerSpace.getTenantId(), accountId,
+                    AlertCategory.valueOf(categoryStr.toUpperCase()), max, getOrgInfo(authToken));
+        }
+
     }
 
     private Map<String, String> getOrgInfo(String token) {

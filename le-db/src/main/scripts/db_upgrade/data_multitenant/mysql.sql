@@ -15,14 +15,14 @@ CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
       create table `ActivityAlert` (
-            `PID`                   bigint not null auto_increment,
+            `PID`                   bigint       not null auto_increment,
             `ALERT_DATA`            JSON,
             `ALERT_NAME`            varchar(100) not null,
-            `CATEGORY`              varchar(50) not null,
-            `CREATION_TIMESTAMP`    datetime not null,
+            `CATEGORY`              varchar(50)  not null,
+            `CREATION_TIMESTAMP`    datetime     not null,
             `ENTITY_ID`             varchar(255) not null,
-            `ENTITY_TYPE`           varchar(50) not null,
-            `TENANT_ID`             bigint not null,
+            `ENTITY_TYPE`           varchar(50)  not null,
+            `TENANT_ID`             bigint       not null,
             `VERSION`               varchar(255) not null,
          primary key (`PID`, `ENTITY_ID`, `TENANT_ID`))
          PARTITION BY KEY(`ENTITY_ID`, `TENANT_ID`)
