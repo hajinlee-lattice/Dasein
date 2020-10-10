@@ -124,9 +124,7 @@ public class ExportTimelineStep extends RunSparkJob<ExportTimelineSparkStepConfi
             String exportTableName = String.format("%s_%s", timelineId,
                     NamingUtils.timestamp(EXPORT_TIMELINE_SUFFIX));
             HdfsDataUnit hdfsDataUnit = result.getTargets().get(outputIdx);
-//            Table table = toTable(exportTableName, result.getTargets().get(outputIdx));
             log.info("Create timeline export table {} for timeline ID {}", exportTableName, timelineId);
-//            tablePaths.addAll(table.getExtracts().stream().map(Extract::getPath).collect(Collectors.toSet()));
             String outputDir = hdfsDataUnit.getPath();
             try {
                 List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, //
