@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.tray.entitymgr.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -59,6 +61,12 @@ public class TrayConnectorTestEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public TrayConnectorTest findByWorkflowRequestId(String workflowRequestId) {
         return trayConnectorTestReaderRepository.findByWorkflowRequestId(workflowRequestId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<TrayConnectorTest> findUnfinishedTests() {
+        return trayConnectorTestDao.findUnfinishedTests();
     }
 
     @Override
