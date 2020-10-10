@@ -24,8 +24,6 @@ public class TimelineExportWorkflow extends AbstractWorkflow<TimelineExportWorkf
     private GenerateTimelineExportUniverse generateTimelineExportUniverse;
     @Inject
     private ExportTimelineStep exportTimelineStep;
-//    @Inject
-//    private TimelineExportFileGeneratorStep timelineExportFileGeneratorStep;
     @Inject
     private ExportTimelineToS3 exportTimelineToS3;
 
