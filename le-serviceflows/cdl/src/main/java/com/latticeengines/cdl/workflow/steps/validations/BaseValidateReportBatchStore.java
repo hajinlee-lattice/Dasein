@@ -133,6 +133,11 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
             ((ObjectNode) consolidateSummaryNode).put(ReportConstants.TOTAL, totalRecords);
             if (activeTable == null) {
                 setNewCount(totalRecords, consolidateSummaryNode);
+            } else {
+                JsonNode newCnt = consolidateSummaryNode.get(ReportConstants.NEW);
+                if (newCnt == null) {
+                    setNewCount(0L, consolidateSummaryNode);
+                }
             }
         }
         updateEntityValueMapInContext(entity, TOTAL_RECORDS, totalCnt, Long.class);
