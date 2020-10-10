@@ -14,4 +14,12 @@ public enum AlertCategory {
         return displayName;
     }
 
+    public static boolean contains(String categoryStr) {
+        for (AlertCategory alertCategory : AlertCategory.values()) {
+            if (alertCategory.name().equals(categoryStr.toUpperCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
