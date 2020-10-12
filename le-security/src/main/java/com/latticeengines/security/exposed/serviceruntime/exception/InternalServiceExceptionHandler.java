@@ -49,7 +49,6 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
             logWarning(e.getMessage());
         } else {
             logError(e);
-            triggerCriticalAlert(e);
         }
         return getJsonView(e, stackTrace);
     }
@@ -60,7 +59,6 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     public JsonNode handleException(LoginException e) {
         String stackTrace = ExceptionUtils.getStackTrace(e);
         logError(e);
-        triggerCriticalAlert(e);
         return getJsonView(e, stackTrace);
     }
 

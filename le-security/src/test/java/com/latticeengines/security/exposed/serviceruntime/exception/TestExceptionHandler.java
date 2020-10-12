@@ -16,14 +16,8 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.monitor.exposed.alerts.service.AlertService;
-
 @Component
 public class TestExceptionHandler extends FrontEndFacingExceptionHandler {
-
-    public void setAlertService(AlertService alertService) {
-        this.alertService = alertService;
-    }
 
     @Override
     @SuppressWarnings("checkstyle:anonInnerLength")

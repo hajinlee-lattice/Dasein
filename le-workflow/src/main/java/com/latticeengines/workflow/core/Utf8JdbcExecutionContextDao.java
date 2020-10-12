@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,6 +54,7 @@ public class Utf8JdbcExecutionContextDao extends JdbcExecutionContextDao {
     private int shortContextLength = DEFAULT_MAX_VARCHAR_LENGTH;
 
     public void setSerializer(ExecutionContextSerializer serializer) {
+        super.setSerializer(serializer);
         this.serializer = serializer;
     }
 
@@ -134,7 +136,7 @@ public class Utf8JdbcExecutionContextDao extends JdbcExecutionContextDao {
 
         try {
             serializer.serialize(m, out);
-            results = new String(out.toByteArray(), Charset.forName("UTF-8"));
+            results = new String(out.toByteArray(), StandardCharsets.UTF_8);
         } catch (IOException ioe) {
             throw new IllegalArgumentException("Could not serialize the execution context", ioe);
         }
