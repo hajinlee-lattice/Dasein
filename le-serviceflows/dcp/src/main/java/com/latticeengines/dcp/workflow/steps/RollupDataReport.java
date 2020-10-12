@@ -326,7 +326,7 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
         stats.setTotalSubmitted(0L);
         stats.setUnmatchedCnt(0L);
         report.setBasicStats(stats);
-        report.setDuplicationReport(new DataReport.DuplicationReport());
+        // duplicationReport will be computed in separate job
         report.setGeoDistributionReport(new DataReport.GeoDistributionReport());
         report.setMatchToDUNSReport(new DataReport.MatchToDUNSReport());
         return report;
