@@ -20,7 +20,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
@@ -80,23 +82,42 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
                         "Cannot find tenant with customerSpace: " + configuration.getCustomerSpace().toString());
             }
 
-            EntityMatchConfiguration entityMatchConfiguration = configuration.getEntityMatchConfiguration();
-            if (entityMatchConfiguration != null) {
-                if (entityMatchConfiguration.getNumStagingShards() != null) {
-                    log.info("Overwriting no. staging shards to {}", entityMatchConfiguration.getNumStagingShards());
-                    entityMatchConfigurationService.setNumShards(STAGING,
-                            entityMatchConfiguration.getNumStagingShards());
-                }
-                if (entityMatchConfiguration.getStagingTableName() != null) {
-                    log.info("Overwriting no. staging table name to {}",
-                            entityMatchConfiguration.getStagingTableName());
-                    entityMatchConfigurationService.setStagingTableName(entityMatchConfiguration.getStagingTableName());
-                }
+            try {
+                acquireLockAndFailOpen();
+                commit(tenant);
+            } finally {
+                EntityMatchUtils.unlockCommitStep();
             }
-            Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(tenant);
-            entityMatchVersionService.invalidateCache(standardizedTenant);
-            ENTITIES_TO_COMMIT.forEach(entity -> commitWithCommitter(standardizedTenant, entity));
         }
+    }
+
+    private void acquireLockAndFailOpen() {
+        try (PerformanceTimer timer = new PerformanceTimer("acquiring commit entity match staging lock")) {
+            boolean success = EntityMatchUtils.lockCommitStep();
+            if (!success) {
+                // TODO record metrics
+                log.warn("Failed to acquire lock for commit step. Continue (fail open) for now.");
+            } else {
+                log.info("Lock for commit step acquired successfully");
+            }
+        }
+    }
+
+    private void commit(@NotNull Tenant tenant) {
+        EntityMatchConfiguration entityMatchConfiguration = configuration.getEntityMatchConfiguration();
+        if (entityMatchConfiguration != null) {
+            if (entityMatchConfiguration.getNumStagingShards() != null) {
+                log.info("Overwriting no. staging shards to {}", entityMatchConfiguration.getNumStagingShards());
+                entityMatchConfigurationService.setNumShards(STAGING, entityMatchConfiguration.getNumStagingShards());
+            }
+            if (entityMatchConfiguration.getStagingTableName() != null) {
+                log.info("Overwriting no. staging table name to {}", entityMatchConfiguration.getStagingTableName());
+                entityMatchConfigurationService.setStagingTableName(entityMatchConfiguration.getStagingTableName());
+            }
+        }
+        Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(tenant);
+        entityMatchVersionService.invalidateCache(standardizedTenant);
+        ENTITIES_TO_COMMIT.forEach(entity -> commitWithCommitter(standardizedTenant, entity));
     }
 
     private void commitWithCommitter(Tenant tenant, String entity) {
