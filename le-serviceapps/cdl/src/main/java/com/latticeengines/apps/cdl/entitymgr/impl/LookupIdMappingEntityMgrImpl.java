@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +68,12 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
         } else {
             sortby = "updated";
         }
-        Sort sort = new Sort(descending ? Direction.DESC : Direction.ASC, sortby);
+        Sort sort = Sort.by(sortby);
+        if (descending) {
+            sort = sort.descending();
+        } else {
+            sort = sort.ascending();
+        }
         return lookupIdMappingRepository.findAll(sort);
 
     }

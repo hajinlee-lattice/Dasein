@@ -50,12 +50,6 @@
             <artifactId>le-monitor</artifactId>
             <version>${project.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.latticeengines</groupId>-->
-<!--            <artifactId>le-monitor</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--            <scope>runtime</scope>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>

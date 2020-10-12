@@ -49,6 +49,7 @@ public final class KryoUtils {
     private static final ThreadLocal<Kryo> kryoThreadLocal = ThreadLocal.withInitial(() -> {
         log.info("Initializing a Kryo");
         Kryo kryo = new Kryo();
+        kryo.setRegistrationRequired(false);
         kryo.register(Arrays.asList("").getClass(), new ArraysAsListSerializer());
         kryo.register(Collections.EMPTY_LIST.getClass(), new CollectionsEmptyListSerializer());
         kryo.register(Collections.EMPTY_MAP.getClass(), new CollectionsEmptyMapSerializer());

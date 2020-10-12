@@ -26,26 +26,36 @@
         <compiler.version>1.8</compiler.version>
 
         <!-- maven versions -->
-        <maven.jar.version>3.1.0</maven.jar.version>
-        <maven.war.version>3.2.2</maven.war.version>
-        <maven.surefire.version>3.0.0-M3</maven.surefire.version>
-        <maven.shade.version>3.2.1</maven.shade.version>
-        <maven.compiler.version>3.8.0</maven.compiler.version>
-        <maven.assembly.version>3.1.0</maven.assembly.version>
-        <maven.exec.version>1.6.0</maven.exec.version>
-        <maven.checkstyle.version>3.1.0</maven.checkstyle.version>
-        <checkstyle.version>8.19</checkstyle.version>
-        <maven.spotbugs.version>3.1.12</maven.spotbugs.version>
-        <spotbugs.version>3.1.12</spotbugs.version>
-        <maven.scala.version>4.0.1</maven.scala.version>
-        <maven.dependency.version>3.1.1</maven.dependency.version>
+        <maven.jar.version>3.2.0</maven.jar.version>
+        <maven.war.version>3.3.1</maven.war.version>
+        <maven.surefire.version>3.0.0-M5</maven.surefire.version>
+        <maven.shade.version>3.2.4</maven.shade.version>
+        <maven.compiler.version>3.8.1</maven.compiler.version>
+        <maven.assembly.version>3.3.0</maven.assembly.version>
+        <maven.checkstyle.version>3.1.1</maven.checkstyle.version>
+        <checkstyle.version>8.29</checkstyle.version>
+        <maven.spotbugs.version>4.1.3</maven.spotbugs.version>
+        <spotbugs.version>4.1.3</spotbugs.version>
+        <maven.scala.version>4.4.0</maven.scala.version>
+        <maven.dependency.version>3.1.2</maven.dependency.version>
 
-        <maven.deploy.version>2.8.2</maven.deploy.version>
-        <maven.install.version>2.5.2</maven.install.version>
-        <maven.aspectj.version>1.11</maven.aspectj.version>
+        <maven.exec.version>1.6.0</maven.exec.version> <!-- A major upgrade to 3.0, should investigate -->
+        <maven.install.version>2.5.2</maven.install.version> <!-- A major upgrade to 3.0, should investigate -->
+        <maven.aspectj.version>1.11</maven.aspectj.version> <!-- A major upgrade to 3.0, should investigate -->
+        <maven.antrun.version>1.8</maven.antrun.version> <!-- A major upgrade to 3.0, should investigate -->
 
-        <maven.archetype.version>3.0.1</maven.archetype.version>
-        <maven.antrun.version>1.8</maven.antrun.version> <!-- Last update in 2014, we should move away -->
+        <!-- commons -->
+        <commons.io.version>2.8.0</commons.io.version>
+        <commons.lang3.version>3.11</commons.lang3.version>
+        <commons.collections4.version>4.4</commons.collections4.version>
+        <commons.math3.version>3.6.1</commons.math3.version>
+        <commons.text.version>1.9</commons.text.version>
+        <commons.cli.version>1.4</commons.cli.version>
+        <commons.codec.version>1.15</commons.codec.version>
+        <commons.net.version>3.7.1</commons.net.version>
+        <commons.csv.version>1.8</commons.csv.version>
+        <commons.validator.version>1.7</commons.validator.version>
+        <commons.fileupload.version>1.4</commons.fileupload.version>
 
         <!-- javax mostly specification interfaces, keep up with implementations -->
         <javax.validation.version>2.0.1.Final</javax.validation.version> <!-- implemented by hibernate-validator (not hibernate) -->
@@ -91,7 +101,7 @@
         <akka.version>2.4.20</akka.version> <!-- match flink version -->
 
         <!-- versions should be easy to upgrade: keep them updated! -->
-        <freemarker.version>2.3.29</freemarker.version>
+        <freemarker.version>2.3.30</freemarker.version>
         <jacoco.version>0.8.2</jacoco.version>
         <hibernate.validator.version>6.0.13.Final</hibernate.validator.version> <!-- javax.validation -->
         <quartz.version>2.3.0</quartz.version>
@@ -102,40 +112,40 @@
         <apache.directory.api.version>2.0.0.AM2</apache.directory.api.version>
         <argparse4j.version>0.5.0</argparse4j.version> <!-- to be removed, use commons cli instead -->
         <log4j.version>1.2.17</log4j.version> <!-- to be upgraded to log4j2 -->
-        <log4j.extras.version>1.2.17</log4j.extras.version>
-        <log4j2.version>2.11.1</log4j2.version> <!-- to be upgraded to log4j2 -->
-        <slf4j.version>1.7.25</slf4j.version>
+        <log4j.extras.version>1.2.17</log4j.extras.version> <!-- to be upgraded to log4j2 -->
+        <log4j2.version>2.11.1</log4j2.version>
+        <slf4j.version>1.7.30</slf4j.version>
         <jcraft.version>0.1.54</jcraft.version>
-        <snappy.version>1.1.7.3</snappy.version>
+        <snappy.version>1.1.7.7</snappy.version>
         <curator.version>4.0.1</curator.version>
         <querydsl.version>4.2.1</querydsl.version>
         <jayway.jsonpath.version>2.4.0</jayway.jsonpath.version>
         <libphonenumber.version>8.8.0</libphonenumber.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
-        <derby.version>10.14.2.0</derby.version>
         <bitcoinj.version>0.14.7</bitcoinj.version> <!-- for base58 -->
-        <protobuf.version>3.6.1</protobuf.version>
         <j2html.version>1.3.0</j2html.version>
         <jcabi.version>1.1</jcabi.version>
         <sourceforge.csvjdbc.version>1.0.34</sourceforge.csvjdbc.version>
-        <jedis.version>2.9.0</jedis.version>
-        <lettuce.version>5.1.3.RELEASE</lettuce.version>
-        <caffeine.version>2.6.2</caffeine.version>
+        <jedis.version>3.3.0</jedis.version>
+        <lettuce.version>5.3.4.RELEASE</lettuce.version> <!-- has 6.x versions -->
         <lingala.zip4j.version>1.3.2</lingala.zip4j.version>
-        <netty.all.version>4.1.31.Final</netty.all.version>
+        <netty.all.version>4.1.52.Final</netty.all.version>
         <zt.exec.version>1.10</zt.exec.version>
         <xalan.version>2.7.2</xalan.version>
         <xerces.version>2.12.0</xerces.version>
-        <kryo.version>4.0.2</kryo.version>
-        <kryo.serializers.version>0.42</kryo.serializers.version> <!-- needed for kryo 4.0.1 -->
+        <kryo.version>4.0.2</kryo.version> <!-- match kryo serializers 0.45 -->
+        <kryo.serializers.version>0.45</kryo.serializers.version>
         <zookeeper.version>3.4.13</zookeeper.version>
         <tinkerpop.version>3.4.2</tinkerpop.version>
         <springfox.swagger.version>2.9.2</springfox.swagger.version>
         <io.swagger.version>1.5.22</io.swagger.version>
-        <io.micrometer.version>1.1.5</io.micrometer.version>
+        <io.micrometer.version>1.5.5</io.micrometer.version>
+        <caffeine.version>2.8.5</caffeine.version> <!-- needed for micrometer 4.0.1 -->
         <io.opentracing.version>0.33.0</io.opentracing.version>
-        <io.opentracing.spring.web.version>2.1.3</io.opentracing.spring.web.version>
-        <io.jaegertracing.version>1.0.0</io.jaegertracing.version>
+        <io.opentracing.spring.web.version>4.0.0</io.opentracing.spring.web.version>
+        <io.jaegertracing.version>1.4.0</io.jaegertracing.version>
+        <nimbusds.jwt.version>6.0</nimbusds.jwt.version>
+        <onelogin.saml.version>2.5.0</onelogin.saml.version>
 
         <!-- Confluent -->
         <kafka.version>0.11.0.0-cp1</kafka.version>
@@ -144,22 +154,25 @@
         <libthrift.version>0.11.0</libthrift.version>
 
         <!-- Spring -->
-        <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
-        <spring.saml2.version>1.0.4.RELEASE</spring.saml2.version>
-        <spring.oauth2.version>2.3.4.RELEASE</spring.oauth2.version>
+        <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
         <!-- Better match spring boot -->
-        <!-- https://github.com/spring-projects/spring-boot/blob/v2.1.1.RELEASE/spring-boot-project/spring-boot-dependencies/pom.xml -->
-        <spring-framework.version>5.1.4.RELEASE</spring-framework.version>
-        <spring-data-releasetrain.version>Lovelace-SR3</spring-data-releasetrain.version>
-        <spring-security.version>5.1.2.RELEASE</spring-security.version>
-        <spring-batch.version>4.1.0.RELEASE</spring-batch.version>
+        <!-- https://github.com/spring-projects/spring-boot/blob/v2.3.4.RELEASE/spring-boot-project/spring-boot-dependencies/build.gradle -->
+        <spring-framework.version>5.2.9.RELEASE</spring-framework.version>
+        <spring-data-releasetrain.version>Neumann-SR4</spring-data-releasetrain.version>
+        <spring-batch.version>4.2.4.RELEASE</spring-batch.version>
+
+        <spring-security.version>5.3.4.RELEASE</spring-security.version>
+        <spring.oauth2.version>2.5.0.RELEASE</spring.oauth2.version>
+        <spring-security.oauth2.version>4.2.15.RELEASE</spring-security.oauth2.version>
+        <spring.saml2.version>1.0.10.RELEASE</spring.saml2.version>
+        <spring-security.saml2.version>4.2.15.RELEASE</spring-security.saml2.version>
 
         <!-- Reactor -->
-        <reactor.release.train>Californium-SR3</reactor.release.train>
+        <reactor.release.train>Californium-SR21</reactor.release.train>
 
         <!-- Camel -->
         <camel.version>2.23.0</camel.version>
-        <jetty.version>9.4.14.v20181114</jetty.version> <!-- camel-salesforce 2.19.1 -->
+        <jetty.version>9.4.14.v20181114</jetty.version>
 
         <!-- DB Drivers -->
         <c3p0.version>0.9.5.5</c3p0.version>
@@ -168,29 +181,13 @@
         <sqljdbc.version>7.0.0.jre8</sqljdbc.version>
         <mysql.connector.version>5.1.38</mysql.connector.version>
 
-        <!-- commons -->
-        <commons.io.version>2.6</commons.io.version>
-        <commons.lang3.version>3.8.1</commons.lang3.version>
-        <commons.math3.version>3.6.1</commons.math3.version>
-        <commons.configuration.version>1.10</commons.configuration.version> <!-- should migrate to configuration2 -->
-        <commons.text.version>1.6</commons.text.version>
-        <commons.cli.version>1.4</commons.cli.version>
-        <commons.codec.version>1.11</commons.codec.version>
-        <commons.collections4.version>4.2</commons.collections4.version>
-        <commons.net.version>3.6</commons.net.version>
-        <commons.vfs.version>1.0</commons.vfs.version> <!-- should be migrated to commons vfs2 -->
-        <commons.csv.version>1.6</commons.csv.version>
-        <commons.exec.version>1.3</commons.exec.version> <!-- stale project! -->
-        <commons.validator.version>1.6</commons.validator.version>
-        <commons.fileupload.version>1.3.3</commons.fileupload.version>
-
         <!-- OWASP security -->
         <esapi.verions>2.2.1.1</esapi.verions>
         <antisamy.version>1.5.7</antisamy.version>
 
         <!-- only used in tests -->
-        <testng.version>6.14.2</testng.version>
-        <mockito.version>2.13.0</mockito.version>
+        <testng.version>6.14.3</testng.version> <!-- 7.3.0 -->
+        <mockito.version>2.28.2</mockito.version> <!-- 3.5.13 -->
         <curator.test.version>1.3.3</curator.test.version>
 
         <!-- deprecated, kept here to sync transitive deps -->
@@ -1249,11 +1246,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-archetype-plugin</artifactId>
-                    <version>${maven.archetype.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${maven.dependency.version}</version>
                 </plugin>
@@ -1348,6 +1340,28 @@
                 <artifactId>jaxb-ri</artifactId>
                 <version>${javax.ws.version}</version>
                 <type>pom</type>
+            </dependency>
+
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo-shaded</artifactId>
+                <version>${kryo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.javakaffee</groupId>
+                <artifactId>kryo-serializers</artifactId>
+                <version>${kryo.serializers.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.owasp.esapi</groupId>
+                <artifactId>esapi</artifactId>
+                <version>${esapi.verions}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.owasp.antisamy</groupId>
+                <artifactId>antisamy</artifactId>
+                <version>${antisamy.version}</version>
             </dependency>
 
             <dependency>
@@ -1649,11 +1663,6 @@
                 <version>${commons.lang3.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-configuration</groupId>
-                <artifactId>commons-configuration</artifactId>
-                <version>${commons.configuration.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons.lang.version}</version>
@@ -1667,17 +1676,6 @@
                 <groupId>commons-net</groupId>
                 <artifactId>commons-net</artifactId>
                 <version>${commons.net.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-vfs</groupId>
-                <artifactId>commons-vfs</artifactId>
-                <version>${commons.vfs.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -2419,6 +2417,7 @@
                 <artifactId>spring-data-hadoop-store</artifactId>
                 <version>${spring.data.hdp.version}</version>
             </dependency>
+<!--
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
@@ -2439,6 +2438,7 @@
                 <artifactId>jackson-xc</artifactId>
                 <version>${jackson.codehaus.version}</version>
             </dependency>
+-->
             <dependency>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>jetty</artifactId>
@@ -2490,28 +2490,23 @@
 
             <!-- Web Applications -->
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${javax.servlet.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.validation</groupId>
                 <artifactId>validation-api</artifactId>
                 <version>${javax.validation.version}</version>
             </dependency>
             <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>javax.servlet.jsp</groupId>
                 <artifactId>javax.servlet.jsp-api</artifactId>
-                <version>${javax.jsp.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-server</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlets</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
@@ -2664,11 +2659,6 @@
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-vfs</groupId>
-            <artifactId>commons-vfs</artifactId>
         </dependency>
 
         <dependency>

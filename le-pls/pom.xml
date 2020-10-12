@@ -59,31 +59,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${maven.deploy.version}</version>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                            <url>${project.distributionManagement.repository.url}</url>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <groupId>${project.parent.groupId}</groupId>
-                            <version>${project.parent.version}</version>
-                            <file>${project.build.directory}/${project.artifactId}-${project.parent.version}.jar</file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
-
 
     <dependencies>
         <dependency>
@@ -176,11 +153,6 @@
             <artifactId>le-proxy</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-exec</artifactId>
-            <version>${commons.exec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

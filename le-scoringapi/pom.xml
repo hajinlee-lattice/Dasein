@@ -70,27 +70,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                            <url>${project.distributionManagement.repository.url}</url>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <groupId>${project.parent.groupId}</groupId>
-                            <version>${project.parent.version}</version>
-                            <file>${project.build.directory}/${project.artifactId}-${project.parent.version}.jar</file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -116,34 +95,34 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-transform</artifactId>
-            <version>${le.transform.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
 
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
 
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
@@ -151,7 +130,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-oauth2db</artifactId>
-            <version>${le.oauth2.db.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-boot-starter-jetty</artifactId>
@@ -187,19 +166,19 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-datafabric</artifactId>
-            <version>${le.datafabric.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -216,6 +195,7 @@
         </dependency>
 
         <dependency>
+            <!-- not needed ? -->
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>1.2</version>
@@ -223,7 +203,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-hadoop</artifactId>
-            <version>${le.hadoop.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
 

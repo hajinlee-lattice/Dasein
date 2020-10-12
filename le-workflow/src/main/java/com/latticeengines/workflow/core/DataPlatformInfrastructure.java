@@ -21,6 +21,8 @@ import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+
 @Configuration
 @EnableBatchProcessing(modular = true)
 @Import({ AsyncInfrastructure.class, JobOperatorInfrastructure.class, LEJobExecutionRetriever.class })
@@ -48,8 +50,14 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
 
     @Override
     public JobRepository getJobRepository() throws Exception {
-        LEJobRepositoryFactoryBean factory = new LEJobRepositoryFactoryBean(jdbcTemplate, WORKFLOW_PREFIX, databaseType,
-                new Jackson2ExecutionContextStringSerializer());
+        Jackson2ExecutionContextStringSerializer serializer = new Jackson2ExecutionContextStringSerializer();
+        serializer.setObjectMapper(JsonUtils.getObjectMapper());
+        LEJobRepositoryFactoryBean factory = new LEJobRepositoryFactoryBean( //
+                jdbcTemplate,  //
+                WORKFLOW_PREFIX, //
+                databaseType, //
+                serializer //
+        );
         factory.setDataSource(dataSource);
         factory.setTransactionManager(getTransactionManager());
         factory.setIsolationLevelForCreate("ISOLATION_REPEATABLE_READ");
@@ -61,7 +69,7 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
         factory.setRetryBackOffMultiplier(2.0);
         factory.setRetryBackOffInitialIntervalMsec(500);
         factory.afterPropertiesSet();
-        return (JobRepository) factory.getObject();
+        return factory.getObject();
     }
 
     @Override
@@ -80,9 +88,11 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
 
     @Override
     public JobExplorer getJobExplorer() throws Exception {
+        Jackson2ExecutionContextStringSerializer serializer = new Jackson2ExecutionContextStringSerializer();
+        serializer.setObjectMapper(JsonUtils.getObjectMapper());
         LEJobExplorerFactoryBean leJobExplorerFactoryBean = new LEJobExplorerFactoryBean(jdbcTemplate, WORKFLOW_PREFIX);
         leJobExplorerFactoryBean.setDataSource(dataSource);
-        leJobExplorerFactoryBean.setSerializer(new Jackson2ExecutionContextStringSerializer());
+        leJobExplorerFactoryBean.setSerializer(serializer);
         leJobExplorerFactoryBean.setTablePrefix(WORKFLOW_PREFIX);
         leJobExplorerFactoryBean.setJobExecutionRetriever(leJobExecutionRetriever);
         leJobExplorerFactoryBean.afterPropertiesSet();

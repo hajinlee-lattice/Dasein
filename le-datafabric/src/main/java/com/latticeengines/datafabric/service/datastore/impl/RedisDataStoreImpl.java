@@ -30,7 +30,7 @@ import com.latticeengines.datafabric.util.RedisUtil;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
-import redis.clients.util.Pool;
+import redis.clients.jedis.util.Pool;
 
 @SuppressWarnings("deprecation")
 public class RedisDataStoreImpl implements FabricDataStore {
@@ -71,7 +71,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
             jedis.set(buildIndexKey(), redisIndex);
         }
 
-        jedisPool.returnResource(jedis);
+        jedis.close();
 
         if (redisIndex != null) {
             this.indexes = RedisUtil.getIndex(redisIndex);
@@ -85,7 +85,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
         Pipeline pipeline = jedis.pipelined();
         createRecordInternal(pipeline, id, (pair == null) ? null : pair.getLeft());
         flushPipeline(pipeline);
-        jedisPool.returnResource(jedis);
+        jedis.close();
     }
 
     @Override
@@ -100,7 +100,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
         for (Map.Entry<String, Pair<GenericRecord, Map<String, Object>>> entry : records.entrySet())
             createRecordInternal(pipeline, entry.getKey(), (entry.getValue() == null) ? null : entry.getValue().getLeft());
         flushPipeline(pipeline);
-        jedisPool.returnResource(jedis);
+        jedis.close();
     }
 
     @Override
@@ -109,7 +109,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
         String key = buildKey(id);
         String jsonRecord = jedis.get(key);
         GenericRecord record = jsonToAvro(jsonRecord);
-        jedisPool.returnResource(jedis);
+        jedis.close();
         return (record == null) ? null : Pair.of(record, null);
     }
 
@@ -151,7 +151,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
                 records.add(Pair.of(record, null));
             }
         }
-        jedisPool.returnResource(jedis);
+        jedis.close();
 
         return records;
     }
@@ -161,7 +161,7 @@ public class RedisDataStoreImpl implements FabricDataStore {
         Jedis jedis = jedisPool.getResource();
         Pipeline pipeline = jedis.pipelined();
         deleteRecordInternal(pipeline, id, record);
-        jedisPool.returnResource(jedis);
+        jedis.close();
     }
 
     private void createRecordInternal(Pipeline pipeline, String id, GenericRecord record) {

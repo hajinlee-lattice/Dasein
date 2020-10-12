@@ -1,20 +1,14 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
-import org.springframework.retry.RetryListener;
-import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
@@ -29,9 +23,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("campaignLaunchSchedulingService")
 public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implements CampaignLaunchSchedulingService {
@@ -41,13 +33,7 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
 
     @Inject
-    private WorkflowProxy workflowProxy;
-
-    @Inject
     private BatonService batonService;
-
-    @Inject
-    private AlertService alertService;
 
     @Inject
     private ZKConfigService zkConfigService;
@@ -206,31 +192,8 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
 
     private RetryTemplate getRetryTemplate() {
         RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(3, 2000L, 2.0D, null);
-        template.registerListener(getLaunchSchedulingFailureListener());
         template.setThrowLastExceptionOnExhausted(false);
         return template;
-    }
-
-    private RetryListener getLaunchSchedulingFailureListener() {
-        return new RetryListenerSupport() {
-            @Override
-            public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback,
-                    Throwable throwable) {
-                // Send a PagerDuty
-                List<BasicNameValuePair> details = new ArrayList<>();
-                details.add(new BasicNameValuePair(FAILURE_URL_KEY, (String) context.getAttribute(FAILURE_URL_KEY)));
-                details.add(new BasicNameValuePair(FAILURE_DESCRIPTION_KEY,
-                        (String) context.getAttribute(FAILURE_DESCRIPTION_KEY)));
-                details.add(new BasicNameValuePair(FAILURE_MESSAGE_KEY,
-                        (String) context.getAttribute(FAILURE_MESSAGE_KEY)));
-                details.add(new BasicNameValuePair(FAILURE_STACKTRACE_KEY,
-                        (String) context.getAttribute(FAILURE_STACKTRACE_KEY)));
-                alertService.triggerCriticalEvent((String) context.getAttribute(FAILURE_STACKTRACE_KEY),
-                        (String) context.getAttribute(FAILURE_URL_KEY), (String) context.getAttribute(FAILURE_URL_KEY),
-                        details);
-                super.close(context, callback, throwable);
-            }
-        };
     }
 
 }

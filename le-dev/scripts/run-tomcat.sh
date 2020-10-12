@@ -18,6 +18,7 @@ export CATALINA_OPTS="${CATALINA_OPTS} -Djavax.net.ssl.trustStore=/etc/ledp/tls/
 export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1098"
 export CATALINA_OPTS="${CATALINA_OPTS} -Dio.lettuce.core.topology.sort=RANDOMIZE"
+export CATALINA_OPTS="${CATALINA_OPTS} -Dorg.owasp.esapi.resources=${CATALINA_HOME}/conf"
 
 export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:-} -XX:+UseNUMA"
 if [[ -n $(java -version 2>&1 |  grep "11.0") ]]; then
