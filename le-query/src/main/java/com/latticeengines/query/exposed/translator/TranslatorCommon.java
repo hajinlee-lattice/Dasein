@@ -38,6 +38,7 @@ public class TranslatorCommon {
     static final String PERIOD_ID = InterfaceName.PeriodId.name();
     static final String PERIOD_NAME = InterfaceName.PeriodName.name();
     static final String PRODUCT_ID = InterfaceName.ProductId.name();
+    static final String PRODUCT_TYPE = InterfaceName.ProductType.name();
     static final String TOTAL_AMOUNT = InterfaceName.TotalAmount.name();
     static final String TOTAL_QUANTITY = InterfaceName.TotalQuantity.name();
     static final String TRXN = "trxn";
@@ -67,6 +68,7 @@ public class TranslatorCommon {
     static final StringPath periodId = Expressions.stringPath(PERIOD_ID);
     static final StringPath periodName = Expressions.stringPath(PERIOD_NAME);
     static final StringPath productId = Expressions.stringPath(PRODUCT_ID);
+    static final StringPath productType = Expressions.stringPath(PRODUCT_TYPE);
     static final StringPath amountVal = Expressions.stringPath(TOTAL_AMOUNT);
     static final StringPath quantityVal = Expressions.stringPath(TOTAL_QUANTITY);
     static final StringPath amountAggr = Expressions.stringPath(AMOUNT_AGG);

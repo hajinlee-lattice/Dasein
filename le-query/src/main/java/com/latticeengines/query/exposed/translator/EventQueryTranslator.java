@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.factory.SparkQueryProvider;
 import com.querydsl.core.Tuple;
@@ -96,7 +97,8 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         SQLQuery<Tuple> txnTableSubQuery = factory.query() //
                 .select(accountId, periodId, productId, amountVal, quantityVal) //
-                .where(periodName.eq(period));
+                .where(periodName.eq(period)
+                        .and(productType.eq(ProductType.Analytic.name())));
         txnTableSubQuery = txnTableSubQuery.from(tablePath);
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(txnTableSubQuery);
