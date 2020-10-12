@@ -315,7 +315,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         dataCollectionProxy.upsertTable(tenantId, ratingTableName, TableRoleInCollection.PivotedRating, active);
         final String finalTenantId = tenantId;
         Flux.fromIterable(engineIds).parallel().runOn(Schedulers.parallel()) //
-                .map(engineId -> ratingEngineProxy.updateRatingEngineCounts(finalTenantId, engineId)) //
+                .map(engineId -> ratingEngineProxy.updateRatingEngineCounts(finalTenantId, engineId, null)) //
                 .sequential().collectList().block();
         if (uploadRatingTable) {
             uploadRatingTable(finalTenantId, ratingTableName, schema, columns, data);

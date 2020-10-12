@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.ratings.coverage.UpdateRatingCoverageRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -219,10 +220,11 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     @SuppressWarnings("rawtypes")
-    public Map<String, Long> updateRatingEngineCounts(String customerSpace, String ratingEngineId) {
+    public Map<String, Long> updateRatingEngineCounts(String customerSpace, String ratingEngineId, //
+                                                      UpdateRatingCoverageRequest request) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/counts", shortenCustomerSpace(customerSpace),
                 ratingEngineId);
-        Map map = put("update rating engine counts", url, null, Map.class);
+        Map map = put("update rating engine counts", url, request, Map.class);
         return JsonUtils.convertMap(map, String.class, Long.class);
     }
 

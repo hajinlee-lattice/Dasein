@@ -86,6 +86,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
+import com.latticeengines.domain.exposed.ratings.coverage.UpdateRatingCoverageRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -276,11 +277,34 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingEngine ratingEngine = getRatingEngineById(engineId, false, true);
         if (ratingEngine != null) {
             counts = updateRatingCount(ratingEngine);
-            log.info("Updated counts for rating engine " + engineId + " to " + JsonUtils.serialize(counts));
+            log.info("Updating rating engine {}, counts to {}", ratingEngine.getId(), //
+                    JsonUtils.serialize(counts));
         } else {
             log.warn("Cannot find engine with id " + engineId);
         }
         return counts;
+    }
+
+    @Override
+    public Map<String, Long> updateRatingEngineCounts(String engineId, UpdateRatingCoverageRequest request) {
+        if (request != null && MapUtils.isNotEmpty(request.getCounts())) {
+            RatingEngine ratingEngine = getRatingEngineById(engineId, false, true);
+            Map<String, Long> counts = null;
+            if (ratingEngine != null) {
+                if (MultiTenantContext.getTenant() == null) {
+                    log.warn("Cannot find a Tenant in MultiTenantContext, skip getting rating count.");
+                } else {
+                    counts = request.getCounts();
+                    log.info("Updating rating engine {}, counts to {}", ratingEngine.getId(), //
+                            JsonUtils.serialize(counts));
+                    ratingEngine.setCountsByMap(counts);
+                    createOrUpdate(ratingEngine);
+                }
+            }
+            return counts;
+        } else {
+            return updateRatingEngineCounts(engineId);
+        }
     }
 
     @Override
