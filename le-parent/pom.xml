@@ -58,9 +58,9 @@
         <commons.fileupload.version>1.4</commons.fileupload.version>
 
         <!-- javax mostly specification interfaces, keep up with implementations -->
-        <javax.validation.version>2.0.1.Final</javax.validation.version> <!-- implemented by hibernate-validator (not hibernate) -->
+        <javax.validation.version>2.0.1.Final</javax.validation.version> <!-- hibernate-validator 6.1.6 and com.sun.xml.ws:jaxws-ri:pom:2.3.0-->
         <javax.mail.version>1.5.4</javax.mail.version>
-        <javax.el.version>2.2.4</javax.el.version>
+        <javax.el.version>3.0.0</javax.el.version> <!-- hibernate-validator 6.1.6 -->
         <javax.jsr250.version>1.0</javax.jsr250.version> <!-- implemented by spring -->
         <javax.servlet.version>4.0.1</javax.servlet.version> <!-- implemented by tomcat -->
         <javax.jsp.version>2.3.3</javax.jsp.version> <!-- implemented by tomcat -->
@@ -103,7 +103,7 @@
         <!-- versions should be easy to upgrade: keep them updated! -->
         <freemarker.version>2.3.30</freemarker.version>
         <jacoco.version>0.8.2</jacoco.version>
-        <hibernate.validator.version>6.0.13.Final</hibernate.validator.version> <!-- javax.validation -->
+        <hibernate.validator.version>6.1.6.Final</hibernate.validator.version> <!-- javax.validation -->
         <quartz.version>2.3.0</quartz.version>
         <aspectj.version>1.8.13</aspectj.version>
         <reflections.version>0.9.10</reflections.version>
@@ -1340,6 +1340,16 @@
                 <artifactId>jaxb-ri</artifactId>
                 <version>${javax.ws.version}</version>
                 <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>javax.el</groupId>
+                <artifactId>javax.el-api</artifactId>
+                <version>${javax.el.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.el</artifactId>
+                <version>${javax.el.version}</version>
             </dependency>
 
             <dependency>
