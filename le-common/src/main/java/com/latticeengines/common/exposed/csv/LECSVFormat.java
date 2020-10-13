@@ -8,5 +8,5 @@ public final class LECSVFormat {
         throw new UnsupportedOperationException();
     }
     public static final CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',').withIgnoreEmptyLines(true)
-            .withIgnoreSurroundingSpaces(true);
+            .withIgnoreSurroundingSpaces(true).withAllowMissingColumnNames();
 }
