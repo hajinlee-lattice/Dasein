@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.ConfidenceCode;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -66,8 +67,10 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         Map<String, String> map =
                 new LinkedHashMap<>(FIELDS.stream().map(Pair::getLeft).collect(Collectors.toMap(e->e, e->e)));
         map.put("Organization", "Organization - No. Of Employees - Employee Figures Date");
-        config.setAcceptedAttrsMap(map);
-        config.setRejectedAttrsMap(map);
+        List<String> attrs = new ArrayList<>(map.keySet());
+        config.setDisplayNameMap(map);
+        config.setAcceptedAttrs(attrs);
+        config.setRejectedAttrs(attrs);
         config.setCountryAttr(InterfaceName.Country.name());
         config.setManageDbUrl(url);
         config.setUser(user);
@@ -140,8 +143,10 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
         config.setConfidenceCodeAttr(ConfidenceCode);
         config.setTotalCount(8L);
         Map<String, String> map = FIELDS.stream().map(Pair::getLeft).collect(Collectors.toMap(e->e, e->e));
-        config.setAcceptedAttrsMap(map);
-        config.setRejectedAttrsMap(map);
+        List<String> attrs = new ArrayList<>(map.keySet());
+        config.setDisplayNameMap(map);
+        config.setAcceptedAttrs(attrs);
+        config.setRejectedAttrs(attrs);
         SparkJobResult result = runSparkJob(SplitImportMatchResultJob.class, config, Collections.singletonList(input),
                 getWorkspace());
         verifyNoDupOutput(result.getOutput());
