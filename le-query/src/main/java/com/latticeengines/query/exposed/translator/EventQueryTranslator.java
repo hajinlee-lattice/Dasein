@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -36,7 +37,6 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.factory.SparkQueryProvider;
 import com.querydsl.core.Tuple;
@@ -97,8 +97,7 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         SQLQuery<Tuple> txnTableSubQuery = factory.query() //
                 .select(accountId, periodId, productId, amountVal, quantityVal) //
-                .where(periodName.eq(period)
-                        .and(productType.eq(ProductType.Analytic.name())));
+                .where(periodName.eq(period).and(productType.eq(ProductType.Analytic.name())));
         txnTableSubQuery = txnTableSubQuery.from(tablePath);
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(txnTableSubQuery);
@@ -546,21 +545,20 @@ public class EventQueryTranslator extends TranslatorCommon {
         if (evaluationPeriodId < 0) {
             EntityPath<String> periodViewPath = new PathBuilder<>(String.class, MAX_PID);
             NumberExpression periodIdExpression = Expressions.numberPath(Long.class, periodViewPath, PERIOD_ID);
-            subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression)
-                    .from(keysPath, Expressions.stringPath(MAX_PID));
+            subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression).from(keysPath,
+                    Expressions.stringPath(MAX_PID));
         } else {
             if (SPARK_BATCH_USER.equals(sqlUser)) {
                 // M32: a work around to spark not being able to parse "distinct" correctly
                 NumberExpression periodIdExpression = Expressions.asNumber(evaluationPeriodId).as(PERIOD_ID);
-                SQLQuery distinctIds = factory.query()
-                        .distinct().select(Expressions.stringPath(ACCOUNT_ID)).from(keysPath);
+                SQLQuery distinctIds = factory.query().distinct().select(Expressions.stringPath(ACCOUNT_ID))
+                        .from(keysPath);
                 subQueryExpression = factory.query() //
                         .select(Expressions.stringPath(ACCOUNT_ID), periodIdExpression) //
                         .from(distinctIds);
             } else {
                 NumberExpression periodIdExpression = Expressions.asNumber(evaluationPeriodId).as(PERIOD_ID);
-                subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression)
-                        .from(keysPath);
+                subQueryExpression = factory.query().distinct().select(accountId, periodIdExpression).from(keysPath);
             }
         }
         SubQuery subQuery = new SubQuery();
