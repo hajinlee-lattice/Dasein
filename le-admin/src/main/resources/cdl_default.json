@@ -74,6 +74,10 @@
     {
       "Node": "Timezone",
       "Data": ""
+    },
+    {
+      "Node": "IntentEmailDeliveryCronExpression",
+      "Data": ""
     }
   ]
 }

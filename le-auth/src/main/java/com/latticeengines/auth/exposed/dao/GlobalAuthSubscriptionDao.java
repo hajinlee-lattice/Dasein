@@ -11,4 +11,5 @@ public interface GlobalAuthSubscriptionDao extends BaseDao<GlobalAuthSubscriptio
 
     List<String> findEmailsByTenantId(String tenantId);
 
+    List<String> getAllTenantId();
 }

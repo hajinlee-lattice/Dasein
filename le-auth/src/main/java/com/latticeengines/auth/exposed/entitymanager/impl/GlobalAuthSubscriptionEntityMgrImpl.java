@@ -66,4 +66,9 @@ public class GlobalAuthSubscriptionEntityMgrImpl extends BaseEntityMgrImpl<Globa
         gaSubscriptionDao.delete(gaSubscription);
     }
 
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<String> getAllTenantId() {
+        return gaSubscriptionDao.getAllTenantId();
+    }
 }

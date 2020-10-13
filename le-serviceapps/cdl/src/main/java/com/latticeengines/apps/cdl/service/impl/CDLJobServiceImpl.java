@@ -41,27 +41,40 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.ActivityStoreService;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
+import com.latticeengines.apps.cdl.workflow.GenerateIntentAlertWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ZKConfigService;
+import com.latticeengines.auth.exposed.service.GlobalAuthSubscriptionService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.CronUtils;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.AtlasScheduling;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityBookkeeping;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
@@ -73,6 +86,7 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
+import com.latticeengines.domain.exposed.serviceflows.cdl.GenerateIntentEmailAlertWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -135,6 +149,9 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Inject
     private DataCollectionService dataCollectionService;
 
+    @Inject
+    private GlobalAuthSubscriptionService subscriptionService;
+
     @VisibleForTesting
     @Value("${cdl.processAnalyze.concurrent.job.count}")
     int concurrentProcessAnalyzeJobs;
@@ -176,6 +193,12 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Inject
     private PlsHealthCheckProxy plsHealthCheckProxy;
+
+    @Inject
+    private GenerateIntentAlertWorkflowSubmitter intentAlertWorkflowSubmitter;
+
+    @Inject
+    private ActivityStoreService activityStoreService;
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
@@ -256,6 +279,8 @@ public class CDLJobServiceImpl implements CDLJobService {
                 log.error("schedule CDLJobType.SCHEDULINGNOWPA failed" + e.getMessage());
                 throw e;
             }
+        } else if (cdlJobType == CDLJobType.SENDDNBINTENTALERTEMAIL) {
+            sendDNBIntentAlertEmail();
         }
         return true;
     }
@@ -476,7 +501,8 @@ public class CDLJobServiceImpl implements CDLJobService {
     private void scheduleNowPAJob() {
         List<AtlasScheduling> atlasSchedulingList = atlasSchedulingService.findAllByType(AtlasScheduling.ScheduleType.PA);
         if (CollectionUtils.isNotEmpty(atlasSchedulingList)) {
-            log.info(String.format("The count of tenant that needs to do schedule now is: %d.", atlasSchedulingList.size()));
+            log.info(String.format("The count of tenant that needs to do schedule now is: %d.",
+                    atlasSchedulingList.size()));
             for (AtlasScheduling atlasScheduling : atlasSchedulingList) {
                 Tenant tenant = atlasScheduling.getTenant();
                 String customerSpace = CustomerSpace.shortenCustomerSpace(tenant.getId());
@@ -514,7 +540,8 @@ public class CDLJobServiceImpl implements CDLJobService {
             cdlProxy.scheduleProcessAnalyze(tenant.getId(), false, request);
             log.info(String.format("Succeed to submit entity schedulenow job for tenant name: %s .", customerSpace));
         } catch (Exception e) {
-            log.info(String.format("Failed to submit entity schedulenow job for tenant name: %s，message is %s", customerSpace, e.getMessage()));
+            log.info(String.format("Failed to submit entity schedulenow job for tenant name: %s，message is %s",
+                    customerSpace, e.getMessage()));
         }
     }
 
@@ -932,6 +959,63 @@ public class CDLJobServiceImpl implements CDLJobService {
         } catch (Exception e) {
             log.error("get redis cache fail.", e);
         }
+    }
+
+    public void sendDNBIntentAlertEmail() {
+        log.info("generateIntentEmailAlertWorkflow job checking");
+        List<String> customerSpaceList = subscriptionService.getAllTenantId();
+        Set<String> runningTenantSet = getTenantWithRunningIntentWorkFlow();
+        for (String customerSpaceStr : customerSpaceList) {
+            if (!runningTenantSet.contains(customerSpaceStr) && isCronExpressionSatisfied(customerSpaceStr)
+                    && isNewDataGenerated(customerSpaceStr)) {
+                log.info(String.format("start generateIntentEmailAlertWorkflow for tenant %s", customerSpaceStr));
+                intentAlertWorkflowSubmitter.submit(customerSpaceStr, new WorkflowPidWrapper(-1L));
+            }
+        }
+    }
+
+    private boolean isNewDataGenerated(String customerSpaceStr) {
+        DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpaceStr);
+        DataCollectionStatus dataStatus = dataCollectionService.getOrCreateDataCollectionStatus(customerSpaceStr,
+                activeVersion);
+        String intentAlertVersionPeriod = dataStatus.getIntentAlertVersion();
+        // get intent stream dateId
+        List<AtlasStream> streams = activityStoreService.getStreams(customerSpaceStr);
+        AtlasStream intentStream = streams.stream()
+                .filter(stream -> (stream.getStreamType() == AtlasStream.StreamType.DnbIntentData)).findFirst().get();
+        ActivityBookkeeping bookkeeping = dataStatus.getActivityBookkeeping();
+        Map<Integer, Long> records = bookkeeping.streamRecord.get(intentStream.getStreamId());
+        Integer dateId = records.keySet().stream().sorted(Comparator.reverseOrder()).findFirst().get();
+        log.info(String.format("check if new data genenrated  %d , intentalertversion: %s", dateId,
+                intentAlertVersionPeriod));
+        return dateId >= Integer.parseInt(intentAlertVersionPeriod);
+    }
+
+    private boolean isCronExpressionSatisfied(String customerSpaceStr) {
+        String deliveryCron = getIntentEmailDeliveryCronExpression(CustomerSpace.parse(customerSpaceStr));
+        return CronUtils.isSatisfiedByDate(deliveryCron, new Date());
+    }
+
+    private Set<String> getTenantWithRunningIntentWorkFlow() {
+        List<String> types = Arrays.asList(GenerateIntentEmailAlertWorkflowConfiguration.WORKFLOW_NAME);
+        List<String> jobStatuses = Arrays.asList(JobStatus.RUNNING.getName());
+        List<Job> jobs = workflowProxy.getJobs(null, types, jobStatuses, false);
+        return jobs.stream().map(Job::getTenantId).collect(Collectors.toSet());
+    }
+
+    private String getIntentEmailDeliveryCronExpression(CustomerSpace customerSpace) {
+        try {
+            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
+                    CDLComponent.componentName);
+            Path intentEmailDeliveryCronExpression = path.append("IntentEmailDeliveryCronExpression");
+            Camille camille = CamilleEnvironment.getCamille();
+            if (camille.exists(intentEmailDeliveryCronExpression)) {
+                return camille.get(intentEmailDeliveryCronExpression).getData();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get intentEmailDeliveryCronExpression from ZK for " + customerSpace.toString(), e);
+        }
+        return null;
     }
 
 }

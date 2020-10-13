@@ -80,4 +80,9 @@ public class GlobalAuthSubscriptionServiceImpl implements GlobalAuthSubscription
         }
         return subscription;
     }
+
+    @Override
+    public List<String> getAllTenantId() {
+        return globalAuthSubscriptionEntityMgr.getAllTenantId();
+    }
 }
