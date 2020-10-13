@@ -66,7 +66,7 @@ public class TrayConnectorTestEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<TrayConnectorTest> findUnfinishedTests() {
-        return trayConnectorTestDao.findUnfinishedTests();
+        return trayConnectorTestReaderRepository.findUnfinishedTests();
     }
 
     @Override

@@ -38,10 +38,16 @@ public class TrayTestTimeoutServiceImpl implements TrayTestTimeoutService {
         log.info("Found " + unfinishedTrayTests.size() + " Tray tests currently unfinished");
         List<TrayConnectorTest> timedOutTrayTests;
 
-        // Tray tests timeout in 3 days: 1 day for processing + 2 days for audience size update
+        // Tray tests timeout:
+        // AD_PLATFORM in 3 days (1 day for processing + 2 days for audience size update)
+        // Other destinations in 1 day
         timedOutTrayTests = unfinishedTrayTests.stream()
-                .filter(test -> test.getStartTime().toInstant().atOffset(ZoneOffset.UTC)
-                        .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(72)))
+                .filter(
+                    test -> (isAdPlatform(test) && test.getStartTime().toInstant().atOffset(ZoneOffset.UTC)
+                                    .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(72))) ||
+                            (!isAdPlatform(test) && test.getStartTime().toInstant().atOffset(ZoneOffset.UTC)
+                                    .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(24)))
+                    )
                 .collect(Collectors.toList());
 
         if (timedOutTrayTests.size() > 0) {
@@ -59,6 +65,10 @@ public class TrayTestTimeoutServiceImpl implements TrayTestTimeoutService {
         timedOutTrayTests.forEach(test -> {
             trayConnectorTestService.cancelTrayTestByWorkflowReqId(test.getWorkflowRequestId());
         });
+    }
+
+    private boolean isAdPlatform(TrayConnectorTest test) {
+        return trayConnectorTestService.isAdPlatform(test);
     }
 
 }

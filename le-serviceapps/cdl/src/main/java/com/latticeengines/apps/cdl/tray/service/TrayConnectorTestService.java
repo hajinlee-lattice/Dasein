@@ -15,4 +15,6 @@ public interface TrayConnectorTestService {
     List<TrayConnectorTest> findUnfinishedTests();
 
     void cancelTrayTestByWorkflowReqId(String workflowRequestId);
+
+    boolean isAdPlatform(TrayConnectorTest test);
 }

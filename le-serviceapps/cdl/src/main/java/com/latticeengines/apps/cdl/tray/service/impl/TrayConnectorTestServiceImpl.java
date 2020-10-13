@@ -170,6 +170,12 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         }
     }
 
+    @Override
+    public boolean isAdPlatform(TrayConnectorTest test) {
+        CDLExternalSystemName externalSystemName = test.getExternalSystemName();
+        return CDLExternalSystemName.AD_PLATFORMS.contains(externalSystemName);
+    }
+
     private void handleStatus(DataIntegrationStatusMonitorMessage status) {
         String workflowRequestId = status.getWorkflowRequestId();
         log.info("Workflow Request ID: " + workflowRequestId);
