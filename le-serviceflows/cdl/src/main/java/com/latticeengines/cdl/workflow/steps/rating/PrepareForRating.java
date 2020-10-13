@@ -20,7 +20,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -76,8 +75,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         putObjectInContext(RATING_MODELS, activeModels);
 
         initializeRatingLifts();
-        // TODO: remove this log later
-        log.info("ORIGINAL_BUCKET_METADATA is " + JsonUtils.serialize(originalBucketMetadataMap));
         WorkflowStaticContext.putObject(ORIGINAL_BUCKET_METADATA, originalBucketMetadataMap);
 
         removeObjectFromContext(TABLES_GOING_TO_DYNAMO);
