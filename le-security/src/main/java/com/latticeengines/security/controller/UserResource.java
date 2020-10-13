@@ -111,8 +111,9 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Register or validate a new user in the current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg, @RequestHeader(value = Constants.SET_TEMP_PASS, required = false) Boolean setTempPass,
-                                                         HttpServletRequest request, HttpServletResponse httpResponse) {
+    public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg,
+            @RequestHeader(value = Constants.SET_TEMP_PASS, required = false) Boolean setTempPass,
+            HttpServletRequest request, HttpServletResponse httpResponse) {
         ResponseDocument<RegistrationResult> response = new ResponseDocument<>();
         response.setSuccess(false);
 
@@ -172,12 +173,11 @@ public class UserResource {
             } else {
                 emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
             }
-        }
-        else {
+        } else {
             IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
             if (idaasUser == null) {
-                LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s.",
-                        loginUsername, loginLevel));
+                LOGGER.error(
+                        String.format("Failed to create IDaaS user for %s at level %s.", loginUsername, loginLevel));
                 String title = "Failed to create IDaaS User.";
                 UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
                 UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
@@ -198,13 +198,13 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Update password of user")
     public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data,
-                                                   HttpServletRequest request) {
+            HttpServletRequest request) {
         username = userService.getURLSafeUsername(username).toLowerCase();
         try {
             User user = SecurityUtils.getUserFromRequest(request, sessionService, userService);
             checkUser(user);
             if (!user.getUsername().equals(username)) {
-                throw new LedpException(LedpCode.LEDP_18001, new String[]{username});
+                throw new LedpException(LedpCode.LEDP_18001, new String[] { username });
             }
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
@@ -233,7 +233,7 @@ public class UserResource {
     @ApiOperation(value = "Update users")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public SimpleBooleanResponse update(@PathVariable String username, @RequestBody UserUpdateData data,
-                                        HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         username = userService.getURLSafeUsername(username).toLowerCase();
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
@@ -252,11 +252,20 @@ public class UserResource {
                 return SimpleBooleanResponse.failedResponse(
                         Collections.singletonList("Cannot update to a level higher than that of the login user."));
             }
+
+            if ((AccessLevel.SUPER_ADMIN.equals(targetLevel) || AccessLevel.INTERNAL_ADMIN.equals(targetLevel))
+                    && !EmailUtils.isInternalUser(user.getEmail())) {
+                response.setStatus(500);
+                return SimpleBooleanResponse.failedResponse(Collections.singletonList(
+                        "Cannot assign INTERNAL_ADMIN access level to users with external email addresses."));
+            }
+
             userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
                     false, !newUser, data.getUserTeams());
             LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                     targetLevel.name(), username, tenantId));
-            if (newUser && user != null && !batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+            if (newUser && user != null
+                    && !batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                     emailService.sendExistingUserEmail(tenant, user, apiPublicUrl,
                             !tenantService.getTenantEmailFlag(tenant.getId()));
@@ -296,7 +305,7 @@ public class UserResource {
     @ApiOperation(value = "Delete a user. The user must be in the tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public SimpleBooleanResponse deleteUser(@PathVariable String username, HttpServletRequest request,
-                                            HttpServletResponse response) {
+            HttpServletResponse response) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
