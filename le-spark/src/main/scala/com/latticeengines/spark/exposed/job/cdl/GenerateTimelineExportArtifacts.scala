@@ -26,6 +26,7 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
     val fromDateTimestamp = config.fromDateTimestamp
     val toDateTimestamp = config.toDateTimestamp
     val rollupToDaily = config.rollupToDaily
+    val filterDuns = config.filterDuns
     val eventTypes = config.eventTypes
     val timeZone = config.timeZone
     val accountList: DataFrame =
@@ -60,7 +61,7 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
           (eventTypes))
         }
         if (accountList != null) {
-          timelineFilterTable = timelineFilterTable.join(accountList.select(AccountId.name), Seq(AccountId.name),  "inner")
+          timelineFilterTable = timelineFilterTable.join(accountList.select(AccountId.name), Seq(AccountId.name))
         }
         timelineFilterTable = timelineFilterTable.withColumn(Count.name, lit(1))
         if (rollupToDaily) {
@@ -77,10 +78,13 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
           .name), col(EventType.name), col(StreamType.name), col(Count.name))
         timelineFilterTable = timelineFilterTable.join(latticeAccount.select(AccountId.name, "LDC_DUNS",
           "DOMESTIC_ULTIMATE_DUNS_NUMBER",
-          "GLOBAL_ULTIMATE_DUNS_NUMBER", "LDC_DOMAIN", "LE_IS_PRIMARY_DOMAIN"), Seq(AccountId.name))
+          "GLOBAL_ULTIMATE_DUNS_NUMBER", "LDC_DOMAIN", "LE_IS_PRIMARY_DOMAIN"), Seq(AccountId.name), "left")
           .withColumnRenamed("LDC_DUNS", DUNS.name).withColumnRenamed("DOMESTIC_ULTIMATE_DUNS_NUMBER",
           DomesticUltimateDuns.name).withColumnRenamed("GLOBAL_ULTIMATE_DUNS_NUMBER", GlobalUltimateDuns.name)
           .withColumnRenamed("LDC_DOMAIN", Domain.name).withColumnRenamed("LE_IS_PRIMARY_DOMAIN", IsPrimaryDomain.name)
+        if (filterDuns) {
+          timelineFilterTable = timelineFilterTable.filter(col(DUNS.name()).isNotNull)
+        }
         (timelineId, timelineFilterTable)
     }.toSeq: _*
     )

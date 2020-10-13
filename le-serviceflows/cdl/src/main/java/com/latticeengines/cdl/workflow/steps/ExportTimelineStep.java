@@ -98,6 +98,7 @@ public class ExportTimelineStep extends RunSparkJob<ExportTimelineSparkStepConfi
         config.timelineTableNames = timelineTableNames;
         config.timeZone = request.getTimezone();
         config.rollupToDaily = request.isRollupToDaily();
+        config.filterDuns = request.isFilterDuns();
         toDataUnits(new ArrayList<>(timelineTableNames.values()), config.inputIdx, inputs);
         config.latticeAccountTableIdx = inputs.size();
         inputs.add(latticeAccountTable.toHdfsDataUnit("LatticeAccount"));

@@ -35,6 +35,8 @@ public class GenerateTimelineExportArtifactsJobConfig extends SparkJobConfig imp
     @JsonProperty
     public String timeZone;
     @JsonProperty
+    public boolean filterDuns;
+    @JsonProperty
     public List<String> eventTypes = new ArrayList<>();
 
     @Override
