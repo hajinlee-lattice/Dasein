@@ -17,4 +17,6 @@ public interface TrayConnectorTestService {
     void cancelTrayTestByWorkflowReqId(String workflowRequestId);
 
     boolean isAdPlatform(TrayConnectorTest test);
+
+    boolean isLiveramp(TrayConnectorTest test);
 }

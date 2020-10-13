@@ -39,13 +39,16 @@ public class TrayTestTimeoutServiceImpl implements TrayTestTimeoutService {
         List<TrayConnectorTest> timedOutTrayTests;
 
         // Tray tests timeout:
-        // AD_PLATFORM in 3 days (1 day for processing + 2 days for audience size update)
-        // Other destinations in 1 day
+        // - AD_PLATFORM in 3 days (1 day for processing + 2 days for audience size update)
+        // - Liveramp in 2 days
+        // - Other destinations in 1 day
         timedOutTrayTests = unfinishedTrayTests.stream()
                 .filter(
                     test -> (isAdPlatform(test) && test.getStartTime().toInstant().atOffset(ZoneOffset.UTC)
                                     .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(72))) ||
-                            (!isAdPlatform(test) && test.getStartTime().toInstant().atOffset(ZoneOffset.UTC)
+                            (isLiveramp(test) && test.getStartTime().toInstant().atOffset(ZoneOffset.UTC)
+                                    .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(48))) ||
+                            (isOthers(test) && test.getStartTime().toInstant().atOffset(ZoneOffset.UTC)
                                     .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(24)))
                     )
                 .collect(Collectors.toList());
@@ -69,6 +72,14 @@ public class TrayTestTimeoutServiceImpl implements TrayTestTimeoutService {
 
     private boolean isAdPlatform(TrayConnectorTest test) {
         return trayConnectorTestService.isAdPlatform(test);
+    }
+
+    private boolean isLiveramp(TrayConnectorTest test) {
+        return trayConnectorTestService.isLiveramp(test);
+    }
+
+    private boolean isOthers(TrayConnectorTest test) {
+        return !isAdPlatform(test) && !isLiveramp(test);
     }
 
 }
