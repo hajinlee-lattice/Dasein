@@ -121,12 +121,11 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
   private def selectAndRename(input: DataFrame, attrNames: Map[String, String], nameSeq: List[String]): DataFrame = {
     logSpark("the display names in map  are " + JsonUtils.serialize(nameSeq.asJava))
     val selected = input.columns.filter(attrNames.keySet)
-    val filtered = input.select(selected map col: _*)
-    val newNames = filtered.columns.map(c => attrNames.getOrElse(c, c))
-    val renamed = filtered.toDF(newNames: _*)
-    val orderedNames = renamed.columns.sortWith((n1, n2) => nameSeq.indexOf(n1) < nameSeq.indexOf(n2))
+    val orderedNames = selected.sortWith((n1, n2) => nameSeq.indexOf(attrNames.get(n1)) < nameSeq.indexOf(attrNames.get(n2)))
     logSpark("the ordered names in csv are " + JsonUtils.serialize(orderedNames))
-    renamed.select(orderedNames map col: _*)
+    val filtered = input.select(orderedNames map col: _*)
+    val newNames = filtered.columns.map(c => attrNames.getOrElse(c, c))
+    filtered.toDF(newNames: _*)
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[SplitImportMatchResultConfig]): List[HdfsDataUnit] = {
