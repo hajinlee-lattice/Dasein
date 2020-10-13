@@ -11,6 +11,7 @@ import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
 import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
+import com.latticeengines.apps.cdl.tray.service.TrayTestTimeoutService;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 
 public class CDLQuartzJobCallable implements Callable<Boolean> {
@@ -24,6 +25,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
     private S3ImportService s3ImportService;
     private EntityStateCorrectionService entityStateCorrectionService;
     private CampaignLaunchSchedulingService campaignLaunchSchedulingService;
+    private TrayTestTimeoutService trayTestTimeoutService;
     private String jobArguments;
 
     public CDLQuartzJobCallable(Builder builder) {
@@ -34,6 +36,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         this.s3ImportService = builder.s3ImportService;
         this.entityStateCorrectionService = builder.entityStateCorrectionService;
         this.campaignLaunchSchedulingService = builder.campaignLaunchSchedulingService;
+        this.trayTestTimeoutService = builder.trayTestTimeoutService;
         this.jobArguments = builder.jobArguments;
     }
 
@@ -51,6 +54,8 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
             return entityStateCorrectionService.execute();
         case CAMPAIGNLAUNCHSCHEDULER:
             return campaignLaunchSchedulingService.kickoffScheduledCampaigns();
+        case TRAYTESTTIMEOUT:
+            return trayTestTimeoutService.execute();
         default:
             return cdlJobService.submitJob(cdlJobType, jobArguments);
         }
@@ -65,6 +70,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         private S3ImportService s3ImportService;
         private EntityStateCorrectionService entityStateCorrectionService;
         private CampaignLaunchSchedulingService campaignLaunchSchedulingService;
+        private TrayTestTimeoutService trayTestTimeoutService;
 
         private String jobArguments;
 
@@ -105,6 +111,11 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
 
         public Builder campaignLaunchSchedulingService(CampaignLaunchSchedulingService campaignLaunchSchedulingService) {
             this.campaignLaunchSchedulingService = campaignLaunchSchedulingService;
+            return this;
+        }
+
+        public Builder trayTestTimeoutService(TrayTestTimeoutService trayTestTimeoutService) {
+            this.trayTestTimeoutService = trayTestTimeoutService;
             return this;
         }
 

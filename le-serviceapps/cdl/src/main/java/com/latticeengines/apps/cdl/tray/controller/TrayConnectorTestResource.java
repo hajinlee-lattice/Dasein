@@ -33,9 +33,9 @@ public class TrayConnectorTestResource {
     @PostMapping("trigger/connectors/{externalSystemName}/tests/{testScenario}")
     @ApiOperation(value = "Trigger Tray Connector Test.")
     @NoCustomerSpace
-    public void triggerTrayConnectorTest(@PathVariable CDLExternalSystemName externalSystemName, //
+    public void triggerTrayConnectorTest(@PathVariable String customerSpace, @PathVariable CDLExternalSystemName externalSystemName, //
             @PathVariable String testScenario) {
-        trayConnectorTestService.triggerTrayConnectorTest(externalSystemName, testScenario);
+        trayConnectorTestService.triggerTrayConnectorTest(customerSpace, externalSystemName, testScenario);
     }
 
     /**
