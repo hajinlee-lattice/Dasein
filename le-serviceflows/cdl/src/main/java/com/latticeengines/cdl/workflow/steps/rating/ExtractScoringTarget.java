@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,13 +13,18 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -30,12 +37,16 @@ import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("extractScoringTarget")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExtractScoringTarget extends BaseExtractRatingsStep<GenerateRatingStepConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(ExtractScoringTarget.class);
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -43,25 +54,44 @@ public class ExtractScoringTarget extends BaseExtractRatingsStep<GenerateRatingS
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
     private boolean hasCrossSellModel = false;
 
     @Override
     public void execute() {
-        setupExtractStep();
-        containers.sort(Comparator.comparing(container -> container.getEngineSummary().getType()));
-        containers.forEach(container -> {
-            RatingEngineType ratingEngineType = container.getEngineSummary().getType();
-            if (!hasCrossSellModel && RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
-                hasCrossSellModel = true;
+        int count = retryCount();
+        RetryTemplate retry = RetryUtils.getRetryTemplate(count);
+        retry.execute(cxt -> {
+            if (cxt.getRetryCount() > 0) {
+                log.warn("(Attempt=" + cxt.getRetryCount() + " to execute. reset active version.");
+                version = dataCollectionProxy.getActiveVersion(customerSpace.toString());
+                WorkflowStaticContext.putObject(ATTRIBUTE_REPO, null);
             }
+            setupExtractStep();
+            containers.sort(Comparator.comparing(container -> container.getEngineSummary().getType()));
+            containers.forEach(container -> {
+                RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                if (!hasCrossSellModel && RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
+                    hasCrossSellModel = true;
+                }
+            });
+            extractAllContainers();
+            String resultTableName = NamingUtils.timestamp("ScoringTarget");
+            mergeResults(resultTableName);
+            removeObjectFromContext(FILTER_EVENT_TABLE);
+            putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, resultTableName);
+            putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, InterfaceName.__Composite_Key__.name());
+            putStringValueInContext(HAS_CROSS_SELL_MODEL, String.valueOf(hasCrossSellModel));
+            return true;
         });
-        extractAllContainers();
-        String resultTableName = NamingUtils.timestamp("ScoringTarget");
-        mergeResults(resultTableName);
-        removeObjectFromContext(FILTER_EVENT_TABLE);
-        putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, resultTableName);
-        putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, InterfaceName.__Composite_Key__.name());
-        putStringValueInContext(HAS_CROSS_SELL_MODEL, String.valueOf(hasCrossSellModel));
+    }
+
+    private int retryCount() {
+        DataCollection.Version inactiveVesion = getObjectFromContext(CDL_INACTIVE_VERSION,
+                DataCollection.Version.class);
+        return inactiveVesion == null ? 2 : 1;
     }
 
     @Override
