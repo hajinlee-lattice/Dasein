@@ -13,6 +13,7 @@ import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.service.impl.CDLQuartzJobCallable;
+import com.latticeengines.apps.cdl.tray.service.TrayTestTimeoutService;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
@@ -38,6 +39,9 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
     @Inject
     private CampaignLaunchSchedulingService campaignLaunchSchedulingService;
 
+    @Inject
+    private TrayTestTimeoutService trayTestTimeoutService;
+
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         CDLQuartzJobCallable.Builder builder = new CDLQuartzJobCallable.Builder();
@@ -45,7 +49,8 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
                 .dataFeedExecutionCleanupService(dataFeedExecutionCleanupService)
                 .redshiftCleanupService(redShiftCleanupService).s3ImportService(s3ImportService)
                 .entityStateCorrectionService(entityStateCorrectionService)
-                .campaignLaunchSchedulingService(campaignLaunchSchedulingService).jobArguments(jobArguments);
+                .campaignLaunchSchedulingService(campaignLaunchSchedulingService).jobArguments(jobArguments)
+                .trayTestTimeoutService(trayTestTimeoutService);
         return new CDLQuartzJobCallable(builder);
     }
 
