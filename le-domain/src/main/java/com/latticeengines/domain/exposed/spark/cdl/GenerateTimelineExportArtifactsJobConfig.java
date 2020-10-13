@@ -37,6 +37,8 @@ public class GenerateTimelineExportArtifactsJobConfig extends SparkJobConfig imp
     @JsonProperty
     public boolean filterDuns;
     @JsonProperty
+    public boolean includeOrphan;
+    @JsonProperty
     public List<String> eventTypes = new ArrayList<>();
 
     @Override

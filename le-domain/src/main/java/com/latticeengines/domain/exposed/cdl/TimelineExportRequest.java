@@ -34,6 +34,9 @@ public class TimelineExportRequest {
     @JsonProperty("FilterDuns")
     private boolean filterDuns = false;
 
+    @JsonProperty("IncludeOrphan")
+    private boolean includeOrphan = false;
+
     public String getSegmentName() {
         return segmentName;
     }
@@ -88,5 +91,13 @@ public class TimelineExportRequest {
 
     public void setFilterDuns(boolean filterDuns) {
         this.filterDuns = filterDuns;
+    }
+
+    public boolean isIncludeOrphan() {
+        return includeOrphan;
+    }
+
+    public void setIncludeOrphan(boolean includeOrphan) {
+        this.includeOrphan = includeOrphan;
     }
 }
