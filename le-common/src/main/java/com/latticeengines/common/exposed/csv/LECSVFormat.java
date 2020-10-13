@@ -7,6 +7,11 @@ public final class LECSVFormat {
     protected LECSVFormat() {
         throw new UnsupportedOperationException();
     }
-    public static final CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',').withIgnoreEmptyLines(true)
-            .withIgnoreSurroundingSpaces(true).withAllowMissingColumnNames();
+    public static final CSVFormat format = CSVFormat.RFC4180 //
+            .withHeader() //
+            .withDelimiter(',') //
+            .withIgnoreEmptyLines(true) //
+            .withIgnoreSurroundingSpaces(true) //
+            .withAllowMissingColumnNames(true) //
+            .withAllowDuplicateHeaderNames(false);
 }

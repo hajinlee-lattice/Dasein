@@ -58,10 +58,14 @@ public class LettuceBeansConfiguration {
         } else {
             RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
             String host = elastiCacheService.getPrimaryEndpointAddress();
+            log.info("host={}", host);
+            host = host.substring(host.indexOf("://") + 3);
             if (host.endsWith(":6379")) {
                 host = host.substring(0, host.lastIndexOf(":"));
             }
+            log.info("host={}", host);
             standaloneConfiguration.setHostName(host);
+            standaloneConfiguration.setPort(6379);
             LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                     .commandTimeout(Duration.ofMinutes(redisTimeout))//
                     .shutdownTimeout(Duration.ZERO) //
