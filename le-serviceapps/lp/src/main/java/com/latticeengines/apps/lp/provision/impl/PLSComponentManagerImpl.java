@@ -1,17 +1,21 @@
 package com.latticeengines.apps.lp.provision.impl;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +108,15 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
     @Value("${common.dcp.public.url}")
     private String dcpPublicUrl;
 
+    @Value("${aws.s3.bucket}")
+    private String tenantConfigBucket;
+
+    @Value("${aws.tenant.configuration.s3.folder}")
+    private String tenantConfigFolder;
+
+    @Value("${aws.tenant.configuration.dcp.admin.email}")
+    private String dcpAdminEmailsConfig;
+
     @Override
     public void provisionTenant(CustomerSpace space, InstallDocument installDocument) {
         // get tenant information
@@ -142,6 +155,13 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<String> productList = JsonUtils.convertList(JsonUtils.deserialize(productsJson, List.class), String.class);
         List<LatticeProduct> products = productList.stream().map(LatticeProduct::fromName).collect(Collectors.toList());
         setTenantInfo(tenant, products);
+        if (products.contains(LatticeProduct.DCP)) {
+            List<String> dcpAdminEmails = getDCPSuperAdminEmails();
+            if (CollectionUtils.isNotEmpty(dcpAdminEmails)) {
+                superAdminEmails = Stream.concat(superAdminEmails.stream(), dcpAdminEmails.stream())
+                                .distinct().collect(Collectors.toList());
+            }
+        }
         String tenantStatus = installDocument.getProperty(ComponentConstants.Install.TENANT_STATUS);
         String tenantType = installDocument.getProperty(ComponentConstants.Install.TENANT_TYPE);
         String contract = installDocument.getProperty(ComponentConstants.Install.CONTRACT);
@@ -405,6 +425,13 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         tenant.setName(tenantName);
         List<LatticeProduct> products = getProducts(space);
         setTenantInfo(tenant, products);
+        if (products.contains(LatticeProduct.DCP)) {
+            List<String> dcpAdminEmails = getDCPSuperAdminEmails();
+            if (CollectionUtils.isNotEmpty(dcpAdminEmails)) {
+                superAdminEmails = Stream.concat(superAdminEmails.stream(), dcpAdminEmails.stream())
+                        .distinct().collect(Collectors.toList());
+            }
+        }
         try {
             TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
             if (StringUtils.isNotBlank(info.properties.status)) {
@@ -486,6 +513,16 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         if (tenantService.hasTenantId(tenant.getId())) {
             tenantService.discardTenant(tenant);
         }
+    }
+
+    private List<String> getDCPSuperAdminEmails() {
+        String dcpEmailS3File = tenantConfigFolder + "/" + dcpAdminEmailsConfig;
+        if (s3Service.objectExist(tenantConfigBucket, dcpEmailS3File)) {
+            log.info(String.format("Start getting DCP admin email from %s : %s", tenantConfigBucket, dcpEmailS3File));
+            InputStream dcpEmailStream = s3Service.readObjectAsStream(tenantConfigBucket, dcpEmailS3File);
+            return JsonUtils.convertList(JsonUtils.deserialize(dcpEmailStream, List.class), String.class);
+        }
+        return Collections.emptyList();
     }
 
     private List<IDaaSUser> OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
