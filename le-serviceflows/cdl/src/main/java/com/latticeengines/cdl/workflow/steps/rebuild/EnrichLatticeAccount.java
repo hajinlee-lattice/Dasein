@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -410,7 +411,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         log.info("EnrichLatticeAccount, fetch vertically and merge into LatticeAccount");
 
         // Merge added & updated attributes and generate ColumnSelection for fetch
-        List<String> changedCols = new ArrayList<>();
+        Set<String> changedCols = new LinkedHashSet<>();
         changedCols.addAll(attrs2Add);
         changedCols.addAll(attrs2Update);
         List<Column> colsToFetch = changedCols.stream().map(Column::new).collect(Collectors.toList());
@@ -615,7 +616,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private List<String> findAttrs2Remove() {
-        List<String> attrs2Remove = new ArrayList<>();
+        Set<String> attrs2Remove = new LinkedHashSet<>();
         if (oldLatticeAccountTable != null) {
             attrs2Remove.addAll(Arrays.asList(oldLatticeAccountTable.getAttributeNames()));
             attrs2Remove.removeAll(fetchAttrs);
@@ -626,7 +627,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             attrs2Remove.remove(InterfaceName.CDLUpdatedTime.name());
             log.info("Going to remove {} attributes from LatticeAccount: {}", attrs2Remove.size(), attrs2Remove);
         }
-        return attrs2Remove;
+        return new LinkedList<>(attrs2Remove);
     }
 
     private List<String> findAttrs2Add() {
@@ -644,7 +645,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private List<String> findAttrs2Update() {
-        List<String> attrs2Update = new ArrayList<>();
+        Set<String> attrs2Update = new LinkedHashSet<>();
         boolean hasDataCloudMinorChange = //
                 Boolean.TRUE.equals(getObjectFromContext(HAS_DATA_CLOUD_MINOR_CHANGE, Boolean.class));
         if (hasDataCloudMinorChange) {
@@ -655,7 +656,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             attrs2Update.retainAll(fetchAttrs);
             log.info("Going to update {} LDC attributes due to data cloud minor release.", attrs2Update.size());
         }
-        return attrs2Update;
+        return new LinkedList<>(attrs2Update);
     }
 
     private ColumnSelection selectActiveDataCloudAttrs() {
@@ -697,7 +698,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             String attr = cm.getAttrName();
             if (validAttrs.contains(attr)) {
                 fetchAttrs.add(attr);
-            } else if(isIntentAlertEnabled && DEFAULT_FIRMOGRAPHIC_ATTRIBUTES.contains(attr)) {
+            } else if (isIntentAlertEnabled && DEFAULT_FIRMOGRAPHIC_ATTRIBUTES.contains(attr)) {
                 fetchAttrs.add(attr);
             }
         }
