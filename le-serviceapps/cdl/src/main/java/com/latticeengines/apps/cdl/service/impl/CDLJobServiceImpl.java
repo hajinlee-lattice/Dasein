@@ -55,7 +55,6 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.CronUtils;
-import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -964,36 +963,49 @@ public class CDLJobServiceImpl implements CDLJobService {
     public void sendDNBIntentAlertEmail() {
         log.info("generateIntentEmailAlertWorkflow job checking");
         List<String> customerSpaceList = subscriptionService.getAllTenantId();
-        Set<String> runningTenantSet = getTenantWithRunningIntentWorkFlow();
+        Set<String> runningCustomerSpaceSet = getTenantWithRunningIntentWorkFlow();
         for (String customerSpaceStr : customerSpaceList) {
-            if (!runningTenantSet.contains(customerSpaceStr) && isCronExpressionSatisfied(customerSpaceStr)
+            if (!runningCustomerSpaceSet.contains(customerSpaceStr) && isCronExpressionSatisfied(customerSpaceStr)
                     && isNewDataGenerated(customerSpaceStr)) {
-                log.info(String.format("start generateIntentEmailAlertWorkflow for tenant %s", customerSpaceStr));
-                intentAlertWorkflowSubmitter.submit(customerSpaceStr, new WorkflowPidWrapper(-1L));
+                ApplicationId appId = intentAlertWorkflowSubmitter.submit(customerSpaceStr,
+                        new WorkflowPidWrapper(-1L));
+                log.info(String.format("start generateIntentEmailAlertWorkflow applicationId : {} , customerSpace {}",
+                        appId.toString(), customerSpaceStr));
             }
         }
     }
 
     private boolean isNewDataGenerated(String customerSpaceStr) {
+        boolean result = false;
         DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpaceStr);
         DataCollectionStatus dataStatus = dataCollectionService.getOrCreateDataCollectionStatus(customerSpaceStr,
                 activeVersion);
-        String intentAlertVersionPeriod = dataStatus.getIntentAlertVersion();
+        String intentAlertVersion = dataStatus.getIntentAlertVersion();
         // get intent stream dateId
         List<AtlasStream> streams = activityStoreService.getStreams(customerSpaceStr);
         AtlasStream intentStream = streams.stream()
                 .filter(stream -> (stream.getStreamType() == AtlasStream.StreamType.DnbIntentData)).findFirst().get();
         ActivityBookkeeping bookkeeping = dataStatus.getActivityBookkeeping();
         Map<Integer, Long> records = bookkeeping.streamRecord.get(intentStream.getStreamId());
-        Integer dateId = records.keySet().stream().sorted(Comparator.reverseOrder()).findFirst().get();
-        log.info(String.format("check if new data genenrated  %d , intentalertversion: %s", dateId,
-                intentAlertVersionPeriod));
-        return dateId >= Integer.parseInt(intentAlertVersionPeriod);
+        if (records != null && !records.isEmpty()) {
+            if (StringUtils.isEmpty(intentAlertVersion)) {
+                result = true;
+            } else {
+                Integer dateId = records.keySet().stream().sorted(Comparator.reverseOrder()).findFirst().get();
+                int intentAlertVersionId = Integer.parseInt(intentAlertVersion);
+                result = dateId >= intentAlertVersionId;
+                log.info(String.format("intentalertversion: {}, intentstream dateId {}", intentAlertVersion, dateId));
+            }
+        }
+        log.info(String.format("check new data generated result: {}, activeVersion is {}", result, activeVersion));
+        return result;
     }
 
     private boolean isCronExpressionSatisfied(String customerSpaceStr) {
         String deliveryCron = getIntentEmailDeliveryCronExpression(CustomerSpace.parse(customerSpaceStr));
-        return CronUtils.isSatisfiedByDate(deliveryCron, new Date());
+        boolean result = CronUtils.isSatisfiedByDate(deliveryCron, new Date());
+        log.info(String.format("check delivery cron expression satisfied: {}, cron is {}",result, deliveryCron));
+        return result;
     }
 
     private Set<String> getTenantWithRunningIntentWorkFlow() {
