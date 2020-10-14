@@ -57,6 +57,7 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeTimeSeriesDeleteDataConf
 import com.latticeengines.domain.exposed.spark.cdl.MigrateActivityPartitionKeyJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
+import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
@@ -183,6 +184,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateTimelineExportArtifactsJobConfig.class, name = GenerateTimelineExportArtifactsJobConfig.NAME), //
         @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME), //
+        @JsonSubTypes.Type(value = PublishActivityAlertsJobConfig.class, name = PublishActivityAlertsJobConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateRecommendationCSVConfig.class, name = GenerateRecommendationCSVConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateIntentAlertArtifactsConfig.class, name = GenerateIntentAlertArtifactsConfig.NAME) //
 })

@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 @Entity
-@Table(name = "ActivityAlert", //
+@Table(name = ActivityAlert.TABLE_NAME, //
         uniqueConstraints = @UniqueConstraint(columnNames = { "ENTITY_ID", "ENTITY_TYPE", "TENANT_ID", "VERSION",
                 "CREATION_TIMESTAMP", "ALERT_NAME" }), //
         indexes = { @Index(name = "REC_CREATION_TIMESTAMP", columnList = "CREATION_TIMESTAMP"), //
@@ -48,6 +48,8 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 @Filters(@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"))
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActivityAlert implements HasPid, HasTenantId {
+    public static final String TABLE_NAME = "ActivityAlert";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -55,38 +57,38 @@ public class ActivityAlert implements HasPid, HasTenantId {
     @JsonProperty("pid")
     private Long pid;
 
-    @Column(name = "ENTITY_ID", nullable = false)
+    @Column(name = ENTITY_ID_COL, nullable = false)
     @JsonProperty("entity_id")
     private String entityId;
 
-    @Column(name = "ENTITY_TYPE", nullable = false, length = 50)
+    @Column(name = ENTITY_TYPE_COL, nullable = false, length = 50)
     @JsonProperty("entity_type")
     @Enumerated(EnumType.STRING)
     private BusinessEntity entityType;
 
-    @Column(name = "TENANT_ID", nullable = false)
+    @Column(name = TENANT_ID_COL, nullable = false)
     @JsonProperty("tenant_id")
     private Long tenantId;
 
-    @Column(name = "CREATION_TIMESTAMP", nullable = false)
+    @Column(name = CREATION_TIMESTAMP_COL, nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @JsonProperty("creationTimestamp")
     private Date creationTimestamp;
 
-    @Column(name = "VERSION", nullable = false)
+    @Column(name = VERSION_COL, nullable = false)
     @JsonProperty("version")
     private String version;
 
-    @Column(name = "ALERT_NAME", nullable = false, length = 100)
+    @Column(name = ALERT_NAME_COL, nullable = false, length = 100)
     @JsonProperty("alertName")
     private String alertName;
 
-    @Column(name = "CATEGORY", nullable = false, length = 50)
+    @Column(name = CATEGORY_COL, nullable = false, length = 50)
     @JsonProperty("category")
     @Enumerated(EnumType.STRING)
     private AlertCategory category;
 
-    @Column(name = "ALERT_DATA", columnDefinition = "'JSON'")
+    @Column(name = ALERT_DATA_COL, columnDefinition = "'JSON'")
     @Type(type = "json")
     @JsonProperty("alert_data")
     @Convert(attributeName = "data")
@@ -167,4 +169,13 @@ public class ActivityAlert implements HasPid, HasTenantId {
     public void setAlertData(Map<String, Object> alertData) {
         this.alertData = alertData;
     }
+
+    public static final String ENTITY_ID_COL = "ENTITY_ID";
+    public static final String ENTITY_TYPE_COL = "ENTITY_TYPE";
+    public static final String CREATION_TIMESTAMP_COL = "CREATION_TIMESTAMP";
+    public static final String VERSION_COL = "VERSION";
+    public static final String ALERT_NAME_COL = "ALERT_NAME";
+    public static final String CATEGORY_COL = "CATEGORY";
+    public static final String ALERT_DATA_COL = "ALERT_DATA";
+    public static final String TENANT_ID_COL = "TENANT_ID";
 }
