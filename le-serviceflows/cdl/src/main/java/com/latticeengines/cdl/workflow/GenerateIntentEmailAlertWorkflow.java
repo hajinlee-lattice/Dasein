@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import com.latticeengines.cdl.workflow.steps.SendIntentAlertEmailStep;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -21,14 +22,14 @@ public class GenerateIntentEmailAlertWorkflow extends AbstractWorkflow<GenerateI
     @Inject
     private GenerateIntentAlertArtifacts generateIntentAlertArtifacts;
 
-    // @Inject
-    // private SendIntentAlertEmailStep sendIntentAlertEmailStep;
+    @Inject
+    private SendIntentAlertEmailStep sendIntentAlertEmailStep;
 
     @Override
     public Workflow defineWorkflow(GenerateIntentEmailAlertWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig) //
                 .next(generateIntentAlertArtifacts) //
-                // .next(sendIntentAlertEmailStep) //
+                .next(sendIntentAlertEmailStep) //
                 .build();
     }
 }
