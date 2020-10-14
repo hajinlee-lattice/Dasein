@@ -22,9 +22,8 @@ public class ResourceAspect {
     private TenantEntityMgr tenantEntityMgr;
 
     @Before("(execution(* com.latticeengines.apps.*.controller.*.*(..)) "
-            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace))"
-            + "|| (execution(* com.latticeengines.apps.*.*.controller.*.*(..)) "
-            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace))")
+            + "|| execution(* com.latticeengines.apps.*.*.controller.*.*(..))) "
+            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allControllerMethods(JoinPoint joinPoint) {
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof HttpServletRequest) {
             // for certain microservice endpoints (PlaymakerTenantResource -
