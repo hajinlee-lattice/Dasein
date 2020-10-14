@@ -21,7 +21,8 @@ public class ResourceAspect {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.apps.*.controller.*.*(..)) "
+    @Before("(execution(* com.latticeengines.apps.*.controller.*.*(..)) "
+            + "|| execution(* com.latticeengines.apps.*.*.controller.*.*(..))) "
             + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allControllerMethods(JoinPoint joinPoint) {
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof HttpServletRequest) {
