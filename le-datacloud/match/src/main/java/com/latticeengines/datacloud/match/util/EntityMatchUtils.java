@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Sets;
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -56,6 +58,8 @@ public final class EntityMatchUtils {
     // # and : is recommended not to use by dynamo, || is our internal delimiter
     private static final Pattern INVALID_MATCH_FILED_CHAR_PTN = Pattern.compile("(#|:|\\|\\|)");
     private static final Pattern INVALID_CHAR_TOKEN_PTN = Pattern.compile("\\$>(PND|COLON|DPIPE)<");
+    private static final String COMMIT_ENTITY_MATCH_STAGING_LOCK = "COMMIT_EM_STAGING_LOCK";
+    private static final long DEFAULT_LOCK_WAIT_TIME_IN_HOURS = 2L;
 
     protected EntityMatchUtils() {
         throw new UnsupportedOperationException();
@@ -78,6 +82,40 @@ public final class EntityMatchUtils {
         INVALID_CHARS_TOKENS.put("#", "\\$>PND<");
         INVALID_CHARS_TOKENS.put(":", "\\$>COLON<");
         INVALID_CHARS_TOKENS.put("\\|\\|", "\\$>DPIPE<");
+    }
+
+    /**
+     * Acquire lock to perform the operation to publishing seed/lookup entries from
+     * staging env to serving env
+     *
+     * @return true if lock is acquired
+     */
+    public static boolean lockCommitStep() {
+        return lockCommitStep(DEFAULT_LOCK_WAIT_TIME_IN_HOURS, TimeUnit.HOURS);
+    }
+
+    /**
+     * Acquire lock to perform the operation of publishing seed/lookup entries from
+     * staging env to serving env
+     *
+     * @param duration
+     *            duration to wait when lock cannot be acquired
+     * @param unit
+     *            time unit of duration
+     * @return true if lock is acquired
+     */
+    public static boolean lockCommitStep(long duration, TimeUnit unit) {
+        String lockName = COMMIT_ENTITY_MATCH_STAGING_LOCK;
+        LockManager.registerCrossDivisionLock(lockName);
+        return LockManager.acquireWriteLock(lockName, duration, unit);
+    }
+
+    /**
+     * Release lock for operation to publishing seed/lookup entries from staging env
+     * to serving env. Noop if lock is not acquired
+     */
+    public static void unlockCommitStep() {
+        LockManager.releaseWriteLock(COMMIT_ENTITY_MATCH_STAGING_LOCK);
     }
 
     /**
