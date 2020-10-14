@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,8 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.IOUtils;
@@ -30,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.auth.exposed.service.GlobalAuthSubscriptionService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.IntentAlertEmailInfo;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityBookkeeping;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
@@ -37,6 +34,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SendIntentAlertEmailStepConfiguration;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
@@ -71,14 +69,14 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace();
-        //send email
+        // send email
         Map<String, Object> params = getEmailInfo();
         List<String> recipients = subscriptionService.getEmailsByTenantId(customerSpace.toString());
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
         emailService.sendDnbIntentAlertEmail(tenant, recipients, subject, params);
         // Set IntentAlertVersion in data collection status table
         String intentAlertVersion = updateIntentAlertVersion();
-        log.info("Done with generating intent alert artifacts, intent alert version is {}", intentAlertVersion);
+        log.info("Done with sending intent alert email, update intent alert version to {}", intentAlertVersion);
     }
 
     private Map<String, Object> getEmailInfo() {
@@ -134,8 +132,7 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
         try {
             Table allAccountsTable = getObjectFromContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, Table.class);
             String filePath = allAccountsTable.getExtracts().get(0).getPath();
-            if(HdfsUtils.fileExists(yarnConfiguration, filePath))
-            {
+            if (HdfsUtils.fileExists(yarnConfiguration, filePath)) {
                 return IOUtils.toByteArray(HdfsUtils.getInputStream(yarnConfiguration, filePath));
             }
         } catch (Exception e) {

@@ -198,6 +198,7 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
         String destPath = convertToCSV(allAccountsDU);
         // Save all accounts csv path into context
         putObjectInContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, destPath);
+        log.info("Done with generating intent alert artifacts");
     }
 
     private String convertToCSV(HdfsDataUnit dataUnit) {
