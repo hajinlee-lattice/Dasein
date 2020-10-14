@@ -80,7 +80,7 @@ public class AccountAttrsDecorator implements Decorator {
             return cm;
         }
 
-        // DP-12913 if EntityMatchGA, hide all system Ids
+        // DP-12913 if EntityMatchGA, hide all default system Ids
         if (StringUtils.isNotEmpty(cm.getAttrName()) && cm.getAttrName().startsWith("user_DefaultSystem_")
                 && onlyEntityMatchGAEnabled && (Category.SUB_CAT_ACCOUNT_IDS.equals(cm.getSubcategory()))) {
             cm.disableGroup(Segment);
