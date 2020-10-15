@@ -27,6 +27,7 @@ public class TrayConnectorTestResource {
     private TrayConnectorTestService trayConnectorTestService;
 
     /**
+     * @param customerSpace
      * @param externalSystemName
      * @param testScenario
      */
