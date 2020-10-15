@@ -18,21 +18,21 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "tray", description = "REST resource for Tray Connectors")
+@Api(value = "tray", description = "REST resource for Tray connectors test")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/tray/test")
+@RequestMapping("/tray/test")
 public class TrayConnectorTestResource {
 
     @Inject
     private TrayConnectorTestService trayConnectorTestService;
 
     /**
+     * @param customerSpace
      * @param externalSystemName
      * @param testScenario
      */
-    @PostMapping("trigger/connectors/{externalSystemName}/tests/{testScenario}")
+    @PostMapping("/customerspaces/{customerSpace}/trigger/connectors/{externalSystemName}/tests/{testScenario}")
     @ApiOperation(value = "Trigger Tray Connector Test.")
-    @NoCustomerSpace
     public void triggerTrayConnectorTest(@PathVariable String customerSpace, @PathVariable CDLExternalSystemName externalSystemName, //
             @PathVariable String testScenario) {
         trayConnectorTestService.triggerTrayConnectorTest(customerSpace, externalSystemName, testScenario);
