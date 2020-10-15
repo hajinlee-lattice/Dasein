@@ -122,7 +122,7 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     private void generateEmailInfo(Map<String, List<IntentAlertEmailInfo.Intent>> modelMap,
             Map<String, IntentAlertEmailInfo.TopItem> industryCountMap,
             Map<String, IntentAlertEmailInfo.TopItem> locationCountMap) {
-        String newAccountsTableName = getObjectFromContext(INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME, String.class);
+        String newAccountsTableName = getStringValueFromContext(INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME);
         Table newAccountsTable = metadataProxy.getTableSummary(customerSpace.toString(), newAccountsTableName);
         try {
             List<Extract> extracts = newAccountsTable.getExtracts();
@@ -155,7 +155,7 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
 
     private byte[] getAttachment() {
         try {
-            String allAccountsTableName = getObjectFromContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, String.class);
+            String allAccountsTableName = getStringValueFromContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME);
             Table allAccountsTable = metadataProxy.getTableSummary(customerSpace.toString(), allAccountsTableName);
             String filePath = allAccountsTable.getExtracts().get(0).getPath();
             if (HdfsUtils.fileExists(yarnConfiguration, filePath)) {
