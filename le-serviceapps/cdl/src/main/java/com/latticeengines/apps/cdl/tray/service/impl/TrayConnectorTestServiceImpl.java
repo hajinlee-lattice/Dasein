@@ -129,6 +129,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
             DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(tenantId);
             messageBody.setTrayTenantId(dropboxSummary.getDropBox());
+            log.info("Setting Tray tenant ID: " + dropboxSummary.getDropBox());
 
             copyInputFiles(messageBody, externalSystemName);
 
