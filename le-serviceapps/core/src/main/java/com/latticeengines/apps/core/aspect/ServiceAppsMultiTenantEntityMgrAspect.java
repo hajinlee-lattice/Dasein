@@ -34,7 +34,8 @@ public class ServiceAppsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrA
     @Qualifier("entityManagerFactoryReader")
     private EntityManager entityManagerReader;
 
-    @Before("execution(* com.latticeengines.apps.*.entitymgr.impl.*.find*(..))")
+    @Before("(execution(* com.latticeengines.apps.*.entitymgr.impl.*.find*(..))"
+            + "|| execution(* com.latticeengines.apps.*.*.entitymgr.impl.*.find*(..)))")
     public void find(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
                 Arrays.asList(entityManager, entityManagerReader));
@@ -57,7 +58,8 @@ public class ServiceAppsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrA
         enableMultiTenantFilter(joinPoint, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
     }
 
-    @Before("execution(* com.latticeengines.apps.*.entitymgr.impl.*.delete*(..))")
+    @Before("(execution(* com.latticeengines.apps.*.entitymgr.impl.*.delete*(..))"
+            + "|| execution(* com.latticeengines.apps.*.*.entitymgr.impl.*.delete*(..)))")
     public void delete(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
                 Arrays.asList(entityManager, entityManagerReader));
