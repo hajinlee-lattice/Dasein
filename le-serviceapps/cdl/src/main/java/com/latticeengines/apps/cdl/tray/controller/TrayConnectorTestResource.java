@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "tray", description = "REST resource for Tray connectors test")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/tray/test")
+@RequestMapping("/tray/test")
 public class TrayConnectorTestResource {
 
     @Inject
@@ -30,7 +30,7 @@ public class TrayConnectorTestResource {
      * @param externalSystemName
      * @param testScenario
      */
-    @PostMapping("trigger/connectors/{externalSystemName}/tests/{testScenario}")
+    @PostMapping("/customerspaces/{customerSpace}/trigger/connectors/{externalSystemName}/tests/{testScenario}")
     @ApiOperation(value = "Trigger Tray Connector Test.")
     public void triggerTrayConnectorTest(@PathVariable String customerSpace, @PathVariable CDLExternalSystemName externalSystemName, //
             @PathVariable String testScenario) {
