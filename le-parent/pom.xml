@@ -99,6 +99,7 @@
         <cascading.redshift.version>3.0.0</cascading.redshift.version> <!-- should cut this dep -->
         <flink.version>1.8.0</flink.version>
         <akka.version>2.4.20</akka.version> <!-- match flink version -->
+        <janino.version>2.7.6</janino.version> <!-- match cascading-expression version -->
 
         <!-- versions should be easy to upgrade: keep them updated! -->
         <freemarker.version>2.3.30</freemarker.version>
@@ -1747,6 +1748,18 @@
                 <artifactId>zookeeper</artifactId>
                 <version>${zookeeper.version}</version>
                 <classifier>tests</classifier>
+            </dependency>
+
+            <!-- compatible with cascading -->
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>janino</artifactId>
+                <version>${janino.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>commons-compiler</artifactId>
+                <version>${janino.version}</version>
             </dependency>
 
             <!-- Avro Dependencies -->
