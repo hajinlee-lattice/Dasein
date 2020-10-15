@@ -13,4 +13,6 @@ public interface GlobalAuthSubscriptionService {
 
     GlobalAuthSubscription deleteByEmailAndTenantId(String email, String tenantId);
 
+    List<String> getAllTenantId();
+
 }

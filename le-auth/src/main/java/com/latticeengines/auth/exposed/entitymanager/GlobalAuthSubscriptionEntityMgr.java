@@ -16,4 +16,5 @@ public interface GlobalAuthSubscriptionEntityMgr extends BaseEntityMgr<GlobalAut
 
     void create(List<GlobalAuthSubscription> gaSubscriptions);
 
+    List<String> getAllTenantId();
 }

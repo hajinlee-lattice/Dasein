@@ -87,6 +87,13 @@
         "Type": "string",
         "Required": false
       }
+    },
+    {
+      "Node": "IntentEmailDeliveryCronExpression",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
     }
   ]
 }
