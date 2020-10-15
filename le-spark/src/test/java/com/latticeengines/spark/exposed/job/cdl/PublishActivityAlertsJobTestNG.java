@@ -34,10 +34,10 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
 
     private static final Logger log = LoggerFactory.getLogger(PublishActivityAlertsJobTestNG.class);
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testPublishActivityAlerts() {
         PublishActivityAlertsJobConfig config = new PublishActivityAlertsJobConfig();
-        config.setTableToPublish(HdfsDataUnit.fromPath("/tmp/jlmehta/GenerateActivityAlertJobTestNG/UeGWbH/Output2"));
+        config.setTableToPublish(HdfsDataUnit.fromPath("/tmp/jlmehta/publishAlerts"));
         config.setDbDriver(dataDbDriver);
         config.setDbUrl(dataDbUrl);
         config.setDbUser(dataDbUser);
@@ -45,11 +45,11 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
         config.setDbTableName(ActivityAlert.TABLE_NAME);
         config.setAlertVersion("version");
         config.setTenantId(10L);
-        Map<String, AlertCategory> map = new HashMap<>();
-        map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, AlertCategory.PRODUCTS);
-        map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT, AlertCategory.PRODUCTS);
-        map.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, AlertCategory.PRODUCTS);
-        map.put(ActivityStoreConstants.Alert.SHOWN_INTENT, AlertCategory.PEOPLE);
+        Map<String, String> map = new HashMap<>();
+        map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, AlertCategory.PRODUCTS.name());
+        map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT, AlertCategory.PRODUCTS.name());
+        map.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, AlertCategory.PRODUCTS.name());
+        map.put(ActivityStoreConstants.Alert.SHOWN_INTENT, AlertCategory.PEOPLE.name());
         config.setAlertNameToAlertCategory(map);
 
         log.info("Config: " + JsonUtils.serialize(config));

@@ -52,7 +52,6 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
 
     @Value("${app.timeline.default.period}")
     private String defaultTimelinePeriod;
-
     @Value("${app.timeline.activity.metrics.period}")
     private String defaultActivityMetricsPeriod;
 
@@ -76,6 +75,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
 
         return activityProxy.getData(customerSpace, null, query);
     }
+
 
     @Override
     public DataPage getContactActivities(String accountId, String contactId, String timelinePeriod,

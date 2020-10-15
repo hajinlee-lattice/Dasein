@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.{SaveMode, SparkSession}
-import org.apache.spark.sql.functions.{coalesce, lit, typedLit}
+import org.apache.spark.sql.functions.{coalesce, col, from_unixtime, lit, typedLit}
 
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 
@@ -21,11 +21,12 @@ class PublishActivityAlertsJob extends AbstractSparkJob[PublishActivityAlertsJob
       .withColumnRenamed(InterfaceName.AccountId.name(), ActivityAlert.ENTITY_ID_COL)
       .withColumn(ActivityAlert.ENTITY_TYPE_COL, lit(BusinessEntity.Account.name()))
       .withColumn(ActivityAlert.TENANT_ID_COL, lit(config.tenantId))
-      .withColumnRenamed(InterfaceName.CreationTimestamp.name(), ActivityAlert.CREATION_TIMESTAMP_COL)
-      .withColumnRenamed(InterfaceName.AlertName.name(), ActivityAlert.ALERT_NAME_COL)
-      .withColumnRenamed(InterfaceName.AlertData.name(), ActivityAlert.ALERT_DATA_COL)
+      .withColumn(ActivityAlert.CREATION_TIMESTAMP_COL, from_unixtime(col(InterfaceName.CreationTimestamp.name())))
+      .drop(InterfaceName.CreationTimestamp.name())
       .withColumn(ActivityAlert.VERSION_COL, lit(config.alertVersion))
       .withColumn(ActivityAlert.CATEGORY_COL, coalesce(alertNameToAlertCategory(alertsDf.col(InterfaceName.AlertName.name())), lit("")))
+      .withColumnRenamed(InterfaceName.AlertName.name(), ActivityAlert.ALERT_NAME_COL)
+      .withColumnRenamed(InterfaceName.AlertData.name(), ActivityAlert.ALERT_DATA_COL)
 
     val prop = new java.util.Properties
     prop.setProperty("driver", config.getDbDriver)
@@ -33,7 +34,8 @@ class PublishActivityAlertsJob extends AbstractSparkJob[PublishActivityAlertsJob
     prop.setProperty("password", CipherUtils.decrypt(config.getDbPassword))
     val table = config.getDbTableName
 
-    //write data from spark dataframe to database
+    // write data from spark dataframe to database
+    // we can repartition here, not doing it now to avoid premature optimization
     exportDf.write.mode(SaveMode.Append).jdbc(config.getDbUrl, table, prop)
   }
 }

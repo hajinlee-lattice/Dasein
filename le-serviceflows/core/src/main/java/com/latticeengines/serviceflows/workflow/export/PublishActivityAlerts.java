@@ -111,7 +111,7 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
         config.alertNameToAlertCategory.putAll(alertConfigs.stream() //
                 .filter(Objects::nonNull) //
                 .filter(ActivityAlertsConfig::isActive) //
-                .map(alertConfig -> Pair.of(alertConfig.getName(), alertConfig.getAlertCategory())) //
+                .map(alertConfig -> Pair.of(alertConfig.getName(), alertConfig.getAlertCategory().name())) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1)));
         return config;
     }

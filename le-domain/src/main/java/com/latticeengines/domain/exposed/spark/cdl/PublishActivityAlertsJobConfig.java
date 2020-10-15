@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.cdl.activity.AlertCategory;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
@@ -18,7 +17,7 @@ public class PublishActivityAlertsJobConfig extends SparkJobConfig {
 
     @NotNull
     @JsonProperty
-    public Map<String, AlertCategory> alertNameToAlertCategory = new HashMap<>();
+    public Map<String, String> alertNameToAlertCategory = new HashMap<>();
 
     @NotNull
     @JsonProperty
@@ -61,11 +60,11 @@ public class PublishActivityAlertsJobConfig extends SparkJobConfig {
         this.tableToPublish = tableToPublish;
     }
 
-    public Map<String, AlertCategory> getAlertNameToAlertCategory() {
+    public Map<String, String> getAlertNameToAlertCategory() {
         return alertNameToAlertCategory;
     }
 
-    public void setAlertNameToAlertCategory(Map<String, AlertCategory> alertNameToAlertCategory) {
+    public void setAlertNameToAlertCategory(Map<String, String> alertNameToAlertCategory) {
         this.alertNameToAlertCategory = alertNameToAlertCategory;
     }
 
@@ -77,9 +76,13 @@ public class PublishActivityAlertsJobConfig extends SparkJobConfig {
         this.alertVersion = alertVersion;
     }
 
-    public Long getTenantId() { return tenantId; }
+    public Long getTenantId() {
+        return tenantId;
+    }
 
-    public void setTenantId(Long tenantId) { this.tenantId = tenantId; }
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
 
     public String getDbTableName() {
         return dbTableName;
