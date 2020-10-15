@@ -104,6 +104,11 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    public void setObjectAclToBucketOwner(String bucket, String object) {
+        s3Client.setObjectAcl(bucket, object, ACL);
+    }
+
+    @Override
     public void copyObject(String sourceBucketName, String sourceKey, String destinationBucketName,
             String destinationKey) {
         sourceKey = sanitizePathToKey(sourceKey);
