@@ -58,4 +58,13 @@ public class GlobalAuthSubscriptionDaoImpl extends BaseDaoImpl<GlobalAuthSubscri
         return emails;
     }
 
+    @Override
+    public List<String> getAllTenantId() {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthSubscription> entityClz = getEntityClass();
+        String queryStr = String.format("select distinct tenantId from %s", entityClz.getSimpleName());
+        Query<String> query = session.createQuery(queryStr, String.class);
+        return query.list();
+    }
+
 }
