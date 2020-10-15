@@ -1013,8 +1013,9 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildRawMultipart();
             // TODO change logo to dnb lattice logo when UX finishes it
             builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/dnb_logo.svg", "image/svg+xml", "logo");
-            if(params.get("attachment") != null) {
-                builder.addAttachmentToMultipart(mp, (byte[]) params.get("attachment"), "full_intent_data.csv", "text/csv");
+            if (params.get("attachment") != null) {
+                builder.addAttachmentToMultipart(mp, (byte[]) params.get("attachment"),
+                        params.get("attachment_name").toString(), "text/csv");
             }
             return mp;
         } catch (IOException | MessagingException e) {

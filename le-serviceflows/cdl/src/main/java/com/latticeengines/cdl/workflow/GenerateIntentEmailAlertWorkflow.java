@@ -2,12 +2,12 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
-import com.latticeengines.cdl.workflow.steps.SendIntentAlertEmailStep;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.SendIntentAlertEmailStep;
 import com.latticeengines.cdl.workflow.steps.process.GenerateIntentAlertArtifacts;
 import com.latticeengines.domain.exposed.serviceflows.cdl.GenerateIntentEmailAlertWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;

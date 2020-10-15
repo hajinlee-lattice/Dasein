@@ -1,11 +1,8 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +12,11 @@ import javax.inject.Inject;
 
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.Path;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.auth.exposed.service.GlobalAuthSubscriptionService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.IntentAlertEmailInfo;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityBookkeeping;
@@ -66,12 +67,22 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
 
     private CustomerSpace customerSpace;
 
+    private int numBuyIntents;
+
+    private int numResearchIntents;
+
+    private LocalDate startDay;
+
+    private LocalDate endDay;
+
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace();
         // send email
-        Map<String, Object> params = getEmailInfo();
         List<String> recipients = subscriptionService.getEmailsByTenantId(customerSpace.toString());
+        if (CollectionUtils.isEmpty(recipients))
+            return;
+        Map<String, Object> params = getEmailParams();
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
         emailService.sendDnbIntentAlertEmail(tenant, recipients, subject, params);
         // Set IntentAlertVersion in data collection status table
@@ -79,13 +90,38 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
         log.info("Done with sending intent alert email, update intent alert version to {}", intentAlertVersion);
     }
 
-    private Map<String, Object> getEmailInfo() {
-        Table newAccountsTable = getObjectFromContext(INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME, Table.class);
-        int numBuyIntents = 0;
-        int numResearchIntents = 0;
+    private Map<String, Object> getEmailParams() {
         Map<String, List<IntentAlertEmailInfo.Intent>> modelMap = new HashMap<>();
         Map<String, IntentAlertEmailInfo.TopItem> industryCountMap = new HashMap<>();
         Map<String, IntentAlertEmailInfo.TopItem> locationCountMap = new HashMap<>();
+        numBuyIntents = 0;
+        numResearchIntents = 0;
+        LocalDate now = new LocalDate();
+        startDay = now.withDayOfWeek(DateTimeConstants.MONDAY);
+        endDay = now.withDayOfWeek(DateTimeConstants.SUNDAY);
+        generateEmailInfo(modelMap, industryCountMap, locationCountMap);
+
+        Map<String, Object> params = new HashMap<>();
+        subject = String.format("Dun & Bradstreet's Intent Alert Report - %s to %s", startDay.toString("MM/dd/yyyy"),
+                endDay.toString("MM/dd/yyyy"));
+        params.put("date_range",
+                String.format("%s - %s", startDay.toString("MM/dd/yyyy"), endDay.toString("MM/dd/yyyy")));
+        params.put("num_buy_intents", numBuyIntents);
+        params.put("num_research_intents", numResearchIntents);
+        params.put("summary_text", getSummaryText(numBuyIntents, numResearchIntents));
+        params.put("top_industries", getTopListFromMap(industryCountMap));
+        params.put("top_locations", getTopListFromMap(locationCountMap));
+        params.put("model_pairs", getModelPairFromMap(modelMap));
+        params.put("attachment", getAttachment());
+        params.put("attachment_name",
+                String.format("intent_data_%s_%s.csv", startDay.toString("yyyyMMdd"), endDay.toString("yyyyMMdd")));
+        return params;
+    }
+
+    private void generateEmailInfo(Map<String, List<IntentAlertEmailInfo.Intent>> modelMap,
+            Map<String, IntentAlertEmailInfo.TopItem> industryCountMap,
+            Map<String, IntentAlertEmailInfo.TopItem> locationCountMap) {
+        Table newAccountsTable = getObjectFromContext(INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME, Table.class);
         try {
             List<Extract> extracts = newAccountsTable.getExtracts();
             for (Extract extract : extracts) {
@@ -100,12 +136,12 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
                         addToCountMap(locationCountMap, intentItem.getLocation());
                         if (stageEqual(intentItem, IntentAlertEmailInfo.StageType.BUY)) {
                             numBuyIntents++;
-                            industryCountMap.get(intentItem.getIndustry()).increaseNum_buy();
-                            locationCountMap.get(intentItem.getLocation()).increaseNum_buy();
+                            industryCountMap.get(intentItem.getIndustry()).increaseNumBuy();
+                            locationCountMap.get(intentItem.getLocation()).increaseNumBuy();
                         } else if (stageEqual(intentItem, IntentAlertEmailInfo.StageType.RESEARCH)) {
                             numResearchIntents++;
-                            industryCountMap.get(intentItem.getIndustry()).increaseNum_research();
-                            locationCountMap.get(intentItem.getLocation()).increaseNum_research();
+                            industryCountMap.get(intentItem.getIndustry()).increaseNumIntents();
+                            locationCountMap.get(intentItem.getLocation()).increaseNumIntents();
                         }
                     }
                 }
@@ -113,19 +149,6 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-
-        Map<String, Object> params = new HashMap<>();
-        String[] dateRange = getDateRange();
-        subject = String.format("Dun & Bradstreet's Intent Alert Report - {} to {}", dateRange[0], dateRange[1]);
-        params.put("date_range", String.format("{} - {}", dateRange[0], dateRange[1]));
-        params.put("num_buy_intents", numBuyIntents);
-        params.put("num_research_intents", numResearchIntents);
-        params.put("summary_text", getSummaryText(numBuyIntents, numResearchIntents));
-        params.put("top_industries", getTopListFromMap(industryCountMap));
-        params.put("top_locations", getTopListFromMap(locationCountMap));
-        params.put("model_pairs", getModelPairFromMap(modelMap));
-        params.put("attachment", getAttachment());
-        return params;
     }
 
     private byte[] getAttachment() {
@@ -139,18 +162,6 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
             log.error(e.getMessage(), e);
         }
         return null;
-    }
-
-    private String[] getDateRange() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.setFirstDayOfWeek(Calendar.MONDAY);
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        String startTime = simpleDateFormat.format(calendar.getTime());
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        String endTime = simpleDateFormat.format(calendar.getTime());
-        return new String[] { startTime, endTime };
     }
 
     private String getSummaryText(int numBuyIntents, int numResearchIntents) {
@@ -168,26 +179,22 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
             topItem.setName(name);
             map.put(name, topItem);
         }
-        topItem.increaseNum_intents();
+        topItem.increaseNumIntents();
     }
 
     private void addToModelMap(Map<String, List<IntentAlertEmailInfo.Intent>> map,
             IntentAlertEmailInfo.Intent subscriptionItem) {
-        List<IntentAlertEmailInfo.Intent> list = map.get(subscriptionItem.getModel());
-        if (list == null) {
-            list = new ArrayList<>();
-            map.put(subscriptionItem.getModel(), list);
-        }
-        list.add(subscriptionItem);
+        String modelName = subscriptionItem.getModel();
+        map.putIfAbsent(modelName, new ArrayList<>()).add(subscriptionItem);
     }
 
-    private List<IntentAlertEmailInfo.TopItem> getTopListFromMap(Map<String, IntentAlertEmailInfo.TopItem> map) {
+    private Object getTopListFromMap(Map<String, IntentAlertEmailInfo.TopItem> map) {
         List<IntentAlertEmailInfo.TopItem> topList = map.values().stream().collect(Collectors.toList());
-        topList.sort(Comparator.comparing(IntentAlertEmailInfo.TopItem::getNum_intents).reversed());
+        topList.sort(Comparator.comparing(IntentAlertEmailInfo.TopItem::getNumIntents).reversed());
         topList = topList.size() > IntentAlertEmailInfo.TOPLIMIT ? topList.subList(0, IntentAlertEmailInfo.TOPLIMIT)
                 : topList;
         updatePercentage(topList);
-        return topList;
+        return toJsonObject(topList);
     }
 
     private List<List<HashMap<String, Object>>> getModelPairFromMap(
@@ -202,18 +209,22 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
             }
             HashMap<String, Object> intentMap = new HashMap<>();
             intentMap.put("name", key);
-            intentMap.put("intents", map.get(key));
+            intentMap.put("intents", toJsonObject(map.get(key)));
             pair.add(intentMap);
         }
         return pairList;
     }
 
+    private Object toJsonObject(List<?> list) {
+        return JsonUtils.deserialize(JsonUtils.serialize(list), List.class);
+    }
+
     private void updatePercentage(List<IntentAlertEmailInfo.TopItem> list) {
-        double max = Collections.max(list, Comparator.comparing(IntentAlertEmailInfo.TopItem::getNum_intents))
-                .getNum_intents();
+        double max = Collections.max(list, Comparator.comparing(IntentAlertEmailInfo.TopItem::getNumIntents))
+                .getNumIntents();
         for (IntentAlertEmailInfo.TopItem item : list) {
-            item.setBuy_percentage(item.getNum_buy() / max);
-            item.setResearch_percentage(item.getNum_research() / max);
+            item.setBuyPercentage(item.getNumBuy() / max);
+            item.setResearchPercentage(item.getNumResearch() / max);
         }
     }
 

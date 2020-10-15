@@ -4,7 +4,13 @@ import java.io.Serializable;
 
 import org.apache.avro.generic.GenericRecord;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class IntentAlertEmailInfo {
+
+    protected IntentAlertEmailInfo() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final int TOPLIMIT = 5;
 
@@ -26,14 +32,19 @@ public class IntentAlertEmailInfo {
 
     public static class Intent implements Serializable {
 
+        @JsonProperty("industry")
         private String industry;
 
+        @JsonProperty("location")
         private String location;
 
+        @JsonProperty("model")
         private String model;
 
-        private String company_name;
+        @JsonProperty("company_name")
+        private String companyName;
 
+        @JsonProperty("stage")
         private String stage;
 
         public String getIndustry() {
@@ -60,12 +71,12 @@ public class IntentAlertEmailInfo {
             this.model = model;
         }
 
-        public String getCompany_name() {
-            return company_name;
+        public String getCompanyName() {
+            return companyName;
         }
 
-        public void setCompany_name(String company_name) {
-            this.company_name = company_name;
+        public void setCompanyName(String companyName) {
+            this.companyName = companyName;
         }
 
         public String getStage() {
@@ -80,22 +91,34 @@ public class IntentAlertEmailInfo {
             this.industry = getRecordByFieldName(record, "LDC_PrimaryIndustry");
             this.location = getRecordByFieldName(record, "STATE_PROVINCE_ABBR");
             this.model = getRecordByFieldName(record, "ModelName");
-            this.company_name = getRecordByFieldName(record, "LDC_Name");
+            this.companyName = getRecordByFieldName(record, "LDC_Name");
             this.stage = getRecordByFieldName(record, "Stage");
         }
 
         private String getRecordByFieldName(GenericRecord record, String name) {
-            return record.get(name) == null ? "default" : record.get(name).toString();
+            return record.get(name) == null ? "" : record.get(name).toString();
         }
     }
 
     public static class TopItem {
+
+        @JsonProperty("name")
         private String name;
-        private int num_intents;
-        private int num_buy;
-        private int num_research;
-        private double buy_percentage;
-        private double research_percentage;
+
+        @JsonProperty("num_intents")
+        private int numIntents;
+
+        @JsonProperty("num_buy")
+        private int numBuy;
+
+        @JsonProperty("num_research")
+        private int numResearch;
+
+        @JsonProperty("buy_percentage")
+        private double buyPercentage;
+
+        @JsonProperty("research_percentage")
+        private double researchPercentage;
 
         public String getName() {
             return name;
@@ -105,56 +128,56 @@ public class IntentAlertEmailInfo {
             this.name = name;
         }
 
-        public int getNum_buy() {
-            return num_buy;
+        public int getNumBuy() {
+            return numBuy;
         }
 
-        public void setNum_buy(int num_buy) {
-            this.num_buy = num_buy;
+        public void setNumBuy(int numBuy) {
+            this.numBuy = numBuy;
         }
 
-        public int getNum_research() {
-            return num_research;
+        public int getNumResearch() {
+            return numResearch;
         }
 
-        public void setNum_research(int num_research) {
-            this.num_research = num_research;
+        public void setNumResearch(int numResearch) {
+            this.numResearch = numResearch;
         }
 
-        public double getBuy_percentage() {
-            return buy_percentage;
+        public double getBuyPercentage() {
+            return buyPercentage;
         }
 
-        public void setBuy_percentage(double buy_percentage) {
-            this.buy_percentage = buy_percentage;
+        public void setBuyPercentage(double buyPercentage) {
+            this.buyPercentage = buyPercentage;
         }
 
-        public double getResearch_percentage() {
-            return research_percentage;
+        public double getResearchPercentage() {
+            return researchPercentage;
         }
 
-        public void setResearch_percentage(double research_percentage) {
-            this.research_percentage = research_percentage;
+        public void setResearchPercentage(double researchPercentage) {
+            this.researchPercentage = researchPercentage;
         }
 
-        public int getNum_intents() {
-            return num_intents;
+        public int getNumIntents() {
+            return numIntents;
         }
 
-        public void setNum_intents(int num_intents) {
-            this.num_intents = num_intents;
+        public void setNumIntents(int numIntents) {
+            this.numIntents = numIntents;
         }
 
-        public int increaseNum_intents() {
-            return ++num_intents;
+        public int increaseNumIntents() {
+            return ++numIntents;
         }
 
-        public int increaseNum_buy() {
-            return ++num_buy;
+        public int increaseNumBuy() {
+            return ++numBuy;
         }
 
-        public int increaseNum_research() {
-            return ++num_research;
+        public int increaseNumResearch() {
+            return ++numResearch;
         }
     }
 }
