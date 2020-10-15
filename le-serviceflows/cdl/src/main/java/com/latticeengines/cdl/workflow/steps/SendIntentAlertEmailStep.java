@@ -80,8 +80,9 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
         customerSpace = configuration.getCustomerSpace();
         // send email
         List<String> recipients = subscriptionService.getEmailsByTenantId(customerSpace.toString());
-        if (CollectionUtils.isEmpty(recipients))
+        if (CollectionUtils.isEmpty(recipients)) {
             return;
+        }
         Map<String, Object> params = getEmailParams();
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
         emailService.sendDnbIntentAlertEmail(tenant, recipients, subject, params);
@@ -121,7 +122,8 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     private void generateEmailInfo(Map<String, List<IntentAlertEmailInfo.Intent>> modelMap,
             Map<String, IntentAlertEmailInfo.TopItem> industryCountMap,
             Map<String, IntentAlertEmailInfo.TopItem> locationCountMap) {
-        Table newAccountsTable = getObjectFromContext(INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME, Table.class);
+        String newAccountsTableName = getObjectFromContext(INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME, String.class);
+        Table newAccountsTable = metadataProxy.getTableSummary(customerSpace.toString(), newAccountsTableName);
         try {
             List<Extract> extracts = newAccountsTable.getExtracts();
             for (Extract extract : extracts) {
@@ -153,7 +155,8 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
 
     private byte[] getAttachment() {
         try {
-            Table allAccountsTable = getObjectFromContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, Table.class);
+            String allAccountsTableName = getObjectFromContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, String.class);
+            Table allAccountsTable = metadataProxy.getTableSummary(customerSpace.toString(), allAccountsTableName);
             String filePath = allAccountsTable.getExtracts().get(0).getPath();
             if (HdfsUtils.fileExists(yarnConfiguration, filePath)) {
                 return IOUtils.toByteArray(HdfsUtils.getInputStream(yarnConfiguration, filePath));
