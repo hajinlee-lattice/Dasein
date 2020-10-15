@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -155,13 +154,21 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<String> productList = JsonUtils.convertList(JsonUtils.deserialize(productsJson, List.class), String.class);
         List<LatticeProduct> products = productList.stream().map(LatticeProduct::fromName).collect(Collectors.toList());
         setTenantInfo(tenant, products);
+        List<IDaaSUser> iDaaSUsers = new ArrayList<>();
         if (products.contains(LatticeProduct.DCP)) {
             List<String> dcpAdminEmails = getDCPSuperAdminEmails();
             if (CollectionUtils.isNotEmpty(dcpAdminEmails)) {
-                superAdminEmails = Stream.concat(superAdminEmails.stream(), dcpAdminEmails.stream())
-                                .distinct().collect(Collectors.toList());
+                for (String dcpAdminEmail: dcpAdminEmails) {
+                    IDaaSUser iDaaSUser = iDaaSService.getIDaaSUser(dcpAdminEmail);
+                    if (iDaaSUser != null) {
+                        iDaaSUsers.add(iDaaSUser);
+                    } else {
+                        log.warn("Cannot find IDaaS user: " + dcpAdminEmail);
+                    }
+                }
             }
         }
+        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantDisplayName);
         String tenantStatus = installDocument.getProperty(ComponentConstants.Install.TENANT_STATUS);
         String tenantType = installDocument.getProperty(ComponentConstants.Install.TENANT_TYPE);
         String contract = installDocument.getProperty(ComponentConstants.Install.CONTRACT);
@@ -175,7 +182,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         log.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is " + tenant.getTenantType());
 
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails,
-                null, userName);
+                retrievedUsers, userName);
     }
 
     private void setTenantInfo(Tenant tenant, List<LatticeProduct> products) {
@@ -407,6 +414,21 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         log.info("IDaaS users are: " + usersInJson);
         List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
                 IDaaSUser.class);
+
+        List<LatticeProduct> products = getProducts(space);
+        if (products.contains(LatticeProduct.DCP)) {
+            List<String> dcpAdminEmails = getDCPSuperAdminEmails();
+            if (CollectionUtils.isNotEmpty(dcpAdminEmails)) {
+                for (String dcpAdminEmail: dcpAdminEmails) {
+                    IDaaSUser iDaaSUser = iDaaSService.getIDaaSUser(dcpAdminEmail);
+                    if (iDaaSUser != null) {
+                        iDaaSUsers.add(iDaaSUser);
+                    } else {
+                        log.warn("Cannot find IDaaS user: " + dcpAdminEmail);
+                    }
+                }
+            }
+        }
         List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
 
         // Update IDaaS users node with email sent times; to be stored in Camille
@@ -423,15 +445,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
         tenant.setId(PLSTenantId);
         tenant.setName(tenantName);
-        List<LatticeProduct> products = getProducts(space);
         setTenantInfo(tenant, products);
-        if (products.contains(LatticeProduct.DCP)) {
-            List<String> dcpAdminEmails = getDCPSuperAdminEmails();
-            if (CollectionUtils.isNotEmpty(dcpAdminEmails)) {
-                superAdminEmails = Stream.concat(superAdminEmails.stream(), dcpAdminEmails.stream())
-                        .distinct().collect(Collectors.toList());
-            }
-        }
         try {
             TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
             if (StringUtils.isNotBlank(info.properties.status)) {
