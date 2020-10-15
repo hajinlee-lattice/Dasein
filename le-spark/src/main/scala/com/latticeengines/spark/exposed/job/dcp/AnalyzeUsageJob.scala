@@ -41,7 +41,7 @@ class AnalyzeUsageJob extends AbstractSparkJob[AnalyzeUsageConfig] {
         }  else if (field == VboUsageConstants.ATTR_DELIVERY_CHANNEL) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit("Web Application").cast(StringType))
         }  else if (field == VboUsageConstants.ATTR_DELIVERY_MODE) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Batch").cast(StringType))
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Transactional Batch").cast(StringType))
         }  else if (field == VboUsageConstants.ATTR_APPID) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit("157").cast(StringType))
         }  else if (field == VboUsageConstants.ATTR_CAPPID) {
