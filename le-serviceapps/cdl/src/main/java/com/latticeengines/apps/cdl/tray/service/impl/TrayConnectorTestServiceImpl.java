@@ -335,7 +335,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         log.info(String.format("Publish to DynamoDB %s with workflowRequestId %s and Url %s",
                 integrationSessionContextTable, workflowRequestId,
                 microserviceHostPort + CDL_TRAY_TEST_VERIFICATION_END_POINT));
-        dynamoItemService.putItem(integrationSessionContextTable, getItem(workflowRequestId, verifyPath));
+        dynamoItemService.putItem(integrationSessionContextTable, getItem(workflowRequestId));
     }
 
     private Item getItem(String workflowRequestId) {
