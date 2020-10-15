@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,12 +28,10 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.cdl.activity.ActivityBookkeeping;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -198,10 +195,7 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
         String destPath = convertToCSV(allAccountsDU);
         // Save all accounts csv path into context
         putObjectInContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, destPath);
-
-        // Set IntentAlertVersion in data collection status table
-        intentAlertVersion = updateIntentAlertVersion();
-        log.info("Done with generating intent alert artifacts, intent alert version is {}", intentAlertVersion);
+        log.info("Done with generating intent alert artifacts");
     }
 
     private String convertToCSV(HdfsDataUnit dataUnit) {
@@ -239,21 +233,5 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
             artifact.setStatus(GENERATING);
             return dataCollectionProxy.createDataCollectionArtifact(customerSpace.toString(), activeVersion, artifact);
         }
-    }
-
-    private String updateIntentAlertVersion() {
-        DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
-                activeVersion);
-        // Use last intent import time as intent alert version
-        ActivityBookkeeping bookkeeping = dcStatus.getActivityBookkeeping();
-        Map<Integer, Long> records = bookkeeping.streamRecord.get(streamId);
-        Integer dateId = records.keySet().stream().sorted(Comparator.reverseOrder()).findFirst().get();
-        intentAlertVersion = String.valueOf(dateId);
-        dcStatus.setIntentAlertVersion(intentAlertVersion);
-        // Write back to Data Collection Status tables
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), dcStatus, activeVersion);
-
-        log.info("New intent alert version is {}", intentAlertVersion);
-        return intentAlertVersion;
     }
 }
