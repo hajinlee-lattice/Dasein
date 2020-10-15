@@ -177,6 +177,7 @@ public class VboUsageServiceImpl implements VboUsageService {
                                     context.getRetryCount() + 1, srcBucket, srcKey, tgtBucket, tgtKey);
                         }
                         s3Service.copyObject(srcBucket, srcKey, tgtBucket, tgtKey);
+                        s3Service.setObjectAclToBucketOwner(tgtBucket, tgtKey);
                         return true;
                     });
                     log.info("Copying file {} from s3://{}/{} to s3://{}/{}", //

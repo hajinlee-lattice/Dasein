@@ -134,13 +134,16 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             boolean isFromDataBlock = isFromDataBlock(cm);
             return isCustomer && !isIdToExclude && !isFromDataBlock;
         }).collect(Collectors.toList());
-        Map<String, String> rejectedAttrs = convertToDispMap(rejectedCms);
-        jobConfig.setRejectedAttrsMap(rejectedAttrs);
+        // Map<String, String> rejectedAttrs = convertToDispMap(rejectedCms);
+        List<String> rejectedAttrs = sortOutputAttrs(rejectedCms);
+        jobConfig.setRejectedAttrs(rejectedAttrs);
 
         List<ColumnMetadata> acceptedCms = cms.stream() //
                 .filter(cm -> !isAttrToExclude(cm)).collect(Collectors.toList());
-        Map<String, String> acceptedAttrs = convertToDispMap(acceptedCms);
-        jobConfig.setAcceptedAttrsMap(acceptedAttrs);
+        Map<String, String> displayNameMap = convertToDispMap(cms);
+        List<String> acceptedAttrs = sortOutputAttrs(acceptedCms);
+        jobConfig.setAcceptedAttrs(acceptedAttrs);
+        jobConfig.setDisplayNameMap(displayNameMap);
 
         log.info("JobConfig=" + JsonUtils.serialize(jobConfig));
         return jobConfig;
@@ -238,6 +241,36 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         } else {
             return getFirstCsvFilePath(dataUnit);
         }
+    }
+
+    private List<String> sortOutputAttrs(Collection<ColumnMetadata> cms) {
+        Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
+        List<ColumnMetadata> customerAttrs = new ArrayList<>();
+        List<ColumnMetadata> dataBlockAttrs = new ArrayList<>();
+        List<ColumnMetadata> candidateAttrs = new ArrayList<>();
+        List<ColumnMetadata> otherAttrs = new ArrayList<>();
+        // MatchedDuns belongs to candidate attribute
+        ColumnMetadata duns = null;
+        for (ColumnMetadata cm : cms) {
+            if (MatchedDuns.equals(cm.getAttrName())) {
+                duns = cm;
+            } else if (dataBlockDispNames.containsKey(cm.getAttrName())) {
+                dataBlockAttrs.add(cm);
+            } else if (candidateFieldDispNames.containsKey(cm.getAttrName())) {
+                candidateAttrs.add(cm);
+            } else if ((cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL)){
+                customerAttrs.add(cm);
+            } else {
+                otherAttrs.add(cm);
+            }
+        }
+        List<String> attrNames = new ArrayList<>();
+        customerAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
+        attrNames.add(duns.getAttrName());
+        candidateAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
+        dataBlockAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
+        otherAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
+        return attrNames;
     }
 
     private Map<String, String> convertToDispMap(Collection<ColumnMetadata> cms) {

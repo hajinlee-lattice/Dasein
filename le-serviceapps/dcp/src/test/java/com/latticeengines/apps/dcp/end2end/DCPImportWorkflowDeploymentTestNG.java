@@ -260,6 +260,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "primaryindcode_ussicv4desc", //
                 "primaryaddr_latitude", //
                 "primaryaddr_longitude", //
+                "numberofemployees_employeefiguresdate", //
                 "registeredname" //
         ));
         ResponseDocument<String> response =  enrichmentLayoutService.create(mainCustomerSpace, enrichmentLayout);
