@@ -74,13 +74,13 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
         ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
                 configuration.getProjectId(), Boolean.FALSE, null);
         if (projectDetails.getPurposeOfUse() != null) {
-            jobConfig.setDRTAttr(projectDetails.getPurposeOfUse().getDomain() //
-                    + "-" + projectDetails.getPurposeOfUse().getRecordType());
+            jobConfig.setDRTAttr(projectDetails.getPurposeOfUse().getDomain().getDisplayName() //
+                    + "-" + projectDetails.getPurposeOfUse().getRecordType().getDisplayName());
         } else {
             log.info("No purpose of use found for project {}", configuration.getProjectId());
         }
 
-        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.getTenantId());
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
         if (tenant != null && tenant.getSubscriberNumber() != null) {
             String subNumber = tenant.getSubscriberNumber();
             jobConfig.setSubscriberNumber(subNumber);

@@ -28,7 +28,7 @@ public final class VboUsageConstants {
     public static final String ATTR_POAEID = "POAEID";
     public static final String ATTR_TIMESTAMP = "TimeStamp";
     public static final String ATTR_RESPONSE_TIME = "Response Time";
-    public static final String ATTR_EVENT_TYPE = "Event Type";
+    public static final String ATTR_EVENT_TYPE = "Event Type*";
     public static final String ATTR_FEATURE = "Feature URI";
     public static final String ATTR_SUBJECT_DUNS = "Subject DUNS/Entity ID";
     public static final String ATTR_SUBJECT_NAME = "Subject Name";
@@ -63,7 +63,7 @@ public final class VboUsageConstants {
     public static final String ATTR_GUID = "GUID";
     public static final String ATTR_CLIENT_ID = "Client ID (API Key)";
     public static final String ATTR_KEY_TYPE = "API Key Type";
-    public static final String ATTR_EMAIL = "EMAIL ADDRESS";
+    public static final String ATTR_EMAIL = "Email Address";
     public static final String ATTR_LUID = "LUID";
     public static final String ATTR_AGENT_ID = "Agent ID";
     public static final String ATTR_CONSUMER_IP = "Consumer IP";
