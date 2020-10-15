@@ -164,14 +164,15 @@ public class EntityMatchUtilsUnitTestNG {
                 { newSeed("tc_8", MKTO_2, SFDC_4), newSeed("tc_8", MKTO_1, SFDC_5, DUNS_1),
                         newSeed("tc_8", MKTO_2, SFDC_4, DUNS_1), new EntityLookupEntry[0] },
                 /*
-                 * explicitly specify conflicts that will not be merged
+                 * explicitly specify conflicts for one to one entry will not be merged
                  */
                 { newSeed("tc_9", SFDC_1, DC_GOOGLE_1), newSeed("tc_9", MKTO_1, DC_GOOGLE_1, DC_GOOGLE_2, DUNS_3),
-                        newSeed("tc_9", SFDC_1, MKTO_1, DC_GOOGLE_1, DUNS_3), new EntityLookupEntry[] { DC_GOOGLE_2 } },
+                        newSeed("tc_9", SFDC_1, MKTO_1, DC_GOOGLE_1, DC_GOOGLE_2, DUNS_3),
+                        new EntityLookupEntry[] { DC_GOOGLE_2, DUNS_3 } },
                 // note that MKTO_2 still exist in the merged seed even though specify as
                 // conflict somehow as it is in the base seed
                 { newSeed("tc_10", MKTO_2, NC_NETFLIX_1), newSeed("tc_10", MKTO_2, DC_GOOGLE_1, SFDC_2),
-                        newSeed("tc_10", MKTO_2, NC_NETFLIX_1),
+                        newSeed("tc_10", MKTO_2, NC_NETFLIX_1, DC_GOOGLE_1),
                         new EntityLookupEntry[] { SFDC_2, DC_GOOGLE_1, MKTO_2 } },
                 /*
                  * merge attributes

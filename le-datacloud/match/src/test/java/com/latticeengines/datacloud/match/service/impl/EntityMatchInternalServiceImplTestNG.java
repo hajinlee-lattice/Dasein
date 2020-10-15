@@ -204,7 +204,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         waitForAllLookupEntriesPopulated();
         List<String> seedIdsInStaging = entityLookupEntryService.get(
                 STAGING, tenant, TEST_ENTRIES, entityMatchVersionService.getCurrentVersion(STAGING, tenant));
-        if (isAllocateMode) {
+        if (isAllocateMode && !entityMatchConfigurationService.shouldCopyToStagingLazily()) {
             // only entry 1 & 3 are set to staging
             Assert.assertEquals(seedIdsInStaging, Arrays.asList(SEED_ID_FOR_LOOKUP, null, SEED_ID_FOR_LOOKUP, null));
         } else {
@@ -241,7 +241,11 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         List<EntityRawSeed> resultsInStaging = entityRawSeedService
                 .get(STAGING, tenant, TEST_ENTITY, SEED_IDS,
                         entityMatchVersionService.getCurrentVersion(STAGING, tenant));
-        verifyEntityRawSeeds(resultsInStaging, SEED_ID_1, SEED_ID_2, SEED_ID_3, null, null);
+        if (entityMatchConfigurationService.shouldCopyToStagingLazily()) {
+            verifyEntityRawSeeds(resultsInStaging, null, null, null, null, null);
+        } else {
+            verifyEntityRawSeeds(resultsInStaging, SEED_ID_1, SEED_ID_2, SEED_ID_3, null, null);
+        }
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class, priority = 3)
@@ -358,7 +362,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         EntityRawSeed seedToUpdate1 = newSeed(seedId, "sfdc_1", "google.com");
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result1 = entityMatchInternalService
-                .associate(tenant, seedToUpdate1, false, null, null);
+                .associate(tenant, seedToUpdate1, null, false, null, null);
         Assert.assertNotNull(result1);
         // check state before update has no lookup entries
         Assert.assertTrue(equalsDisregardPriority(result1.getLeft(), newSeed(seedId, null)));
@@ -367,7 +371,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         EntityRawSeed seedToUpdate2 = newSeed(seedId, "sfdc_2", "facebook.com", "netflix.com");
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result2 = entityMatchInternalService
-                .associate(tenant, seedToUpdate2, false, null, null);
+                .associate(tenant, seedToUpdate2, null, false, null, null);
         Assert.assertNotNull(result2);
         // check state before update
         Assert.assertTrue(equalsDisregardPriority(result2.getLeft(), seedToUpdate1));
@@ -381,7 +385,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
 
         // update domain again and make sure it does not get reported in failure
         result2 = entityMatchInternalService.associate(tenant,
-                newSeed(seedId, null, "facebook.com", "netflix.com"), false, null, null);
+                newSeed(seedId, null, "facebook.com", "netflix.com"), null, false, null, null);
         Assert.assertNotNull(result2);
         verifyNoAssociationFailure(result2);
     }
@@ -422,7 +426,7 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
                 entityMatchVersionService.getCurrentVersion(env, tenant));
 
         Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result =
-                entityMatchInternalService.associate(tenant, seedToAssociate, false, null, null);
+                entityMatchInternalService.associate(tenant, seedToAssociate, null, false, null, null);
         Assert.assertNotNull(result);
         // currently, we only return updated old attribute, so no equals current seed
         Assert.assertNotNull(result.getLeft());
@@ -698,7 +702,8 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         String seedId = UUID.randomUUID().toString();
         EntityRawSeed seed = newSeed(seedId, "sfdc_acc_1", domains);
 
-        EntityTransactUpdateResult result = entityMatchInternalService.transactAssociate(tenant, seed, null, null);
+        EntityTransactUpdateResult result = entityMatchInternalService.transactAssociate(tenant, seed, seed, null,
+                null);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isSucceeded());
         Assert.assertTrue(MapUtils.isEmpty(result.getEntriesMapToOtherSeeds()));
@@ -937,6 +942,9 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
     }
 
     private void waitForAllLookupEntriesPopulated() {
+        if (entityMatchConfigurationService.shouldCopyToStagingLazily()) {
+            return;
+        }
         for (int i = 0; i < MAX_WAIT_TIMES; i++) {
             try {
                 Thread.sleep(WAIT_INTERVAL);

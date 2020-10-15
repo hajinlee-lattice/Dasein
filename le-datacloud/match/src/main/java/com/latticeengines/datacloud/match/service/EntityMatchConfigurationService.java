@@ -132,4 +132,21 @@ public interface EntityMatchConfigurationService {
      * @return current value of the flag
      */
     boolean isAllocateMode();
+
+    /**
+     * Return a flag to indicate whether match should lazily copy seed/lookup from
+     * serving to staging
+     *
+     * @return current value of the flag
+     */
+    boolean shouldCopyToStagingLazily();
+
+    /**
+     * Configure whether match should lazily copy seed/lookup from serving to
+     * staging
+     *
+     * @param shouldCopyToStagingLazily
+     *            true to lazily copy
+     */
+    void setShouldCopyToStagingLazily(boolean shouldCopyToStagingLazily);
 }

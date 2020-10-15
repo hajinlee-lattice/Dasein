@@ -4,6 +4,8 @@ import java.time.Duration;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.RetryCallback;
@@ -25,6 +27,8 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 @Component("entityMatchConfigurationService")
 public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigurationService {
 
+    private static final Logger log = LoggerFactory.getLogger(EntityMatchConfigurationServiceImpl.class);
+
     /*
      * TODO put these in property file after cache setting is finalized
      */
@@ -44,6 +48,8 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     private volatile String servingTableName;
     @Value("${datacloud.match.entity.staging.ttl:2629746}")
     private volatile long stagingTTLInSeconds; // expire 1 month
+    @Value("${datacloud.match.entity.staging.copy.lazy:false}")
+    private volatile boolean lazyCopyToStaging;
     /*
      * TODO tune these for staging/serving environment separately
      */
@@ -172,6 +178,16 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
         this.retryTemplate = retryTemplate;
     }
 
+    @Override
+    public boolean shouldCopyToStagingLazily() {
+        return lazyCopyToStaging;
+    }
+
+    @Override
+    public void setShouldCopyToStagingLazily(boolean shouldCopyToStagingLazily) {
+        lazyCopyToStaging = shouldCopyToStagingLazily;
+    }
+
     /*
      * Listener to record dynamo read/write throttling metrics
      */
@@ -183,6 +199,8 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
                     Throwable throwable) {
                 if (DynamoRetryPolicy.isThrottlingError(throwable)) {
                     entityMatchMetricService.recordDynamoThrottling(env, getTableName(env));
+                } else {
+                    log.error("Retrying count = {}, error = {}", context.getRetryCount(), throwable);
                 }
                 super.onError(context, callback, throwable);
             }
