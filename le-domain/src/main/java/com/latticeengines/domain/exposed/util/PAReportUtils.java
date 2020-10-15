@@ -54,13 +54,10 @@ public final class PAReportUtils {
         entityNode.set(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey(), consolidateSummaryNode);
 
         ObjectNode entityNumberNode = JsonUtils.createObjectNode();
-        switch (entity) {
-            case Product:
-                entityNumberNode.put(ReportConstants.TOTAL, "Not Available");
-                break;
-            default:
-                entityNumberNode.put(ReportConstants.TOTAL, "0");
-                break;
+        if (entity == BusinessEntity.Product) {
+            entityNumberNode.put(ReportConstants.TOTAL, "Not Available");
+        } else {
+            entityNumberNode.put(ReportConstants.TOTAL, "0");
         }
         entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
 
@@ -85,7 +82,7 @@ public final class PAReportUtils {
         String nodeKey = isWarningMessage ? ReportConstants.WARN_MESSAGE
                 : ReportConstants.ERROR_MESSAGE;
         JsonNode messageNode = consolidateSummaryNode.get(nodeKey);
-        if (StringUtils.isNotBlank(messageNode.asText())) {
+        if (messageNode != null && StringUtils.isNotBlank(messageNode.asText())) {
             message = messageNode.asText() + " " + message;
         }
         consolidateSummaryNode.put(nodeKey, message);
