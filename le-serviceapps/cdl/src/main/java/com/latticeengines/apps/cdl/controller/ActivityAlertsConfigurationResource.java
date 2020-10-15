@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "ActivityAlertsConfig")
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/activity-alerts-config")
-public class ActivityAlertsConfigurationResource {
+public class    ActivityAlertsConfigurationResource {
 
     @Inject
     private ActivityAlertsConfigService activityAlertsConfigService;

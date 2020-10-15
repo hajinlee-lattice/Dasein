@@ -24,6 +24,7 @@ import com.latticeengines.cdl.workflow.steps.process.PeriodStoresGenerationStep;
 import com.latticeengines.cdl.workflow.steps.process.ProfileAccountActivityMetricsWrapper;
 import com.latticeengines.cdl.workflow.steps.process.ProfileContactActivityMetricsWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessActivityStreamWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.export.PublishActivityAlerts;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -81,6 +82,9 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     private GenerateActivityAlerts generateActivityAlert;
 
     @Inject
+    private PublishActivityAlerts publishActivityAlerts;
+
+    @Inject
     private FinishActivityStreamProcessing finishActivityStreamProcessing;
 
     @Override
@@ -101,6 +105,7 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
                 .next(generateTimeLine) //
                 .next(generateJourneyStage) //
                 .next(generateActivityAlert) //
+                .next(publishActivityAlerts) //
                 .next(finishActivityStreamProcessing) //
                 .build();
     }
