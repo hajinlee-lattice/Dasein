@@ -34,12 +34,12 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
 
     val classificationAttr: String = config.getClassificationAttr
     val matchedDunsAttr: String = config.getMatchedDunsAttr
-    val acceptedSeq = config.getAcceptedAttrs.asScala
-    val rejectedSeq = config.getRejectedAttrs.asScala
+    val acceptedAttrs = config.getAcceptedAttrs.asScala
+    val rejectedAttrs = config.getRejectedAttrs.asScala
     val displayNameMap: Map[String, String] = config.getDisplayNameMap.asScala.toMap
 
-    val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, acceptedSeq)
-    val rejectedCsv = filterRejected(input, classificationAttr, rejectedAttrs, rejectedSeq)
+    val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, displayNameMap)
+    val rejectedCsv = filterRejected(input, classificationAttr, rejectedAttrs, displayNameMap)
     val (dupReport, dunsCount) = generateDupReport(acceptedDF, matchedDunsAttr)
 
     val report : DataReport = new DataReport
