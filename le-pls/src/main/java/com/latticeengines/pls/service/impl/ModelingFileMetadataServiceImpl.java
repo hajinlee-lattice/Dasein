@@ -467,7 +467,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                             FieldValidation validation = createValidation(userField, fieldMapping.getMappedField(),
                                     ValidationStatus.WARNING, warningMessage.toString());
                             validations.add(validation);
-                            groupedValidations.get(ValidationCategory.DataFormat).add(validation);
+                            groupedValidations.get(ValidationCategory.DateFormat).add(validation);
                         } else if (StringUtils.isNotBlank(userFormat) && !userFormat.equals(formatWithBestEffort)) {
                             // this is case that user change the date/time format which can be parsed
                             String message =  String.format("%s is set as %s which can parse the value from uploaded " +
@@ -475,7 +475,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                             FieldValidation validation = createValidation(userField, fieldMapping.getMappedField(),
                                     ValidationStatus.WARNING, message);
                             validations.add(validation);
-                            groupedValidations.get(ValidationCategory.DataFormat).add(validation);
+                            groupedValidations.get(ValidationCategory.DateFormat).add(validation);
                         }
                     }
                 }
