@@ -107,6 +107,8 @@ public interface S3Service {
 
     S3Objects getIterableObjects(String s3Bucket, String prefix);
 
+    void setObjectAclToBucketOwner(String bucket, String object);
+
     /**
      * Generate a read only URL to access the specified key under the input bucket. The URL will expires at
      * the given date.
