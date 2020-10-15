@@ -969,14 +969,13 @@ public class CDLJobServiceImpl implements CDLJobService {
                     && isNewDataGenerated(customerSpaceStr)) {
                 ApplicationId appId = intentAlertWorkflowSubmitter.submit(customerSpaceStr,
                         new WorkflowPidWrapper(-1L));
-                log.info(String.format("start generateIntentEmailAlertWorkflow applicationId : {} , customerSpace {}",
-                        appId.toString(), customerSpaceStr));
+                log.info("start generateIntentEmailAlertWorkflow applicationId : {} , customerSpace {}",
+                        appId.toString(), customerSpaceStr);
             }
         }
     }
 
     private boolean isNewDataGenerated(String customerSpaceStr) {
-        boolean result = false;
         DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpaceStr);
         DataCollectionStatus dataStatus = dataCollectionService.getOrCreateDataCollectionStatus(customerSpaceStr,
                 activeVersion);
@@ -986,25 +985,27 @@ public class CDLJobServiceImpl implements CDLJobService {
         AtlasStream intentStream = streams.stream()
                 .filter(stream -> (stream.getStreamType() == AtlasStream.StreamType.DnbIntentData)).findFirst().get();
         ActivityBookkeeping bookkeeping = dataStatus.getActivityBookkeeping();
+        if (bookkeeping == null)
+            return false;
         Map<Integer, Long> records = bookkeeping.streamRecord.get(intentStream.getStreamId());
-        if (records != null && !records.isEmpty()) {
-            if (StringUtils.isEmpty(intentAlertVersion)) {
-                result = true;
-            } else {
-                Integer dateId = records.keySet().stream().sorted(Comparator.reverseOrder()).findFirst().get();
-                int intentAlertVersionId = Integer.parseInt(intentAlertVersion);
-                result = dateId >= intentAlertVersionId;
-                log.info(String.format("intentalertversion: {}, intentstream dateId {}", intentAlertVersion, dateId));
-            }
+        if (MapUtils.isEmpty(records)) {
+            return false;
         }
-        log.info(String.format("check new data generated result: {}, activeVersion is {}", result, activeVersion));
+        boolean result = true;
+        if (StringUtils.isNotEmpty(intentAlertVersion)) {
+            Integer dateId = records.keySet().stream().sorted(Comparator.reverseOrder()).findFirst().get();
+            int intentAlertVersionId = Integer.parseInt(intentAlertVersion);
+            result = dateId >= intentAlertVersionId;
+            log.info("intentalertversion: {}, intentstream dateId {}", intentAlertVersion, dateId);
+        }
+        log.info("check new data generated result: {}, activeVersion is {}", result, activeVersion);
         return result;
     }
 
     private boolean isCronExpressionSatisfied(String customerSpaceStr) {
         String deliveryCron = getIntentEmailDeliveryCronExpression(CustomerSpace.parse(customerSpaceStr));
         boolean result = CronUtils.isSatisfiedByDate(deliveryCron, new Date());
-        log.info(String.format("check delivery cron expression satisfied: {}, cron is {}",result, deliveryCron));
+        log.info("check delivery cron expression satisfied: {}, cron is {}", result, deliveryCron);
         return result;
     }
 
@@ -1029,5 +1030,4 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         return null;
     }
-
 }
