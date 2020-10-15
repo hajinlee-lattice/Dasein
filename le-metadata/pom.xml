@@ -133,11 +133,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.thrift</groupId>
-            <artifactId>libthrift</artifactId>
-            <version>${libthrift.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-component</artifactId>
             <version>${project.version}</version>
