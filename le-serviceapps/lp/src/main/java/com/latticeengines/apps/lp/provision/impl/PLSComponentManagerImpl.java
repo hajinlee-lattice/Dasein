@@ -533,8 +533,15 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         String dcpEmailS3File = tenantConfigFolder + "/" + dcpAdminEmailsConfig;
         if (s3Service.objectExist(tenantConfigBucket, dcpEmailS3File)) {
             log.info(String.format("Start getting DCP admin email from %s : %s", tenantConfigBucket, dcpEmailS3File));
-            InputStream dcpEmailStream = s3Service.readObjectAsStream(tenantConfigBucket, dcpEmailS3File);
-            return JsonUtils.convertList(JsonUtils.deserialize(dcpEmailStream, List.class), String.class);
+            try {
+                InputStream dcpEmailStream = s3Service.readObjectAsStream(tenantConfigBucket, dcpEmailS3File);
+                return JsonUtils.convertList(JsonUtils.deserialize(dcpEmailStream, List.class), String.class);
+            } catch (Exception e) {
+                log.error("Cannot parse DCP default admin email file. Exception: {}", e.getMessage());
+                return Collections.emptyList();
+            }
+        } else {
+            log.warn("DCP default admin email file is missing.");
         }
         return Collections.emptyList();
     }
