@@ -48,7 +48,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
     private static final Logger log = LoggerFactory.getLogger(TrayConnectorTestServiceImpl.class);
 
-    private static final String CDL_TRAY_TEST_VERIFICATION_END_POINT = "/cdl/tray/test/verify";
+    private static final String CDL_TRAY_TEST_VERIFICATION_END_POINT = "/cdl/customerspaces/%s/tray/test/verify";
     private static final String PATH_TEMPLATE = "connectors/%s/test-scenarios/%s/input.json";
     private static final String TEST_FILE_PATH_TEMPLATE = "tray-test/%s/%s/%s";
 
@@ -113,7 +113,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
             String workflowRequestId = UUID.randomUUID().toString();
             log.info("Generated workflowRequestId: " + workflowRequestId);
 
-            publishSessionContext(workflowRequestId);
+            publishSessionContext(workflowRequestId, customerSpace);
 
             TriggerMetadata trigger = metadata.getTrigger();
             ExternalIntegrationMessageBody messageBody = trigger.getMessage();
@@ -331,16 +331,17 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         trayConnectorTestEntityMgr.create(test);
     }
 
-    private void publishSessionContext(String workflowRequestId) {
+    private void publishSessionContext(String workflowRequestId, String customerSpace) {
+        String verifyPath = String.format(CDL_TRAY_TEST_VERIFICATION_END_POINT, customerSpace);
         log.info(String.format("Publish to DynamoDB %s with workflowRequestId %s and Url %s",
                 integrationSessionContextTable, workflowRequestId,
-                microserviceHostPort + CDL_TRAY_TEST_VERIFICATION_END_POINT));
-        dynamoItemService.putItem(integrationSessionContextTable, getItem(workflowRequestId));
+                microserviceHostPort + verifyPath));
+        dynamoItemService.putItem(integrationSessionContextTable, getItem(workflowRequestId, verifyPath));
     }
 
-    private Item getItem(String workflowRequestId) {
+    private Item getItem(String workflowRequestId, String verifyPath) {
         Map<String, Object> session = new HashMap<String, Object>();
-        session.put(URL, microserviceHostPort + CDL_TRAY_TEST_VERIFICATION_END_POINT);
+        session.put(URL, microserviceHostPort + verifyPath);
         session.put(MAPPING, "");
         return new Item().withPrimaryKey("WorkflowId", workflowRequestId)
                 .withLong("TTL", System.currentTimeMillis() / 1000 + sessionContextTTLinSec)
