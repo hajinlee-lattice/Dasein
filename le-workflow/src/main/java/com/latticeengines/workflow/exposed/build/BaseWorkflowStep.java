@@ -432,7 +432,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             CURATED_ACCOUNT_STATS_TABLE_NAME, //
             CURATED_CONTACT_SERVING_TABLE_NAME, //
             CURATED_CONTACT_STATS_TABLE_NAME //
-            );
+    );
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME);
 
     protected static final Set<String> TABLE_NAME_MAPS_FOR_PA_RETRY = Sets.newHashSet( //
@@ -481,8 +481,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACTIVITY_METRICS_CATEGORICAL_ATTR, //
             ACTIVITY_METRICS_CATEGORIES, //
             ACTIVITY_ALERT_GENERATED, //
-            RETAIN_PRODUCT_TYPE
-    );
+            RETAIN_PRODUCT_TYPE);
 
     @Autowired
     protected Configuration yarnConfiguration;

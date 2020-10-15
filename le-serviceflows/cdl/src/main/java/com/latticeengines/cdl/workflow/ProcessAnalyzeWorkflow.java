@@ -116,7 +116,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(startProcessing) //
                 .next(importProcessAnalyzeFromS3) //
                 .next(legacyDeleteWorkFlow)//
-                .next(convertBatchStoreToDataTableWorkflow)
+                .next(convertBatchStoreToDataTableWorkflow) //
                 .next(matchEntityWorkflow) //
                 .next(processAccountWorkflow) //
                 .next(processContactWorkflow) //

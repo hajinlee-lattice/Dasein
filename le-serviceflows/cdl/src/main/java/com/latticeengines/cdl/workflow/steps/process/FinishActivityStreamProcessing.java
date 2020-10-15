@@ -49,6 +49,8 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
     @Value("${cdl.processAnalyze.skip.dynamo.publication}")
     private boolean skipPublishDynamo;
 
+
+
     @Override
     public void execute() {
         publishTimelineDiffTablesToDynamo();
@@ -57,11 +59,13 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
 
     public void publishTimelineDiffTablesToDynamo() {
         if (!shouldPublishTimelineToDynamo()) {
-            log.info("Skip publishing timeline diff table to dynamo. Account360 enabled = {}, skipPublishDynamo = {}", account360Enabled(), skipPublishDynamo);
+            log.info("Skip publishing timeline diff table to dynamo. Account360 enabled = {}, skipPublishDynamo = {}",
+                    account360Enabled(), skipPublishDynamo);
             return;
         }
 
-        Map<String, String> timelineTableNames = getMapObjectFromContext(TIMELINE_DIFF_TABLE_NAME, String.class, String.class);
+        Map<String, String> timelineTableNames = getMapObjectFromContext(TIMELINE_DIFF_TABLE_NAME, String.class,
+                String.class);
         if (MapUtils.isEmpty(timelineTableNames)) {
             log.info("No timeline diff table found in context, skip publishing to dynamo");
             return;
