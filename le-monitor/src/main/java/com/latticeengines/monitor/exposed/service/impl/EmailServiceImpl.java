@@ -1013,6 +1013,10 @@ public class EmailServiceImpl implements EmailService {
             Multipart mp = builder.buildRawMultipart();
             // TODO change logo to dnb lattice logo when UX finishes it
             builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/dnb_logo.svg", "image/svg+xml", "logo");
+            if (params.get("attachment") != null) {
+                builder.addAttachmentToMultipart(mp, (byte[]) params.get("attachment"),
+                        params.get("attachment_name").toString(), "text/csv");
+            }
             return mp;
         } catch (IOException | MessagingException e) {
             String msg = String.format("Failed to generate dnb intent email for tenant %s. params = %s", tenantId,
