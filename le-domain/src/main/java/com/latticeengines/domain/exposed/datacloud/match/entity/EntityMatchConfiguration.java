@@ -15,13 +15,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class EntityMatchConfiguration {
     private final Integer numStagingShards;
     private final String stagingTableName;
+    private final Boolean lazyCopyToStaging;
 
     @JsonCreator
     public EntityMatchConfiguration( //
             @JsonProperty("NumStagingShards") Integer numStagingShards, //
-            @JsonProperty("StagingTableName") String stagingTableName) {
+            @JsonProperty("StagingTableName") String stagingTableName, //
+            @JsonProperty("LazyCopyToStaging") Boolean lazyCopyToStaging) {
         this.numStagingShards = numStagingShards;
         this.stagingTableName = stagingTableName;
+        this.lazyCopyToStaging = lazyCopyToStaging;
     }
 
     @JsonProperty("NumStagingShards")
@@ -34,10 +37,15 @@ public class EntityMatchConfiguration {
         return stagingTableName;
     }
 
+    @JsonProperty("LazyCopyToStaging")
+    public Boolean isLazyCopyToStaging() {
+        return lazyCopyToStaging;
+    }
+
     @Override
     public String toString() {
         return "EntityMatchConfiguration{" + "numStagingShards=" + numStagingShards + ", stagingTableName='"
-                + stagingTableName + '\'' + '}';
+                + stagingTableName + '\'' + ", lazyCopyToStaging=" + lazyCopyToStaging + '}';
     }
 
     // TODO refactor and move all configuration here

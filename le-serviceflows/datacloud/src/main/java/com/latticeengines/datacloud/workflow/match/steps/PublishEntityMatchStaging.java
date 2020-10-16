@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -98,13 +97,7 @@ public class PublishEntityMatchStaging extends BaseWorkflowStep<PublishEntityMat
         EntityMatchConfiguration emConfig = configuration.getEntityMatchConfiguration();
         if (emConfig != null) {
             log.info("Overriding entity match configuration {}", JsonUtils.serialize(emConfig));
-            if (StringUtils.isNotBlank(emConfig.getStagingTableName())) {
-                entityMatchConfigurationService.setStagingTableName(emConfig.getStagingTableName());
-            }
-            if (emConfig.getNumStagingShards() != null) {
-                entityMatchConfigurationService.setNumShards(EntityMatchEnvironment.STAGING,
-                        emConfig.getNumStagingShards());
-            }
+            EntityMatchUtils.overwriteWithConfiguration(entityMatchConfigurationService, emConfig);
         }
     }
 
