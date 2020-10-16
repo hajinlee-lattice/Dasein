@@ -45,7 +45,7 @@ class AnalyzeUsageJob extends AbstractSparkJob[AnalyzeUsageConfig] {
         }  else if (field == VboUsageConstants.ATTR_APPID) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit("157").cast(StringType))
         }  else if (field == VboUsageConstants.ATTR_CAPPID) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("47").cast(StringType))
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit("46").cast(StringType))
         } else if (!rawFields.contains(field)) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit("").cast(StringType))
         }

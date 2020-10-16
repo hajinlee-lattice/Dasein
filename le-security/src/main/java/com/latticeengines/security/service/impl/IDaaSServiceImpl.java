@@ -389,6 +389,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         catch (HttpClientErrorException hcee) {
             String msg = String.format("HttpClientErrorException while trying to get subscriber_details " +
                     "from IDaaS. Error Code %d\nMsg %s", hcee.getRawStatusCode(), hcee.getStatusText());
+            log.error(msg, hcee);
         }
         catch (Exception e) {
             String msg = "Exception while trying to get subscription_details from IDaaS.";
