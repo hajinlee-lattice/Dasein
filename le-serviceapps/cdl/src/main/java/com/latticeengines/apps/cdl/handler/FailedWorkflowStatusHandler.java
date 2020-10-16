@@ -61,13 +61,17 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
     public DataIntegrationStatusMonitor handleWorkflowState(DataIntegrationStatusMonitor statusMonitor,
             DataIntegrationStatusMonitorMessage status) {
 
-        checkStatusMonitorExists(statusMonitor, status);
-        statusMonitor.setStatus(DataIntegrationEventType.Failed.toString());
+        try {
+            checkStatusMonitorExists(statusMonitor, status);
+            statusMonitor.setStatus(DataIntegrationEventType.Failed.toString());
 
-        handleErrorObject(statusMonitor, status);
+            handleErrorObject(statusMonitor, status);
 
-        String launchId = statusMonitor.getEntityId();
-        updatePlayLaunchAndSendEmail(launchId);
+            String launchId = statusMonitor.getEntityId();
+            updatePlayLaunchAndSendEmail(launchId);
+        } catch (Exception e) {
+            log.error("Failed to process this message: " + e.getMessage());
+        }
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
     }
@@ -88,12 +92,11 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
     }
 
     private void saveErrorNumber(PlayLaunch playLaunch) {
-        Long totalAccounts = playLaunch.getAccountsLaunched();
-        Long totalContacts = playLaunch.getContactsLaunched();
-
         if (playLaunch.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS) {
+            Long totalAccounts = playLaunch.getAccountsLaunched();
             playLaunch.setAccountsErrored(totalAccounts);
         } else {
+            Long totalContacts = playLaunch.getContactsLaunched();
             playLaunch.setContactsErrored(totalContacts);
         }
     }
