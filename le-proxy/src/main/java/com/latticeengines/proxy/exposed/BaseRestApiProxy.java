@@ -432,6 +432,12 @@ public abstract class BaseRestApiProxy {
         return JsonUtils.convertSet(set, returnValueClazz);
     }
 
+    protected <K, V> Map<K, V> getMap(final String method, final String url, //
+                                final Class<K> returnKeyClazz, final Class<V> returnValueClazz) {
+        Map<?, ?> set = get(method, url, Map.class, false);
+        return JsonUtils.convertMap(set, returnKeyClazz, returnValueClazz);
+    }
+
     protected <T> T getNoTracing(final String method, final String url, final Class<T> returnValueClazz) {
         return get(method, url, returnValueClazz, false, false);
     }
