@@ -218,13 +218,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
     val containsJoinKey = accountColsRecIncluded.contains(joinKey)
     val joinKeyCol: Option[String] = if (!containsJoinKey) Some(joinKey) else None
-    var internalAppendedCols: Seq[String] = Seq.empty[String]
-
-    if (accountColsRecNotIncludedStd.nonEmpty) {
-      internalAppendedCols = (accountColsRecIncluded ++ joinKeyCol)
-    } else if (accountColsRecIncluded.nonEmpty) {
-      internalAppendedCols = (accountColsRecIncluded)
-    }
+    val internalAppendedCols: Seq[String] = accountColsRecIncluded ++ joinKeyCol
 
     // map internal column names to Recommendation column names
     val mappedToRecAppendedCols = internalAppendedCols.map{col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
