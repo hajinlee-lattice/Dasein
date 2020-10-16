@@ -50,7 +50,7 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
 
     if (mainEntity == BusinessEntity.Contact) {
       var addedContactsData = contactsDf.drop(accountId).join(positiveDeltaDf, Seq(contactId), if (config.isIncludeAccountsWithoutContacts) "right" else "inner")
-      var removedContactsData = contactsDf.drop(accountId).join(negativeDeltaDf, Seq(contactId), "right")
+      val removedContactsData = contactsDf.drop(accountId).join(negativeDeltaDf, Seq(contactId), "right")
 
       if (CDLExternalSystemName.AD_PLATFORMS.contains(externalSystemName)) {
         addedContactsData = CountryCodeUtils.convert(addedContactsData, contactCountry, contactCountry, url, user, password, key, salt)
