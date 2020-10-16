@@ -66,7 +66,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = WriteOutputStepConfiguration.class, name = "WriteOutputStepConfiguration"),
         @Type(value = PublishTableRoleStepConfiguration.class, name = "PublishTableRoleStepConfiguration"),
         @Type(value = ImportSourceStepConfiguration.class, name = "ImportSourceStepConfiguration"),
-        @Type(value = PublishActivityAlertsStepConfiguration.class, name = "ExportToMysqlStepConfiguration"),
+        @Type(value = PublishActivityAlertsStepConfiguration.class, name = "PublishActivityAlertsJobConfig"),
         @Type(value = ImportDeltaArtifactsFromS3Configuration.class, name = "ImportDeltaArtifactsFromS3Configuration") })
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 
