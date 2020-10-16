@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -143,8 +144,8 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
                             locationCountMap.get(intentItem.getLocation()).increaseNumBuy();
                         } else if (stageEqual(intentItem, IntentAlertEmailInfo.StageType.RESEARCH)) {
                             numResearchIntents++;
-                            industryCountMap.get(intentItem.getIndustry()).increaseNumIntents();
-                            locationCountMap.get(intentItem.getLocation()).increaseNumIntents();
+                            industryCountMap.get(intentItem.getIndustry()).increaseNumResearch();
+                            locationCountMap.get(intentItem.getLocation()).increaseNumResearch();
                         }
                     }
                 }
@@ -156,14 +157,19 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
 
     private byte[] getAttachment() {
         try {
-            String allAccountsTableName = getStringValueFromContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME);
-            Table allAccountsTable = metadataProxy.getTableSummary(customerSpace.toString(), allAccountsTableName);
-            String filePath = allAccountsTable.getExtracts().get(0).getPath();
-            if (HdfsUtils.fileExists(yarnConfiguration, filePath)) {
-                return IOUtils.toByteArray(HdfsUtils.getInputStream(yarnConfiguration, filePath));
+            String attachmentPath = StringUtils
+                    .appendIfMissing(getStringValueFromContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME), "/*.csv");
+            List<String> attachments = HdfsUtils.getFilesByGlob(yarnConfiguration, attachmentPath);
+            log.info("Attachment path = {}, csv files in path = {}", attachmentPath, attachments);
+            if (CollectionUtils.isNotEmpty(attachments)) {
+                Optional<String> attachment = attachments.stream().filter(StringUtils::isNotBlank).findFirst();
+                if (attachment.isPresent()) {
+                    return IOUtils.toByteArray(HdfsUtils.getInputStream(yarnConfiguration, attachment.get()));
+                }
             }
+            log.warn("Attachment file does not exist");
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to get intent email attachment", e);
         }
         return null;
     }
@@ -236,7 +242,7 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     }
 
     private boolean stageEqual(IntentAlertEmailInfo.Intent intent, IntentAlertEmailInfo.StageType type) {
-        return intent.getStage().equalsIgnoreCase(type.toString());
+        return type.toString().equalsIgnoreCase(intent.getStage());
     }
 
     private String updateIntentAlertVersion() {
