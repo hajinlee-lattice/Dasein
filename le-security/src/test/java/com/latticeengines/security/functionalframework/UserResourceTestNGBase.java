@@ -63,7 +63,7 @@ public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
 
     protected User createTestUser(AccessLevel accessLevel) {
         User user = new User();
-        user.setEmail("tester-" + UUID.randomUUID() + "@test.lattice.com");
+        user.setEmail("tester-" + UUID.randomUUID() + "@lattice-engines.com");
         user.setFirstName("Test");
         user.setLastName("Tester");
 
