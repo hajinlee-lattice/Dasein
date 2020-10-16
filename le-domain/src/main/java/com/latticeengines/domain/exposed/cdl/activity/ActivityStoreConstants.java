@@ -17,6 +17,7 @@ public final class ActivityStoreConstants {
 
     public static class JourneyStage {
         public static final String STREAM_SOURCE_ATLAS = "Atlas";
+        public static final String STREAM_DETAIL1_DARK = "Dark";
         public static final String STREAM_EVENT_TYPE_JOURNEYSTAGECHANGE = "Journey Stage Change";
     }
 

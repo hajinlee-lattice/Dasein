@@ -59,11 +59,11 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     @Inject
     private ActivityProxy activityProxy;
 
-    @Value("${app.timeline.default.period}")
-    private String defaultTimelinePeriod;
-
     @Value("${app.timeline.default.back.period}")
     private String defaultBackPeriod;
+
+    @Value("${app.timeline.default.period}")
+    private String defaultTimelinePeriod;
 
     @Value("${app.timeline.activity.metrics.period}")
     private String defaultActivityMetricsPeriod;
@@ -231,7 +231,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         Map<String, Object> stageEvent = new HashMap<String, Object>();
 
         List<JourneyStage> stages = activityStoreProxy.getJourneyStages(customerSpace);
-        String stageName = stages.isEmpty() ? "Dark"
+        String stageName = stages.isEmpty() ? ActivityStoreConstants.JourneyStage.STREAM_DETAIL1_DARK
                 : Collections.min(stages, Comparator.comparing(s -> s.getPriority())).getStageName();
         String accountId = reference == null ? "" : (String) reference.get(InterfaceName.AccountId.name());
 
