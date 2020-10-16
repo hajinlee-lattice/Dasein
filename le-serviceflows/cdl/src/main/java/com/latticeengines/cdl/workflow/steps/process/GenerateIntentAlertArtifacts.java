@@ -194,7 +194,7 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
         HdfsDataUnit allAccountsDU = result.getTargets().get(1);
         String destPath = convertToCSV(allAccountsDU);
         // Save all accounts csv path into context
-        putObjectInContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, destPath);
+        putStringValueInContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, destPath);
         log.info("Done with generating intent alert artifacts");
     }
 

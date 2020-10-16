@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -80,8 +82,9 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
         customerSpace = configuration.getCustomerSpace();
         // send email
         List<String> recipients = subscriptionService.getEmailsByTenantId(customerSpace.toString());
-        if (CollectionUtils.isEmpty(recipients))
+        if (CollectionUtils.isEmpty(recipients)) {
             return;
+        }
         Map<String, Object> params = getEmailParams();
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
         emailService.sendDnbIntentAlertEmail(tenant, recipients, subject, params);
@@ -121,7 +124,8 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     private void generateEmailInfo(Map<String, List<IntentAlertEmailInfo.Intent>> modelMap,
             Map<String, IntentAlertEmailInfo.TopItem> industryCountMap,
             Map<String, IntentAlertEmailInfo.TopItem> locationCountMap) {
-        Table newAccountsTable = getObjectFromContext(INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME, Table.class);
+        String newAccountsTableName = getStringValueFromContext(INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME);
+        Table newAccountsTable = metadataProxy.getTableSummary(customerSpace.toString(), newAccountsTableName);
         try {
             List<Extract> extracts = newAccountsTable.getExtracts();
             for (Extract extract : extracts) {
@@ -140,8 +144,8 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
                             locationCountMap.get(intentItem.getLocation()).increaseNumBuy();
                         } else if (stageEqual(intentItem, IntentAlertEmailInfo.StageType.RESEARCH)) {
                             numResearchIntents++;
-                            industryCountMap.get(intentItem.getIndustry()).increaseNumIntents();
-                            locationCountMap.get(intentItem.getLocation()).increaseNumIntents();
+                            industryCountMap.get(intentItem.getIndustry()).increaseNumResearch();
+                            locationCountMap.get(intentItem.getLocation()).increaseNumResearch();
                         }
                     }
                 }
@@ -153,13 +157,19 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
 
     private byte[] getAttachment() {
         try {
-            Table allAccountsTable = getObjectFromContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, Table.class);
-            String filePath = allAccountsTable.getExtracts().get(0).getPath();
-            if (HdfsUtils.fileExists(yarnConfiguration, filePath)) {
-                return IOUtils.toByteArray(HdfsUtils.getInputStream(yarnConfiguration, filePath));
+            String attachmentPath = StringUtils
+                    .appendIfMissing(getStringValueFromContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME), "/*.csv");
+            List<String> attachments = HdfsUtils.getFilesByGlob(yarnConfiguration, attachmentPath);
+            log.info("Attachment path = {}, csv files in path = {}", attachmentPath, attachments);
+            if (CollectionUtils.isNotEmpty(attachments)) {
+                Optional<String> attachment = attachments.stream().filter(StringUtils::isNotBlank).findFirst();
+                if (attachment.isPresent()) {
+                    return IOUtils.toByteArray(HdfsUtils.getInputStream(yarnConfiguration, attachment.get()));
+                }
             }
+            log.warn("Attachment file does not exist");
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to get intent email attachment", e);
         }
         return null;
     }
@@ -185,7 +195,10 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     private void addToModelMap(Map<String, List<IntentAlertEmailInfo.Intent>> map,
             IntentAlertEmailInfo.Intent subscriptionItem) {
         String modelName = subscriptionItem.getModel();
-        map.putIfAbsent(modelName, new ArrayList<>()).add(subscriptionItem);
+        if (StringUtils.isNotBlank(modelName)) {
+            map.putIfAbsent(modelName, new ArrayList<>());
+            map.get(modelName).add(subscriptionItem);
+        }
     }
 
     private Object getTopListFromMap(Map<String, IntentAlertEmailInfo.TopItem> map) {
@@ -229,7 +242,7 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     }
 
     private boolean stageEqual(IntentAlertEmailInfo.Intent intent, IntentAlertEmailInfo.StageType type) {
-        return intent.getStage().equalsIgnoreCase(type.toString());
+        return type.toString().equalsIgnoreCase(intent.getStage());
     }
 
     private String updateIntentAlertVersion() {
