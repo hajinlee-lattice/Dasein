@@ -138,9 +138,11 @@ public interface EntityMatchInternalService {
      *
      * @param tenant
      *            target tenant
-     * @param seed
+     * @param change
      *            seed object containing lookup entries and attributes that we want
      *            to associate
+     * @param currentSeed
+     *            current state of target seed
      * @param clearAllFailedLookupEntries
      *            true if we clear all lookup entries that failed to set lookup
      *            mapping, false if we only clear one to one entries that failed
@@ -159,8 +161,9 @@ public interface EntityMatchInternalService {
      *             if allocating new accounts are not supported
      */
     Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
-            @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries,
-            Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap);
+            @NotNull Tenant tenant, @NotNull EntityRawSeed change, EntityRawSeed currentSeed,
+            boolean clearAllFailedLookupEntries, Set<EntityLookupEntry> entriesMapToOtherSeed,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Associate all lookup entries and attributes in the input
@@ -171,9 +174,11 @@ public interface EntityMatchInternalService {
      *
      * @param tenant
      *            target tenant
-     * @param seed
+     * @param change
      *            seed object containing lookup entries and attributes that we want
      *            to associate
+     * @param mergedSeed
+     *            state of seed after change is applied
      * @param entriesMapToOtherSeed
      *            set of entries that are already map to other seeds, can be
      *            {@code null}
@@ -185,8 +190,9 @@ public interface EntityMatchInternalService {
      *         entries having conflict during association), seed should only be used
      *         to find conflict entries if operation failed
      */
-    EntityTransactUpdateResult transactAssociate(@NotNull Tenant tenant, @NotNull EntityRawSeed seed,
-            Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap);
+    EntityTransactUpdateResult transactAssociate(@NotNull Tenant tenant, @NotNull EntityRawSeed change,
+            @NotNull EntityRawSeed mergedSeed, Set<EntityLookupEntry> entriesMapToOtherSeed,
+            Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**
      * Cleanup entity seed that is supposed to be orphan (not mapped by any of its

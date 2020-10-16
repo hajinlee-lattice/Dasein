@@ -105,16 +105,8 @@ public class CommitEntityMatch extends BaseWorkflowStep<CommitEntityMatchConfigu
 
     private void commit(@NotNull Tenant tenant) {
         EntityMatchConfiguration entityMatchConfiguration = configuration.getEntityMatchConfiguration();
-        if (entityMatchConfiguration != null) {
-            if (entityMatchConfiguration.getNumStagingShards() != null) {
-                log.info("Overwriting no. staging shards to {}", entityMatchConfiguration.getNumStagingShards());
-                entityMatchConfigurationService.setNumShards(STAGING, entityMatchConfiguration.getNumStagingShards());
-            }
-            if (entityMatchConfiguration.getStagingTableName() != null) {
-                log.info("Overwriting no. staging table name to {}", entityMatchConfiguration.getStagingTableName());
-                entityMatchConfigurationService.setStagingTableName(entityMatchConfiguration.getStagingTableName());
-            }
-        }
+        log.info("entity match configuration = {}", entityMatchConfiguration);
+        EntityMatchUtils.overwriteWithConfiguration(entityMatchConfigurationService, entityMatchConfiguration);
         Tenant standardizedTenant = EntityMatchUtils.newStandardizedTenant(tenant);
         entityMatchVersionService.invalidateCache(standardizedTenant);
         ENTITIES_TO_COMMIT.forEach(entity -> commitWithCommitter(standardizedTenant, entity));

@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.util;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_PREFIX_SEED_ATTRIBUTES;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.MATCH_FIELD_LENGTH_LIMIT;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.ONE_TO_ONE;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
@@ -36,6 +37,7 @@ import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
+import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -43,6 +45,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -82,6 +85,24 @@ public final class EntityMatchUtils {
         INVALID_CHARS_TOKENS.put("#", "\\$>PND<");
         INVALID_CHARS_TOKENS.put(":", "\\$>COLON<");
         INVALID_CHARS_TOKENS.put("\\|\\|", "\\$>DPIPE<");
+    }
+
+    public static void overwriteWithConfiguration(@NotNull EntityMatchConfigurationService service,
+            EntityMatchConfiguration config) {
+        if (config == null) {
+            return;
+        }
+
+        // overwrite configuration
+        if (config.getNumStagingShards() != null) {
+            service.setNumShards(EntityMatchEnvironment.STAGING, config.getNumStagingShards());
+        }
+        if (StringUtils.isNotBlank(config.getStagingTableName())) {
+            service.setStagingTableName(config.getStagingTableName());
+        }
+        if (config.isLazyCopyToStaging() != null) {
+            service.setShouldCopyToStagingLazily(config.isLazyCopyToStaging());
+        }
     }
 
     /**
@@ -182,7 +203,8 @@ public final class EntityMatchUtils {
         // NOTE: assumption here is that the number of match keys will not be large, so
         // using iteration to check conflict is better than having separate map/set
         change.getLookupEntries().forEach(entry -> {
-            if (isNotEmpty(conflictEntries) && conflictEntries.contains(entry)) {
+            if (isNotEmpty(conflictEntries) && conflictEntries.contains(entry)
+                    && entry.getType().mapping == ONE_TO_ONE) {
                 // conflict known prior to update, no need to merge
                 return;
             }
