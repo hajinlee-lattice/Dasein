@@ -67,6 +67,7 @@ public class ActivityTimelineResource {
     @SuppressWarnings("ConstantConditions")
     public DataPage getAccountActivities(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
+            @RequestParam(value = "back-timeline-period", required = false) String backPeriod,
             @RequestParam(value = "timeline-period", required = false) String timelinePeriod, //
             @RequestParam(value = "streams", required = false) Set<AtlasStream.StreamType> streamTypes) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -76,7 +77,8 @@ public class ActivityTimelineResource {
         log.info(String.format("Retrieving activity timeline data of accountId(ID: %s) for %s period, ( tenantId: %s )",
                 accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
-        DataPage data = activityTimelineService.getAccountActivities(accountId, timelinePeriod, getOrgInfo(authToken));
+        DataPage data = activityTimelineService.getCompleteTimelineActivities(accountId, timelinePeriod, backPeriod,
+                getOrgInfo(authToken));
         filterStreamData(data, CollectionUtils.isEmpty(streamTypes) ? getDefaultStreams()
                 : streamTypes.stream().map(AtlasStream.StreamType::name).collect(Collectors.toSet()));
         return data;

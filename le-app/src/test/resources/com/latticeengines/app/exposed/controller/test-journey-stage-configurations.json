@@ -1,0 +1,267 @@
+[
+  {
+    "tenant": {
+      "Identifier": "QA_CDL_MultiTemplate_Account360_6.QA_CDL_MultiTemplate_Account360_6.Production",
+      "DisplayName": "QA_CDL_MultiTemplate_Account360_6",
+      "Pid": 283200,
+      "RegisteredTime": 1597821933529,
+      "UIVersion": "4.0",
+      "Status": "ACTIVE",
+      "TenantType": "QA",
+      "Contract": "QA_CDL_MultiTemplate_Account360_6",
+      "EntitledApps": "Lattice",
+      "NotificationLevel": "ERROR",
+      "NotificationType": "ALL_USER",
+      "JobNotificationLevel": {}
+    },
+    "pid": 102,
+    "stage_name": "Closed-Won",
+    "display_name": "Closed-Won",
+    "description": "Opportunity is closed-won",
+    "display_color_code": "#059142",
+    "priority": 7,
+    "predicates": [
+      {
+        "stream_type": "Opportunity",
+        "period_days": 90,
+        "stream_fields_to_filter": [
+          {
+            "comparison_type": "CONTAINS",
+            "column_name": "Detail1",
+            "column_value": "Closed%",
+            "column_values": null
+          },
+          {
+            "comparison_type": "CONTAINS",
+            "column_name": "Detail1",
+            "column_value": "%Won",
+            "column_values": null
+          }
+        ],
+        "no_of_events": 1,
+        "contact_not_null": false
+      }
+    ],
+    "created": 1598429103000,
+    "updated": 1598429103000
+  },
+  {
+    "tenant": {
+      "Identifier": "QA_CDL_MultiTemplate_Account360_6.QA_CDL_MultiTemplate_Account360_6.Production",
+      "DisplayName": "QA_CDL_MultiTemplate_Account360_6",
+      "Pid": 283200,
+      "RegisteredTime": 1597821933529,
+      "UIVersion": "4.0",
+      "Status": "ACTIVE",
+      "TenantType": "QA",
+      "Contract": "QA_CDL_MultiTemplate_Account360_6",
+      "EntitledApps": "Lattice",
+      "NotificationLevel": "ERROR",
+      "NotificationType": "ALL_USER",
+      "JobNotificationLevel": {}
+    },
+    "pid": 103,
+    "stage_name": "Closed",
+    "display_name": "Closed",
+    "description": "Opportunity is closed",
+    "display_color_code": "#07da63",
+    "priority": 6,
+    "predicates": [
+      {
+        "stream_type": "Opportunity",
+        "period_days": 90,
+        "stream_fields_to_filter": [
+          {
+            "comparison_type": "CONTAINS",
+            "column_name": "Detail1",
+            "column_value": "Closed%",
+            "column_values": null
+          }
+        ],
+        "no_of_events": 1,
+        "contact_not_null": false
+      }
+    ],
+    "created": 1598429103000,
+    "updated": 1598429103000
+  },
+  {
+    "tenant": {
+      "Identifier": "QA_CDL_MultiTemplate_Account360_6.QA_CDL_MultiTemplate_Account360_6.Production",
+      "DisplayName": "QA_CDL_MultiTemplate_Account360_6",
+      "Pid": 283200,
+      "RegisteredTime": 1597821933529,
+      "UIVersion": "4.0",
+      "Status": "ACTIVE",
+      "TenantType": "QA",
+      "Contract": "QA_CDL_MultiTemplate_Account360_6",
+      "EntitledApps": "Lattice",
+      "NotificationLevel": "ERROR",
+      "NotificationType": "ALL_USER",
+      "JobNotificationLevel": {}
+    },
+    "pid": 104,
+    "stage_name": "Opportunity",
+    "display_name": "Opportunity",
+    "description": "Opportunity on Account",
+    "display_color_code": "#0C99BA",
+    "priority": 5,
+    "predicates": [
+      {
+        "stream_type": "Opportunity",
+        "period_days": 90,
+        "stream_fields_to_filter": [
+          {
+            "comparison_type": "NOT_CONTAINS",
+            "column_name": "Detail1",
+            "column_value": "Closed%",
+            "column_values": null
+          }
+        ],
+        "no_of_events": 1,
+        "contact_not_null": false
+      }
+    ],
+    "created": 1598429103000,
+    "updated": 1598429103000
+  },
+  {
+    "tenant": {
+      "Identifier": "QA_CDL_MultiTemplate_Account360_6.QA_CDL_MultiTemplate_Account360_6.Production",
+      "DisplayName": "QA_CDL_MultiTemplate_Account360_6",
+      "Pid": 283200,
+      "RegisteredTime": 1597821933529,
+      "UIVersion": "4.0",
+      "Status": "ACTIVE",
+      "TenantType": "QA",
+      "Contract": "QA_CDL_MultiTemplate_Account360_6",
+      "EntitledApps": "Lattice",
+      "NotificationLevel": "ERROR",
+      "NotificationType": "ALL_USER",
+      "JobNotificationLevel": {}
+    },
+    "pid": 105,
+    "stage_name": "Known Engaged",
+    "display_name": "Known Engaged",
+    "description": "Account is being engaged with",
+    "display_color_code": "#59bfff",
+    "priority": 4,
+    "predicates": [
+      {
+        "stream_type": "MarketingActivity",
+        "period_days": 90,
+        "stream_fields_to_filter": [
+          {
+            "comparison_type": "EQUAL",
+            "column_name": "EventType",
+            "column_value": "WebVisit",
+            "column_values": null
+          }
+        ],
+        "no_of_events": 1,
+        "contact_not_null": false
+      }
+    ],
+    "created": 1598429103000,
+    "updated": 1598429103000
+  },
+  {
+    "tenant": {
+      "Identifier": "QA_CDL_MultiTemplate_Account360_6.QA_CDL_MultiTemplate_Account360_6.Production",
+      "DisplayName": "QA_CDL_MultiTemplate_Account360_6",
+      "Pid": 283200,
+      "RegisteredTime": 1597821933529,
+      "UIVersion": "4.0",
+      "Status": "ACTIVE",
+      "TenantType": "QA",
+      "Contract": "QA_CDL_MultiTemplate_Account360_6",
+      "EntitledApps": "Lattice",
+      "NotificationLevel": "ERROR",
+      "NotificationType": "ALL_USER",
+      "JobNotificationLevel": {}
+    },
+    "pid": 106,
+    "stage_name": "Engaged",
+    "display_name": "Engaged",
+    "description": "Account has website visits",
+    "display_color_code": "#055a8c",
+    "priority": 3,
+    "predicates": [
+      {
+        "stream_type": "WebVisit",
+        "period_days": 14,
+        "stream_fields_to_filter": [],
+        "no_of_events": 1,
+        "contact_not_null": false
+      }
+    ],
+    "created": 1598429103000,
+    "updated": 1598429103000
+  },
+  {
+    "tenant": {
+      "Identifier": "QA_CDL_MultiTemplate_Account360_6.QA_CDL_MultiTemplate_Account360_6.Production",
+      "DisplayName": "QA_CDL_MultiTemplate_Account360_6",
+      "Pid": 283200,
+      "RegisteredTime": 1597821933529,
+      "UIVersion": "4.0",
+      "Status": "ACTIVE",
+      "TenantType": "QA",
+      "Contract": "QA_CDL_MultiTemplate_Account360_6",
+      "EntitledApps": "Lattice",
+      "NotificationLevel": "ERROR",
+      "NotificationType": "ALL_USER",
+      "JobNotificationLevel": {}
+    },
+    "pid": 107,
+    "stage_name": "Aware",
+    "display_name": "Aware",
+    "description": "Account is showing interest",
+    "display_color_code": "#094c72",
+    "priority": 2,
+    "predicates": [
+      {
+        "stream_type": "DnbIntentData",
+        "period_days": 28,
+        "stream_fields_to_filter": [],
+        "no_of_events": 1,
+        "contact_not_null": false
+      }
+    ],
+    "created": 1598429103000,
+    "updated": 1598429103000
+  },
+  {
+    "tenant": {
+      "Identifier": "QA_CDL_MultiTemplate_Account360_6.QA_CDL_MultiTemplate_Account360_6.Production",
+      "DisplayName": "QA_CDL_MultiTemplate_Account360_6",
+      "Pid": 283200,
+      "RegisteredTime": 1597821933529,
+      "UIVersion": "4.0",
+      "Status": "ACTIVE",
+      "TenantType": "QA",
+      "Contract": "QA_CDL_MultiTemplate_Account360_6",
+      "EntitledApps": "Lattice",
+      "NotificationLevel": "ERROR",
+      "NotificationType": "ALL_USER",
+      "JobNotificationLevel": {}
+    },
+    "pid": 108,
+    "stage_name": "Dark",
+    "display_name": "Dark",
+    "description": "No Activity",
+    "display_color_code": "#0c3953",
+    "priority": 1,
+    "predicates": [
+      {
+        "stream_type": null,
+        "period_days": 0,
+        "stream_fields_to_filter": null,
+        "no_of_events": 0,
+        "contact_not_null": false
+      }
+    ],
+    "created": 1598429103000,
+    "updated": 1598429103000
+  }
+]
