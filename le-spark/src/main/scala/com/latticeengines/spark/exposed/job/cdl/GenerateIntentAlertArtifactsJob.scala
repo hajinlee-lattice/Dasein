@@ -20,7 +20,7 @@ class GenerateIntentAlertArtifactsJob extends AbstractSparkJob[GenerateIntentAle
   private val TIMERANGE_LAST_WEEK = "w_1_w"
 
   private val NEW_ACCOUNTS_ROW_LIMIT = 50000
-  private val ALL_ACCOUNTS_ROW_LIMIT = 200000
+  private val ALL_ACCOUNTS_ROW_LIMIT = 125000
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateIntentAlertArtifactsConfig]): Unit = {
     val config: GenerateIntentAlertArtifactsConfig = lattice.config
