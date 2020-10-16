@@ -15,13 +15,12 @@ public class ProfileProxy extends MicroserviceRestApiProxy {
         super("datacloudapi/profile");
     }
 
-    @SuppressWarnings("unchecked")
     public Map<String, ProfileArgument> getAMAttrsConfig(String dataCloudVersion) {
         String url = constructUrl("/arguments");
         if (StringUtils.isNotBlank(dataCloudVersion)) {
             url += "?dataCloudVersion=" + dataCloudVersion;
         }
-        return getKryo("getAMAttrsConfig", url, Map.class);
+        return getMap("getAMAttrsConfig", url, String.class, ProfileArgument.class);
     }
 
 }
