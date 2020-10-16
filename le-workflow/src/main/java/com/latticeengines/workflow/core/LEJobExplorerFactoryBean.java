@@ -11,6 +11,8 @@ import org.springframework.batch.core.repository.dao.JobInstanceDao;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+
 public class LEJobExplorerFactoryBean extends JobExplorerFactoryBean {
 
     private LEJobExecutionRetriever leJobExecutionRetriever;
@@ -34,7 +36,9 @@ public class LEJobExplorerFactoryBean extends JobExplorerFactoryBean {
         dao.setJdbcTemplate(jdbcTemplate);
         dao.setLobHandler(null);
         dao.setTablePrefix(tablePrefix);
-        dao.setSerializer(new Jackson2ExecutionContextStringSerializer());
+        Jackson2ExecutionContextStringSerializer serializer = new Jackson2ExecutionContextStringSerializer();
+        serializer.setObjectMapper(JsonUtils.getObjectMapper());
+        dao.setSerializer(serializer);
         dao.afterPropertiesSet();
         return dao;
     }
