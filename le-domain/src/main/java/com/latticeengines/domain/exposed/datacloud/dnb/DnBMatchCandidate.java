@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.dnb;
 
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -47,6 +48,9 @@ public class DnBMatchCandidate {
 
     @JsonProperty("Classification")
     private Classification classification;
+
+    @JsonIgnore
+    private Long matchDuration;
 
     public String getMatchType() {
         return matchType;
@@ -94,6 +98,14 @@ public class DnBMatchCandidate {
 
     public void setClassification(Classification classification) {
         this.classification = classification;
+    }
+
+    public Long getMatchDuration() {
+        return matchDuration;
+    }
+
+    public void setMatchDuration(Long matchDuration) {
+        this.matchDuration = matchDuration;
     }
 
     public enum Classification {

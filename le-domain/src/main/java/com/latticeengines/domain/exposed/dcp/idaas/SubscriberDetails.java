@@ -79,7 +79,7 @@ public class SubscriberDetails {
     private String customerParam4;
 
     @JsonProperty("is_overage_allowed")
-    private Boolean isOverageAllowed;
+    private String isOverageAllowed;
 
     @JsonProperty("mail")
     private String mail;
@@ -89,7 +89,7 @@ public class SubscriberDetails {
 
     public static class Address {
 
-        @JsonProperty("country_code")
+        @JsonProperty("iso2_country_code")
         private String countryCode;
 
         @JsonProperty("street")
@@ -271,11 +271,11 @@ public class SubscriberDetails {
         this.customerParam4 = customerParam4;
     }
 
-    public Boolean getOverageAllowed() {
+    public String getOverageAllowed() {
         return isOverageAllowed;
     }
 
-    public void setOverageAllowed(Boolean overageAllowed) {
+    public void setOverageAllowed(String overageAllowed) {
         isOverageAllowed = overageAllowed;
     }
 

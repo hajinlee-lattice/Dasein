@@ -392,6 +392,7 @@ public class FuzzyMatchHelper implements DbHelper {
         }
 
         List<PrimeAccount> accounts;
+        long start = System.currentTimeMillis();
         try (PerformanceTimer timer = //
                      new PerformanceTimer("Fetch " + ids.size() + " accounts from Direct+.")) {
             List<DirectPlusEnrichRequest> requests = new ArrayList<>();
@@ -403,6 +404,7 @@ public class FuzzyMatchHelper implements DbHelper {
             }
             accounts = directPlusEnrichService.fetch(requests);
         }
+        long duration = System.currentTimeMillis() - start;
 
         Map<String, PrimeAccount> dunsAccountMap = accounts.stream() //
                 .filter(pa -> pa != null && StringUtils.isNotBlank(pa.getId())) //
@@ -423,6 +425,7 @@ public class FuzzyMatchHelper implements DbHelper {
                     fetchResult.setRecordId(copy.getId());
                     record.setFetchResult(fetchResult);
                     List<VboUsageEvent> usageEvents = parseEnrichEvents(primeAccount, trackingBlockIds);
+                    usageEvents.forEach(e -> e.setResponseTime(duration));
                     record.addUsageEvents(usageEvents);
                 }
             }
