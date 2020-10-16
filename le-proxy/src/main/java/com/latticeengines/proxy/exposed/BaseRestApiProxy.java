@@ -36,6 +36,7 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriTemplate;
 
+import com.esotericsoftware.kryo.KryoException;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -440,7 +441,12 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <T> T getKryo(final String method, final String url, final Class<T> returnValueClazz) {
-        return get(method, url, returnValueClazz, true);
+        try {
+            return get(method, url, returnValueClazz, true);
+        } catch (KryoException e) {
+            log.warn("Failed to deserialize kryo response, fall back to JSON", e);
+            return get(method, url, returnValueClazz, false);
+        }
     }
 
     private <T> T get(final String method, final String url, final Class<T> returnValueClazz, boolean useKryo) {

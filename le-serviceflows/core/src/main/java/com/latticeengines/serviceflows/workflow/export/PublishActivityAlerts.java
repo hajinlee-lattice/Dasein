@@ -82,10 +82,10 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
         }
         String alertTableName;
         if (configuration.isShouldRebuild()) {
-            alertTableName = getObjectFromContext(ACTIVITY_ALERT_MASTER_TABLE_NAME, String.class);
+            alertTableName = getStringValueFromContext(ACTIVITY_ALERT_MASTER_TABLE_NAME);
             log.info("In rebuild mode, publishing master activity alert data, tablename {}", alertTableName);
         } else {
-            alertTableName = getObjectFromContext(ACTIVITY_ALERT_DIFF_TABLE_NAME, String.class);
+            alertTableName = getStringValueFromContext(ACTIVITY_ALERT_DIFF_TABLE_NAME);
             log.info("Publishing diff activity alert data, tablename {}", alertTableName);
         }
 
