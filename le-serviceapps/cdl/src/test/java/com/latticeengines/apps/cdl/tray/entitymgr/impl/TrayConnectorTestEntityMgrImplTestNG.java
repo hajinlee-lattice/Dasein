@@ -41,14 +41,21 @@ public class TrayConnectorTestEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         test1.setTestState(DataIntegrationEventType.WorkflowSubmitted);
         trayConnectorTestEntityMgr.create(test1);
 
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
+
+        retry.execute(context -> {
+            TrayConnectorTest createdTest = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
+            Assert.assertNotNull(createdTest);
+            return true;
+        });
+
         TrayConnectorTest newTest = new TrayConnectorTest();
         newTest.setWorkflowRequestId(workflowRequestId);
         newTest.setTestState(DataIntegrationEventType.Completed);
         TrayConnectorTest test = trayConnectorTestEntityMgr.updateTrayConnectorTest(newTest);
         Assert.assertEquals(test.getTestState(), DataIntegrationEventType.Completed);
 
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
-                Collections.singleton(AssertionError.class), null);
         retry.execute(context -> {
             TrayConnectorTest currTest = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
             Assert.assertEquals(currTest.getTestState(), DataIntegrationEventType.Completed);
@@ -65,6 +72,12 @@ public class TrayConnectorTestEntityMgrImplTestNG extends CDLFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void testFindUnfinishedTests() {
+        List<TrayConnectorTest> hangingTests = trayConnectorTestEntityMgr.findUnfinishedTests();
+        if (hangingTests.size() != 0) {
+            hangingTests.forEach(test -> {
+                trayConnectorTestEntityMgr.deleteByWorkflowRequestId(test.getWorkflowRequestId());
+            });
+        }
 
         TrayConnectorTest test1 = new TrayConnectorTest();
         test1.setCDLExternalSystemName(CDLExternalSystemName.Facebook);
@@ -83,8 +96,8 @@ public class TrayConnectorTestEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         test2.setTestResult(TrayConnectorTestResultType.Succeeded);
         trayConnectorTestEntityMgr.create(test2);
 
-        List<TrayConnectorTest> timedOutTests = trayConnectorTestEntityMgr.findUnfinishedTests();
-        Assert.assertEquals(timedOutTests.size(), 1);
+        List<TrayConnectorTest> unfinishedTests = trayConnectorTestEntityMgr.findUnfinishedTests();
+        Assert.assertEquals(unfinishedTests.size(), 1);
 
         // Clean up from here
         trayConnectorTestEntityMgr.deleteByWorkflowRequestId(workflowRequestId1);
