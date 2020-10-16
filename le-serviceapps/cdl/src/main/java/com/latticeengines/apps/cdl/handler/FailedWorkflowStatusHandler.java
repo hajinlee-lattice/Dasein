@@ -82,15 +82,12 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
         if (MessageType.Information.equals(MessageType.valueOf(messageType))) {
             saveErrorFile(eventDetail, statusMonitor);
-            saveErrorNumber(statusMonitor);
         } else if (MessageType.Event.equals(MessageType.valueOf(messageType))) {
             saveErrorMessage(eventDetail, statusMonitor);
         }
     }
 
-    private void saveErrorNumber(DataIntegrationStatusMonitor statusMonitor) {
-        String launchId = statusMonitor.getEntityId();
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
+    private void saveErrorNumber(PlayLaunch playLaunch) {
         Long totalAccounts = playLaunch.getAccountsLaunched();
         Long totalContacts = playLaunch.getContactsLaunched();
 
@@ -118,9 +115,12 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
     private void updatePlayLaunchAndSendEmail(String launchId) {
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
+
+        saveErrorNumber(playLaunch);
         playLaunch.setLaunchState(LaunchState.SyncFailed);
         recoverLaunchUniverse(launchId, playLaunchChannelService, playLaunchService);
         playLaunchService.update(playLaunch);
+
         PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getId());
         try {
             emailProxy.sendPlayLaunchErrorEmail(
