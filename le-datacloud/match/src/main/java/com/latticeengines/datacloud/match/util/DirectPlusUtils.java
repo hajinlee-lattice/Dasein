@@ -255,6 +255,9 @@ public final class DirectPlusUtils {
         JsonNode jsonNode = JsonUtils.deserialize(response, JsonNode.class);
         if (DnBAPIType.REALTIME_ENTITY.equals(apiType)) {
             List<DnBMatchCandidate> candidates = parseRealTimeCandidates(jsonNode);
+            if (context.getDuration() != null) {
+                candidates.forEach(candidate -> candidate.setMatchDuration(context.getDuration()));
+            }
             context.setCandidates(candidates);
         }
     }
