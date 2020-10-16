@@ -14,6 +14,7 @@ import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -188,7 +189,10 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     private void addToModelMap(Map<String, List<IntentAlertEmailInfo.Intent>> map,
             IntentAlertEmailInfo.Intent subscriptionItem) {
         String modelName = subscriptionItem.getModel();
-        map.putIfAbsent(modelName, new ArrayList<>()).add(subscriptionItem);
+        if (StringUtils.isNotBlank(modelName)) {
+            map.putIfAbsent(modelName, new ArrayList<>());
+            map.get(modelName).add(subscriptionItem);
+        }
     }
 
     private Object getTopListFromMap(Map<String, IntentAlertEmailInfo.TopItem> map) {
