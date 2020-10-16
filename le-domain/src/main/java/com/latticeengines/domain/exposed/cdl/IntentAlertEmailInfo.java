@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.BUYING_STAGE;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.RESEARCHING_STAGE;
+
 import java.io.Serializable;
 
 import org.apache.avro.generic.GenericRecord;
@@ -16,17 +19,28 @@ public class IntentAlertEmailInfo {
 
     public enum StageType {
 
-        BUY("buying"), RESEARCH("researching");
+        BUY(BUYING_STAGE, "Buying"), RESEARCH(RESEARCHING_STAGE, "Research");
 
-        private String type;
+        private String name;
+        private String displayName;
 
-        StageType(String type) {
-            this.type = type;
+        StageType(String name, String displayName) {
+            this.name = name;
+            this.displayName = displayName;
+        }
+
+        public static String parseStageName(String stageName) {
+            for (StageType type : values()) {
+                if (type.name.equalsIgnoreCase(stageName)) {
+                    return type.toString();
+                }
+            }
+            return stageName;
         }
 
         @Override
         public String toString() {
-            return this.type;
+            return this.displayName;
         }
     }
 
@@ -92,7 +106,7 @@ public class IntentAlertEmailInfo {
             this.location = getRecordByFieldName(record, "STATE_PROVINCE_ABBR");
             this.model = getRecordByFieldName(record, "ModelName");
             this.companyName = getRecordByFieldName(record, "LDC_Name");
-            this.stage = getRecordByFieldName(record, "Stage");
+            this.stage = StageType.parseStageName(getRecordByFieldName(record, "Stage"));
         }
 
         private String getRecordByFieldName(GenericRecord record, String name) {
