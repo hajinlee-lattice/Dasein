@@ -54,7 +54,7 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testFailedWorkflowStatusHandler() {
+    public void testFailureRecovery() {
         Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
         Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
         Assert.assertNotEquals(playLaunch.getLaunchState(), LaunchState.SyncFailed);

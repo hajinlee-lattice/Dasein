@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.cdl.MessageType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.proxy.exposed.pls.EmailProxy;
 
 @Component
@@ -81,8 +82,22 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
 
         if (MessageType.Information.equals(MessageType.valueOf(messageType))) {
             saveErrorFile(eventDetail, statusMonitor);
+            saveErrorNumber(statusMonitor);
         } else if (MessageType.Event.equals(MessageType.valueOf(messageType))) {
             saveErrorMessage(eventDetail, statusMonitor);
+        }
+    }
+
+    private void saveErrorNumber(DataIntegrationStatusMonitor statusMonitor) {
+        String launchId = statusMonitor.getEntityId();
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
+        Long totalAccounts = playLaunch.getAccountsLaunched();
+        Long totalContacts = playLaunch.getContactsLaunched();
+
+        if (playLaunch.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS) {
+            playLaunch.setAccountsErrored(totalAccounts);
+        } else {
+            playLaunch.setContactsErrored(totalContacts);
         }
     }
 
