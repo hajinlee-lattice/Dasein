@@ -106,7 +106,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         ActivityTimelineQuery query = buildActivityTimelineQuery(BusinessEntity.Contact, contactId, customerSpace,
                 parseTimePeriod(customerSpace, timelinePeriod));
 
-        return activityProxy.getData(customerSpace, null, query);
+        return filterStreamData(activityProxy.getData(customerSpace, null, query), streamTypes);
     }
 
     @Override
