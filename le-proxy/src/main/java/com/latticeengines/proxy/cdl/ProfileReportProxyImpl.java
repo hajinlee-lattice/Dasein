@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.AtlasProfileReportRequest;
 import com.latticeengines.domain.exposed.cdl.AtlasProfileReportStatus;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.cdl.ProfileReportProxy;
 
@@ -25,7 +26,7 @@ public class ProfileReportProxyImpl extends MicroserviceRestApiProxy implements 
                 shortenCustomerSpace(customerSpace));
         ResponseDocument<String> resp = post("submit profile report job", url, request, ResponseDocument.class);
         String appIdStr = resp.getResult();
-        return ApplicationId.fromString(appIdStr);
+        return ApplicationIdUtils.toApplicationIdObj(appIdStr);
     }
 
     @Override

@@ -33,9 +33,12 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Service("uploadService")
 public class UploadServiceImpl implements UploadService {
@@ -56,6 +59,9 @@ public class UploadServiceImpl implements UploadService {
 
     @Inject
     private SourceFileProxy sourceFileProxy;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     @Override
     public boolean hasUnterminalUploads(String customerSpace, String excludeUploadId) {
@@ -219,7 +225,19 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public UploadDetails getUploadByUploadId(String customerSpace, String uploadId, Boolean includeConfig) {
         Upload upload = expandStatistics(uploadEntityMgr.findByUploadId(uploadId));
-        return getUploadDetails(upload, includeConfig);
+        UploadDetails details = getUploadDetails(upload, includeConfig);
+        String appId = details.getUploadDiagnostics().getApplicationId();
+        if (ApplicationIdUtils.isFakeApplicationId(appId)) {
+            log.info("Upload {} has a fake app id {}, trying to update it to the true app id.", uploadId, appId);
+            Job job = workflowProxy.getWorkflowJobFromApplicationId(appId, customerSpace);
+            String newId = job.getApplicationId();
+            if (!ApplicationIdUtils.isFakeApplicationId(newId)) {
+                log.info("Updating app id for upload {} from {} to {}", uploadId, appId, newId);
+                details.getUploadDiagnostics().setApplicationId(newId);
+                uploadEntityMgr.update(upload);
+            }
+        }
+        return details;
     }
 
     @Override

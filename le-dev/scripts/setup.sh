@@ -23,7 +23,7 @@ echo "You are using this python: ${PYTHON}"
 echo "You are using this java: ${JAVA_HOME}"
 
 source "${WSHOME}/le-dev/scripts/check_aws_creds_expiration.sh"
-#check_aws_creds_expiration
+check_aws_creds_expiration
 
 # Expand aliases
 echo "Expanding aliases."
