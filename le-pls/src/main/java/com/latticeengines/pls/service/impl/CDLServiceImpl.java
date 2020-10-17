@@ -114,7 +114,7 @@ public class CDLServiceImpl implements CDLService {
     private static final String PATHNAME = "N/A";
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
     private static final String DELETE_FAIL_TITLE = "Validation Error";
-    private static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs\">Data Processing Job page</a>.</p>";
+    private static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs.data\">Data Processing Job page</a>.</p>";
 
     private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
     private static final String DEFAULT_SYSTEM = "DefaultSystem";
