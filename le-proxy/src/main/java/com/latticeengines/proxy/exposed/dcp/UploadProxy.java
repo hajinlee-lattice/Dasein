@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadDiagnostics;
 import com.latticeengines.domain.exposed.dcp.UploadRequest;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -111,7 +112,7 @@ public class UploadProxy extends MicroserviceRestApiProxy implements ProxyInterf
         String baseUrl = "/customerspaces/{customerSpace}/uploads/startimport";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
         String appIdStr = post("Start DCP import", url, request, String.class);
-        return ApplicationId.fromString(appIdStr);
+        return ApplicationIdUtils.toApplicationIdObj(appIdStr);
     }
 
     public void updateDropFileTime(String customerSpace, String uploadId, long dropFileTime) {
