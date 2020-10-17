@@ -61,18 +61,18 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
     public DataIntegrationStatusMonitor handleWorkflowState(DataIntegrationStatusMonitor statusMonitor,
             DataIntegrationStatusMonitorMessage status) {
 
+        checkStatusMonitorExists(statusMonitor, status);
+        String launchId = statusMonitor.getEntityId();
+
         try {
-            checkStatusMonitorExists(statusMonitor, status);
             statusMonitor.setStatus(DataIntegrationEventType.Failed.toString());
-
             handleErrorObject(statusMonitor, status);
-
-            String launchId = statusMonitor.getEntityId();
-            updatePlayLaunchAndSendEmail(launchId);
+            updatePlayLaunch(launchId);
         } catch (Exception e) {
             log.error("Failed to process this message: " + e.getMessage());
         }
 
+        sendEmail(launchId);
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
     }
 
@@ -116,15 +116,19 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
                 JsonUtils.serialize(eventDetail)));
     }
 
-    private void updatePlayLaunchAndSendEmail(String launchId) {
+    private void updatePlayLaunch(String launchId) {
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
 
         saveErrorNumber(playLaunch);
         playLaunch.setLaunchState(LaunchState.SyncFailed);
         recoverLaunchUniverse(launchId, playLaunchChannelService, playLaunchService);
         playLaunchService.update(playLaunch);
+    }
 
+    private void sendEmail(String launchId) {
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
         PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getId());
+
         try {
             emailProxy.sendPlayLaunchErrorEmail(
                     MultiTenantContext.getTenant().getId(), channel.getUpdatedBy(), playLaunch);
