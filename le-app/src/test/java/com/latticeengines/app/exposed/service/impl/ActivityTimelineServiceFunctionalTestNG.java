@@ -6,22 +6,37 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.collections.CollectionUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.service.ActivityTimelineService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.testframework.AppFunctionalTestNGBase;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.query.ActivityTimelineQuery;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -39,7 +54,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
     private final String TEST_ACCOUNT_ID = "0014P000028BlGMQA0";
 
     @BeforeClass(groups = "functional")
-    public void setup() {
+    public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
 
         ActivityProxy spiedActivityProxy = spy(new ActivityProxyImpl());
@@ -59,12 +74,18 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
         doReturn(JsonUtils.convertList(raws, JourneyStage.class)).when(spiedActivityStoreProxy)
                 .getJourneyStages(any(String.class));
         ((ActivityTimelineServiceImpl) activityTimelineService).setActivityStoreProxy(spiedActivityStoreProxy);
+
+        Path cdlPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(mainTestTenant.getId()), "CDL");
+        Path fakeCurrentDatePath = cdlPath.append("FakeCurrentDate");
+        CamilleEnvironment.getCamille().upsert(fakeCurrentDatePath, new Document("2020-08-12"),
+                ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
 
     @Test(groups = "functional")
     public void testGetMetrics() {
         Map<String, Integer> metrics = activityTimelineService.getActivityTimelineMetrics(TEST_ACCOUNT_ID, null, null);
-        Assert.assertEquals(metrics.get("newActivities").intValue(), 139);
+        Assert.assertEquals(metrics.get("newActivities").intValue(), 93);
 
         Assert.assertEquals(metrics.get("newIdentifiedContacts").intValue(), 0);
 
@@ -76,11 +97,14 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
     @Test(groups = "functional")
     public void testGetActivityWithBackStage() {
         List<Map<String, Object>> dataWithbackStage = activityTimelineService
-                .getCompleteTimelineActivities(TEST_ACCOUNT_ID, null, null, null).getData();
+                .getAccountActivities(TEST_ACCOUNT_ID, null, null, //
+                        Arrays.stream(AtlasStream.StreamType.values()).collect(Collectors.toSet()), null)
+                .getData();
+        Assert.assertEquals(dataWithbackStage.size(), 305);
         Map<String, Object> backStageEvent = dataWithbackStage.get(dataWithbackStage.size() - 1);
-        Assert.assertTrue(backStageEvent.get("StreamType").equals("JourneyStage"));
-        Assert.assertTrue(backStageEvent.get("Detail1").equals("Dark"));
-        Assert.assertTrue(backStageEvent.get("EventTimestamp").equals(1595030400000L));
+        Assert.assertEquals(backStageEvent.get("StreamType"), "JourneyStage");
+        Assert.assertEquals(backStageEvent.get("Detail1"), "Engaged");
+        Assert.assertEquals(backStageEvent.get("EventTimestamp"), 1589068800000L);
     }
 
     private <T> T generateTestData(String filePath, Class<T> clazz) {
