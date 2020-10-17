@@ -12,10 +12,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -64,41 +67,34 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
 
     @Value("${app.timeline.default.period}")
     private String defaultTimelinePeriod;
+
     @Value("${app.timeline.activity.metrics.period}")
     private String defaultActivityMetricsPeriod;
 
     private static final String componentName = "CDL";
 
     @Override
-    public DataPage getCompleteTimelineActivities(String accountId, String timelinePeriod, String backPeriod,
-            Map<String, String> orgInfo) {
+    public DataPage getAccountActivities(String accountId, String timelinePeriodStr, String backPeriodStr,
+            Set<AtlasStream.StreamType> streamTypes, Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
+        Period timelinePeriod = parseTimePeriod(customerSpace,
+                StringUtils.isNotBlank(timelinePeriodStr) ? timelinePeriodStr : defaultTimelinePeriod);
+        Period backPeriod = parseTimePeriod(customerSpace,
+                StringUtils.isNotBlank(backPeriodStr) ? backPeriodStr : defaultBackPeriod);
+        DataPage dataPage;
+        if (streamTypes.contains(AtlasStream.StreamType.JourneyStage)) {
+            dataPage = getAccountActivities(customerSpace, accountId, timelinePeriod.plus(backPeriod), orgInfo);
+            dataPage = postProcessForJourneyStages(customerSpace, dataPage, timelinePeriod, streamTypes);
+        } else {
+            dataPage = getAccountActivities(customerSpace, accountId, timelinePeriod, orgInfo);
+        }
 
-        timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultTimelinePeriod;
-        backPeriod = StringUtils.isNotBlank(backPeriod) ? backPeriod : defaultBackPeriod;
-
-        String internalAccountId = getInternalAccountId(accountId, orgInfo, customerSpace);
-
-        ActivityTimelineQuery query = buildActivityTimelineQuery(BusinessEntity.Account, internalAccountId,
-                customerSpace, timelinePeriod);
-        Instant start = query.getStartTimeStamp();
-        query.setEndTimeStamp(start);
-        query.setStartTimeStamp(start.minus(Integer.valueOf(backPeriod.replaceAll("[^0-9]", "")), ChronoUnit.DAYS));
-
-        DataPage data = getAccountActivities(accountId, timelinePeriod, orgInfo);
-        List<Map<String, Object>> dataFlow = data.getData();
-        Map<String, Object> event = dataFlow.isEmpty() ? null : dataFlow.get(0);
-        DataPage backData = activityProxy.getData(customerSpace, null, query);
-        dataFlow.add(getJourneyStageEvent(customerSpace, backData, start.toEpochMilli(), event));
-        data.setData(dataFlow);
-
-        return data;
+        return filterStreamData(dataPage, streamTypes);
     }
-
 
     @Override
     public DataPage getContactActivities(String accountId, String contactId, String timelinePeriod,
-            Map<String, String> orgInfo) {
+            Set<AtlasStream.StreamType> streamTypes, Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
         timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultTimelinePeriod;
 
@@ -108,7 +104,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         String internalAccountId = getInternalAccountId(accountId, orgInfo, customerSpace);
 
         ActivityTimelineQuery query = buildActivityTimelineQuery(BusinessEntity.Contact, contactId, customerSpace,
-                timelinePeriod);
+                parseTimePeriod(customerSpace, timelinePeriod));
 
         return activityProxy.getData(customerSpace, null, query);
     }
@@ -122,25 +118,99 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                 CustomerSpace.shortenCustomerSpace(customerSpace)));
 
         timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultActivityMetricsPeriod;
-        DataPage data = getAccountActivities(accountId, timelinePeriod, orgInfo);
+        DataPage data = getAccountActivities(customerSpace, accountId, parseTimePeriod(customerSpace, timelinePeriod),
+                orgInfo);
 
-        Map<String, Integer> metrics = new HashMap<String, Integer>();
+        Map<String, Integer> metrics = new HashMap<>();
         metrics.put("newActivities", dataFilter(data, AtlasStream.StreamType.WebVisit, null).size());
+
         metrics.put("newIdentifiedContacts",
-                dataFilter(data, AtlasStream.StreamType.MarketingActivity, SourceType.MARKETO).stream()
-                        .filter(t -> t.get("EventType").equals("New Lead")).map(t -> t.get("ContactId")).distinct()
-                        .collect(Collectors.toList()).size());
+                (int) dataFilter(data, AtlasStream.StreamType.MarketingActivity, SourceType.MARKETO).stream()
+                        .filter(t -> t.get(InterfaceName.EventType.name()).equals("New Lead"))
+                        .map(t -> t.get(InterfaceName.ContactId.name())).distinct().count());
+
         metrics.put("newEngagements", dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
                 + dataFilter(data, AtlasStream.StreamType.MarketingActivity, null).size());
+
         metrics.put("newOpportunities",
-                dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
-                        .filter(t -> !t.get("Detail1").equals("Closed") && !t.get("Detail1").equals("Closed Won"))
-                        .collect(Collectors.toList()).size());
+                (int) dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
+                        .filter(t -> !t.get(InterfaceName.Detail1.name()).equals("Closed")
+                                && !t.get(InterfaceName.Detail1.name()).equals("Closed Won"))
+                        .count());
         return metrics;
     }
 
-    private String getInternalAccountId(String accountId, Map<String, String> orgInfo, String customerSpace) {
+    private DataPage filterStreamData(DataPage dataPage, Set<AtlasStream.StreamType> streamTypes) {
+        Set<String> streamTypeStrs = streamTypes.stream().map(AtlasStream.StreamType::name) //
+                .collect(Collectors.toSet());
+        dataPage.setData(dataPage.getData().stream()
+                .filter(event -> streamTypeStrs.contains((String) event.get(InterfaceName.StreamType.name())))
+                .collect(Collectors.toList()));
+        return dataPage;
+    }
 
+    private DataPage getAccountActivities(String customerSpace, String accountId, Period timelinePeriod,
+            Map<String, String> orgInfo) {
+        String internalAccountId = getInternalAccountId(accountId, orgInfo, customerSpace);
+        ActivityTimelineQuery query = buildActivityTimelineQuery(BusinessEntity.Account, internalAccountId,
+                customerSpace, timelinePeriod);
+
+        return activityProxy.getData(customerSpace, null, query);
+    }
+
+    private DataPage postProcessForJourneyStages(String customerSpace, DataPage dataPage, Period timelinePeriod,
+            Set<AtlasStream.StreamType> streamTypes) {
+        if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData()))
+            return dataPage;
+
+        if (streamTypes.contains(AtlasStream.StreamType.JourneyStage)) {
+            Instant cutoffTimeStamp = getTimeWindowFromPeriod(customerSpace, timelinePeriod).getLeft();
+            Map<String, Object> datum = getPrevailingJourneyStageEvent(customerSpace, dataPage, cutoffTimeStamp);
+
+            dataPage.setData(dataPage.getData().stream().filter(
+                    event -> (Long) event.get(InterfaceName.EventTimestamp.name()) >= cutoffTimeStamp.toEpochMilli())
+                    .collect(Collectors.toList()));
+
+            if (MapUtils.isNotEmpty(datum))
+                dataPage.getData().add(datum);
+        }
+        return dataPage;
+    }
+
+    private Map<String, Object> getPrevailingJourneyStageEvent(String customerSpace, DataPage dataPage,
+            Instant cutoffTimestamp) {
+        String accountId = (String) dataPage.getData().get(0).get(InterfaceName.AccountId.name());
+        return dataPage.getData().stream() //
+                .filter(event -> event.get(InterfaceName.StreamType.name())
+                        .equals(AtlasStream.StreamType.JourneyStage.name())) //
+                .filter(event -> (Long) event.get(InterfaceName.EventTimestamp.name()) <= cutoffTimestamp
+                        .toEpochMilli()) //
+                .max(Comparator.comparingLong(event -> (Long) event.get(InterfaceName.EventTimestamp.name()))) //
+                .orElse(getDefaultJourneyStageEvent(customerSpace, accountId, cutoffTimestamp.toEpochMilli()));
+    }
+
+    private Map<String, Object> getDefaultJourneyStageEvent(String customerSpace, String accountId,
+            long eventTimestamp) {
+        List<JourneyStage> stages = activityStoreProxy.getJourneyStages(customerSpace);
+        if (CollectionUtils.isEmpty(stages)) {
+            log.warn("No Journey Stage Config found for customerSpace=" + customerSpace);
+            return null;
+        }
+
+        JourneyStage defaultStageConfig = Collections.min(stages, Comparator.comparing(JourneyStage::getPriority));
+        Map<String, Object> stageEvent = new HashMap<>();
+
+        stageEvent.put(InterfaceName.StreamType.name(), AtlasStream.StreamType.JourneyStage.name());
+        stageEvent.put(InterfaceName.AccountId.name(), accountId);
+        stageEvent.put(InterfaceName.Detail1.name(), defaultStageConfig.getStageName());
+        stageEvent.put(InterfaceName.EventTimestamp.name(), eventTimestamp);
+        stageEvent.put(InterfaceName.EventType.name(),
+                ActivityStoreConstants.JourneyStage.STREAM_EVENT_TYPE_JOURNEYSTAGECHANGE);
+        stageEvent.put(InterfaceName.Source.name(), ActivityStoreConstants.JourneyStage.STREAM_SOURCE_ATLAS);
+        return stageEvent;
+    }
+
+    private String getInternalAccountId(String accountId, Map<String, String> orgInfo, String customerSpace) {
         String internalAccountId = dataLakeService.getInternalAccountId(accountId, orgInfo);
         if (StringUtils.isBlank(internalAccountId)) {
             throw new LedpException(LedpCode.LEDP_32000,
@@ -151,34 +221,22 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         return internalAccountId;
     }
 
-    private DataPage getAccountActivities(String accountId, String timelinePeriod, Map<String, String> orgInfo) {
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
-        timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultTimelinePeriod;
-
-        String internalAccountId = getInternalAccountId(accountId, orgInfo, customerSpace);
-
-        ActivityTimelineQuery query = buildActivityTimelineQuery(BusinessEntity.Account, internalAccountId,
-                customerSpace, timelinePeriod);
-
-        return activityProxy.getData(customerSpace, null, query);
-    }
-
     private List<Map<String, Object>> dataFilter(DataPage dataPage, AtlasStream.StreamType streamType,
             SourceType sourceType) {
         List<Map<String, Object>> result = dataPage.getData();
         if (streamType != null) {
-            result = result.stream().filter(t -> t.get("StreamType").equals(streamType.name()))
+            result = result.stream().filter(t -> t.get(InterfaceName.StreamType.name()).equals(streamType.name()))
                     .collect(Collectors.toList());
         }
         if (sourceType != null) {
-            result = result.stream().filter(t -> t.get("Source").equals(sourceType.getName()))
+            result = result.stream().filter(t -> t.get(InterfaceName.Source.name()).equals(sourceType.getName()))
                     .collect(Collectors.toList());
         }
         return result;
     }
 
     private ActivityTimelineQuery buildActivityTimelineQuery(BusinessEntity entity, String entityId,
-            String customerSpace, String timelinePeriod) {
+            String customerSpace, Period timelinePeriod) {
 
         ActivityTimelineQuery query = new ActivityTimelineQuery();
         query.setMainEntity(entity);
@@ -193,19 +251,21 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         return query;
     }
 
-    private Pair<Instant, Instant> getTimeWindowFromPeriod(String customerSpace, String timelinePeriod) {
+    private Period parseTimePeriod(String customerSpace, String timelinePeriod) {
         try {
-            Period expirationPeriod = Period.parse(timelinePeriod);
-            Instant now = getCurrentInstant(customerSpace);
-            return Pair.of(
-                    now.atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS).minus(expirationPeriod).toInstant(),
-                    now.atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS).toInstant());
+            return Period.parse(timelinePeriod);
         } catch (DateTimeParseException exp) {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { String.format(
                             "Unable to parse the time period for the timeline query:%s , customerSpace: %s ",
                             timelinePeriod, customerSpace) });
         }
+    }
+
+    private Pair<Instant, Instant> getTimeWindowFromPeriod(String customerSpace, Period timelinePeriod) {
+        Instant now = getCurrentInstant(customerSpace);
+        return Pair.of(now.atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS).minus(timelinePeriod).toInstant(),
+                now.atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS).toInstant());
     }
 
     private Instant getCurrentInstant(String customerSpace) {
@@ -219,39 +279,10 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
             return LocalDate.parse(fakeCurrentDate, DateTimeFormatter.ISO_DATE).atStartOfDay(ZoneOffset.UTC)
                     .toOffsetDateTime().toInstant();
         } catch (Exception e) {
-            log.warn("Failed to get FakeCurrentDate from ZK for " + customerSpace + ". Using current timestamp instead",
-                    e);
+            log.warn(
+                    "Failed to get FakeCurrentDate from ZK for " + customerSpace + ". Using current timestamp instead");
             return Instant.now();
         }
-    }
-
-    private Map<String, Object> getJourneyStageEvent(String customerSpace, DataPage data, Long timeStamp,
-            Map<String, Object> reference) {
-
-        Map<String, Object> stageEvent = new HashMap<String, Object>();
-
-        List<JourneyStage> stages = activityStoreProxy.getJourneyStages(customerSpace);
-        String stageName = stages.isEmpty() ? ActivityStoreConstants.JourneyStage.STREAM_DETAIL1_DARK
-                : Collections.min(stages, Comparator.comparing(s -> s.getPriority())).getStageName();
-        String accountId = reference == null ? "" : (String) reference.get(InterfaceName.AccountId.name());
-
-        stageEvent.put(InterfaceName.StreamType.name(), AtlasStream.StreamType.JourneyStage.name());
-        stageEvent.put(InterfaceName.AccountId.name(), accountId);
-        stageEvent.put(InterfaceName.Detail1.name(), stageName);
-        stageEvent.put(InterfaceName.EventTimestamp.name(), timeStamp);
-        stageEvent.put(InterfaceName.EventType.name(),
-                ActivityStoreConstants.JourneyStage.STREAM_EVENT_TYPE_JOURNEYSTAGECHANGE);
-        stageEvent.put(InterfaceName.Source.name(), ActivityStoreConstants.JourneyStage.STREAM_SOURCE_ATLAS);
-
-        Long max = timeStamp;
-        for (Map<String, Object> event : data.getData()) {
-            if (event.get(InterfaceName.StreamType.name()).equals(AtlasStream.StreamType.JourneyStage)
-                    && (Long) event.get(InterfaceName.EventTimestamp.name()) > max) {
-                stageEvent = event;
-                max = (Long) event.get(InterfaceName.EventTimestamp.name());
-            }
-        }
-        return stageEvent;
     }
 
     @VisibleForTesting

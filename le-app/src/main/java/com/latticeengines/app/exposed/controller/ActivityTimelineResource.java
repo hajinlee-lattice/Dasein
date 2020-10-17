@@ -67,8 +67,8 @@ public class ActivityTimelineResource {
     @SuppressWarnings("ConstantConditions")
     public DataPage getAccountActivities(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
-            @RequestParam(value = "back-timeline-period", required = false) String backPeriod,
             @RequestParam(value = "timeline-period", required = false) String timelinePeriod, //
+            @RequestParam(value = "back-timeline-period", required = false) String backPeriod, //
             @RequestParam(value = "streams", required = false) Set<AtlasStream.StreamType> streamTypes) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
@@ -77,11 +77,8 @@ public class ActivityTimelineResource {
         log.info(String.format("Retrieving activity timeline data of accountId(ID: %s) for %s period, ( tenantId: %s )",
                 accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
-        DataPage data = activityTimelineService.getCompleteTimelineActivities(accountId, timelinePeriod, backPeriod,
-                getOrgInfo(authToken));
-        filterStreamData(data, CollectionUtils.isEmpty(streamTypes) ? getDefaultStreams()
-                : streamTypes.stream().map(AtlasStream.StreamType::name).collect(Collectors.toSet()));
-        return data;
+        return activityTimelineService.getAccountActivities(accountId, timelinePeriod, backPeriod,
+                CollectionUtils.isEmpty(streamTypes) ? getDefaultStreams() : streamTypes, getOrgInfo(authToken));
     }
 
     @GetMapping("/accounts/{accountId:.+}/contacts/{contactId:.+}")
@@ -101,11 +98,9 @@ public class ActivityTimelineResource {
                 "Retrieving activity timeline data of contact(Id: %s), accountId(ID: %s) for %s period, ( tenantId: %s )",
                 contactId, accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
-        DataPage data = activityTimelineService.getContactActivities(accountId, contactId, timelinePeriod,
+        return activityTimelineService.getContactActivities(accountId, contactId, timelinePeriod,
+                CollectionUtils.isEmpty(streamTypes) ? getDefaultStreams() : streamTypes,
                 getOrgInfo(authToken));
-        filterStreamData(data, CollectionUtils.isEmpty(streamTypes) ? getDefaultStreams()
-                : streamTypes.stream().map(AtlasStream.StreamType::name).collect(Collectors.toSet()));
-        return data;
     }
 
     @GetMapping("/journey-stage-configuration")
@@ -149,20 +144,9 @@ public class ActivityTimelineResource {
         return null;
     }
 
-    private Set<String> getDefaultStreams() {
+    private Set<AtlasStream.StreamType> getDefaultStreams() {
         return Stream.of(defaultStreams.split(",")) //
                 .map(AtlasStream.StreamType::valueOf) //
-                .map(AtlasStream.StreamType::name) //
                 .collect(Collectors.toSet());
-    }
-
-    private void filterStreamData(DataPage data, Set<String> streamTypes) {
-        List<Map<String, Object>> filteredData = new ArrayList<>();
-        for (Map<String, Object> datum : data.getData()) {
-            if (datum.containsKey(InterfaceName.StreamType.name())
-                    && streamTypes.contains((String) datum.get(InterfaceName.StreamType.name())))
-                filteredData.add(datum);
-        }
-        data.setData(filteredData);
     }
 }
