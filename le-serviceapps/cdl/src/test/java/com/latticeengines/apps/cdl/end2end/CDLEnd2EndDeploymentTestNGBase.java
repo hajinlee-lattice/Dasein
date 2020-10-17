@@ -168,7 +168,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
-    public static final int S3_CHECKPOINTS_VERSION = 27;
+    public static final int S3_CHECKPOINTS_VERSION = 28;
     private static final int S3_RATING_CHECKPOINTS_VERSION = 26;
 
     private static final String INITIATOR = "test@lattice-engines.com";

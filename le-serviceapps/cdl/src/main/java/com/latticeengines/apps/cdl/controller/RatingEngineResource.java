@@ -207,7 +207,7 @@ public class RatingEngineResource {
     @ApiOperation(value = "Update rating engine counts")
     public Map<String, Long> updateRatingEngineCounts(@PathVariable String customerSpace, //
                                                       @PathVariable String ratingEngineId, //
-                                                      @RequestBody UpdateRatingCoverageRequest request) {
+                                                      @RequestBody(required = false) UpdateRatingCoverageRequest request) {
         if (request != null) {
             return ratingEngineService.updateRatingEngineCounts(ratingEngineId, request);
         } else {

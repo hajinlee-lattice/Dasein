@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -113,7 +114,7 @@ public class DataReportProxy extends MicroserviceRestApiProxy implements ProxyIn
         String baseUrl = "/customerspaces/{customerSpace}/datareport/rollup";
         String url = constructUrl(baseUrl, customerSpace);
         String appId =  post("rollup data report", url, request, String.class);
-        return ApplicationId.fromString(appId);
+        return ApplicationIdUtils.toApplicationIdObj(appId);
     }
 
     public void copyDataReportToParent(String customerSpace, DataReportRecord.Level level, String ownerId) {

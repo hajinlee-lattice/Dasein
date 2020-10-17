@@ -36,7 +36,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.PublishActivityAlertsJob;
 
-@Component("exportToMysql")
+@Component("publishActivityAlerts")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 
 public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfiguration, PublishActivityAlertsJobConfig> {
