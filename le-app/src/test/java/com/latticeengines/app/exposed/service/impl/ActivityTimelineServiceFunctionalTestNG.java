@@ -7,7 +7,6 @@ import static org.mockito.Mockito.spy;
 
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,17 +19,12 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.collections.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.service.ActivityTimelineService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.testframework.AppFunctionalTestNGBase;
-import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;

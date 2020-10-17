@@ -154,7 +154,6 @@ public class DeltaCampaignLaunchInitStep
         createDeleteCsvDataFrame = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
         deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataFrame(createDeleteCsvDataFrame);
-        deltaCampaignLaunchSparkContext.setAccountContactRatio(stepConfiguration.getAccountContactRatio());
         sparkConfig.setDeltaCampaignLaunchSparkContext(deltaCampaignLaunchSparkContext);
         log.info("sparkConfig=" + JsonUtils.serialize(sparkConfig));
         return sparkConfig;
