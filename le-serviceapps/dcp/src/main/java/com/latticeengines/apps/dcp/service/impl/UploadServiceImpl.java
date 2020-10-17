@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -228,13 +229,17 @@ public class UploadServiceImpl implements UploadService {
         UploadDetails details = getUploadDetails(upload, includeConfig);
         String appId = details.getUploadDiagnostics().getApplicationId();
         if (ApplicationIdUtils.isFakeApplicationId(appId)) {
-            log.info("Upload {} has a fake app id {}, trying to update it to the true app id.", uploadId, appId);
-            Job job = workflowProxy.getWorkflowJobFromApplicationId(appId, customerSpace);
-            String newId = job.getApplicationId();
-            if (!ApplicationIdUtils.isFakeApplicationId(newId)) {
-                log.info("Updating app id for upload {} from {} to {}", uploadId, appId, newId);
-                details.getUploadDiagnostics().setApplicationId(newId);
-                uploadEntityMgr.update(upload);
+            boolean is5MinAgo = upload.getCreated().getTime() < //
+                    System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5);
+            if (is5MinAgo) {
+                log.info("Upload {} has a fake app id {}, trying to update it to the true app id.", uploadId, appId);
+                Job job = workflowProxy.getWorkflowJobFromApplicationId(appId, customerSpace);
+                String newId = job.getApplicationId();
+                if (!ApplicationIdUtils.isFakeApplicationId(newId)) {
+                    log.info("Updating app id for upload {} from {} to {}", uploadId, appId, newId);
+                    details.getUploadDiagnostics().setApplicationId(newId);
+                    uploadEntityMgr.update(upload);
+                }
             }
         }
         return details;
