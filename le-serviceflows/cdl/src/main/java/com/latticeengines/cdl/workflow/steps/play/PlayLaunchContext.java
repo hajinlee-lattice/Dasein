@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext.DeltaCampaignLaunchSparkContextBuilder;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext.PlayLaunchSparkContextBuilder;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -34,6 +35,8 @@ public class PlayLaunchContext {
     private PlayLaunch playLaunch;
 
     private Play play;
+
+    private PlayLaunchChannel channel;
 
     private long launchTimestampMillis;
 
@@ -64,7 +67,7 @@ public class PlayLaunchContext {
     private Schema schema;
 
     public PlayLaunchContext(CustomerSpace customerSpace, Tenant tenant, String playName, String playLaunchId,
-            PlayLaunch playLaunch, Play play, long launchTimestampMillis, RatingEngine ratingEngine,
+            PlayLaunch playLaunch, Play play, PlayLaunchChannel channel, long launchTimestampMillis, RatingEngine ratingEngine,
             MetadataSegment segment, String segmentName, String modelId, String ratingId,
             RatingModel publishedIteration, FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
             List<Object> modifiableAccountIdCollectionForContacts, List<ColumnMetadata> fieldMappingMetadata,
@@ -76,6 +79,7 @@ public class PlayLaunchContext {
         this.playLaunchId = playLaunchId;
         this.playLaunch = playLaunch;
         this.play = play;
+        this.channel = channel;
         this.launchTimestampMillis = launchTimestampMillis;
         this.ratingEngine = ratingEngine;
         this.segment = segment;
@@ -210,6 +214,14 @@ public class PlayLaunchContext {
         return schema;
     }
 
+    public PlayLaunchChannel getChannel() {
+        return channel;
+    }
+
+    public void setChannel(PlayLaunchChannel channel) {
+        this.channel = channel;
+    }
+
     public static class PlayLaunchContextBuilder {
         private CustomerSpace customerSpace;
 
@@ -222,6 +234,8 @@ public class PlayLaunchContext {
         private PlayLaunch playLaunch;
 
         private Play play;
+
+        private PlayLaunchChannel channel;
 
         private long launchTimestampMillis;
 
@@ -355,8 +369,13 @@ public class PlayLaunchContext {
             return this;
         }
 
+        public PlayLaunchContextBuilder channel(PlayLaunchChannel channel) {
+            this.channel = channel;
+            return this;
+        }
+
         public PlayLaunchContext build() {
-            return new PlayLaunchContext(customerSpace, tenant, playName, playLaunchId, playLaunch, play,
+            return new PlayLaunchContext(customerSpace, tenant, playName, playLaunchId, playLaunch, play, channel,
                     launchTimestampMillis, ratingEngine, segment, segmentName, publishedIterationId, ratingId,
                     publishedIteration, accountFrontEndQuery, contactFrontEndQuery,
                     modifiableAccountIdCollectionForContacts, fieldMappingMetadata, counter, recommendationTable,

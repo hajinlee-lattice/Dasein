@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaun
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportFilesToS3Configuration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportPublishToSNSConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.play.ExportRecommendationsToS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalculationResultsFromS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.LiveRampCampaignLaunchInitStepConfiguration;
 
@@ -47,6 +48,7 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
         private ImportDeltaCalculationResultsFromS3StepConfiguration importDeltaCalculationResultsFromS3Conf = new ImportDeltaCalculationResultsFromS3StepConfiguration();
         private DeltaCampaignLaunchInitStepConfiguration nonLiveRampInitStep = new DeltaCampaignLaunchInitStepConfiguration();
         private LiveRampCampaignLaunchInitStepConfiguration liveRampInitStepConf = new LiveRampCampaignLaunchInitStepConfiguration();
+        private ExportRecommendationsToS3StepConfiguration exportRecsToS3StepConf = new ExportRecommendationsToS3StepConfiguration();
         private DeltaCampaignLaunchExportFilesGeneratorConfiguration exportFileGeneratorConf = new DeltaCampaignLaunchExportFilesGeneratorConfiguration();
         private DeltaCampaignLaunchExportFilesToS3Configuration exportFilesToS3Conf = new DeltaCampaignLaunchExportFilesToS3Configuration();
         private DeltaCampaignLaunchExportPublishToSNSConfiguration exportPublishToSNSConf = new DeltaCampaignLaunchExportPublishToSNSConfiguration();
@@ -57,6 +59,7 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
             importDeltaCalculationResultsFromS3Conf.setCustomerSpace(customerSpace);
             nonLiveRampInitStep.setCustomerSpace(customerSpace);
             liveRampInitStepConf.setCustomerSpace(customerSpace);
+            exportRecsToS3StepConf.setCustomerSpace(customerSpace);
             exportFileGeneratorConf.setCustomerSpace(customerSpace);
             exportFilesToS3Conf.setCustomerSpace(customerSpace);
             exportPublishToSNSConf.setCustomerSpace(customerSpace);
@@ -65,6 +68,7 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder dataCollectionVersion(DataCollection.Version version) {
             nonLiveRampInitStep.setDataCollectionVersion(version);
+            exportRecsToS3StepConf.setVersion(version);
             return this;
         }
 
@@ -144,10 +148,16 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder executionId(String executionId) {
+            nonLiveRampInitStep.setExecutionId(executionId);
+            return this;
+        }
+
         public DeltaCampaignLaunchWorkflowConfiguration build() {
             configuration.add(importDeltaCalculationResultsFromS3Conf);
             configuration.add(nonLiveRampInitStep);
             configuration.add(liveRampInitStepConf);
+            configuration.add(exportRecsToS3StepConf);
             configuration.add(exportFileGeneratorConf);
             configuration.add(exportFilesToS3Conf);
             configuration.add(exportPublishToSNSConf);

@@ -29,10 +29,13 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
@@ -203,7 +206,7 @@ public class DeltaCampaignLaunchInitStep
     @Override
     protected void postJobExecution(SparkJobResult result) {
         // TODO define the launched account and contacts in the context of delta
-
+        DeltaCampaignLaunchInitStepConfiguration config = getConfiguration();
         int resultDataFrameNum = result.getTargets().size();
         log.info("resultDataFrameNum=" + resultDataFrameNum);
         log.info(result.getOutput());
@@ -213,46 +216,54 @@ public class DeltaCampaignLaunchInitStep
                 totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch));
         long launchedAccountNum = 0L;
         long launchedContactNum = 0L;
-
+        String primaryKey = getPrimaryKey();
         if (createAddCsvDataFrame && !createDeleteCsvDataFrame) {
             String recommendationTargetPath = result.getTargets().get(0).getPath();
             log.info("recommendationTargetPath: " + recommendationTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recommendationTargetPath));
-            String addCsvTargetPath = result.getTargets().get(1).getPath();
+            HdfsDataUnit addRecommendationDataUnit = result.getTargets().get(1);
+            String addCsvTargetPath = addRecommendationDataUnit.getPath();
             log.info("addCsvTargetPath: " + addCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(addCsvTargetPath));
 
-            launchedAccountNum = result.getTargets().get(1).getCount();
+            launchedAccountNum = addRecommendationDataUnit.getCount();
             // return a string of array.
             // the first element is the contact num for add csv
             launchedContactNum = JsonUtils
                     .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+            processHDFSDataUnit(String.format("AddedRecommendations_%s", config.getExecutionId()), addRecommendationDataUnit, primaryKey, ADDED_RECOMMENDATION_TABLE);
         } else if (createAddCsvDataFrame && createDeleteCsvDataFrame) {
             String recommendationTargetPath = result.getTargets().get(0).getPath();
             log.info("recommendationTargetPath: " + recommendationTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recommendationTargetPath));
-            String addCsvTargetPath = result.getTargets().get(1).getPath();
+            HdfsDataUnit addRecommendationDataUnit = result.getTargets().get(1);
+            String addCsvTargetPath = addRecommendationDataUnit.getPath();
             log.info("addCsvTargetPath: " + addCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(addCsvTargetPath));
-            String deleteCsvTargetPath = result.getTargets().get(2).getPath();
+            HdfsDataUnit deleteRecommendationDataUnit = result.getTargets().get(2);
+            String deleteCsvTargetPath = deleteRecommendationDataUnit.getPath();
             log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(deleteCsvTargetPath));
 
-            launchedAccountNum = result.getTargets().get(1).getCount();
+            launchedAccountNum = addRecommendationDataUnit.getCount();
             // return a string of array.
             // the first element is the contact num for add csv
             launchedContactNum = JsonUtils
                     .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+            processHDFSDataUnit(String.format("AddedRecommendations_%s", config.getExecutionId()), addRecommendationDataUnit, primaryKey, ADDED_RECOMMENDATION_TABLE);
+            processHDFSDataUnit(String.format("DeletedRecommendations_%s", config.getExecutionId()), deleteRecommendationDataUnit, primaryKey, DELETED_RECOMMENDATION_TABLE);
         } else if (!createAddCsvDataFrame && createDeleteCsvDataFrame) {
-            String deleteCsvTargetPath = result.getTargets().get(0).getPath();
+            HdfsDataUnit deleteRecommendationDataUnit = result.getTargets().get(0);
+            String deleteCsvTargetPath = deleteRecommendationDataUnit.getPath();
             log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(deleteCsvTargetPath));
+            processHDFSDataUnit(String.format("DeletedRecommendations_%s", config.getExecutionId()), deleteRecommendationDataUnit, primaryKey, DELETED_RECOMMENDATION_TABLE);
         } else {
             throw new LedpException(LedpCode.LEDP_70000);
         }
@@ -261,5 +272,21 @@ public class DeltaCampaignLaunchInitStep
         long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
         log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
         log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
+    }
+
+    private String getPrimaryKey() {
+        AudienceType audienceType = playLaunchContext.getChannel().getChannelConfig().getAudienceType();
+        if (audienceType.equals(AudienceType.ACCOUNTS)) {
+            return InterfaceName.AccountId.name();
+        } else {
+            return DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name();
+        }
+    }
+
+    private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String tableNameKey) {
+        Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
+        metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
+        putObjectInContext(tableNameKey, dataUnitTable.getName());
+        log.info(String.format("Created table %s.", tableName));
     }
 }

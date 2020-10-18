@@ -19,6 +19,9 @@ public class DeltaCampaignLaunchInitStepConfiguration extends BaseStepConfigurat
     @JsonProperty("data_collection_version")
     private DataCollection.Version dataCollectionVersion;
 
+    @JsonProperty("executionId")
+    private String executionId;
+
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }
@@ -49,5 +52,13 @@ public class DeltaCampaignLaunchInitStepConfiguration extends BaseStepConfigurat
 
     public void setDataCollectionVersion(DataCollection.Version dataCollectionVersion) {
         this.dataCollectionVersion = dataCollectionVersion;
+    }
+
+    public String getExecutionId() {
+        return executionId;
+    }
+
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
     }
 }

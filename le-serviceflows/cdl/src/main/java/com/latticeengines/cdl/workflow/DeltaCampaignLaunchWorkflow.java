@@ -12,6 +12,7 @@ import com.latticeengines.cdl.workflow.steps.DeltaCampaignLaunchInitStep;
 import com.latticeengines.cdl.workflow.steps.play.DeltaCampaignLaunchExportFileGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.play.DeltaCampaignLaunchExportFilesToS3Step;
 import com.latticeengines.cdl.workflow.steps.play.DeltaCampaignLaunchExportPublishToSNSStep;
+import com.latticeengines.cdl.workflow.steps.play.ExportRecommendationsToS3Step;
 import com.latticeengines.cdl.workflow.steps.play.ImportDeltaCalculationResultsFromS3;
 import com.latticeengines.cdl.workflow.steps.play.LiveRampCampaignLaunchInitStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
@@ -34,6 +35,9 @@ public class DeltaCampaignLaunchWorkflow extends AbstractWorkflow<DeltaCampaignL
     private LiveRampCampaignLaunchInitStep liveRampCampaignLaunchInitStep;
 
     @Inject
+    private ExportRecommendationsToS3Step exportRecommendationsToS3Step;
+
+    @Inject
     private DeltaCampaignLaunchExportFileGeneratorStep deltaCampaignLaunchExportFileGeneratorStep;
 
     @Inject
@@ -50,6 +54,7 @@ public class DeltaCampaignLaunchWorkflow extends AbstractWorkflow<DeltaCampaignL
         return new WorkflowBuilder(name(), config) //
                 .next(importDeltaCalculationResultsFromS3) //
                 .next(deltaCampaignLaunchInitStep) //
+                .next(exportRecommendationsToS3Step) //
                 .next(liveRampCampaignLaunchInitStep) //
                 .next(deltaCampaignLaunchExportFileGeneratorStep) //
                 .next(deltaCampaignLaunchExportFilesToS3Step) //
