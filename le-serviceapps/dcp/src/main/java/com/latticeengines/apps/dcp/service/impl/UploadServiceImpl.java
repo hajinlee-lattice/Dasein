@@ -228,7 +228,7 @@ public class UploadServiceImpl implements UploadService {
         Upload upload = expandStatistics(uploadEntityMgr.findByUploadId(uploadId));
         UploadDetails details = getUploadDetails(upload, includeConfig);
         String appId = details.getUploadDiagnostics().getApplicationId();
-        if (ApplicationIdUtils.isFakeApplicationId(appId)) {
+        if (StringUtils.isNotBlank(appId) && ApplicationIdUtils.isFakeApplicationId(appId)) {
             boolean is5MinAgo = upload.getCreated().getTime() < //
                     System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5);
             if (is5MinAgo) {
