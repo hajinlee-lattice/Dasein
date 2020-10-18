@@ -149,7 +149,7 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy {
     @SuppressWarnings("unchecked")
     public boolean isValidOauthToken(String tenantId, String oAuthToken) {
         String url = oauth2AuthHostPort + "/oauth/check_token?token=" + oAuthToken;
-        Map<String, ?> tokenInfo = get("Check Tenant", url, Map.class);
+        Map<String, ?> tokenInfo = post("Check Tenant", url, null, Map.class);
         return tokenInfo != null && tokenInfo.containsKey("active") && (Boolean) tokenInfo.get("active");
     }
 }
