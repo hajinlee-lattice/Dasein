@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWor
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.CreateDeltaRecommendationsJob;
 
@@ -75,6 +76,9 @@ public class DeltaCampaignLaunchInitStep
 
     @Inject
     private CampaignLaunchUtils campaignLaunchUtils;
+
+    @Inject
+    private PlayProxy playProxy;
 
     private PlayLaunchContext playLaunchContext;
 
@@ -267,7 +271,7 @@ public class DeltaCampaignLaunchInitStep
         } else {
             throw new LedpException(LedpCode.LEDP_70000);
         }
-
+        playProxy.updatePlayLaunch(customerSpace.getTenantId(), playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId(), playLaunchContext.getPlayLaunch())
         long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
         long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
         log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
@@ -286,7 +290,19 @@ public class DeltaCampaignLaunchInitStep
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String tableNameKey) {
         Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
-        putObjectInContext(tableNameKey, dataUnitTable.getName());
+        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+        String metadataTableName = dataUnitTable.getName();
+        putObjectInContext(tableNameKey, metadataTableName);
+        switch (tableNameKey) {
+            case ADDED_RECOMMENDATION_TABLE:
+                playLaunch.setAddRecommendationsTable(metadataTableName);
+                break;
+            case DELETED_RECOMMENDATION_TABLE:
+                playLaunch.setDeleteRecommendationsTable(metadataTableName);
+                break;
+            default:
+                log.info("Will not update play launch data.");
+        }
         log.info(String.format("Created table %s.", tableName));
     }
 }
