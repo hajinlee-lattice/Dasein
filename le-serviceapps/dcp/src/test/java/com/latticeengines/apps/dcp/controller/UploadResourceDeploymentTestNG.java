@@ -145,6 +145,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
 
+    @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = "testCRUD")
     public void testDownloadAll() throws Exception {
         List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED, Boolean.TRUE, 0, 20);
@@ -181,11 +182,11 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
                 upload.getUploadId());
         String token = template.getForObject(tokenUrl, String.class);
-        SleepUtils.sleep(300);
         String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);
-
+        SleepUtils.sleep(1000L);
         // test the result file can be extracted to 3 files
         ZipFile zipFile = downloadZipAndVerifyName(template, downloadUrl, "file2_Results.zip");
+        Assert.assertNotNull(zipFile);
         List<FileHeader> fileHeaders = zipFile.getFileHeaders();
         Assert.assertNotNull(fileHeaders);
         Assert.assertEquals(fileHeaders.size(), 4);
