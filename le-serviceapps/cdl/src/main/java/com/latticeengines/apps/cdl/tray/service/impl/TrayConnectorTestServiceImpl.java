@@ -142,14 +142,17 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     }
 
     @Override
-    public void verifyTrayConnectorTest(List<DataIntegrationStatusMonitorMessage> statuses) {
+    public Map<String, Boolean> verifyTrayConnectorTest(List<DataIntegrationStatusMonitorMessage> statuses) {
         log.info("Verifying status messages for Tray test...");
 
+        Map<String, Boolean> statusesUpdate = new HashMap<>();
         statuses.forEach(status -> {
             String statusJson = JsonUtils.serialize(status);
             log.info("Serialized message: " + statusJson);
-            handleStatus(status);
+            statusesUpdate.put(status.getWorkflowRequestId(), handleStatus(status));
         });
+
+        return statusesUpdate;
     }
 
     @Override
@@ -183,24 +186,30 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         return CDLExternalSystemName.LIVERAMP.contains(externalSystemName);
     }
 
-    private void handleStatus(DataIntegrationStatusMonitorMessage status) {
-        String workflowRequestId = status.getWorkflowRequestId();
-        log.info("Workflow Request ID: " + workflowRequestId);
+    private Boolean handleStatus(DataIntegrationStatusMonitorMessage status) {
+        try {
+            String workflowRequestId = status.getWorkflowRequestId();
+            log.info("Workflow Request ID: " + workflowRequestId);
 
-        TrayConnectorTest test = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
-        String objectKey = String.format(PATH_TEMPLATE, test.getExternalSystemName(), test.getTestScenario());
-        log.info("Retrieving test metadata with objectKey: " + objectKey);
+            TrayConnectorTest test = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
+            String objectKey = String.format(PATH_TEMPLATE, test.getExternalSystemName(), test.getTestScenario());
+            log.info("Retrieving test metadata with objectKey: " + objectKey);
 
-        InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
-        TrayConnectorTestMetadata metadata = JsonUtils.deserialize(is, TrayConnectorTestMetadata.class);
-        log.info("Retrieved metadata: " + JsonUtils.serialize(metadata));
+            InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
+            TrayConnectorTestMetadata metadata = JsonUtils.deserialize(is, TrayConnectorTestMetadata.class);
+            log.info("Retrieved metadata: " + JsonUtils.serialize(metadata));
 
-        ValidationMetadata validation = metadata.getValidation();
-        List<DataIntegrationStatusMonitorMessage> validationMessages = validation.getMessages();
-        updateTest(status, test, validationMessages);
+            ValidationMetadata validation = metadata.getValidation();
+            List<DataIntegrationStatusMonitorMessage> validationMessages = validation.getMessages();
+            updateTest(status, test, validationMessages);
 
-        ValidationConfig validationConfig = validation.getValidationConfig();
-        cleanUp(validationConfig, test);
+            ValidationConfig validationConfig = validation.getValidationConfig();
+            cleanUp(validationConfig, test);
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to cancel test", e.toString());
+            return false;
+        }
     }
 
     private void updateTest(DataIntegrationStatusMonitorMessage status, TrayConnectorTest test,

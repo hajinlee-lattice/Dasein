@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.tray.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -44,8 +45,8 @@ public class TrayConnectorTestResource {
     @PostMapping("verify")
     @ApiOperation(value = "Verify Tray Connector Test.")
     @NoCustomerSpace
-    public void verifyTrayConnectorTest(
+    public Map<String, Boolean> verifyTrayConnectorTest(
             @RequestBody List<DataIntegrationStatusMonitorMessage> statuses) {
-        trayConnectorTestService.verifyTrayConnectorTest(statuses);
+        return trayConnectorTestService.verifyTrayConnectorTest(statuses);
     }
 }
