@@ -271,7 +271,8 @@ public class DeltaCampaignLaunchInitStep
         } else {
             throw new LedpException(LedpCode.LEDP_70000);
         }
-        playProxy.updatePlayLaunch(customerSpace.getTenantId(), playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId(), playLaunchContext.getPlayLaunch())
+        playProxy.updatePlayLaunch(customerSpace.getTenantId(), playLaunchContext.getPlayName(),
+                playLaunchContext.getPlayLaunchId(), playLaunchContext.getPlayLaunch());
         long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
         long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
         log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
