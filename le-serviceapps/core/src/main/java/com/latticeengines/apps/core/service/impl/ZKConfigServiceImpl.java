@@ -33,7 +33,6 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     private static final String CAMPAIGN_LAUNCH_END_POINT_URL = "CampaignLaunchEndPointUrl";
     private static final String DCP_DISABLE_ROLLUP = "DisableRollup";
     private static final String PLS = "PLS";
-    private static final int defaultRatio = 1000;
 
     @Inject
     private BatonService batonService;
@@ -115,18 +114,6 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             log.warn("Failed to get count of CampaignLaunchEndPointUrl from ZK for " + customerSpace.getTenantId(), e);
         }
         return null;
-    }
-
-    @Override
-    public int getAccountContactRatio() {
-        try {
-            Camille c = CamilleEnvironment.getCamille();
-            String ratio = c.get(PathBuilder.buildAccountContactRatioPath(CamilleEnvironment.getPodId())).getData();
-            return Integer.valueOf(ratio);
-        } catch (Exception e) {
-            log.error("Failed to get account contact ratio with exception: ", e);
-            return defaultRatio;
-        }
     }
 
     @Override

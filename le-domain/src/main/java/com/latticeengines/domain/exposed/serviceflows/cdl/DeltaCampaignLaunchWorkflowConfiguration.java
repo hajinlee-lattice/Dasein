@@ -103,11 +103,6 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
-        public Builder accountContactRatio(int accountContactRatio) {
-            nonLiveRampInitStep.setAccountContactRatio(accountContactRatio);
-            return this;
-        }
-
         public Builder lookupIdMap(LookupIdMap lookupIdMap) {
             if (lookupIdMap == null) {
                 return this;
