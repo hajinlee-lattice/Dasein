@@ -108,6 +108,9 @@ public class TrayConnectorTestEntityMgrImpl
         if (newTest.getTestState() != null) {
             oldTest.setTestState(newTest.getTestState());
         }
+        if (newTest.getTestResult() != null) {
+            oldTest.setTestResult(newTest.getTestResult());
+        }
     }
 
 }
