@@ -245,10 +245,6 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_PA_FLAG_FILE);
     }
 
-    public static Path buildAccountContactRatioPath(String podId) {
-        return new Path(PathConstants.PODS, podId, PathConstants.ACCOUNT_CONTACT_RATIO);
-    }
-
     public static Path buildSchedulingLargeTenantExemptionListPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_LARGE_TENANT_EXEMPTION_LIST);
     }
