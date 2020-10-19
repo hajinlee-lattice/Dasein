@@ -207,7 +207,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
             cleanUp(validationConfig, test);
             return true;
         } catch (Exception e) {
-            log.error("Failed to cancel test", e.toString());
+            log.error("Failed to process status", e.toString());
             return false;
         }
     }
@@ -271,14 +271,17 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     }
 
     private boolean verifyExportStartMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
+        log.info("Verifying ExportStart message");
         return (expected != null) && (expected.getMessageType().equals(MessageType.Event));
     }
 
     private boolean verifyInitiatedMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
+        log.info("Verifying Initiated message");
         return (expected != null) && (expected.getMessageType().equals(MessageType.Event));
     }
 
     private boolean verifyCompletedMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
+        log.info("Verifying Completed message");
         if (expected == null) {
             return false;
         }
