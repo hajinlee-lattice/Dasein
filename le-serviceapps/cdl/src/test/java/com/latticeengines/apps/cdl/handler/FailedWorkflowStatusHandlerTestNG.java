@@ -4,8 +4,6 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -25,8 +23,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(FailedWorkflowStatusHandlerTestNG.class);
 
     @Inject
     private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
@@ -82,7 +78,7 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
 
             Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Failed.toString());
             Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.SyncFailed);
-            Assert.assertEquals(updatedPlayLaunch.getContactsErrored(), new Long(100));
+            Assert.assertEquals(updatedPlayLaunch.getContactsErrored(), Long.valueOf(100));
             Assert.assertEquals(updatedChannel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
             Assert.assertEquals(updatedChannel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_TABLE);
             Assert.assertEquals(updatedChannel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
