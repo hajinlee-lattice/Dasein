@@ -1283,7 +1283,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             log.info("Checkpoint version is set in environment. Use its value = {}", propCheckpointVersion);
             version = propCheckpointVersion;
         }
-        saveCheckpoint(checkpointName, version, true);
+        saveCheckpoint(checkpointName, version, persistCheckpoint);
     }
 
     void saveCheckpoint(String checkpointName, String checkpointVersion, boolean autoUpload) throws IOException {
