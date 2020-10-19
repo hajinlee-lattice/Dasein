@@ -255,7 +255,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         geoDistributionReport.addGeoDistribution("MX", ct5, matchCnt);
 
         DataReport.MatchToDUNSReport matchToDUNSReport = new DataReport.MatchToDUNSReport();
-        Long dMatch = new RandomDataGenerator().nextLong(300L, matchCnt);
+        Long dMatch = new RandomDataGenerator().nextLong(300L, matchCnt - 1);
         long dUnMatch = matchCnt - dMatch;
         Long dNoMatch = new RandomDataGenerator().nextLong(0L, dUnMatch);
         matchToDUNSReport.setMatched(dMatch);
