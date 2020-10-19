@@ -153,6 +153,7 @@ public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
         playLaunch.setDestinationSysName(CDLExternalSystemName.Marketo);
         playLaunch.setLaunchType(LaunchType.DELTA);
         playLaunch.setPlayLaunchChannel(channel);
+        playLaunch.setChannelConfig(new MarketoChannelConfig());
         playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setUpdatedBy(CREATED_BY);
 
