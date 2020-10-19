@@ -132,14 +132,12 @@ public class UserResource {
         if (userReg.getUser().getAccessLevel() != null) {
             targetLevel = AccessLevel.valueOf(userReg.getUser().getAccessLevel());
         }
-        if (Boolean.TRUE.equals(userReg.isUseIDaaS())) {
-            if ((AccessLevel.SUPER_ADMIN.equals(targetLevel) || AccessLevel.INTERNAL_ADMIN.equals(targetLevel))
-                    && !EmailUtils.isInternalUser(userReg.getUser().getEmail())) {
-                LOGGER.info("target level is {} while email is external, change it to {}", targetLevel,
-                        AccessLevel.EXTERNAL_ADMIN);
-                targetLevel = AccessLevel.EXTERNAL_ADMIN;
-            }
-            userReg.getUser().setAccessLevel(targetLevel.name());
+        if ((AccessLevel.SUPER_ADMIN.equals(targetLevel) || AccessLevel.INTERNAL_ADMIN.equals(targetLevel))
+                && !EmailUtils.isInternalUser(user.getEmail())) {
+            httpResponse.setStatus(500);
+            response.setErrors(Collections
+                    .singletonList("Cannot create users with internal admin access and an external email address."));
+            return response;
         }
         if (!userService.isSuperior(loginLevel, targetLevel)) {
             LOGGER.warn(
@@ -257,7 +255,7 @@ public class UserResource {
                     && !EmailUtils.isInternalUser(user.getEmail())) {
                 response.setStatus(500);
                 return SimpleBooleanResponse.failedResponse(Collections.singletonList(
-                        "Cannot assign INTERNAL_ADMIN access level to users with external email addresses."));
+                        "Cannot assign internal admin access level to users with external email addresses."));
             }
 
             userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
