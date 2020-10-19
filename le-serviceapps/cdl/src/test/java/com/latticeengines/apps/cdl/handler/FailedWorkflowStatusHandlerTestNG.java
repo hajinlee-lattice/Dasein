@@ -52,7 +52,11 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
         play = createPlay();
         lookupIdMap = createLookupIdMap();
         channel = createPlayLaunchChannel(play, lookupIdMap);
+
         playLaunch = createPlayLaunch(play, channel);
+        playLaunch.setContactsLaunched(100L);
+        playLaunch = playLaunchService.update(playLaunch);
+
         statusMessage = createStatusMessage(playLaunch, DataIntegrationEventType.Failed);
         statusMonitor = createStatusMonitor(statusMessage);
     }
@@ -78,6 +82,7 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
 
             Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Failed.toString());
             Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.SyncFailed);
+            Assert.assertEquals(updatedPlayLaunch.getContactsErrored(), new Long(100));
             Assert.assertEquals(updatedChannel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
             Assert.assertEquals(updatedChannel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_TABLE);
             Assert.assertEquals(updatedChannel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
