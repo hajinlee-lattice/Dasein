@@ -6,7 +6,6 @@ import com.latticeengines.domain.exposed.spark.dcp.AnalyzeUsageConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.CSVUtils
 import org.apache.spark.sql.functions.{col, lit}
-import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.JavaConverters._
@@ -29,25 +28,29 @@ class AnalyzeUsageJob extends AbstractSparkJob[AnalyzeUsageConfig] {
     if (outputFields.nonEmpty) {
       for (field <- outputFields.diff(outputWithAllFields.columns)) {
         if (field == VboUsageConstants.ATTR_DRT) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getDRTAttr).cast(StringType))
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getDRTAttr))
         } else if (field == VboUsageConstants.ATTR_SUBSCRIBER_COUNTRY) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getSubscriberCountry).cast(StringType))
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getSubscriberCountry))
         } else if (field == VboUsageConstants.ATTR_SUBSCRIBER_NAME) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getSubscriberName).cast(StringType))
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getSubscriberName))
         } else if (field == VboUsageConstants.ATTR_SUBSCRIBER_NUMBER) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getSubscriberNumber).cast(StringType))
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getSubscriberNumber))
         } else if (field == VboUsageConstants.ATTR_LEID) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getUploadId).cast(StringType))
-        }  else if (field == VboUsageConstants.ATTR_DELIVERY_CHANNEL) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Web Application").cast(StringType))
-        }  else if (field == VboUsageConstants.ATTR_DELIVERY_MODE) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Transactional Batch").cast(StringType))
-        }  else if (field == VboUsageConstants.ATTR_APPID) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("157").cast(StringType))
-        }  else if (field == VboUsageConstants.ATTR_CAPPID) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("46").cast(StringType))
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getUploadId))
+        } else if (field == VboUsageConstants.ATTR_DELIVERY_CHANNEL) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Web Application"))
+        } else if (field == VboUsageConstants.ATTR_DELIVERY_MODE) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Transactional Batch"))
+        } else if (field == VboUsageConstants.ATTR_APPID) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit("157"))
+        } else if (field == VboUsageConstants.ATTR_CAPPID) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit("46"))
+        } else if (field == VboUsageConstants.ATTR_CONTRACT_START) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getContractStartTime))
+        } else if (field == VboUsageConstants.ATTR_CONTRACT_END) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getContractEndTime))
         } else if (!rawFields.contains(field)) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("").cast(StringType))
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(""))
         }
       }
     }

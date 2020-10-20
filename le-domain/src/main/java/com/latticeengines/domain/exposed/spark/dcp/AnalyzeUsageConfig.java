@@ -31,6 +31,12 @@ public class AnalyzeUsageConfig extends SparkJobConfig {
     @JsonProperty("SubscriberCountry")
     private String subscriberCountry;
 
+    @JsonProperty("ContractStartTime")
+    private String contractStartTime;
+
+    @JsonProperty("ContractEndTime")
+    private String contractEndTime;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -96,5 +102,21 @@ public class AnalyzeUsageConfig extends SparkJobConfig {
 
     public void setSubscriberCountry(String subscriberCountry) {
         this.subscriberCountry = subscriberCountry;
+    }
+
+    public String getContractStartTime() {
+        return contractStartTime;
+    }
+
+    public void setContractStartTime(String contractStartTime) {
+        this.contractStartTime = contractStartTime;
+    }
+
+    public String getContractEndTime() {
+        return contractEndTime;
+    }
+
+    public void setContractEndTime(String contractEndTime) {
+        this.contractEndTime = contractEndTime;
     }
 }
