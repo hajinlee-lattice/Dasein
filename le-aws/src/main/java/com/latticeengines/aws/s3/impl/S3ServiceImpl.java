@@ -440,6 +440,7 @@ public class S3ServiceImpl implements S3Service {
                     .withPartNumber(i)
                     .withInputStream(inputStream)
                     .withPartSize(uploadPartSize);
+            uploadRequest.getRequestClientOptions().setReadLimit((int)uploadPartSize);
             // Upload the part and add the response's ETag to list.
             UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
             partETags.add(uploadResult.getPartETag());
