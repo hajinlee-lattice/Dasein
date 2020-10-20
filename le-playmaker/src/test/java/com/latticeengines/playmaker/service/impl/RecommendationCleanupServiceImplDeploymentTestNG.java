@@ -179,7 +179,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         validateRecommendations(0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "cleanupAfterCleanupVeryOldRecommendations" })
+    @Test(groups = "deployment", dependsOnMethods = { "cleanupAfterCleanupVeryOldRecommendations" }, enabled = false)
     public void cleanupRecommendationsForExpiredTenants() throws Exception {
 
         Long nonExistTenantId = 1000000L;
@@ -201,7 +201,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         validateRecommendations(0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "cleanupRecommendationsForExpiredTenants" })
+    @Test(groups = "deployment", dependsOnMethods = { "cleanupRecommendationsForExpiredTenants" }, enabled = false)
     public void cleanupAfterCleanupRecommendationsForExpiredTenants() throws Exception {
 
         int count = ((RecommendationCleanupServiceImpl) recommendationCleanupService)
