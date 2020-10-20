@@ -21,7 +21,7 @@ class PublishActivityAlertsJob extends AbstractSparkJob[PublishActivityAlertsJob
       .withColumnRenamed(InterfaceName.AccountId.name(), ActivityAlert.ENTITY_ID_COL)
       .withColumn(ActivityAlert.ENTITY_TYPE_COL, lit(BusinessEntity.Account.name()))
       .withColumn(ActivityAlert.TENANT_ID_COL, lit(config.tenantId))
-      .withColumn(ActivityAlert.CREATION_TIMESTAMP_COL, from_unixtime(col(InterfaceName.CreationTimestamp.name())))
+      .withColumn(ActivityAlert.CREATION_TIMESTAMP_COL, from_unixtime(col(InterfaceName.CreationTimestamp.name()) / 1000))
       .drop(InterfaceName.CreationTimestamp.name())
       .withColumn(ActivityAlert.VERSION_COL, lit(config.alertVersion))
       .withColumn(ActivityAlert.CATEGORY_COL, coalesce(alertNameToAlertCategory(alertsDf.col(InterfaceName.AlertName.name())), lit("")))

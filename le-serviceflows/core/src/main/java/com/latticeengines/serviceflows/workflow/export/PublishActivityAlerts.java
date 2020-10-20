@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.export;
 
 import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -100,7 +101,7 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
 
         Table alertTable = metadataProxy.getTable(stepConfiguration.getCustomer(), alertTableName);
         PublishActivityAlertsJobConfig config = new PublishActivityAlertsJobConfig();
-        config.setTableToPublish(HdfsDataUnit.fromPath(alertTable.getExtracts().get(0).getPath()));
+        config.setInput(Collections.singletonList(HdfsDataUnit.fromPath(alertTable.getExtracts().get(0).getPath())));
         config.setDbDriver(dataDbDriver);
         config.setDbUrl(dataDbUrl);
         config.setDbUser(dataDbUser);
