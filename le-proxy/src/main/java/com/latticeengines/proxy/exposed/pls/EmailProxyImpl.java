@@ -167,7 +167,7 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
     @Override
     public void sendPlayLaunchErrorEmail(String tenantId, String user, PlayLaunch playLaunch) {
         try {
-            String url = constructUrl(combine("/internal/emails/playlaunch/failed/", tenantId));
+            String url = constructUrl(combine("/internal/emails/playlaunch/failed", tenantId));
             log.info(String.format("Putting to %s", url));
             List<String> params = new ArrayList<>();
             params.add("user=" + user);
