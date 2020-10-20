@@ -375,7 +375,7 @@ public class EmailResource {
         return isSendEmail;
     }
 
-    @PutMapping("/playlaunchchannel/expiring" + TENANT_ID_PATH)
+    @PutMapping("/playlaunchchannel/expiring/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email warning Always On Campaign will expire soon")
     public boolean sendPlayLaunchChannelExpiringEmail(@PathVariable("tenantId") String tenantId,
@@ -413,7 +413,7 @@ public class EmailResource {
         return isSendEmail;
     }
 
-    @PutMapping("/playlaunch/failed" + TENANT_ID_PATH)
+    @PutMapping("/playlaunch/failed/" + TENANT_ID_PATH)
     @ResponseBody
     @ApiOperation(value = "Send out email after Campaign launch error")
     public void sendPlayLaunchErrorEmail(
