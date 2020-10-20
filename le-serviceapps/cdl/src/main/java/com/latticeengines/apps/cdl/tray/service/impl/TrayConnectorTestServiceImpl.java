@@ -295,7 +295,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         Long expectedTotalRecords = expectedEventDetail.getTotalRecordsSubmitted();
         Long expectedRecordsProcessed = expectedEventDetail.getProcessed();
 
-        return (totalRecords == expectedTotalRecords) && (recordsProcessed == expectedRecordsProcessed);
+        return (totalRecords.equals(expectedTotalRecords)) && (recordsProcessed.equals(expectedRecordsProcessed));
     }
 
     private boolean verifyAudienceSizeUpdateMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
@@ -305,7 +305,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
         AudienceEventDetail eventDetail = (AudienceEventDetail) status.getEventDetail();
         Long audienceSize = eventDetail.getAudienceSize();
-        return audienceSize > 0L;
+        return audienceSize != null;
     }
 
     private void cleanUp(ValidationConfig validationConfig, TrayConnectorTest test) {
