@@ -13,10 +13,6 @@ public class PublishActivityAlertsJobConfig extends SparkJobConfig {
 
     @NotNull
     @JsonProperty
-    public DataUnit tableToPublish;
-
-    @NotNull
-    @JsonProperty
     public Map<String, String> alertNameToAlertCategory = new HashMap<>();
 
     @NotNull
@@ -53,11 +49,7 @@ public class PublishActivityAlertsJobConfig extends SparkJobConfig {
     }
 
     public DataUnit getTableToPublish() {
-        return tableToPublish;
-    }
-
-    public void setTableToPublish(DataUnit tableToPublish) {
-        this.tableToPublish = tableToPublish;
+        return getInput().get(0);
     }
 
     public Map<String, String> getAlertNameToAlertCategory() {
