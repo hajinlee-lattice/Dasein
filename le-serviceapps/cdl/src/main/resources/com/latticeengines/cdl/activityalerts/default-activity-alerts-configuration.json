@@ -20,7 +20,7 @@
     "alert_header": "Re-engaged Activity",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
-    "alert_message_template": "Someone from this account has visited a product page, after not visiting for more than 30 days. This may mean they are looking to reinitiate their search.",
+    "alert_message_template": "<#if (Data.ReEngagedContacts > 1)>Multiple contacts have<#else>Someone has</#if> re-engaged with your product after not returning for more than 30 days.",
     "is_active": true
   },
   {
