@@ -62,6 +62,8 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
         LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByOrgId(playLaunch.getDestinationOrgId(),
                 playLaunch.getDestinationSysType());
         DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
+        Map<String, String> contactDisplayNameMap = getContactDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap);
+        replaceSfdcContactId(playLaunch, contactDisplayNameMap);
         DeltaCampaignLaunchWorkflowConfiguration configuration = new DeltaCampaignLaunchWorkflowConfiguration.Builder()
                 .workflow("deltaCampaignLaunchWorkflow") //
                 .customer(getCustomerSpace()) //
@@ -72,8 +74,7 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
                 .playLaunchDestination(playLaunch.getDestinationSysType()) //
                 .accountAttributeExportDiplayNames(
                         getAccountDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
-                .contactAttributeExportDiplayNames(
-                        getContactDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
+                .contactAttributeExportDiplayNames(contactDisplayNameMap) //
                 .exportPublishPlayLaunch(playLaunch, enableExternalLaunch(playLaunch, lookupIdMap))
                 .exportPublishPlayLaunch(playLaunch, enableExternalLaunch(playLaunch, lookupIdMap)).executionId(executionId).build();
         ApplicationId appId = workflowJobService.submit(configuration);
@@ -83,6 +84,16 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
         } else {
             Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), getCustomerSpace().getTenantId());
             return job.getPid();
+        }
+    }
+
+    private void replaceSfdcContactId(PlayLaunch playLaunch, Map<String, String> contactDisplayNameMap) {
+        String sfdcContactId = playLaunch.getDestinationContactId();
+        if (StringUtils.isNotEmpty(sfdcContactId)) {
+            String key = "sfdcContactId";
+            String value = contactDisplayNameMap.get(key);
+            contactDisplayNameMap.remove(key);
+            contactDisplayNameMap.put(sfdcContactId, value);
         }
     }
 

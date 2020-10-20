@@ -1,26 +1,24 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.play;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class DeltaCampaignLaunchInitStepConfiguration extends BaseStepConfiguration {
 
-    @JsonProperty("customer_space")
     private CustomerSpace customerSpace;
 
-    @JsonProperty("play_name")
     private String playName;
 
-    @JsonProperty("play_launch_id")
     private String playLaunchId;
 
-    @JsonProperty("data_collection_version")
     private DataCollection.Version dataCollectionVersion;
 
-    @JsonProperty("executionId")
     private String executionId;
+
+    private Map<String, String> contactDisplayNames;
 
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
@@ -60,5 +58,13 @@ public class DeltaCampaignLaunchInitStepConfiguration extends BaseStepConfigurat
 
     public void setExecutionId(String executionId) {
         this.executionId = executionId;
+    }
+
+    public Map<String, String> getContactDisplayNames() {
+        return contactDisplayNames;
+    }
+
+    public void setContactDisplayNames(Map<String, String> contactDisplayNames) {
+        this.contactDisplayNames = contactDisplayNames;
     }
 }

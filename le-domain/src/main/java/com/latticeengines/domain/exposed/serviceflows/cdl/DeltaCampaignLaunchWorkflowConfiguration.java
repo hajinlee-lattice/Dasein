@@ -144,6 +144,7 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder contactAttributeExportDiplayNames(Map<String, String> contactExportDisplayNames) {
+            nonLiveRampInitStep.setContactDisplayNames(contactExportDisplayNames);
             exportFileGeneratorConf.setContactDisplayNames(contactExportDisplayNames);
             return this;
         }
