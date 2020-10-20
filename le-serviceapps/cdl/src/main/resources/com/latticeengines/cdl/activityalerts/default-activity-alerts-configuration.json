@@ -4,7 +4,7 @@
     "alert_header": "Increased Web Activity",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
-    "alert_message_template": "There have been ${Data.PageVisits} visits to the ${Data.PageName} pages. Check on this interest with your ${Data.ActiveContacts} active contacts. This may mean they are looking to buy.",
+    "alert_message_template": "${Data.PageVisits} visits to the ${Data.PageName} pages have occurred meaning they are looking to buy, check on your ${Data.ActiveContacts} active contacts.",
     "is_active": true
   },
   {
@@ -12,7 +12,7 @@
     "alert_header": "Increased Activity on Product Pages",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
-    "alert_message_template": "There have been ${Data.PageVisits} visits to the ${Data.PageName} pages. This means you'll need to prospect more into the personas.",
+    "alert_message_template": "${Data.PageVisits} visits your ${Data.PageName} page suggests you'll need to prospect into those personas.",
     "is_active": true
   },
   {

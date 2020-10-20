@@ -62,14 +62,14 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
         input.put(COL_ALERT_DATA, data);
         String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
-                "There have been 10 visits to the About Us pages. Check on this interest with your 2 active contacts. This may mean they are looking to buy.");
+                "10 visits to the About Us pages have occurred meaning they are looking to buy, check on your 2 active contacts.");
 
         alertConfig = defaults.stream().filter(a -> a.getAlertHeader().equals("Increased Activity on Product Pages"))
                 .findFirst().orElse(null);
         Assert.assertNotNull(alertConfig);
         rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
-                "There have been 10 visits to the About Us pages. This means you'll need to prospect more into the personas.");
+                "10 visits your About Us page suggests you'll need to prospect into those personas.");
 
         verifyReEngagedAlertConfig(defaults);
         verifyHasShownIntentAlertConfig(defaults);
