@@ -38,7 +38,6 @@ public class ProductFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     private ProductFileValidationService productFileValidationService;
 
     private static final String PRODUCT_FILE_DESTINATION = "/validation/product/";
-    private static final String INPUT_PATH = "inputFileValidation/Product1.avro";
 
     private String fileName;
 
