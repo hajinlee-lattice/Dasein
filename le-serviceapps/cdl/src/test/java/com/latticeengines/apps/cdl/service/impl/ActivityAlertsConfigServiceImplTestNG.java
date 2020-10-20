@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConsta
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_NUM_RESEARCH_INTENTS;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_PAGE_NAME;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_PAGE_VISITS;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_RE_ENGAGED_CONTACTS;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,23 +62,41 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
         input.put(COL_ALERT_DATA, data);
         String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
-                "There have been 10 visits to the About Us pages. Check on this interest with your 2 active contacts. This may mean they are looking to buy.");
+                "10 visits to the About Us pages have occurred meaning they are looking to buy, check on your 2 active contacts.");
 
         alertConfig = defaults.stream().filter(a -> a.getAlertHeader().equals("Increased Activity on Product Pages"))
                 .findFirst().orElse(null);
         Assert.assertNotNull(alertConfig);
         rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
-                "There have been 10 visits to the About Us pages. This means you'll need to prospect more into the personas.");
+                "10 visits your About Us page suggests you'll need to prospect into those personas.");
 
-        alertConfig = defaults.stream().filter(a -> a.getAlertHeader().equals("Re-engaged Activity")).findFirst()
+        verifyReEngagedAlertConfig(defaults);
+        verifyHasShownIntentAlertConfig(defaults);
+    }
+
+    private void verifyReEngagedAlertConfig(List<ActivityAlertsConfig> configs) {
+        ActivityAlertsConfig alertConfig = configs.stream() //
+                .filter(a -> a.getName().equals(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY)) //
+                .findFirst() //
                 .orElse(null);
         Assert.assertNotNull(alertConfig);
+
+        Map<String, Object> input = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
+        input.put(COL_ALERT_DATA, data);
+
+        // different alert messages for one/multiple contact
+
+        data.put(COL_RE_ENGAGED_CONTACTS, 1L);
+        String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
+        Assert.assertEquals(rendered,
+                "Someone has re-engaged with your product after not returning for more than 30 days.");
+
+        data.put(COL_RE_ENGAGED_CONTACTS, 2L);
         rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
-                "Someone from this account has visited a product page, after not visiting for more than 30 days. This may mean they are looking to reinitiate their search.");
-
-        verifyHasShownIntentAlertConfig(defaults);
+                "Multiple contacts have re-engaged with your product after not returning for more than 30 days.");
     }
 
     private void verifyHasShownIntentAlertConfig(List<ActivityAlertsConfig> defaults) {
