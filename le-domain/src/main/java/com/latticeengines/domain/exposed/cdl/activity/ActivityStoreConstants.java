@@ -43,6 +43,7 @@ public final class ActivityStoreConstants {
         public static final String COL_PREV_PAGE_VISIT_TIME = "PrevPageVisitTime";
         public static final String COL_NUM_RESEARCH_INTENTS = "NumResearchIntents";
         public static final String COL_NUM_BUY_INTENTS = "NumBuyIntents";
+        public static final String COL_RE_ENGAGED_CONTACTS = "ReEngagedContacts";
 
         public static final long RE_ENGAGED_QUIET_PERIOD_IN_DAYS = 30L;
     }

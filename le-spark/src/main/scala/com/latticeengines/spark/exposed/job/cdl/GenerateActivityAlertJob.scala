@@ -5,8 +5,8 @@ import java.time.{Duration, Instant}
 
 import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants
 import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert
-import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.{COL_ALERT_DATA, COL_END_TIMESTAMP, COL_START_TIMESTAMP}
-import com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.{DnbIntentData, WebVisit}
+import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.{COL_ALERT_DATA, COL_END_TIMESTAMP, COL_RE_ENGAGED_CONTACTS, COL_START_TIMESTAMP}
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.{DnbIntentData, MarketingActivity, WebVisit}
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{AlertData, AlertName, CreationTimestamp}
@@ -118,35 +118,36 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
 
   def generateReEngagedActivity(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
     val inactivePeriodInMillis = Duration.ofDays(ActivityStoreConstants.Alert.RE_ENGAGED_QUIET_PERIOD_IN_DAYS).toMillis
-    val accPageVisitDf = timelineDf
-      .filter(col(streamType).equalTo(WebVisit.name))
-      .filter(col(detail2).isNotNull)
-      .withColumn(pageName, explode(split(col(detail2), ",")))
+
+    val marketingEventDf = timelineDf
+      .filter(col(streamType).equalTo(MarketingActivity.name))
+      .filter(col(accountId).isNotNull.and(col(accountId).notEqual(anonymousId)))
+      .filter(col(contactId).isNotNull.and(col(contactId).notEqual(anonymousId)))
 
     val window = Window
-      .partitionBy(accountId, pageName)
+      .partitionBy(accountId, contactId)
       .orderBy(col(eventTime).desc)
     val prevVisitTime = lead(col(eventTime), 1).over(window)
-    val firstVisitInRangeWindow = Window
-      .partitionBy(accountId, pageName)
+    val firstEventInRangeWindow = Window
+      .partitionBy(accountId, contactId)
       .orderBy(col(internalRankCol).desc)
 
     val tmpCol = "__TMP_RANK"
-    val reEngagedDf = accPageVisitDf
+    val reEngagedDf = marketingEventDf
       .withColumn(internalRankCol, row_number.over(window))
       .withColumn(internalPrevCol, prevVisitTime)
       .filter(col(eventTime).geq(startTime).and(col(eventTime).leq(endTime)))
       // first visit in time range
-      .withColumn(tmpCol, row_number.over(firstVisitInRangeWindow))
+      .withColumn(tmpCol, row_number.over(firstEventInRangeWindow))
       .filter(col(tmpCol) === 1)
       // duration between visit to this page and the visit before it exceed threshold
       .filter(col(internalPrevCol).lt(col(eventTime) - inactivePeriodInMillis))
-      .withColumn(pageVisitTime, col(eventTime))
-      .withColumn(prevPageVisitTime, col(internalPrevCol))
+      .groupBy(accountId)
+      .agg(count("*").as(COL_RE_ENGAGED_CONTACTS)) //
 
     // TODO maybe group by account and only issue one alert
     addTimeRange(reEngagedDf, startTime, endTime)
-      .select(col(accountId), col(CreationTimestamp.name), packAlertData(pageName, pageVisitTime, prevPageVisitTime))
+      .select(col(accountId), col(CreationTimestamp.name), packAlertData(COL_RE_ENGAGED_CONTACTS))
   }
 
   def generateShownIntentAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
