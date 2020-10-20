@@ -4,8 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,17 +38,17 @@ public class ProductFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     private ProductFileValidationService productFileValidationService;
 
     private static final String PRODUCT_FILE_DESTINATION = "/validation/product/";
-    private static final String INPUT_PATH = "inputFileValidation/product1.avro";
+    private static final String INPUT_PATH = "inputFileValidation/Product1.avro";
 
     private String fileName;
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        URL url = ClassLoader.getSystemResource(INPUT_PATH);
-        File csvFile = new File(url.getFile());
+        InputStream in = testArtifactService.readTestArtifactAsStream(TEST_AVRO_DIR, TEST_AVRO_VERSION, "Product1" +
+                ".avro");
         HdfsUtils.rmdir(yarnConfiguration, PRODUCT_FILE_DESTINATION);
         fileName = "product.avro";
-        HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, csvFile.getPath(),  PRODUCT_FILE_DESTINATION+ fileName);
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, in,  PRODUCT_FILE_DESTINATION + fileName);
     }
 
     @AfterClass(groups = {"functional"})

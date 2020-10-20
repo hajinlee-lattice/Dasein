@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.validations.service;
 
-import java.io.File;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,17 +25,17 @@ public class ContactFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     private ContactFileValidationService contactFileValidationService;
 
     private static final String CONTACT_FILE_DESTINATION = "/validation/contact/";
-    private static final String INPUT_PATH = "inputFileValidation/contact1.avro";
+
 
     private String fileName;
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        URL url = ClassLoader.getSystemResource(INPUT_PATH);
-        File csvFile = new File(url.getFile());
+        InputStream in = testArtifactService.readTestArtifactAsStream(TEST_AVRO_DIR, TEST_AVRO_VERSION, "Cccount1" +
+                ".avro");
         HdfsUtils.rmdir(yarnConfiguration, CONTACT_FILE_DESTINATION);
         fileName = "contact.avro";
-        HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, csvFile.getPath(),  CONTACT_FILE_DESTINATION+ fileName);
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, in, CONTACT_FILE_DESTINATION + fileName);
     }
 
     @AfterClass(groups = {"functional"})

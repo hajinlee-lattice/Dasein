@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.validations.service;
 
-import java.io.File;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -22,11 +21,12 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.serv
 
 public class AccountFileValidationServiceFunctionalTestNG extends CDLWorkflowFunctionalTestNGBase {
 
+
     @Inject
     private AccountFileValidationService accountFileValidationService;
 
     private static final String ACCOUNT_FILE_DESTINATION = "/validation/account/";
-    private static final String INPUT_PATH = "inputFileValidation/Account1.avro";
+
     private String fileName;
 
     @Override
@@ -36,11 +36,10 @@ public class AccountFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        URL url = ClassLoader.getSystemResource(INPUT_PATH);
-        File csvFile = new File(url.getFile());
+        InputStream in = testArtifactService.readTestArtifactAsStream(TEST_AVRO_DIR, TEST_AVRO_VERSION, "Account1.avro");
         HdfsUtils.rmdir(yarnConfiguration, ACCOUNT_FILE_DESTINATION);
         fileName = "account.avro";
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, csvFile.getPath(), ACCOUNT_FILE_DESTINATION + fileName);
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, in, ACCOUNT_FILE_DESTINATION + fileName);
     }
 
     @AfterClass(groups = {"functional"})
