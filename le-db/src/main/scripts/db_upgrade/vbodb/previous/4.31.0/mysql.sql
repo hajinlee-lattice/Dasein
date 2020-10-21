@@ -5,7 +5,7 @@
 * Ensure to maintain backward compatibility.
 */
 
-USE `GlobalAuthentication`;
+USE `VboDB`;
 
 DROP PROCEDURE IF EXISTS `UpdateSchema`;
 DELIMITER //
@@ -14,7 +14,11 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
-      
+      ALTER TABLE `VBO_REQUEST_LOG`
+        ADD COLUMN `CALLBACK_REQUEST` JSON,
+        ADD COLUMN  `CALLBACK_TIME` BIGINT,
+        ADD COLUMN `REQUEST_TIME` BIGINT;
+
   END //
 -- ##############################################################
 
