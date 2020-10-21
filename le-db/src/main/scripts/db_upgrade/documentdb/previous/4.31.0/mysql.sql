@@ -5,16 +5,27 @@
 * Ensure to maintain backward compatibility.
 */
 
-USE `GlobalAuthentication`;
+USE `DocumentDB`;
 
 DROP PROCEDURE IF EXISTS `UpdateSchema`;
 DELIMITER //
+
+CREATE TABLE IF NOT EXISTS `DanteConfiguration` (
+    UUID varchar(36) primary key,
+    TenantId varchar(255),
+    CreatedDate datetime,
+    LastModifiedDate datetime,
+    Document json,
+    index IX_ID (TenantId),
+    constraint UX_ID unique(TenantId)
+)
+
 
 -- ##############################################################
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
-      
+
   END //
 -- ##############################################################
 
