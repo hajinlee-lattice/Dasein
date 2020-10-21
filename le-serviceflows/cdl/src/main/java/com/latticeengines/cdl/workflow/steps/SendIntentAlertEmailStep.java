@@ -140,12 +140,20 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
                         addToCountMap(locationCountMap, intentItem.getLocation());
                         if (stageEqual(intentItem, IntentAlertEmailInfo.StageType.BUY)) {
                             numBuyIntents++;
-                            industryCountMap.get(intentItem.getIndustry()).increaseNumBuy();
-                            locationCountMap.get(intentItem.getLocation()).increaseNumBuy();
+                            if (industryCountMap.get(intentItem.getIndustry()) != null) {
+                                industryCountMap.get(intentItem.getIndustry()).increaseNumBuy();
+                            }
+                            if (locationCountMap.get(intentItem.getLocation()) != null) {
+                                locationCountMap.get(intentItem.getLocation()).increaseNumBuy();
+                            }
                         } else if (stageEqual(intentItem, IntentAlertEmailInfo.StageType.RESEARCH)) {
                             numResearchIntents++;
-                            industryCountMap.get(intentItem.getIndustry()).increaseNumResearch();
-                            locationCountMap.get(intentItem.getLocation()).increaseNumResearch();
+                            if (industryCountMap.get(intentItem.getIndustry()) != null) {
+                                industryCountMap.get(intentItem.getIndustry()).increaseNumResearch();
+                            }
+                            if (locationCountMap.get(intentItem.getLocation()) != null) {
+                                locationCountMap.get(intentItem.getLocation()).increaseNumResearch();
+                            }
                         }
                     }
                 }
@@ -183,6 +191,8 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     }
 
     private void addToCountMap(Map<String, IntentAlertEmailInfo.TopItem> map, String name) {
+        if (StringUtils.isEmpty(name))
+            return;
         IntentAlertEmailInfo.TopItem topItem = map.get(name);
         if (topItem == null) {
             topItem = new IntentAlertEmailInfo.TopItem();
@@ -212,17 +222,26 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
 
     private List<List<HashMap<String, Object>>> getModelPairFromMap(
             Map<String, List<IntentAlertEmailInfo.Intent>> map) {
+        List<List<IntentAlertEmailInfo.Intent>> sortedList = map.values().stream().collect(Collectors.toList());
+        sortedList.sort(Comparator.comparing(list -> list.size()));
         List<List<HashMap<String, Object>>> pairList = new ArrayList<>();
         int index = 0;
         List<HashMap<String, Object>> pair = new ArrayList<>();
-        for (String key : map.keySet()) {
+        for (List<IntentAlertEmailInfo.Intent> list : sortedList) {
             if ((index++ & 1) == 0) {
                 pair = new ArrayList<>();
                 pairList.add(pair);
             }
             HashMap<String, Object> intentMap = new HashMap<>();
-            intentMap.put("name", key);
-            intentMap.put("intents", toJsonObject(map.get(key)));
+            list.sort(Comparator.comparing(IntentAlertEmailInfo.Intent::getStage, (stage1, stage2) -> {
+                if (StringUtils.isEmpty(stage1) && StringUtils.isNotEmpty(stage2))
+                    return 1;
+                else if (StringUtils.isEmpty(stage2) && StringUtils.isNotEmpty(stage1))
+                    return -1;
+                return StringUtils.compareIgnoreCase(stage1, stage2);
+            }));
+            intentMap.put("name", list.get(0).getModel());
+            intentMap.put("intents", toJsonObject(list));
             pair.add(intentMap);
         }
         return pairList;

@@ -157,6 +157,10 @@
             font-size: 9.88px;
             line-height: 12px;
             padding-top: 3.5px;
+            padding-right: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .buy-bar {
@@ -204,6 +208,10 @@
 
             color: #222831;
             text-align: left;
+            padding-right: 5px;
+            white-space: nowrap !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .intent-table tr td:first-child {
@@ -222,6 +230,14 @@
         .middle {
             display: table-cell;
             vertical-align: middle;
+        }
+
+        .company-width {
+            max-width: 145px;
+        }
+
+        .location-width {
+            max-width: 45px;
         }
 
     </style>
@@ -387,8 +403,8 @@
                         <#list model_pair[0].intents as intent>
                         <tr <#if !intent?is_odd_item>class="dark-table-row" </#if>>
                             <td>${intent.stage}</td>
-                            <td>${intent.company_name}</td>
-                            <td>${intent.location}</td>
+                            <td class="company-width">${intent.company_name}</td>
+                            <td class="location-width">${intent.location}</td>
                         </tr>
                         </#list>
                     </table>
@@ -402,8 +418,8 @@
                         <#list model_pair[1].intents as intent>
                         <tr <#if !intent?is_odd_item>class="dark-table-row" </#if>>
                             <td>${intent.stage}</td>
-                            <td>${intent.company_name}</td>
-                            <td>${intent.location}</td>
+                            <td class="company-width">${intent.company_name}</td>
+                            <td class="location-width">${intent.location}</td>
                         </tr>
                         </#list>
                     </table>
