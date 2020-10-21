@@ -24,6 +24,9 @@ public interface DataReportRepository extends BaseJpaRepository<DataReportRecord
             "d.ownerId = ?2")
     List<Object[]> findPidAndDunsCountTableName(DataReportRecord.Level level, String ownerId);
 
+    @Query("select count(*) from DataReportRecord as d join d.dunsCount as dc WHERE dc.name = ?1")
+    int countRecordsByDunsCount(String tableName);
+
     @Query("SELECT d.pid from DataReportRecord d WHERE d.level = ?1 AND d.ownerId = ?2")
     Long findPidByLevelAndOwnerId(DataReportRecord.Level level, String ownerId);
 

@@ -97,6 +97,7 @@ public class DataReportServiceImplTestNG extends DCPFunctionalTestNGBase {
         Object[] objs = result.get(0);
         Assert.assertNotNull(objs[0]);
         Assert.assertNull(objs[1]);
+        dataReportEntityMgr.countRecordsByDunsCount("test");
 
         DataReport dataReportPersist = dataReportService.getDataReport(mainCustomerSpace,
                 DataReportRecord.Level.Upload,  "uploadUID");
