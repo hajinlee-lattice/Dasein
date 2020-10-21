@@ -272,12 +272,12 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
     private boolean verifyExportStartMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
         log.info("Verifying ExportStart message");
-        return (expected != null) && (expected.getMessageType().equals(MessageType.Event));
+        return (expected != null) && (expected.getMessageType().equals(MessageType.Event.toString()));
     }
 
     private boolean verifyInitiatedMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
         log.info("Verifying Initiated message");
-        return (expected != null) && (expected.getMessageType().equals(MessageType.Event));
+        return (expected != null) && (expected.getMessageType().equals(MessageType.Event.toString()));
     }
 
     private boolean verifyCompletedMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
