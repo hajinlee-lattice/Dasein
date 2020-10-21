@@ -31,7 +31,7 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
 
     protected static final String ACCOUNT_VALIDATOR_SOURCE_FILE = "Account_validator.csv";
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
         Map<String, Boolean> flags = new HashMap<>();
@@ -42,7 +42,7 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         createDefaultImportSystem();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testTemplateValidator() {
         // import file
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",

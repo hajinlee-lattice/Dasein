@@ -32,7 +32,7 @@ public class CSVFileImportEntityMatchSchemaDeploymentTestNG extends CSVFileImpor
     private static final String CONTACT_ENTITY_MATCH_FILE = "Contact_Entity_Match.csv";
 
     @Override
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
         Map<String, Boolean> flags = new HashMap<>();
@@ -43,7 +43,7 @@ public class CSVFileImportEntityMatchSchemaDeploymentTestNG extends CSVFileImpor
         createDefaultImportSystem();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testContactStandardSchema() {
         Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Contact, true, false, true, false);
         Attribute customerContactId = standardTable.getAttribute(InterfaceName.CustomerContactId);
@@ -62,7 +62,7 @@ public class CSVFileImportEntityMatchSchemaDeploymentTestNG extends CSVFileImpor
         Assert.assertNull(accountId);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testContactSchema() {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_ENTITY_MATCH_FILE,
@@ -108,7 +108,7 @@ public class CSVFileImportEntityMatchSchemaDeploymentTestNG extends CSVFileImpor
         Assert.assertNotNull(dfIdExtra);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testAccountSchema() {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_ENTITY_MATCH_FILE,

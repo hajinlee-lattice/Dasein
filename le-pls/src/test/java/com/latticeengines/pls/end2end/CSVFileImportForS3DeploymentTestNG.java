@@ -43,7 +43,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
 
     private static final String ACCOUNT_BASE_LOWERCASE = "Account_base_lowercase.csv";
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
@@ -51,7 +51,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         templates = cdlService.getS3ImportTemplate(customerSpace, "", null);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void importS3Base() throws Exception {
         prepareS3BaseData(ENTITY_ACCOUNT, EntityType.Accounts);
         prepareS3BaseData(ENTITY_CONTACT, EntityType.Contacts);
@@ -127,7 +127,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "importS3Base")
+    @Test(groups = "deployment.import.group2", dependsOnMethods = "importS3Base")
     public void testGetS3ImportDisplay() {
         // verify that the tenant has 5 template display by default
         Assert.assertNotNull(templates);

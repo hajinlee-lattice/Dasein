@@ -58,7 +58,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
     private static final String UNMAPPED = "unmapped";
     private RestTemplate restTemplate;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
@@ -66,7 +66,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         restTemplate = testBed.getRestTemplate();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testContactDate() {
         baseContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_DATE_FILE,
@@ -190,7 +190,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
     }
 
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testAccountDateFormat() throws IOException {
         baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         String dateFormatString1 = "DD/MM/YYYY";
