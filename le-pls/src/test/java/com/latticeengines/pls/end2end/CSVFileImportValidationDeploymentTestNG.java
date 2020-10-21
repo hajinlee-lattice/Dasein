@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
@@ -192,11 +193,14 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
             String tenantId = MultiTenantContext.getShortTenantId();
             Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId.toString(), tenantId);
             List<?> rawList = JsonUtils.deserialize(job.getOutputs().get("DATAFEEDTASK_IMPORT_ERROR_FILES"), List.class);
-            String errorFilePath = JsonUtils.convertList(rawList, String.class).get(0);
-            Assert.assertNotNull(errorFilePath);
-            String s3File = String.format(S3_ATLAS_DATA_TABLE_DIR, tenantId) +
-                    errorFilePath.substring(String.format(HDFS_DATA_TABLE_DIR, podId, tenantId, tenantId).length());
-            Assert.assertTrue(s3Service.objectExist(bucket, s3File));
+            // for special case, catalog will fail the workflow without error line
+            if (CollectionUtils.isNotEmpty(rawList)) {
+                String errorFilePath = JsonUtils.convertList(rawList, String.class).get(0);
+                Assert.assertNotNull(errorFilePath);
+                String s3File = String.format(S3_ATLAS_DATA_TABLE_DIR, tenantId) +
+                        errorFilePath.substring(String.format(HDFS_DATA_TABLE_DIR, podId, tenantId, tenantId).length());
+                Assert.assertTrue(s3Service.objectExist(bucket, s3File));
+            }
         }
     }
 }

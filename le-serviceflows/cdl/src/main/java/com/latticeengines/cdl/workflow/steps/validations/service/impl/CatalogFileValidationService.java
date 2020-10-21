@@ -140,11 +140,13 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
             log.info("Error when writing error message to error file");
         }
 
-        // copy error file back to hdfs if needed, remove temporary error.csv generated in local
+        // copy error file back to hdfs if needed
         if (errorLine != 0L || skipCheck) {
             String tenantId = catalogFileValidationServiceConfiguration.getCustomerSpace().getTenantId();
             copyErrorFileBackToHdfs(errorFile, tenantId, pathList.get(0));
         }
+        // remove temporary error.csv generated in local
+        removeErrorFile();
         EntityValidationSummary summary = new EntityValidationSummary();
         summary.setErrorLineNumber(errorLine);
         return summary;
