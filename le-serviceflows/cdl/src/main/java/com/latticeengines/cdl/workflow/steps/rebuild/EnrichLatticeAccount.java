@@ -345,7 +345,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                 joinKey, //
                 InterfaceName.LatticeAccountId.name() //
         ));
-        setPartitionMultiplier(8);
+        setPartitionMultiplier(4);
         SparkJobResult result = runSparkJob(CreateChangeListJob.class, config);
         setPartitionMultiplier(1);
 
@@ -396,7 +396,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         }
         config.setInput(inputs);
         config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-        setPartitionMultiplier(6);
+        setPartitionMultiplier(3);
         SparkJobResult result = runSparkJob(TruncateLatticeAccount.class, config);
         setPartitionMultiplier(1);
 
@@ -453,7 +453,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         config.setSelectColumns(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name()));
         // Set output format as avro as the match step afterwards only take avro input
         config.setSpecialTarget(0, DataUnit.DataFormat.AVRO);
-        setPartitionMultiplier(4);
+        setPartitionMultiplier(2);
         SparkJobResult result = runSparkJob(FilterByJoinJob.class, config);
         setPartitionMultiplier(1);
         return result.getTargets().get(0);
@@ -512,7 +512,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                     inputData // new table
             ));
             jobConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-            setPartitionMultiplier(10);
+            setPartitionMultiplier(3);
             result = runSparkJob(MergeLatticeAccount.class, jobConfig);
             setPartitionMultiplier(1);
             output = result.getTargets().get(0);
@@ -573,7 +573,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                     InterfaceName.LatticeAccountId.name() //
             ));
             try {
-                setPartitionMultiplier(8);
+                setPartitionMultiplier(4);
                 SparkJobResult result = runSparkJob(CreateChangeListJob.class, config);
                 setPartitionMultiplier(1);
                 changeLists.add(result.getTargets().get(0));

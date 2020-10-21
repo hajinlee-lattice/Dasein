@@ -16,6 +16,7 @@ public class LivyConfigurer {
     private String executorMem;
     private int maxExecutors = -1;
     private int minExecutors = -1;
+    private int basePartitionMultiplier = 4;
 
     public LivyConfigurer withDriverMem(String driverMem) {
         this.driverMem = driverMem;
@@ -81,7 +82,7 @@ public class LivyConfigurer {
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
 
-        int partitions = maxExe * executorCores * partitionMultiplier;
+        int partitions = basePartitionMultiplier * maxExe * executorCores * partitionMultiplier;
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
 
