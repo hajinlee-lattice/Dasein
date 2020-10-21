@@ -73,14 +73,14 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
     @Inject
     private SourceFileProxy sourceFileProxy;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group1")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group1")
     public void testInvalidFile() throws IOException {
         // account
         SourceFile accountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
@@ -152,7 +152,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         verifyReport(pathPatternReport, 0L,29L, 0L);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group1")
     public void testProductNameMissing() {
         SourceFile sourceFile = uploadSourceFile(PRODUCT_SOURCE_FILE, ENTITY_PRODUCT);
         startCDLImport(sourceFile, ENTITY_PRODUCT);

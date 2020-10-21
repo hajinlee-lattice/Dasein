@@ -41,7 +41,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
 
     private List<S3ImportTemplateDisplay> templates = null;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
@@ -50,7 +50,7 @@ public class CSVFileImportToS3DeploymentTestNG extends CSVFileImportDeploymentTe
         log.info("templates is :" + JsonUtils.serialize(templates));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testMain() {
         for (S3ImportTemplateDisplay display : templates) {
             importFile(display.getEntity().name(), display.getPath());
