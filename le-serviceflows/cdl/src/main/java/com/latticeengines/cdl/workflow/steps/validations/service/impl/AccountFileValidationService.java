@@ -146,10 +146,12 @@ public class AccountFileValidationService
             log.info("Error when writing error message to error file");
         }
 
-        // copy error file back to hdfs, remove local error.csv
+        // copy error file back to hdfs
         if (errorLine != 0L) {
             copyErrorFileBackToHdfs(errorFile);
         }
+        // local always has the error file after the above logic
+        removeErrorFile();
         EntityValidationSummary summary = new EntityValidationSummary();
         summary.setErrorLineNumber(errorLine);
         return summary;
