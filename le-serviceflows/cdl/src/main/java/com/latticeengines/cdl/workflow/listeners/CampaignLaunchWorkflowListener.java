@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CampaignLaunchWorkflowConfiguration;
@@ -58,7 +59,9 @@ public class CampaignLaunchWorkflowListener extends LEJobListener {
                 log.warn(String.format("CampaignLaunch failed. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
                 playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
+                Play play = playProxy.getPlay(customerSpace, playName);
                 PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
+                playLaunch.setPlay(play);
                 PlayLaunchChannel channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace, playName,
                         playLaunch.getId());
                 try {

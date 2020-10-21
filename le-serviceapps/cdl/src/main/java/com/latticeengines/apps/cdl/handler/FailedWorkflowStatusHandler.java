@@ -116,9 +116,9 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
                 JsonUtils.serialize(eventDetail)));
     }
 
-    private void updatePlayLaunch(String launchId) {
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
 
+    private void updatePlayLaunch(String launchId) {
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, true);
         saveErrorNumber(playLaunch);
         playLaunch.setLaunchState(LaunchState.SyncFailed);
         recoverLaunchUniverse(launchId, playLaunchChannelService, playLaunchService);

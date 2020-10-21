@@ -64,7 +64,7 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         updateMonitoringStatus(statusMonitor, status.getEventType());
 
         String launchId = statusMonitor.getEntityId();
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, true);
         if (playLaunch == null) {
             log.error("DataIntegrationStatusMonitor NOT updated: Entity " + launchId
                     + "is not returning the playLaunch.");
