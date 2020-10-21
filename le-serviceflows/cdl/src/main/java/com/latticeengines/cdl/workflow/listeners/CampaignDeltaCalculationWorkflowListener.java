@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -77,8 +78,9 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
                         channel.getCurrentLaunchedAccountUniverseTable(),
                         channel.getCurrentLaunchedContactUniverseTable()));
                 playProxy.updatePlayLaunchChannel(customerSpace, playId, channelId, channel, false);
-
+                Play play = playProxy.getPlay(customerSpace, playId);
                 PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace, playId, launchId);
+                playLaunch.setPlay(play);
                 try {
                     emailProxy.sendPlayLaunchErrorEmail(customerSpace,
                             channel.getUpdatedBy(), playLaunch);

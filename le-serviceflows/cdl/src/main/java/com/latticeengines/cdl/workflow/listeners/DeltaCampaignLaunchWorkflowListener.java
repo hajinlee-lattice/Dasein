@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
@@ -64,7 +65,9 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
                         playLaunchId, playName, customerSpace));
                 recoverLaunchUniverses(customerSpace, playName, channelId);
                 updateFailedPlayLaunch(playName, playLaunchId);
+                Play play = playProxy.getPlay(customerSpace, playName);
                 PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
+                playLaunch.setPlay(play);
                 PlayLaunchChannel channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace, playName,
                         playLaunch.getId());
                 try {
