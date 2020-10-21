@@ -233,7 +233,13 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
                 pairList.add(pair);
             }
             HashMap<String, Object> intentMap = new HashMap<>();
-            list.sort(Comparator.comparing(IntentAlertEmailInfo.Intent::getStage));
+            list.sort(Comparator.comparing(IntentAlertEmailInfo.Intent::getStage, (stage1, stage2) -> {
+                if (StringUtils.isEmpty(stage1) && StringUtils.isNotEmpty(stage2))
+                    return 1;
+                else if (StringUtils.isEmpty(stage2) && StringUtils.isNotEmpty(stage1))
+                    return -1;
+                return StringUtils.compareIgnoreCase(stage1, stage2);
+            }));
             intentMap.put("name", list.get(0).getModel());
             intentMap.put("intents", toJsonObject(list));
             pair.add(intentMap);
