@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,7 +46,7 @@ public final class OAuth2Utils {
     @Deprecated
     @SuppressWarnings("unchecked")
     public static String extractHeaderToken(HttpServletRequest request) {
-        Enumeration<String> headers = request.getHeaders("Authorization");
+        Enumeration<String> headers = request.getHeaders(HttpHeaders.AUTHORIZATION);
         while (headers.hasMoreElements()) { // typically there is only one (most
             // servers enforce that)
             String value = headers.nextElement();

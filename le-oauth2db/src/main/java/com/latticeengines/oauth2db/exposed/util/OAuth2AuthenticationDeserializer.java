@@ -16,7 +16,6 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -48,15 +47,19 @@ public class OAuth2AuthenticationDeserializer extends JsonDeserializer<OAuth2Aut
 
     @Override
     public OAuth2Authentication deserialize(JsonParser jp, DeserializationContext ctxt)
-            throws IOException, JsonProcessingException {
+            throws IOException {
         ObjectCodec oc = jp.getCodec();
         JsonNode node = oc.readTree(jp);
         // log.info("JSON Object: " + node);
 
         OAuth2Request oauth2Request = extractOAuth2Request(jp, node.get(STRING_OAUTH2_REQUEST));
-        Authentication userAuthentication = extractAuthentication(jp, node.get(STRING_USER_AUTHENTICATION));
-
-        return new OAuth2Authentication(oauth2Request, userAuthentication);
+        if (node.hasNonNull(STRING_USER_AUTHENTICATION) && !node.get(STRING_USER_AUTHENTICATION).isNull()) {
+            Authentication userAuthentication = extractAuthentication(jp, node.get(STRING_USER_AUTHENTICATION));
+            return new OAuth2Authentication(oauth2Request, userAuthentication);
+        } else {
+            Authentication userAuthentication = extractAuthentication(jp, node);
+            return new OAuth2Authentication(oauth2Request, userAuthentication);
+        }
     }
 
     private OAuth2Request extractOAuth2Request(JsonParser jp, JsonNode oauth2RequestNode) throws IOException {
@@ -89,7 +92,7 @@ public class OAuth2AuthenticationDeserializer extends JsonDeserializer<OAuth2Aut
     private Authentication extractAuthentication(JsonParser jp, JsonNode authNode) {
         Authentication authentication = jsonToUsernamePasswordAuthentication(authNode);
         if (log.isDebugEnabled()) {
-            log.debug("Authentication Autorities: {}", authentication.getAuthorities());
+            log.debug("Authentication Authorities: {}", authentication.getAuthorities());
         }
         return authentication;
     }
