@@ -24,7 +24,7 @@ public class CSVFileImportEntityMatchGASchemaDeploymentTestNG extends CSVFileImp
     private static final String ACCOUNT_ENTITY_MATCH_FILE = "Account_base.csv";
 
     @Override
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName();
         Map<String, Boolean> flags = new HashMap<>();
@@ -34,7 +34,7 @@ public class CSVFileImportEntityMatchGASchemaDeploymentTestNG extends CSVFileImp
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testFieldMappingAndTemplate() {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_ENTITY_MATCH_FILE,

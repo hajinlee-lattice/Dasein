@@ -34,7 +34,7 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
 
     private static final String PRODUCT_HIERARCHY_SOURCE_FILE = "Product_Without_Family_File.csv";
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
         Map<String, Boolean> flags = new HashMap<>();
@@ -45,7 +45,7 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
         createDefaultImportSystem();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testImport() {
         prepareBaseData(ENTITY_ACCOUNT);
         getDataFeedTask(ENTITY_ACCOUNT);
@@ -56,7 +56,7 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
         Assert.assertNull(accountTemplate.getAttribute(InterfaceName.AccountId));
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment.import.group2", enabled = false)
     public void testInvalidFile() throws IOException {
         SourceFile accountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",

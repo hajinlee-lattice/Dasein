@@ -41,7 +41,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
     @Inject
     private CDLService cdlService;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
         Map<String, Boolean> flags = new HashMap<>();
@@ -52,7 +52,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         createDefaultImportSystem();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testImportSystem() {
         // verify there's default system
         List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
@@ -413,7 +413,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         return allSystems;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testImportSystem")
+    @Test(groups = "deployment.import.group2", dependsOnMethods = "testImportSystem")
     public void  testGetDataFeedTask() {
         List<DataFeedTask> accountTasks =
                 dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace, BusinessEntity.Account.name());
@@ -429,7 +429,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testImportSystem")
+    @Test(groups = "deployment.import.group2", dependsOnMethods = "testImportSystem")
     public void testMapToLatticeIdFlag() {
         SourceFile sfAccountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
@@ -455,7 +455,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertTrue(idMappingCount > 1);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testMapToLatticeIdFlag")
+    @Test(groups = "deployment.import.group2", dependsOnMethods = "testMapToLatticeIdFlag")
     public void testPriorityList() {
         List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
         Assert.assertEquals(allSystems.size(), 3);
@@ -464,7 +464,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertEquals(allSystems.get(2).getPriority(), 3);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testPriorityList")
+    @Test(groups = "deployment.import.group2", dependsOnMethods = "testPriorityList")
     public void testMultipleSubType() {
         List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
         Assert.assertEquals(allSystems.size(), 3);
@@ -558,7 +558,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testMultipleSubType")
+    @Test(groups = "deployment.import.group2", dependsOnMethods = "testMultipleSubType")
     public void testGetSystemList() {
         // Right now there should be 4 systems: DefaultSystem, Test_SalesforceSystem, Test_OtherSystem, Test_SalesforceSystemLead
         // Three of them have Account System Id : DefaultSystem, Test_SalesforceSystem, Test_OtherSystem
@@ -598,7 +598,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertEquals(filteredS3ImportSystems.size(), 2);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testGetSystemList")
+    @Test(groups = "deployment.import.group2", dependsOnMethods = "testGetSystemList")
     public void testMarketoSystem() {
         // 1. create Marketo system
         cdlService.createS3ImportSystem(mainTestTenant.getId(), "MKTO_System", S3ImportSystem.SystemType.Marketo,

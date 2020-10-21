@@ -77,14 +77,14 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group1")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group1")
     public void testExternalSystem() {
         SourceFile accountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
@@ -140,7 +140,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertEquals(system.getDisplayNameById(attrName.get()), "SFDC ID");
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group1")
     public void testFormatDate() throws Exception {
         SourceFile accountFile = fileUploadService.uploadFile(
                 "file_" + DateTime.now().getMillis() + ".csv",
@@ -312,7 +312,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertEquals(records.get(3).get(fieldName3).toString(), Long.toString(expected3d));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group1")
     public void testExternalSystemWithContact() {
         SourceFile accountFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
@@ -383,7 +383,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertTrue(jobs.size() >= 1);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group1")
     public void testSchemaUpdate() {
         SourceFile firstFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Small_Account.csv",
@@ -447,7 +447,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertTrue(countryExist);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group1")
     public void importBase() {
         prepareBaseData(ENTITY_ACCOUNT);
         prepareBaseData(ENTITY_CONTACT);
@@ -459,7 +459,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
 
 
 
-    @Test(groups = "deployment", dependsOnMethods = "importBase")
+    @Test(groups = "deployment.import.group1", dependsOnMethods = "importBase")
     public void verifyTransaction() throws IOException {
         Assert.assertNotNull(baseTransactionFile);
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Transaction/Extracts",
@@ -484,7 +484,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertEquals(schema.getField("Quantity").schema().getTypes().get(0).getType(), Schema.Type.DOUBLE);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group1")
     public void verifyRequiredFieldMissing() {
         SourceFile missingColumn = uploadSourceFile(TRANSACTION_SOURCE_FILE_MISSING, ENTITY_TRANSACTION);
         Assert.assertNotNull(missingColumn);
@@ -497,7 +497,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertNotNull(exp);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "importBase")
+    @Test(groups = "deployment.import.group1", dependsOnMethods = "importBase")
     public void verifyBase() throws IOException {
         Assert.assertNotNull(accountDataFeedTask);
         Assert.assertNotNull(contactDataFeedTask);
@@ -546,7 +546,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyBase")
+    @Test(groups = "deployment.import.group1", dependsOnMethods = "verifyBase")
     public void verifyColumnMissing() {
         SourceFile missingAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
         Assert.assertNotNull(missingAccountFile);
@@ -559,7 +559,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertNotNull(accountTemplate2.getAttribute(InterfaceName.Website));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyBase")
+    @Test(groups = "deployment.import.group1", dependsOnMethods = "verifyBase")
     public void verifyDataTypeChange() {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
@@ -610,7 +610,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         assertTrue(attributes.size() >= headers.size());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyColumnMissing", enabled = false)
+    @Test(groups = "deployment.import.group1", dependsOnMethods = "verifyColumnMissing", enabled = false)
     public void testParallelImport() {
         SourceFile sourceFile1 = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
         Assert.assertNotNull(sourceFile1);
@@ -632,7 +632,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     }
 
     // Backend will add some auto update logic to prevent wrong mapping.
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment.import.group1", enabled = false)
     public void testWrongFieldMapping() {
         SourceFile firstFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Small_Account.csv",
