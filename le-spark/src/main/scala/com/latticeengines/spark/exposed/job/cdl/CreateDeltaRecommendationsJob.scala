@@ -126,7 +126,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       var recommendations: DataFrame = null
       val result: DataFrame = baseAddRecDf
       if (!completeContactTable.rdd.isEmpty && !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName)) {
-        val aggregatedContacts = aggregateContacts(baseAddRecDf, sfdcContactId, joinKey, deltaCampaignLaunchSparkContext.getDestinationSysName)
+        val aggregatedContacts = aggregateContacts(completeContactTable, sfdcContactId, joinKey, deltaCampaignLaunchSparkContext.getDestinationSysName)
         recommendations = baseAddRecDf.join(aggregatedContacts, joinKey :: Nil, "left")
         logDataFrame("recommendations", recommendations, joinKey, Seq(joinKey, "CONTACT_NUM"), limit = 100)
         recommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
