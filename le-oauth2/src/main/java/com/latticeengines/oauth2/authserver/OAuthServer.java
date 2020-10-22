@@ -50,10 +50,10 @@ public class OAuthServer extends SpringBootServletInitializer {
         @Resource(name = "dataSourceOauth2")
         private DataSource dataSource;
 
-    @Inject
+        @Inject
         private OneTimeKeyAuthenticationManager authenticationManager;
 
-    @Inject
+        @Inject
         private LatticeAuthenticationKeyGenerator authenticationKeyGenerator;
 
         @Bean
