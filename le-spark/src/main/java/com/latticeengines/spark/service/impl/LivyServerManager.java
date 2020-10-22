@@ -42,7 +42,7 @@ public class LivyServerManager {
 
     // Define the upper limit for livy sessions on each server
     // for load balance and performance purpose
-    private static final int MAX_SESSION_PER_SERVER = 10;
+    private static final int MAX_SESSION_PER_SERVER = 8;
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 

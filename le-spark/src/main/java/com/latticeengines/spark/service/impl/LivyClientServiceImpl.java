@@ -53,7 +53,7 @@ public class LivyClientServiceImpl implements LivyClientService {
             boolean sharedContext = m.matches();
             Runtime.getRuntime().addShutdownHook(new Thread(() -> javaClient.stop(!sharedContext)));
             if (sharedContext) { // wait for loading jars
-                Thread.sleep(3000L);
+                Thread.sleep(30000L);
             }
             return new LivyScalaClient(javaClient);
         } catch (IOException | URISyntaxException | InterruptedException e) {

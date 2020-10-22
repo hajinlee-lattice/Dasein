@@ -83,7 +83,8 @@ public class SparkJobServiceImpl implements SparkJobService {
         J job;
         try {
             job = jobClz.getConstructor().newInstance();
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException
+                | IllegalAccessException e) {
             throw new RuntimeException("Failed to instantiate a spark job of type " + jobClz);
         }
         cleanupTargetDirs(config.getTargets());
@@ -108,7 +109,7 @@ public class SparkJobServiceImpl implements SparkJobService {
 
     private <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
     String submitJobWithRetry(LivyScalaClient client, J job) {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(20);
+        RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(10, 2000L, 2D, 60000L, true, null);
         return retry.execute(context -> {
             if (context.getRetryCount() > 0) {
                 log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry submitting spark job " //
@@ -130,21 +131,20 @@ public class SparkJobServiceImpl implements SparkJobService {
     }
 
     @Override
-    public SparkJobResult runScript(LivySession session, SparkScript script,
-            ScriptJobConfig config) {
+    public SparkJobResult runScript(LivySession session, SparkScript script, ScriptJobConfig config) {
         LivySession retrieved = verifySession(session);
         cleanupTargetDirs(config.getTargets());
         SparkScriptClient client = getClient(retrieved, script);
         client.runPreScript(config);
         switch (script.getType()) {
-            case InputStream:
-                runInputStreamScript(client, (InputStreamSparkScript) script);
-                break;
-            case LocalFile:
-                runLocalFileScript(client, (LocalFileSparkScript) script);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown script type " + script.getType());
+        case InputStream:
+            runInputStreamScript(client, (InputStreamSparkScript) script);
+            break;
+        case LocalFile:
+            runLocalFileScript(client, (LocalFileSparkScript) script);
+            break;
+        default:
+            throw new UnsupportedOperationException("Unknown script type " + script.getType());
         }
         SparkScriptOutput scriptOutput = client.runPostScript();
         SparkJobResult result = new SparkJobResult();
@@ -188,8 +188,7 @@ public class SparkJobServiceImpl implements SparkJobService {
             }
         }
         if (CollectionUtils.isNotEmpty(lines)) {
-            log.info("Submitting " + CollectionUtils.size(lines)
-                    + " lines as one statement to spark.");
+            log.info("Submitting " + CollectionUtils.size(lines) + " lines as one statement to spark.");
             output = submitLines(client, lines);
         }
         return output;
@@ -217,8 +216,7 @@ public class SparkJobServiceImpl implements SparkJobService {
     private LivySession verifySession(LivySession session) {
         LivySession retrieved = sessionService.getSession(session);
         if (!LivySession.STATE_IDLE.equalsIgnoreCase(retrieved.getState())) {
-            throw new IllegalStateException(
-                    "Livy session is not ready: " + JsonUtils.serialize(retrieved));
+            throw new IllegalStateException("Livy session is not ready: " + JsonUtils.serialize(retrieved));
         }
         return retrieved;
     }

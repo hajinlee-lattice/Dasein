@@ -27,6 +27,7 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -51,6 +52,9 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     @Inject
     private Configuration yarnConfiguration;
+
+    @Value("${spark.jars.repositories}")
+    private String sparkJarsRepo;
 
     private static final Logger log = LoggerFactory.getLogger(LivySessionServiceImpl.class);
 
@@ -79,6 +83,10 @@ public class LivySessionServiceImpl implements LivySessionService {
             pkgs.addAll(Arrays.asList(sparkConf.get("spark.jars.packages").split(",")));
         }
         conf.put("spark.jars.packages", StringUtils.join(pkgs, ","));
+        // Explicitly point to dnb artifactory if present in properties
+        if (StringUtils.isNotEmpty(sparkJarsRepo)) {
+            conf.put("spark.jars.repositories", sparkJarsRepo);
+        }
         log.info("conf=" + JsonUtils.serialize(conf));
         payLoad.put("conf", conf);
         if (MapUtils.isNotEmpty(livyConf)) {
