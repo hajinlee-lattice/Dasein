@@ -52,7 +52,14 @@ CREATE PROCEDURE `UpdateSchema`()
           `FK_TENANT_ID`              bigint        not null,
           PRIMARY KEY (`PID`),
           UNIQUE KEY `UK_ALERT_NAME_TENANT` (`NAME`, `FK_TENANT_ID`)
-      ) ENGINE = InnoDB;
+      );
+
+      alter table `ACTIVITY_ALERTS_CONFIG`
+          add constraint `UK6oj1vx6r6gtv7lkmgff614k29` unique (`NAME`, `FK_TENANT_ID`);
+      alter table `ACTIVITY_ALERTS_CONFIG`
+          add constraint `FK_ACTIVITYALERTSCONFIG_FKTENANTID_TENANT`
+              foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
+
 
       create table `DCP_ENRICHMENT_LAYOUT`
       (
