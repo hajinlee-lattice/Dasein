@@ -47,6 +47,9 @@ public class DestinationAccountCreationWorkflowStatusHandler implements Workflow
                         + "is not returning the playLaunch.");
                 return statusMonitor;
             }
+            playLaunch.setDestinationOrgId(eventDetail.getAccountId());
+            playLaunchService.update(playLaunch);
+
             PlayLaunchChannel playLaunchChannel = playLaunch.getPlayLaunchChannel();
             LookupIdMap lookupIdMap = playLaunchChannel.getLookupIdMap();
             lookupIdMap.setOrgId(eventDetail.getAccountId());
