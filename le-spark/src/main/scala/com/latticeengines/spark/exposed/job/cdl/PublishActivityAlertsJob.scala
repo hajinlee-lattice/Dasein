@@ -31,7 +31,7 @@ class PublishActivityAlertsJob extends AbstractSparkJob[PublishActivityAlertsJob
     val prop = new java.util.Properties
     prop.setProperty("driver", config.getDbDriver)
     prop.setProperty("user", config.getDbUser)
-    prop.setProperty("password", CipherUtils.decrypt(config.getDbPassword))
+    prop.setProperty("password", config.getDbPassword)
     val table = config.getDbTableName
 
     // write data from spark dataframe to database
