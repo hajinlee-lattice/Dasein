@@ -7,8 +7,8 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.sql.functions.{coalesce, col, from_unixtime, lit, typedLit}
+import org.apache.spark.sql.{SaveMode, SparkSession}
 
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 
@@ -31,7 +31,7 @@ class PublishActivityAlertsJob extends AbstractSparkJob[PublishActivityAlertsJob
     val prop = new java.util.Properties
     prop.setProperty("driver", config.getDbDriver)
     prop.setProperty("user", config.getDbUser)
-    prop.setProperty("password", config.getDbPassword)
+    prop.setProperty("password", CipherUtils.decrypt(config.getDbPassword, config.getDbRandomStr.substring(24), config.getDbRandomStr.substring(0, 24)))
     val table = config.getDbTableName
 
     // write data from spark dataframe to database
