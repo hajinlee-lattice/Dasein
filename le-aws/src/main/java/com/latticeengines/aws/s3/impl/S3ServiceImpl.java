@@ -420,6 +420,7 @@ public class S3ServiceImpl implements S3Service {
     public void uploadInputStreamMultiPart(String bucket, String key, InputStream inputStream, long streamLength) {
 
         long uploadPartSize = 16 * MB;
+        int readLimit = (int)(20 * MB);
         List<PartETag> partETags = new ArrayList<>();
 
         // Initiate the multipart upload.
@@ -440,6 +441,7 @@ public class S3ServiceImpl implements S3Service {
                     .withPartNumber(i)
                     .withInputStream(inputStream)
                     .withPartSize(uploadPartSize);
+            uploadRequest.getRequestClientOptions().setReadLimit(readLimit);
             // Upload the part and add the response's ETag to list.
             UploadPartResult uploadResult = s3Client.uploadPart(uploadRequest);
             partETags.add(uploadResult.getPartETag());
