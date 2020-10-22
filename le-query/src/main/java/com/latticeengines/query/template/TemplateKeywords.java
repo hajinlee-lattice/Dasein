@@ -27,6 +27,8 @@ public class TemplateKeywords {
 
         public static final Set<String> SPARKSQL = readLines("spark-sql");
 
+        public static final Set<String> PRESTO = readLines("presto");
+
         private static class CommentDiscardingLineProcessor implements LineProcessor<Collection<String>> {
 
             private final Collection<String> result = Sets.newHashSet();

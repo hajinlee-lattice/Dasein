@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,6 +31,9 @@ public abstract class DataUnit {
 
     @JsonProperty("PartitionKeys")
     private List<String> partitionKeys;
+
+    @JsonProperty("TypedPartitionKeys")
+    private List<Pair<String, String>> typedPartitionKeys;
 
     @JsonProperty("Tenant")
     private String tenant;
@@ -104,12 +111,37 @@ public abstract class DataUnit {
         DataTemplateId = dataTemplateId;
     }
 
+    public List<Pair<String, String>> getTypedPartitionKeys() {
+        return typedPartitionKeys;
+    }
+
+    public void setTypedPartitionKeys(Collection<Pair<String, String>> typedPartitionKeys) {
+        this.typedPartitionKeys = new ArrayList<>(typedPartitionKeys);
+    }
     public enum StorageType {
-        Dynamo, Hdfs, Redshift, S3, MySQL, Presto, Athena
+        Dynamo, Hdfs, Redshift, S3, Presto, Athena, Unknown;
+
+        @JsonCreator
+        public static StorageType safeValueOf(String string) {
+            try {
+                return StorageType.valueOf(string);
+            } catch (IllegalArgumentException e) {
+                return Unknown;
+            }
+        }
     }
 
     public enum DataFormat {
-        AVRO, PARQUET, CSV
+        AVRO, PARQUET, CSV, UNKOWN;
+
+        @JsonCreator
+        public static DataFormat safeValueOf(String string) {
+            try {
+                return DataFormat.valueOf(string);
+            } catch (IllegalArgumentException e) {
+                return UNKOWN;
+            }
+        }
     }
 
     public enum Role {

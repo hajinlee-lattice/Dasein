@@ -408,6 +408,15 @@ public final class AvroUtils {
         return fieldAssembler.endRecord();
     }
 
+    public static List<Pair<String, Class<?>>> parseSchema(Schema schema) {
+        List<Pair<String, Class<?>>> pairs = new ArrayList<>();
+        for (Field field: schema.getFields()) {
+            Class<?> clz = getJavaType(getType(field));
+            pairs.add(Pair.of(field.name(), clz));
+        }
+        return pairs;
+    }
+
     public static Schema constructSchema(String tableName, List<Pair<String, Class<?>>> columns) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(tableName);
         FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
@@ -1660,6 +1669,7 @@ public final class AvroUtils {
             HdfsUtils.rmdir(yarnConfiguration, dirPath);
         }
         writeToHdfsFile(yarnConfiguration, schema, dirPath + File.separator + fileName, records, true);
+        // writeToHdfsFile(yarnConfiguration, schema, dirPath + File.separator + fileName, records, false);
     }
 
     public static boolean isValidColumn(String column) {

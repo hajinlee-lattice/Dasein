@@ -35,7 +35,8 @@ public abstract class QueryProvider implements ApplicationContextAware {
     }
 
     public BaseSQLQueryFactory getCachedSQLQueryFactory(AttributeRepository repository, String sqlUser) {
-        BaseSQLQueryFactory factory = factoryCache.getIfPresent(repository.getIdentifier(sqlUser));
+        String cacheKey = getCacheKey(repository, sqlUser);
+        BaseSQLQueryFactory factory = factoryCache.getIfPresent(cacheKey);
         if (factory != null) {
             return factory;
         } else {
@@ -48,6 +49,8 @@ public abstract class QueryProvider implements ApplicationContextAware {
     }
 
     protected abstract  BaseSQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser);
+
+    protected abstract String getCacheKey(AttributeRepository repository, String sqlUser);
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

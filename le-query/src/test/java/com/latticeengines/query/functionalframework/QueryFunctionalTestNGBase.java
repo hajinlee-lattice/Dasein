@@ -119,6 +119,10 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     }
 
     protected long testGetCountAndAssert(String sqlUser, Query query, long expectedCount) {
+        return testGetCountAndAssert(attrRepo, sqlUser, query, expectedCount);
+    }
+
+    protected long testGetCountAndAssert(AttributeRepository attrRepo, String sqlUser, Query query, long expectedCount) {
         long count = queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         Assert.assertEquals(count, expectedCount);
         // test idempotent
@@ -129,6 +133,11 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     protected List<Map<String, Object>> testGetDataAndAssert(String sqlUser, Query query, long expectedCount,
             List<Map<String, Object>> expectedResult) {
+        return testGetDataAndAssert(attrRepo, sqlUser, query, expectedCount, expectedResult);
+    }
+
+    protected List<Map<String, Object>> testGetDataAndAssert(AttributeRepository attrRepo, String sqlUser, Query query, long expectedCount,
+                                                             List<Map<String, Object>> expectedResult) {
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query, sqlUser).getData();
         if (expectedCount >= 0) {
             Assert.assertEquals(results.size(), expectedCount);
