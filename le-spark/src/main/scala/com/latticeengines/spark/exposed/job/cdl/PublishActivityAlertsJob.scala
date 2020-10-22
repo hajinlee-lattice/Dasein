@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl
 
+import com.latticeengines.common.exposed.util.CipherUtils
 import com.latticeengines.domain.exposed.cdl.activitydata.ActivityAlert
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
@@ -30,7 +31,7 @@ class PublishActivityAlertsJob extends AbstractSparkJob[PublishActivityAlertsJob
     val prop = new java.util.Properties
     prop.setProperty("driver", config.getDbDriver)
     prop.setProperty("user", config.getDbUser)
-    prop.setProperty("password", config.getDbPassword)
+    prop.setProperty("password", CipherUtils.decrypt(config.getDbPassword, config.getDbRandomStr.substring(24), config.getDbRandomStr.substring(0, 24)))
     val table = config.getDbTableName
 
     // write data from spark dataframe to database

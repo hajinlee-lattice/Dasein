@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -100,12 +102,15 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
         List<ActivityAlertsConfig> alertConfigs = getAlertConfigs();
 
         Table alertTable = metadataProxy.getTable(stepConfiguration.getCustomer(), alertTableName);
+        String key = CipherUtils.generateKey();
+        String random = RandomStringUtils.randomAlphanumeric(24);
         PublishActivityAlertsJobConfig config = new PublishActivityAlertsJobConfig();
         config.setInput(Collections.singletonList(HdfsDataUnit.fromPath(alertTable.getExtracts().get(0).getPath())));
         config.setDbDriver(dataDbDriver);
         config.setDbUrl(dataDbUrl);
         config.setDbUser(dataDbUser);
-        config.setDbPassword(dataDbPassword);
+        config.setDbPassword(CipherUtils.encrypt(dataDbPassword, key, random));
+        config.setDbRandomStr(random + key);
         config.setDbTableName(ActivityAlert.TABLE_NAME);
         config.setAlertVersion(getActivityAlertVersion());
         config.setTenantId(tenant.getPid());
