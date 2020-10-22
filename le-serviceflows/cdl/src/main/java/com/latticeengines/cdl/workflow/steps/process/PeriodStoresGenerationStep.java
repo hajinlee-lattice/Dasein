@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
@@ -95,7 +96,11 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
             return null;
         }
         config.evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
-        config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
+        BusinessCalendar calendar = periodProxy.getBusinessCalendar(customerSpace.toString());
+        config.streams.forEach(stream -> {
+            String streamId = stream.getStreamId();
+            config.businessCalendar.put(streamId, calendar);
+        });
         Map<String, Table> dailyDeltaTables = getTablesFromMapCtxKey(customerSpace.toString(), DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME);
         config.incrementalStreams = config.streams.stream()
                 .filter(stream -> shouldIncrUpdate(stream) && dailyDeltaTables.get(stream.getStreamId()) != null)

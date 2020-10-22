@@ -965,6 +965,12 @@ public class CDLJobServiceImpl implements CDLJobService {
         List<String> customerSpaceList = subscriptionService.getAllTenantId();
         Set<String> runningCustomerSpaceSet = getTenantWithRunningIntentWorkFlow();
         for (String customerSpaceStr : customerSpaceList) {
+            Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpaceStr).toString());
+            if (tenant == null) {
+                continue;
+            }
+
+            MultiTenantContext.setTenant(tenant);
             if (!runningCustomerSpaceSet.contains(customerSpaceStr) && isCronExpressionSatisfied(customerSpaceStr)
                     && isNewDataGenerated(customerSpaceStr)) {
                 ApplicationId appId = intentAlertWorkflowSubmitter.submit(customerSpaceStr,
@@ -985,8 +991,9 @@ public class CDLJobServiceImpl implements CDLJobService {
         AtlasStream intentStream = streams.stream()
                 .filter(stream -> (stream.getStreamType() == AtlasStream.StreamType.DnbIntentData)).findFirst().get();
         ActivityBookkeeping bookkeeping = dataStatus.getActivityBookkeeping();
-        if (bookkeeping == null)
+        if (bookkeeping == null) {
             return false;
+        }
         Map<Integer, Long> records = bookkeeping.streamRecord.get(intentStream.getStreamId());
         if (MapUtils.isEmpty(records)) {
             return false;

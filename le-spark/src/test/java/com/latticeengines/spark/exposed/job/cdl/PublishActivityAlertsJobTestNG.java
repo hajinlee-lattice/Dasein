@@ -1,6 +1,11 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +17,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
@@ -33,11 +37,11 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
     @Value("${datadb.datasource.user}")
     private String dataDbUser;
 
-    String inputPath;
-
     @Value("${datadb.datasource.password.encrypted}")
     private String dataDbPassword;
+
     private static final Logger log = LoggerFactory.getLogger(PublishActivityAlertsJobTestNG.class);
+    private String inputPath;
 
     @BeforeClass
     public void setup() {
@@ -53,19 +57,27 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
         } catch (Exception e) {
             Assert.fail("Failed in setup\n" + e.getMessage());
         }
+
+        try {
+            Connection conn = DriverManager.getConnection(dataDbUrl, dataDbUser, dataDbPassword);
+            Statement stmt = conn.createStatement();
+            stmt.execute("DELETE FROM Data_MultiTenant.ActivityAlert WHERE TENANT_ID = -1");
+        } catch (Exception e) {
+            log.warn("Failed to clean up possible existing data");
+        }
     }
 
-    @Test(groups = "functional", enabled = false)
-    public void testPublishActivityAlerts() {
+    @Test(groups = "functional")
+    public void testPublishActivityAlerts() throws SQLException {
         PublishActivityAlertsJobConfig config = new PublishActivityAlertsJobConfig();
         config.setInput(Collections.singletonList(HdfsDataUnit.fromPath(inputPath)));
         config.setDbDriver(dataDbDriver);
         config.setDbUrl(dataDbUrl);
         config.setDbUser(dataDbUser);
-        config.setDbPassword(CipherUtils.encrypt(dataDbPassword));
+        config.setDbPassword(dataDbPassword);
         config.setDbTableName(ActivityAlert.TABLE_NAME);
         config.setAlertVersion("version");
-        config.setTenantId(10L);
+        config.setTenantId(-1L);
         Map<String, String> map = new HashMap<>();
         map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, AlertCategory.PRODUCTS.name());
         map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT, AlertCategory.PRODUCTS.name());
@@ -79,5 +91,40 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
         log.info("Results: " + JsonUtils.serialize(result));
 
         Assert.assertEquals(result.getTargets().size(), 0);
+        verifyResult();
     }
+
+    private void verifyResult() throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(dataDbUrl, dataDbUser, dataDbPassword);
+            Statement stmt = conn.createStatement();
+            ResultSet rs;
+            int size = 0;
+            Map<String, Integer> alertTypeCounts = new HashMap<>();
+
+            rs = stmt.executeQuery("SELECT * FROM Data_MultiTenant.ActivityAlert WHERE TENANT_ID = -1");
+            Assert.assertNotNull(rs);
+            while (rs.next()) {
+                size++;
+                String alertName = rs.getString("ALERT_NAME");
+                if (!alertTypeCounts.containsKey(alertName))
+                    alertTypeCounts.put(alertName, 0);
+                alertTypeCounts.put(alertName, alertTypeCounts.get(alertName) + 1);
+            }
+
+            Assert.assertEquals(size, 10);
+            Assert.assertEquals(alertTypeCounts.get(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY).intValue(), 5);
+            Assert.assertEquals(
+                    alertTypeCounts.get(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT).intValue(), 4);
+            Assert.assertEquals(alertTypeCounts.get(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY).intValue(), 1);
+        } catch (Exception e) {
+            Assert.fail("Failed to verify\n" + e.getMessage());
+        } finally {
+            if (conn != null) {
+                conn.close();
+            }
+        }
+    }
+
 }
