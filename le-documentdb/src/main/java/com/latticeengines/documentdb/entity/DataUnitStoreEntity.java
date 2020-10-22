@@ -7,8 +7,7 @@ import javax.persistence.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnitStore;
 
 @Entity
-@Table(name = "DataUnitStore", //
-        indexes = { @Index(name = "IX_NAME", columnList = "Name") })
+@Table(name = "DataUnitStore")
 public class DataUnitStoreEntity extends BaseMultiTenantDocEntity<DataUnitStore> {
 
 
