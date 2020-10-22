@@ -75,7 +75,7 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
         // FIXME (Ray): ConsolidatedDailyTxn is partitioned by TxnDayPeriod and AvroUtils is unable to count
         // FIXME (Ray): Only verifying AggregatedTxn for now as it has same table (only not partitioned)
         // map.put(BusinessEntity.Transaction, DAILY_TXN_PT_EM);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_PT_EM); // changed from 62037 to 62027
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_PT_EM);
         return map;
     }
 

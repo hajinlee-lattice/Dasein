@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
@@ -116,7 +117,7 @@ public class AggPeriodTransactionStep extends BaseProcessAnalyzeSparkStep<Proces
         }
         config.streams = constructTransactionStreams(retainTypes);
         config.evaluationDate = evaluationDate;
-        config.businessCalendar = businessCalendar;
+        config.businessCalendar = Collections.singletonMap(ProductType.Analytic.name(), businessCalendar);
         Map<String, Table> dailyTransactionTables = getTablesFromMapCtxKey(customerSpaceStr, DAILY_TXN_STREAMS);
         List<DataUnit> inputs = new ArrayList<>();
         ActivityStoreSparkIOMetadata metadataWrapper = new ActivityStoreSparkIOMetadata();
