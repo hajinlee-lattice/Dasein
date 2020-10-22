@@ -79,6 +79,7 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
         config.setDbUrl(dataDbUrl);
         config.setDbUser(dataDbUser);
         config.setDbPassword(CipherUtils.encrypt(dataDbPassword, key, random));
+        config.setDbRandomStr(random + key);
         config.setDbTableName(ActivityAlert.TABLE_NAME);
         config.setAlertVersion("version");
         config.setTenantId(-1L);
