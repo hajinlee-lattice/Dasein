@@ -79,7 +79,6 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_DUNS_COUNT")
-    @OnDelete(action = OnDeleteAction.NO_ACTION)
     private com.latticeengines.domain.exposed.metadata.Table dunsCount;
 
     @Column(name = "REFRESH_TIME")
