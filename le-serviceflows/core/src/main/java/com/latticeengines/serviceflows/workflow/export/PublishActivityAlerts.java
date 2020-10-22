@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -105,7 +106,7 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
         config.setDbDriver(dataDbDriver);
         config.setDbUrl(dataDbUrl);
         config.setDbUser(dataDbUser);
-        config.setDbPassword(dataDbPassword);
+        config.setDbPassword(CipherUtils.encrypt(dataDbPassword));
         config.setDbTableName(ActivityAlert.TABLE_NAME);
         config.setAlertVersion(getActivityAlertVersion());
         config.setTenantId(tenant.getPid());
