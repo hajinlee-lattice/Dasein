@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -29,16 +31,26 @@ public class SubscriptionResource {
     @Inject
     private GlobalAuthSubscriptionService subscriptionService;
 
+    private String emailKey = "emails";
+
     @GetMapping("/tenant/{tenantId}")
     @ApiOperation(value = "Get subscription emails by tenantId")
-    public List<String> getEmailsByTenantId(@PathVariable String tenantId) {
-        return subscriptionService.getEmailsByTenantId(CustomerSpace.parse(tenantId).toString());
+    public Map<String, List<String>> getEmailsByTenantId(@PathVariable String tenantId) {
+        List<String> emailList = subscriptionService.getEmailsByTenantId(CustomerSpace.parse(tenantId).toString());
+        Map<String, List<String>> resultMap = new HashMap<>();
+        resultMap.put(emailKey, emailList);
+        return resultMap;
     }
 
     @PostMapping("/tenant/{tenantId}")
     @ApiOperation(value = "Create subscription by email list and tenantId")
-    public List<String> createByEmailsAndTenantId(@PathVariable String tenantId, @RequestBody Set<String> emails) {
-        return subscriptionService.createByEmailsAndTenantId(emails, CustomerSpace.parse(tenantId).toString());
+    public Map<String, List<String>> createByEmailsAndTenantId(@PathVariable String tenantId,
+            @RequestBody Map<String, Set<String>> emailsMap) {
+        List<String> emailList = subscriptionService.createByEmailsAndTenantId(emailsMap.get(emailKey),
+                CustomerSpace.parse(tenantId).toString());
+        Map<String, List<String>> resultMap = new HashMap<>();
+        resultMap.put(emailKey, emailList);
+        return resultMap;
     }
 
     @DeleteMapping("/tenant/{tenantId}")

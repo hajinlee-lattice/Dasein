@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConsta
 import java.io.Serializable;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -95,6 +96,18 @@ public class IntentAlertEmailInfo {
 
         public String getStage() {
             return stage;
+        }
+
+        public int getStageCompareInt() {
+            if (stage.equalsIgnoreCase(StageType.BUY.toString())) {
+                return 0;
+            } else if (stage.equalsIgnoreCase(StageType.RESEARCH.toString())) {
+                return 1;
+            } else if (StringUtils.isBlank(stage)) {
+                return 100;
+            } else {
+                return 2;
+            }
         }
 
         public void setStage(String stage) {

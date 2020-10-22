@@ -1,8 +1,10 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -25,6 +27,8 @@ public class SubscriptionResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Inject
     private SubscriptionProxy subscriptionProxy;
 
+    private String emailKey = "emails";
+
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
@@ -34,7 +38,7 @@ public class SubscriptionResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     public void testGet() {
         String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
         Assert.assertEquals(0, getEmailsCount(tenantId));
-        Set<String> validEmails = initEmailSet(new String[] { "ga_dev@lattice-engines.com" });
+        Map<String, Set<String>> validEmails = initEmailSet(new String[] { "ga_dev@lattice-engines.com" });
         subscriptionProxy.saveByEmailsAndTenantId(validEmails, tenantId);
         Assert.assertEquals(validEmails.size(), getEmailsCount(tenantId));
     }
@@ -44,23 +48,24 @@ public class SubscriptionResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
         String[] validEmailArray = { "pls-super-admin-tester@lattice-engines.com", "ysong@lattice-engines.com",
                 "bross@lattice-engines.com" };
-        Set<String> validEmails = initEmailSet(validEmailArray);
+        Map<String, Set<String>> validEmails = initEmailSet(validEmailArray);
         int expectedCount = getEmailsCount(tenantId);
 
-        List<String> savedEmails = subscriptionProxy.saveByEmailsAndTenantId(validEmails, tenantId);
+        Map<String, List<String>> savedEmails = subscriptionProxy.saveByEmailsAndTenantId(validEmails, tenantId);
         Assert.assertTrue(verityEmailsSaved(validEmails, tenantId));
-        expectedCount += savedEmails.size();
+        expectedCount += savedEmails.get(emailKey).size();
 
-        Set<String> inValidEmails = initEmailSet(new String[] { "invalid@lattice-engines.com" });
+        Map<String, Set<String>> inValidEmails = initEmailSet(new String[] { "invalid@lattice-engines.com" });
         savedEmails = subscriptionProxy.saveByEmailsAndTenantId(inValidEmails, tenantId);
-        Assert.assertEquals(0, savedEmails.size());
+        Assert.assertEquals(0, savedEmails.get(emailKey).size());
         Assert.assertEquals(expectedCount, getEmailsCount(tenantId));
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCreate" })
     public void testDelete() {
         String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
-        List<String> emails = subscriptionProxy.getEmailsByTenantId(tenantId);
+        Map<String, List<String>> emailMap = subscriptionProxy.getEmailsByTenantId(tenantId);
+        List<String> emails = emailMap.get(emailKey);
         Assert.assertTrue(CollectionUtils.isNotEmpty(emails));
         for (String email : emails) {
             subscriptionProxy.deleteByEmailAndTenantId(email, tenantId);
@@ -69,12 +74,15 @@ public class SubscriptionResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     }
 
     private int getEmailsCount(String tenantId) {
-        List<String> emails = subscriptionProxy.getEmailsByTenantId(tenantId);
+        Map<String, List<String>> emailMap = subscriptionProxy.getEmailsByTenantId(tenantId);
+        List<String> emails = emailMap.get(emailKey);
         return CollectionUtils.isEmpty(emails) ? 0 : emails.size();
     }
 
-    private boolean verityEmailsSaved(Set<String> inputEmails, String tenantId) {
-        Set<String> subscriptEmails = new HashSet<>(subscriptionProxy.getEmailsByTenantId(tenantId));
+    private boolean verityEmailsSaved(Map<String, Set<String>> inputMap, String tenantId) {
+        Map<String, List<String>> subscriptMap = subscriptionProxy.getEmailsByTenantId(tenantId);
+        Set<String> subscriptEmails = new HashSet<>(subscriptMap.get(emailKey));
+        Set<String> inputEmails = inputMap.get(emailKey);
         for (String email : inputEmails) {
             if (!subscriptEmails.contains(email))
                 return false;
@@ -82,8 +90,10 @@ public class SubscriptionResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         return true;
     }
 
-    private Set<String> initEmailSet(String[] array) {
-        return new HashSet<>(Arrays.asList(array));
+    private Map<String, Set<String>> initEmailSet(String[] array) {
+        Map<String, Set<String>> map = new HashMap<>();
+        map.put(emailKey, new HashSet<>(Arrays.asList(array)));
+        return map;
     }
 
 }

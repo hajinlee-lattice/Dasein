@@ -191,8 +191,9 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     }
 
     private void addToCountMap(Map<String, IntentAlertEmailInfo.TopItem> map, String name) {
-        if (StringUtils.isEmpty(name))
+        if (StringUtils.isBlank(name)) {
             return;
+        }
         IntentAlertEmailInfo.TopItem topItem = map.get(name);
         if (topItem == null) {
             topItem = new IntentAlertEmailInfo.TopItem();
@@ -233,13 +234,7 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
                 pairList.add(pair);
             }
             HashMap<String, Object> intentMap = new HashMap<>();
-            list.sort(Comparator.comparing(IntentAlertEmailInfo.Intent::getStage, (stage1, stage2) -> {
-                if (StringUtils.isEmpty(stage1) && StringUtils.isNotEmpty(stage2))
-                    return 1;
-                else if (StringUtils.isEmpty(stage2) && StringUtils.isNotEmpty(stage1))
-                    return -1;
-                return StringUtils.compareIgnoreCase(stage1, stage2);
-            }));
+            list.sort(Comparator.comparing(IntentAlertEmailInfo.Intent::getStageCompareInt));
             intentMap.put("name", list.get(0).getModel());
             intentMap.put("intents", toJsonObject(list));
             pair.add(intentMap);
