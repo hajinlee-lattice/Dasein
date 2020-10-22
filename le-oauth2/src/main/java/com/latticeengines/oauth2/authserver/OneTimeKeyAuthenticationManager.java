@@ -81,7 +81,7 @@ public class OneTimeKeyAuthenticationManager implements AuthenticationManager {
         } else {
             authentication.getAuthorities().forEach(auth -> {
                 log.info("auth=" + auth.toString());
-                authorities.add(new SimpleGrantedAuthority(auth.toString().toUpperCase()));
+                authorities.add(new SimpleGrantedAuthority(auth.toString()));
             });
         }
 
