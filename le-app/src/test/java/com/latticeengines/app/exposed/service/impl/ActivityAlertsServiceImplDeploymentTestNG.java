@@ -23,7 +23,6 @@ import com.latticeengines.app.exposed.service.ActivityAlertsService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.testframework.AppDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.cdl.activity.ActivityAlertsConfig;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
 import com.latticeengines.domain.exposed.cdl.activity.AlertCategory;
 import com.latticeengines.domain.exposed.cdl.activitydata.ActivityAlert;
