@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
@@ -69,12 +71,15 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
 
     @Test(groups = "functional")
     public void testPublishActivityAlerts() throws SQLException {
+        String key = CipherUtils.generateKey();
+        String random = RandomStringUtils.randomAlphanumeric(24);
         PublishActivityAlertsJobConfig config = new PublishActivityAlertsJobConfig();
         config.setInput(Collections.singletonList(HdfsDataUnit.fromPath(inputPath)));
         config.setDbDriver(dataDbDriver);
         config.setDbUrl(dataDbUrl);
         config.setDbUser(dataDbUser);
-        config.setDbPassword(dataDbPassword);
+        config.setDbPassword(CipherUtils.encrypt(dataDbPassword, key, random));
+        config.setDbRandomStr(random + key);
         config.setDbTableName(ActivityAlert.TABLE_NAME);
         config.setAlertVersion("version");
         config.setTenantId(-1L);

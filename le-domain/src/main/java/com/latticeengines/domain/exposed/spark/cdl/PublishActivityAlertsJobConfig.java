@@ -38,6 +38,9 @@ public class PublishActivityAlertsJobConfig extends SparkJobConfig {
     @JsonProperty
     private String dbPassword;
 
+    @JsonProperty
+    private String dbRandomStr;
+
     @Override
     public String getName() {
         return NAME;
@@ -114,5 +117,13 @@ public class PublishActivityAlertsJobConfig extends SparkJobConfig {
 
     public void setDbPassword(String dbPassword) {
         this.dbPassword = dbPassword;
+    }
+
+    public String getDbRandomStr() {
+        return dbRandomStr;
+    }
+
+    public void setDbRandomStr(String dbRandomStr) {
+        this.dbRandomStr = dbRandomStr;
     }
 }
