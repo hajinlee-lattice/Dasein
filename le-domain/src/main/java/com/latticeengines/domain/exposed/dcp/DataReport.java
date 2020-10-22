@@ -730,13 +730,19 @@ public class DataReport {
             if (total > 0) {
                 return getScaledDouble((unique / total) * 100);
             } else {
-                return 100.0;
+                return 0.0;
             }
         }
 
         @JsonProperty("duplicateRate")
         public double getDuplicateRate() {
-            return getScaledDouble(100 - getUniqueRate());
+            double uniqueRate = getUniqueRate();
+            long duplicate = duplicateRecords != null ? duplicateRecords : 0L;
+            if (duplicate > 0) {
+                return getScaledDouble(100 - uniqueRate);
+            } else {
+                return 0.0;
+            }
         }
     }
 
