@@ -179,6 +179,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         validateRecommendations(0);
     }
 
+    // TODO - enable it. It passes on local but fails on remote
     @Test(groups = "deployment", dependsOnMethods = { "cleanupAfterCleanupVeryOldRecommendations" }, enabled = false)
     public void cleanupRecommendationsForExpiredTenants() throws Exception {
 
@@ -201,6 +202,7 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         validateRecommendations(0);
     }
 
+    // TODO - enable it. It passes on local but fails on remote
     @Test(groups = "deployment", dependsOnMethods = { "cleanupRecommendationsForExpiredTenants" }, enabled = false)
     public void cleanupAfterCleanupRecommendationsForExpiredTenants() throws Exception {
 
