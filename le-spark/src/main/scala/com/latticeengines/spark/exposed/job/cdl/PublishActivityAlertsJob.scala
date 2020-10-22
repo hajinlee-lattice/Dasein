@@ -1,14 +1,13 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.common.exposed.util.CipherUtils
 import com.latticeengines.domain.exposed.cdl.activitydata.ActivityAlert
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.sql.functions.{coalesce, col, from_unixtime, lit, typedLit}
+import org.apache.spark.sql.{SaveMode, SparkSession}
 
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 
