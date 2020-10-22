@@ -6,8 +6,8 @@ import com.latticeengines.apps.cdl.dao.ListSegmentDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 
-@Component("segmentDao")
-public class LIstSegmentDaoImpl extends BaseDaoImpl<ListSegment> implements ListSegmentDao {
+@Component("listSegmentDao")
+public class ListSegmentDaoImpl extends BaseDaoImpl<ListSegment> implements ListSegmentDao {
 
     @Override
     protected Class<ListSegment> getEntityClass() {

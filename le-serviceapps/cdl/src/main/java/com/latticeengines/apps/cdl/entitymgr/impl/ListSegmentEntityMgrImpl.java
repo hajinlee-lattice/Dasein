@@ -15,7 +15,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 
-@Controller("talkingPointEntityMgr")
+@Controller("listSegmentEntityMgr")
 public class ListSegmentEntityMgrImpl extends
         BaseReadWriteRepoEntityMgrImpl<ListSegmentRepository, ListSegment, Long> implements ListSegmentEntityMgr {
 
