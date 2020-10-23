@@ -1195,11 +1195,9 @@ public class CDLServiceImpl implements CDLService {
                 String displayName = attribute.getSourceAttrName() == null ? attribute.getDisplayName()
                         : attribute.getSourceAttrName();
                 appendTemplateMapptingValue(fileContent, displayName);
+                templateAttrNameMap.remove(name);
             }
             for (Attribute attribute : templateAttrNameMap.values()) {
-                if (templateAttrNameMap.containsKey(name)) {
-                    continue;
-                }
                 String displayName = attribute.getSourceAttrName() == null ? attribute.getDisplayName()
                         : attribute.getSourceAttrName();
                 appendTemplateMapptingValue(fileContent, displayName);
