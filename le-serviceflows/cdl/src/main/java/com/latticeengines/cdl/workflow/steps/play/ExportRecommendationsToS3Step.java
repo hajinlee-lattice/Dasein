@@ -28,7 +28,7 @@ public class ExportRecommendationsToS3Step extends BaseImportExportS3<ExportReco
     }
 
     private void addTableDirs(String tableName, List<ImportExportRequest> requests) {
-        if (StringUtils.isNoneEmpty(tableName)) {
+        if (StringUtils.isNotEmpty(tableName)) {
             Table table = metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(), tableName);
             if (table != null) {
                 List<Extract> extracts = table.getExtracts();
