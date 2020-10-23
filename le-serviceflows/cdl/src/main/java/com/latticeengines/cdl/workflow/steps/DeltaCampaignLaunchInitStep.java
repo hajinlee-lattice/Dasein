@@ -227,11 +227,6 @@ public class DeltaCampaignLaunchInitStep
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recommendationTargetPath));
             HdfsDataUnit addRecommendationDataUnit = result.getTargets().get(1);
-            String addCsvTargetPath = addRecommendationDataUnit.getPath();
-            log.info("addCsvTargetPath: " + addCsvTargetPath);
-            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
-                    PathUtils.toAvroGlob(addCsvTargetPath));
-
             launchedAccountNum = addRecommendationDataUnit.getCount();
             // return a string of array.
             // the first element is the contact num for add csv
@@ -244,16 +239,7 @@ public class DeltaCampaignLaunchInitStep
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recommendationTargetPath));
             HdfsDataUnit addRecommendationDataUnit = result.getTargets().get(1);
-            String addCsvTargetPath = addRecommendationDataUnit.getPath();
-            log.info("addCsvTargetPath: " + addCsvTargetPath);
-            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
-                    PathUtils.toAvroGlob(addCsvTargetPath));
             HdfsDataUnit deleteRecommendationDataUnit = result.getTargets().get(2);
-            String deleteCsvTargetPath = deleteRecommendationDataUnit.getPath();
-            log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
-            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
-                    PathUtils.toAvroGlob(deleteCsvTargetPath));
-
             launchedAccountNum = addRecommendationDataUnit.getCount();
             // return a string of array.
             // the first element is the contact num for add csv
@@ -263,10 +249,6 @@ public class DeltaCampaignLaunchInitStep
             processHDFSDataUnit(String.format("DeletedRecommendations_%s", config.getExecutionId()), deleteRecommendationDataUnit, primaryKey, DELETED_RECOMMENDATION_TABLE);
         } else if (!createAddCsvDataFrame && createDeleteCsvDataFrame) {
             HdfsDataUnit deleteRecommendationDataUnit = result.getTargets().get(0);
-            String deleteCsvTargetPath = deleteRecommendationDataUnit.getPath();
-            log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
-            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
-                    PathUtils.toAvroGlob(deleteCsvTargetPath));
             processHDFSDataUnit(String.format("DeletedRecommendations_%s", config.getExecutionId()), deleteRecommendationDataUnit, primaryKey, DELETED_RECOMMENDATION_TABLE);
         } else {
             throw new LedpException(LedpCode.LEDP_70000);
@@ -293,13 +275,18 @@ public class DeltaCampaignLaunchInitStep
         metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
         String metadataTableName = dataUnitTable.getName();
+        String path = dataUnitTable.getExtracts().get(0).getPath();
         putObjectInContext(tableNameKey, metadataTableName);
         switch (tableNameKey) {
             case ADDED_RECOMMENDATION_TABLE:
                 playLaunch.setAddRecommendationsTable(metadataTableName);
+                putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH, path);
+                log.info("addCsvTargetPath: " + path);
                 break;
             case DELETED_RECOMMENDATION_TABLE:
                 playLaunch.setDeleteRecommendationsTable(metadataTableName);
+                putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH, path);
+                log.info("deleteCsvTargetPath: " + path);
                 break;
             default:
                 log.info("Will not update play launch data.");
