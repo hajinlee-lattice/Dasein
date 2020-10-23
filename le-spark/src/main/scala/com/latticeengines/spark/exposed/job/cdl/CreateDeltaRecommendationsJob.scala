@@ -94,6 +94,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       result.drop("PID")
       result.drop("DELETED")
       result = result.join(contactTableRenamed, result(joinKey) === contactTableRenamed(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + joinKey), "left")
+      result = result.drop(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + joinKey)
     }
     result
   }
