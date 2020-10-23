@@ -25,7 +25,7 @@ public class EntityQueryServiceImplCuratedMetricsTestNG extends QueryServiceImpl
     @Inject
     private EntityQueryService entityQueryService;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"functional", SPARK_TEST_GROUP})
     public void setup() {
         setupTestData(3);
     }

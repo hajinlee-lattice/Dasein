@@ -40,6 +40,15 @@ public final class AttrRepoUtils {
         return new PathBuilder<>(String.class, tableName);
     }
 
+    public static boolean testExistsEntity(AttributeRepository repository, BusinessEntity entity) {
+        try {
+            AttrRepoUtils.getTablePath(repository, entity);
+            return true;
+        } catch (QueryEvaluationException e) {
+            return false;
+        }
+    }
+
     private static String getTableName(AttributeRepository repository, BusinessEntity entity) {
         TableRoleInCollection tableRole = entity.getServingStore();
         if (tableRole == null) {
