@@ -75,13 +75,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     }
     if (createDeleteCsvDataFrame) {
       var deleteRecDf: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, deleteAccountTable)
-      if (dbConnector) {
-        finalDfs += generateCsvDfForDbConnector(deleteContactTable, deleteRecDf, joinKey, contactCols)
-      } else {
-        deleteRecDf = deleteRecDf.checkpoint(eager = true)
-        deleteRecDf = createFinalRecommendationDf(deltaCampaignLaunchSparkContext, contactCols, contactNums, joinKey, deleteRecDf, deleteAccountTable, deleteContactTable)
-        finalDfs += deleteRecDf
-      }
+      deleteRecDf = deleteRecDf.checkpoint(eager = true)
+      deleteRecDf = createFinalRecommendationDf(deltaCampaignLaunchSparkContext, contactCols, contactNums, joinKey, deleteRecDf, deleteAccountTable, deleteContactTable)
+      finalDfs += deleteRecDf
     }
     lattice.output = finalDfs.toList
     lattice.outputStr = contactNums.mkString("[", ",", "]")
