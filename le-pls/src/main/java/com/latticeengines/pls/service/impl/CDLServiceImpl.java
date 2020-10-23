@@ -1188,6 +1188,7 @@ public class CDLServiceImpl implements CDLService {
     private String getCSVFromValues(Table templateTable, List<Map<String, Object>> metadataValues) {
         StringBuffer fileContent = new StringBuffer();
         Map<String, Attribute> templateAttrNameMap = templateTable.getNameAttributeMap();
+        List<String> attrNameList = new ArrayList<>();
         if (MapUtils.isNotEmpty(templateAttrNameMap)) {
             String name = InterfaceName.Name.name();
             if (templateAttrNameMap.containsKey(name)) {// make column "Name" in the first position.
@@ -1195,12 +1196,19 @@ public class CDLServiceImpl implements CDLService {
                 String displayName = attribute.getSourceAttrName() == null ? attribute.getDisplayName()
                         : attribute.getSourceAttrName();
                 appendTemplateMapptingValue(fileContent, displayName);
-                templateAttrNameMap.remove(name);
+                attrNameList.add(name);
             }
             for (Attribute attribute : templateAttrNameMap.values()) {
+                String attrName = attribute.getName();
+                // FIXME use other util to check whether this is a custom attribute
+                if (StringUtils.isBlank(attrName) || attrName.equals(name) || attrName.startsWith("user_")) {
+                    // skip Name & custom attributes
+                    continue;
+                }
                 String displayName = attribute.getSourceAttrName() == null ? attribute.getDisplayName()
                         : attribute.getSourceAttrName();
                 appendTemplateMapptingValue(fileContent, displayName);
+                attrNameList.add(attribute.getName());
             }
         }
         fileContent.deleteCharAt(fileContent.length() - 1);
@@ -1211,7 +1219,7 @@ public class CDLServiceImpl implements CDLService {
         }
 
         for (Map<String, Object> metadataValue : metadataValues) {
-            for (String attrName : templateAttrNameMap.keySet()) {
+            for (String attrName : attrNameList) {
                 if (metadataValue.containsKey(attrName)) {
                     appendTemplateMapptingValue(fileContent, metadataValue.get(attrName).toString());
                 } else {
