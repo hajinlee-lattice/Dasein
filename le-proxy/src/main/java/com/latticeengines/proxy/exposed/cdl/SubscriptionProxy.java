@@ -2,6 +2,7 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,16 +19,16 @@ public class SubscriptionProxy extends MicroserviceRestApiProxy implements Proxy
         super("cdl");
     }
 
-    public List<String> getEmailsByTenantId(String tenantId) {
+    public Map<String, List<String>> getEmailsByTenantId(String tenantId) {
         String url = constructUrl("/subscription/tenant/{tenantId}", tenantId);
-        List<?> list = get("Get subscription emails by tenantId", url, List.class);
-        return JsonUtils.convertList(list, String.class);
+        Map<?, List<?>> map = get("Get subscription emails by tenantId", url, Map.class);
+        return JsonUtils.convertMapWithListValue(map, String.class, String.class);
     }
 
-    public List<String> saveByEmailsAndTenantId(Set<String> emails, String tenantId) {
+    public Map<String, List<String>> saveByEmailsAndTenantId(Map<String, Set<String>> emails, String tenantId) {
         String url = constructUrl("/subscription/tenant/{tenantId}", tenantId);
-        List<?> list = post("Create subscription by email list and tenantId", url, emails, List.class);
-        return JsonUtils.convertList(list, String.class);
+        Map<?, List<?>> map = post("Create subscription by email list and tenantId", url, emails, Map.class);
+        return JsonUtils.convertMapWithListValue(map, String.class, String.class);
     }
 
     public void deleteByEmailAndTenantId(String email, String tenantId) {
