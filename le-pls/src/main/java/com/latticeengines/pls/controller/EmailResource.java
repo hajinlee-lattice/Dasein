@@ -27,12 +27,11 @@ import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
+import com.latticeengines.domain.exposed.pls.ChannelSummary;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.TenantEmailNotificationType;
@@ -379,14 +378,13 @@ public class EmailResource {
     @ResponseBody
     @ApiOperation(value = "Send out email warning Always On Campaign will expire soon")
     public boolean sendPlayLaunchChannelExpiringEmail(@PathVariable("tenantId") String tenantId,
-            @RequestBody PlayLaunchChannel playLaunchChannel) {
+            @RequestBody ChannelSummary playLaunchChannel) {
         boolean isSendEmail = false;
         List<User> users = userService.getUsers(tenantId);
         if (playLaunchChannel != null) {
-            Play play = playLaunchChannel.getPlay();
             SimpleDateFormat format = new SimpleDateFormat("MMMM dd, yyyy 'at' hh:mm a z");
-            String playDisplayName = play.getDisplayName();
-            String externalSystemName = playLaunchChannel.getLookupIdMap().getExternalSystemName().getDisplayName();
+            String playDisplayName = playLaunchChannel.getPlayDisplayName();
+            String externalSystemName = playLaunchChannel.getExternalSystemName();
             String nextScheduledLaunch = format.format(playLaunchChannel.getNextScheduledLaunch());
             String launchInterval;
             if (playLaunchChannel.getExpirationPeriodString().endsWith("W")) {
@@ -402,7 +400,7 @@ public class EmailResource {
                 if (user.getEmail().equals(playLaunchChannel.getUpdatedBy())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String launchSettingsUrl = String.format("%s/atlas/tenant/%s/playbook/dashboard/%s/launchhistory",
-                            appPublicUrl, tenantName, play.getName());
+                            appPublicUrl, tenantName, playLaunchChannel.getPlayName());
                     emailService.sendPlsAlwaysOnCampaignExpirationEmail(user, launchInterval, launchSettingsUrl,
                             playDisplayName,
                             externalSystemName, nextScheduledLaunch);
@@ -417,22 +415,21 @@ public class EmailResource {
     @ResponseBody
     @ApiOperation(value = "Send out email after Campaign launch error")
     public void sendPlayLaunchErrorEmail(
-            @PathVariable("tenantId") String tenantId, @RequestBody PlayLaunch playLaunch,
+            @PathVariable("tenantId") String tenantId, @RequestBody LaunchSummary playLaunch,
             @RequestParam(value = "user", required = true) String userEmail) {
         List<User> users = userService.getUsers(tenantId);
         if (playLaunch != null) {
-            Play play = playLaunch.getPlay();
             SimpleDateFormat format = new SimpleDateFormat("MMMM dd, yyyy 'at' hh:mm a z");
-            String playDisplayName = play.getDisplayName();
+            String playDisplayName = playLaunch.getPlayDisplayName();
             String externalSystemName = playLaunch.getDestinationSysName().getDisplayName();
-            String playLaunchState = playLaunch.getUILaunchState();
-            String playLaunchCreated = format.format(playLaunch.getCreated());
+            String playLaunchState = playLaunch.getUiLaunchState();
+            String playLaunchCreated = format.format(playLaunch.getLaunchTime());
             String currentTime = format.format(new Date());
             for (User user : users) {
                 if (user.getEmail().equals(userEmail)) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     String launchHistoryUrl = String.format("%s/atlas/tenant/%s/playbook/dashboard/%s/launchhistory",
-                            appPublicUrl, tenantName, play.getName());
+                            appPublicUrl, tenantName, playLaunch.getPlayName());
                     if (playLaunch.getLaunchState().equals(LaunchState.Failed)
                             || playLaunch.getLaunchState().equals(LaunchState.SyncFailed)) {
                         emailService.sendPlsCampaignFailedEmail(user, launchHistoryUrl, playDisplayName,
