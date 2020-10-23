@@ -64,7 +64,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         };
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"functional", SPARK_TEST_GROUP})
     public void setupBase() {
         super.setupBase();
         testIsEnabled = true;
