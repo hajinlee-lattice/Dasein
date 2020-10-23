@@ -123,7 +123,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     // Default firmographic attributes required by Intent email alert
     private static final Set<String> DEFAULT_FIRMOGRAPHIC_ATTRIBUTES = ImmutableSet.of("GLOBAL_ULTIMATE_DUNS_NUMBER",
             "DOMESTIC_ULTIMATE_DUNS_NUMBER", "LDC_DUNS", "LDC_Domain", "LDC_Name", "LDC_City", "STATE_PROVINCE_ABBR",
-            "LE_IS_PRIMARY_DOMAIN", "LDC_PrimaryIndustry", "LE_REVENUE_RANGE");
+            "LDC_Country", "LE_IS_PRIMARY_DOMAIN", "LDC_PrimaryIndustry", "LE_REVENUE_RANGE");
 
     @Override
     public void execute() {

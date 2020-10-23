@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -23,7 +22,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -82,8 +82,10 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
     private static final String INTENTDATA_BY_MODELNAME_GROUPID = "ibm";
     private static final String BUYING_STAGE_BY_MODEL_GROUPID = "bsbm";
 
-    private static final Set<String> SELECTED_ATTRIBUTES = ImmutableSet.of("LDC_Name", "LDC_PrimaryIndustry",
-            "LDC_City", "STATE_PROVINCE_ABBR", "LE_REVENUE_RANGE", "LDC_DUNS", "ModelName", "Stage");
+    private static final List<String> SELECTED_ATTRIBUTES = ImmutableList.of("ModelName", "Stage", "LDC_Name",
+            "LDC_City", "STATE_PROVINCE_ABBR", "LDC_Country", "LDC_PrimaryIndustry", "LE_REVENUE_RANGE", "LDC_DUNS");
+
+    public static final String DATE_ONLY_FORMAT_STRING = "yyyy-MM-dd";
 
     @Override
     public void execute() {
@@ -163,7 +165,7 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
 
         GenerateIntentAlertArtifactsConfig config = new GenerateIntentAlertArtifactsConfig();
         config.setDimensionMetadata(dimensionMetadata);
-        config.setOutputColumns(SELECTED_ATTRIBUTES);
+        config.setSelectedAttributes(SELECTED_ATTRIBUTES);
         config.setInput(inputs);
         log.info("Generating intent alerts, spark config = {}", JsonUtils.serialize(config));
 
@@ -201,6 +203,7 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
     private String convertToCSV(HdfsDataUnit dataUnit) {
         ConvertToCSVConfig config = new ConvertToCSVConfig();
         config.setCompress(false);
+        config.setDateAttrsFmt(ImmutableMap.of("Date", DATE_ONLY_FORMAT_STRING));
         config.setInput(Collections.singletonList(dataUnit));
         SparkJobResult csvResult = runSparkJob(ConvertToCSVJob.class, config);
 
