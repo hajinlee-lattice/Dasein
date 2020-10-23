@@ -1002,7 +1002,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (StringUtils.isNotEmpty(intentAlertVersion)) {
             Integer dateId = records.keySet().stream().sorted(Comparator.reverseOrder()).findFirst().get();
             int intentAlertVersionId = Integer.parseInt(intentAlertVersion);
-            result = dateId >= intentAlertVersionId;
+            result = dateId > intentAlertVersionId;
             log.info("intentalertversion: {}, intentstream dateId {}", intentAlertVersion, dateId);
         }
         log.info("check new data generated result: {}, activeVersion is {}", result, activeVersion);
