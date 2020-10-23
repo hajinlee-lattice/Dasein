@@ -126,7 +126,7 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
     }
 
     private void sendEmail(String launchId) {
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, true);
         PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getId());
 
         try {
