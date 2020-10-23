@@ -568,7 +568,15 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (standardAttrNames.contains(mapping.getMappedField())) {
                 String preUserField = previousStandardFieldMapping.get(mapping.getMappedField());
                 String userField = mapping.getUserField();
-                if (StringUtils.isNotBlank(preUserField) && StringUtils.isNotBlank(userField) &&
+                if (StringUtils.isNotBlank(preUserField) && StringUtils.isBlank(userField) ) {
+                    String message = String.format("%s was previously mapped to %s. " +
+                                    "This mapping can be changed, but removing the mapping is currently not supported.",
+                            mapping.getMappedField(), preUserField);
+                    FieldValidation validation = createValidation(userField, mapping.getMappedField(),
+                            ValidationStatus.WARNING, message);
+                    validations.add(validation);
+                    groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
+                } else if (StringUtils.isNotBlank(preUserField) && StringUtils.isNotBlank(userField) &&
                         !preUserField.equals(userField)) {
                     String message = String.format("standard field mapping changed from %s -> %s to %s -> %s.",
                             preUserField, mapping.getMappedField(), userField, mapping.getMappedField());
@@ -580,6 +588,17 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 previousStandardFieldMapping.remove(mapping.getMappedField());
             }
         }
+        previousStandardFieldMapping.forEach((mappedField, userField) -> {
+            if (StringUtils.isNotBlank(userField)) {
+                String message = String.format("%s was previously mapped to %s. " +
+                                "This mapping can be changed, but removing the mapping is currently not supported.",
+                        mappedField, userField);
+                FieldValidation validation = createValidation(userField, mappedField, ValidationStatus.WARNING,
+                        message);
+                validations.add(validation);
+                groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
+            }
+        });
     }
 
     private void validateFieldSize(FieldValidationResult fieldValidationResult, CustomerSpace customerSpace, String entity, Table generatedTemplate,
