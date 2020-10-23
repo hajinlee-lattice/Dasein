@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.campaign.GenerateLaunchUniverse;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -35,7 +34,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 @Component("generateTimelineUniverse")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GenerateTimelineExportUniverse extends BaseSparkSQLStep<GenerateTimelineExportUniverseStepConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(GenerateLaunchUniverse.class);
+    private static final Logger log = LoggerFactory.getLogger(GenerateTimelineExportUniverse.class);
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
