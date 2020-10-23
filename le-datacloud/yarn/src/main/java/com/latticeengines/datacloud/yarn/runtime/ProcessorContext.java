@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.yarn.runtime;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.CREATED_TEMPLATE_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_MATCH_ERROR_CODE;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_MATCH_ERROR_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
@@ -570,8 +571,10 @@ public class ProcessorContext {
     }
 
     Schema appendErrorSchema(Schema schema) {
+        // TODO: Incorporate error code
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
         fieldMap.put(ENTITY_MATCH_ERROR_FIELD, String.class);
+        fieldMap.put(ENTITY_MATCH_ERROR_CODE, String.class);
         Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
         Schema errorSchema = AvroUtils.constructSchemaWithProperties(schema.getName(), fieldMap, propertiesMap);
         return (Schema) AvroUtils.combineSchemas(schema, errorSchema)[0];

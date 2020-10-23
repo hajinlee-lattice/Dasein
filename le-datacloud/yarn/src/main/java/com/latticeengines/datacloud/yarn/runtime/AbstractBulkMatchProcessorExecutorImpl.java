@@ -576,6 +576,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
             List<Object> allValues = new ArrayList<>(outputRecord.getInput());
             allValues.add(StringUtils.join(outputRecord.getErrorMessages(), "|"));
+            allValues.add(StringUtils.join(outputRecord.getErrorCodes(), "|"));
             GenericRecordBuilder builder = new GenericRecordBuilder(errorSchema);
             List<Schema.Field> fields = errorSchema.getFields();
             buildAvroRecords(allValues, builder, fields);

@@ -59,6 +59,7 @@ public final class MatchConstants {
     public static final String ENTITY_TEMPLATE_FIELD = InterfaceName.CDLTemplateName.name();
     public static final String CREATED_TEMPLATE_FIELD = InterfaceName.CDLCreatedTemplate.name();
     public static final String ENTITY_MATCH_ERROR_FIELD = "Entity_Match_Error";
+    public static final String ENTITY_MATCH_ERROR_CODE = "Entity_Match_Error_Code";
 
     // those are the internal avro attributes
     public static final String INT_LDC_LID = "__LDC_LID__";
