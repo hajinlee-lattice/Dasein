@@ -11,15 +11,12 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -155,17 +152,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @JsonProperty("viewOnly")
     @Transient
     private boolean viewOnly;
-
-    @JsonProperty("type")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "TYPE")
-    private SegmentType type;
-
-    @JsonProperty("listSegment")
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
-    @JoinColumn(name = "LIST_SEGMENT_ID")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private ListSegment listSegment;
 
     @JsonIgnore
     @Transient
@@ -510,14 +496,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Override
     public void setViewOnly(boolean viewOnly) {
         this.viewOnly = viewOnly;
-    }
-
-    public SegmentType getType() {
-        return type;
-    }
-
-    public void setType(SegmentType type) {
-        this.type = type;
     }
 
     public enum SegmentType {
