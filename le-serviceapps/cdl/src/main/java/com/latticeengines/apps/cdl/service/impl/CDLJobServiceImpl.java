@@ -279,7 +279,12 @@ public class CDLJobServiceImpl implements CDLJobService {
                 throw e;
             }
         } else if (cdlJobType == CDLJobType.SENDDNBINTENTALERTEMAIL) {
-            sendDNBIntentAlertEmail();
+            try {
+                sendDNBIntentAlertEmail();
+            } catch (Exception e) {
+                log.error("schedule CDLJobType.SENDDNBINTENTALERTEMAIL failed" + e.getMessage());
+                throw e;
+            }
         }
         return true;
     }
@@ -1018,7 +1023,7 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private Set<String> getTenantWithRunningIntentWorkFlow() {
         List<String> types = Arrays.asList(GenerateIntentEmailAlertWorkflowConfiguration.WORKFLOW_NAME);
-        List<String> jobStatuses = Arrays.asList(JobStatus.RUNNING.getName());
+        List<String> jobStatuses = Arrays.asList(JobStatus.RUNNING.getName(), JobStatus.PENDING.getName());
         List<Job> jobs = workflowProxy.getJobs(null, types, jobStatuses, false);
         return jobs.stream().map(Job::getTenantId).collect(Collectors.toSet());
     }
