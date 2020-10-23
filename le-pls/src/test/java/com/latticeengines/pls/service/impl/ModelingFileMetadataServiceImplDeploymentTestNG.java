@@ -190,11 +190,11 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .filter(validation -> FieldValidation.ValidationStatus.WARNING.equals(validation.getStatus()))
                 .collect(Collectors.toList());
         Assert.assertNotNull(warningValidations);
-        Assert.assertEquals(warningValidations.size(), 5);
+        Assert.assertEquals(warningValidations.size(), 6);
 
         Map<ValidationCategory, List<FieldValidation>> groupedValidations =
                 fieldValidationResult.getGroupedValidations();
-        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 5);
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 6);
 
 
         // verify error
