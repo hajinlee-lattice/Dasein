@@ -17,16 +17,27 @@ import scala.collection.mutable.ListBuffer
 
 class GenerateIntentAlertArtifactsJob extends AbstractSparkJob[GenerateIntentAlertArtifactsConfig] {
 
-  private val TIMERANGE_LAST_WEEK = "w_1_w"
+  private val TimeperiodLastWeek = "w_1_w"
 
-  private val NEW_ACCOUNTS_ROW_LIMIT = 50000
-  private val ALL_ACCOUNTS_ROW_LIMIT = 125000
+  private val NewAccountsRowLimit = 50000
+  private val AllAccountsRowLimit = 125000
+
+  // Mapping between datacloud attribute names and names in email
+  private val ColumnNameMapping: Map[String, String] = Map(
+    "LDC_DUNS" -> "DUNS",
+    "LDC_Name" -> "CompanyName",
+    "LE_REVENUE_RANGE" -> "Size",
+    "LDC_PrimaryIndustry" -> "Industry",
+    "LDC_City" -> "City",
+    "STATE_PROVINCE_ABBR" -> "Location",
+    "LDC_Country" -> "Country"
+  )
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateIntentAlertArtifactsConfig]): Unit = {
     val config: GenerateIntentAlertArtifactsConfig = lattice.config
     val input: Seq[DataFrame] = lattice.input
     val dimensionValues: List[util.Map[String, AnyRef]] = config.getDimensionMetadata.getDimensionValues.asScala.toList
-    val outputColumns: List[String] = config.getOutputColumns.asScala.toList
+    val outputColumns: List[String] = config.getSelectedAttributes.asScala.toList
     val (latticeAccountTbl, rawstreamTble, ibmTbl, bsbmTbl) = (input(0), input(1), input(2), input(3))
 
     var modelNameMap: Map[String, String] = Map();
@@ -50,7 +61,7 @@ class GenerateIntentAlertArtifactsJob extends AbstractSparkJob[GenerateIntentAle
       .filter(col => {
         val tokens = ActivityMetricsGroupUtils.parseAttrName(col)
         val timeRangeStr = tokens.get(2)
-        timeRangeStr == TIMERANGE_LAST_WEEK
+        timeRangeStr == TimeperiodLastWeek
       })
       .toList
     ibmCols ++= List(InterfaceName.AccountId.name())
@@ -63,7 +74,10 @@ class GenerateIntentAlertArtifactsJob extends AbstractSparkJob[GenerateIntentAle
     val ibmConverted: DataFrame = convert(ibmSelected, modelNameMap, outputSchema, false)
     val newaccounts = bsbmConverted.join(ibmConverted, Seq(InterfaceName.AccountId.name()), "left_anti")
     val newaccountsJoined = latticeAccountTbl.join(newaccounts, Seq(InterfaceName.AccountId.name()), "inner")
-    val output1: DataFrame = newaccountsJoined.select(outputColumns map col: _*).limit(NEW_ACCOUNTS_ROW_LIMIT)
+    val selected1: DataFrame = newaccountsJoined.select(outputColumns map col: _*).limit(NewAccountsRowLimit)
+    val output1: DataFrame = ColumnNameMapping.foldLeft(selected1){(df, names) =>
+      df.withColumnRenamed(names._1, names._2)
+    }
 
     // Find all accounts that show intent in current week
     var outputCols = new ListBuffer[String]()
@@ -76,22 +90,26 @@ class GenerateIntentAlertArtifactsJob extends AbstractSparkJob[GenerateIntentAle
       .select(outputCols.head, outputCols.tail: _*)
     outputCols ++= List(InterfaceName.LastModifiedDate.name())
     val joinRaw: DataFrame = joinLatticeaccount
-      .join(rawstreamTble.drop(InterfaceName.ModelName.name()), Seq(InterfaceName.AccountId.name()), "inner")
-      .select(outputCols.head, outputCols.tail: _*)
+      .join(rawstreamTble, Seq(InterfaceName.AccountId.name(), InterfaceName.ModelName.name()), "inner")
+      .select(outputCols map col: _*)
     outputCols -= InterfaceName.LastModifiedDate.name()
+    outputCols -= InterfaceName.AccountId.name()
     val grouped = joinRaw
-      .groupBy(outputCols.head, outputCols.tail: _*)
+      .groupBy(outputCols map col: _*)
       .agg(min(InterfaceName.LastModifiedDate.name()).as("EarliestDate"))
     // Convert epoch time to actual date
     val getDate = udf {
       time: Long => toDateOnlyFromMillis(time)
     }
     outputCols += "Date"
-    val output2: DataFrame = grouped
+    val selected2: DataFrame = grouped
       .withColumn("Date", getDate(col("EarliestDate")))
       .drop("EarliestDate")
-      .select(outputCols.head, outputCols.tail: _*)
-      .limit(ALL_ACCOUNTS_ROW_LIMIT)
+      .select(outputCols map col: _*)
+      .limit(AllAccountsRowLimit)
+    val output2: DataFrame = ColumnNameMapping.foldLeft(selected2){(df, names) =>
+      df.withColumnRenamed(names._1, names._2)
+    }
 
     lattice.output = output1 :: output2 :: Nil
   }

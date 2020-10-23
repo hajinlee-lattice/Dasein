@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
@@ -22,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -48,28 +47,31 @@ public class GenerateIntentAlertArtifactsJobTestNG extends SparkJobFunctionalTes
             Pair.of(LastModifiedDate.name(), Long.class), //
             Pair.of("DUNS", String.class));
 
+    // Intent by model with last 1, 2, 4, 8, 12 weeks
     private static final List<Pair<String, Class<?>>> METRICSGROUP_IBM_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
             Pair.of("am_ibm__1__w_1_w", Boolean.class), //
-            Pair.of("am_ibm__2__w_1_w", Boolean.class), //
-            Pair.of("am_ibm__3__w_2_w", Boolean.class), //
-            Pair.of("am_ibm__4__w_4_w", Boolean.class), //
-            Pair.of("am_ibm__5__w_8_w", Boolean.class));
+            Pair.of("am_ibm__2__w_2_w", Boolean.class), //
+            Pair.of("am_ibm__3__w_4_w", Boolean.class), //
+            Pair.of("am_ibm__4__w_8_w", Boolean.class), //
+            Pair.of("am_ibm__5__w_12_w", Boolean.class));
 
+    // Buying stage by model, every week
     private static final List<Pair<String, Class<?>>> METRICSGROUP_BSBM_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
             Pair.of("am_bsbm__1__ev_w", String.class), //
             Pair.of("am_bsbm__2__ev_w", String.class), //
             Pair.of("am_bsbm__3__ev_w", String.class), //
-            Pair.of("am_bsbm__4__ev_w", String.class));
+            Pair.of("am_bsbm__4__ev_w", String.class), //
+            Pair.of("am_bsbm__5__ev_w", String.class));
 
-    private static final Set<String> OUTPUT_COLUMNS = ImmutableSet.of( //
+    private static final List<String> SELECTED_ATTRIBUTES = ImmutableList.of( //
             AccountId.name(), //
-            LDC_Name.name(), //
-            "LDC_PrimaryIndustry", //
-            "LDC_DUNS", //
             "ModelName", //
-            "Stage" //
+            "LDC_PrimaryIndustry", //
+            "Stage", //
+            LDC_Name.name(), //
+            "LDC_DUNS" //
     );
 
     List<String> inputs = new ArrayList<>();
@@ -81,7 +83,7 @@ public class GenerateIntentAlertArtifactsJobTestNG extends SparkJobFunctionalTes
 
         GenerateIntentAlertArtifactsConfig config = new GenerateIntentAlertArtifactsConfig();
         config.setDimensionMetadata(dimensionMetadata);
-        config.setOutputColumns(OUTPUT_COLUMNS);
+        config.setSelectedAttributes(SELECTED_ATTRIBUTES);
 
         SparkJobResult result = runSparkJob(GenerateIntentAlertArtifactsJob.class, config, inputs,
                 String.format("/tmp/%s/%s/GenerateIntentAlertArtifactsJob", leStack, this.getClass().getSimpleName()));
@@ -101,11 +103,16 @@ public class GenerateIntentAlertArtifactsJobTestNG extends SparkJobFunctionalTes
         inputs.add(uploadHdfsDataUnit(latticeAccountData, LATTICEACCOUNT_FIELDS));
 
         Object[][] rawStreamData = new Object[][] { //
-                { "01f0iorkcvc39gpj", "DNBinternal-hoovers", 1601931247000L, "039741717" }, //
-                { "01f0iorkcvc39gpj", "DNBinternal-optimizer", 1601758447000L, "039741717" }, // Earlier date
-                { "034nxyxyfz2uwyw1", "DNBinternal-intent", 1601585647000L, "160733585" }, //
-                { "046vxci0yxv0mo8n", "DNBinternal-ABM", 1601499247000L, "114462769" }, //
-                { "04wis14pzgqzxxd0", "D&B_ABM_intent_model", 1601326447000L, "082339268" }, //
+                { "01f0iorkcvc39gpj", "DNBinternal-intent", 1601831247000L, "039741717" }, //
+                { "01f0iorkcvc39gpj", "DNBinternal-optimizer", 1601931247000L, "039741717" }, //
+                { "01f0iorkcvc39gpj", "DNBinternal-optimizer", 1601758447000L, "039741717" }, // same model, earlier
+                                                                                              // date
+                { "034nxyxyfz2uwyw1", "DNBinternal-optimizer", 1601585647000L, "160733585" }, //
+                { "034nxyxyfz2uwyw1", "DNBinternal-ABM", 1601485777000L, "160733585" }, //
+                { "046vxci0yxv0mo8n", "DNBinternal-intent", 1601499247000L, "114462769" }, //
+                { "04wis14pzgqzxxd0", "DNBinternal-optimizer", 1601326447000L, "082339268" }, //
+                { "04wis14pzgqzxxd0", "DNBinternal-ABM", 1603126888000L, "082339268" }, //
+                { "04wis14pzgqzxxd0", "DNBinternal-ABM", 1603004888000L, "082339268" }, // same model, earlier date
         };
         inputs.add(uploadHdfsDataUnit(rawStreamData, RAWSTREAM_FIELDS));
 
@@ -113,15 +120,16 @@ public class GenerateIntentAlertArtifactsJobTestNG extends SparkJobFunctionalTes
                 { "01f0iorkcvc39gpj", false, false, false, true, true }, //
                 { "034nxyxyfz2uwyw1", false, false, false, false, true }, //
                 { "046vxci0yxv0mo8n", true, true, true, true, true }, // account shown in last week
-                { "046vxci0yxv0mo8n", false, false, true, true, true }, //
+                { "04wis14pzgqzxxd0", false, false, true, true, true }, //
         };
         inputs.add(uploadHdfsDataUnit(ibmData, METRICSGROUP_IBM_FIELDS));
 
         Object[][] bsbmData = new Object[][] { //
-                { "01f0iorkcvc39gpj", null, null, "Researching", null }, //
-                { "034nxyxyfz2uwyw1", null, "Buying", null, "Buying" }, //
-                { "046vxci0yxv0mo8n", null, null, "Researching", null }, //
-                { "04wis14pzgqzxxd0", null, "Researching", null, "Buying" }, // multiple results from different models
+                { "01f0iorkcvc39gpj", null, "Buying", "Researching", null, null }, //
+                { "034nxyxyfz2uwyw1", null, "Buying", null, "Buying", null }, //
+                { "046vxci0yxv0mo8n", null, null, "Researching", null, null }, //
+                { "04wis14pzgqzxxd0", null, "Researching", null, "Buying", null }, // multiple results from different
+                                                                                   // models
         };
         inputs.add(uploadHdfsDataUnit(bsbmData, METRICSGROUP_BSBM_FIELDS));
 
@@ -144,18 +152,20 @@ public class GenerateIntentAlertArtifactsJobTestNG extends SparkJobFunctionalTes
 
     private Boolean verifyNewAccounts(HdfsDataUnit output1) {
         Object[][] expectedResult = new Object[][] {
+                { "01f0iorkcvc39gpj", "DNBinternal-optimizer", "Finance", "Buying", "Morgan Stanley", "039741717" },
                 { "01f0iorkcvc39gpj", "DNBinternal-intent", "Finance", "Researching", "Morgan Stanley", "039741717" },
                 { "034nxyxyfz2uwyw1", "DNBinternal-optimizer", "Internet", "Buying", "Facebook", "160733585" },
                 { "034nxyxyfz2uwyw1", "DNBinternal-ABM", "Internet", "Buying", "Facebook", "160733585" },
                 { "04wis14pzgqzxxd0", "DNBinternal-optimizer", "Restaurant", "Researching", "Cheesecake Factory",
                         "082339268" },
                 { "04wis14pzgqzxxd0", "DNBinternal-ABM", "Restaurant", "Buying", "Cheesecake Factory", "082339268" } };
+
         Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult).collect(Collectors
-                .toMap(arr -> arr[5].toString() + "_" + arr[1].toString() + "_" + arr[3].toString(), Arrays::asList));
+                .toMap(arr -> arr[4].toString() + "_" + arr[1].toString() + "_" + arr[3].toString(), Arrays::asList));
         Iterator<GenericRecord> iterator = verifyAndReadTarget(output1);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iterator) {
-            String id = record.get("LDC_DUNS").toString() + "_" + record.get(ModelName.name()).toString() + "_"
+            String id = record.get("CompanyName").toString() + "_" + record.get(ModelName.name()).toString() + "_"
                     + record.get("Stage").toString();
             verifyTargetData(expectedMap, record, id);
             rows++;
@@ -167,23 +177,21 @@ public class GenerateIntentAlertArtifactsJobTestNG extends SparkJobFunctionalTes
 
     private Boolean verifyAllAccounts(HdfsDataUnit output2) {
         Object[][] expectedResult = new Object[][] {
-                { "01f0iorkcvc39gpj", "DNBinternal-intent", "Finance", "Researching", "Morgan Stanley", "039741717",
-                        "2020-10-03" },
-                { "034nxyxyfz2uwyw1", "DNBinternal-optimizer", "Internet", "Buying", "Facebook", "160733585",
-                        "2020-10-01" },
-                { "034nxyxyfz2uwyw1", "DNBinternal-ABM", "Internet", "Buying", "Facebook", "160733585", "2020-10-01" },
-                { "046vxci0yxv0mo8n", "DNBinternal-intent", "Grocery", "Researching", "Costco", "114462769",
-                        "2020-09-30" },
-                { "04wis14pzgqzxxd0", "DNBinternal-optimizer", "Restaurant", "Researching", "Cheesecake Factory",
-                        "082339268", "2020-09-28" },
-                { "04wis14pzgqzxxd0", "DNBinternal-ABM", "Restaurant", "Buying", "Cheesecake Factory", "082339268",
-                        "2020-09-28" } };
+                { "DNBinternal-optimizer", "Finance", "Buying", "Morgan Stanley", "039741717", "2020-10-03" },
+                { "DNBinternal-intent", "Finance", "Researching", "Morgan Stanley", "039741717", "2020-10-04" },
+                { "DNBinternal-optimizer", "Internet", "Buying", "Facebook", "160733585", "2020-10-01" },
+                { "DNBinternal-ABM", "Internet", "Buying", "Facebook", "160733585", "2020-09-30" },
+                { "DNBinternal-intent", "Grocery", "Researching", "Costco", "114462769", "2020-09-30" },
+                { "DNBinternal-optimizer", "Restaurant", "Researching", "Cheesecake Factory", "082339268",
+                        "2020-09-28" },
+                { "DNBinternal-ABM", "Restaurant", "Buying", "Cheesecake Factory", "082339268", "2020-10-18" } };
+
         Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult).collect(Collectors
-                .toMap(arr -> arr[5].toString() + "_" + arr[1].toString() + "_" + arr[3].toString(), Arrays::asList));
+                .toMap(arr -> arr[3].toString() + "_" + arr[0].toString() + "_" + arr[2].toString(), Arrays::asList));
         Iterator<GenericRecord> iterator = verifyAndReadTarget(output2);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iterator) {
-            String id = record.get("LDC_DUNS").toString() + "_" + record.get(ModelName.name()).toString() + "_"
+            String id = record.get("CompanyName").toString() + "_" + record.get(ModelName.name()).toString() + "_"
                     + record.get("Stage").toString();
             verifyTargetData(expectedMap, record, id);
             rows++;

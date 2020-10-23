@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
@@ -13,8 +13,8 @@ public class GenerateIntentAlertArtifactsConfig extends SparkJobConfig {
     @JsonProperty("DimensionMetadata")
     private DimensionMetadata dimensionMetadata;
 
-    @JsonProperty("outputColumns")
-    private Set<String> outputColumns;
+    @JsonProperty("SelectedAttributes")
+    private List<String> selectedAttributes;
 
     public DimensionMetadata getDimensionMetadata() {
         return dimensionMetadata;
@@ -24,12 +24,12 @@ public class GenerateIntentAlertArtifactsConfig extends SparkJobConfig {
         this.dimensionMetadata = dimensionMetadata;
     }
 
-    public Set<String> getOutputColumns() {
-        return outputColumns;
+    public List<String> getSelectedAttributes() {
+        return selectedAttributes;
     }
 
-    public void setOutputColumns(Set<String> outputColumns) {
-        this.outputColumns = outputColumns;
+    public void setSelectedAttributes(List<String> selectedAttributes) {
+        this.selectedAttributes = selectedAttributes;
     }
 
     @Override
