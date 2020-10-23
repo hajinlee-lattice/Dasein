@@ -14,9 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.TimelineExportRequest;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
@@ -41,10 +43,20 @@ public class TimelineExportWorkflowSubmitter extends WorkflowSubmitter {
     private SegmentProxy segmentProxy;
     @Inject
     private TimeLineProxy timelineProxy;
+    @Inject
+    private BatonService batonService;
 
     @WithWorkflowJobPid
     public ApplicationId submit(@NotNull String customerSpace, @NotNull TimelineExportRequest request,
                                 @NotNull WorkflowPidWrapper pidWrapper) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        boolean enableEntityMatch =
+                batonService.isEnabled(space,
+                        LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
+        if (!enableEntityMatch) {
+            throw new IllegalStateException(String.format("tenant is not entityMatch tenant, Failed to submit %s's TimelineExportWorkflow",
+                    customerSpace));
+        }
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
         Table latticeAccountTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.LatticeAccount,
                 activeVersion);

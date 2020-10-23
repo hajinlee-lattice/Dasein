@@ -1,19 +1,25 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.TimelineExportRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ExportTimelineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimelineExportUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineToS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportTableRoleFromS3StepConfiguration;
 
 public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
         private TimelineExportWorkflowConfiguration configuration = new TimelineExportWorkflowConfiguration();
+        private ImportTableRoleFromS3StepConfiguration importTableRoleFromS3StepConfiguration =
+                new ImportTableRoleFromS3StepConfiguration();
         private GenerateTimelineExportUniverseStepConfiguration timelineUniverseStepConfiguration =
                 new GenerateTimelineExportUniverseStepConfiguration();
         private ExportTimelineSparkStepConfiguration exportTimelineSparkStepConfiguration =
@@ -22,6 +28,7 @@ public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
+            importTableRoleFromS3StepConfiguration.setCustomerSpace(customerSpace);
             exportTimelineSparkStepConfiguration.setCustomer(customerSpace.toString());
             timelineUniverseStepConfiguration.setCustomerSpace(customerSpace);
             importExportS3.setCustomerSpace(customerSpace);
@@ -62,10 +69,19 @@ public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public TimelineExportWorkflowConfiguration build() {
             configuration.setContainerConfiguration("timelineExportWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
+            importTableRoleFromS3StepConfiguration.setTableRoleInCollections(getTableRole());
+            configuration.add(importTableRoleFromS3StepConfiguration);
             configuration.add(exportTimelineSparkStepConfiguration);
             configuration.add(timelineUniverseStepConfiguration);
             configuration.add(importExportS3);
             return configuration;
+        }
+
+        private List<TableRoleInCollection> getTableRole() {
+            List<TableRoleInCollection> list = new ArrayList<>();
+            list.add(TableRoleInCollection.TimelineProfile);
+            list.add(TableRoleInCollection.LatticeAccount);
+            return list;
         }
     }
 }
