@@ -23,6 +23,7 @@ public class GenerateIntentEmailAlertWorkflowConfiguration extends BaseCDLWorkfl
 
         public GenerateIntentEmailAlertWorkflowConfiguration.Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
+            importTableRoleFromS3StepConfiguration.setCustomerSpace(customerSpace);
             generateIntentArtifacts.setCustomerSpace(customerSpace);
             sendIntentAlertEmail.setCustomerSpace(customerSpace);
             return this;

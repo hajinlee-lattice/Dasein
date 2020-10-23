@@ -28,6 +28,7 @@ public class TimelineExportWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
+            importTableRoleFromS3StepConfiguration.setCustomerSpace(customerSpace);
             exportTimelineSparkStepConfiguration.setCustomer(customerSpace.toString());
             timelineUniverseStepConfiguration.setCustomerSpace(customerSpace);
             importExportS3.setCustomerSpace(customerSpace);
