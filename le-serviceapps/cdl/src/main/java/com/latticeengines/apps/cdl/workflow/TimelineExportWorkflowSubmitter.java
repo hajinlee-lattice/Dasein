@@ -52,8 +52,7 @@ public class TimelineExportWorkflowSubmitter extends WorkflowSubmitter {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         boolean enableEntityMatch =
                 batonService.isEnabled(space,
-                        LatticeFeatureFlag.ENABLE_ENTITY_MATCH) && !batonService.isEnabled(space,
-                        LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
+                        LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         if (!enableEntityMatch) {
             throw new IllegalStateException(String.format("tenant is not entityMatch tenant, Failed to submit %s's TimelineExportWorkflow",
                     customerSpace));
