@@ -115,10 +115,10 @@ public class IntentAlertEmailInfo {
         }
 
         public Intent(GenericRecord record) {
-            this.industry = getRecordByFieldName(record, "LDC_PrimaryIndustry");
-            this.location = getRecordByFieldName(record, "STATE_PROVINCE_ABBR");
+            this.industry = getRecordByFieldName(record, "Industry");
+            this.location = getRecordByFieldName(record, "Location");
             this.model = getRecordByFieldName(record, "ModelName");
-            this.companyName = getRecordByFieldName(record, "LDC_Name");
+            this.companyName = getRecordByFieldName(record, "CompanyName");
             this.stage = StageType.parseStageName(getRecordByFieldName(record, "Stage"));
         }
 
