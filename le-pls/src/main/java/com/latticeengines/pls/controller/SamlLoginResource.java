@@ -155,7 +155,7 @@ public class SamlLoginResource {
             redirectView.setAttributesMap(attributeMap);
 
         } catch (LedpException e) {
-            log.info(e.getMessage(), e);
+            log.error("Error happened when login via SSO: ", e);
             redirectView.setUrl(String.format("%s/login/saml/%s/error", baseLoginURL, tenantDeploymentId));
         }
 
