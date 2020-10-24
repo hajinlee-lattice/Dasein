@@ -175,10 +175,14 @@ public class DataReportServiceImpl implements DataReportService {
             parentId = dataReportEntityMgr.findParentId(parentId);
         }
         if (StringUtils.isNotBlank(oldTableName)) {
-            log.info("There was an old duns count table {}, going to be marked as temporary.", oldTableName);
-            RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY);
-            metadataService.updateTableRetentionPolicy(CustomerSpace.parse(customerSpace), oldTableName,
-                    retentionPolicy);
+            int count = dataReportEntityMgr.countRecordsByDunsCount(oldTableName);
+            log.info("the count reference by data report record for {} is {}", oldTableName, count);
+            if (count == 0) {
+                log.info("There was an old duns count table {}, going to be marked as temporary.", oldTableName);
+                RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY);
+                metadataService.updateTableRetentionPolicy(CustomerSpace.parse(customerSpace), oldTableName,
+                        retentionPolicy);
+            }
         } else {
             log.info("There weren't duns count table previously");
         }

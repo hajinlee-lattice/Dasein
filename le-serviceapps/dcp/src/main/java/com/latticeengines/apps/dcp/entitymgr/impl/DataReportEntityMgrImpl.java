@@ -84,6 +84,12 @@ public class DataReportEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public int countRecordsByDunsCount(String tableName) {
+        return getReadOrWriteRepository().countRecordsByDunsCount(tableName);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataReport.BasicStats findDataReportBasicStats(DataReportRecord.Level level, String ownerId) {
         return getReadOrWriteRepository().findBasicStatsByLevelAndOwnerId(level, ownerId);
     }
