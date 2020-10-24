@@ -83,7 +83,7 @@ public class SoftDeleteAccount extends BaseSingleEntitySoftDelete<ProcessAccount
 
     protected boolean shouldPublishDynamo() {
         boolean enableTp = batonService.hasModule(customerSpace, TalkingPoint);
-        return !skipPublishDynamo || enableTp;
+        return !skipPublishDynamo && enableTp;
     }
 
 }
