@@ -91,8 +91,8 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       val contactTableToJoin: DataFrame = contactTable.select((columnsExistInContactCols ++ joinKeyCol).map(name => col(name)): _*)
       val newAttrs = contactTableToJoin.columns.map(c => DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + c)
       val contactTableRenamed: DataFrame = contactTableToJoin.toDF(newAttrs: _*)
-      result.drop("PID")
-      result.drop("DELETED")
+      result = result.drop("PID")
+      result = result.drop("DELETED")
       result = result.join(contactTableRenamed, result(joinKey) === contactTableRenamed(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + joinKey), "left")
       result = result.drop(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + joinKey)
     }
