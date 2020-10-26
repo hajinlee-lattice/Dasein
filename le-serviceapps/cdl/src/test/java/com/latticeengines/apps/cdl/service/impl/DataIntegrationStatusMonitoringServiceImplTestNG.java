@@ -366,6 +366,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(testPlayLaunch.getId(), true);
+        Assert.assertEquals(changedOrgId, playLaunch.getDestinationOrgId());
         Assert.assertEquals(changedOrgId, playLaunch.getPlayLaunchChannel().getLookupIdMap().getOrgId());
     }
 

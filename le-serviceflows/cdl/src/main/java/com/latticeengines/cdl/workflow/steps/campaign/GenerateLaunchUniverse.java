@@ -37,7 +37,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUni
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
@@ -86,7 +85,10 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
-        contactsDataExists = doesContactDataExist(attrRepo);
+        contactsDataExists = AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact);
+        if (!contactsDataExists) {
+            log.info("No Contact data found in the Attribute Repo");
+        }
 
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         Set<RatingBucketName> launchBuckets = launch == null ? channel.getBucketsToLaunch()
@@ -121,16 +123,6 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         HdfsDataUnit launchUniverseDataUnit = executeSparkJob(frontEndquery);
         log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
-    }
-
-    private boolean doesContactDataExist(AttributeRepository attrRepo) {
-        try {
-            AttrRepoUtils.getTablePath(attrRepo, BusinessEntity.Contact);
-            return true;
-        } catch (QueryEvaluationException e) {
-            log.info("No Contact data found in the Attribute Repo");
-            return false;
-        }
     }
 
     private FrontEndQuery buildFrontEndQuery(FrontEndQuery frontEndQuery, BusinessEntity entity) {

@@ -11,6 +11,7 @@ import com.latticeengines.cdl.workflow.steps.ExportTimelineStep;
 import com.latticeengines.cdl.workflow.steps.GenerateTimelineExportUniverse;
 import com.latticeengines.domain.exposed.serviceflows.cdl.TimelineExportWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportTimelineToS3;
+import com.latticeengines.serviceflows.workflow.export.ImportTableRoleFromS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -21,6 +22,8 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class TimelineExportWorkflow extends AbstractWorkflow<TimelineExportWorkflowConfiguration> {
 
     @Inject
+    private ImportTableRoleFromS3 importTableRoleFromS3;
+    @Inject
     private GenerateTimelineExportUniverse generateTimelineExportUniverse;
     @Inject
     private ExportTimelineStep exportTimelineStep;
@@ -30,6 +33,7 @@ public class TimelineExportWorkflow extends AbstractWorkflow<TimelineExportWorkf
     @Override
     public Workflow defineWorkflow(TimelineExportWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
+                .next(importTableRoleFromS3)
                 .next(generateTimelineExportUniverse)
                 .next(exportTimelineStep)
                 .next(exportTimelineToS3)

@@ -176,7 +176,7 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
      * BEGIN: Tenant clean up methods
      * ==================================================
      */
-    public void cleanup() throws Exception {
+    public void cleanup() {
         try {
             userService.deleteUserByEmail(email);
             deleteTenant(TestTenantId, TestTenantId);

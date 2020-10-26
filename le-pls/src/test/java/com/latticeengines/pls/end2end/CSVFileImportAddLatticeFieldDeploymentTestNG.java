@@ -28,7 +28,7 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNG extends CSVFileImportD
 
     private static final String CONTACT_DATE_FILE = "Contact_Date.csv";
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
         Map<String, Boolean> flags = new HashMap<>();
@@ -39,7 +39,7 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNG extends CSVFileImportD
         createDefaultImportSystem();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testAddLatticeField() {
         baseContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_DATE_FILE,

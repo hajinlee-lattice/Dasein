@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +31,7 @@ public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements
     public ActivityStoreSparkIOMetadata inputMetadata; // describes streamId -> dailyStore input index
 
     @JsonProperty("businessCalendar")
-    public BusinessCalendar businessCalendar;
+    public Map<String, BusinessCalendar> businessCalendar = new HashMap<>();
 
     @JsonProperty
     public Set<String> incrementalStreams = new HashSet<>();

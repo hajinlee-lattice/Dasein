@@ -114,7 +114,7 @@ public class CDLServiceImpl implements CDLService {
     private static final String PATHNAME = "N/A";
     private static final String DELETE_SUCCESS_TITLE = "Success! Delete Action has been submitted.";
     private static final String DELETE_FAIL_TITLE = "Validation Error";
-    private static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs\">Data Processing Job page</a>.</p>";
+    private static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs.data\">Data Processing Job page</a>.</p>";
 
     private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
     private static final String DEFAULT_SYSTEM = "DefaultSystem";
@@ -1188,6 +1188,7 @@ public class CDLServiceImpl implements CDLService {
     private String getCSVFromValues(Table templateTable, List<Map<String, Object>> metadataValues) {
         StringBuffer fileContent = new StringBuffer();
         Map<String, Attribute> templateAttrNameMap = templateTable.getNameAttributeMap();
+        List<String> attrNameList = new ArrayList<>();
         if (MapUtils.isNotEmpty(templateAttrNameMap)) {
             String name = InterfaceName.Name.name();
             if (templateAttrNameMap.containsKey(name)) {// make column "Name" in the first position.
@@ -1195,12 +1196,19 @@ public class CDLServiceImpl implements CDLService {
                 String displayName = attribute.getSourceAttrName() == null ? attribute.getDisplayName()
                         : attribute.getSourceAttrName();
                 appendTemplateMapptingValue(fileContent, displayName);
-                templateAttrNameMap.remove(name);
+                attrNameList.add(name);
             }
             for (Attribute attribute : templateAttrNameMap.values()) {
+                String attrName = attribute.getName();
+                // FIXME use other util to check whether this is a custom attribute
+                if (StringUtils.isBlank(attrName) || attrName.equals(name) || attrName.startsWith("user_")) {
+                    // skip Name & custom attributes
+                    continue;
+                }
                 String displayName = attribute.getSourceAttrName() == null ? attribute.getDisplayName()
                         : attribute.getSourceAttrName();
                 appendTemplateMapptingValue(fileContent, displayName);
+                attrNameList.add(attribute.getName());
             }
         }
         fileContent.deleteCharAt(fileContent.length() - 1);
@@ -1211,7 +1219,7 @@ public class CDLServiceImpl implements CDLService {
         }
 
         for (Map<String, Object> metadataValue : metadataValues) {
-            for (String attrName : templateAttrNameMap.keySet()) {
+            for (String attrName : attrNameList) {
                 if (metadataValue.containsKey(attrName)) {
                     appendTemplateMapptingValue(fileContent, metadataValue.get(attrName).toString());
                 } else {

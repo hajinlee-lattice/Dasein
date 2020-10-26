@@ -4,7 +4,9 @@ import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstant
 import static com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants.RAW_USAGE_DISPLAY_NAMES;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.USAGE_CSV_DATA_UNIT;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 
 import javax.inject.Inject;
 
@@ -74,13 +76,13 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
         ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
                 configuration.getProjectId(), Boolean.FALSE, null);
         if (projectDetails.getPurposeOfUse() != null) {
-            jobConfig.setDRTAttr(projectDetails.getPurposeOfUse().getDomain() //
-                    + "-" + projectDetails.getPurposeOfUse().getRecordType());
+            jobConfig.setDRTAttr(projectDetails.getPurposeOfUse().getDomain().getDisplayName() //
+                    + "-" + projectDetails.getPurposeOfUse().getRecordType().getDisplayName());
         } else {
             log.info("No purpose of use found for project {}", configuration.getProjectId());
         }
 
-        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.getTenantId());
+        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
         if (tenant != null && tenant.getSubscriberNumber() != null) {
             String subNumber = tenant.getSubscriberNumber();
             jobConfig.setSubscriberNumber(subNumber);
@@ -88,6 +90,17 @@ public class AnalyzeUsage extends RunSparkJob<ImportSourceStepConfiguration, Ana
             if (subscriberDetails != null) {
                 jobConfig.setSubscriberName(subscriberDetails.getCompanyName());
                 jobConfig.setSubscriberCountry(subscriberDetails.getAddress().getCountryCode());
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                Date startDate = subscriberDetails.getEffectiveDate();
+                if (startDate == null) {
+                    startDate = new Date();
+                }
+                jobConfig.setContractStartTime(dateFormat.format(startDate));
+                Date endDate = subscriberDetails.getExpirationDate();
+                if (endDate == null) {
+                    endDate = new Date();
+                }
+                jobConfig.setContractEndTime(dateFormat.format(endDate));
             } else {
                 log.info("No subscriber detail found for {}", subNumber);
             }

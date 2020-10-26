@@ -258,22 +258,30 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
 
     @Override
     public Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
-            @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries,
-            Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap) {
+            @NotNull Tenant tenant, @NotNull EntityRawSeed change, EntityRawSeed currentSeed,
+            boolean clearAllFailedLookupEntries, Set<EntityLookupEntry> entriesMapToOtherSeed,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
-        checkNotNull(tenant, seed);
+        checkNotNull(tenant, change);
         if (!isAllocateMode()) {
             throw new UnsupportedOperationException("Not allowed to associate entity in lookup mode");
         }
 
+        int version = getMatchVersion(env, tenant, versionMap);
+        // current seed is not copy to staging eagerly, set it before applying update
+        if (entityMatchConfigurationService.shouldCopyToStagingLazily() && currentSeed != null) {
+            entityRawSeedService.setIfNotExists(env, tenant, currentSeed, shouldSetTTL(env), version);
+        }
+
         // update seed & lookup table and get all entries that cannot update
-        EntityRawSeed seedBeforeUpdate = entityRawSeedService.updateIfNotSet(env, tenant, seed, shouldSetTTL(env),
-                getMatchVersion(env, tenant, versionMap));
+        EntityRawSeed seedBeforeUpdate = entityRawSeedService.updateIfNotSet(env, tenant, change, shouldSetTTL(env),
+                version);
         Map<Pair<EntityLookupEntry.Type, String>, Set<String>> existingLookupPairs =
                 getExistingLookupPairs(seedBeforeUpdate);
-        Set<EntityLookupEntry> entriesFailedToAssociate = getLookupEntriesFailedToAssociate(existingLookupPairs, seed);
+        Set<EntityLookupEntry> entriesFailedToAssociate = getLookupEntriesFailedToAssociate(existingLookupPairs,
+                change);
         List<EntityLookupEntry> entriesFailedToSetLookup =
-                mapLookupEntriesToSeed(env, tenant, existingLookupPairs, seed, clearAllFailedLookupEntries,
+                mapLookupEntriesToSeed(env, tenant, existingLookupPairs, change, clearAllFailedLookupEntries,
                         entriesMapToOtherSeed, versionMap);
 
         // clear one to one entries in seed that we failed to set in the lookup table
@@ -283,29 +291,34 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                         || entry.getType().mapping == EntityLookupEntry.Mapping.ONE_TO_ONE)
                 .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(entriesToClear)) {
-            EntityRawSeed seedToClear = new EntityRawSeed(seed.getId(), seed.getEntity(), entriesToClear, null);
-            entityRawSeedService.clear(env, tenant, seedToClear, getMatchVersion(env, tenant, versionMap));
+            EntityRawSeed seedToClear = new EntityRawSeed(change.getId(), change.getEntity(), entriesToClear, null);
+            entityRawSeedService.clear(env, tenant, seedToClear, version);
         }
 
         return Triple.of(seedBeforeUpdate, new ArrayList<>(entriesFailedToAssociate), entriesFailedToSetLookup);
     }
 
     @Override
-    public EntityTransactUpdateResult transactAssociate(@NotNull Tenant tenant, @NotNull EntityRawSeed seed,
-            Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap) {
+    public EntityTransactUpdateResult transactAssociate(@NotNull Tenant tenant, @NotNull EntityRawSeed change,
+            @NotNull EntityRawSeed mergedSeed, Set<EntityLookupEntry> entriesMapToOtherSeed,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
-        checkNotNull(tenant, seed);
+        checkNotNull(tenant, change);
         if (!isAllocateMode()) {
             throw new UnsupportedOperationException("Not allowed to associate entity in lookup mode");
         }
         int version = getMatchVersion(env, tenant, versionMap);
 
+        // current seed is not copy to staging eagerly, need to set the merged seed
+        boolean useMergedSeed = entityMatchConfigurationService.shouldCopyToStagingLazily();
+
         // first txn, if this fail then consider association failure
         int startIdx = 0;
-        EntityRawSeed seedToUpdate = seedForUpdate(seed, startIdx, true);
+        EntityRawSeed seedToUpdate = seedForUpdate(change, startIdx, true);
         Preconditions.checkNotNull(seedToUpdate,
-                String.format("Should have either lookup entries or attributes for association. seed = %s", seed));
-        EntityTransactUpdateResult result = entityRawSeedService.transactUpdate(env, tenant, seedToUpdate,
+                String.format("Should have either lookup entries or attributes for association. seed = %s", change));
+        EntityTransactUpdateResult result = entityRawSeedService.transactUpdate(env, tenant, //
+                useMergedSeed ? mergedSeed : seedToUpdate,
                 seedToUpdate.getLookupEntries().stream() //
                         .filter(entry -> !CollectionUtils.emptyIfNull(entriesMapToOtherSeed).contains(entry)) //
                         .collect(Collectors.toList()),
@@ -322,7 +335,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // handle following batches, ignore any conflict and accept that entries will
         // not be updated for now (since we are far from reaching 25 items, this part
         // shouldn't be executed at all)
-        for (; (seedToUpdate = seedForUpdate(seed, startIdx, false)) != null; startIdx += seedToUpdate
+        for (; (seedToUpdate = seedForUpdate(change, startIdx, false)) != null; startIdx += seedToUpdate
                 .getLookupEntries().size()) {
             result = entityRawSeedService.transactUpdate(env, tenant, seedToUpdate,
                     seedToUpdate.getLookupEntries().stream() //
@@ -641,14 +654,16 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // NOTE we can publish lookup entry asynchronously because we will not try to update
         //      lookup entry that is already in serving
 
-        // increase # of processing entries
-        nProcessingLookupEntries.addAndGet(missingResults.size());
         // populate missing seed IDs to staging layer (async, batch)
-        missingResults
-                .entrySet()
-                .stream()
-                .map(entry -> new StagingLookupPublishRequest(tenant, entry.getKey(), entry.getValue(), stagingVersion))
-                .forEach(lookupQueue::offer);
+        if (!entityMatchConfigurationService.shouldCopyToStagingLazily()) {
+            // increase # of processing entries
+            nProcessingLookupEntries.addAndGet(missingResults.size());
+            missingResults.entrySet() //
+                    .stream() //
+                    .map(entry -> new StagingLookupPublishRequest(tenant, entry.getKey(), entry.getValue(),
+                            stagingVersion)) //
+                    .forEach(lookupQueue::offer);
+        }
 
         return results;
     }
@@ -734,10 +749,10 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         // populate staging table
         // NOTE we need to update seed synchronously because we will use update expression to update each lookup entry
         //      in the seed. therefore we need to make sure the same seed is in staging before we returns anything
-        missingResults
-                .values()
-                .forEach(seed -> entityRawSeedService.setIfNotExists(env, tenant, seed, shouldSetTTL(env),
-                        getMatchVersion(env, tenant, versionMap)));
+        if (!entityMatchConfigurationService.shouldCopyToStagingLazily()) {
+            missingResults.values().forEach(seed -> entityRawSeedService.setIfNotExists(env, tenant, seed,
+                    shouldSetTTL(env), getMatchVersion(env, tenant, versionMap)));
+        }
 
         return results;
     }

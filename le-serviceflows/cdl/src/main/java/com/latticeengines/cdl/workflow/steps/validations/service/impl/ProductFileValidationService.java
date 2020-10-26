@@ -112,6 +112,7 @@ public class ProductFileValidationService
             copyErrorFileBackToHdfs(errorFile, productFileValidationServiceConfiguration.getCustomerSpace().getTenantId(),
                     pathList.get(0));
         }
+        removeErrorFile();
         return productValidationSummary;
     }
 

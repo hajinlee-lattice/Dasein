@@ -170,7 +170,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         log.info("Run spark job " + jobClz.getSimpleName() + " with configuration: " + configStr);
         computeScalingMultiplier(jobConfig.getInput(), jobConfig.getNumTargets());
         try {
-            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+            RetryTemplate retry = RetryUtils.getRetryTemplate(4);
             return retry.execute(context -> {
                 if (context.getRetryCount() > 0) {
                     log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //

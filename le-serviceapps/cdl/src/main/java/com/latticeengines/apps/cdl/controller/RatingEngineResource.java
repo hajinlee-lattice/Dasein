@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.ratings.coverage.UpdateRatingCoverageRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 import io.swagger.annotations.Api;
@@ -204,9 +205,14 @@ public class RatingEngineResource {
     @PutMapping("/{ratingEngineId}/counts")
     @ResponseBody
     @ApiOperation(value = "Update rating engine counts")
-    public Map<String, Long> updateRatingEngineCounts(@PathVariable String customerSpace,
-            @PathVariable String ratingEngineId) {
-        return ratingEngineService.updateRatingEngineCounts(ratingEngineId);
+    public Map<String, Long> updateRatingEngineCounts(@PathVariable String customerSpace, //
+                                                      @PathVariable String ratingEngineId, //
+                                                      @RequestBody(required = false) UpdateRatingCoverageRequest request) {
+        if (request != null) {
+            return ratingEngineService.updateRatingEngineCounts(ratingEngineId, request);
+        } else {
+            return ratingEngineService.updateRatingEngineCounts(ratingEngineId);
+        }
     }
 
     @GetMapping("/{ratingEngineId}/dependencies")

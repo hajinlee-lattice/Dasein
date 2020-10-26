@@ -38,14 +38,18 @@ class AnalyzeUsageJob extends AbstractSparkJob[AnalyzeUsageConfig] {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getSubscriberNumber).cast(StringType))
         } else if (field == VboUsageConstants.ATTR_LEID) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getUploadId).cast(StringType))
-        }  else if (field == VboUsageConstants.ATTR_DELIVERY_CHANNEL) {
+        } else if (field == VboUsageConstants.ATTR_DELIVERY_CHANNEL) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit("Web Application").cast(StringType))
-        }  else if (field == VboUsageConstants.ATTR_DELIVERY_MODE) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Batch").cast(StringType))
-        }  else if (field == VboUsageConstants.ATTR_APPID) {
+        } else if (field == VboUsageConstants.ATTR_DELIVERY_MODE) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit("Transactional Batch").cast(StringType))
+        } else if (field == VboUsageConstants.ATTR_APPID) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit("157").cast(StringType))
-        }  else if (field == VboUsageConstants.ATTR_CAPPID) {
-          outputWithAllFields = outputWithAllFields.withColumn(field, lit("47").cast(StringType))
+        } else if (field == VboUsageConstants.ATTR_CAPPID) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit("46").cast(StringType))
+        } else if (field == VboUsageConstants.ATTR_CONTRACT_START) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getContractStartTime).cast(StringType))
+        } else if (field == VboUsageConstants.ATTR_CONTRACT_END) {
+          outputWithAllFields = outputWithAllFields.withColumn(field, lit(config.getContractEndTime).cast(StringType))
         } else if (!rawFields.contains(field)) {
           outputWithAllFields = outputWithAllFields.withColumn(field, lit("").cast(StringType))
         }

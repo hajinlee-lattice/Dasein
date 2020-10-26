@@ -34,13 +34,12 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
 
     val classificationAttr: String = config.getClassificationAttr
     val matchedDunsAttr: String = config.getMatchedDunsAttr
-    val acceptedSeq = config.getAcceptedAttrsMap.values().asScala.toList
-    val rejectedSeq = config.getRejectedAttrsMap.values().asScala.toList
-    val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
-    val rejectedAttrs: Map[String, String] = config.getRejectedAttrsMap.asScala.toMap
+    val acceptedAttrs = config.getAcceptedAttrs.asScala
+    val rejectedAttrs = config.getRejectedAttrs.asScala
+    val displayNameMap: Map[String, String] = config.getDisplayNameMap.asScala.toMap
 
-    val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, acceptedSeq)
-    val rejectedCsv = filterRejected(input, classificationAttr, rejectedAttrs, rejectedSeq)
+    val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, displayNameMap)
+    val rejectedCsv = filterRejected(input, classificationAttr, rejectedAttrs, displayNameMap)
     val (dupReport, dunsCount) = generateDupReport(acceptedDF, matchedDunsAttr)
 
     val report : DataReport = new DataReport
@@ -52,19 +51,19 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     lattice.output = acceptedCsv :: rejectedCsv :: dunsCount :: Nil
   }
 
-  private def filterAccepted(input: DataFrame, classificationAttr: String, acceptedAttrs: Map[String, String],
-                             acceptedSeq : List[String]):
+  private def filterAccepted(input: DataFrame, classificationAttr: String, acceptedAttrs: Seq[String], //
+                             displayNameMap: Map[String, String]):
   (DataFrame, DataFrame) = {
     val accepted = DnBMatchCandidate.Classification.Accepted.name
     val acceptedDF = input.filter(col(classificationAttr) === accepted)
-    (acceptedDF, selectAndRename(acceptedDF, acceptedAttrs, acceptedSeq))
+    (acceptedDF, selectAndRename(acceptedDF, displayNameMap, acceptedAttrs))
   }
 
-  private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Map[String, String],
-                             rejectedSeq: List[String]): DataFrame = {
+  private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Seq[String],
+                             displayNameMap: Map[String, String]): DataFrame = {
     val rejected = DnBMatchCandidate.Classification.Rejected.name
-    selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === rejected), rejectedAttrs,
-      rejectedSeq)
+    val rejectedDF = input.filter(col(matchIndicator).isNull || col(matchIndicator) === rejected)
+    selectAndRename(rejectedDF, displayNameMap, rejectedAttrs)
   }
 
   private def generateGeoReport(input: DataFrame, countryAttr: String, totalCnt: Long, url: String, user: String,
@@ -118,15 +117,13 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     matchToDunsReport
   }
 
-  private def selectAndRename(input: DataFrame, attrNames: Map[String, String], nameSeq: List[String]): DataFrame = {
+  private def selectAndRename(input: DataFrame, attrNames: Map[String, String], nameSeq: Seq[String]): DataFrame = {
     logSpark("the display names in map  are " + JsonUtils.serialize(nameSeq.asJava))
-    val selected = input.columns.filter(attrNames.keySet)
+    val selected = nameSeq.intersect(input.columns)
     val filtered = input.select(selected map col: _*)
     val newNames = filtered.columns.map(c => attrNames.getOrElse(c, c))
     val renamed = filtered.toDF(newNames: _*)
-    val orderedNames = renamed.columns.sortWith((n1, n2) => nameSeq.indexOf(n1) < nameSeq.indexOf(n2))
-    logSpark("the ordered names in csv are " + JsonUtils.serialize(orderedNames))
-    renamed.select(orderedNames map col: _*)
+    renamed
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[SplitImportMatchResultConfig]): List[HdfsDataUnit] = {

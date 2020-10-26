@@ -101,7 +101,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         Assert.assertEquals(warningValidations.size(), 1);
         Map<ValidationCategory, List<FieldValidation>> groupedValidations =
                 fieldValidationResult.getGroupedValidations();
-        Assert.assertEquals(groupedValidations.get(ValidationCategory.DataFormat).size(), 1);
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.DateFormat).size(), 1);
     }
 
     @Test(groups = "deployment")

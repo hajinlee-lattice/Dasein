@@ -72,7 +72,6 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     @ResponseBody
     public JsonNode handleException(Exception e) {
         logError(e);
-        triggerCriticalAlert(e);
 
         return getJsonView();
     }

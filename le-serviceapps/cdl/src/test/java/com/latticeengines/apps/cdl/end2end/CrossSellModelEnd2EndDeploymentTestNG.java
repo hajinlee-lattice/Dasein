@@ -78,10 +78,12 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     // Training Products are only used by this test
     private static final ImmutableList<String> repeatTrainingProducts = ImmutableList.of(
-            "PQ8ho4EWIq2BpgpMul928bTgYiVoISna", "Og8oP4j5zJ1Lieh3G38qTINC6m2Jor", "NlRV90sf5DW24uZJN7rb1jHOCYxbgtK5", //
-            "NlRV90sf5DW24uZJN7rb1jHOCYxbgtK5", "AA2AE7655F28BFE08EC4D4CB387DB488", //
-            "CrqP4hEDn3tMF3ZConN0j6CVchfOWRAq", "g8cH04Lzvb0Mhou2lvuuSJjjvQm1KQ3J", //
-            "650050C066EF46905EC469E9CC2921E0", "26OcFFnMiag2jvSb3iucbyiwJuxPVY1P");
+            "PQ8ho4EWIq2BpgpMul928bTgYiVoISna", //
+            "43356888902E7390269D7AF4DCD94E6F", //
+            "aJnd3ihdb8Y1el3gNA3jLW42lprVQjA", //
+            "650050C066EF46905EC469E9CC2921E0", //
+            "g8cH04Lzvb0Mhou2lvuuSJjjvQm1KQ3J", //
+            "VJp7ePCPdYwcSpTKbOIlksmWkH4OhiEn");
     private static final ImmutableList<String> firstTrainingProducts = ImmutableList
             .of("PQ8ho4EWIq2BpgpMul928bTgYiVoISna");
 
@@ -311,9 +313,9 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
                 + " trainingCount=" + trainingCount //
                 + " eventCount=" + eventCount;
         if (strategy == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
-            Assert.assertEquals(targetCount, 20, errorMsg);
-            Assert.assertEquals(trainingCount, 223, errorMsg);
-            Assert.assertEquals(eventCount, 190, errorMsg);
+            Assert.assertEquals(targetCount, 10, errorMsg);
+            Assert.assertEquals(trainingCount, 210, errorMsg);
+            Assert.assertEquals(eventCount, 181, errorMsg);
         } else {
             Assert.assertEquals(targetCount, 506, errorMsg);
             Assert.assertEquals(trainingCount, 2359, errorMsg);

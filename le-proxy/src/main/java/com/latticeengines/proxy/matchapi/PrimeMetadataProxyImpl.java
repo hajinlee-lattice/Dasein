@@ -98,6 +98,22 @@ public class PrimeMetadataProxyImpl extends BaseRestApiProxy implements PrimeMet
 
     @Override
     public List<PrimeColumn> getPrimeColumns(List<String> elementIds) {
+        int chunkSize = 100;
+        if (CollectionUtils.isEmpty(elementIds)) {
+            return new ArrayList<>();
+        } else if (CollectionUtils.size(elementIds) <= chunkSize) {
+            return getChunkOfPrimeColumns(elementIds);
+        } else {
+            List<String> head = elementIds.subList(0, chunkSize);
+            List<String> tail = elementIds.subList(chunkSize, elementIds.size());
+            List<PrimeColumn> headPcs = new ArrayList<>(getChunkOfPrimeColumns(head));
+            List<PrimeColumn> tailPcs = new ArrayList<>(getPrimeColumns(tail));
+            CollectionUtils.addAll(headPcs, tailPcs);
+            return headPcs;
+        }
+    }
+
+    private List<PrimeColumn> getChunkOfPrimeColumns(List<String> elementIds) {
         String url = constructUrl("/columns?elementIds={elementIds}", //
                 StringUtils.join(elementIds, ","));
         return getList("get prime columns", url, PrimeColumn.class);

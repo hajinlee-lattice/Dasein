@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,13 +23,19 @@ import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.ratings.coverage.UpdateRatingCoverageRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceapps.lp.UpdateBucketMetadataRequest;
@@ -134,21 +141,41 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     }
 
     private void updateActiveRuleModelCounts() {
-        List<RatingModelContainer> containers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
-        if (CollectionUtils.isNotEmpty(containers)) {
-            containers.forEach(container -> {
-                if (RatingEngineType.RULE_BASED.equals(container.getEngineSummary().getType())) {
-                    String engineId = container.getEngineSummary().getId();
-                    try {
-                        Map<String, Long> counts = ratingEngineProxy.updateRatingEngineCounts(customerSpace.toString(),
-                                engineId);
-                        log.info("Updated the counts of rating engine " + engineId + " to "
-                                + (MapUtils.isNotEmpty(counts) ? JsonUtils.pprint(counts) : null));
-                    } catch (Exception e) {
-                        log.error("Failed to update the counts of rating engine " + engineId, e);
+        StatisticsContainer statsContainer = dataCollectionProxy.getStats(customerSpace.toString());
+        if (statsContainer != null //
+                && MapUtils.isNotEmpty(statsContainer.getStatsCubes()) //
+                && statsContainer.getStatsCubes().containsKey(BusinessEntity.Rating.name())) {
+            StatsCube cube = statsContainer.getStatsCubes().get(BusinessEntity.Rating.name());
+            Map<String, AttributeStats> attributeStatsMap = cube.getStatistics();
+            List<RatingModelContainer> containers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+            if (CollectionUtils.isNotEmpty(containers)) {
+                containers.forEach(container -> {
+                    if (RatingEngineType.RULE_BASED.equals(container.getEngineSummary().getType())) {
+                        String engineId = container.getEngineSummary().getId();
+                        if (attributeStatsMap.containsKey(engineId)) {
+                            AttributeStats attributeStats = attributeStatsMap.get(engineId);
+                            List<Bucket> buckets = attributeStats.getBuckets().getBucketList();
+                            Map<String, Long> counts = new HashMap<>();
+                            buckets.forEach(bucket -> counts.put(bucket.getLabel(), bucket.getCount()));
+                            UpdateRatingCoverageRequest request = new UpdateRatingCoverageRequest();
+                            request.setCounts(counts);
+                            Map<String, Long> returned = ratingEngineProxy //
+                                    .updateRatingEngineCounts(customerSpace.toString(), engineId, request);
+                            log.info("Updating rating coverage for {} to: {}", engineId, JsonUtils.serialize(returned));
+                        } else {
+                            log.warn("Cannot find rating coverage for {} in stats cube", engineId);
+                            try {
+                                Map<String, Long> counts = ratingEngineProxy.updateRatingEngineCounts(customerSpace.toString(),
+                                        engineId, null);
+                                log.info("Updated the counts of rating engine " + engineId + " to "
+                                        + (MapUtils.isNotEmpty(counts) ? JsonUtils.pprint(counts) : null));
+                            } catch (Exception e) {
+                                log.error("Failed to update the counts of rating engine " + engineId, e);
+                            }
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 

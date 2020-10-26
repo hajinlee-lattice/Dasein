@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -24,17 +22,15 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.cdl.activity.ActivityBookkeeping;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -85,8 +81,8 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
     private static final String INTENTDATA_BY_MODELNAME_GROUPID = "ibm";
     private static final String BUYING_STAGE_BY_MODEL_GROUPID = "bsbm";
 
-    private static final Set<String> SELECTED_ATTRIBUTES = ImmutableSet.of("LDC_Name", "LDC_PrimaryIndustry",
-            "LDC_City", "STATE_PROVINCE_ABBR", "LE_REVENUE_RANGE", "LDC_DUNS", "ModelName", "Stage");
+    private static final List<String> SELECTED_ATTRIBUTES = ImmutableList.of("ModelName", "Stage", "LDC_Name",
+            "LDC_City", "STATE_PROVINCE_ABBR", "LDC_Country", "LDC_PrimaryIndustry", "LE_REVENUE_RANGE", "LDC_DUNS");
 
     @Override
     public void execute() {
@@ -166,7 +162,7 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
 
         GenerateIntentAlertArtifactsConfig config = new GenerateIntentAlertArtifactsConfig();
         config.setDimensionMetadata(dimensionMetadata);
-        config.setOutputColumns(SELECTED_ATTRIBUTES);
+        config.setSelectedAttributes(SELECTED_ATTRIBUTES);
         config.setInput(inputs);
         log.info("Generating intent alerts, spark config = {}", JsonUtils.serialize(config));
 
@@ -197,11 +193,8 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
         HdfsDataUnit allAccountsDU = result.getTargets().get(1);
         String destPath = convertToCSV(allAccountsDU);
         // Save all accounts csv path into context
-        putObjectInContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, destPath);
-
-        // Set IntentAlertVersion in data collection status table
-        intentAlertVersion = updateIntentAlertVersion();
-        log.info("Done with generating intent alert artifacts, intent alert version is {}", intentAlertVersion);
+        putStringValueInContext(INTENT_ALERT_ALL_ACCOUNT_TABLE_NAME, destPath);
+        log.info("Done with generating intent alert artifacts");
     }
 
     private String convertToCSV(HdfsDataUnit dataUnit) {
@@ -239,21 +232,5 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
             artifact.setStatus(GENERATING);
             return dataCollectionProxy.createDataCollectionArtifact(customerSpace.toString(), activeVersion, artifact);
         }
-    }
-
-    private String updateIntentAlertVersion() {
-        DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
-                activeVersion);
-        // Use last intent import time as intent alert version
-        ActivityBookkeeping bookkeeping = dcStatus.getActivityBookkeeping();
-        Map<Integer, Long> records = bookkeeping.streamRecord.get(streamId);
-        Integer dateId = records.keySet().stream().sorted(Comparator.reverseOrder()).findFirst().get();
-        intentAlertVersion = String.valueOf(dateId);
-        dcStatus.setIntentAlertVersion(intentAlertVersion);
-        // Write back to Data Collection Status tables
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), dcStatus, activeVersion);
-
-        log.info("New intent alert version is {}", intentAlertVersion);
-        return intentAlertVersion;
     }
 }

@@ -168,7 +168,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
-    public static final int S3_CHECKPOINTS_VERSION = 27;
+    public static final int S3_CHECKPOINTS_VERSION = 28;
     private static final int S3_RATING_CHECKPOINTS_VERSION = 26;
 
     private static final String INITIATOR = "test@lattice-engines.com";
@@ -312,7 +312,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after ProcessTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long PERIOD_TXN_PT_EM = 62027L;
+    static final Long PERIOD_TXN_PT_EM = 62037L;
     // Number of aggregated period transaction after UpdateTransaction test
     static final Long PERIOD_TRANSACTION_UT = 73892L;
     // Number of aggregated period transaction after UpdateTransaction entity
@@ -668,7 +668,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             request = new ProcessAnalyzeRequest();
         }
         if (request.getEntityMatchConfiguration() == null) {
-            request.setEntityMatchConfiguration(new EntityMatchConfiguration(TEST_NUM_STAGING_SHARDS, null));
+            request.setEntityMatchConfiguration(new EntityMatchConfiguration(TEST_NUM_STAGING_SHARDS, null, true));
         }
         log.info("Start processing and analyzing ... request = {}", JsonUtils.serialize(request));
         ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), request);

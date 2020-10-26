@@ -1,9 +1,10 @@
 package com.latticeengines.apps.cdl.handler;
 
+import java.util.Collections;
+
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -11,6 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
@@ -21,8 +23,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(FailedWorkflowStatusHandlerTestNG.class);
 
     @Inject
     private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
@@ -48,7 +48,11 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
         play = createPlay();
         lookupIdMap = createLookupIdMap();
         channel = createPlayLaunchChannel(play, lookupIdMap);
+
         playLaunch = createPlayLaunch(play, channel);
+        playLaunch.setContactsLaunched(100L);
+        playLaunch = playLaunchService.update(playLaunch);
+
         statusMessage = createStatusMessage(playLaunch, DataIntegrationEventType.Failed);
         statusMonitor = createStatusMonitor(statusMessage);
     }
@@ -65,15 +69,23 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
         handler.handleWorkflowState(statusMonitor, statusMessage);
 
         String launchId = playLaunch.getLaunchId();
-        playLaunch = playLaunchService.findByLaunchId(launchId, false);
-        channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
 
-        Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Failed.toString());
-        Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.SyncFailed);
-        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_TABLE);
-        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
-        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
+        retry.execute(context -> {
+            PlayLaunch updatedPlayLaunch = playLaunchService.findByLaunchId(launchId, false);
+            PlayLaunchChannel updatedChannel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
+
+            Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Failed.toString());
+            Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.SyncFailed);
+            Assert.assertEquals(updatedPlayLaunch.getContactsErrored(), Long.valueOf(100));
+            Assert.assertEquals(updatedChannel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
+            Assert.assertEquals(updatedChannel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_TABLE);
+            Assert.assertEquals(updatedChannel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
+            Assert.assertEquals(updatedChannel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
+            return true;
+        });
+
         teardown(launchId, channel.getId(), play.getName());
     }
 }

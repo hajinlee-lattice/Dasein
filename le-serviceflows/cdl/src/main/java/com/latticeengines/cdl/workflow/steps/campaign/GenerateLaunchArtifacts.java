@@ -63,7 +63,6 @@ import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.spark.exposed.job.cdl.GenerateLaunchArtifactsJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -146,7 +145,10 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
-        boolean contactsDataExists = doesContactDataExist(attrRepo);
+        boolean contactsDataExists = AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact);
+        if (!contactsDataExists) {
+            log.info("No Contact data found in the Attribute Repo");
+        }
 
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         String accountLookupId = launch == null ? channel.getLookupIdMap().getAccountId()
@@ -186,16 +188,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
                 contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName());
         processSparkJobResults(channelConfig.getAudienceType(), channelConfig.getSystemName(), sparkJobResult);
-    }
-
-    private boolean doesContactDataExist(AttributeRepository attrRepo) {
-        try {
-            AttrRepoUtils.getTablePath(attrRepo, BusinessEntity.Contact);
-            return true;
-        } catch (QueryEvaluationException e) {
-            log.info("No Contact data found in the Attribute Repo");
-            return false;
-        }
     }
 
     private SparkJobResult executeSparkJob(MetadataSegment targetSegment, Set<Lookup> accountLookups,

@@ -124,9 +124,16 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
                 copyErrorFileToS3(params[0], params[1]);
             }
             HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, ImportProperty.ERROR_FILE, errorFile);
-            FileUtils.forceDelete(new File(ImportProperty.ERROR_FILE));
         } catch (IOException e) {
             log.info("Error when copying file to hdfs");
+        }
+    }
+
+    protected void removeErrorFile() {
+        try {
+            FileUtils.forceDelete(new File(ImportProperty.ERROR_FILE));
+        } catch (IOException e) {
+            log.info("Error when deleting local error file");
         }
     }
 

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     // Default firmographic attributes required by Intent email alert
     private static final Set<String> DEFAULT_FIRMOGRAPHIC_ATTRIBUTES = ImmutableSet.of("GLOBAL_ULTIMATE_DUNS_NUMBER",
             "DOMESTIC_ULTIMATE_DUNS_NUMBER", "LDC_DUNS", "LDC_Domain", "LDC_Name", "LDC_City", "STATE_PROVINCE_ABBR",
-            "LE_IS_PRIMARY_DOMAIN", "LDC_PrimaryIndustry", "LE_REVENUE_RANGE");
+            "LDC_Country", "LE_IS_PRIMARY_DOMAIN", "LDC_PrimaryIndustry", "LE_REVENUE_RANGE");
 
     @Override
     public void execute() {
@@ -344,7 +345,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                 joinKey, //
                 InterfaceName.LatticeAccountId.name() //
         ));
-        setPartitionMultiplier(8);
+        setPartitionMultiplier(4);
         SparkJobResult result = runSparkJob(CreateChangeListJob.class, config);
         setPartitionMultiplier(1);
 
@@ -395,7 +396,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         }
         config.setInput(inputs);
         config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-        setPartitionMultiplier(6);
+        setPartitionMultiplier(3);
         SparkJobResult result = runSparkJob(TruncateLatticeAccount.class, config);
         setPartitionMultiplier(1);
 
@@ -410,7 +411,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         log.info("EnrichLatticeAccount, fetch vertically and merge into LatticeAccount");
 
         // Merge added & updated attributes and generate ColumnSelection for fetch
-        List<String> changedCols = new ArrayList<>();
+        Set<String> changedCols = new LinkedHashSet<>();
         changedCols.addAll(attrs2Add);
         changedCols.addAll(attrs2Update);
         List<Column> colsToFetch = changedCols.stream().map(Column::new).collect(Collectors.toList());
@@ -452,7 +453,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         config.setSelectColumns(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name()));
         // Set output format as avro as the match step afterwards only take avro input
         config.setSpecialTarget(0, DataUnit.DataFormat.AVRO);
-        setPartitionMultiplier(4);
+        setPartitionMultiplier(2);
         SparkJobResult result = runSparkJob(FilterByJoinJob.class, config);
         setPartitionMultiplier(1);
         return result.getTargets().get(0);
@@ -511,7 +512,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                     inputData // new table
             ));
             jobConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
-            setPartitionMultiplier(10);
+            setPartitionMultiplier(3);
             result = runSparkJob(MergeLatticeAccount.class, jobConfig);
             setPartitionMultiplier(1);
             output = result.getTargets().get(0);
@@ -572,7 +573,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
                     InterfaceName.LatticeAccountId.name() //
             ));
             try {
-                setPartitionMultiplier(8);
+                setPartitionMultiplier(4);
                 SparkJobResult result = runSparkJob(CreateChangeListJob.class, config);
                 setPartitionMultiplier(1);
                 changeLists.add(result.getTargets().get(0));
@@ -615,7 +616,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private List<String> findAttrs2Remove() {
-        List<String> attrs2Remove = new ArrayList<>();
+        Set<String> attrs2Remove = new LinkedHashSet<>();
         if (oldLatticeAccountTable != null) {
             attrs2Remove.addAll(Arrays.asList(oldLatticeAccountTable.getAttributeNames()));
             attrs2Remove.removeAll(fetchAttrs);
@@ -626,7 +627,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             attrs2Remove.remove(InterfaceName.CDLUpdatedTime.name());
             log.info("Going to remove {} attributes from LatticeAccount: {}", attrs2Remove.size(), attrs2Remove);
         }
-        return attrs2Remove;
+        return new LinkedList<>(attrs2Remove);
     }
 
     private List<String> findAttrs2Add() {
@@ -644,7 +645,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
     }
 
     private List<String> findAttrs2Update() {
-        List<String> attrs2Update = new ArrayList<>();
+        Set<String> attrs2Update = new LinkedHashSet<>();
         boolean hasDataCloudMinorChange = //
                 Boolean.TRUE.equals(getObjectFromContext(HAS_DATA_CLOUD_MINOR_CHANGE, Boolean.class));
         if (hasDataCloudMinorChange) {
@@ -655,7 +656,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             attrs2Update.retainAll(fetchAttrs);
             log.info("Going to update {} LDC attributes due to data cloud minor release.", attrs2Update.size());
         }
-        return attrs2Update;
+        return new LinkedList<>(attrs2Update);
     }
 
     private ColumnSelection selectActiveDataCloudAttrs() {
@@ -697,7 +698,7 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
             String attr = cm.getAttrName();
             if (validAttrs.contains(attr)) {
                 fetchAttrs.add(attr);
-            } else if(isIntentAlertEnabled && DEFAULT_FIRMOGRAPHIC_ATTRIBUTES.contains(attr)) {
+            } else if (isIntentAlertEnabled && DEFAULT_FIRMOGRAPHIC_ATTRIBUTES.contains(attr)) {
                 fetchAttrs.add(attr);
             }
         }

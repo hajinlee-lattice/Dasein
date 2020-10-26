@@ -27,7 +27,7 @@ public class GlobalAuthAccessResourceTestNG extends UserResourceTestNGBase {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         String principal = restTemplate.getForObject(getRestAPIHostPort() + "/garesource/principal", String.class);
         Assert.assertNotNull(principal);
-        Assert.assertTrue(principal.startsWith("tester"));
-        Assert.assertTrue(principal.endsWith("@test.lattice.com"));
+        Assert.assertTrue(principal.startsWith("tester"), principal);
+        Assert.assertTrue(principal.endsWith("@lattice-engines.com"), principal);
     }
 }

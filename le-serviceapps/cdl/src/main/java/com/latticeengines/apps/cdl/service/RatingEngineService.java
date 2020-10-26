@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.ratings.coverage.UpdateRatingCoverageRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public interface RatingEngineService {
@@ -57,6 +58,8 @@ public interface RatingEngineService {
     RatingEngine replicateRatingEngine(String id);
 
     Map<String, Long> updateRatingEngineCounts(String engineId);
+
+    Map<String, Long> updateRatingEngineCounts(String engineId, UpdateRatingCoverageRequest request);
 
     void deleteById(String id);
 

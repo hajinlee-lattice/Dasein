@@ -497,4 +497,8 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     public void setViewOnly(boolean viewOnly) {
         this.viewOnly = viewOnly;
     }
+
+    public enum SegmentType {
+        Query, List
+    }
 }

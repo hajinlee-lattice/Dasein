@@ -30,7 +30,6 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     val streams: Seq[AtlasStream] = config.streams.toSeq
     val input = lattice.input
     val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
-    val calendar: BusinessCalendar = config.businessCalendar
     val incrementalStreams = config.incrementalStreams
     val evaluationDate = config.evaluationDate
 
@@ -38,8 +37,9 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     val detailsMap = new util.HashMap[String, Details]() // streamId -> details
     var periodStores: Seq[DataFrame] = Seq()
     streams.foreach(stream => {
-      val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(stream.getPeriods, calendar), evaluationDate)
       val streamId: String = stream.getStreamId
+      val calendar: BusinessCalendar = config.businessCalendar.getOrElse(streamId, null)
+      val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(stream.getPeriods, calendar), evaluationDate)
       val inputDetails = inputMetadata.getMetadata.get(streamId)
       val outputDetails: Details = new Details()
       outputDetails.setStartIdx(periodStores.size)

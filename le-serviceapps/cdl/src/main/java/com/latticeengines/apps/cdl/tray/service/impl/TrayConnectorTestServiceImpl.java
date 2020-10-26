@@ -52,7 +52,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     private static final String PATH_TEMPLATE = "connectors/%s/test-scenarios/%s/input.json";
     private static final String TEST_FILE_PATH_TEMPLATE = "tray-test/%s/%s/%s";
 
-    private static final String CSV = "CSV";
+    private static final String CSV = "csv";
     private static final String URL = "Url";
     private static final String MAPPING = "Mapping";
 
@@ -99,69 +99,117 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     private String trayTestDataBucket;
 
     @Override
-    public void triggerTrayConnectorTest(CDLExternalSystemName externalSystemName, String testScenario) {
+    public void triggerTrayConnectorTest(String customerSpace, CDLExternalSystemName externalSystemName, String testScenario) {
 
-        String customerSpace = MultiTenantContext.getShortTenantId();
+        String tenantId = MultiTenantContext.getShortTenantId();
         String objectKey = String.format(PATH_TEMPLATE, externalSystemName, testScenario);
-        log.info(String.format("Trigger test for customerSpace=%s, objectKey=%s", customerSpace, objectKey));
+        log.info(String.format("Trigger test for tenant=%s, objectKey=%s", tenantId, objectKey));
 
-        InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
-        TrayConnectorTestMetadata metadata = JsonUtils.deserialize(is, TrayConnectorTestMetadata.class);
-        log.info("Retrieved metadata: " + JsonUtils.serialize(metadata));
+        try {
+            InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
+            TrayConnectorTestMetadata metadata = JsonUtils.deserialize(is, TrayConnectorTestMetadata.class);
+            log.info("Retrieved metadata: " + JsonUtils.serialize(metadata));
 
-        String workflowRequestId = UUID.randomUUID().toString();
-        log.info("Generated workflowRequestId: " + workflowRequestId);
+            String workflowRequestId = UUID.randomUUID().toString();
+            log.info("Generated workflowRequestId: " + workflowRequestId);
 
-        publishSessionContext(workflowRequestId);
+            publishSessionContext(workflowRequestId);
 
-        TriggerMetadata trigger = metadata.getTrigger();
-        ExternalIntegrationMessageBody messageBody = trigger.getMessage();
-        TriggerConfig triggerConfig = trigger.getTriggerConfig();
+            TriggerMetadata trigger = metadata.getTrigger();
+            ExternalIntegrationMessageBody messageBody = trigger.getMessage();
+            TriggerConfig triggerConfig = trigger.getTriggerConfig();
 
-        if (triggerConfig.getGenerateSolutionInstance()) {
-            // TODO generate solution instance
+            if (triggerConfig.getGenerateSolutionInstance()) {
+                // TODO generate solution instance
+            }
+
+            if (triggerConfig.getGenerateExternalAudience()) {
+                // TODO generate external audience
+            }
+
+            DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(tenantId);
+            messageBody.setTrayTenantId(dropboxSummary.getDropBox());
+            log.info("Setting Tray tenant ID: " + dropboxSummary.getDropBox());
+
+            copyInputFiles(messageBody, externalSystemName);
+
+            publishToSnsTopic(externalSystemName, workflowRequestId, messageBody);
+
+            registerTrayConnectorTest(externalSystemName, testScenario, workflowRequestId);
+        } catch (Exception e) {
+            log.error("Failed to trigger test", e.toString());
         }
-
-        if (triggerConfig.getGenerateExternalAudience()) {
-            // TODO generate external audience
-        }
-
-        copyInputFiles(messageBody, externalSystemName);
-
-        publishToSnsTopic(customerSpace, externalSystemName, workflowRequestId, messageBody);
-
-        registerTrayConnectorTest(externalSystemName, testScenario, workflowRequestId);
     }
 
     @Override
-    public void verifyTrayConnectorTest(List<DataIntegrationStatusMonitorMessage> statuses) {
+    public Map<String, Boolean> verifyTrayConnectorTest(List<DataIntegrationStatusMonitorMessage> statuses) {
         log.info("Verifying status messages for Tray test...");
 
+        Map<String, Boolean> statusesUpdate = new HashMap<>();
         statuses.forEach(status -> {
             String statusJson = JsonUtils.serialize(status);
             log.info("Serialized message: " + statusJson);
-            handleStatus(status);
+            statusesUpdate.put(status.getWorkflowRequestId(), handleStatus(status));
         });
+
+        return statusesUpdate;
     }
 
-    private void handleStatus(DataIntegrationStatusMonitorMessage status) {
-        String workflowRequestId = status.getWorkflowRequestId();
-        log.info("Workflow Request ID: " + workflowRequestId);
+    @Override
+    public List<TrayConnectorTest> findUnfinishedTests() {
+        return trayConnectorTestEntityMgr.findUnfinishedTests();
+    }
 
+    @Override
+    public void cancelTrayTestByWorkflowReqId(String workflowRequestId) {
         TrayConnectorTest test = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
-        String objectKey = String.format(PATH_TEMPLATE, test.getExternalSystemName(), test.getTestScenario());
-        log.info("Retrieving test metadata with objectKey: " + objectKey);
+        log.info("Cancelling test with Workflow Request ID: " + workflowRequestId);
 
-        InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
-        TrayConnectorTestMetadata metadata = JsonUtils.deserialize(is, TrayConnectorTestMetadata.class);
-        log.info("Retrieved metadata: " + JsonUtils.serialize(metadata));
+        try {
+            test.setTestResult(TrayConnectorTestResultType.Cancelled);
+            test.setEndTime(new Date());
+            trayConnectorTestEntityMgr.updateTrayConnectorTest(test);
+        } catch (Exception e) {
+            log.error("Failed to cancel test", e.toString());
+        }
+    }
 
-        ValidationMetadata validation = metadata.getValidation();
-        List<DataIntegrationStatusMonitorMessage> validationMessages = validation.getMessages();
-        updateTest(status, test, validationMessages);
+    @Override
+    public boolean isAdPlatform(TrayConnectorTest test) {
+        CDLExternalSystemName externalSystemName = test.getExternalSystemName();
+        return CDLExternalSystemName.AD_PLATFORMS.contains(externalSystemName);
+    }
 
-        ValidationConfig validationConfig = validation.getValidationConfig();
-        cleanUp(validationConfig, test);
+    @Override
+    public boolean isLiveramp(TrayConnectorTest test) {
+        CDLExternalSystemName externalSystemName = test.getExternalSystemName();
+        return CDLExternalSystemName.LIVERAMP.contains(externalSystemName);
+    }
+
+    private Boolean handleStatus(DataIntegrationStatusMonitorMessage status) {
+        try {
+            String workflowRequestId = status.getWorkflowRequestId();
+            log.info("Workflow Request ID: " + workflowRequestId);
+
+            TrayConnectorTest test = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId);
+            String objectKey = String.format(PATH_TEMPLATE, test.getExternalSystemName(), test.getTestScenario());
+            log.info("Retrieving test metadata with objectKey: " + objectKey);
+
+            InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
+            TrayConnectorTestMetadata metadata = JsonUtils.deserialize(is, TrayConnectorTestMetadata.class);
+            log.info("Retrieved metadata: " + JsonUtils.serialize(metadata));
+
+            ValidationMetadata validation = metadata.getValidation();
+            List<DataIntegrationStatusMonitorMessage> validationMessages = validation.getMessages();
+            updateTest(status, test, validationMessages);
+
+            ValidationConfig validationConfig = validation.getValidationConfig();
+            cleanUp(validationConfig, test);
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to process status", e.toString());
+            return false;
+        }
     }
 
     private void updateTest(DataIntegrationStatusMonitorMessage status, TrayConnectorTest test,
@@ -183,10 +231,12 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
             if (isLastStatus(status, test)) {
                 log.info("Received last expected status update. Setting test result to Succeeded");
                 test.setTestResult(TrayConnectorTestResultType.Succeeded);
+                test.setEndTime(new Date());
             }
         } else {
             log.warn("Received unexpected status update. Setting test result to Failed");
             test.setTestResult(TrayConnectorTestResultType.Failed);
+            test.setEndTime(new Date());
         }
 
         trayConnectorTestEntityMgr.updateTrayConnectorTest(test);
@@ -221,14 +271,17 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     }
 
     private boolean verifyExportStartMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
-        return (expected != null) && (expected.getMessageType().equals(MessageType.Event));
+        log.info("Verifying ExportStart message");
+        return (expected != null) && (expected.getMessageType().equals(MessageType.Event.toString()));
     }
 
     private boolean verifyInitiatedMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
-        return (expected != null) && (expected.getMessageType().equals(MessageType.Event));
+        log.info("Verifying Initiated message");
+        return (expected != null) && (expected.getMessageType().equals(MessageType.Event.toString()));
     }
 
     private boolean verifyCompletedMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
+        log.info("Verifying Completed message");
         if (expected == null) {
             return false;
         }
@@ -242,17 +295,21 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         Long expectedTotalRecords = expectedEventDetail.getTotalRecordsSubmitted();
         Long expectedRecordsProcessed = expectedEventDetail.getProcessed();
 
-        return (totalRecords == expectedTotalRecords) && (recordsProcessed == expectedRecordsProcessed);
+        return (totalRecords.equals(expectedTotalRecords)) && (recordsProcessed.equals(expectedRecordsProcessed));
     }
 
     private boolean verifyAudienceSizeUpdateMessage(DataIntegrationStatusMonitorMessage status, DataIntegrationStatusMonitorMessage expected) {
+        log.info("Verifying AudienceSizeUpdate message");
         if (expected == null) {
             return false;
         }
 
         AudienceEventDetail eventDetail = (AudienceEventDetail) status.getEventDetail();
         Long audienceSize = eventDetail.getAudienceSize();
-        return audienceSize > 0L;
+        log.info(String.format("Test result: audienceSize=%s", audienceSize.toString()));
+
+        // We sometimes receive 0 as an audienceSize after matching
+        return audienceSize != null;
     }
 
     private void cleanUp(ValidationConfig validationConfig, TrayConnectorTest test) {
@@ -306,12 +363,11 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
                 .withString("Session", JsonUtils.serialize(session));
     }
 
-    private PublishResult publishToSnsTopic(String customerSpace, CDLExternalSystemName externalSystemName,
+    private PublishResult publishToSnsTopic(CDLExternalSystemName externalSystemName,
             String workflowRequestId, ExternalIntegrationMessageBody messageBody) {
 
         messageBody.setWorkflowRequestId(workflowRequestId);
-        DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(customerSpace);
-        messageBody.setTrayTenantId(dropboxSummary.getDropBox());
+
         String solutionInstanceId = SOLUTION_INSTANCE_ID_MAP.get(externalSystemName);
         messageBody.setSolutionInstanceId(solutionInstanceId);
 
@@ -327,7 +383,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
             log.info("Publish Request: " + JsonUtils.serialize(publishRequest));
             return snsService.publishToTopic(exportDataTopic, publishRequest);
         } catch (Exception e) {
-            log.info(e.toString());
+            log.error("Failed to publish to SNS ", e.toString());
             return null;
         }
     }

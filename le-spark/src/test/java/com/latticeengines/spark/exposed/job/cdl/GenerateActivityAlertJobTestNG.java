@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConsta
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.SHOWN_INTENT;
 import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.DnbIntentData;
+import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.MarketingActivity;
 import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.WebVisit;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AlertData;
@@ -138,10 +139,18 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
                 newTimelineRecord("a7", WebVisit, "Page 1", "page 1,page 4"), //
 
                 /*-
-                 * re-visit page 1 after over 30days
+                 * re-engaged contacts (one of them have two contacts, the other only have one)
                  */
-                newWebVisitRecord("a8", -30000000000L, "Page 1", "page 1,page 2"), //
-                newTimelineRecord("a8", WebVisit, "Page 1", "page 1,page 4"), //
+                newMARecord("a8", "c1", -30000000000L), //
+                newMARecord("a8", "c1", 0L), //
+                newMARecord("a8", "c2", -30000000000L), //
+                newMARecord("a8", "c2", 0L), //
+                newMARecord("a9", "c1", -30000000000L), //
+                newMARecord("a9", "c1", 0L), //
+
+                // interval between two events are too short, not consider as re-engaged
+                newMARecord("a10", "c1", -10000L), //
+                newMARecord("a10", "c1", 0L), //
 
                 /*-
                  * from researching stage to buying stage
@@ -185,9 +194,9 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         counts.put(Pair.of("a5", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
         counts.put(Pair.of("a6", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
         counts.put(Pair.of("a7", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
-        counts.put(Pair.of("a8", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
 
         counts.put(Pair.of("a8", RE_ENGAGED_ACTIVITY), 1);
+        counts.put(Pair.of("a9", RE_ENGAGED_ACTIVITY), 1);
 
         counts.put(Pair.of("a3", SHOWN_INTENT), 1);
         counts.put(Pair.of("a4", SHOWN_INTENT), 1);
@@ -198,10 +207,10 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         return counts;
     }
 
-    private Object[] newWebVisitRecord(String accountId, long timestamp, String detail1, String detail2) {
+    private Object[] newMARecord(String accountId, String contactId, long timestamp) {
         return new Object[] { //
                 "p", "s", "r", timestamp, // not testing pk, sk, uuid and timestamp for now
-                accountId, null, "fake event", WebVisit.name(), null, detail1, detail2, //
+                accountId, contactId, "fake event", MarketingActivity.name(), null, null, null, //
         };
     }
 

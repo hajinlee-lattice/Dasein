@@ -275,6 +275,12 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             event.setSubjectCountry(nl.getCountryCode());
         }
         event.setEventTime(USAGE_EVENT_TIME_FORMAT.format(new Date()));
+        Long duration = candidate.getMatchDuration();
+        if (duration == null || duration < 0) {
+            event.setResponseTime(100L);
+        } else {
+            event.setResponseTime(duration);
+        }
         return event;
     }
 

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
@@ -15,6 +16,8 @@ import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
+import com.latticeengines.domain.exposed.pls.ChannelSummary;
+import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
@@ -156,9 +159,11 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
     public boolean sendPlayLaunchChannelExpiringEmail(String tenantId,
             PlayLaunchChannel playLaunchChannel) {
         try {
-            String url = constructUrl(combine("/playlaunchchannel/expiring", tenantId));
+            String url = constructUrl(combine("/internal/emails/playlaunchchannel/expiring", tenantId));
             log.info(String.format("Putting to %s", url));
-            return put("sendPlayLaunchChannelExpiringEmail", url, playLaunchChannel, Boolean.class);
+            ChannelSummary launchChannelSummary = new ChannelSummary(playLaunchChannel);
+            log.info(JsonUtils.serialize(launchChannelSummary));
+            return put("sendPlayLaunchChannelExpiringEmail", url, launchChannelSummary, Boolean.class);
         } catch (Exception e) {
             throw new RuntimeException("sendScoreEmail: Remote call failure", e);
         }
@@ -167,14 +172,16 @@ public class EmailProxyImpl extends BaseRestApiProxy implements EmailProxy {
     @Override
     public void sendPlayLaunchErrorEmail(String tenantId, String user, PlayLaunch playLaunch) {
         try {
-            String url = constructUrl(combine("/playlaunch/failed/", tenantId));
+            String url = constructUrl(combine("/internal/emails/playlaunch/failed", tenantId));
             log.info(String.format("Putting to %s", url));
             List<String> params = new ArrayList<>();
             params.add("user=" + user);
             if (!params.isEmpty()) {
                 url += "?" + StringUtils.join(params, "&");
             }
-            put("sendPlayLaunchErrorEmail", url, playLaunch);
+            LaunchSummary launchSummary = new LaunchSummary(playLaunch);
+            log.info(JsonUtils.serialize(launchSummary));
+            put("sendPlayLaunchErrorEmail", url, launchSummary);
         } catch (Exception e) {
             throw new RuntimeException("sendScoreEmail: Remote call failure", e);
         }

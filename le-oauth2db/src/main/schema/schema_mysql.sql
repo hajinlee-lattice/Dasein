@@ -104,20 +104,8 @@ insert into oauth_client_details
            ,autoapprove)
      values
            ('playmaker', 'playmaker_api', null, 'read,write', 'password,refresh_token', null,
-            'role_playmaker_admin', null, null, null, 0);
-
- insert into oauth_client_details
-           (client_id
-           ,resource_ids
-           ,client_secret
-           ,scope
-           ,authorized_grant_types
-           ,web_server_redirect_uri
-           ,authorities
-           ,access_token_validity
-           ,refresh_token_validity
-           ,additional_information
-           ,autoapprove)
-     values
+            'ROLE_PLAYMAKER_ADMIN', null, null, null, 0),
            ('lp', 'lp_api', null, 'read,write', 'password,refresh_token', null,
-            'role_lp_admin', null, null, null, 0);
+            'ROLE_LP_ADMIN', null, null, null, 0),
+           ('datavision', 'datavision_api', 'myHhvemWCayWkQfM', 'read,write', 'client_credentials,refresh_token', null,
+            'ROLE_DATAVISION_ADMIN', null, null, null, 0);

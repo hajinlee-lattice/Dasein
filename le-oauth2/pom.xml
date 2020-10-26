@@ -5,19 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-oauth2</artifactId>
     <packaging>war</packaging>
-    <version>4.31.0-SNAPSHOT</version>
+    <version>4.32.0-SNAPSHOT</version>
     <name>le-${component-name}</name>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-spring-boot-webmvc-parent</artifactId>
-        <version>4.31.0-SNAPSHOT</version>
+        <version>4.32.0-SNAPSHOT</version>
         <relativePath>../le-parent/spring-boot/webmvc</relativePath>
     </parent>
 
     <properties>
         <component-name>oauth2</component-name>
-        <spring-security.version>3.2.10.RELEASE</spring-security.version>
         <start-class>com.latticeengines.oauth2.authserver.OAuthServer</start-class>
     </properties>
 
@@ -78,17 +77,17 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>${spring-security.version}</version>
+            <version>${spring-security.oauth2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
-            <version>${spring-security.version}</version>
+            <version>${spring-security.oauth2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
-            <version>${spring-security.version}</version>
+            <version>${spring-security.oauth2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>

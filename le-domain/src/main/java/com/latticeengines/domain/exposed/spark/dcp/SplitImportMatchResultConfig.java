@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.spark.dcp;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,13 +10,14 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     public static final String NAME = "splitImportMatchResult";
 
-    // (attr -> dispName) mapping for attributes in the accepted split
     @JsonProperty("AcceptedAttrs")
-    private Map<String, String> acceptedAttrsMap;
+    private List<String> acceptedAttrs;
 
-    // (attr -> dispName) mapping for attributes in the rejected split
     @JsonProperty("RejectedAttrs")
-    private Map<String, String> rejectedAttrsMap;
+    private List<String> rejectedAttrs;
+
+    @JsonProperty("DisplayNameMap")
+    private Map<String, String> displayNameMap;
 
     @JsonProperty("MatchedDunsAttr")
     private String matchedDunsAttr;
@@ -58,20 +60,28 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
         return 3;
     }
 
-    public Map<String, String> getAcceptedAttrsMap() {
-        return acceptedAttrsMap;
+    public List<String> getAcceptedAttrs() {
+        return acceptedAttrs;
     }
 
-    public void setAcceptedAttrsMap(Map<String, String> acceptedAttrsMap) {
-        this.acceptedAttrsMap = acceptedAttrsMap;
+    public void setAcceptedAttrs(List<String> acceptedAttrs) {
+        this.acceptedAttrs = acceptedAttrs;
     }
 
-    public Map<String, String> getRejectedAttrsMap() {
-        return rejectedAttrsMap;
+    public List<String> getRejectedAttrs() {
+        return rejectedAttrs;
     }
 
-    public void setRejectedAttrsMap(Map<String, String> rejectedAttrsMap) {
-        this.rejectedAttrsMap = rejectedAttrsMap;
+    public void setRejectedAttrs(List<String> rejectedAttrs) {
+        this.rejectedAttrs = rejectedAttrs;
+    }
+
+    public Map<String, String> getDisplayNameMap() {
+        return displayNameMap;
+    }
+
+    public void setDisplayNameMap(Map<String, String> displayNameMap) {
+        this.displayNameMap = displayNameMap;
     }
 
     public String getMatchedDunsAttr() {

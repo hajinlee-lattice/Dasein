@@ -1,7 +1,9 @@
 package com.latticeengines.apps.lp.provision.impl;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +107,15 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
     @Value("${common.dcp.public.url}")
     private String dcpPublicUrl;
 
+    @Value("${aws.s3.bucket}")
+    private String tenantConfigBucket;
+
+    @Value("${aws.tenant.configuration.s3.folder}")
+    private String tenantConfigFolder;
+
+    @Value("${aws.tenant.configuration.dcp.admin.email}")
+    private String dcpAdminEmailsConfig;
+
     @Override
     public void provisionTenant(CustomerSpace space, InstallDocument installDocument) {
         // get tenant information
@@ -142,6 +154,21 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<String> productList = JsonUtils.convertList(JsonUtils.deserialize(productsJson, List.class), String.class);
         List<LatticeProduct> products = productList.stream().map(LatticeProduct::fromName).collect(Collectors.toList());
         setTenantInfo(tenant, products);
+        List<IDaaSUser> iDaaSUsers = new ArrayList<>();
+        if (products.contains(LatticeProduct.DCP)) {
+            List<String> dcpAdminEmails = getDCPSuperAdminEmails();
+            if (CollectionUtils.isNotEmpty(dcpAdminEmails)) {
+                for (String dcpAdminEmail: dcpAdminEmails) {
+                    IDaaSUser iDaaSUser = iDaaSService.getIDaaSUser(dcpAdminEmail);
+                    if (iDaaSUser != null) {
+                        iDaaSUsers.add(iDaaSUser);
+                    } else {
+                        log.warn("Cannot find IDaaS user: " + dcpAdminEmail);
+                    }
+                }
+            }
+        }
+        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantDisplayName);
         String tenantStatus = installDocument.getProperty(ComponentConstants.Install.TENANT_STATUS);
         String tenantType = installDocument.getProperty(ComponentConstants.Install.TENANT_TYPE);
         String contract = installDocument.getProperty(ComponentConstants.Install.CONTRACT);
@@ -155,7 +182,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         log.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is " + tenant.getTenantType());
 
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails,
-                null, userName);
+                retrievedUsers, userName);
     }
 
     private void setTenantInfo(Tenant tenant, List<LatticeProduct> products) {
@@ -387,6 +414,21 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         log.info("IDaaS users are: " + usersInJson);
         List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
                 IDaaSUser.class);
+
+        List<LatticeProduct> products = getProducts(space);
+        if (products.contains(LatticeProduct.DCP)) {
+            List<String> dcpAdminEmails = getDCPSuperAdminEmails();
+            if (CollectionUtils.isNotEmpty(dcpAdminEmails)) {
+                for (String dcpAdminEmail: dcpAdminEmails) {
+                    IDaaSUser iDaaSUser = iDaaSService.getIDaaSUser(dcpAdminEmail);
+                    if (iDaaSUser != null) {
+                        iDaaSUsers.add(iDaaSUser);
+                    } else {
+                        log.warn("Cannot find IDaaS user: " + dcpAdminEmail);
+                    }
+                }
+            }
+        }
         List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
 
         // Update IDaaS users node with email sent times; to be stored in Camille
@@ -403,7 +445,6 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
         tenant.setId(PLSTenantId);
         tenant.setName(tenantName);
-        List<LatticeProduct> products = getProducts(space);
         setTenantInfo(tenant, products);
         try {
             TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
@@ -486,6 +527,23 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         if (tenantService.hasTenantId(tenant.getId())) {
             tenantService.discardTenant(tenant);
         }
+    }
+
+    private List<String> getDCPSuperAdminEmails() {
+        String dcpEmailS3File = tenantConfigFolder + "/" + dcpAdminEmailsConfig;
+        if (s3Service.objectExist(tenantConfigBucket, dcpEmailS3File)) {
+            log.info(String.format("Start getting DCP admin email from %s : %s", tenantConfigBucket, dcpEmailS3File));
+            try {
+                InputStream dcpEmailStream = s3Service.readObjectAsStream(tenantConfigBucket, dcpEmailS3File);
+                return JsonUtils.convertList(JsonUtils.deserialize(dcpEmailStream, List.class), String.class);
+            } catch (Exception e) {
+                log.error("Cannot parse DCP default admin email file. Exception: {}", e.getMessage());
+                return Collections.emptyList();
+            }
+        } else {
+            log.warn("DCP default admin email file is missing.");
+        }
+        return Collections.emptyList();
     }
 
     private List<IDaaSUser> OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -21,14 +22,17 @@ public final class VboUsageConstants {
 
     public static final String FEATURE_MATCH = "clnmat";
 
-    private static final String ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    private static final String ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     public static final SimpleDateFormat USAGE_EVENT_TIME_FORMAT = new SimpleDateFormat(ISO_8601);
+    static {
+        USAGE_EVENT_TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     // tracked in match engine
     public static final String ATTR_POAEID = "POAEID";
     public static final String ATTR_TIMESTAMP = "TimeStamp";
     public static final String ATTR_RESPONSE_TIME = "Response Time";
-    public static final String ATTR_EVENT_TYPE = "Event Type";
+    public static final String ATTR_EVENT_TYPE = "Event Type*";
     public static final String ATTR_FEATURE = "Feature URI";
     public static final String ATTR_SUBJECT_DUNS = "Subject DUNS/Entity ID";
     public static final String ATTR_SUBJECT_NAME = "Subject Name";
@@ -58,12 +62,14 @@ public final class VboUsageConstants {
     public static final String ATTR_SUBSCRIBER_COUNTRY = "Subscriber Country";
     public static final String ATTR_APPID = "APPID";
     public static final String ATTR_CAPPID = "CAPPID";
+    public static final String ATTR_CONTRACT_START = "Contract Term Start Date";
+    public static final String ATTR_CONTRACT_END = "Contract Term End Date";
 
     // not applicable for now
     public static final String ATTR_GUID = "GUID";
     public static final String ATTR_CLIENT_ID = "Client ID (API Key)";
     public static final String ATTR_KEY_TYPE = "API Key Type";
-    public static final String ATTR_EMAIL = "EMAIL ADDRESS";
+    public static final String ATTR_EMAIL = "Email Address";
     public static final String ATTR_LUID = "LUID";
     public static final String ATTR_AGENT_ID = "Agent ID";
     public static final String ATTR_CONSUMER_IP = "Consumer IP";
@@ -72,8 +78,6 @@ public final class VboUsageConstants {
     public static final String ATTR_PORTFOLIO_SIZE = "Portfolio Size";
     public static final String ATTR_USER_LOCATION = "User Location";
     public static final String ATTR_CONTRACT_ID = "Contract ID";
-    public static final String ATTR_CONTRACT_START = "Contract Term Start Date";
-    public static final String ATTR_CONTRACT_END = "Contract Term End Date";
     public static final String ATTR_PRICING_REGION = "Pricing (Subscriber) Region";
     public static final String ATTR_RECORD_REGION = "Record (Subject Country) Region";
     public static final String ATTR_GO_NUMBER = "GO Number";

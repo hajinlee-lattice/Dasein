@@ -9,6 +9,8 @@ import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -66,6 +68,20 @@ public class ContactAttrsDecorator implements Decorator {
             cm.setAttrState(AttrState.Active);
 
             if (systemAttrs.contains(cm.getAttrName())) {
+                return cm;
+            }
+            // DP-12913 if EntityMatchGA, hide all default system Ids
+            if (StringUtils.isNotEmpty(cm.getAttrName()) && cm.getAttrName().startsWith("user_DefaultSystem_")
+                    && onlyEntityMatchGAEnabled && (Category.SUB_CAT_CONTACT_IDS.equals(cm.getSubcategory()))) {
+                cm.disableGroup(Segment);
+                cm.disableGroup(Enrichment);
+                cm.disableGroup(TalkingPoint);
+                cm.disableGroup(CompanyProfile);
+                cm.disableGroup(Model);
+                cm.setCanSegment(false);
+                cm.setCanModel(false);
+                cm.setCanEnrich(false);
+                cm.setAttrState(AttrState.Inactive);
                 return cm;
             }
 

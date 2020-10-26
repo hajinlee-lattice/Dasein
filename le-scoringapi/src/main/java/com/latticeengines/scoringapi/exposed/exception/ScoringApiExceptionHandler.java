@@ -7,7 +7,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -19,17 +18,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.latticeengines.common.exposed.rest.RequestIdUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoringapi.Warnings;
-import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.monitor.exposed.ratelimit.RateLimitException;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 
@@ -39,10 +34,6 @@ import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 public class ScoringApiExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringApiExceptionHandler.class);
-    private static final String SPLUNK_URL = "http://splunksearch.lattice.local:8000/en-US/app/search/search?q=search%20index%3Dscoringapi%20%22";
-
-    @Inject
-    private AlertService alertService;
 
     @Inject
     private RequestInfo requestInfo;
@@ -177,22 +168,6 @@ public class ScoringApiExceptionHandler {
             errorMsg = exceptionHandlerErrorsMsg + "\n" + trace;
         }
         log.error(errorMsg);
-
-        if (fireAlert) {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
-            String identifier = String.valueOf(attributes.getRequest().getAttribute(RequestIdUtils.IDENTIFIER_KEY));
-
-            List<BasicNameValuePair> alertDetails = new ArrayList<>();
-            alertDetails.add(new BasicNameValuePair(RequestIdUtils.REQUEST_ID, identifier));
-            alertDetails.add(new BasicNameValuePair("Tenant", requestInfo.get(RequestInfo.TENANT)));
-            alertDetails.add(new BasicNameValuePair("Error Message:", errorMsg));
-
-            String logUrl = SPLUNK_URL + identifier + "%22";
-            String dedupKey = getClass().getName() + requestInfo.get(RequestInfo.TENANT) + "-" + code + "-"
-                    + ex.getClass().getName();
-            alertService.triggerCriticalEvent(errorMessage, logUrl, dedupKey, alertDetails);
-        }
 
         requestInfo.put("HasWarning", String.valueOf(warnings.hasWarnings()));
         requestInfo.put("HasError", Boolean.toString(true));

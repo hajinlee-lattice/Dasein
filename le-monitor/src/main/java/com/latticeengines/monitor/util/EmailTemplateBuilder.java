@@ -104,6 +104,15 @@ public class EmailTemplateBuilder {
         mp.addBodyPart(customPart);
     }
 
+    public void addAttachmentToMultipart(Multipart mp, byte[] bytes, String name, String type) throws MessagingException {
+        if (bytes != null && bytes.length > 0) {
+            MimeBodyPart attachmentPart = new MimeBodyPart();
+            attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(bytes, type)));
+            attachmentPart.setFileName(name);
+            mp.addBodyPart(attachmentPart);
+        }
+    }
+
     public enum Template {
         NEW_USER("new_user.html"),//
         EXISTING_USER("old_user.html"),//

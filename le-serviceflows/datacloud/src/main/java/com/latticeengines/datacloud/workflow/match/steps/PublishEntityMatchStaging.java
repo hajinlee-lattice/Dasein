@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -15,6 +14,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
@@ -56,8 +56,24 @@ public class PublishEntityMatchStaging extends BaseWorkflowStep<PublishEntityMat
         entityMatchVersionService.invalidateCache(tenant);
         overwriteEntityMatchConfiguration();
 
-        // publish from staging to serving (TODO lock and rate limit this step)
-        configuration.getEntities().forEach(entity -> commitWithCommitter(tenant, entity.name()));
+        try {
+            acquireLockAndFailOpen();
+            // publish from staging to serving
+            configuration.getEntities().forEach(entity -> commitWithCommitter(tenant, entity.name()));
+        } finally {
+            EntityMatchUtils.unlockCommitStep();
+        }
+    }
+
+    private void acquireLockAndFailOpen() {
+        try (PerformanceTimer time = new PerformanceTimer("acquiring commit entity match staging lock")) {
+            boolean success = EntityMatchUtils.lockCommitStep();
+            if (!success) {
+                log.warn("Failed to acquire lock for commit step. Continue (fail open) for now.");
+            } else {
+                log.info("Lock for commit step acquired successfully");
+            }
+        }
     }
 
     private void commitWithCommitter(Tenant tenant, String entity) {
@@ -81,13 +97,7 @@ public class PublishEntityMatchStaging extends BaseWorkflowStep<PublishEntityMat
         EntityMatchConfiguration emConfig = configuration.getEntityMatchConfiguration();
         if (emConfig != null) {
             log.info("Overriding entity match configuration {}", JsonUtils.serialize(emConfig));
-            if (StringUtils.isNotBlank(emConfig.getStagingTableName())) {
-                entityMatchConfigurationService.setStagingTableName(emConfig.getStagingTableName());
-            }
-            if (emConfig.getNumStagingShards() != null) {
-                entityMatchConfigurationService.setNumShards(EntityMatchEnvironment.STAGING,
-                        emConfig.getNumStagingShards());
-            }
+            EntityMatchUtils.overwriteWithConfiguration(entityMatchConfigurationService, emConfig);
         }
     }
 

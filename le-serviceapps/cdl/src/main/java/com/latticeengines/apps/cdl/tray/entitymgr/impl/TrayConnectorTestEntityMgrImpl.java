@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.tray.entitymgr.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -62,6 +64,12 @@ public class TrayConnectorTestEntityMgrImpl
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<TrayConnectorTest> findUnfinishedTests() {
+        return trayConnectorTestReaderRepository.findUnfinishedTests();
+    }
+
+    @Override
     protected TrayConnectorTestRepository getReaderRepo() {
         return trayConnectorTestReaderRepository;
     }
@@ -99,6 +107,9 @@ public class TrayConnectorTestEntityMgrImpl
         }
         if (newTest.getTestState() != null) {
             oldTest.setTestState(newTest.getTestState());
+        }
+        if (newTest.getTestResult() != null) {
+            oldTest.setTestResult(newTest.getTestResult());
         }
     }
 

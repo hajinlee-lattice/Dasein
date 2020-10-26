@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.latticeengines.query.util.AttrRepoUtils;
 import com.querydsl.sql.SQLQuery;
 
 import reactor.core.publisher.Flux;
@@ -51,10 +52,17 @@ public class QueryEvaluatorService {
 
     public long getCount(AttributeRepository attrRepo, Query query, String sqlUser) {
         query.setCount(true);
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
-        try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
-            timer.setThreshold(0L);
-            return sqlQuery.fetchCount();
+        query.analyze();
+        BusinessEntity entity = query.getMainEntity();
+        if (entity != null && !AttrRepoUtils.testExistsEntity(attrRepo, entity)) {
+            log.warn("Cannot find table for entity: " + query.getMainEntity() + " in the repository. Returns 0.");
+            return 0L;
+        } else {
+            SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
+            try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
+                timer.setThreshold(0L);
+                return sqlQuery.fetchCount();
+            }
         }
     }
 

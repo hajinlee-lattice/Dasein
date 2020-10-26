@@ -5,6 +5,7 @@ import static com.cronutils.model.CronType.QUARTZ;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.util.CronExpression;
 import org.joda.time.DateTime;
 
@@ -55,4 +56,15 @@ public final class CronUtils {
         return CronExpression.isValidExpression(expression);
     }
 
+    public static Boolean isSatisfiedByDate(String cron, Date now) {
+        if (StringUtils.isNotEmpty(cron) && isValidExpression(cron)) {
+            try {
+                CronExpression cronExpr = new CronExpression(cron);
+                return cronExpr.isSatisfiedBy(now);
+            } catch (ParseException e) {
+                throw new RuntimeException("Fail to parse cron expression " + cron);
+            }
+        }
+        return true;
+    }
 }

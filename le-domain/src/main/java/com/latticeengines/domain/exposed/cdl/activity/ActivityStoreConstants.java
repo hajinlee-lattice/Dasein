@@ -15,6 +15,12 @@ public final class ActivityStoreConstants {
         public static final double BUYING_STAGE_THRESHOLD = 0.5;
     }
 
+    public static class JourneyStage {
+        public static final String STREAM_SOURCE_ATLAS = "Atlas";
+        public static final String STREAM_DETAIL1_DARK = "Dark";
+        public static final String STREAM_EVENT_TYPE_JOURNEYSTAGECHANGE = "Journey Stage Change";
+    }
+
     /**
      * {@link ActivityAlertsConfig} related constants
      */
@@ -37,6 +43,7 @@ public final class ActivityStoreConstants {
         public static final String COL_PREV_PAGE_VISIT_TIME = "PrevPageVisitTime";
         public static final String COL_NUM_RESEARCH_INTENTS = "NumResearchIntents";
         public static final String COL_NUM_BUY_INTENTS = "NumBuyIntents";
+        public static final String COL_RE_ENGAGED_CONTACTS = "ReEngagedContacts";
 
         public static final long RE_ENGAGED_QUIET_PERIOD_IN_DAYS = 30L;
     }

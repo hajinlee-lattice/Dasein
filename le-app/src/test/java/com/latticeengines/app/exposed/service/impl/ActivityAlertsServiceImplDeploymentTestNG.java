@@ -23,7 +23,6 @@ import com.latticeengines.app.exposed.service.ActivityAlertsService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.testframework.AppDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
-import com.latticeengines.domain.exposed.cdl.activity.ActivityAlertsConfig;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
 import com.latticeengines.domain.exposed.cdl.activity.AlertCategory;
 import com.latticeengines.domain.exposed.cdl.activitydata.ActivityAlert;
@@ -53,9 +52,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
     @Inject
     private ActivityAlertsService activityAlertsService;
 
-    private final String version = "testDataVersion";
     private final DataCollection.Version DATA_COLLECTION_VERSION = DataCollection.Version.Blue;
-    private final String CLIENT_ID = "playmaker";
     private final String TEST_ACCOUNT_ID = "v5k5xq52updfo67n";
     private final String TEST_ALERT_VERSION = "AlertVersion";
 
@@ -67,8 +64,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         setupDataCollection();
         activityAlertRepository.saveAll(generatePeopleAlerts());
         activityAlertRepository.saveAll(generateProductsAlerts());
-        List<ActivityAlertsConfig> configs = activityStoreProxy
-                .generateDefaultActivityAlertsConfiguration(mainTestCustomerSpace.getTenantId());
+        activityStoreProxy.generateDefaultActivityAlertsConfiguration(mainTestCustomerSpace.getTenantId());
 
         DataLakeService spiedDataLakeService = spy(new DataLakeServiceImpl(null));
         doReturn(TEST_ACCOUNT_ID).when(spiedDataLakeService).getInternalAccountId(TEST_ACCOUNT_ID, null);
@@ -262,6 +258,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
         data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
         alertData = new HashMap<>();
+        alertData.put("ReEngagedContacts", 3);
         data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
         record.setAlertData(data);
 

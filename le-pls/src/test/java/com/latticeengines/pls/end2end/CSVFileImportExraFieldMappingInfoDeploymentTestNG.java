@@ -19,14 +19,14 @@ public class CSVFileImportExraFieldMappingInfoDeploymentTestNG extends CSVFileIm
 
     private static final String ACCOUNT_EXTRAINFO_FILE = "Account_ExtraInfo.csv";
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testExtraFieldMappingInfo() {
         baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
 

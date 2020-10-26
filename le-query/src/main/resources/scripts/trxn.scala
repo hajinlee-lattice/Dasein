@@ -10,7 +10,7 @@ val storageLevel: Option[StorageLevel] =
   }
 
 val tempSqls: List[(String, String)] = List(
-  ("temptrxn", s"select AccountId, PeriodId, ProductId, TotalAmount, TotalQuantity from $trxnTableName where PeriodName = '$periodName'"),
+  ("temptrxn", s"select AccountId, PeriodId, ProductId, TotalAmount, TotalQuantity from $trxnTableName where PeriodName = '$periodName' and ProductType = 'Analytic'"),
   ("crossprod", "select AccountId, PeriodId from ( select distinct AccountId from temptrxn ) as allaccounts, ( select distinct PeriodId from temptrxn ) as allperiods"),
   ("periodrange", "select AccountId, min(PeriodId) as minpid from temptrxn group by AccountId"),
   ("tempkeys", "select crossprod.AccountId, crossprod.PeriodId from crossprod inner join periodrange on periodrange.AccountId = crossprod.AccountId where crossprod.PeriodId >= periodrange.minpid - 2")

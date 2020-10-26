@@ -15,7 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -77,9 +76,8 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dataSnapshotTime;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_DUNS_COUNT")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private com.latticeengines.domain.exposed.metadata.Table dunsCount;
 
     @Column(name = "REFRESH_TIME")

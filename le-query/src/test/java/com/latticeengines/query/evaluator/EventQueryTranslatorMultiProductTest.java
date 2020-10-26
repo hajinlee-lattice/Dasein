@@ -29,28 +29,28 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
     }
 
     private List<String> productIds = Arrays.asList(
-            "Hd3c9G01LBGBF7LKRGu9Oc0dS8HnuRdv", // Product 0
-            "DkhSLVHpu5iIS5jw4aWOmojNlz7CvAa", // Product 1
-            "eNm3Nmt72BXLZRniXJWSFO4j2jnOUpY", // Product 2
-            "H8u0TkdKoeqD2b8bEFNwcWagzKmPJk", // Product 3
-            "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks", // Product 4
-            "uKt9Tnd4sTXNUxEMzvIXcC9eSkaGah8", // Product 5
-            "k4Pb7AhrIccPjW5jXiWzpwWX2mTvY7I", // Product 6
-            "LHdgKhusYLJqk9JgC5SdJrwNv8tg9il", // Product 7
-            "yhJKT0T3Pu64VprFieVLFbstNw17yz1h", // Product 8
-            "zqpVPoOPufEuPkcxqjDFMykEHN7ocY", // Product 9
-            "uiUrfXNLCGpDIkTAB5he5iLbhGwLik0I", // Product 10
-            "hpf28LuxIoQzJ4gy4u20Vwazew0t", // Product 11
-            "5Bg2lBhLITlRpSMIMv8qtVMRS9ortPL", // Product 12
-            "hLxxPy0B6A4ehW7FaaGRh9LAjNzsYicB", // Product 13
-            "uIbuNRuc30AVD8Hqz0r3bJoscKyrZoJj", // Product 14
-            "aBbvvgqeFEGCr9h1JZpGP9NZDsRerBhC", // Product 15
-            "TyZ3prYakrgeUdVTxbu7UPNAF3GtN8", // Product 16
-            "FcUOE0yZRyjId7f9MZt2WDTWo6wHXRo", // Product 17
-            "I0VN2ZbBuKtXeQs8LFPOqwBxRgjpoLq", // Product 18
-            "1ydd4TfF8tNf1yeAzi4EnrrYWrBOAa", // Product 19
-            "iGfEB6bqSCdrYXsd17BmIU5FK1Wd7A0I", // Product 20
-            "Bl2ObAv3Smmm0xLD1bXMYnQ0zs4Hsnh8" // Product 21
+            "3872223C9BA06C649D68E415E23A9446", // Product 0
+            "6B047FF03A59E42A79D1961541C1BF60", // Product 1
+            "FE4D73162629DF254688CC8D553FA52A", // Product 2
+            "3CA17E482511F94FCEB93195D2B146DE", // Product 3
+            "94842E58561D516577E4C0377F601DA3", // Product 4
+            "8D6A468D2B5F99D5D2252DE0DF6F971C", // Product 5
+            "A78DF03BAC196BE9A08508FFDB433A31", // Product 6
+            "40BE92E2D8ADE18DC80A3FAEC761F91A", // Product 7
+            "D7B8185BB08C1AFA624B7B9BA49AA77C", // Product 8
+            "6C5E5F2F07EB909FDB480F868047586C", // Product 9
+            "64E8729DCA85D713B8BE424E6A2828E5", // Product 10
+            "EBB5D5D47420FE96255F586D37FE3EB0", // Product 11
+            "56E3D7F5C674E7AC8026A61360A80769", // Product 12
+            "B365E24EC8F2C3672684ACC2F2EE208A", // Product 13
+            "D45763A3E784654F2C17CF906F9CD295", // Product 14
+            "7D18DD009AC1004A4E72B66E2D8F594F", // Product 15
+            "5544C27D9C475BF2B639241F65D8D26F", // Product 16
+            "E49000DA92C149E7BF960306185BF577", // Product 17
+            "36E2AF3FC4AE03328EE407C3A3933007", // Product 18
+            "1EF99C5568D3047FBD9D4A271614B008", // Product 19
+            "CFF528B14A522C97F5F23964583EDB78", // Product 20
+            "2A2A5856EC1CCB78E786DF65564DA39E" // Product 21
     );
 
     private List<String> getProductIds() {

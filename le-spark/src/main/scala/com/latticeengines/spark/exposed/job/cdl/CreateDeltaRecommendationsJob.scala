@@ -32,7 +32,6 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     val createAddCsvDataFrame: Boolean = deltaCampaignLaunchSparkContext.getCreateAddCsvDataFrame
     val createDeleteCsvDataFrame: Boolean = deltaCampaignLaunchSparkContext.getCreateDeleteCsvDataFrame
     val sfdcContactId: String = deltaCampaignLaunchSparkContext.getSfdcContactID
-    val accountContactRatio: Int = deltaCampaignLaunchSparkContext.getAccountContactRatio
     logSpark(f"playId=$playId%s, playLaunchId=$playLaunchId%s, createRecommendationDataFrame=$createRecommendationDataFrame%s, createAddCsvDataFrame=$createAddCsvDataFrame%s, createDeleteCsvDataFrame=$createDeleteCsvDataFrame%s")
     val listSize = lattice.input.size
     logSpark(s"input size is: $listSize")
@@ -58,7 +57,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     if (createRecommendationDataFrame) {
       val recommendationDf: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable)
       val baseAddRecDf = recommendationDf.checkpoint(eager = true)
-      finalDfs += publishRecommendationsToDB(deltaCampaignLaunchSparkContext, completeContactTable, baseAddRecDf, sfdcContactId, joinKey, contactCols, contactNums, accountContactRatio)
+      finalDfs += publishRecommendationsToDB(deltaCampaignLaunchSparkContext, completeContactTable, baseAddRecDf, sfdcContactId, joinKey, contactCols, contactNums)
       if (createAddCsvDataFrame) {
         var addRecDf: DataFrame = createFinalRecommendationDf(deltaCampaignLaunchSparkContext, contactCols, contactNums, joinKey, baseAddRecDf, addAccountTable, addContactTable)
         finalDfs += addRecDf
@@ -97,11 +96,11 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
   }
 
   private def publishRecommendationsToDB(deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, completeContactTable: DataFrame,
-                                         baseAddRecDf: DataFrame, sfdcContactId: String, joinKey: String, contactCols: Seq[String], contactNums: ListBuffer[Long], accountContactRatio: Int): DataFrame = {
+                                         baseAddRecDf: DataFrame, sfdcContactId: String, joinKey: String, contactCols: Seq[String], contactNums: ListBuffer[Long]): DataFrame = {
     if (deltaCampaignLaunchSparkContext.getPublishRecommendationsToDB) {
       var recommendations: DataFrame = null
       if (!completeContactTable.rdd.isEmpty && !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName)) {
-        val aggregatedContacts = aggregateContacts(completeContactTable, contactCols, sfdcContactId, joinKey, deltaCampaignLaunchSparkContext.getDestinationSysName, accountContactRatio)
+        val aggregatedContacts = aggregateContacts(completeContactTable, contactCols, sfdcContactId, joinKey, deltaCampaignLaunchSparkContext.getDestinationSysName)
         recommendations = baseAddRecDf.join(aggregatedContacts, joinKey :: Nil, "left")
         logDataFrame("recommendations", recommendations, joinKey, Seq(joinKey, "CONTACT_NUM"), limit = 100)
         recommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
@@ -218,13 +217,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
     val containsJoinKey = accountColsRecIncluded.contains(joinKey)
     val joinKeyCol: Option[String] = if (!containsJoinKey) Some(joinKey) else None
-    var internalAppendedCols: Seq[String] = Seq.empty[String]
-
-    if (accountColsRecNotIncludedStd.nonEmpty) {
-      internalAppendedCols = (accountColsRecIncluded ++ joinKeyCol)
-    } else if (accountColsRecIncluded.nonEmpty) {
-      internalAppendedCols = (accountColsRecIncluded)
-    }
+    val internalAppendedCols: Seq[String] = accountColsRecIncluded ++ joinKeyCol
 
     // map internal column names to Recommendation column names
     val mappedToRecAppendedCols = internalAppendedCols.map{col => RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.asScala.getOrElse(col, col)}
@@ -265,13 +258,11 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
   }
 
   private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String,
-                                joinKey: String, destinationSysName: String, accountContactRatio: Int): DataFrame = {
+                                joinKey: String, destinationSysName: String): DataFrame= {
     var contactTableToUse: DataFrame = contactTable
     val rowNumber: String = "rowNumber"
     if (CDLExternalSystemName.Salesforce.name().equals(destinationSysName)) {
       contactTableToUse = contactTableToUse.withColumn(rowNumber, rank().over(Window.partitionBy(joinKey).orderBy(InterfaceName.ContactId.name()))).filter(col(rowNumber) <= 1).drop(rowNumber)
-    } else {
-      contactTableToUse = contactTableToUse.withColumn(rowNumber, rank().over(Window.partitionBy(joinKey).orderBy(InterfaceName.ContactId.name()))).filter(col(rowNumber) <= accountContactRatio).drop(rowNumber)
     }
     val contactWithoutJoinKey = contactTableToUse.drop(joinKey)
     val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId)

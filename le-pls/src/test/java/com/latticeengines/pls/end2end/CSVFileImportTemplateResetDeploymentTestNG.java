@@ -24,7 +24,7 @@ public class CSVFileImportTemplateResetDeploymentTestNG extends CSVFileImportDep
 
     private String contactDFId;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
         Map<String, Boolean> flags = new HashMap<>();
@@ -35,7 +35,7 @@ public class CSVFileImportTemplateResetDeploymentTestNG extends CSVFileImportDep
         createDefaultImportSystem();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.import.group2")
     public void testResetTemplate() {
         setupTemplateAndData();
         DataFeedTask contactDFT = dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), contactDFId);

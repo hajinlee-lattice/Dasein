@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
@@ -23,8 +24,13 @@ public class LatticeOauth2AuthenticationManager extends OAuth2AuthenticationMana
 
     private static final String LP_REST_RESOURCE_ID = "lp_api";
     private static final String PLAYMAKER_REST_RESOURCE_ID = "playmaker_api";
+    private static final String DATAVISION_REST_RESOURCE_ID = "datavision_api";
     private ResourceServerTokenServices tokenServices;
-    private List<String> multiResourceIds = Arrays.asList(LP_REST_RESOURCE_ID, PLAYMAKER_REST_RESOURCE_ID);
+    private List<String> multiResourceIds = Arrays.asList( //
+            LP_REST_RESOURCE_ID, //
+            PLAYMAKER_REST_RESOURCE_ID, //
+            DATAVISION_REST_RESOURCE_ID //
+    );
 
     private ClientDetailsService clientDetailsService;
 
@@ -56,8 +62,8 @@ public class LatticeOauth2AuthenticationManager extends OAuth2AuthenticationMana
 
         Collection<String> resourceIds = auth.getOAuth2Request().getResourceIds();
         if (resourceIds != null && !multiResourceIds.containsAll(resourceIds)) {
-            throw new OAuth2AccessDeniedException("Invalid token does not contain resource id (" + LP_REST_RESOURCE_ID
-                    + " or " + PLAYMAKER_REST_RESOURCE_ID + ")");
+            throw new OAuth2AccessDeniedException("Invalid token does not contain resource id (" //
+                    + StringUtils.join(multiResourceIds, " or ") + ")");
         }
 
         checkClientDetails(auth);

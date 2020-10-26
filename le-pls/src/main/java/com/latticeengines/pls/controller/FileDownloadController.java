@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.exception.Status;
 import com.latticeengines.domain.exposed.exception.UIAction;
 import com.latticeengines.domain.exposed.exception.UIActionUtils;
 import com.latticeengines.domain.exposed.exception.View;
-import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,9 +30,6 @@ public class FileDownloadController {
 
     @Inject
     private FileDownloadService fileDownloadService;
-
-    @Inject
-    private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
     @GetMapping("/{token}")
     @ResponseBody
