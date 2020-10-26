@@ -5,11 +5,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -27,6 +27,7 @@ import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -36,22 +37,25 @@ import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DataLicense;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("datafeedService")
@@ -94,6 +98,12 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    private ActionService actionService;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     private static final String LockType = "DataFeedExecutionLock";
 
@@ -198,8 +208,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         List<DataFeedImport> imports = new ArrayList<>();
         List<DataFeedTask> tasks = datafeed.getTasks();
         tasks.forEach(task -> {
-            imports.addAll(createImports(task));
-            datafeedTaskEntityMgr.clearTableQueuePerTask(task);
+            imports.addAll(createImports(task, customerSpace));
         });
         log.info("imports for processanalyze are: " + imports);
 
@@ -220,16 +229,44 @@ public class DataFeedServiceImpl implements DataFeedService {
         return execution;
     }
 
-    private List<DataFeedImport> createImports(DataFeedTask task) {
+    private List<DataFeedImport> createImports(DataFeedTask task, String customerSpace) {
         List<DataFeedImport> imports = new ArrayList<>();
 
-        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskEntityMgr.getInflatedDataFeedTaskTables(task);
-        datafeedTaskTables.stream().map(DataFeedTaskTable::getTable)//
-                .filter(Objects::nonNull)//
-                .forEach(dataTable -> {
-                    task.setImportData(dataTable);
-                    imports.add(DataFeedImportUtils.createImportFromTask(task));
-                });
+        String appId = task.getActiveJob();
+        if (StringUtils.isNotBlank(appId)) {
+            Job job = workflowProxy.getWorkflowJobFromApplicationId(appId, customerSpace);
+            if (job != null) {
+                Map<String, String> inputs = job.getInputs();
+                String actionIdStr = inputs.get(WorkflowContextConstants.Inputs.ACTION_ID);
+                if (StringUtils.isNotBlank(actionIdStr)) {
+                    Long actionId = Long.valueOf(actionIdStr);
+                    Action action = actionService.findByPid(actionId);
+                    ImportActionConfiguration config = (ImportActionConfiguration) action.getActionConfiguration();
+                    if (config.getImportCount() == 0) {
+                        log.info("action {} doesn't have import rows", actionIdStr);
+                        return imports;
+                    }
+                    List<String> tableNames = config.getRegisteredTables();
+                    if (CollectionUtils.isNotEmpty(tableNames)) {
+                        tableNames.forEach(tableName -> {
+                            Table dataTable = metadataProxy.getTable(customerSpace, tableName);
+                            if (dataTable != null) {
+                                task.setImportData(dataTable);
+                                imports.add(DataFeedImportUtils.createImportFromTask(task));
+                            }
+                        });
+                    } else {
+                        log.info("action {} doesn't have table to be registered", actionIdStr);
+                    }
+                } else {
+                    log.info("input context is empty from job {}", job.getId());
+                }
+            } else {
+                log.info("job is null from app {}", appId);
+            }
+        } else {
+            log.info("data feed task {} has no active app id", task.getUniqueId());
+        }
         return imports;
 
     }

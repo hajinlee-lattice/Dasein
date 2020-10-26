@@ -771,7 +771,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     log.warn(String.format("Action %d doesn't have table to be registered.", action.getPid()));
                     continue;
                 }
-                dataFeedProxy.addTablesToQueue(customerSpace.toString(), taskId, tables);
 
                 if (configuration.isEntityMatchEnabled()) {
                     DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),
