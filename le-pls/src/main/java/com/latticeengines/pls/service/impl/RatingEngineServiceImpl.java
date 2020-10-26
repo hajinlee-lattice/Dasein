@@ -81,7 +81,9 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     @Override
     public RatingEngineSummary getRatingEngineSummary(String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getRatingEngineSummary(tenant.getId(), ratingEngineId);
+        RatingEngineSummary ratingEngineSummary = ratingEngineProxy.getRatingEngineSummary(tenant.getId(), ratingEngineId);
+        teamWrapperService.fillTeamInfo(ratingEngineSummary, false);
+        return ratingEngineSummary;
     }
 
     @Override
