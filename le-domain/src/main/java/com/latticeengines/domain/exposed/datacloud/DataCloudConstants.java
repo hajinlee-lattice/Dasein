@@ -24,6 +24,7 @@ public final class DataCloudConstants {
     public static final String ACCOUNT_MASTER_LOOKUP = "AccountMasterLookup";
     public static final String DUNS_GUIDE_BOOK = "DunsGuideBook";
     public static final String ACCOUNT_MASTER_DIFF = "AccountMasterDiff";
+    public static final String DNBWEEKLY_ACCOUNT_MASTER_DIFF = "DnBWeeklyAccountMasterDiff";
     public static final String ACCOUNT_MASTER_COLLECTION = "AMCollection";
     public static final String PATCH_BOOK_ATTR_PREFIX = "PATCH_";
 
