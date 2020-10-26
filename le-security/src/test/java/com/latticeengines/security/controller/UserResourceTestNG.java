@@ -237,7 +237,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         UserRegistration userReg = new UserRegistration();
 
         User user = new User();
-        user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
+        user.setEmail("test" + UUID.randomUUID().toString() + "@lattice-engines.com");
         user.setFirstName("Test");
         user.setLastName("Tester");
         user.setPhoneNumber("650-555-5555");
