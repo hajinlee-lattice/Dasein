@@ -53,7 +53,7 @@ public class PrestoQueryTester {
             if (path.endsWith(".parquet")) {
                 prestoDbService.createTableIfNotExists(tblName, path, DataUnit.DataFormat.PARQUET, null);
             } else {
-                prestoDbService.createTableIfNotExists(tblName, path);
+                prestoDbService.createTableIfNotExists(tblName, path, DataUnit.DataFormat.AVRO);
             }
         });
 

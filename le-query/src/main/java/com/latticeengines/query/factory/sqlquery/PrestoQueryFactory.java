@@ -8,15 +8,15 @@ import com.querydsl.sql.Configuration;
  * Implementation for PrestoDB
  *
  */
-public class PrestoSQLQueryFactory extends BaseSQLQueryFactory {
+public class PrestoQueryFactory extends BaseSQLQueryFactory {
 
-    public PrestoSQLQueryFactory(Configuration configuration, DataSource dataSource) {
+    public PrestoQueryFactory(Configuration configuration, DataSource dataSource) {
         super(configuration, dataSource);
     }
 
     @Override
     public BaseSQLQuery<?> query() {
-        return new PrestoSQLQuery<Void>(connection, configuration);
+        return new PrestoQuery<Void>(connection, configuration);
     }
 
 }

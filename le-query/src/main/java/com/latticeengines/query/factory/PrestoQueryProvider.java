@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.prestodb.exposed.service.PrestoConnectionService;
 import com.latticeengines.query.factory.sqlquery.BaseSQLQueryFactory;
-import com.latticeengines.query.factory.sqlquery.PrestoSQLQueryFactory;
+import com.latticeengines.query.factory.sqlquery.PrestoQueryFactory;
 import com.latticeengines.query.template.PrestoTemplates;
 import com.querydsl.sql.Configuration;
 
@@ -26,7 +26,7 @@ public class PrestoQueryProvider extends QueryProvider {
     @Override
     protected BaseSQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser) {
         Configuration configuration = new Configuration(new PrestoTemplates());
-        return new PrestoSQLQueryFactory(configuration, connectionService.getPrestoDataSource());
+        return new PrestoQueryFactory(configuration, connectionService.getPrestoDataSource());
     }
 
     protected String getCacheKey(AttributeRepository repository, String sqlUser) {

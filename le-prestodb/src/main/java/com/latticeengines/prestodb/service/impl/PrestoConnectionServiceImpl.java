@@ -63,15 +63,6 @@ public class PrestoConnectionServiceImpl implements PrestoConnectionService {
         return cpds;
     }
 
-    private String getHiveHostPort() {
-        if (Boolean.TRUE.equals(useEmr)) {
-            String masterIp = emrCacheService.getMasterIp();
-            return masterIp + ":10000";
-        } else {
-            return "localhost:10000";
-        }
-    }
-
     private String getPrestoHostPort() {
         if (Boolean.TRUE.equals(useEmr)) {
             String masterIp = emrCacheService.getMasterIp();

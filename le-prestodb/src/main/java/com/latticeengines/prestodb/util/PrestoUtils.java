@@ -58,9 +58,9 @@ public final class PrestoUtils {
 
     private static String getCreateTableStmtPrefix(String tableName, List<Pair<String, Class<?>>> fields, //
                                                    List<Pair<String, Class<?>>> partitionKeys) {
-        String stmt = String.format("CREATE TABLE IF NOT EXISTS %s (", tableName);
+        String stmt = String.format("CREATE TABLE IF NOT EXISTS %s (\n", tableName);
         List<String> fieldLines = getFieldLines(fields, partitionKeys);
-        stmt += StringUtils.join(fieldLines, ",");
+        stmt += StringUtils.join(fieldLines, ",\n");
         stmt += "\n) WITH (";
         if (CollectionUtils.isNotEmpty(partitionKeys)) {
             List<String> keyNames = partitionKeys.stream().map(Pair::getLeft).collect(Collectors.toList());

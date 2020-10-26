@@ -13,6 +13,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -34,13 +36,15 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.prestodb.exposed.service.PrestoDbService;
-import com.latticeengines.query.factory.PrestoQueryProvider;
+import com.latticeengines.prestodb.exposed.service.AthenaService;
+import com.latticeengines.query.factory.AthenaQueryProvider;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import com.querydsl.sql.SQLQuery;
 
-public class PrestoQueryTestNG extends QueryFunctionalTestNGBase {
+public class AthenaQueryTestNG extends QueryFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(AthenaQueryTestNG.class);
 
     private final int lowestBit = 50;
     private final int numBits = 4;
@@ -51,12 +55,20 @@ public class PrestoQueryTestNG extends QueryFunctionalTestNGBase {
     private AttributeRepository attrRepo;
     private String accountAvroDir;
     private String contactAvroDir;
+    private String accountS3Dir;
+    private String contactS3Dir;
 
     @Value("${common.le.stack}")
     private String leStack;
 
+    @Value("${aws.test.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
     @Inject
-    private PrestoDbService prestoDbService;
+    private AthenaService athenaService;
 
     @BeforeClass(groups = "functional")
     public void setup() throws IOException {
@@ -64,40 +76,48 @@ public class PrestoQueryTestNG extends QueryFunctionalTestNGBase {
         accountTableName = NamingUtils.timestamp(tenantId + "_Account");
         contactTableName = NamingUtils.timestamp(tenantId + "_Contact");
 
-        accountAvroDir = "/tmp/prestoTest/" + leStack + "/account";
+        accountAvroDir = "/tmp/athenaTest/" + leStack + "/account";
         if (HdfsUtils.fileExists(yarnConfiguration, accountAvroDir)) {
             HdfsUtils.rmdir(yarnConfiguration, accountAvroDir);
         }
-        contactAvroDir = "/tmp/prestoTest/" + leStack + "/contact";
+        contactAvroDir = "/tmp/athenaTest/" + leStack + "/contact";
         if (HdfsUtils.fileExists(yarnConfiguration, contactAvroDir)) {
             HdfsUtils.rmdir(yarnConfiguration, contactAvroDir);
         }
         uploadDataToHdfs(accountAvroDir, contactAvroDir);
 
-        prestoDbService.deleteTableIfExists(accountTableName);
-        prestoDbService.createTableIfNotExists(accountTableName, accountAvroDir, DataUnit.DataFormat.AVRO);
-        prestoDbService.deleteTableIfExists(contactTableName);
-        prestoDbService.createTableIfNotExists(contactTableName, contactAvroDir, DataUnit.DataFormat.AVRO);
+        String s3Protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+        String accountS3Prefix = leStack + "/athenaTest/account";
+        String contactS3Prefix = leStack + "/athenaTest/contact";
+        accountS3Dir = s3Protocol + "://" + s3Bucket + "/" + accountS3Prefix;
+        contactS3Dir = s3Protocol + "://" + s3Bucket + "/" + contactS3Prefix;
+        copyToS3(accountAvroDir, accountS3Dir);
+        copyToS3(contactAvroDir, contactS3Dir);
+
+        athenaService.deleteTableIfExists(accountTableName);
+        athenaService.deleteTableIfExists(contactTableName);
+
+        athenaService.createTableIfNotExists(accountTableName, s3Bucket, accountS3Prefix, DataUnit.DataFormat.AVRO);
+        athenaService.createTableIfNotExists(contactTableName, s3Bucket, contactS3Prefix, DataUnit.DataFormat.AVRO);
 
         attrRepo = getAttrRepo();
     }
 
     @AfterClass(groups = "functional", alwaysRun = true)
     public void tearDown() throws IOException {
-        prestoDbService.deleteTableIfExists(accountTableName);
-        prestoDbService.deleteTableIfExists(contactTableName);
-        if (HdfsUtils.fileExists(yarnConfiguration, accountAvroDir)) {
-            HdfsUtils.rmdir(yarnConfiguration, accountAvroDir);
-        }
-        if (HdfsUtils.fileExists(yarnConfiguration, contactAvroDir)) {
-            HdfsUtils.rmdir(yarnConfiguration, contactAvroDir);
+        athenaService.deleteTableIfExists(accountTableName);
+        athenaService.deleteTableIfExists(contactTableName);
+        List<String> dirs = Arrays.asList(accountS3Dir, contactS3Dir, accountAvroDir, contactAvroDir);
+        for (String dir: dirs) {
+            if (HdfsUtils.fileExists(yarnConfiguration, dir)) {
+                HdfsUtils.rmdir(yarnConfiguration, dir);
+            }
         }
     }
 
     @Test(groups = "functional")
-    public void testQueryPresto() {
-        String sqlUser = PrestoQueryProvider.PRESTO_USER;
-
+    public void testQueryAthena() {
+        String sqlUser = AthenaQueryProvider.ATHENA_USER;
         Restriction restriction = Restriction.builder() //
                 .let(Account, "AccountId").eq("acc1") //
                 .build();
@@ -203,6 +223,18 @@ public class PrestoQueryTestNG extends QueryFunctionalTestNGBase {
     private long getEncodedValue(int val) {
         long encoded = 0L;
         return BitCodecUtils.setBits(encoded, lowestBit, numBits, val);
+    }
+
+    private void copyToS3(String hdfsDir, String s3Dir) {
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, s3Dir)) {
+                HdfsUtils.rmdir(yarnConfiguration, s3Dir);
+            }
+            log.info("Copying from {} to {}", hdfsDir, s3Dir);
+            HdfsUtils.copyFiles(yarnConfiguration, hdfsDir, s3Dir);
+        } catch (IOException e) {
+            Assert.fail("Failed to copy from " + hdfsDir + " to " + s3Dir, e);
+        }
     }
 
     private AttributeRepository getAttrRepo() {

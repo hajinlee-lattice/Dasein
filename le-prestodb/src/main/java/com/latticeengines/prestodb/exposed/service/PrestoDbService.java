@@ -14,7 +14,9 @@ public interface PrestoDbService {
 
     void deleteTableIfExists(String tableName);
 
-    void createTableIfNotExists(String tableName, String avroDir); // AVRO is default format
+    default void createTableIfNotExists(String tableName, String dataDir, DataUnit.DataFormat format) {
+        createTableIfNotExists(tableName, dataDir, format, null);
+    }
 
     void createTableIfNotExists(String tableName, String dataDir, DataUnit.DataFormat format, List<Pair<String, Class<?>>> partitionKeys);
 

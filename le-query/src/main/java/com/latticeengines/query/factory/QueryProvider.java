@@ -41,9 +41,8 @@ public abstract class QueryProvider implements ApplicationContextAware {
             return factory;
         } else {
             factory = getSQLQueryFactory(repository, sqlUser);
-            String repoId = repository.getIdentifier(sqlUser);
-            factoryCache.put(repoId, factory);
-            log.info("Created a query factory for attr-repo {}", repoId);
+            factoryCache.put(cacheKey, factory);
+            log.info("Created a query factory for attr-repo {}", cacheKey);
             return factory;
         }
     }

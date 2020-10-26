@@ -1,6 +1,6 @@
-package com.latticeengines.query.evaluator.presto;
+package com.latticeengines.query.evaluator.athena;
 
-import static com.latticeengines.query.factory.PrestoQueryProvider.PRESTO_USER;
+import static com.latticeengines.query.factory.AthenaQueryProvider.ATHENA_USER;
 import static com.latticeengines.query.factory.RedshiftQueryProvider.USER_SEGMENT;
 import static org.testng.Assert.assertEquals;
 
@@ -35,10 +35,10 @@ import com.latticeengines.domain.exposed.query.Query;
  * This allows us test new usecases with different data sets versions. without hard coding expected outputs.
  *
  */
-public interface RedshiftAndPrestoQueryTester {
+public interface RedshiftAndAthenaQueryTester {
 
     Logger getLogger();
-    PrestoQueryTester getPrestoQueryTester();
+    AthenaQueryTester getQueryTester();
 
     default long getCountFromRedshift(AttributeRepository attrRepo, Query query, String sqlUser) {
         throw new UnsupportedOperationException("Implement the method in TestClass");
@@ -54,8 +54,8 @@ public interface RedshiftAndPrestoQueryTester {
     List<List<Map<String, Object>>> redshiftQueryDataResults = new ArrayList<>();
     List<List<Map<String, Object>>> prestoQueryDataResults = new ArrayList<>();
 
-    default void setupQueryTester(CustomerSpace customerSpace, AttributeRepository attrRepo, Map<String, String> tblPathMap) {
-        getPrestoQueryTester().setupTestContext(customerSpace, attrRepo, tblPathMap);
+    default void setupQueryTester(CustomerSpace customerSpace, AttributeRepository attrRepo) {
+        getQueryTester().setupTestContext(customerSpace, attrRepo);
     }
 
     default void teardownQueryTester() {
@@ -63,7 +63,8 @@ public interface RedshiftAndPrestoQueryTester {
 
     @BeforeMethod(groups = "functional")
     default void beforeMethod(Method method, Object[] params) {
-        getLogger().info("\n*********** Running Test Method (Redshift-Presto): {}, Params: {} **********%n",
+        getLogger().info(
+                "\n*********** Running Test Method (Redshift-Athena): {}}, Params: {} **********%n",
                 method.getName(), Arrays.deepToString(params));
     }
 
@@ -80,9 +81,9 @@ public interface RedshiftAndPrestoQueryTester {
                 getLogger().info("Redshift Query Data Collection Size: {}",
                         redshiftQueryDataResults.stream().map(List::size).collect(Collectors.toList()));
                 break;
-            case PRESTO_USER:
-                getLogger().info("Presto Query Count Collection: {}", prestoQueryCountResults);
-                getLogger().info("Presto Query Data Collection Size: {}",
+            case ATHENA_USER:
+                getLogger().info("Athena Query Count Collection: {}", prestoQueryCountResults);
+                getLogger().info("Athena Query Data Collection Size: {}",
                         prestoQueryDataResults.stream().map(List::size).collect(Collectors.toList()));
                 assertEquals(redshiftQueryCountResults, prestoQueryCountResults,
                         String.format("Counts doesn't match for %s : %s", testResult.getMethod().getMethodName(),
@@ -98,9 +99,9 @@ public interface RedshiftAndPrestoQueryTester {
             }
         } finally {
             getLogger().info(
-                    "---------- Completed Test Method (Redshift-Presto): {}, Params: {}, Time: {} ms ----------\n%n",
+                    "---------- Completed Test Method (Redshift-Athena): {}, Params: {}, Time: {} ms ----------\n%n",
                     testResult.getMethod().getMethodName(), Arrays.deepToString(params), timeTaken);
-            if (PRESTO_USER.equalsIgnoreCase(currUserContext) || StringUtils.isBlank(currUserContext)) {
+            if (ATHENA_USER.equalsIgnoreCase(currUserContext) || StringUtils.isBlank(currUserContext)) {
                 // We Need to reset these counts only when SparkSQLTest is run. Because
                 // @AfterMethod gets triggered for each user context
                 redshiftQueryCountResults.clear();
@@ -115,13 +116,13 @@ public interface RedshiftAndPrestoQueryTester {
     default long testGetCountAndAssertFromTester(String sqlUser, Query query, long expectedCount) {
         switch (sqlUser) {
         case USER_SEGMENT:
-            long redshiftQueryCount = getCountFromRedshift(getPrestoQueryTester().getAttrRepo(), query, sqlUser);
+            long redshiftQueryCount = getCountFromRedshift(getQueryTester().getAttrRepo(), query, sqlUser);
             getLogger().info("Redshift Query Count: {}", redshiftQueryCount);
             redshiftQueryCountResults.add(redshiftQueryCount);
             return redshiftQueryCount;
-        case PRESTO_USER:
-            long prestoQueryCount = getPrestoQueryTester().getCountFromPresto(query);
-            getLogger().info("Presto Query Count: {}", prestoQueryCount);
+        case ATHENA_USER:
+            long prestoQueryCount = getQueryTester().getCountFromAthena(query);
+            getLogger().info("Athena Query Count: {}", prestoQueryCount);
             prestoQueryCountResults.add(prestoQueryCount);
             return prestoQueryCount;
         default:
@@ -133,13 +134,13 @@ public interface RedshiftAndPrestoQueryTester {
                                                  long expectedCount, List<Map<String, Object>> expectedResult) {
         switch (sqlUser) {
         case USER_SEGMENT:
-            List<Map<String, Object>> redshiftResults = getDataFromRedshift(getPrestoQueryTester().getAttrRepo(), query, sqlUser).getData();
+            List<Map<String, Object>> redshiftResults = getDataFromRedshift(getQueryTester().getAttrRepo(), query, sqlUser).getData();
             getLogger().info("Redshift Query Data Size: {}", redshiftResults.size());
             redshiftQueryDataResults.add(redshiftResults);
             return redshiftResults;
-        case PRESTO_USER:
-            List<Map<String, Object>> prestoResultsAsList = getPrestoQueryTester().getDataFromPresto(query).getData();
-            getLogger().info("Presto Query Data Size: {}", prestoResultsAsList.size());
+        case ATHENA_USER:
+            List<Map<String, Object>> prestoResultsAsList = getQueryTester().getDataFromAthena(query).getData();
+            getLogger().info("Athena Query Data Size: {}", prestoResultsAsList.size());
             prestoQueryDataResults.add(prestoResultsAsList);
             return prestoResultsAsList;
         default:

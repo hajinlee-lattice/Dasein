@@ -82,7 +82,7 @@ public class PrestoDbServiceImplTestNG extends PrestoDbFunctionalTestNGBase {
         Assert.assertFalse(prestoDbService.tableExists(tableName));
 
         uploadDataToHdfs(avroDir);
-        prestoDbService.createTableIfNotExists(tableName, avroDir);
+        prestoDbService.createTableIfNotExists(tableName, avroDir, DataUnit.DataFormat.AVRO);
         SleepUtils.sleep(500);
 
         Assert.assertTrue(prestoDbService.tableExists(tableName));

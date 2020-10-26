@@ -226,7 +226,13 @@ public final class AvroUtils {
         if (matches.size() == 0) {
             throw new RuntimeException(String.format("No such file could be found: %s", path));
         }
-        return AvroUtils.getSchema(config, new Path(matches.get(0)));
+        String file = matches.get(0);
+        if (!path.startsWith("/")) {
+            String rootFolder = file.substring(0, file.indexOf("/", 1));
+            String server = path.substring(0, path.indexOf(rootFolder));
+            return AvroUtils.getSchema(config, new Path(server + file));
+        }
+        return AvroUtils.getSchema(config, new Path(file));
     }
 
     public static List<GenericRecord> getDataFromGlob(Configuration configuration, String path) {

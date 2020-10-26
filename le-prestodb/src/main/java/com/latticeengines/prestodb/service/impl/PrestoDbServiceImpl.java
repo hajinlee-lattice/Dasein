@@ -110,11 +110,6 @@ public class PrestoDbServiceImpl implements PrestoDbService {
         }
     }
 
-    @Override
-    public void createTableIfNotExists(String tableName, String avroDir) {
-        createAvroTable(tableName, avroDir, null);
-    }
-
     private void createAvroTable(String tableName, String avroDir, List<Pair<String, Class<?>>> partitionKeys) {
         String avroGlob;
         if (CollectionUtils.isNotEmpty(partitionKeys)) {
@@ -197,7 +192,6 @@ public class PrestoDbServiceImpl implements PrestoDbService {
         String tableName = hdfsDataUnit.getName().toLowerCase();
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, path)) {
-                deleteTableIfExists(tableName);
                 List<Pair<String, Class<?>>> partitionKeys = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(hdfsDataUnit.getTypedPartitionKeys())) {
                     hdfsDataUnit.getTypedPartitionKeys().forEach(pair -> {
@@ -222,6 +216,7 @@ public class PrestoDbServiceImpl implements PrestoDbService {
                 } else if (CollectionUtils.isNotEmpty(hdfsDataUnit.getPartitionKeys())) {
                     hdfsDataUnit.getPartitionKeys().forEach(pk -> partitionKeys.add(Pair.of(pk, String.class)));
                 }
+                deleteTableIfExists(tableName);
                 createTableIfNotExists(tableName, path, hdfsDataUnit.getDataFormat(), partitionKeys);
             } else {
                 throw new IOException("Failed to create presto table, because cannot find hdfs path " + path);
@@ -230,6 +225,7 @@ public class PrestoDbServiceImpl implements PrestoDbService {
             throw new RuntimeException("Failed to create presto table by hdfs path: " + path, e);
         }
         PrestoDataUnit prestoDataUnit = new PrestoDataUnit();
+        prestoDataUnit.setTenant(hdfsDataUnit.getTenant());
         prestoDataUnit.setName(hdfsDataUnit.getName());
         String clusterId = prestoConnectionService.getClusterId();
         prestoDataUnit.addPrestoTableName(clusterId, tableName);

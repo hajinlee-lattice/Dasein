@@ -33,12 +33,14 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
+import com.latticeengines.prestodb.exposed.service.AthenaService;
 import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -77,6 +79,9 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
+
+    @Inject
+    private AthenaService athenaService;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -218,6 +223,38 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
             }
         }
         uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);
+        customerSpace = attrRepo.getCustomerSpace();
+    }
+
+    protected void initializeAttributeRepo(int version, boolean copyToHdfs, boolean registerAthena) {
+        InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
+                String.valueOf(version), ATTR_REPO_S3_FILENAME);
+        attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
+        attrRepo.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
+        Map<TableRoleInCollection, String> pathMap = readTablePaths(version);
+        if (version >= 3) {
+            tblPathMap = new HashMap<>();
+            for (TableRoleInCollection role: QueryTestUtils.getRolesInAttrRepo()) {
+                String path = pathMap.get(role);
+                if (StringUtils.isNotBlank(path)) {
+                    String tblName = QueryTestUtils.getServingStoreName(role, version);
+                    tblPathMap.put(tblName, path);
+                    attrRepo.changeServingStoreTableName(role, tblName);
+                    if (registerAthena) {
+                        if (!athenaService.tableExists(tblName)) {
+                            String s3Folder = path.substring( //
+                                    path.indexOf("/Tables/") + "/Tables/".length(), path.lastIndexOf("/"));
+                            s3Folder = "le-query/attrrepo/" + version + "/ParquetTables/" + s3Folder;
+                            String bucket = "latticeengines-test-artifacts";
+                            athenaService.createTableIfNotExists(tblName, bucket, s3Folder, DataUnit.DataFormat.PARQUET);
+                        }
+                    }
+                }
+            }
+        }
+        if (copyToHdfs) {
+            uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);
+        }
         customerSpace = attrRepo.getCustomerSpace();
     }
 
