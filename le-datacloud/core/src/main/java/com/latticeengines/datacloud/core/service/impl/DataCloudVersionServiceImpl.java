@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.core.service.impl;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER_DIFF;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ACCOUNT_MASTER_LOOKUP;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.DNBWEEKLY_ACCOUNT_MASTER_DIFF;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.DUNS_GUIDE_BOOK;
 
 import java.util.ArrayList;
@@ -76,6 +77,7 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
         switch (sourceName) {
         case ACCOUNT_MASTER:
         case ACCOUNT_MASTER_DIFF:
+        case DNBWEEKLY_ACCOUNT_MASTER_DIFF:
             return constructDynamoVersion(latestVersion.getVersion(), latestVersion.getDynamoTableSignature());
         case ACCOUNT_MASTER_LOOKUP:
             return constructDynamoVersion(latestVersion.getVersion(), latestVersion.getDynamoTableSignatureLookup());
