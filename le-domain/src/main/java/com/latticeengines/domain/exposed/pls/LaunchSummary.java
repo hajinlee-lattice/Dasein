@@ -88,6 +88,7 @@ public class LaunchSummary {
         this.setSelectedBuckets(launch.getBucketsToLaunch());
         this.setDestinationOrgId(launch.getDestinationOrgId());
         this.setDestinationSysType(launch.getDestinationSysType());
+        this.setDestinationSysName(launch.getDestinationSysName());
         this.setDestinationAccountId(launch.getDestinationAccountId());
         this.setAudienceName(launch.getAudienceName());
         this.setFolderName(launch.getFolderName());
