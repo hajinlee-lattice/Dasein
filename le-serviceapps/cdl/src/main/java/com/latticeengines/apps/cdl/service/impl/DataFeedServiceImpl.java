@@ -113,13 +113,16 @@ public class DataFeedServiceImpl implements DataFeedService {
     @VisibleForTesting
     DataFeedServiceImpl(DataFeedEntityMgr datafeedEntityMgr, DataFeedExecutionEntityMgr datafeedExecutionEntityMgr,
             DataFeedTaskEntityMgr datafeedTaskEntityMgr, DataCollectionService dataCollectionService,
-            DataFeedTaskService datafeedTaskService, WorkflowProxy workflowProxy) {
+            DataFeedTaskService datafeedTaskService, WorkflowProxy workflowProxy,
+                        ActionService actionService, MetadataProxy metadataProxy) {
         this.datafeedEntityMgr = datafeedEntityMgr;
         this.datafeedExecutionEntityMgr = datafeedExecutionEntityMgr;
         this.datafeedTaskEntityMgr = datafeedTaskEntityMgr;
         this.dataCollectionService = dataCollectionService;
         this.datafeedTaskService = datafeedTaskService;
         this.workflowProxy = workflowProxy;
+        this.actionService = actionService;
+        this.metadataProxy = metadataProxy;
     }
 
     @Override
@@ -207,9 +210,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
         List<DataFeedImport> imports = new ArrayList<>();
         List<DataFeedTask> tasks = datafeed.getTasks();
-        tasks.forEach(task -> {
-            imports.addAll(createImports(task, customerSpace));
-        });
+        tasks.forEach(task -> imports.addAll(createImports(task, customerSpace)));
         log.info("imports for processanalyze are: " + imports);
 
         imports.sort(Comparator.comparingLong(dataFeedImport -> dataFeedImport.getDataTable().getPid()));
