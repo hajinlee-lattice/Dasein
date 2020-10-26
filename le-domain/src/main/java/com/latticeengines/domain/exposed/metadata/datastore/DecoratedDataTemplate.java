@@ -10,12 +10,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
 public abstract class DecoratedDataTemplate<N extends Namespace, BaseNS extends Namespace, DecoratorNS extends Namespace>
-        implements DataTemplate<N> {
+        implements DataUnitStore<N> {
 
-    private final DataTemplate<BaseNS> kernel;
+    private final DataUnitStore<BaseNS> kernel;
     private final DecoratorFactory<DecoratorNS> factory;
 
-    public DecoratedDataTemplate(DataTemplate<BaseNS> base, DecoratorFactory<DecoratorNS> factory) {
+    public DecoratedDataTemplate(DataUnitStore<BaseNS> base, DecoratorFactory<DecoratorNS> factory) {
         this.kernel = base;
         this.factory = factory;
     }

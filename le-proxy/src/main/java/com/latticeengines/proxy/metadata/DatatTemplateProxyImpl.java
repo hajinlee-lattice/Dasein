@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnitStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -16,7 +16,6 @@ import com.latticeengines.proxy.exposed.metadata.DataTemplateProxy;
 import com.latticeengines.proxy.exposed.metadata.ProxyDataTemplate;
 
 import reactor.core.publisher.Flux;
-
 
 @Component("dataTemplateProxy")
 public class DatatTemplateProxyImpl extends MicroserviceRestApiProxy implements DataTemplateProxy {
@@ -50,12 +49,12 @@ public class DatatTemplateProxyImpl extends MicroserviceRestApiProxy implements 
     }
 
     @Override
-    public <T extends Serializable> DataTemplate<Namespace1<T>> toDataTemplate(String dtName, Class<T> clz) {
+    public <T extends Serializable> DataUnitStore<Namespace1<T>> toDataTemplate(String dtName, Class<T> clz) {
         return ProxyDataTemplate.build(this, dtName, clz);
     }
 
     @Override
-    public <T1 extends Serializable, T2 extends Serializable> DataTemplate<Namespace2<T1, T2>> toDataTemplate(String dtName, Class<T1> clz1, Class<T2> clz2) {
+    public <T1 extends Serializable, T2 extends Serializable> DataUnitStore<Namespace2<T1, T2>> toDataTemplate(String dtName, Class<T1> clz1, Class<T2> clz2) {
         return ProxyDataTemplate.build(this, dtName, clz1, clz2);
     }
 
