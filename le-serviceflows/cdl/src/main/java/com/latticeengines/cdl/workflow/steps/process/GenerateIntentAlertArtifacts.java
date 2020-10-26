@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -84,8 +83,6 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
 
     private static final List<String> SELECTED_ATTRIBUTES = ImmutableList.of("ModelName", "Stage", "LDC_Name",
             "LDC_City", "STATE_PROVINCE_ABBR", "LDC_Country", "LDC_PrimaryIndustry", "LE_REVENUE_RANGE", "LDC_DUNS");
-
-    public static final String DATE_ONLY_FORMAT_STRING = "yyyy-MM-dd";
 
     @Override
     public void execute() {
@@ -203,7 +200,6 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
     private String convertToCSV(HdfsDataUnit dataUnit) {
         ConvertToCSVConfig config = new ConvertToCSVConfig();
         config.setCompress(false);
-        config.setDateAttrsFmt(ImmutableMap.of("Date", DATE_ONLY_FORMAT_STRING));
         config.setInput(Collections.singletonList(dataUnit));
         SparkJobResult csvResult = runSparkJob(ConvertToCSVJob.class, config);
 
