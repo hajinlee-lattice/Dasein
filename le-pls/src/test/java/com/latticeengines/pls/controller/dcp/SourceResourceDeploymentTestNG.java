@@ -57,7 +57,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private String sourceId;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-dcp")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
         MultiTenantContext.setTenant(mainTestTenant);
@@ -66,7 +66,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         attachProtectedProxy(fileUploadProxy);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-dcp")
     public void testCreateAndGetSource() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId("testProject",
                 Project.ProjectType.Type1, null);
@@ -122,7 +122,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         sourceId = source2.getSourceId();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-dcp")
     public void testFieldDefinitions() {
         Resource csvResource = new MultipartFileResource(testArtifactService.readTestArtifactAsStream(TEST_DATA_DIR,
                 TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE), TEST_ACCOUNT_DATA_FILE);

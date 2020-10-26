@@ -19,14 +19,14 @@ public class DataReportResourceDeploymentTestNG extends DCPDeploymentTestNGBase 
     @Inject
     private TestDataReportProxy testDataReportProxy;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-dcp")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
         MultiTenantContext.setTenant(mainTestTenant);
         attachProtectedProxy(testDataReportProxy);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-dcp")
     public void testGetDataReport() {
         DataReport dataReport = testDataReportProxy.getDataReport(DataReportRecord.Level.Tenant, null, Boolean.TRUE);
         Assert.assertNotNull(dataReport);

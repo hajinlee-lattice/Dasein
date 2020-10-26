@@ -70,7 +70,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Inject
     private Configuration yarnConfiguration;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-dcp")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
         MultiTenantContext.setTenant(mainTestTenant);
@@ -81,7 +81,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         attachProtectedProxy(fileUploadProxy);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-dcp")
     public void testUploadFile() throws IOException {
         Resource csvResource = new ClassPathResource(PATH,
                 Thread.currentThread().getContextClassLoader());
@@ -97,7 +97,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, sourceFile.getPath()));
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-dcp")
     public void testSubmitImport() {
         // Create Project & Source
         ProjectDetails projectDetails = testProjectProxy.createProjectWithOutProjectId(PROJECT_NAME,
@@ -199,13 +199,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(uploadJobDetails.getProgressPercentage());
         Assert.assertEquals(uploadJobDetails.getProgressPercentage(), Double.valueOf(ANALYSIS_PERCENTAGE));
 
-
-
-
         Assert.assertEquals(uploadJobDetails.getUploadJobSteps().size(), 3);
         Assert.assertNull(uploadJobDetails.getCurrentStep());
-
-
-
     }
 }
