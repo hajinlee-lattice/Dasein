@@ -240,6 +240,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         }
     }
 
+    // TODO: lucascl - MatchConstants.ENTITY_MATCH_ERROR_CODE should be removed from rejected.csv and accepted.csv,
+    // TODO: contains error code from D+ (use to decide whether to put in rejected or error)
+    // TODO: MatchConstants.ENTITY_MATCH_ERROR_FIELD should also be removed from all CSVs
     private Map<String, String> convertToDispMap(Collection<ColumnMetadata> cms) {
         Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
         Map<String, String> dispNames = new LinkedHashMap<>();

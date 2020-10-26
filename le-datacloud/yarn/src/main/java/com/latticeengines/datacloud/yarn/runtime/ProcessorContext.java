@@ -529,6 +529,9 @@ public class ProcessorContext {
         }
         if (BusinessEntity.PrimeAccount.name().equals(originalInput.getTargetEntity())) {
             outputSchema = appendCandidateSchema(outputSchema);
+
+            // Need to pipe D+ error codes out of core; should be removed from most CSV files at the end
+            outputSchema = appendErrorSchema(outputSchema);
         }
 
         disableDunsValidation = originalInput.isDisableDunsValidation();
@@ -571,7 +574,6 @@ public class ProcessorContext {
     }
 
     Schema appendErrorSchema(Schema schema) {
-        // TODO: Incorporate error code
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
         fieldMap.put(ENTITY_MATCH_ERROR_FIELD, String.class);
         fieldMap.put(ENTITY_MATCH_ERROR_CODE, String.class);

@@ -368,7 +368,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 }
             }
 
-            if (internalRecord.getRawError() != null) {
+            // don't copy errors if null or was successful on a later retry
+            if (CollectionUtils.isNotEmpty(internalRecord.getErrorMessages()) && internalRecord.getRawError() != null) {
                 outputRecord.addErrorCode(internalRecord.getRawError());
             }
 

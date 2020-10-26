@@ -309,6 +309,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                 }
                 if (BusinessEntity.PrimeAccount.name().equals(processorContext.getOriginalInput().getTargetEntity())) {
                     appendCandidateValues(allValues, outputRecord);
+                    appendErrorCodes(allValues, outputRecord);
                 }
                 data.add(allValues);
             }
@@ -614,6 +615,14 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             candidateVals = directPlusCandidateService.emptyCandidate();
         }
         allValues.addAll(candidateVals);
+    }
+
+    private void appendErrorCodes(List<Object> allValues, OutputRecord outputRecord) {
+        String errorMessages = CollectionUtils.isEmpty(outputRecord.getErrorMessages()) ? "" : StringUtils.join(outputRecord.getErrorMessages(), "|");
+        allValues.add(errorMessages);
+
+        String errorCodes = CollectionUtils.isEmpty(outputRecord.getErrorCodes()) ? "" : StringUtils.join(outputRecord.getErrorCodes(), "|");
+        allValues.add(errorCodes);
     }
 
     private Object convertToClaimedType(Schema.Type avroType, Object value, String columnName) {
