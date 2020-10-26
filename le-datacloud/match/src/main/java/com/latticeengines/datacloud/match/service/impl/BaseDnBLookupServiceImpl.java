@@ -34,7 +34,6 @@ import com.latticeengines.proxy.exposed.RestApiClient;
 
 /*
  * Base class for the service sending lookup requests to a D&B API (e.g. Direct+)
- * @param <T>
  */
 public abstract class BaseDnBLookupServiceImpl<T> {
     private static final Logger log = LoggerFactory.getLogger(BaseDnBLookupServiceImpl.class);

@@ -60,6 +60,10 @@ import com.latticeengines.proxy.exposed.matchapi.MatchInternalProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
+/**
+ * Bulk match workflow step
+ * Splits match requests into blocks which are sent in parallel to Yarn containers
+ */
 @Component("parallelBlockExecution")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecutionConfiguration> {
@@ -140,11 +144,14 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
             HdfsPodContext.changeHdfsPodId(getConfiguration().getPodId());
             rootOperationUid = getStringValueFromContext(BulkMatchContextKey.ROOT_OPERATION_UID);
+
+            // Output directories
             matchErrorDir = hdfsPathBuilder.constructMatchErrorDir(rootOperationUid).toString();
             matchNewEntityDir = hdfsPathBuilder.constructMatchNewEntityDir(rootOperationUid).toString();
             matchCandidateDir = hdfsPathBuilder.constructMatchCandidateDir(rootOperationUid).toString();
             matchUsageDir = hdfsPathBuilder.constructMatchUsageDir(rootOperationUid).toString();
 
+            // Setup complete
             remainingJobs = new ArrayList<>(jobConfigurations);
             // TODO trace block submission
             while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
@@ -152,6 +159,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 waitForMatchBlocks();
                 SleepUtils.sleep(10000L);
             }
+
             if (!success) {
                 throw new LedpException(LedpCode.LEDP_00008, new String[] { failedApps.toString() });
             }
@@ -461,7 +469,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 }
             }
         } else {
-            log.warn(errorMsg + ". Killing the whole match");
+            log.warn(errorMsg + ". Failing the block");
             MatchStatus terminalStatus = FinalApplicationStatus.FAILED.equals(status) ? MatchStatus.FAILED
                     : MatchStatus.ABORTED;
             handleFailedBlock(terminalStatus, report);
@@ -498,6 +506,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
         try {
             String blockError = HdfsUtils.getHdfsFileContents(yarnConfiguration, blockErrorFile);
+
+            // Each batch is given its own file, to avoid overwrites (especially by failTheWorkflowWithErrorMessage)
             String matchErrorFile = hdfsPathBuilder.constructErrorFileForBatchError(rootOperationUid, blockOperationUid).toString();
 
             DataCloudJobConfiguration config = configMap.get(blockOperationUid);
@@ -519,6 +529,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 .status(terminalStatus) //
                 .errorMessage(errorMsg) //
                 .commit();
+
+        // Wait until end to fail workflow; don't know if entire job will fail or only this block
         success = false;
         failedApps.add(failedAppId.toString());
     }
