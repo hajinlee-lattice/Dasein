@@ -26,14 +26,14 @@ public class MatchRuleResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Inject
     private TestMatchRuleProxy testMatchRuleProxy;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-dcp")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
         MultiTenantContext.setTenant(mainTestTenant);
         attachProtectedProxy(testMatchRuleProxy);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-dcp")
     public void testGetAndUpdateMatchRule() {
         // Create Base Rule
         MatchRule matchRule = new MatchRule();

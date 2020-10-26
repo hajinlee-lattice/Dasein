@@ -86,7 +86,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
     @Inject
     private TestUploadProxy testUploadProxy;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-dcp")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
@@ -96,7 +96,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         attachProtectedProxy(testSourceProxy);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-dcp")
     public void testFlow() {
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
@@ -217,7 +217,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         Assert.assertEquals(uploadJobDetails.getProgressPercentage(), Double.valueOf(ANALYSIS_PERCENTAGE));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testFlow")
+    @Test(groups = "deployment-dcp", dependsOnMethods = "testFlow")
     public void testGetAndDelete() {
         List<ProjectSummary> projects = testProjectProxy.getAllProjects(false, true);
         Assert.assertNotNull(projects);

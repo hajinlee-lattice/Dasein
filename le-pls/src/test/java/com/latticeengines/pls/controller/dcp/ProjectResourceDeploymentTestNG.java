@@ -42,7 +42,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Inject
     TestProjectProxy testProjectProxy;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-dcp")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
         MultiTenantContext.setTenant(mainTestTenant);
@@ -51,7 +51,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     // Test creating a project with a provided ID and making sure that deleting the project moves it to archived
     // state.
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-dcp")
     public void testCreateDCPProjectWithProjectId() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithProjectId(DISPLAY_NAME, PROJECT_ID,
                 Project.ProjectType.Type1, null);
@@ -69,7 +69,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     // Test creating a project without a provided ID and making sure that deleting the project moves it to archived
     // state.
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-dcp")
     public void testCreateDCPProjectWithOutProjectId() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME,
                 Project.ProjectType.Type1, DESCRIPTION);
@@ -84,7 +84,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     // Test getting the list of projects with and without archived projects.
-    @Test(groups = "deployment", dependsOnMethods = {"testCreateDCPProjectWithProjectId",
+    @Test(groups = "deployment-dcp", dependsOnMethods = {"testCreateDCPProjectWithProjectId",
             "testCreateDCPProjectWithOutProjectId"})
     public void testGetAllDCPProject() {
         ProjectDetails projectDetail1 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME,
@@ -129,7 +129,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         });
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testGetAllDCPProject")
+    @Test(groups = "deployment-dcp", dependsOnMethods = "testGetAllDCPProject")
     public void testGetAllDCPProjectWithTeamRestriction() {
         // Check the projects viewable by a Super Admin.  All created projects should be visible.
         switchToSuperAdmin();
