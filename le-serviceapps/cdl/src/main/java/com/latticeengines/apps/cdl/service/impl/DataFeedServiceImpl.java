@@ -213,7 +213,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         tasks.forEach(task -> imports.addAll(createImports(task, customerSpace)));
         log.info("imports for processanalyze are: " + imports);
 
-        imports.sort(Comparator.comparingLong(dataFeedImport -> dataFeedImport.getDataTable().getPid()));
+        imports.sort(Comparator.comparingLong(dataFeedImport -> dataFeedImport.getDataTable().getCreated().getTime()));
         DataFeedExecution execution = datafeed.getActiveExecution();
         execution.addImports(imports);
         execution.setWorkflowId(jobId);

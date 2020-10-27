@@ -865,12 +865,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Job failedJob = new Job();
         failedJob.setJobType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName());
         String appId = String.format("application_%s", System.currentTimeMillis());
+        failedJob.setApplicationId(appId);
         failedJob.setUser(INITIATOR);
         failedJob.setErrorCode(LedpCode.LEDP_00002);
         failedJob.setErrorMsg("ac");
         failedJob.setInputs(new HashMap<>());
         failedJob.getInputs().put(WorkflowContextConstants.Inputs.ACTION_ID, String.valueOf(action.getPid()));
-        Long workflowPId = workflowProxy.createFailedWorkflowJob(mainTestTenant.getId(), failedJob);
+        workflowProxy.createFailedWorkflowJob(mainTestTenant.getId(), failedJob);
 
         DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace.toString(), feedTaskId);
         task.setActiveJob(appId);
