@@ -60,6 +60,10 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
     static {
         SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Facebook, "d01b9af1-e773-42a9-b660-f42378cbc747");
+        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.GoogleAds, "e089a0e4-9b89-45ff-ac9d-d75e643ac212");
+        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.LinkedIn, "add0a7c7-4342-42cb-a726-63e488aa23a3");
+        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Outreach, "a16c9564-d640-4f38-9171-8d0eb03e0641");
+        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Marketo, "64497731-1be1-4b25-8830-56fcb1ffcf82");
     }
 
     @Inject
@@ -97,6 +101,12 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
     @Value("${cdl.tray.test.data.bucket}")
     private String trayTestDataBucket;
+
+    @Value("${cdl.atlas.export.dropfolder.tag}")
+    private String expire30dTag;
+
+    @Value("${cdl.atlas.export.dropfolder.tag.value}")
+    private String expire30dTagValue;
 
     @Override
     public void triggerTrayConnectorTest(String customerSpace, CDLExternalSystemName externalSystemName, String testScenario) {
@@ -410,6 +420,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         String fileName = testObjectKey.substring(testObjectKey.lastIndexOf("/")+1);
         String objectKey = String.format(TEST_FILE_PATH_TEMPLATE, tenantId, externalSystemName, fileName);
         s3Service.copyObject(trayTestDataBucket, testObjectKey, exportS3Bucket, objectKey);
+        tagS3Expiration(exportS3Bucket, objectKey);
         log.info("Copied tset input file in " + objectKey);
 
         ExportFileConfig exportFileConfig = new ExportFileConfig();
@@ -420,5 +431,15 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         newFileList.add(exportFileConfig);
 
         return newFileList;
+    }
+
+    private void tagS3Expiration(String bucket, String key) {
+        log.info("Tagging the copied input file to expire in 30 days");
+        try {
+            s3Service.addTagToObject(bucket, key, expire30dTag, expire30dTagValue);
+            log.info(String.format("Tagged %s to expire in 30 days", key));
+        } catch (Exception e) {
+            log.error(String.format("Failed to tag %s to expire in 30 days", key));
+        }
     }
 }
