@@ -399,7 +399,7 @@ public class EmailResource {
             for (User user : users) {
                 if (user.getEmail().equals(playLaunchChannel.getUpdatedBy())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
-                    String launchSettingsUrl = String.format("%s/atlas/tenant/%s/playbook/dashboard/%s/launchhistory",
+                    String launchSettingsUrl = String.format("%s/atlas/tenant/%s/playbook/overview/%s",
                             appPublicUrl, tenantName, playLaunchChannel.getPlayName());
                     emailService.sendPlsAlwaysOnCampaignExpirationEmail(user, launchInterval, launchSettingsUrl,
                             playDisplayName,
