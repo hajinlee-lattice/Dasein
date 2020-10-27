@@ -24,7 +24,7 @@ public class ContactFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     @Inject
     private ContactFileValidationService contactFileValidationService;
 
-    private static final String CONTACT_FILE_DESTINATION = "/validation/contact/";
+    private static final String CONTACT_FILE_DESTINATION = "tmp/validation/contact/";
 
 
     private String fileName;
