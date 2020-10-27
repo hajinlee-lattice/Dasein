@@ -115,7 +115,7 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
         map.put(BusinessEntity.Contact, CONTACT_PA_EM);
         map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
 //        map.put(BusinessEntity.Transaction, DAILY_TXN_UT_EM);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT_EM); // changed from 75183 to 75175
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT_EM);
         return map;
     }
 
