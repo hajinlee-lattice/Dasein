@@ -189,7 +189,14 @@ public class PrestoDbServiceImpl implements PrestoDbService {
     @Override
     public PrestoDataUnit saveDataUnit(HdfsDataUnit hdfsDataUnit) {
         String path = hdfsDataUnit.getPath();
+        String tenantId = hdfsDataUnit.getTenant();
         String tableName = hdfsDataUnit.getName().toLowerCase();
+        if (!tableName.startsWith(tenantId.toLowerCase())) {
+            tableName = tenantId.toLowerCase() + "_" + tableName;
+        }
+        if (hdfsDataUnit.getDataFormat() == null) {
+            hdfsDataUnit.setDataFormat(DataUnit.DataFormat.AVRO);
+        }
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, path)) {
                 List<Pair<String, Class<?>>> partitionKeys = new ArrayList<>();

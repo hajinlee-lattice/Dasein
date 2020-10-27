@@ -119,7 +119,14 @@ public class AthenaServiceImpl implements AthenaService  {
     public AthenaDataUnit saveDataUnit(S3DataUnit s3DataUnit) {
         String bucket = s3DataUnit.getBucket();
         String prefix = s3DataUnit.getPrefix();
+        String tenantId = s3DataUnit.getTenant();
         String tableName = s3DataUnit.getName().toLowerCase();
+        if (!tableName.startsWith(tenantId.toLowerCase())) {
+            tableName = tenantId.toLowerCase() + "_" + tableName;
+        }
+        if (s3DataUnit.getDataFormat() == null) {
+            s3DataUnit.setDataFormat(DataUnit.DataFormat.AVRO);
+        }
         try {
             if (s3Service.isNonEmptyDirectory(bucket, prefix)) {
                 List<Pair<String, Class<?>>> partitionKeys = new ArrayList<>();
