@@ -757,6 +757,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         workflowJob.setStartTimeInMillis(currentTime);
         workflowJob.setType(failedJob.getJobType());
         workflowJob.setUserId(failedJob.getUser());
+        // this is just for testing
+        workflowJob.setApplicationId(failedJob.getApplicationId());
         workflowJob.setInputContext(failedJob.getInputs());
         ErrorDetails errorDetails = new ErrorDetails(failedJob.getErrorCode(), failedJob.getErrorMsg(), "");
         workflowJob.setErrorDetails(errorDetails);
