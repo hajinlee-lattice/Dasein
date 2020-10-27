@@ -78,7 +78,7 @@ public class S3ChannelConfig implements ChannelConfig {
     @Override
     @JsonProperty("suppressAccountsWithoutContacts")
     public boolean isSuppressAccountsWithoutContacts() {
-        return audienceType != AudienceType.ACCOUNTS;
+        return false;
     }
 
     @Override
