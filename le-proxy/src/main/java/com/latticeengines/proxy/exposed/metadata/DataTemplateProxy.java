@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnitStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 
@@ -21,8 +21,8 @@ public interface DataTemplateProxy {
 
     Flux<ColumnMetadata> getUnorderedSchema(String dtName, String... namespace);
 
-    <T extends Serializable> DataTemplate<Namespace1<T>> toDataTemplate(String dtName, Class<T> clz);
+    <T extends Serializable> DataUnitStore<Namespace1<T>> toDataTemplate(String dtName, Class<T> clz);
 
-    <T1 extends Serializable, T2 extends Serializable> DataTemplate<Namespace2<T1, T2>> toDataTemplate(String dtName, Class<T1> clz1, Class<T2> clz2);
+    <T1 extends Serializable, T2 extends Serializable> DataUnitStore<Namespace2<T1, T2>> toDataTemplate(String dtName, Class<T1> clz1, Class<T2> clz2);
 
 }

@@ -16,9 +16,9 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datastore.DataTemplateName;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnitStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.metadata.service.DataTemplateService;
 
@@ -33,7 +33,7 @@ public class TableRoleTemplateImpl implements TableRoleTemplate {
 
     private final CDLNamespaceService cdlNamespaceService;
     private final TableRoleTemplate _tableRoleTemplate;
-    private final DataTemplate<Namespace2<String, String>> proxyTemplate;
+    private final DataUnitStore<Namespace2<String, String>> proxyTemplate;
 
     private static final Scheduler scheduler = Schedulers.newParallel("tablerole-template");
 
@@ -41,7 +41,7 @@ public class TableRoleTemplateImpl implements TableRoleTemplate {
     public TableRoleTemplateImpl(DataTemplateService dataTemplateService, CDLNamespaceService cdlNamespaceService,
             TableRoleTemplate tableRoleTemplate) {
         this.cdlNamespaceService = cdlNamespaceService;
-        this.proxyTemplate = new DataTemplate<Namespace2<String, String>>() {
+        this.proxyTemplate = new DataUnitStore<Namespace2<String, String>>() {
             @Override
             public List<DataUnit> getData(Namespace2<String, String> namespace2) {
                 return dataTemplateService.getData(DataTemplateName.Table, namespace2.getCoord1(),

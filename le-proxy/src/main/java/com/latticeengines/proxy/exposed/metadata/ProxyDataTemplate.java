@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnitStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
@@ -15,7 +15,7 @@ import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-public class ProxyDataTemplate<N extends Namespace> implements DataTemplate<N> {
+public class ProxyDataTemplate<N extends Namespace> implements DataUnitStore<N> {
 
     private final DataTemplateProxy dataTemplateProxy;
     private final String dtName;

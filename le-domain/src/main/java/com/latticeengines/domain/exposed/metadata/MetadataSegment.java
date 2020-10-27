@@ -376,25 +376,25 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setEntityCount(BusinessEntity entity, Long count) {
         switch (entity) {
-        case Account:
-            setAccounts(count);
-            break;
-        case Contact:
-            setContacts(count);
-            break;
-        default:
-            throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+            case Account:
+                setAccounts(count);
+                break;
+            case Contact:
+                setContacts(count);
+                break;
+            default:
+                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
     }
 
     public Long getEntityCount(BusinessEntity entity) {
         switch (entity) {
-        case Account:
-            return getAccounts();
-        case Contact:
-            return getContacts();
-        default:
-            throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
+            case Account:
+                return getAccounts();
+            case Contact:
+                return getContacts();
+            default:
+                throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
     }
 
