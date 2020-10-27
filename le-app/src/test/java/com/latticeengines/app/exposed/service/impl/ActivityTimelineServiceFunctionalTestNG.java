@@ -6,6 +6,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +34,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.ActivityTimelineQuery;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
@@ -75,7 +80,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
     @Test(groups = "functional")
     public void testGetMetrics() {
         Map<String, Integer> metrics = activityTimelineService.getActivityTimelineMetrics(TEST_ACCOUNT_ID, null, null);
-        Assert.assertEquals(metrics.get("newActivities").intValue(), 93);
+        Assert.assertEquals(metrics.get("newActivities").intValue(), 139);
 
         Assert.assertEquals(metrics.get("newIdentifiedContacts").intValue(), 0);
 
@@ -84,7 +89,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
         Assert.assertEquals(metrics.get("newOpportunities").intValue(), 97);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = "testGetMetrics")
     public void testGetActivityWithBackStage() {
         List<Map<String, Object>> dataWithbackStage = activityTimelineService
                 .getAccountActivities(TEST_ACCOUNT_ID, null, null, //
@@ -94,7 +99,39 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
         Map<String, Object> backStageEvent = dataWithbackStage.get(dataWithbackStage.size() - 1);
         Assert.assertEquals(backStageEvent.get("StreamType"), "JourneyStage");
         Assert.assertEquals(backStageEvent.get("Detail1"), "Engaged");
-        Assert.assertEquals(backStageEvent.get("EventTimestamp"), 1589068800000L);
+        Assert.assertEquals(backStageEvent.get("EventTimestamp"), 1589414400000L);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testGetActivityWithBackStage")
+    public void testGetActivityWithBackStage1() throws Exception {
+        // setup
+        Path cdlPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(mainTestTenant.getId()), "CDL");
+        Path fakeCurrentDatePath = cdlPath.append("FakeCurrentDate");
+        CamilleEnvironment.getCamille().upsert(fakeCurrentDatePath, new Document("2020-06-12"),
+                ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Instant cutoffTimeStamp = LocalDate.parse("2020-06-12", DateTimeFormatter.ISO_DATE).atStartOfDay(ZoneOffset.UTC)
+                .toOffsetDateTime().toInstant();
+        ActivityProxy spiedActivityProxy = spy(new ActivityProxyImpl());
+        doReturn(new DataPage(generateTestData(
+                "com/latticeengines/app/exposed/controller/test-activity-timeline-insight-data.json", DataPage.class)
+                        .getData().stream()
+                        .filter(event -> (Long) event.get(InterfaceName.EventTimestamp.name()) >= cutoffTimeStamp
+                                .toEpochMilli())
+                        .collect(Collectors.toList()))).when(spiedActivityProxy).getData(any(String.class), eq(null),
+                                any(ActivityTimelineQuery.class));
+        ((ActivityTimelineServiceImpl) activityTimelineService).setActivityProxy(spiedActivityProxy);
+
+        // Test
+        List<Map<String, Object>> dataWithbackStage = activityTimelineService
+                .getAccountActivities(TEST_ACCOUNT_ID, null, null, //
+                        Arrays.stream(AtlasStream.StreamType.values()).collect(Collectors.toSet()), null)
+                .getData();
+        Assert.assertEquals(dataWithbackStage.size(), 157);
+        Map<String, Object> backStageEvent = dataWithbackStage.get(dataWithbackStage.size() - 1);
+        Assert.assertEquals(backStageEvent.get("StreamType"), "JourneyStage");
+        Assert.assertEquals(backStageEvent.get("Detail1"), "Dark");
+        Assert.assertEquals(backStageEvent.get("EventTimestamp"), 1584144000000L);
     }
 
     private <T> T generateTestData(String filePath, Class<T> clazz) {

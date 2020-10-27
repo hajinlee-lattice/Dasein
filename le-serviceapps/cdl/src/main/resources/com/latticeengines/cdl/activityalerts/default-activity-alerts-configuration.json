@@ -2,23 +2,23 @@
   {
     "name": "IncWebActivity",
     "alert_header": "Increased Web Activity",
-    "alert_category": "PRODUCTS",
+    "alert_category": "PEOPLE",
     "qualification_period_days": 10,
-    "alert_message_template": "${Data.PageVisits} visits to the ${Data.PageName} pages have occurred meaning they are looking to buy, check on your ${Data.ActiveContacts} active contacts.",
+    "alert_message_template": "${Data.PageVisits} <#if (Data.PageVisits > 1)>visits<#else>visit</#if> to the ${Data.PageName} page <#if (Data.PageVisits > 1)>have<#else>has</#if> occurred meaning they are looking to buy, check your ${Data.ActiveContacts} active <#if (Data.ActiveContacts > 1)>contacts<#else>contact</#if>.",
     "is_active": true
   },
   {
     "name": "IncActivityOnProduct",
     "alert_header": "Increased Activity on Product Pages",
-    "alert_category": "PRODUCTS",
+    "alert_category": "PEOPLE",
     "qualification_period_days": 10,
-    "alert_message_template": "${Data.PageVisits} visits your ${Data.PageName} page suggests you'll need to prospect into those personas.",
+    "alert_message_template": "${Data.PageVisits} <#if (Data.PageVisits > 1)>visits<#else>visit</#if> to your ${Data.PageName} page suggests you'll need to prospect into those personas.",
     "is_active": true
   },
   {
     "name": "ReEngagedActivity",
     "alert_header": "Re-engaged Activity",
-    "alert_category": "PRODUCTS",
+    "alert_category": "PEOPLE",
     "qualification_period_days": 10,
     "alert_message_template": "<#if (Data.ReEngagedContacts > 1)>Multiple contacts have<#else>Someone has</#if> re-engaged with your product after not returning for more than 30 days.",
     "is_active": true
@@ -26,7 +26,7 @@
   {
     "name": "HasShownIntent",
     "alert_header": "Has Shown Intent",
-    "alert_category": "PEOPLE",
+    "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
     "alert_message_template": "We saw <#if (Data.NumResearchIntents > 0)>research intent on ${Data.NumResearchIntents} products </#if><#if (Data.NumBuyIntents > 0) && (Data.NumResearchIntents > 0)>and </#if><#if (Data.NumBuyIntents > 0)>buy intent on ${Data.NumBuyIntents} products </#if>within the last 10 days. Check out which models in the Recent Activity section.",
     "is_active": true
