@@ -179,7 +179,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{apppublicurl}}", hostport);
             builder.replaceToken("{{helpcenterurl}}", helpCenterUrl);
 
-            Multipart mp = builder.buildMultipart();
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             if (bccEmail) {
                 sendMultiPartEmail(EmailSettings.NEW_USER_SUBJECT, mp, Collections.singleton(user.getEmail()),
                         Collections.singleton(businessOpsEmail));
