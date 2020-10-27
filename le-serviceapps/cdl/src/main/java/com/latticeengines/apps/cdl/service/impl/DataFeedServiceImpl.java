@@ -55,7 +55,7 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("datafeedService")
@@ -103,7 +103,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     private ActionService actionService;
 
     @Inject
-    private MetadataProxy metadataProxy;
+    private MetadataService metadataService;
 
     private static final String LockType = "DataFeedExecutionLock";
 
@@ -114,7 +114,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     DataFeedServiceImpl(DataFeedEntityMgr datafeedEntityMgr, DataFeedExecutionEntityMgr datafeedExecutionEntityMgr,
             DataFeedTaskEntityMgr datafeedTaskEntityMgr, DataCollectionService dataCollectionService,
             DataFeedTaskService datafeedTaskService, WorkflowProxy workflowProxy,
-                        ActionService actionService, MetadataProxy metadataProxy) {
+                        ActionService actionService, MetadataService metadataService) {
         this.datafeedEntityMgr = datafeedEntityMgr;
         this.datafeedExecutionEntityMgr = datafeedExecutionEntityMgr;
         this.datafeedTaskEntityMgr = datafeedTaskEntityMgr;
@@ -122,7 +122,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         this.datafeedTaskService = datafeedTaskService;
         this.workflowProxy = workflowProxy;
         this.actionService = actionService;
-        this.metadataProxy = metadataProxy;
+        this.metadataService = metadataService;
     }
 
     @Override
@@ -213,7 +213,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         tasks.forEach(task -> imports.addAll(createImports(task, customerSpace)));
         log.info("imports for processanalyze are: " + imports);
 
-        imports.sort(Comparator.comparingLong(dataFeedImport -> dataFeedImport.getDataTable().getCreated().getTime()));
+        imports.sort(Comparator.comparingLong(dataFeedImport -> dataFeedImport.getDataTable().getPid()));
         DataFeedExecution execution = datafeed.getActiveExecution();
         execution.addImports(imports);
         execution.setWorkflowId(jobId);
@@ -250,7 +250,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                     List<String> tableNames = config.getRegisteredTables();
                     if (CollectionUtils.isNotEmpty(tableNames)) {
                         tableNames.forEach(tableName -> {
-                            Table dataTable = metadataProxy.getTable(customerSpace, tableName);
+                            Table dataTable = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
                             if (dataTable != null) {
                                 task.setImportData(dataTable);
                                 imports.add(DataFeedImportUtils.createImportFromTask(task));

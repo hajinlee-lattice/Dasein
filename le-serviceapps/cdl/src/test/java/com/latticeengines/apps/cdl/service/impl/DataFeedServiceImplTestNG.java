@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -52,7 +54,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
@@ -149,8 +151,8 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         WorkflowProxy workflowProxy = mock(WorkflowProxy.class);
         when(workflowProxy.getWorkflowExecution(anyString(), anyString())).thenReturn(job);
         when(workflowProxy.getWorkflowJobFromApplicationId(anyString(), anyString())).thenReturn(job);
-        MetadataProxy metadataProxy = mock(MetadataProxy.class);
-        when(metadataProxy.getTable(anyString(), anyString())).thenReturn(dataTable);
+        MetadataService metadataProxy = mock(MetadataService.class);
+        when(metadataProxy.getTable(any(CustomerSpace.class), anyString())).thenReturn(dataTable);
         datafeedService = new DataFeedServiceImpl(datafeedEntityMgr, datafeedExecutionEntityMgr, datafeedTaskEntityMgr,
                 dataCollectionService, datafeedTaskService, workflowProxy, actionService, metadataProxy);
         datafeedService.createDataFeed(MultiTenantContext.getTenant().getId(), dataCollection.getName(), datafeed);
