@@ -122,6 +122,7 @@ public class QueryEvaluatorService {
                 .doOnSubscribe(s -> startTime.set(System.currentTimeMillis())) //
                 .doOnNext(m -> counter.getAndIncrement()) //
                 .doOnComplete(() -> {
+                    sqlQuery.setUseLiterals(false);
                     String msg = String.format(
                             "[Metric] Finished fetching %d records. tenantId=%s SQLQuery=%s Bindings=%s ElapsedTime=%d ms",
                             counter.get(), attrRepo.getCustomerSpace().getTenantId(),

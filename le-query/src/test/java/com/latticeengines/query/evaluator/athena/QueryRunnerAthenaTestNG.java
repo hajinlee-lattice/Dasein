@@ -35,7 +35,7 @@ public class QueryRunnerAthenaTestNG extends QueryRunnerTestNG implements Redshi
 
     @BeforeClass(groups = "functional")
     public void setupBase() {
-        initializeAttributeRepo(3, false, true);
+        initializeAttributeRepo(3, false);
         setupQueryTester(customerSpace, attrRepo);
     }
 

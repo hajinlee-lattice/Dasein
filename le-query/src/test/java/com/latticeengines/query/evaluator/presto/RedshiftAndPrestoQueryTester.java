@@ -54,8 +54,8 @@ public interface RedshiftAndPrestoQueryTester {
     List<List<Map<String, Object>>> redshiftQueryDataResults = new ArrayList<>();
     List<List<Map<String, Object>>> prestoQueryDataResults = new ArrayList<>();
 
-    default void setupQueryTester(CustomerSpace customerSpace, AttributeRepository attrRepo, Map<String, String> tblPathMap) {
-        getPrestoQueryTester().setupTestContext(customerSpace, attrRepo, tblPathMap);
+    default void setupQueryTester(CustomerSpace customerSpace, AttributeRepository attrRepo) {
+        getPrestoQueryTester().setupTestContext(customerSpace, attrRepo);
     }
 
     default void teardownQueryTester() {
@@ -63,7 +63,7 @@ public interface RedshiftAndPrestoQueryTester {
 
     @BeforeMethod(groups = "functional")
     default void beforeMethod(Method method, Object[] params) {
-        getLogger().info("\n*********** Running Test Method (Redshift-Presto): {}, Params: {} **********%n",
+        getLogger().info("\n*********** Running Test Method (Redshift-Presto): {}, Params: {} **********\n",
                 method.getName(), Arrays.deepToString(params));
     }
 
@@ -98,7 +98,7 @@ public interface RedshiftAndPrestoQueryTester {
             }
         } finally {
             getLogger().info(
-                    "---------- Completed Test Method (Redshift-Presto): {}, Params: {}, Time: {} ms ----------\n%n",
+                    "---------- Completed Test Method (Redshift-Presto): {}, Params: {}, Time: {} ms ----------\n\n",
                     testResult.getMethod().getMethodName(), Arrays.deepToString(params), timeTaken);
             if (PRESTO_USER.equalsIgnoreCase(currUserContext) || StringUtils.isBlank(currUserContext)) {
                 // We Need to reset these counts only when SparkSQLTest is run. Because

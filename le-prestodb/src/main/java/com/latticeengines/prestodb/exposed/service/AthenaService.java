@@ -24,6 +24,8 @@ public interface AthenaService {
     void createTableIfNotExists(String tableName, String s3Bucket, String s3Prefix, DataUnit.DataFormat format, //
                                 List<Pair<String, Class<?>>> partitionKeys);
 
+    List<String> getTablesStartsWith(String tableNamePrefix);
+
     AthenaDataUnit saveDataUnit(S3DataUnit s3DataUnit);
 
     Flux<Map<String, Object>> queryFlux(String sql);

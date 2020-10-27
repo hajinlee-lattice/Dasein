@@ -2,8 +2,6 @@ package com.latticeengines.query.evaluator.presto;
 
 import static com.latticeengines.query.factory.PrestoQueryProvider.PRESTO_USER;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
@@ -11,11 +9,9 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.prestodb.exposed.service.PrestoDbService;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 @Component
@@ -27,11 +23,7 @@ public class PrestoQueryTester {
     @Inject
     protected Configuration yarnConfiguration;
 
-    @Inject
-    private PrestoDbService prestoDbService;
-
     protected AttributeRepository attrRepo;
-    protected Map<String, String> tblPathMap;
     protected CustomerSpace customerSpace;
 
     public AttributeRepository getAttrRepo() {
@@ -42,21 +34,9 @@ public class PrestoQueryTester {
         return customerSpace;
     }
 
-    public void setupTestContext(CustomerSpace customerSpace, AttributeRepository attrRepo,
-            Map<String, String> tblPathMap) {
+    public void setupTestContext(CustomerSpace customerSpace, AttributeRepository attrRepo) {
         this.customerSpace = customerSpace;
         this.attrRepo = attrRepo;
-        this.tblPathMap = tblPathMap;
-
-        tblPathMap.forEach((tblName, path) -> {
-            prestoDbService.deleteTableIfExists(tblName);
-            if (path.endsWith(".parquet")) {
-                prestoDbService.createTableIfNotExists(tblName, path, DataUnit.DataFormat.PARQUET, null);
-            } else {
-                prestoDbService.createTableIfNotExists(tblName, path, DataUnit.DataFormat.AVRO);
-            }
-        });
-
     }
 
     public long getCountFromPresto(Query query) {

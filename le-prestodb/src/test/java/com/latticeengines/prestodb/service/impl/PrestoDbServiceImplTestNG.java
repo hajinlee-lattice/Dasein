@@ -67,9 +67,9 @@ public class PrestoDbServiceImplTestNG extends PrestoDbFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testConnection() {
+    public void testCrudTable() {
         String avroDir = "/tmp/prestoTest/" + leStack + "/input";
-        String tableName = "TestTable";
+        String tableName = "prestodb_test_" + leStack.replace("-", "_");
         try {
             prestoDbService.deleteTableIfExists(tableName);
             if (HdfsUtils.fileExists(yarnConfiguration, avroDir)) {
@@ -88,6 +88,9 @@ public class PrestoDbServiceImplTestNG extends PrestoDbFunctionalTestNGBase {
         Assert.assertTrue(prestoDbService.tableExists(tableName));
         List<Map<String, Object>> lst = jdbcTemplate.queryForList("SELECT * FROM " + tableName);
         Assert.assertEquals(lst.size(), 2);
+
+        List<String> tableNames = prestoDbService.getTablesStartsWith("prestodb_test");
+        Assert.assertTrue(tableNames.contains(tableName));
     }
 
     @Test(groups = "functional")
@@ -144,12 +147,13 @@ public class PrestoDbServiceImplTestNG extends PrestoDbFunctionalTestNGBase {
         PrestoDataUnit prestoDataUnit = prestoDbService.saveDataUnit(hdfsDataUnit);
         System.out.println(JsonUtils.pprint(prestoDataUnit));
         String clusterId = prestoConnectionService.getClusterId();
-        Assert.assertTrue(prestoDbService.tableExists(prestoDataUnit.getPrestoTableName(clusterId)));
-        Long cnt = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM " + tableName, Long.class);
+        String prestoTableName = prestoDataUnit.getPrestoTableName(clusterId);
+        Assert.assertTrue(prestoDbService.tableExists(prestoTableName));
+        Long cnt = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM " + prestoTableName, Long.class);
         Assert.assertEquals(cnt, prestoDataUnit.getCount());
 
         List<String> accountIds = jdbcTemplate.queryForList( //
-                "SELECT AccountId FROM " + tableName + " LIMIT 5", String.class);
+                "SELECT AccountId FROM " + prestoTableName + " LIMIT 5", String.class);
         for (String accountId: accountIds) {
             Assert.assertNotNull(accountId);
         }
@@ -158,7 +162,7 @@ public class PrestoDbServiceImplTestNG extends PrestoDbFunctionalTestNGBase {
             if ((DataUnit.DataFormat.PARQUET.equals(format) && enableParquetPartition) || //
                     (DataUnit.DataFormat.AVRO.equals(format) && enableAvroPartition)) {
                 Long partitionCnt = jdbcTemplate.queryForObject( //
-                        "SELECT COUNT(1) FROM " + tableName + " WHERE month(pk_date) = 10", Long.class);
+                        "SELECT COUNT(1) FROM " + prestoTableName + " WHERE month(pk_date) = 10", Long.class);
                 Assert.assertTrue(partitionCnt > 0);
             }
         }

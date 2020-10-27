@@ -99,6 +99,12 @@ public class AthenaServiceImpl implements AthenaService  {
     }
 
     @Override
+    public List<String> getTablesStartsWith(String tableNamePrefix) {
+        String stmt = AthenaUtils.getTableNamesStartsWith(database, tableNamePrefix);
+        return queryForList(stmt, String.class);
+    }
+
+    @Override
     public void createTableIfNotExists(String tableName, String s3Bucket, String s3Prefix, DataUnit.DataFormat format, //
                                        List<Pair<String, Class<?>>> partitionKeys) {
         String s3Protocol = Boolean.TRUE.equals(useEmr) ? "s3a://" : "s3n://";
@@ -380,7 +386,7 @@ public class AthenaServiceImpl implements AthenaService  {
             ColumnInfo columnInfo = columnInfoList.get(i);
             Object val = null;
             Datum datum = row.getData().get(i);
-            if (datum != null) {
+            if (datum != null && datum.getVarCharValue() != null) {
                 switch (columnInfo.getType()) {
                     case "varchar":
                         val = datum.getVarCharValue();

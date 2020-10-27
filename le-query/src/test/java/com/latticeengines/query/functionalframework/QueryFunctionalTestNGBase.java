@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -26,6 +27,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -41,6 +43,8 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.prestodb.exposed.service.AthenaService;
+import com.latticeengines.prestodb.exposed.service.PrestoConnectionService;
+import com.latticeengines.prestodb.exposed.service.PrestoDbService;
 import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -82,6 +86,12 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     @Inject
     private AthenaService athenaService;
+
+    @Inject
+    private PrestoConnectionService prestoConnectionService;
+
+    @Inject
+    private PrestoDbService prestoDbService;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -226,7 +236,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         customerSpace = attrRepo.getCustomerSpace();
     }
 
-    protected void initializeAttributeRepo(int version, boolean copyToHdfs, boolean registerAthena) {
+    protected void initializeAttributeRepo(int version, boolean copyToHdfs) {
         InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
                 String.valueOf(version), ATTR_REPO_S3_FILENAME);
         attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
@@ -240,14 +250,32 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
                     String tblName = QueryTestUtils.getServingStoreName(role, version);
                     tblPathMap.put(tblName, path);
                     attrRepo.changeServingStoreTableName(role, tblName);
-                    if (registerAthena) {
-                        if (!athenaService.tableExists(tblName)) {
-                            String s3Folder = path.substring( //
-                                    path.indexOf("/Tables/") + "/Tables/".length(), path.lastIndexOf("/"));
-                            s3Folder = "le-query/attrrepo/" + version + "/ParquetTables/" + s3Folder;
-                            String bucket = "latticeengines-test-artifacts";
-                            athenaService.createTableIfNotExists(tblName, bucket, s3Folder, DataUnit.DataFormat.PARQUET);
+                    if (prestoConnectionService.isPrestoDbAvailable()) {
+                        String lockName = "QueryTest_PrestoDB_" + tblName;
+                        try {
+                            LockManager.registerCrossDivisionLock(lockName);
+                            LockManager.acquireWriteLock(lockName, 10, TimeUnit.MINUTES);
+                            log.info("Won the distributed lock {}", lockName);
+                        } catch (Exception e) {
+                            log.warn("Error while acquiring zk lock {}", lockName, e);
                         }
+                        try {
+                            prestoDbService.deleteTableIfExists(tblName);
+                            if (path.endsWith(".parquet")) {
+                                prestoDbService.createTableIfNotExists(tblName, path, DataUnit.DataFormat.PARQUET, null);
+                            } else {
+                                prestoDbService.createTableIfNotExists(tblName, path, DataUnit.DataFormat.AVRO);
+                            }
+                        } finally {
+                            LockManager.releaseWriteLock(lockName);
+                        }
+                    }
+                    if (!athenaService.tableExists(tblName)) {
+                        String s3Folder = path.substring( //
+                                path.indexOf("/Tables/") + "/Tables/".length(), path.lastIndexOf("/"));
+                        s3Folder = "le-query/attrrepo/" + version + "/ParquetTables/" + s3Folder;
+                        String bucket = "latticeengines-test-artifacts";
+                        athenaService.createTableIfNotExists(tblName, bucket, s3Folder, DataUnit.DataFormat.PARQUET);
                     }
                 }
             }

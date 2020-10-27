@@ -66,6 +66,13 @@ public class PrestoDbServiceImpl implements PrestoDbService {
     }
 
     @Override
+    public List<String> getTablesStartsWith(String tableNamePrefix) {
+        JdbcTemplate jdbcTemplate = getJdbcTemplate();
+        String stmt = PrestoUtils.getTableNamesStartsWith("hive", "default", tableNamePrefix);
+        return jdbcTemplate.queryForList(stmt, String.class);
+    }
+
+    @Override
     public void deleteTableIfExists(String tableName) {
         String avscPath = getAvscPath(tableName);
         if (tableExists(tableName)) {

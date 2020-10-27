@@ -65,7 +65,7 @@ public interface RedshiftAndSparkQueryTester {
 
     @BeforeMethod(groups = "functional")
     default void beforeMethod(Method method, Object[] params) {
-        System.out.printf("\n*********** Running Test Method (Redshift-SparkSQL): %s, Params: %s **********%n",
+        System.out.printf("\n*********** Running Test Method (Redshift-SparkSQL): %s, Params: %s **********\n",
                 method.getName(), Arrays.deepToString(params));
     }
 
@@ -100,7 +100,7 @@ public interface RedshiftAndSparkQueryTester {
             }
         } finally {
             System.out.printf(
-                    "---------- Completed Test Method (Redshift-SparkSQL): %s, Params: %s, Time: %d ms ----------\n%n",
+                    "---------- Completed Test Method (Redshift-SparkSQL): %s, Params: %s, Time: %d ms ----------\n\n",
                     testResult.getMethod().getMethodName(), Arrays.deepToString(params), timeTaken);
             if (SPARK_BATCH_USER.equalsIgnoreCase(currUserContext) || StringUtils.isBlank(currUserContext)) {
                 // We Need to reset these counts only when SparkSQLTest is run. Because

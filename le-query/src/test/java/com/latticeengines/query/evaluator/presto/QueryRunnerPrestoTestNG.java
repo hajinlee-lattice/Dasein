@@ -36,7 +36,7 @@ public class QueryRunnerPrestoTestNG extends QueryRunnerTestNG implements Redshi
     @BeforeClass(groups = "functional")
     public void setupBase() {
         initializeAttributeRepo(3);
-        setupQueryTester(customerSpace, attrRepo, tblPathMap);
+        setupQueryTester(customerSpace, attrRepo);
     }
 
     @AfterClass(groups = "functional", alwaysRun = true)

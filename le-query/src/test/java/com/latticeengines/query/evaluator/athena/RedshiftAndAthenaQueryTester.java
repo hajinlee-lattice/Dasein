@@ -64,7 +64,7 @@ public interface RedshiftAndAthenaQueryTester {
     @BeforeMethod(groups = "functional")
     default void beforeMethod(Method method, Object[] params) {
         getLogger().info(
-                "\n*********** Running Test Method (Redshift-Athena): {}}, Params: {} **********%n",
+                "\n*********** Running Test Method (Redshift-Athena): {}}, Params: {} **********\n",
                 method.getName(), Arrays.deepToString(params));
     }
 
@@ -99,7 +99,7 @@ public interface RedshiftAndAthenaQueryTester {
             }
         } finally {
             getLogger().info(
-                    "---------- Completed Test Method (Redshift-Athena): {}, Params: {}, Time: {} ms ----------\n%n",
+                    "---------- Completed Test Method (Redshift-Athena): {}, Params: {}, Time: {} ms ----------\n\n",
                     testResult.getMethod().getMethodName(), Arrays.deepToString(params), timeTaken);
             if (ATHENA_USER.equalsIgnoreCase(currUserContext) || StringUtils.isBlank(currUserContext)) {
                 // We Need to reset these counts only when SparkSQLTest is run. Because

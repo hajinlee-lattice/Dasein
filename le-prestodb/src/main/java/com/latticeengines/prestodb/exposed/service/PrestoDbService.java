@@ -20,6 +20,8 @@ public interface PrestoDbService {
 
     void createTableIfNotExists(String tableName, String dataDir, DataUnit.DataFormat format, List<Pair<String, Class<?>>> partitionKeys);
 
+    List<String> getTablesStartsWith(String tableNamePrefix);
+
     PrestoDataUnit saveDataUnit(HdfsDataUnit hdfsDataUnit);
 
 }

@@ -28,6 +28,13 @@ public final class AthenaUtils {
         return String.format("DROP TABLE IF EXISTS %s", tableName);
     }
 
+    public static String getTableNamesStartsWith(String schema, String tableNamePrefix) {
+        String stmt = "SELECT table_name FROM information_schema.tables";
+        stmt += String.format("\nWHERE table_schema = '%s'", schema);
+        stmt += String.format("\nAND table_name like '%s%%'", tableNamePrefix.toLowerCase());
+        return stmt;
+    }
+
     public static List<String> getCreateAvroTableStmt(String tableName, Schema schema, //
                                                 List<Pair<String, Class<?>>> partitionKeys, //
                                                 String avroDir) {

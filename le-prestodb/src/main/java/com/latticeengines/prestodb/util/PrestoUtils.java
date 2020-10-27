@@ -35,6 +35,14 @@ public final class PrestoUtils {
         return String.format("DROP TABLE IF EXISTS %s", tableName);
     }
 
+    public static String getTableNamesStartsWith(String catalog, String schema, String tableNamePrefix) {
+        String stmt = "SELECT table_name FROM information_schema.tables";
+        stmt += String.format("\nWHERE table_catalog = '%s'", catalog);
+        stmt += String.format("\nAND table_schema = '%s'", schema);
+        stmt += String.format("\nAND table_name like '%s%%'", tableNamePrefix.toLowerCase());
+        return stmt;
+    }
+
     public static String getCreateAvroTableStmt(String tableName, List<Pair<String, Class<?>>> fields, //
                                                 List<Pair<String, Class<?>>> partitionKeys, //
                                                 String avroDir, String avscPath) {

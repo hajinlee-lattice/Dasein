@@ -8,4 +8,6 @@ public interface PrestoConnectionService {
 
     String getClusterId();
 
+    boolean isPrestoDbAvailable();
+
 }

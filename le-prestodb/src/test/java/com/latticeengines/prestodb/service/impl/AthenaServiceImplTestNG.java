@@ -97,6 +97,9 @@ public class AthenaServiceImplTestNG extends PrestoDbFunctionalTestNGBase {
         Flux<Map<String, Object>> flux = athenaService.queryFlux("SELECT * FROM " + tableName);
         List<Map<String, Object>> lst2 = flux.collectList().block();
         System.out.println(lst2);
+
+        List<String> tableNames = athenaService.getTablesStartsWith("athena_test");
+        Assert.assertTrue(tableNames.contains(tableName));
     }
 
     @Test(groups = "functional")
@@ -156,23 +159,24 @@ public class AthenaServiceImplTestNG extends PrestoDbFunctionalTestNGBase {
         System.out.println(JsonUtils.pprint(athenaDataUnit));
         Assert.assertNotNull(athenaDataUnit.getTenant());
         Assert.assertNotNull(athenaDataUnit.getName());
-        Assert.assertTrue(athenaService.tableExists(tableName));
-        Long cnt = athenaService.queryObject("SELECT COUNT(1) FROM " + tableName, Long.class);
+        String athenaTableName = athenaDataUnit.getAthenaTable();
+        Assert.assertTrue(athenaService.tableExists(athenaTableName));
+        Long cnt = athenaService.queryObject("SELECT COUNT(1) FROM " + athenaTableName, Long.class);
         Assert.assertEquals(cnt, athenaDataUnit.getCount());
 
         List<String> accountIds = athenaService.queryForList( //
-                "SELECT AccountId FROM " + tableName + " LIMIT 5", String.class);
+                "SELECT AccountId FROM " + athenaTableName + " LIMIT 5", String.class);
         for (String accountId: accountIds) {
             Assert.assertNotNull(accountId);
         }
 
         if (CollectionUtils.isNotEmpty(partitionKeys)) {
             Long partitionCnt = athenaService.queryObject( //
-                    "SELECT COUNT(1) FROM " + tableName + " WHERE month(pk_date) = 10", Long.class);
+                    "SELECT COUNT(1) FROM " + athenaTableName + " WHERE month(pk_date) = 10", Long.class);
             Assert.assertTrue(partitionCnt > 0);
         }
 
-        athenaService.deleteTableIfExists(tableName);
+        athenaService.deleteTableIfExists(athenaTableName);
         if (s3Service.objectExist(s3Bucket, s3Root + "/")) {
             s3Service.cleanupDirectory(s3Bucket, s3Root);
         }

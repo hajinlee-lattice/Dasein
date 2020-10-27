@@ -5,6 +5,7 @@ import java.beans.PropertyVetoException;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,6 +83,10 @@ public class PrestoConnectionServiceImpl implements PrestoConnectionService {
         } else {
             return "presto-localhost";
         }
+    }
+
+    public boolean isPrestoDbAvailable() {
+        return Boolean.TRUE.equals(useEmr) || StringUtils.isNotBlank(System.getenv("PRESTO_HOME"));
     }
 
 }
