@@ -235,6 +235,25 @@ public final class AvroUtils {
         return AvroUtils.getSchema(config, new Path(file));
     }
 
+    public static String getFilePathFromGlob(Configuration config, String path) {
+        List<String> matches;
+        try {
+            matches = HdfsUtils.getFilesByGlob(config, path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (matches.size() == 0) {
+            throw new RuntimeException(String.format("No such file could be found: %s", path));
+        }
+        String file = matches.get(0);
+        if (!path.startsWith("/")) {
+            String rootFolder = file.substring(0, file.indexOf("/", 1));
+            String server = path.substring(0, path.indexOf(rootFolder));
+            return server + file;
+        }
+        return file;
+    }
+
     public static List<GenericRecord> getDataFromGlob(Configuration configuration, String path) {
         try {
             List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);

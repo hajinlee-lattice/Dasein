@@ -62,9 +62,12 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     @Inject
     private EventQueryService eventQueryService;
 
+    private String sqlUser;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestData(3);
+        sqlUser = SEGMENT_USER;
     }
 
     @DataProvider(name = "userContexts", parallel = false)
@@ -109,7 +112,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setTargetProductIds(Collections.singletonList("o13brsbfF10fllM6VUZRxMO7wfo5I7Ks"));
-        return eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+        return eventQueryService.getScoringCount(frontEndQuery, sqlUser, DataCollection.Version.Blue);
     }
 
     private Restriction getTxnRestriction(Bucket.Transaction txn) {
@@ -275,7 +278,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @DataProvider(name = "timefilterProvider")
     protected Object[][] timefilterProvider() {
-        return getTimeFilterDataProvider(SEGMENT_USER);
+        return getTimeFilterDataProvider(sqlUser);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")

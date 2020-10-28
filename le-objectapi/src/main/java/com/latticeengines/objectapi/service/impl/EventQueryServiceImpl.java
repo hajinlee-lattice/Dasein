@@ -63,33 +63,33 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
     }
 
     @Override
-    public DataPage getScoringTuples(EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Scoring, version);
+    public DataPage getScoringTuples(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version) {
+        return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Scoring, sqlUser, version);
     }
 
     @Override
-    public DataPage getTrainingTuples(EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Training, version);
+    public DataPage getTrainingTuples(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version) {
+        return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Training, sqlUser, version);
     }
 
     @Override
-    public DataPage getEventTuples(EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event, version);
+    public DataPage getEventTuples(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version) {
+        return getData(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event, sqlUser, version);
     }
 
     @Override
-    public long getScoringCount(EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Scoring, version);
+    public long getScoringCount(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version) {
+        return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Scoring, sqlUser, version);
     }
 
     @Override
-    public long getTrainingCount(EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Training, version);
+    public long getTrainingCount(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version) {
+        return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Training, sqlUser, version);
     }
 
     @Override
-    public long getEventCount(EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event, version);
+    public long getEventCount(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version) {
+        return getCount(MultiTenantContext.getCustomerSpace(), frontEndQuery, EventType.Event, sqlUser, version);
     }
 
     /*
@@ -99,38 +99,38 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
      * SEGMENT_USER queries. So, changed it back to BATCH_USER
      */
     private long getCount(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
-            DataCollection.Version version) {
+            String sqlUser, DataCollection.Version version) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            Query query = getQuery(attrRepo, frontEndQuery, eventType);
-            return queryEvaluatorService.getCount(attrRepo, query, getBatchUser());
+            Query query = getQuery(attrRepo, frontEndQuery, eventType, sqlUser);
+            return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
     private DataPage getData(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
-            DataCollection.Version version) {
+            String sqlUser, DataCollection.Version version) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
-            Query query = getQuery(attrRepo, frontEndQuery, eventType);
+            Query query = getQuery(attrRepo, frontEndQuery, eventType, sqlUser);
             if (queryDiagnostics.getQueryLoggingConfig()) {
                 log.info("getData using query: {}",
-                        getQueryStr(frontEndQuery, eventType, version).replaceAll("\\r\\n|\\r|\\n", " "));
+                        getQueryStr(frontEndQuery, eventType, sqlUser, version).replaceAll("\\r\\n|\\r|\\n", " "));
             }
-            return queryEvaluatorService.getData(attrRepo, query, getBatchUser());
+            return queryEvaluatorService.getData(attrRepo, query, sqlUser);
         } catch (Exception e) {
             throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
-    private Query getQuery(AttributeRepository attrRepo, EventFrontEndQuery frontEndQuery, EventType eventType) {
+    private Query getQuery(AttributeRepository attrRepo, EventFrontEndQuery frontEndQuery, EventType eventType, String sqlUser) {
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService, //
                 frontEndQuery.getSegmentQuery());
         ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                attrRepo, getBatchUser(), timeTranslator, tempListService);
+                attrRepo, sqlUser, timeTranslator, tempListService);
         if (frontEndQuery.getSegmentQuery() != null) {
             if (frontEndQuery.getMainEntity() == null) {
                 frontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -151,7 +151,7 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        Query query = getQuery(attrRepo, frontEndQuery, eventType);
+        Query query = getQuery(attrRepo, frontEndQuery, eventType, sqlUser);
         try {
             return queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser);
         } catch (Exception e) {
@@ -165,8 +165,8 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
     }
 
     @Override
-    public String getQueryStr(EventFrontEndQuery frontEndQuery, EventType eventType, DataCollection.Version version) {
-        return getQueryStr(frontEndQuery, eventType, version, getBatchUser());
+    public String getQueryStr(EventFrontEndQuery frontEndQuery, EventType eventType, String sqlUser, DataCollection.Version version) {
+        return getQueryStr(frontEndQuery, eventType, version, sqlUser);
     }
 
 }

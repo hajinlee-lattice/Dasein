@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -26,6 +29,8 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/periodtransactions")
 public class PeriodTransactionResource {
 
+    private static final Logger log = LoggerFactory.getLogger(PeriodTransactionResource.class);
+
     @Inject
     private PurchaseHistoryService purchaseHistoryService;
 
@@ -36,6 +41,10 @@ public class PeriodTransactionResource {
             @PathVariable String accountId, //
             @RequestParam(value = "periodname", required = false, defaultValue = "Month") String periodName, //
             @RequestParam(value = "producttype", required = false, defaultValue = "Spending") ProductType productType) {
+        if (!"Month".equalsIgnoreCase(periodName) || !ProductType.Spending.equals(productType)) {
+            log.warn("Invalid period transaction query, customer={}, accountId={}, periodName={} and productType={}", //
+                    CustomerSpace.shortenCustomerSpace(customerSpace), accountId, periodName, productType);
+        }
         return purchaseHistoryService.getPeriodTransactionsByAccountId(accountId, periodName, productType);
     }
 
@@ -53,6 +62,10 @@ public class PeriodTransactionResource {
             @PathVariable String spendAnalyticsSegment, //
             @RequestParam(value = "periodname", required = false, defaultValue = "Month") String periodName, //
             @RequestParam(value = "producttype", required = false, defaultValue = "Spending") ProductType productType) {
+        if (!"Month".equalsIgnoreCase(periodName) || !ProductType.Spending.equals(productType)) {
+            log.warn("Invalid period transaction query, customer={}, segment={}, periodName={} and productType={}", //
+                    CustomerSpace.shortenCustomerSpace(customerSpace), spendAnalyticsSegment, periodName, productType);
+        }
         return purchaseHistoryService.getPeriodTransactionsForSegmentAccounts(spendAnalyticsSegment, periodName,
                 productType);
     }

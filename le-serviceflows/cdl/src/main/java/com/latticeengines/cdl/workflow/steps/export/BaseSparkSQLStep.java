@@ -169,7 +169,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
         frontEndQuery.setPageFilter(null);
         DataCollection.Version version = parseDataCollectionVersion(configuration);
-        String sql = eventQueryService.getQueryStr(frontEndQuery, eventType, version);
+        String sql = eventQueryService.getQueryStr(frontEndQuery, eventType, SQL_USER, version);
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {

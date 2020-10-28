@@ -79,28 +79,37 @@ public final class TempListUtils {
         List<List<Object>> lst = new ArrayList<>();
         vals.forEach(val -> {
             if (val != null) {
-                Object casted;
-                if (String.class.equals(fieldClz)) {
-                    casted = ((String) val).toLowerCase();
-                } else if (fieldClz.equals(val.getClass())) {
-                    casted = val;
-                } else if (Integer.class.equals(fieldClz)) {
-                    casted = Integer.valueOf(String.valueOf(val));
-                } else if (Long.class.equals(fieldClz)) {
-                    casted = Long.valueOf(String.valueOf(val));
-                } else if (Float.class.equals(fieldClz)) {
-                    casted = Float.valueOf(String.valueOf(val));
-                } else if (Double.class.equals(fieldClz)) {
-                    casted = Double.valueOf(String.valueOf(val));
-                } else if (Boolean.class.equals(fieldClz)) {
-                    casted = Boolean.valueOf(String.valueOf(val));
-                } else {
-                    throw new IllegalArgumentException("Cannot insert " + val + " as " + fieldClz);
-                }
+                Object casted = castVal(fieldClz, val);
                 lst.add(Collections.singletonList(casted));
             }
         });
         return lst;
+    }
+
+    public static Object castVal(Class<?> fieldClz, Object val) {
+        if (val != null) {
+            Object casted;
+            if (String.class.equals(fieldClz)) {
+                casted = ((String) val).toLowerCase();
+            } else if (fieldClz.equals(val.getClass())) {
+                casted = val;
+            } else if (Integer.class.equals(fieldClz)) {
+                casted = Integer.valueOf(String.valueOf(val));
+            } else if (Long.class.equals(fieldClz)) {
+                casted = Long.valueOf(String.valueOf(val));
+            } else if (Float.class.equals(fieldClz)) {
+                casted = Float.valueOf(String.valueOf(val));
+            } else if (Double.class.equals(fieldClz)) {
+                casted = Double.valueOf(String.valueOf(val));
+            } else if (Boolean.class.equals(fieldClz)) {
+                casted = Boolean.valueOf(String.valueOf(val));
+            } else {
+                throw new IllegalArgumentException("Cannot insert " + val + " as " + fieldClz);
+            }
+            return casted;
+        } else {
+            return null;
+        }
     }
 
 }

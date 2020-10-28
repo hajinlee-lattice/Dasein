@@ -1,5 +1,7 @@
 package com.latticeengines.objectapi.service.impl;
 
+import static com.latticeengines.query.exposed.evaluator.QueryEvaluator.SCORE;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,7 +49,6 @@ import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.RatingQueryTranslator;
-import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 
@@ -78,7 +79,6 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
                     attrRepo, sqlUser, timeTranslator, tempListService);
             Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery);
             preprocess(map, attrRepo, timeTranslator);
-            ConcurrentMap<String, ConcreteRestriction> tempLists = new ConcurrentHashMap<>();
             Query query = queryTranslator.translateRatingQuery(frontEndQuery, true);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
@@ -161,15 +161,14 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             String sqlUser) {
         try {
             CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-            ConcurrentMap<String, ConcreteRestriction> tempLists = new ConcurrentHashMap<>();
-            Query query = ratingCountQuery(customerSpace, frontEndQuery, version, sqlUser, tempLists);
+            Query query = ratingCountQuery(customerSpace, frontEndQuery, version, sqlUser);
             List<Map<String, Object>> data = queryEvaluatorService
                     .getData(customerSpace.toString(), version, query, sqlUser).getData();
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
             TreeMap<String, Long> counts = new TreeMap<>();
             data.forEach(map -> {
-                String key = lblMap.get(map.get(QueryEvaluator.SCORE));
+                String key = lblMap.get(map.get(SCORE));
                 if (!counts.containsKey(key)) {
                     counts.put(key, 0L);
                 }
@@ -193,7 +192,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                     queryEvaluatorService);
             ConcurrentMap<String, ConcreteRestriction> tempLists = new ConcurrentHashMap<>();
-            Query query = ratingCountQuery(customerSpace, frontEndQuery, version, sqlUser, tempLists);
+            Query query = ratingCountQuery(customerSpace, frontEndQuery, version, sqlUser);
             return queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser);
         } catch (Exception e) {
             String msg = "Failed to execute query " + JsonUtils.serialize(frontEndQuery) //
@@ -206,8 +205,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
     }
 
     private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery,
-            DataCollection.Version version, String sqlUser,
-            final ConcurrentMap<String, ConcreteRestriction> tempLists) {
+            DataCollection.Version version, String sqlUser) {
         List<RatingModel> models = frontEndQuery.getRatingModels();
         if (models != null && models.size() == 1) {
             Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
@@ -237,7 +235,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
                 Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
-                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true);
+                        ruleBasedModel.getRatingRule(), SCORE, true);
                 AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
                 query.setLookups(Arrays.asList(idLookup, ruleLookup));
                 GroupBy groupBy = new GroupBy();
@@ -245,7 +243,7 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
                 query.setGroupBy(groupBy);
 
                 SubQuery subQuery = new SubQuery(query, "q");
-                SubQueryAttrLookup subQueryAttrLookup = new SubQueryAttrLookup(subQuery, QueryEvaluator.SCORE);
+                SubQueryAttrLookup subQueryAttrLookup = new SubQueryAttrLookup(subQuery, SCORE);
                 return Query.builder() //
                         .select(subQueryAttrLookup, AggregateLookup.count().as("Count")) //
                         .from(subQuery) //

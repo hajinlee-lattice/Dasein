@@ -1,6 +1,7 @@
 package com.latticeengines.prestodb.service.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
@@ -195,7 +196,21 @@ public class AthenaServiceImpl implements AthenaService  {
         } else {
             avroGlob = PathUtils.toParquetOrAvroDir(avroDir) + "/*.avro";
         }
-        Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
+        // find a specific file from glob
+        String s3Path = AvroUtils.getFilePathFromGlob(yarnConfiguration, avroGlob);
+        s3Path = s3Path //
+                .replace("s3://", "") //
+                .replace("s3a://", "") //
+                .replace("s3n://", "");
+        String bucket = s3Path.substring(0, s3Path.indexOf("/"));
+        String key = s3Path.substring(s3Path.indexOf("/") + 1);
+        InputStream is = s3Service.readObjectAsStream(bucket, key);
+        Schema schema;
+        try {
+            schema = AvroUtils.readSchemaFromInputStream(is);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to parse avro schema from " + s3Path, e);
+        }
         List<Pair<String, Class<?>>> fields = AvroUtils.parseSchema(schema);
         schema = AvroUtils.constructSchema(schema.getName(), fields);
         List<String> createStmts = AthenaUtils.getCreateAvroTableStmt(tableName, schema, partitionKeys, //

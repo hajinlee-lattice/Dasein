@@ -18,8 +18,10 @@ public class AthenaQueryServiceImpl implements AthenaQueryService {
     public long getCount(SQLQuery<?> sqlQuery) {
         sqlQuery.setUseLiterals(true);
         String sql = sqlQuery.getSQL().getSQL();
-        sql = sql.substring(sql.indexOf("from"));
-        sql = "select count(1) " + sql;
+        if (sql.startsWith("select")) {
+            sql = sql.substring(sql.indexOf("from"));
+            sql = "select count(1) " + sql;
+        }
         return athenaService.queryObject(sql, Long.class);
     }
 

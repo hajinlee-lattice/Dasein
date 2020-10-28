@@ -69,9 +69,13 @@ public class EntityResource {
     @ApiOperation(value = "Retrieve the SQL for the specified query")
     public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,
+            @RequestParam(value = "sqlUser", required = false) String sqlUser,
             @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation,
             @RequestParam(value = "isCountQuery", required = false, defaultValue = "false") Boolean isCountQuery) {
-        return entityQueryService.getQueryStr(frontEndQuery, version, BATCH_USER, isCountQuery);
+        if (StringUtils.isBlank(sqlUser)) {
+            sqlUser = SEGMENT_USER;
+        }
+        return entityQueryService.getQueryStr(frontEndQuery, version, sqlUser, isCountQuery);
     }
 
     @PostMapping("/ratingcount")

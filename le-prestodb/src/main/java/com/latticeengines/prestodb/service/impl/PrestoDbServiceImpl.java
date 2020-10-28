@@ -204,8 +204,9 @@ public class PrestoDbServiceImpl implements PrestoDbService {
         if (hdfsDataUnit.getDataFormat() == null) {
             hdfsDataUnit.setDataFormat(DataUnit.DataFormat.AVRO);
         }
+        String dirPath = PathUtils.toParquetOrAvroDir(path);
         try {
-            if (HdfsUtils.fileExists(yarnConfiguration, path)) {
+            if (HdfsUtils.fileExists(yarnConfiguration, dirPath)) {
                 List<Pair<String, Class<?>>> partitionKeys = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(hdfsDataUnit.getTypedPartitionKeys())) {
                     hdfsDataUnit.getTypedPartitionKeys().forEach(pair -> {
@@ -231,12 +232,12 @@ public class PrestoDbServiceImpl implements PrestoDbService {
                     hdfsDataUnit.getPartitionKeys().forEach(pk -> partitionKeys.add(Pair.of(pk, String.class)));
                 }
                 deleteTableIfExists(tableName);
-                createTableIfNotExists(tableName, path, hdfsDataUnit.getDataFormat(), partitionKeys);
+                createTableIfNotExists(tableName, dirPath, hdfsDataUnit.getDataFormat(), partitionKeys);
             } else {
-                throw new IOException("Failed to create presto table, because cannot find hdfs path " + path);
+                throw new IOException("Failed to create presto table, because cannot find hdfs path " + dirPath);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create presto table by hdfs path: " + path, e);
+            throw new RuntimeException("Failed to create presto table by hdfs path: " + dirPath, e);
         }
         PrestoDataUnit prestoDataUnit = new PrestoDataUnit();
         prestoDataUnit.setTenant(hdfsDataUnit.getTenant());
