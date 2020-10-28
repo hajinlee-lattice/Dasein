@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
@@ -56,6 +57,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
 
     private String sourceId;
+    private String fileImportId;
 
     @BeforeClass(groups = "deployment-dcp")
     public void setup() throws Exception {
@@ -105,7 +107,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(getSource.getSourceId(), source.getSourceId());
         Assert.assertEquals(getSource.getImportStatus(), DataFeedTask.S3ImportStatus.Active);
 
-        List<Source> allSources = testSourceProxy.getSourcesByProject(projectDetail.getProjectId());
+        List<Source> allSources = testSourceProxy.getSourcesByProject(projectId);
         Assert.assertNotNull(allSources);
         Assert.assertEquals(allSources.size(), 2);
         Set<String> allIds = new HashSet<>(Arrays.asList(source.getSourceId(),  source2.getSourceId()));
@@ -116,7 +118,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         testSourceProxy.deleteSourceById(source.getSourceId());
 
-        allSources = testSourceProxy.getSourcesByProject(projectDetail.getProjectId());
+        allSources = testSourceProxy.getSourcesByProject(projectId);
         Assert.assertEquals(allSources.size(), 1);
         Assert.assertEquals(allSources.get(0).getSourceId(), source2.getSourceId());
         sourceId = source2.getSourceId();
@@ -175,5 +177,111 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
                     updatedDefinitions.stream().collect(Collectors.toMap(FieldDefinition::getFieldName, e -> e));
             definitions.forEach(e -> Assert.assertNotNull(nameToFieldDefinition.get(e.getFieldName())));
         }
+    }
+
+    @Test(groups = "deployment-dcp")
+    public void testCreateSourceFromFile() {
+        // create project
+        ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId("testProject_2",
+                Project.ProjectType.Type1, null);
+        Assert.assertNotNull(projectDetail);
+        String projectId = projectDetail.getProjectId();
+
+        // upload test file; get fieldDefinitionsRecord for test file
+        Resource csvResource = new MultipartFileResource(testArtifactService.readTestArtifactAsStream(TEST_DATA_DIR,
+                TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE), TEST_ACCOUNT_DATA_FILE);
+        SourceFileInfo testSourceFile = fileUploadProxy.uploadFile(TEST_ACCOUNT_DATA_FILE, csvResource);
+        fileImportId = testSourceFile.getFileImportId();
+
+        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
+                TEST_TEMPLATE_NAME);
+        FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
+
+        // create source
+        SourceRequest sourceRequest = new SourceRequest();
+        sourceRequest.setDisplayName("testSource");
+        sourceRequest.setProjectId(projectId);
+        sourceRequest.setFileImportId(fileImportId);
+        sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
+        Source source = testSourceProxy.createSource(sourceRequest);
+        sourceId = source.getSourceId();
+
+        Assert.assertNotNull(source);
+        Assert.assertEquals(source.getImportStatus(), DataFeedTask.S3ImportStatus.Active);
+        Assert.assertFalse(StringUtils.isBlank(sourceId));
+        Assert.assertFalse(StringUtils.isBlank(source.getDropFullPath()));
+
+        // verify source retrieval from project
+        List<Source> allSources = testSourceProxy.getSourcesByProject(projectId);
+        Assert.assertNotNull(allSources);
+        Assert.assertEquals(allSources.size(), 1);
+
+        Source retrieved = allSources.get(0);
+        Assert.assertEquals(retrieved.getSourceId(), sourceId);
+        Assert.assertFalse(StringUtils.isEmpty(retrieved.getDropFullPath()));
+
+        testSourceProxy.deleteSourceById(sourceId);
+    }
+
+    @Test(groups = "deployment-dcp")
+    public void testUpdateSource() {
+        // fetch from previous project/source
+        FetchFieldDefinitionsResponse fetchResponse = testSourceProxy.getSourceMappings(sourceId,
+                EntityType.Accounts.name(),
+                fileImportId);
+        Assert.assertTrue(MapUtils.isNotEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
+
+        // validate (no change); assert PASS
+        ValidateFieldDefinitionsRequest validateRequest = new ValidateFieldDefinitionsRequest();
+        validateRequest.setCurrentFieldDefinitionsRecord(fetchResponse.getCurrentFieldDefinitionsRecord());
+        validateRequest.setExistingFieldDefinitionsMap(fetchResponse.getExistingFieldDefinitionsMap());
+        validateRequest.setAutodetectionResultsMap(fetchResponse.getAutodetectionResultsMap());
+        validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
+        ValidateFieldDefinitionsResponse response =
+                testSourceProxy.validateSourceMappings(fileImportId,
+                        null, validateRequest);
+        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.PASS);
+
+        // make INVALID change to FieldDefinitionsRecord
+        FieldDefinitionsRecord record = validateRequest.getCurrentFieldDefinitionsRecord();
+        FieldDefinition fd = record.getFieldDefinition("companyInformation","CompanyName");
+        Assert.assertNotNull(fd);
+        fd.setFieldType(UserDefinedType.BOOLEAN);
+
+        // updateSource with invalid FieldDefinitionsRecord, new displayName
+        UpdateSourceRequest updateSourceRequest = new UpdateSourceRequest();
+        updateSourceRequest.setDisplayName("updatedSource");
+        updateSourceRequest.setFieldDefinitionsRecord(record);
+        updateSourceRequest.setFileImportId(fileImportId);
+        updateSourceRequest.setSourceId(sourceId);
+        Source updatedSource = testSourceProxy.updateSource(updateSourceRequest);
+
+        Assert.assertNotNull(updatedSource);
+        Assert.assertEquals(updatedSource.getSourceDisplayName(), "updatedSource");
+
+        // fetch updatedSource; assert FieldDefinitionsRecord changes persist
+        fetchResponse = testSourceProxy.getSourceMappings(sourceId,
+                EntityType.Accounts.name(),
+                fileImportId);
+        fd = fetchResponse.getCurrentFieldDefinitionsRecord().getFieldDefinition(
+                "companyInformation", "CompanyName");
+
+        Assert.assertTrue(MapUtils.isNotEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
+        Assert.assertEquals(fd.getFieldType(), UserDefinedType.BOOLEAN);
+
+        // validate updatedSource (invalid change); assert ERROR
+        validateRequest = new ValidateFieldDefinitionsRequest();
+        validateRequest.setCurrentFieldDefinitionsRecord(fetchResponse.getCurrentFieldDefinitionsRecord());
+        validateRequest.setExistingFieldDefinitionsMap(fetchResponse.getExistingFieldDefinitionsMap());
+        validateRequest.setAutodetectionResultsMap(fetchResponse.getAutodetectionResultsMap());
+        validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
+
+        // TODO: Why is EntityType null in the other calls to validate?
+        response = testSourceProxy.validateSourceMappings(fileImportId,
+                EntityType.Accounts.name(), validateRequest);
+        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
+
+        // assert the warning is for the field that was changed
+        // ...
     }
 }
