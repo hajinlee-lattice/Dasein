@@ -264,8 +264,8 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
                 cmList = servingStoreService.getContactMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
                         attributeSetName, null);
             } else {
-                cmList = servingStoreService.getAccountMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
-                        attributeSetName, null);
+                cmList = servingStoreService.getEntitiesMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
+                        Collections.singletonList(BusinessEntity.Account), attributeSetName, null);
             }
             if (CollectionUtils.isNotEmpty(cmList)) {
                 cms = Flux.fromIterable(cmList).filter(

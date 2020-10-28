@@ -47,6 +47,9 @@ public interface ServingStoreService {
     List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group, String attributeSetName,
                                             DataCollection.Version version);
 
+    List<ColumnMetadata> getEntitiesMetadata(String customerSpace, ColumnSelection.Predefined group, List<BusinessEntity> entities,
+                                             String attributeSetName, DataCollection.Version version);
+
     Map<String, Boolean> getAttributesUsage(String customerSpace, BusinessEntity entity, Set<String> attributes,
             ColumnSelection.Predefined group, String attributeSetName, DataCollection.Version version);
     // ========== END: Get Metadata Not From Cache ==========

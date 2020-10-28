@@ -132,10 +132,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
             exportColumnMetadataList.addAll(contactAttributesMap.values());
         }
         exportColumnMetadataList.addAll(accountAttributesMap.values());
-        exportColumnMetadataList
-                .addAll(getServingMetadata(customerSpace,
-                        Arrays.asList(BusinessEntity.Rating, BusinessEntity.PurchaseHistory,
-                                BusinessEntity.CuratedAccount),
-                        channelConfig.getAttributeSetName()).collect(Collectors.toList()).block());
+        List<BusinessEntity> exportList = BusinessEntity.EXPORT_ACCOUNT_ENTITIES.stream().filter(entity -> !BusinessEntity.Account.equals(entity)).collect(Collectors.toList());
+        exportColumnMetadataList.addAll(getServingMetadata(customerSpace, exportList, channelConfig.getAttributeSetName()).collect(Collectors.toList()).block());
     }
 }
