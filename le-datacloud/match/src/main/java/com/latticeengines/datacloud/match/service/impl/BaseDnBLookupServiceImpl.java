@@ -85,7 +85,6 @@ public abstract class BaseDnBLookupServiceImpl<T> {
                 log.info("Submitting request {} with token {}", url, token);
             }
             String response = sendRequest(url, entity, apiType);
-            log.info(response);
             parseResponse(response, context, apiType);
         } catch (Exception ex) {
             log.error("Exception caught: " + ex);

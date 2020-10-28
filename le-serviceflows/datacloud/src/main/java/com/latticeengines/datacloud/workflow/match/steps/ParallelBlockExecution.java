@@ -114,7 +114,10 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
     private Random random = new Random(System.currentTimeMillis());
 
-    private boolean success = true;
+    // Continuously AND blocks: start with true in both
+    private boolean allSuccess = true;
+    private boolean allFailures = true;
+
     private List<String> failedApps = new ArrayList<>();
 
     @Override
@@ -160,9 +163,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 SleepUtils.sleep(10000L);
             }
 
-            if (!success) {
-                throw new LedpException(LedpCode.LEDP_00008, new String[] { failedApps.toString() });
-            }
             finalizeMatch();
         } catch (Exception e) {
             failTheWorkflowWithErrorMessage(e.getMessage(), e);
@@ -233,8 +233,15 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void finalizeMatch() {
+        if (allFailures) {
+            throw new LedpException(LedpCode.LEDP_00008, new String[] { failedApps.toString() });
+        }
+
         try {
-            matchCommandService.update(rootOperationUid).status(MatchStatus.FINISHING).progress(0.98f).commit();
+            matchCommandService.update(rootOperationUid)
+                    .status(MatchStatus.FINISHING)
+                    .progress(0.98f)
+                    .commit();
 
             long startTime = matchOutput.getReceivedAt().getTime();
             matchOutput.getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
@@ -307,7 +314,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     .rowsMatched(count.intValue()) //
                     .newEntityCounts(outputNewEntityCnts) //
                     .matchResults(entityMatchResultMap) //
-                    .status(MatchStatus.FINISHED) //
+                    .status(allSuccess ? MatchStatus.FINISHED : MatchStatus.PARTIAL_SUCCESS) //
                     .progress(1f) //
                     .commit();
             setupErrorExport();
@@ -433,10 +440,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     mergeBlockCandidateResult(appId);
                     mergeBlockUsageResult(appId);
                     matchCommandService.updateBlock(blockUid).status(state).progress(1f).commit();
+                    allFailures = false;
                 } else {
                     log.error("Unknown teminal status " + status + " for Application [" + appId
                             + "]. Treat it as FAILED.");
-                    handleFailedBlock(MatchStatus.FAILED, report);
+                    logFailedBlock(MatchStatus.FAILED, report);
                 }
 
             }
@@ -472,7 +480,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             log.warn(errorMsg + ". Failing the block");
             MatchStatus terminalStatus = FinalApplicationStatus.FAILED.equals(status) ? MatchStatus.FAILED
                     : MatchStatus.ABORTED;
-            handleFailedBlock(terminalStatus, report);
+            logFailedBlock(terminalStatus, report);
+            allSuccess = false;
         }
     }
 
@@ -496,7 +505,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         return matchCommandService.blockIsRetriable(blockUid);
     }
 
-    private void handleFailedBlock(MatchStatus terminalStatus, ApplicationReport failedReport) {
+    private void logFailedBlock(MatchStatus terminalStatus, ApplicationReport failedReport) {
         ApplicationId failedAppId = failedReport.getApplicationId();
         String blockOperationUid = blockUuidMap.get(failedAppId.toString());
         String blockErrorFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid)
@@ -524,14 +533,17 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             log.error("Failed to read the error for matcher " + blockOperationUid + " in application " + failedAppId
                     + " : " + e.getMessage());
         }
-        matchCommandService.update(rootOperationUid) //
-                .resultLocation(avroDir)
-                .status(terminalStatus) //
-                .errorMessage(errorMsg) //
-                .commit();
 
-        // Wait until end to fail workflow; don't know if entire job will fail or only this block
-        success = false;
+        if (terminalStatus == MatchStatus.ABORTED) {
+            matchCommandService.update(rootOperationUid) //
+                    .resultLocation(avroDir)
+                    .status(terminalStatus) //
+                    .errorMessage(errorMsg) //
+                    .commit();
+
+            throw new LedpException(LedpCode.LEDP_00008, new String[] { errorMsg });
+        }
+
         failedApps.add(failedAppId.toString());
     }
 

@@ -531,7 +531,7 @@ public class ProcessorContext {
             outputSchema = appendCandidateSchema(outputSchema);
 
             // Need to pipe D+ error codes out of core; should be removed from most CSV files at the end
-            outputSchema = appendErrorSchema(outputSchema);
+            outputSchema = appendDcpErrorSchema(outputSchema);
         }
 
         disableDunsValidation = originalInput.isDisableDunsValidation();
@@ -574,6 +574,14 @@ public class ProcessorContext {
     }
 
     Schema appendErrorSchema(Schema schema) {
+        Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
+        fieldMap.put(ENTITY_MATCH_ERROR_FIELD, String.class);
+        Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
+        Schema errorSchema = AvroUtils.constructSchemaWithProperties(schema.getName(), fieldMap, propertiesMap);
+        return (Schema) AvroUtils.combineSchemas(schema, errorSchema)[0];
+    }
+
+    Schema appendDcpErrorSchema(Schema schema) {
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
         fieldMap.put(ENTITY_MATCH_ERROR_FIELD, String.class);
         fieldMap.put(ENTITY_MATCH_ERROR_CODE, String.class);

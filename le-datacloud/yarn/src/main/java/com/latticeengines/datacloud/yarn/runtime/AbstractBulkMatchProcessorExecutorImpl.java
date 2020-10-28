@@ -273,7 +273,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     private void writeDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords)
             throws IOException {
-        // TODO: write error records
         List<GenericRecord> records = new ArrayList<>();
         for (OutputRecord outputRecord : outputRecords) {
             List<List<Object>> data = new LinkedList<>();
@@ -577,7 +576,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
             List<Object> allValues = new ArrayList<>(outputRecord.getInput());
             allValues.add(StringUtils.join(outputRecord.getErrorMessages(), "|"));
-            allValues.add(StringUtils.join(outputRecord.getErrorCodes(), "|"));
             GenericRecordBuilder builder = new GenericRecordBuilder(errorSchema);
             List<Schema.Field> fields = errorSchema.getFields();
             buildAvroRecords(allValues, builder, fields);

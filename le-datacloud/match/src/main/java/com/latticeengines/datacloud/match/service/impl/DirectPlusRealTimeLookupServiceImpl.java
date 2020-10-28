@@ -122,10 +122,8 @@ public class DirectPlusRealTimeLookupServiceImpl extends BaseDnBLookupServiceImp
 
             context.setRawError(errorCode);
         } else if (ex instanceof LedpException) {
-            log.error("Base: " + ex.getCause());
             if (ex.getCause() instanceof HttpClientErrorException) {
                 String response = ((HttpClientErrorException) ex.getCause()).getResponseBodyAsString();
-                log.error("Body: " + response);
                 String errorCode = (String) retrieveJsonValueFromResponse(getErrorCodePath(), response, false);
                 context.setRawError(errorCode);
             }
