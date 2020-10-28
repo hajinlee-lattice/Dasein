@@ -252,7 +252,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         postKryo("upsertTable", url, null, null);
-        log.info("Evict attr repo cache for inactive version " + version);
         evictAttrRepoCache(customerSpace, version);
     }
 
@@ -269,7 +268,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         postKryo("upsertTables", url, null, null);
-        log.info("Evict attr repo cache for inactive version " + version);
         evictAttrRepoCache(customerSpace, version);
     }
 
@@ -285,7 +283,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         postKryo("upsertTablesWithSignatures", url, signatureTableNames, null);
-        log.info("Evict attr repo cache for inactive version " + version);
         evictAttrRepoCache(customerSpace, version);
     }
 
@@ -299,7 +296,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         args.add(version);
         String url = constructUrl(urlPattern, args.toArray());
         delete("unlinkTable", url);
-        log.info("Evict attr repo cache for inactive version " + version);
         evictAttrRepoCache(customerSpace, version);
     }
 
@@ -311,7 +307,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         args.add(version);
         String url = constructUrl(urlPattern, args.toArray());
         delete("unlinkTables", url);
-        log.info("Evict attr repo cache for inactive version " + version);
         evictAttrRepoCache(customerSpace, version);
     }
 
@@ -322,7 +317,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         args.add(version);
         String url = constructUrl(urlPattern, args.toArray());
         delete("unlinkTables", url);
-        log.info("Evict attr repo cache for inactive version " + version);
         evictAttrRepoCache(customerSpace, version);
     }
 
