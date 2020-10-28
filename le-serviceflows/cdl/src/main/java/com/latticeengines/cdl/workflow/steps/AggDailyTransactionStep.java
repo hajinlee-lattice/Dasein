@@ -146,7 +146,6 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
     private List<String> getAdditionalAttrs() {
         return Arrays.asList( //
                 InterfaceName.AccountId.name(), //
-                InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.ProductType.name());
