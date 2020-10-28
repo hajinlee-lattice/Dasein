@@ -166,7 +166,7 @@ public class AggPeriodTransactionStep extends BaseProcessAnalyzeSparkStep<Proces
                 prepareDimension(InterfaceName.TransactionType.name()), //
                 prepareDimension(InterfaceName.ProductType.name()) //
         ));
-        stream.setAggrEntities(Collections.singletonList(BusinessEntity.Contact.name()));
+        stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
         stream.setAttributeDerivers(Arrays.asList( //
                 constructSumDeriver(InterfaceName.Amount.name()), //
                 constructSumDeriver(InterfaceName.Quantity.name()), //

@@ -87,7 +87,7 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
         map.put(BusinessEntity.Transaction, DAILY_TXN_PT_EM);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_PT_EM); // changed from 62037 to 62027
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_PT_EM);
         return map;
     }
 
