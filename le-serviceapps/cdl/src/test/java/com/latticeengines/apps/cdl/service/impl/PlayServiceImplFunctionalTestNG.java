@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,9 +42,6 @@ public class PlayServiceImplFunctionalTestNG extends CDLFunctionalTestNGBase {
     private static final String TALKINGPOINT_CONTENT = "<p>Space={!Space}</p> <p>Hello&nbsp;{!PlaySolutionName}, I am&nbsp;{!ExpectedValue}</p> <p>Let's checkout&nbsp;{!Account.Website}, and DUNS={!Account.DUNS},</p> <p>in&nbsp;{!Account.LDC_City},&nbsp;{!Account.LDC_State}, {!Account.LDC_Country}</p>";
 
     private static final Logger log = LoggerFactory.getLogger(PlayServiceImplFunctionalTestNG.class);
-
-    @Value("${cdl.model.delete.propagate:false}")
-    private Boolean shouldPropagateDelete;
 
     @Inject
     private SegmentService segmentService;
@@ -117,7 +113,7 @@ public class PlayServiceImplFunctionalTestNG extends CDLFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testCreateAndGet" })
+    @Test(groups = "functional", dependsOnMethods = {"testCreateAndGet"})
     public void testFindDependingAttributes() {
         createTalkingPoints();
         List<AttributeLookup> attributes = playService.findDependingAttributes(playService.getAllPlays());
@@ -126,7 +122,7 @@ public class PlayServiceImplFunctionalTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(attributes.size(), 5);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testFindDependingAttributes" })
+    @Test(groups = "functional", dependsOnMethods = {"testFindDependingAttributes"})
     public void testFindDependingPlays() {
         List<String> attributes = new ArrayList<>();
         attributes.add("Account.DUNS");
@@ -136,32 +132,21 @@ public class PlayServiceImplFunctionalTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(plays.size(), 1);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testFindDependingPlays" })
+    @Test(groups = "functional", dependsOnMethods = {"testFindDependingPlays"})
     public void testDelete() {
         Play retrievedPlay = playService.getPlayByName(playName, false);
         Assert.assertNotNull(retrievedPlay);
-        Assert.assertNotNull(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getName(), playName);
-        Assert.assertNotNull(retrievedPlay.getDisplayName());
-        Assert.assertNotNull(retrievedPlay.getRatingEngine());
         Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
         Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
-        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
-        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
 
         retrievedPlay.setPlayStatus(PlayStatus.INACTIVE);
         playService.createOrUpdate(retrievedPlay, mainCustomerSpace);
 
         retrievedPlay = playService.getPlayByName(playName, true);
         Assert.assertNotNull(retrievedPlay);
-        Assert.assertNotNull(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getName(), playName);
-        Assert.assertNotNull(retrievedPlay.getDisplayName());
-        Assert.assertNotNull(retrievedPlay.getRatingEngine());
-        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.INACTIVE);
         Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
-        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
-        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
 
         playService.deleteByName(playName, false);
         List<Play> playList = playService.getAllPlays();
@@ -174,12 +159,7 @@ public class PlayServiceImplFunctionalTestNG extends CDLFunctionalTestNGBase {
         retrievedPlay = playService.getPlayByName(playName, true);
         Assert.assertNotNull(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getName(), playName);
-        Assert.assertNotNull(retrievedPlay.getDisplayName());
-        Assert.assertNotNull(retrievedPlay.getRatingEngine());
-        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.INACTIVE);
         Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
-        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
-        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
 
         List<String> deletedPlayIds = playService.getAllDeletedPlayIds(true);
         Assert.assertNotNull(deletedPlayIds);
@@ -197,12 +177,7 @@ public class PlayServiceImplFunctionalTestNG extends CDLFunctionalTestNGBase {
         retrievedPlay = playService.getPlayByName(playName, true);
         Assert.assertNotNull(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getName(), playName);
-        Assert.assertNotNull(retrievedPlay.getDisplayName());
-        Assert.assertNotNull(retrievedPlay.getRatingEngine());
-        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.INACTIVE);
         Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
-        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.TRUE);
-        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
 
         deletedPlayIds = playService.getAllDeletedPlayIds(true);
         Assert.assertNotNull(deletedPlayIds);
@@ -224,7 +199,7 @@ public class PlayServiceImplFunctionalTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(playNames.size(), 0);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testFindDependantPlaysAfterDeleting" })
+    @Test(groups = "functional", dependsOnMethods = {"testFindDependantPlaysAfterDeleting"})
     public void testDeleteViaRatingEngine() {
         Play newPlay = playService.createOrUpdate(createDefaultPlay(), mainTestTenant.getId());
         assertPlay(newPlay);
@@ -241,52 +216,28 @@ public class PlayServiceImplFunctionalTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(retrievedPlay);
         Assert.assertNotNull(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getName(), playName);
-        Assert.assertNotNull(retrievedPlay.getDisplayName());
-        Assert.assertNotNull(retrievedPlay.getRatingEngine());
-        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
         Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
-        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
-        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
 
         try {
             ratingEngineService.deleteById(ratingEngine1.getId(), false, CREATED_BY);
-            if (shouldPropagateDelete != Boolean.TRUE) {
-                Assert.fail("Should not be able to delete rating engine if non-deleted play exists");
-            } else {
-                retrievedPlay = playService.getPlayByName(playName, false);
-                Assert.assertNull(retrievedPlay);
+            retrievedPlay = playService.getPlayByName(playName, false);
+            Assert.assertNull(retrievedPlay);
 
-                retrievedPlay = playService.getPlayByName(playName, true);
-                Assert.assertNotNull(retrievedPlay);
-                Assert.assertEquals(retrievedPlay.getName(), playName);
-                Assert.assertNotNull(retrievedPlay.getDisplayName());
-                Assert.assertNotNull(retrievedPlay.getRatingEngine());
-                Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
-                Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
-                Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
-                Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
-            }
+            retrievedPlay = playService.getPlayByName(playName, true);
+            Assert.assertNotNull(retrievedPlay);
+            Assert.assertEquals(retrievedPlay.getName(), playName);
+            Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
         } catch (LedpException ex) {
-            if (shouldPropagateDelete != Boolean.TRUE) {
-                Assert.assertEquals(ex.getCode(), LedpCode.LEDP_40042);
-                retrievedPlay = playService.getPlayByName(playName, false);
-                Assert.assertNotNull(retrievedPlay);
-                Assert.assertEquals(retrievedPlay.getName(), playName);
-                Assert.assertNotNull(retrievedPlay.getDisplayName());
-                Assert.assertNotNull(retrievedPlay.getRatingEngine());
-                Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
-                Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
-                Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
-                Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
-            } else {
-                Assert.fail("Should have been able to delete rating engine even "
-                        + "if non-deleted play exists as it would have first soft deleted plays");
-            }
+            Assert.assertEquals(ex.getCode(), LedpCode.LEDP_40042);
+            retrievedPlay = playService.getPlayByName(playName, false);
+            Assert.assertNotNull(retrievedPlay);
+            Assert.assertEquals(retrievedPlay.getName(), playName);
+            Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
 
         }
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "testDeleteViaRatingEngine" })
+    @Test(groups = "deployment-app", dependsOnMethods = {"testDeleteViaRatingEngine"})
     public void testDeleteViaSegment() {
         Play newPlay = playService.getPlayByName(playName, true);
         assertPlay(newPlay);
@@ -298,50 +249,26 @@ public class PlayServiceImplFunctionalTestNG extends CDLFunctionalTestNGBase {
 
         Play retrievedPlay = playService.getPlayByName(playName, false);
         Assert.assertNotNull(retrievedPlay);
-        Assert.assertNotNull(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getName(), playName);
-        Assert.assertNotNull(retrievedPlay.getDisplayName());
-        Assert.assertNotNull(retrievedPlay.getRatingEngine());
-        Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
         Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
-        Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
         Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
 
         try {
             String reSegmentName = retrievedPlay.getTargetSegment().getName();
             segmentService.deleteSegmentByName(mainCustomerSpace, false, true);
-            if (shouldPropagateDelete != Boolean.TRUE) {
-                Assert.fail("Should not be able to delete segment if non-deleted rating engine exists in play");
-            } else {
-                retrievedPlay = playService.getPlayByName(playName, false);
-                Assert.assertNull(retrievedPlay);
+            retrievedPlay = playService.getPlayByName(playName, false);
+            Assert.assertNull(retrievedPlay);
 
-                retrievedPlay = playService.getPlayByName(playName, true);
-                Assert.assertNotNull(retrievedPlay);
-                Assert.assertEquals(retrievedPlay.getName(), playName);
-                Assert.assertNotNull(retrievedPlay.getDisplayName());
-                Assert.assertNotNull(retrievedPlay.getRatingEngine());
-                Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
-                Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
-                Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
-                Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
-            }
+            retrievedPlay = playService.getPlayByName(playName, true);
+            Assert.assertNotNull(retrievedPlay);
+            Assert.assertEquals(retrievedPlay.getName(), playName);
+            Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.TRUE);
         } catch (LedpException ex) {
-            if (shouldPropagateDelete != Boolean.TRUE) {
-                Assert.assertEquals(ex.getCode(), LedpCode.LEDP_40042);
-                retrievedPlay = playService.getPlayByName(playName, false);
-                Assert.assertNotNull(retrievedPlay);
-                Assert.assertEquals(retrievedPlay.getName(), playName);
-                Assert.assertNotNull(retrievedPlay.getDisplayName());
-                Assert.assertNotNull(retrievedPlay.getRatingEngine());
-                Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.ACTIVE);
-                Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
-                Assert.assertEquals(retrievedPlay.getIsCleanupDone(), Boolean.FALSE);
-                Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
-            } else {
-                Assert.fail("Should have been able to delete segment even "
-                        + "if non-deleted play exists as it would have first soft deleted plays");
-            }
+            Assert.assertEquals(ex.getCode(), LedpCode.LEDP_40042);
+            retrievedPlay = playService.getPlayByName(playName, false);
+            Assert.assertNotNull(retrievedPlay);
+            Assert.assertEquals(retrievedPlay.getName(), playName);
+            Assert.assertEquals(retrievedPlay.getDeleted(), Boolean.FALSE);
 
         }
     }
