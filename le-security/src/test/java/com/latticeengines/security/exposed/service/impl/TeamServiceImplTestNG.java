@@ -1,7 +1,10 @@
 package com.latticeengines.security.exposed.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -9,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -72,12 +76,13 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         assertNotNull(globalTeam.getTeamId());
         assertEquals(globalTeam.getTeamName(), teamName);
         assertNotNull(globalTeam.getCreatedByUser());
-        assertNotNull(globalTeam.getTeamMembers());
         assertEquals(globalTeam.getTeamMembers().size(), teamMemberSize);
-        Map<String, User> userMap = globalTeam.getTeamMembers().stream()
-                .collect(Collectors.toMap(User::getEmail, User -> User));
-        User user = userMap.get(teamMemberName);
-        assertNotNull(user);
+        if (CollectionUtils.isNotEmpty(globalTeam.getMetadataSegments())) {
+            Map<String, User> userMap = globalTeam.getTeamMembers().stream()
+                    .collect(Collectors.toMap(User::getEmail, User -> User));
+            User user = userMap.get(teamMemberName);
+            assertNotNull(user);
+        }
     }
 
     @Test(groups = "functional")
@@ -87,6 +92,10 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         assertNotNull(teamId);
         GlobalTeam globalTeam = teamService.getTeamByTeamId(teamId, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         validateTeamInfo(globalTeam, teamName1InTenant, username2InTenant, 2);
+        globalTeam = teamService.getTeamByTeamId(teamId, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()), false);
+        assertNull(globalTeam.getTeamMembers());
+        assertTrue(teamService.userBelongsToTeam(username1InTenant, teamId));
+        assertFalse(teamService.userBelongsToTeam(teamName2InTenant, teamId));
         // create
         String teamId2 = createTeam(username2InTenant, teamName2InTenant, Sets.newHashSet(username1InTenant));
         List<GlobalTeam> globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
