@@ -252,6 +252,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         postKryo("upsertTable", url, null, null);
+        evictAttrRepoCache(customerSpace, version);
     }
 
     public void upsertTables(String customerSpace, List<String> tableNames, TableRoleInCollection role,
@@ -267,6 +268,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         postKryo("upsertTables", url, null, null);
+        evictAttrRepoCache(customerSpace, version);
     }
 
     public void upsertTablesWithSignatures(String customerSpace, Map<String, String> signatureTableNames,
@@ -281,6 +283,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[0]));
         postKryo("upsertTablesWithSignatures", url, signatureTableNames, null);
+        evictAttrRepoCache(customerSpace, version);
     }
 
     public void unlinkTable(String customerSpace, String tableName, TableRoleInCollection role,
@@ -293,6 +296,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         args.add(version);
         String url = constructUrl(urlPattern, args.toArray());
         delete("unlinkTable", url);
+        evictAttrRepoCache(customerSpace, version);
     }
 
     public void unlinkTables(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
@@ -303,6 +307,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         args.add(version);
         String url = constructUrl(urlPattern, args.toArray());
         delete("unlinkTables", url);
+        evictAttrRepoCache(customerSpace, version);
     }
 
     public void unlinkTables(String customerSpace, DataCollection.Version version) {
@@ -312,6 +317,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         args.add(version);
         String url = constructUrl(urlPattern, args.toArray());
         delete("unlinkTables", url);
+        evictAttrRepoCache(customerSpace, version);
     }
 
     public void upsertStats(String customerSpace, StatisticsContainer container) {

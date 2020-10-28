@@ -231,8 +231,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
         TableRoleInCollection role = TableRoleInCollection.ConsolidatedAccount;
         exportToDynamo(batchStoreTableName, role.getPartitionKey(), role.getRangeKey());
-        log.info("Evict attr repo cache for inactive version " + inactive);
-        dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
     }
 
     @Override
