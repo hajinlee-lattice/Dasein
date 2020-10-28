@@ -1,6 +1,8 @@
 package com.latticeengines.matchapi.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -21,6 +24,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -461,6 +465,17 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         BulkMatchWorkflowConfiguration bulkConf = matchProxy.getBulkConfig(input, podId);
         Assert.assertNotNull(bulkConf);
         Assert.assertTrue(bulkConf.getSwpkgNames().contains("datacloud"));
+    }
+
+    @Test(groups = "deployment")
+    public void testErrorCode() throws IOException{
+        InputStream is = new ClassPathResource("matchinput/BadMatchInput.json").getInputStream();
+        String errorInputStr = IOUtils.toString(is, Charset.defaultCharset());
+        MatchOutput result = matchProxy.matchRealTime(JsonUtils.deserialize(errorInputStr, MatchInput.class));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getResult().size(), 1);
+        Assert.assertEquals(result.getResult().get(0).getErrorCodes().size(), 1);
+        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(0), "10002");
     }
 
     @DataProvider(name = "recentApprovedVersions", parallel = true)
