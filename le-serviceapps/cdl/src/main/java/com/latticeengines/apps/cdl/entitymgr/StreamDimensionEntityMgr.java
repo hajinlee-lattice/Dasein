@@ -33,4 +33,6 @@ public interface StreamDimensionEntityMgr extends BaseEntityMgrRepository<Stream
      * @return list of Dimension, will not be {@code null}
      */
     List<StreamDimension> findByTenant(@NotNull Tenant tenant);
+
+    StreamDimension findByPid(long pid);
 }
