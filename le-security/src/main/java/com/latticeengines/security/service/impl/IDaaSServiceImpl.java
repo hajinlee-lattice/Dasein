@@ -124,14 +124,34 @@ public class IDaaSServiceImpl implements IDaaSService {
                     log.warn("Failed to generate ticket for external session.", e);
                 }
                 doc = LoginUtils.generateLoginDoc(ticket, gaUserEntityMgr, gaTicketEntityMgr, tenantService);
-                doc.setFirstName(iDaaSUser.getFirstName());
-                doc.setLastName(iDaaSUser.getLastName());
-                doc.getResult().setMustChangePassword(false);
-                doc.getResult().setPasswordLastModified(System.currentTimeMillis());
+                doc = setIdaasUserInfo(doc, iDaaSUser);
             } else {
                 doc.setErrors(Collections.singletonList("The user does not have access to this application."));
             }
         }
+        return doc;
+    }
+
+    /**
+     * Add certain data from IDaaSUser to the LoginDocument then return the LoginDocument.
+     * @param doc
+     * @param iDaaSUser
+     * @return
+     */
+    private LoginDocument setIdaasUserInfo(LoginDocument doc, IDaaSUser iDaaSUser) {
+        doc.setFirstName(iDaaSUser.getFirstName());
+        doc.setLastName(iDaaSUser.getLastName());
+        doc.setCompanyName(iDaaSUser.getCompanyName());
+        doc.setDunsNumber();
+        doc.setSubscriberNumber(iDaaSUser.getSubscriberNumber());
+        doc.setSubscriptionType();
+        doc.setCountryCode(iDaaSUser.getCountryCode());
+        doc.setContractStartDate();
+        doc.setContractEndDate();
+        doc.setStatus();
+        doc.getResult().setMustChangePassword(false);
+        doc.getResult().setPasswordLastModified(System.currentTimeMillis());
+
         return doc;
     }
 
