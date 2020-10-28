@@ -39,6 +39,12 @@ public abstract class DataUnit {
     @JsonProperty("DataFormat")
     private DataFormat dataFormat;
 
+    @JsonProperty("Coalesce")
+    private boolean coalesce;
+
+    @JsonProperty("Roles")
+    private Roles roles;
+
     public abstract StorageType getStorageType();
 
     public String getTenant() {
@@ -81,6 +87,14 @@ public abstract class DataUnit {
         this.partitionKeys = partitionKeys;
     }
 
+    public Roles getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Roles roles) {
+        this.roles = roles;
+    }
+
     public enum StorageType {
         Dynamo, Hdfs, Redshift, S3, MySQL, Presto, Athena
     }
@@ -89,4 +103,7 @@ public abstract class DataUnit {
         AVRO, PARQUET, CSV
     }
 
+    public enum Roles {
+        Master, Import, Snapshot, Serving
+    }
 }
