@@ -17,11 +17,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MediaMathChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
@@ -268,6 +270,21 @@ public class ImportDeltaCalculationResultsFromS3TestNG extends WorkflowTestNGBas
             assertDataFrameResults(false, false, false);
             assertDataFrameCount(String.valueOf(0));
         }
+    }
+
+    @Test(groups = "functional")
+    public void testGetMetadataTableNamesWithSalesForce() {
+        ChannelConfig channelConfig = new SalesforceChannelConfig();
+        playLaunch.setChannelConfig(channelConfig);
+        playLaunch.setDestinationSysName(CDLExternalSystemName.Salesforce);
+        List<String> result;
+        // All Accounts and Contacts enabled
+        clearExecutionContext();
+        reconfigureCurrentPlayLaunchForAccounts(true, true);
+        reconfigureCurrentPlayLaunchForContacts(true, true, true);
+        result = importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
+        assertEquals(3, result.size());
+        assertDataFrameResults(true, false, true);
     }
 
     private void clearExecutionContext() {

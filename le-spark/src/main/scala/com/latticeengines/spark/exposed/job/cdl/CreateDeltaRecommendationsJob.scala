@@ -58,6 +58,8 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     if (createRecommendationDataFrame) {
       val recommendationDf: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable)
       val baseAddRecDf = recommendationDf.checkpoint(eager = true)
+      // only populate one contact record for each account when it is sales force launch, this table will be used for
+      // generating both DB and CSV record
       if (CDLExternalSystemName.Salesforce.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName)) {
         val rowNumber: String = "rowNumber"
         completeContactTable = completeContactTable.withColumn(rowNumber, rank().over(Window.partitionBy(joinKey).orderBy(InterfaceName.ContactId.name()))).filter(col(rowNumber) <= 1).drop(rowNumber)
