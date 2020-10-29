@@ -22,11 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
-import org.testng.annotations.Listeners;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -38,10 +35,9 @@ import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
-import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
-@Listeners({ GlobalAuthCleanupTestListener.class })
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+//@Listeners({ GlobalAuthCleanupTestListener.class })
+//@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextTests {
 
