@@ -189,6 +189,12 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
+    public List<ColumnMetadata> getEntitiesMetadata(String customerSpace, ColumnSelection.Predefined group,
+                                                    List<BusinessEntity> entities, String attributeSetName, DataCollection.Version version) {
+        return getDecoratedMetadataWithDeflatedDisplayName(customerSpace, entities, version, Collections.singleton(group), attributeSetName);
+    }
+
+    @Override
     public List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group, String attributeSetName, DataCollection.Version version) {
         return getDecoratedMetadataWithDeflatedDisplayName(customerSpace,
                 Collections.singletonList(BusinessEntity.Contact), version, Collections.singleton(group), attributeSetName);

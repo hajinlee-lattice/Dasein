@@ -132,7 +132,6 @@ public class DeltaCampaignLaunchInitStep
                 .setAccountColsRecNotIncludedStd(processedFieldMappingMetadata.getAccountColsRecNotIncludedStd());
         deltaCampaignLaunchSparkContext
                 .setAccountColsRecNotIncludedNonStd(processedFieldMappingMetadata.getAccountColsRecNotIncludedNonStd());
-
         deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
         deltaCampaignLaunchSparkContext.setDataDbDriver(dataDbDriver);
         deltaCampaignLaunchSparkContext.setDataDbUrl(dataDbUrl);

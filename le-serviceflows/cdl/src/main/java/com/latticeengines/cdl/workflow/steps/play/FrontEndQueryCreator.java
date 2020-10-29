@@ -266,7 +266,7 @@ public class FrontEndQueryCreator {
         processedFieldMappingMetadata.setContactCols(contactCols);
         fieldMappingMetadata.forEach(metadata -> {
             String attrName = metadata.getAttrName();
-            if (BusinessEntity.Contact.equals(metadata.getEntity())) {
+            if (BusinessEntity.EXPORT_CONTACT_ENTITIES.contains(metadata.getEntity())) {
                 contactCols.add(metadata.getAttrName());
             } else if (RecommendationColumnName.INTERNAL_NAME_TO_RECOMMENDATION_COLUMN_MAP.containsKey(attrName)) {
                 accountColsRecIncluded.add(attrName);
