@@ -373,11 +373,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             dataFeedTaskUniqueId = dataFeedTask.getUniqueId();
         }
 
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
+        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.getByName(entity), true, withoutId,
                 enableEntityMatch || enableEntityMatchGA, enableEntityMatchGA);
+        Table standardTable = templateTable == null ? schemaTable : templateTable;
         MetadataResolver resolver = getMetadataResolver(getSourceFile(sourceFileName), fieldMappingDocument, true,
                 standardTable);
 
+        setSystemFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, customerSpace);
         // validate field mapping document
         List<FieldMapping> fieldMappings = fieldMappingDocument.getFieldMappings();
         List<String> ignored = new ArrayList<>();
@@ -418,7 +420,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
 
-        compareStandardFields(templateTable, fieldMappingDocument, standardTable, validations, groupedValidations,
+        compareStandardFields(templateTable, fieldMappingDocument, schemaTable, validations, groupedValidations,
                 customerSpace,
                 enableEntityMatch);
         // compare field mapping document after being modified with field mapping best effort
@@ -488,7 +490,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 .collect(Collectors.toList());
         Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        Table templateWithStandard = mergeTable(templateTable, standardTable);
+        Table templateWithStandard = mergeTable(templateTable, schemaTable);
         // check lattice field both in template and standard table, seek for the case that user field can be mapped, while not
         for (Attribute latticeAttr : templateWithStandard.getAttributes()) {
             String attrName = latticeAttr.getName();
@@ -948,6 +950,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
     }
 
+
     private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity, String feedType,
                                       Table templateTable) {
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
@@ -956,6 +959,66 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Preconditions.checkNotNull(customerSpace);
+
+        setSystemFieldMapping(fieldMappingDocument, entity, feedType, customerSpace);
+
+        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
+        Table schemaTable = getSchemaTable(customerSpace, entity, feedType, withoutId);
+        Table standardTable = templateTable == null ? schemaTable : templateTable;
+        Set<String> reservedName = standardTable.getAttributes().stream().map(Attribute::getName)
+                .collect(Collectors.toSet());
+        Set<String> mappedFieldName = new HashSet<>();
+        Set<String> pendingUserFieldName = new HashSet<>();
+        Set<String> mappedUserFieldName = new HashSet<>();
+        // 2.check if there's multiple mapping to standard field
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                pendingUserFieldName.add(fieldMapping.getUserField());
+            } else {
+                mappedUserFieldName.add(fieldMapping.getUserField());
+                if (reservedName.contains(fieldMapping.getMappedField())) {
+                    if (mappedFieldName.contains(fieldMapping.getMappedField())) {
+                        throw new LedpException(LedpCode.LEDP_18196, new String[] { fieldMapping.getMappedField() });
+                    } else {
+                        fieldMapping.setMappedToLatticeField(true);
+                        mappedFieldName.add(fieldMapping.getMappedField());
+                    }
+                }
+            }
+        }
+        // 3.remove extra unmapped field
+        Iterator<FieldMapping> fmIterator = fieldMappingDocument.getFieldMappings().iterator();
+        while (fmIterator.hasNext()) {
+            FieldMapping fieldMapping = fmIterator.next();
+            if (pendingUserFieldName.contains(fieldMapping.getUserField())) {
+                if (mappedUserFieldName.contains(fieldMapping.getUserField())) {
+                    if (fieldMapping.getMappedField() == null) {
+                        fmIterator.remove();
+                    }
+                } else {
+                    fieldMapping.setMappedField(fieldMapping.getUserField());
+                    fieldMapping.setMappedToLatticeField(false);
+                }
+            }
+
+        }
+        // 4. Set External Id field mapToLattice flag
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getCdlExternalSystemType() != null) {
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
+    }
+
+    /**
+     * this step will set system id mapping, which will be used to validate and merge
+     * @param fieldMappingDocument
+     * @param entity
+     * @param feedType
+     * @param customerSpace
+     */
+    private void setSystemFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity,
+                                       String feedType, CustomerSpace customerSpace) {
         // 1. set system related mapping //only apply to Account / Contact / Transaction
         Set<String> systemIdSet = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity) || BusinessEntity.Transaction.equals(entity)) {
@@ -1009,52 +1072,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 fieldMappingDocument.getFieldMappings().removeIf(fieldMapping ->
                         InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())
                                 || InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()));
-            }
-        }
-        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
-        Table schemaTable = getSchemaTable(customerSpace, entity, feedType, withoutId);
-        Table standardTable = templateTable == null ? schemaTable : templateTable;
-        Set<String> reservedName = standardTable.getAttributes().stream().map(Attribute::getName)
-                .collect(Collectors.toSet());
-        Set<String> mappedFieldName = new HashSet<>();
-        Set<String> pendingUserFieldName = new HashSet<>();
-        Set<String> mappedUserFieldName = new HashSet<>();
-        // 2.check if there's multiple mapping to standard field
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() == null) {
-                pendingUserFieldName.add(fieldMapping.getUserField());
-            } else {
-                mappedUserFieldName.add(fieldMapping.getUserField());
-                if (reservedName.contains(fieldMapping.getMappedField())) {
-                    if (mappedFieldName.contains(fieldMapping.getMappedField())) {
-                        throw new LedpException(LedpCode.LEDP_18196, new String[] { fieldMapping.getMappedField() });
-                    } else {
-                        fieldMapping.setMappedToLatticeField(true);
-                        mappedFieldName.add(fieldMapping.getMappedField());
-                    }
-                }
-            }
-        }
-        // 3.remove extra unmapped field
-        Iterator<FieldMapping> fmIterator = fieldMappingDocument.getFieldMappings().iterator();
-        while (fmIterator.hasNext()) {
-            FieldMapping fieldMapping = fmIterator.next();
-            if (pendingUserFieldName.contains(fieldMapping.getUserField())) {
-                if (mappedUserFieldName.contains(fieldMapping.getUserField())) {
-                    if (fieldMapping.getMappedField() == null) {
-                        fmIterator.remove();
-                    }
-                } else {
-                    fieldMapping.setMappedField(fieldMapping.getUserField());
-                    fieldMapping.setMappedToLatticeField(false);
-                }
-            }
-
-        }
-        // 4. Set External Id field mapToLattice flag
-        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (fieldMapping.getCdlExternalSystemType() != null) {
-                fieldMapping.setMappedToLatticeField(false);
             }
         }
     }
