@@ -33,8 +33,8 @@ import com.latticeengines.security.exposed.service.UserService;
 
 public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
-    private static final long inAccessPeriod = TimeUnit.DAYS.toMillis(30);
-    private static final long emailPeriod = TimeUnit.DAYS.toMillis(14);
+    private static final long INACTIVE_PERIOD = TimeUnit.DAYS.toMillis(30);
+    private static final long EMAIL_PERIOD = TimeUnit.DAYS.toMillis(14);
     private static final List<String> userLevels =
             AccessLevel.getInternalAccessLevel().stream()
             .map(accessLevel -> accessLevel.toString())
@@ -76,7 +76,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 CustomerSpace space = CustomerSpace.parse(tenant.getId());
                 // send email two weeks before user can't access tenant
-                if (expiredTime - emailPeriod < currentTime && currentTime < expiredTime) {
+                if (expiredTime - EMAIL_PERIOD < currentTime && currentTime < expiredTime) {
                     int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
                     List<User> users = userService.getUsers(tenant.getId());
                     users.forEach(user -> {
@@ -90,12 +90,12 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                     tenant.setStatus(TenantStatus.INACTIVE);
                     tenantService.updateTenant(tenant);
                     log.info(String.format("change tenant %s status to inactive", tenant.getName()));
-                } else if (expiredTime + inAccessPeriod - emailPeriod < currentTime
-                        && currentTime < expiredTime + inAccessPeriod) {
+                } else if (expiredTime + INACTIVE_PERIOD - EMAIL_PERIOD < currentTime
+                        && currentTime < expiredTime + INACTIVE_PERIOD) {
                     // send email to user who can visit tenant two weeks before
                     // delete tenant
                     int days =
-                            (int) Math.ceil((expiredTime + inAccessPeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
+                            (int) Math.ceil((expiredTime + INACTIVE_PERIOD - currentTime) / TimeUnit.DAYS.toMillis(1));
                     List<User> users = userService.getUsers(tenant.getId());
                     users.forEach(user -> {
                         if (userLevels.contains(user.getAccessLevel())) {
@@ -105,7 +105,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                         }
                     });
 
-                } else if (currentTime > expiredTime + inAccessPeriod) {
+                } else if (currentTime > expiredTime + INACTIVE_PERIOD) {
                     adminProxy.deleteTenant(space.getContractId(), space.getTenantId());
                     log.info(String.format("tenant %s has been deleted", tenant.getName()));
                     // this is to print some log
@@ -128,7 +128,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 }
                 long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 long expiredTime = tenantRight.getExpirationDate();
-                if (expiredTime - emailPeriod < currentTime && currentTime < expiredTime) {
+                if (expiredTime - INACTIVE_PERIOD < currentTime && currentTime < expiredTime) {
                     int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
                     sendEmail(tenantRight, days);
 
