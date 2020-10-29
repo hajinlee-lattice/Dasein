@@ -37,7 +37,7 @@ public class ProductFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     @Inject
     private ProductFileValidationService productFileValidationService;
 
-    private static final String PRODUCT_FILE_DESTINATION = "tmp/validation/product/";
+    private static final String PRODUCT_FILE_DESTINATION = "/tmp/validation/product/";
 
     private String fileName;
 

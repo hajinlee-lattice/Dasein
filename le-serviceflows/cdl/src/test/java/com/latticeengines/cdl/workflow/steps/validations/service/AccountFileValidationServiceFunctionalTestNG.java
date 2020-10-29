@@ -25,7 +25,7 @@ public class AccountFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     @Inject
     private AccountFileValidationService accountFileValidationService;
 
-    private static final String ACCOUNT_FILE_DESTINATION = "tmp/validation/account/";
+    private static final String ACCOUNT_FILE_DESTINATION = "/tmp/validation/account/";
 
     private String fileName;
 
