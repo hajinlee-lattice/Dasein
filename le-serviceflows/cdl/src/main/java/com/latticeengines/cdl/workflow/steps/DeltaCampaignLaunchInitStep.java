@@ -26,6 +26,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -139,12 +140,17 @@ public class DeltaCampaignLaunchInitStep
                 .setAccountColsRecNotIncludedStd(processedFieldMappingMetadata.getAccountColsRecNotIncludedStd());
         deltaCampaignLaunchSparkContext
                 .setAccountColsRecNotIncludedNonStd(processedFieldMappingMetadata.getAccountColsRecNotIncludedNonStd());
-        deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
         deltaCampaignLaunchSparkContext.setDataDbDriver(dataDbDriver);
         deltaCampaignLaunchSparkContext.setDataDbUrl(dataDbUrl);
         deltaCampaignLaunchSparkContext.setDataDbUser(dataDbUser);
         deltaCampaignLaunchSparkContext.setPublishRecommendationsToDB(campaignLaunchUtils
                 .shouldPublishRecommendationsToDB(customerSpace, playLaunch.getDestinationSysName()));
+        if (deltaCampaignLaunchSparkContext.getPublishRecommendationsToDB() &&
+                !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName())) {
+            deltaCampaignLaunchSparkContext.setContactCols(config.getContactDisplayNames().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()));
+        } else {
+            deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
+        }
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();

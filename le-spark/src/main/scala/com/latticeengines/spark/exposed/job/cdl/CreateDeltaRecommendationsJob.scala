@@ -54,7 +54,8 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
     var finalDfs = new ListBuffer[DataFrame]()
     val contactNums = new ListBuffer[Long]()
-    val dbConnector: Boolean = deltaCampaignLaunchSparkContext.getPublishRecommendationsToDB && !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName)
+    val dbConnector: Boolean = CDLExternalSystemName.Salesforce.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName) ||
+      CDLExternalSystemName.Eloqua.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName)
     if (createRecommendationDataFrame) {
       val recommendationDf: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable)
       val baseAddRecDf = recommendationDf.checkpoint(eager = true)
