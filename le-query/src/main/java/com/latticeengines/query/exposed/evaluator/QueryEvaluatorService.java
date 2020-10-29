@@ -69,6 +69,7 @@ public class QueryEvaluatorService {
             } else {
                 try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
                     timer.setThreshold(0L);
+                    sqlQuery.setUseLiterals(false);
                     return sqlQuery.fetchCount();
                 }
             }

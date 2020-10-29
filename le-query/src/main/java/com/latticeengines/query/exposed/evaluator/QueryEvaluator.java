@@ -86,7 +86,7 @@ public class QueryEvaluator {
         AtomicLong iter = new AtomicLong(0);
         return Flux.generate(() -> {
             ResultSet results;
-            sqlquery.setUseLiterals(true);
+            sqlquery.setUseLiterals(false);
             results = sqlquery.getResults();
             ResultSetMetaData metadata = results.getMetaData();
             int fetchSize = getFetchSize(metadata.getColumnCount());

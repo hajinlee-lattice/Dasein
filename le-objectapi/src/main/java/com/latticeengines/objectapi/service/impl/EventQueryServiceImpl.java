@@ -1,5 +1,7 @@
 package com.latticeengines.objectapi.service.impl;
 
+import static com.latticeengines.query.factory.RedshiftQueryProvider.USER_BATCH;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -103,6 +105,9 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
+            if (StringUtils.isBlank(sqlUser)) {
+                sqlUser = USER_BATCH;
+            }
             Query query = getQuery(attrRepo, frontEndQuery, eventType, sqlUser);
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
@@ -115,6 +120,9 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
         try {
+            if (StringUtils.isBlank(sqlUser)) {
+                sqlUser = USER_BATCH;
+            }
             Query query = getQuery(attrRepo, frontEndQuery, eventType, sqlUser);
             if (queryDiagnostics.getQueryLoggingConfig()) {
                 log.info("getData using query: {}",
@@ -151,6 +159,9 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
+        if (StringUtils.isBlank(sqlUser)) {
+            sqlUser = USER_BATCH;
+        }
         Query query = getQuery(attrRepo, frontEndQuery, eventType, sqlUser);
         try {
             return queryEvaluatorService.getQueryStr(attrRepo, query, sqlUser);

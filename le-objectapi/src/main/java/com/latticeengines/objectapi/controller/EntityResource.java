@@ -45,7 +45,7 @@ public class EntityResource {
     @InvocationMeter(name = "entity-count", measurment = "objectapi")
     public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,
-            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+            @RequestParam(value = "sqlUser", required = false, defaultValue = SEGMENT_USER) String sqlUser) {
         if (StringUtils.isBlank(sqlUser)) {
             sqlUser = SEGMENT_USER;
         }
@@ -57,7 +57,7 @@ public class EntityResource {
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,
-            @RequestParam(value = "sqlUser", required = false) String sqlUser,
+            @RequestParam(value = "sqlUser", required = false, defaultValue = BATCH_USER) String sqlUser,
             @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation) {
         final String finalSqlUser = StringUtils.isBlank(sqlUser) ? BATCH_USER : sqlUser;
         return entityQueryService.getData(frontEndQuery, version, finalSqlUser, enforceTranslation);
@@ -69,7 +69,7 @@ public class EntityResource {
     @ApiOperation(value = "Retrieve the SQL for the specified query")
     public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,
-            @RequestParam(value = "sqlUser", required = false) String sqlUser,
+            @RequestParam(value = "sqlUser", required = false, defaultValue = SEGMENT_USER) String sqlUser,
             @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation,
             @RequestParam(value = "isCountQuery", required = false, defaultValue = "false") Boolean isCountQuery) {
         if (StringUtils.isBlank(sqlUser)) {
@@ -85,7 +85,7 @@ public class EntityResource {
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
             @RequestBody RatingEngineFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,
-            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+            @RequestParam(value = "sqlUser", required = false, defaultValue = SEGMENT_USER) String sqlUser) {
         if (StringUtils.isBlank(sqlUser)) {
             sqlUser = SEGMENT_USER;
         }
