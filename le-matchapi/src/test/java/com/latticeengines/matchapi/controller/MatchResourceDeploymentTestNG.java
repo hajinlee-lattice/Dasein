@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -468,14 +469,27 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment")
-    public void testErrorCode() throws IOException{
+    public void testMatchErrorCode() throws IOException{
         InputStream is = new ClassPathResource("matchinput/BadMatchInput.json").getInputStream();
         String errorInputStr = IOUtils.toString(is, Charset.defaultCharset());
         MatchOutput result = matchProxy.matchRealTime(JsonUtils.deserialize(errorInputStr, MatchInput.class));
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getResult().size(), 1);
-        Assert.assertEquals(result.getResult().get(0).getErrorCodes().size(), 1);
-        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(0), "10002");
+        Assert.assertFalse(result.getResult().get(0).isMatched());
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().containsKey(OutputRecord.ErrorType.MATCH_ERROR));
+        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(OutputRecord.ErrorType.MATCH_ERROR), Collections.singletonList("10002"));
+    }
+
+    @Test(groups = "deployment")
+    public void testAppendErrorCode() throws IOException{
+        InputStream is = new ClassPathResource("matchinput/DunsUnderReview.json").getInputStream();
+        String errorInputStr = IOUtils.toString(is, Charset.defaultCharset());
+        MatchOutput result = matchProxy.matchRealTime(JsonUtils.deserialize(errorInputStr, MatchInput.class));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getResult().size(), 1);
+        Assert.assertFalse(result.getResult().get(0).isMatched());
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().containsKey(OutputRecord.ErrorType.APPEND_ERROR));
+        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(OutputRecord.ErrorType.APPEND_ERROR), Collections.singletonList("40001"));
     }
 
     @DataProvider(name = "recentApprovedVersions", parallel = true)

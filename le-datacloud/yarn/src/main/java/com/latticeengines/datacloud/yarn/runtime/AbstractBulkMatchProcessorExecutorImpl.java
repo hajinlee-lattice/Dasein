@@ -616,11 +616,26 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     }
 
     private void appendErrorCodes(List<Object> allValues, OutputRecord outputRecord) {
-        String errorMessages = CollectionUtils.isEmpty(outputRecord.getErrorMessages()) ? "" : StringUtils.join(outputRecord.getErrorMessages(), "|");
-        allValues.add(errorMessages);
+        StringBuilder errorTypes = new StringBuilder();
+        StringBuilder errorCodes = new StringBuilder();
 
-        String errorCodes = CollectionUtils.isEmpty(outputRecord.getErrorCodes()) ? "" : StringUtils.join(outputRecord.getErrorCodes(), "|");
-        allValues.add(errorCodes);
+        if (outputRecord.getErrorCodes() != null) {
+            for (Map.Entry<OutputRecord.ErrorType, List<String>> entry : outputRecord.getErrorCodes().entrySet()) {
+                if (errorCodes.length() > 0) {
+                    errorCodes.append('/');
+                }
+                if (errorTypes.length() > 0) {
+                    errorTypes.append('|');
+                }
+                if (CollectionUtils.isNotEmpty(entry.getValue())) {
+                    errorTypes.append(entry.getKey().toString());
+                    errorCodes.append(StringUtils.join(entry.getValue(), "|"));
+                }
+            }
+        }
+
+        allValues.add(errorTypes.toString());
+        allValues.add(errorCodes.toString());
     }
 
     private Object convertToClaimedType(Schema.Type avroType, Object value, String columnName) {

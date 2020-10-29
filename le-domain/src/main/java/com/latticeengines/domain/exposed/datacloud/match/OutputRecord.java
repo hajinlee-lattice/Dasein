@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OutputRecord {
+    public enum ErrorType { MATCH_ERROR, APPEND_ERROR }
 
     @JsonProperty("RowNumber")
     private Integer rowNumber;
@@ -77,7 +79,7 @@ public class OutputRecord {
     private List<String> errorMessages;
 
     @JsonProperty("ErrorCodes")
-    private List<String> errorCodes;
+    private Map<ErrorType, List<String>> errorCodes;
 
     @JsonProperty("DebugValues")
     private List<String> debugValues;
@@ -243,19 +245,24 @@ public class OutputRecord {
         this.errorMessages.add(errorMessage);
     }
 
-    public List<String> getErrorCodes() {
+    public Map<ErrorType, List<String>> getErrorCodes() {
         return errorCodes;
     }
 
-    public void setErrorCodes(List<String> errorCodes) {
+    public void setErrorCodes(Map<ErrorType, List<String>> errorCodes) {
         this.errorCodes = errorCodes;
     }
 
-    public void addErrorCode(String code) {
+    public void addErrorCode(ErrorType type, String code) {
         if (this.errorCodes == null) {
-            this.errorCodes = new ArrayList<>();
-            }
-        this.errorCodes.add(code);
+            this.errorCodes = new HashMap<>();
+        }
+
+        if (!this.errorCodes.containsKey(type)) {
+            this.errorCodes.put(type, new ArrayList<>());
+        }
+
+        this.errorCodes.get(type).add(code);
     }
 
     public List<String> getDebugValues() {

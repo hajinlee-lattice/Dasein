@@ -59,7 +59,6 @@ public final class MatchConstants {
     public static final String ENTITY_TEMPLATE_FIELD = InterfaceName.CDLTemplateName.name();
     public static final String CREATED_TEMPLATE_FIELD = InterfaceName.CDLCreatedTemplate.name();
     public static final String ENTITY_MATCH_ERROR_FIELD = "Entity_Match_Error";
-    public static final String ENTITY_MATCH_ERROR_CODE = "Entity_Match_Error_Code";
 
     // those are the internal avro attributes
     public static final String INT_LDC_LID = "__LDC_LID__";
@@ -83,6 +82,10 @@ public final class MatchConstants {
     public static final String INT_MATCHED_COUNTRY_CODE = "__Matched_Country_Code__";
     public static final String INT_MATCHED_ZIPCODE = "__Matched_Zipcode__";
     public static final String INT_MATCHED_PHONE = "__Matched_Phone__";
+
+    // indicate any errors that occur during match/append lookup
+    public static final String MATCH_ERROR_TYPE = "Match_Error_Type";
+    public static final String MATCH_ERROR_CODE = "Match_Error_Code";
 
     public static final List<String> matchDebugFields = Arrays.asList(INT_MATCHED_DUNS,
             INT_MATCHED_ORIG_DUNS, INT_MATCHED_CONFIDENCE_CODE, INT_MATCHED_MATCH_GRADE,
