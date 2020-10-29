@@ -60,7 +60,7 @@ if [[ -n "${HIVE_HOME}" ]]; then
   popd
 
   if [[ -n "${PRESTO_HOME}" ]]; then
-    pushd ${HIVE_HOME}
+    pushd ${PRESTO_HOME}
     bin/launcher start
     popd
   fi
