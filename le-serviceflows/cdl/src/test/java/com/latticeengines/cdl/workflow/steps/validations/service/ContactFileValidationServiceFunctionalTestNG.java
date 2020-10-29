@@ -24,14 +24,14 @@ public class ContactFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     @Inject
     private ContactFileValidationService contactFileValidationService;
 
-    private static final String CONTACT_FILE_DESTINATION = "tmp/validation/contact/";
+    private static final String CONTACT_FILE_DESTINATION = "/tmp/validation/contact/";
 
 
     private String fileName;
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        InputStream in = testArtifactService.readTestArtifactAsStream(TEST_AVRO_DIR, TEST_AVRO_VERSION, "Cccount1" +
+        InputStream in = testArtifactService.readTestArtifactAsStream(TEST_AVRO_DIR, TEST_AVRO_VERSION, "Contact1" +
                 ".avro");
         HdfsUtils.rmdir(yarnConfiguration, CONTACT_FILE_DESTINATION);
         fileName = "contact.avro";
