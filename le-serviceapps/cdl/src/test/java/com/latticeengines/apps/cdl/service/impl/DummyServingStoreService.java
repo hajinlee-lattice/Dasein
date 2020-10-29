@@ -84,6 +84,11 @@ class DummyServingStoreService implements ServingStoreService {
     }
 
     @Override
+    public List<ColumnMetadata> getEntitiesMetadata(String customerSpace, ColumnSelection.Predefined group, List<BusinessEntity> entities, String attributeSetName, DataCollection.Version version) {
+        return null;
+    }
+
+    @Override
     public Flux<ColumnMetadata> getAttrsCanBeEnabledForModeling(String customerSpace, BusinessEntity entity,
                                                                 DataCollection.Version version, Boolean allCustomerAttrs) {
         return null;

@@ -14,6 +14,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = DynamoDataUnit.class, name = "Dynamo"), //
         @JsonSubTypes.Type(value = RedshiftDataUnit.class, name = "Redshift"), //
         @JsonSubTypes.Type(value = S3DataUnit.class, name = "S3"), //
+        @JsonSubTypes.Type(value = PrestoDataUnit.class, name = "Presto"), //
+        @JsonSubTypes.Type(value = AthenaDataUnit.class, name = "Athena"), //
+        @JsonSubTypes.Type(value = MySQLDataUnit.class, name = "MySQL"), //
         @JsonSubTypes.Type(value = HdfsDataUnit.class, name = "Hdfs"), //
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,9 +38,6 @@ public abstract class DataUnit {
 
     @JsonProperty("DataFormat")
     private DataFormat dataFormat;
-
-    @JsonProperty("Coalesce")
-    private boolean coalesce;
 
     public abstract StorageType getStorageType();
 
@@ -82,7 +82,7 @@ public abstract class DataUnit {
     }
 
     public enum StorageType {
-        Dynamo, Hdfs, Redshift, S3
+        Dynamo, Hdfs, Redshift, S3, MySQL, Presto, Athena
     }
 
     public enum DataFormat {

@@ -260,13 +260,8 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         Flux<ColumnMetadata> cms = Flux.empty();
         if (CollectionUtils.isNotEmpty(entities)) {
             List<ColumnMetadata> cmList;
-            if (entities.contains(BusinessEntity.Contact)) {
-                cmList = servingStoreService.getContactMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
-                        attributeSetName, null);
-            } else {
-                cmList = servingStoreService.getAccountMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
-                        attributeSetName, null);
-            }
+            cmList = servingStoreService.getEntitiesMetadata(customerSpace, ColumnSelection.Predefined.Enrichment,
+                    entities, attributeSetName, null);
             if (CollectionUtils.isNotEmpty(cmList)) {
                 cms = Flux.fromIterable(cmList).filter(
                         cm -> entities.contains(cm.getEntity()) && !AttrState.Inactive.equals(cm.getAttrState()));
