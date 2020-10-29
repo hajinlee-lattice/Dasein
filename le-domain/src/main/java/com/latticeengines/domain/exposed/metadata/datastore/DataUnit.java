@@ -45,6 +45,9 @@ public abstract class DataUnit {
     @JsonProperty("Roles")
     private Roles roles;
 
+    @JsonProperty("DataTemplateId")
+    private String DataTemplateId;
+
     public abstract StorageType getStorageType();
 
     public String getTenant() {

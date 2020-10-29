@@ -162,6 +162,12 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     @Override
+    public List<DataUnit> findAllByDataTemplateIdAndRolesFromReader(String tenantId, String dataTemplateId, DataUnit.Roles roles) {
+        List<DataUnitEntity> entities = readerRepository.findByTenantIdAndDataTemplateIdAndRoles(tenantId, dataTemplateId, roles);
+        return convertList(entities, true);
+    }
+
+    @Override
     public DataUnit findByNameTypeFromReader(String tenantId, String name, DataUnit.StorageType storageType) {
         DataUnitEntity entity = readerRepository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (entity != null) {

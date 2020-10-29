@@ -28,6 +28,11 @@ public class DataUnitEntity extends BaseMultiTenantDocEntity<DataUnit> {
             insertable = false, updatable = false)
     private DataUnit.StorageType storageType;
 
+    @Column(name = "DataTemplateId", //
+            columnDefinition = "'VARCHAR(200) GENERATED ALWAYS AS (`Document` ->> '$.DataTemplateId')'", //
+            insertable = false, updatable = false)
+    private String dataTemplateId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "Roles", //
             columnDefinition = "'VARCHAR(20) GENERATED ALWAYS AS (`Document` ->> '$.Roles')'", //

@@ -28,4 +28,6 @@ public interface DataUnitEntityMgr {
 
     void updateSignature(String tenantId, DataUnit dataUnit, String signature);
 
+    List<DataUnit> findAllByDataTemplateIdAndRolesFromReader(String tenantId, String dataTemplateId, DataUnit.Roles roles);
+
 }

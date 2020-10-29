@@ -21,13 +21,4 @@ public class DataTemplate {
     @JsonProperty("Name")
     private String name;
 
-    @JsonProperty("Count")
-    private Long count;
-
-    @JsonProperty("DataFormat")
-    private DataUnit.DataFormat dataFormat;
-
-    @JsonProperty("Coalesce")
-    private boolean coalesce;
-
 }
