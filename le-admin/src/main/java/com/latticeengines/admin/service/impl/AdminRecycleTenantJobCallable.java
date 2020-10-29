@@ -110,8 +110,8 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                     log.info(String.format("tenant %s has been deleted", tenant.getName()));
                     // this is to print some log
                     Path contractPath = PathBuilder.buildContractPath(podId, space.getContractId());
-                    if (camille.exists(contractPath)) {
-                        log.info("tenant {} exists in db not in zk", tenant.getId());
+                    if (!camille.exists(contractPath)) {
+                        log.info("tenant {} is not in zk", tenant.getId());
                     }
                 }
 
