@@ -93,7 +93,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
                 dcs.getVersion());
     }
 
-    private List<ActivityAlert> generatePeopleAlerts() {
+    private List<ActivityAlert> generateProductsAlerts() {
         List<ActivityAlert> alerts = new ArrayList<>();
         Tenant t = mainTestTenant;
         // record 1
@@ -104,7 +104,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         record.setTenantId(t.getPid());
         record.setCreationTimestamp(new Date());
         record.setVersion(TEST_ALERT_VERSION);
-        record.setCategory(AlertCategory.PEOPLE);
+        record.setCategory(AlertCategory.PRODUCTS);
 
         Map<String, Object> data = new HashMap<>();
         Instant end = Instant.now();
@@ -127,7 +127,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         record.setTenantId(t.getPid());
         record.setCreationTimestamp(Date.from(Instant.now().minus(10, ChronoUnit.HOURS)));
         record.setVersion(TEST_ALERT_VERSION);
-        record.setCategory(AlertCategory.PEOPLE);
+        record.setCategory(AlertCategory.PRODUCTS);
 
         data = new HashMap<>();
         end = Instant.now().minus(1, ChronoUnit.DAYS);
@@ -150,7 +150,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         record.setTenantId(t.getPid());
         record.setCreationTimestamp(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
         record.setVersion(TEST_ALERT_VERSION);
-        record.setCategory(AlertCategory.PEOPLE);
+        record.setCategory(AlertCategory.PRODUCTS);
 
         data = new HashMap<>();
         end = Instant.now().minus(7, ChronoUnit.DAYS);
@@ -173,7 +173,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         record.setTenantId(t.getPid());
         record.setCreationTimestamp(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
         record.setVersion(TEST_ALERT_VERSION);
-        record.setCategory(AlertCategory.PEOPLE);
+        record.setCategory(AlertCategory.PRODUCTS);
 
         data = new HashMap<>();
         end = Instant.now().minus(11, ChronoUnit.DAYS);
@@ -191,7 +191,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         return alerts;
     }
 
-    private List<ActivityAlert> generateProductsAlerts() {
+    private List<ActivityAlert> generatePeopleAlerts() {
         List<ActivityAlert> alerts = new ArrayList<>();
         Tenant t = mainTestTenant;
 
@@ -203,7 +203,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         record.setTenantId(t.getPid());
         record.setCreationTimestamp(new Date());
         record.setVersion(TEST_ALERT_VERSION);
-        record.setCategory(AlertCategory.PRODUCTS);
+        record.setCategory(AlertCategory.PEOPLE);
 
         Map<String, Object> data = new HashMap<>();
         Instant end = Instant.now();
@@ -227,7 +227,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         record.setTenantId(t.getPid());
         record.setCreationTimestamp(Date.from(Instant.now().minus(10, ChronoUnit.HOURS)));
         record.setVersion(TEST_ALERT_VERSION);
-        record.setCategory(AlertCategory.PRODUCTS);
+        record.setCategory(AlertCategory.PEOPLE);
 
         data = new HashMap<>();
         end = Instant.now().minus(1, ChronoUnit.DAYS);
@@ -250,7 +250,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         record.setTenantId(t.getPid());
         record.setCreationTimestamp(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
         record.setVersion(TEST_ALERT_VERSION);
-        record.setCategory(AlertCategory.PRODUCTS);
+        record.setCategory(AlertCategory.PEOPLE);
 
         data = new HashMap<>();
         end = Instant.now().minus(7, ChronoUnit.DAYS);

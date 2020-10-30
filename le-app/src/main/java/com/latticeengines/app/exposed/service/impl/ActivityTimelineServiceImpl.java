@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -166,13 +165,9 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         if (streamTypes.contains(AtlasStream.StreamType.JourneyStage)) {
             Instant cutoffTimeStamp = getTimeWindowFromPeriod(customerSpace, timelinePeriod).getLeft();
             Map<String, Object> datum = getPrevailingJourneyStageEvent(customerSpace, dataPage, cutoffTimeStamp);
-
             dataPage.setData(dataPage.getData().stream().filter(
                     event -> (Long) event.get(InterfaceName.EventTimestamp.name()) >= cutoffTimeStamp.toEpochMilli())
                     .collect(Collectors.toList()));
-
-            if (MapUtils.isNotEmpty(datum))
-                dataPage.getData().add(datum);
         }
         return dataPage;
     }
@@ -180,13 +175,23 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     private Map<String, Object> getPrevailingJourneyStageEvent(String customerSpace, DataPage dataPage,
             Instant cutoffTimestamp) {
         String accountId = (String) dataPage.getData().get(0).get(InterfaceName.AccountId.name());
-        return dataPage.getData().stream() //
+
+        Map<String, Object> prevailingStageEvent = dataPage.getData().stream() //
                 .filter(event -> event.get(InterfaceName.StreamType.name())
                         .equals(AtlasStream.StreamType.JourneyStage.name())) //
                 .filter(event -> (Long) event.get(InterfaceName.EventTimestamp.name()) <= cutoffTimestamp
                         .toEpochMilli()) //
-                .max(Comparator.comparingLong(event -> (Long) event.get(InterfaceName.EventTimestamp.name()))) //
-                .orElse(getDefaultJourneyStageEvent(customerSpace, accountId, cutoffTimestamp.toEpochMilli()));
+                .max(Comparator.comparingLong(event -> (Long) event.get(InterfaceName.EventTimestamp.name())))
+                .orElse(null);
+        if (prevailingStageEvent == null) {
+            prevailingStageEvent = getDefaultJourneyStageEvent(customerSpace, accountId,
+                    cutoffTimestamp.toEpochMilli());
+            if (prevailingStageEvent != null)
+                dataPage.getData().add(prevailingStageEvent);
+        } else {
+            prevailingStageEvent.put(InterfaceName.EventTimestamp.name(), cutoffTimestamp.toEpochMilli());
+        }
+        return prevailingStageEvent;
     }
 
     private Map<String, Object> getDefaultJourneyStageEvent(String customerSpace, String accountId,
@@ -203,9 +208,9 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         stageEvent.put(InterfaceName.StreamType.name(), AtlasStream.StreamType.JourneyStage.name());
         stageEvent.put(InterfaceName.AccountId.name(), accountId);
         stageEvent.put(InterfaceName.Detail1.name(), defaultStageConfig.getStageName());
-        stageEvent.put(InterfaceName.EventTimestamp.name(), eventTimestamp);
         stageEvent.put(InterfaceName.EventType.name(),
                 ActivityStoreConstants.JourneyStage.STREAM_EVENT_TYPE_JOURNEYSTAGECHANGE);
+        stageEvent.put(InterfaceName.EventTimestamp.name(), eventTimestamp);
         stageEvent.put(InterfaceName.Source.name(), ActivityStoreConstants.JourneyStage.STREAM_SOURCE_ATLAS);
         return stageEvent;
     }
