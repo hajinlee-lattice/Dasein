@@ -2,12 +2,12 @@ package com.latticeengines.domain.exposed.pmml;
 
 import javax.xml.transform.sax.SAXSource;
 
+import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLFilterImpl;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 public class SkipFilter extends XMLFilterImpl {
 
@@ -25,7 +25,7 @@ public class SkipFilter extends XMLFilterImpl {
     }
 
     public static SAXSource apply(InputSource source, String name) throws SAXException {
-        XMLReader reader = XMLReaderFactory.createXMLReader();
+        XMLReader reader = PmmlModelUtils.getSafeXmlReader();
 
         SkipFilter filter = new SkipFilter(reader, name);
 

@@ -23,6 +23,7 @@ import org.jpmml.evaluator.UnsupportedFeatureException;
 import org.jpmml.model.ImportFilter;
 import org.jpmml.model.JAXBUtil;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
@@ -124,9 +125,19 @@ public final class PmmlModelUtils {
         return getPmmlFields(pmml);
     }
 
+    public static XMLReader getSafeXmlReader() throws SAXException {
+        XMLReader reader = XMLReaderFactory.createXMLReader();
+        reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        // This may not be strictly required as DTDs shouldn't be allowed at all, per previous line.
+        reader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        reader.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        reader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        return reader;
+    }
+
     public static PMML getPMMLWithOriginalVersion(InputStream pmmlStream) throws Exception {
         InputSource source = new InputSource(pmmlStream);
-        XMLReader reader = XMLReaderFactory.createXMLReader();
+        XMLReader reader = getSafeXmlReader();
         LEImportFilter importFilter = new LEImportFilter(reader);
         XMLFilter skipSegmentationFilter = new SkipFilter(reader, "Segmentation");
         skipSegmentationFilter.setParent(importFilter);
@@ -145,7 +156,7 @@ public final class PmmlModelUtils {
 
     public static PMML getPMML(InputStream pmmlStream, boolean skipSections) throws Exception {
         if (skipSections) {
-            XMLReader reader = XMLReaderFactory.createXMLReader();
+            XMLReader reader = getSafeXmlReader();
             ImportFilter importFilter = new ImportFilter(reader);
             XMLFilter skipSegmentationFilter = new SkipFilter(reader, "Segmentation");
             skipSegmentationFilter.setParent(importFilter);

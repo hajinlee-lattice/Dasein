@@ -75,6 +75,8 @@ public final class SAMLUtils {
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
             TransformerFactory tf = TransformerFactory.newInstance();
+            // tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            // tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             Transformer transformer = tf.newTransformer();
             transformer.transform(source, result);
             return writer.toString();
