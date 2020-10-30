@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -50,6 +51,8 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
 
     private static final String ratingId = RatingEngine.generateIdStr();
     private static final String destinationAccountId = "D41000001Q3z4EAC";
+    private static long CURRENT_TIME_MILLIS = System.currentTimeMillis();
+    private String org1 = "org1_" + CURRENT_TIME_MILLIS;
     private static final int completeContactPerAccount = 10;
     private static final int addOrDeleteContactPerAccount = 5;
     private String addAccountData;
@@ -66,6 +69,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     private boolean createRecommendationDataFrame;
     private boolean createAddCsvDataFrame;
     private boolean createDeleteCsvDataFrame;
+    private boolean launchToDb;
     Map<String, DataUnit> inputUnitsCopy = new HashMap<>();
 
     @Override
@@ -85,44 +89,44 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
      */
 
     @Test(groups = "functional", dataProvider = "dataFrameProvider")
-    public void runTest(boolean createRecommendationDataFrameVal, boolean createAddCsvDataFrameVal,
+    public void runTest(boolean launchToDbDev, boolean createRecommendationDataFrameVal, boolean createAddCsvDataFrameVal,
             boolean createDeleteCsvDataFrameVal) {
         createRecommendationDataFrame = createRecommendationDataFrameVal;
         createAddCsvDataFrame = createAddCsvDataFrameVal;
         createDeleteCsvDataFrame = createDeleteCsvDataFrameVal;
-        overwriteInputUnits();
-        CreateDeltaRecommendationConfig sparkConfig = generateCreateDeltaRecommendationConfig();
+        launchToDb = launchToDbDev;
+        overwriteInputUnits(launchToDbDev);
+        CreateDeltaRecommendationConfig sparkConfig = generateCreateDeltaRecommendationConfig(launchToDbDev);
         SparkJobResult result = runSparkJob(CreateDeltaRecommendationsJob.class, sparkConfig);
         verifyResult(result);
     }
 
-    private void overwriteInputUnits() {
+    private void overwriteInputUnits(boolean launchToDb) {
+        Map<String, DataUnit> inputUnits = new HashMap<>();
         if (createRecommendationDataFrame && createAddCsvDataFrame && createDeleteCsvDataFrame) {
             // do nothing
         } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
             // only have delete Accounts and delete contacts
-            Map<String, DataUnit> inputUnits = new HashMap<>();
-            inputUnitsCopy.forEach((k, v) -> {
-                inputUnits.put(k, v);
-            });
+            inputUnitsCopy.forEach((k, v) -> inputUnits.put(k, v));
             inputUnits.put("Input0", null);
             inputUnits.put("Input1", null);
             inputUnits.put("Input4", null);
             setInputUnits(inputUnits);
         } else if (createRecommendationDataFrame && createAddCsvDataFrame && !createDeleteCsvDataFrame) {
-            Map<String, DataUnit> inputUnits = new HashMap<>();
-            inputUnitsCopy.forEach((k, v) -> {
-                inputUnits.put(k, v);
-            });
-            inputUnits.put("Input1", null); // addContact is null, as this
-                                            // mimics Account-based S3 Launch
-            inputUnits.put("Input2", null);
-            inputUnits.put("Input3", null);
+            if (launchToDb) {
+                inputUnitsCopy.forEach((k, v) -> inputUnits.put(k, v));
+            } else {
+                inputUnitsCopy.forEach((k, v) -> inputUnits.put(k, v));
+                inputUnits.put("Input1", null); // addContact is null, as this
+                // mimics Account-based S3 Launch
+                inputUnits.put("Input2", null);
+                inputUnits.put("Input3", null);
+            }
             setInputUnits(inputUnits);
         }
     }
 
-    private CreateDeltaRecommendationConfig generateCreateDeltaRecommendationConfig() {
+    private CreateDeltaRecommendationConfig generateCreateDeltaRecommendationConfig(boolean launchToDb) {
         if (createRecommendationDataFrame && createAddCsvDataFrame && createDeleteCsvDataFrame) {
             targetNum = 3;
         } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
@@ -131,7 +135,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             targetNum = 2;
         }
         CreateDeltaRecommendationConfig sparkConfig = new CreateDeltaRecommendationConfig();
-        DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext = generateDeltaCampaignLaunchSparkContextForS3();
+        DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext = generateDeltaCampaignLaunchSparkContext(launchToDb);
         sparkConfig.setDeltaCampaignLaunchSparkContext(deltaCampaignLaunchSparkContext);
         sparkConfig.setTargetNums(targetNum);
         return sparkConfig;
@@ -199,12 +203,16 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             AvroUtils.AvroFilesIterator addCsvDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration, PathUtils.toAvroGlob(addCsvDf.getPath()));
             Schema schema = addCsvDfIterator.getSchema();
             List<String> contactColumns = CampaignLaunchUtils.generateContactColsForS3();
-            for (String contactColumn : contactColumns) {
-                Schema.Field field = schema.getField(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn);
-                if (InterfaceName.ContactId.name().equals(contactColumn)) {
-                    Assert.assertNotNull(field);
-                } else {
-                    Assert.assertNull(field);
+            if (launchToDb) {
+                verifyContactColumns(schema);
+            } else {
+                for (String contactColumn : contactColumns) {
+                    Schema.Field field = schema.getField(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn);
+                    if (InterfaceName.ContactId.name().equals(contactColumn)) {
+                        Assert.assertNotNull(field);
+                    } else {
+                        Assert.assertNull(field);
+                    }
                 }
             }
         }
@@ -225,7 +233,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         }
     }
 
-    private DeltaCampaignLaunchSparkContext generateDeltaCampaignLaunchSparkContextForS3() {
+    private DeltaCampaignLaunchSparkContext generateDeltaCampaignLaunchSparkContext(boolean launchToDb) {
         Tenant tenant = new Tenant("DeltaCampaignLaunchTestNG");
         tenant.setPid(1L);
         PlayLaunch playLaunch = new PlayLaunch();
@@ -233,6 +241,12 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         playLaunch.setId(PlayLaunch.generateLaunchId());
         playLaunch.setDestinationAccountId(destinationAccountId);
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch.setDestinationOrgId(org1);
+        if (launchToDb) {
+            playLaunch.setDestinationSysName(CDLExternalSystemName.Salesforce);
+        } else {
+            playLaunch.setDestinationSysName(CDLExternalSystemName.AWS_S3);
+        }
         MetadataSegment segment = new MetadataSegment();
         Play play = new Play();
         play.setTargetSegment(segment);
@@ -281,6 +295,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         deltaCampaignLaunchSparkContext.setCreateRecommendationDataFrame(createRecommendationDataFrame);
         deltaCampaignLaunchSparkContext.setCreateAddCsvDataFrame(createAddCsvDataFrame);
         deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataFrame(createDeleteCsvDataFrame);
+        deltaCampaignLaunchSparkContext.setPublishRecommendationsToDB(launchToDb);
         return deltaCampaignLaunchSparkContext;
     }
 
@@ -376,11 +391,9 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         deleteContacts = new Object[(deleteAccounts.length) * addOrDeleteContactPerAccount][contactFields.size()];
         for (int i = 0; i < deleteAccounts.length; i++) {
             for (int j = 0; j < addOrDeleteContactPerAccount; j++) {
-                deleteContacts[addOrDeleteContactPerAccount * i + j][0] = String.valueOf(i + 10) + "L";
-                deleteContacts[addOrDeleteContactPerAccount * i + j][1] = String
-                        .valueOf(addOrDeleteContactPerAccount * i + j);
-                deleteContacts[addOrDeleteContactPerAccount * i + j][2] = String.valueOf(deleteAccounts.length * i + j)
-                        + "L";
+                deleteContacts[addOrDeleteContactPerAccount * i + j][0] = (i + 10) + "L";
+                deleteContacts[addOrDeleteContactPerAccount * i + j][1] = String.valueOf(addOrDeleteContactPerAccount * i + j);
+                deleteContacts[addOrDeleteContactPerAccount * i + j][2] = (deleteAccounts.length * i + j) + "L";
                 deleteContacts[addOrDeleteContactPerAccount * i + j][3] = "Kind Inc.";
                 deleteContacts[addOrDeleteContactPerAccount * i + j][4] = "michael@kind.com";
                 deleteContacts[addOrDeleteContactPerAccount * i + j][5] = "Michael Jackson";
@@ -400,11 +413,9 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         completeContacts = new Object[(addAccounts.length - 1) * completeContactPerAccount][contactFields.size()];
         for (int i = 0; i < (addAccounts.length - 1); i++) {
             for (int j = 0; j < completeContactPerAccount; j++) {
-                completeContacts[completeContactPerAccount * i + j][0] = String.valueOf(i) + "L";
-                completeContacts[completeContactPerAccount * i + j][1] = String
-                        .valueOf(completeContactPerAccount * i + j);
-                completeContacts[completeContactPerAccount * i + j][2] = String.valueOf(addAccounts.length * i + j)
-                        + "L";
+                completeContacts[completeContactPerAccount * i + j][0] = i + "L";
+                completeContacts[completeContactPerAccount * i + j][1] = String.valueOf(completeContactPerAccount * i + j);
+                completeContacts[completeContactPerAccount * i + j][2] = (addAccounts.length * i + j) + "L";
                 completeContacts[completeContactPerAccount * i + j][3] = "Kind Inc.";
                 completeContacts[completeContactPerAccount * i + j][4] = "michael@kind.com";
                 completeContacts[completeContactPerAccount * i + j][5] = "Michael Jackson";
@@ -424,10 +435,11 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
 
     @DataProvider
     public Object[][] dataFrameProvider() {
-        return new Object[][] { //
-                { true, true, true }, // generate all three dataFrames
-                { false, false, true }, // only generate delete csv dataFrame
-                { true, true, false } // Account only case for two data Frames
+        return new Object[][]{ // the first parameter indicate is a connector launch to DB or not
+                {false, true, true, true}, // generate all three dataFrames
+                {false, false, false, true}, // only generate delete csv dataFrame
+                {false, true, true, false},// Account only case for two data Frames
+                {true, true, true, false} // launch to DB case
         };
     }
 

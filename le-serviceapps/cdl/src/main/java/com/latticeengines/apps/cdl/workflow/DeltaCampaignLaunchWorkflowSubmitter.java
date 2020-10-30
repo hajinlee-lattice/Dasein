@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -53,6 +54,7 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
 
     public Long submit(PlayLaunch playLaunch, String channelId) {
         Map<String, String> inputProperties = new HashMap<>();
+        String executionId = UUID.randomUUID().toString();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "deltaCampaignLaunchWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_NAME, playLaunch.getPlay().getName());
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID, playLaunch.getLaunchId());
@@ -60,6 +62,8 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
         LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByOrgId(playLaunch.getDestinationOrgId(),
                 playLaunch.getDestinationSysType());
         DataCollection.Version version = dataCollectionService.getActiveVersion(getCustomerSpace().toString());
+        Map<String, String> contactDisplayNameMap = getContactDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap);
+        replaceSfdcContactId(playLaunch, contactDisplayNameMap);
         DeltaCampaignLaunchWorkflowConfiguration configuration = new DeltaCampaignLaunchWorkflowConfiguration.Builder()
                 .workflow("deltaCampaignLaunchWorkflow") //
                 .customer(getCustomerSpace()) //
@@ -70,9 +74,9 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
                 .playLaunchDestination(playLaunch.getDestinationSysType()) //
                 .accountAttributeExportDiplayNames(
                         getAccountDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
-                .contactAttributeExportDiplayNames(
-                        getContactDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
-                .exportPublishPlayLaunch(playLaunch, enableExternalLaunch(playLaunch, lookupIdMap)).build();
+                .contactAttributeExportDiplayNames(contactDisplayNameMap) //
+                .exportPublishPlayLaunch(playLaunch, enableExternalLaunch(playLaunch, lookupIdMap))
+                .exportPublishPlayLaunch(playLaunch, enableExternalLaunch(playLaunch, lookupIdMap)).executionId(executionId).build();
         ApplicationId appId = workflowJobService.submit(configuration);
 
         if (FakeApplicationId.isFakeApplicationId(appId.toString())) {
@@ -83,8 +87,18 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
+    private void replaceSfdcContactId(PlayLaunch playLaunch, Map<String, String> contactDisplayNameMap) {
+        String sfdcContactId = playLaunch.getDestinationContactId();
+        if (StringUtils.isNotEmpty(sfdcContactId)) {
+            String key = "sfdcContactId";
+            String value = contactDisplayNameMap.get(key);
+            contactDisplayNameMap.remove(key);
+            contactDisplayNameMap.put(sfdcContactId, value);
+        }
+    }
+
     private Map<String, String> getContactDisplayNameMap(CDLExternalSystemType destinationSysType,
-            LookupIdMap lookupIdMap) {
+                                                         LookupIdMap lookupIdMap) {
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
                 ? "com/latticeengines/cdl/play/launch/s3/contact_display_names.csv"
                 : "com/latticeengines/cdl/play/launch/default/contact_display_names.csv";
@@ -92,7 +106,7 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private Map<String, String> getAccountDisplayNameMap(CDLExternalSystemType destinationSysType,
-            LookupIdMap lookupIdMap) {
+                                                         LookupIdMap lookupIdMap) {
         String filePath = lookupIdMap.getExternalSystemName() == CDLExternalSystemName.AWS_S3
                 ? "com/latticeengines/cdl/play/launch/s3/account_display_names.csv"
                 : "com/latticeengines/cdl/play/launch/default/account_display_names.csv";

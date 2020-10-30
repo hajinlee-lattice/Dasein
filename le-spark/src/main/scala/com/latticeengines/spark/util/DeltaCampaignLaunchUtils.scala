@@ -79,7 +79,9 @@ private[spark] object DeltaCampaignLaunchUtils {
     if (StringUtils.isBlank(companyName)) {
       companyName = checkAndGet(account, InterfaceName.LDC_Name.name())
     }
-
+    synchronizationDestination = playLaunchContext.getSynchronizationDestination
+    destinationOrgId = playLaunchContext.getDestinationOrgId
+    destinationSysType = playLaunchContext.getDestinationSysType
     if (playLaunchContext.getRatingId != null) {
       score = checkAndGet(account,
         playLaunchContext.getRatingId + PlaymakerConstants.RatingScoreColumnSuffix)
@@ -93,10 +95,6 @@ private[spark] object DeltaCampaignLaunchUtils {
       expectedValue = checkAndGet(account,
         playLaunchContext.getRatingId + PlaymakerConstants.RatingEVColumnSuffix)
       monetaryValue = if (StringUtils.isNotEmpty(expectedValue)) Some(expectedValue.toDouble) else None
-      synchronizationDestination = playLaunchContext.getSynchronizationDestination
-      destinationOrgId = playLaunchContext.getDestinationOrgId
-      destinationSysType = playLaunchContext.getDestinationSysType
-
       priorityId =
         if (bucket != null)
           bucket.name()

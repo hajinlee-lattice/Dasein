@@ -329,7 +329,15 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("matchedRate")
     @Transient
     private Long matchedRate;
-    // # LaunchStats
+
+    @JsonProperty("addRecommendationsTable")
+    @Column(name = "ADD_RECOMMENDATIONS_TABLE_NAME")
+    private String addRecommendationsTable;
+
+    @JsonProperty("deleteRecommendationsTable")
+    @Column(name = "DELETE_RECOMMENDATIONS_TABLE_NAME")
+    private String deleteRecommendationsTable;
+
 
     public PlayLaunch() {
     }
@@ -952,6 +960,12 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         if (StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())) {
             this.setRemoveContactsTable(playLaunch.getRemoveContactsTable());
         }
+        if (StringUtils.isNotBlank(playLaunch.getAddRecommendationsTable())) {
+            this.setAddRecommendationsTable(playLaunch.getAddRecommendationsTable());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getDeleteRecommendationsTable())) {
+            this.setDeleteRecommendationsTable(playLaunch.getDeleteRecommendationsTable());
+        }
 
         // Launch Configuration
         if (CollectionUtils.isNotEmpty(playLaunch.getBucketsToLaunch())) {
@@ -979,5 +993,21 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         if (StringUtils.isNotBlank(playLaunch.getUpdatedBy())) {
             this.setUpdatedBy(playLaunch.getUpdatedBy());
         }
+    }
+
+    public String getAddRecommendationsTable() {
+        return addRecommendationsTable;
+    }
+
+    public void setAddRecommendationsTable(String addRecommendationsTable) {
+        this.addRecommendationsTable = addRecommendationsTable;
+    }
+
+    public String getDeleteRecommendationsTable() {
+        return deleteRecommendationsTable;
+    }
+
+    public void setDeleteRecommendationsTable(String deleteRecommendationsTable) {
+        this.deleteRecommendationsTable = deleteRecommendationsTable;
     }
 }

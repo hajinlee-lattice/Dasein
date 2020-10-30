@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
@@ -80,6 +81,8 @@ public class ImportDeltaCalculationResultsFromS3
         String delContacts = playLaunch.getRemoveContactsTable();
         String completeContacts = playLaunch.getCompleteContactsTable();
         AudienceType audienceType = channelConfig.getAudienceType();
+        CDLExternalSystemName systemName = playLaunch.getDestinationSysName();
+        boolean launchToDb = CDLExternalSystemName.Salesforce.equals(systemName) || CDLExternalSystemName.Eloqua.equals(systemName);
         boolean isLiveRampLaunch = channelConfig instanceof LiveRampChannelConfig;
 
         if (isLiveRampLaunch) {
@@ -110,7 +113,7 @@ public class ImportDeltaCalculationResultsFromS3
                     tableNames.add(completeContacts);
                 }
             }
-            if (StringUtils.isNotEmpty(delAccounts)) {
+            if (StringUtils.isNotEmpty(delAccounts) && !launchToDb) {
                 totalDfs += 1; // delete csv
                 putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME,
                         Boolean.toString(true));
@@ -134,7 +137,7 @@ public class ImportDeltaCalculationResultsFromS3
                     throw new RuntimeException("Wrong dataframe combinations for " + addContacts);
                 }
             }
-            if (StringUtils.isNotEmpty(delContacts)) {
+            if (StringUtils.isNotEmpty(delContacts) && !launchToDb) {
                 if (StringUtils.isNotEmpty(delAccounts)) {
                     totalDfs += 1;
                     putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME,

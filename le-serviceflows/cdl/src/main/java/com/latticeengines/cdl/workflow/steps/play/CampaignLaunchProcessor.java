@@ -295,6 +295,7 @@ public class CampaignLaunchProcessor {
                 .play(play) //
                 .playLaunchId(playLaunchId) //
                 .playLaunch(playLaunch) //
+                .channel(playLaunchChannel)
                 .ratingId(ratingId) //
                 .ratingEngine(ratingEngine) //
                 .publishedIterationId(modelId) //

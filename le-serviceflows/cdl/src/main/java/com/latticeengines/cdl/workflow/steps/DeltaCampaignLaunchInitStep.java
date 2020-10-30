@@ -26,19 +26,24 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.CreateDeltaRecommendationsJob;
 
@@ -72,6 +77,9 @@ public class DeltaCampaignLaunchInitStep
 
     @Inject
     private CampaignLaunchUtils campaignLaunchUtils;
+
+    @Inject
+    private PlayProxy playProxy;
 
     private PlayLaunchContext playLaunchContext;
 
@@ -132,12 +140,17 @@ public class DeltaCampaignLaunchInitStep
                 .setAccountColsRecNotIncludedStd(processedFieldMappingMetadata.getAccountColsRecNotIncludedStd());
         deltaCampaignLaunchSparkContext
                 .setAccountColsRecNotIncludedNonStd(processedFieldMappingMetadata.getAccountColsRecNotIncludedNonStd());
-        deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
         deltaCampaignLaunchSparkContext.setDataDbDriver(dataDbDriver);
         deltaCampaignLaunchSparkContext.setDataDbUrl(dataDbUrl);
         deltaCampaignLaunchSparkContext.setDataDbUser(dataDbUser);
         deltaCampaignLaunchSparkContext.setPublishRecommendationsToDB(campaignLaunchUtils
                 .shouldPublishRecommendationsToDB(customerSpace, playLaunch.getDestinationSysName()));
+        if (deltaCampaignLaunchSparkContext.getPublishRecommendationsToDB() &&
+                !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName())) {
+            deltaCampaignLaunchSparkContext.setContactCols(config.getContactDisplayNames().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()));
+        } else {
+            deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
+        }
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();
@@ -203,7 +216,7 @@ public class DeltaCampaignLaunchInitStep
     @Override
     protected void postJobExecution(SparkJobResult result) {
         // TODO define the launched account and contacts in the context of delta
-
+        DeltaCampaignLaunchInitStepConfiguration config = getConfiguration();
         int resultDataFrameNum = result.getTargets().size();
         log.info("resultDataFrameNum=" + resultDataFrameNum);
         log.info(result.getOutput());
@@ -213,53 +226,77 @@ public class DeltaCampaignLaunchInitStep
                 totalAccountsAvailableForLaunch, totalContactsAvailableForLaunch));
         long launchedAccountNum = 0L;
         long launchedContactNum = 0L;
-
+        String primaryKey = getPrimaryKey();
         if (createAddCsvDataFrame && !createDeleteCsvDataFrame) {
             String recommendationTargetPath = result.getTargets().get(0).getPath();
             log.info("recommendationTargetPath: " + recommendationTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recommendationTargetPath));
-            String addCsvTargetPath = result.getTargets().get(1).getPath();
-            log.info("addCsvTargetPath: " + addCsvTargetPath);
-            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
-                    PathUtils.toAvroGlob(addCsvTargetPath));
-
-            launchedAccountNum = result.getTargets().get(1).getCount();
+            HdfsDataUnit addRecommendationDataUnit = result.getTargets().get(1);
+            launchedAccountNum = addRecommendationDataUnit.getCount();
             // return a string of array.
             // the first element is the contact num for add csv
             launchedContactNum = JsonUtils
                     .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+            processHDFSDataUnit(String.format("AddedRecommendations_%s", config.getExecutionId()), addRecommendationDataUnit, primaryKey, ADDED_RECOMMENDATION_TABLE);
         } else if (createAddCsvDataFrame && createDeleteCsvDataFrame) {
             String recommendationTargetPath = result.getTargets().get(0).getPath();
             log.info("recommendationTargetPath: " + recommendationTargetPath);
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recommendationTargetPath));
-            String addCsvTargetPath = result.getTargets().get(1).getPath();
-            log.info("addCsvTargetPath: " + addCsvTargetPath);
-            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH,
-                    PathUtils.toAvroGlob(addCsvTargetPath));
-            String deleteCsvTargetPath = result.getTargets().get(2).getPath();
-            log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
-            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
-                    PathUtils.toAvroGlob(deleteCsvTargetPath));
-
-            launchedAccountNum = result.getTargets().get(1).getCount();
+            HdfsDataUnit addRecommendationDataUnit = result.getTargets().get(1);
+            HdfsDataUnit deleteRecommendationDataUnit = result.getTargets().get(2);
+            launchedAccountNum = addRecommendationDataUnit.getCount();
             // return a string of array.
             // the first element is the contact num for add csv
             launchedContactNum = JsonUtils
                     .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+            processHDFSDataUnit(String.format("AddedRecommendations_%s", config.getExecutionId()), addRecommendationDataUnit, primaryKey, ADDED_RECOMMENDATION_TABLE);
+            processHDFSDataUnit(String.format("DeletedRecommendations_%s", config.getExecutionId()), deleteRecommendationDataUnit, primaryKey, DELETED_RECOMMENDATION_TABLE);
         } else if (!createAddCsvDataFrame && createDeleteCsvDataFrame) {
-            String deleteCsvTargetPath = result.getTargets().get(0).getPath();
-            log.info("deleteCsvTargetPath: " + deleteCsvTargetPath);
-            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH,
-                    PathUtils.toAvroGlob(deleteCsvTargetPath));
+            HdfsDataUnit deleteRecommendationDataUnit = result.getTargets().get(0);
+            processHDFSDataUnit(String.format("DeletedRecommendations_%s", config.getExecutionId()), deleteRecommendationDataUnit, primaryKey, DELETED_RECOMMENDATION_TABLE);
         } else {
             throw new LedpException(LedpCode.LEDP_70000);
         }
-
+        playProxy.updatePlayLaunch(customerSpace.getTenantId(), playLaunchContext.getPlayName(),
+                playLaunchContext.getPlayLaunchId(), playLaunchContext.getPlayLaunch());
         long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
         long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
         log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
         log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
+    }
+
+    private String getPrimaryKey() {
+        AudienceType audienceType = playLaunchContext.getChannel().getChannelConfig().getAudienceType();
+        if (audienceType.equals(AudienceType.ACCOUNTS)) {
+            return InterfaceName.AccountId.name();
+        } else {
+            return DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name();
+        }
+    }
+
+    private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String tableNameKey) {
+        Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
+        metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
+        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+        String metadataTableName = dataUnitTable.getName();
+        String path = dataUnitTable.getExtracts().get(0).getPath();
+        putObjectInContext(tableNameKey, metadataTableName);
+        switch (tableNameKey) {
+            case ADDED_RECOMMENDATION_TABLE:
+                playLaunch.setAddRecommendationsTable(metadataTableName);
+                putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH, path);
+                log.info("addCsvTargetPath: " + path);
+                break;
+            case DELETED_RECOMMENDATION_TABLE:
+                playLaunch.setDeleteRecommendationsTable(metadataTableName);
+                putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH, path);
+                log.info("deleteCsvTargetPath: " + path);
+                break;
+            default:
+                log.info("Will not update play launch data.");
+        }
+        log.info(String.format("Created table %s.", tableName));
     }
 }
