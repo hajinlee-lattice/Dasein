@@ -24,6 +24,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.service.AthenaQueryService;
 import com.latticeengines.query.factory.AthenaQueryProvider;
+import com.latticeengines.query.factory.PrestoQueryProvider;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.querydsl.sql.SQLQuery;
 
@@ -69,7 +70,7 @@ public class QueryEvaluatorService {
             } else {
                 try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
                     timer.setThreshold(0L);
-                    sqlQuery.setUseLiterals(false);
+                    sqlQuery.setUseLiterals(PrestoQueryProvider.PRESTO_USER.equals(sqlUser));
                     return sqlQuery.fetchCount();
                 }
             }

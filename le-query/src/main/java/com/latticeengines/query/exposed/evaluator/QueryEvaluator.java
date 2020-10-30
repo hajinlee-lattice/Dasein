@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.prestodb.exposed.service.AthenaService;
 import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.factory.AthenaQueryProvider;
+import com.latticeengines.query.factory.PrestoQueryProvider;
 import com.querydsl.sql.SQLQuery;
 
 import reactor.core.publisher.Flux;
@@ -76,6 +77,7 @@ public class QueryEvaluator {
         if (AthenaQueryProvider.ATHENA_USER.equals(sqlUser)) {
             flux = getAthenaFlux(sqlquery, attrNames, offset, limit);
         } else {
+            sqlquery.setUseLiterals(PrestoQueryProvider.PRESTO_USER.equals(sqlUser));
             flux = getSQLFlux(sqlquery, attrNames, offset, limit);
         }
         return flux.subscribeOn(getScheduler());
@@ -86,7 +88,6 @@ public class QueryEvaluator {
         AtomicLong iter = new AtomicLong(0);
         return Flux.generate(() -> {
             ResultSet results;
-            sqlquery.setUseLiterals(false);
             results = sqlquery.getResults();
             ResultSetMetaData metadata = results.getMetaData();
             int fetchSize = getFetchSize(metadata.getColumnCount());
