@@ -390,6 +390,7 @@ public class BatonServiceImpl implements BatonService {
             doc.setSpace(space);
         } catch (Exception e) {
             log.error(String.format("Error retrieving tenant %s in %s", tenantId, contractId));
+            return null;
         }
         return doc;
     }

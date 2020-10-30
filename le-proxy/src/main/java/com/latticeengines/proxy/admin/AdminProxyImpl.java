@@ -2,14 +2,15 @@ package com.latticeengines.proxy.admin;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
+import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.admin.AdminProxy;
 
 @Component("adminProxy")
-public class AdminProxyImpl extends MicroserviceRestApiProxy implements AdminProxy {
+public class AdminProxyImpl extends BaseRestApiProxy implements AdminProxy {
 
     protected AdminProxyImpl() {
-        super("admin");
+        super(PropertyUtils.getProperty("common.admin.url"), "admin");
     }
 
     @Override
