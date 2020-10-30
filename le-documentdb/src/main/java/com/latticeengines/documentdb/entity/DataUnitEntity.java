@@ -12,7 +12,8 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 
 @Entity
 @Table(name = "DataUnit", //
-        indexes = { @Index(name = "IX_NAME", columnList = "Name") }, //
+        indexes = { @Index(name = "IX_NAME", columnList = "Name"),
+                @Index(name = "IX_DATATEMPLATEID_ROLES", columnList = "TenantId, DataTemplateId, Roles") }, //
         uniqueConstraints = {
                 @UniqueConstraint(name = "UX_NAME_TYPE", columnNames = { "TenantId", "Name", "StorageType" }) })
 public class DataUnitEntity extends BaseMultiTenantDocEntity<DataUnit> {
