@@ -89,18 +89,18 @@ public class BulkMatchService {
         } while (!status.isTerminal());
         LogManager.getLogger(BaseRestApiProxy.class).setLevel(level);
 
-        if (status == MatchStatus.PARTIAL_SUCCESS || status == MatchStatus.FAILED) {
-            try {
-                log.info(HdfsUtils.getFilesForDir(yarnConfiguration, matchCommand.getResultLocation()).toString());
-                // TODO this is the folder where the batch error files are. See HdfsPathBuilder and ParallelBlockExecution::handleFailedBlock for file name/content format
-            } catch (IOException ex) {
-                log.error("Cannot read folder: " + ex);
-            }
-        }
         if (!MatchStatus.FINISHED.equals(status) && !MatchStatus.PARTIAL_SUCCESS.equals(status)) {
             IllegalStateException inner = new IllegalStateException(
                     "The terminal status of match is " + status + " instead of " + MatchStatus.FINISHED);
             throw new LedpException(LedpCode.LEDP_00006, inner);
+        }
+
+
+        try {
+            log.info(HdfsUtils.getFilesForDir(yarnConfiguration, matchCommand.getResultLocation()).toString());
+            // TODO this is the folder where the batch error files are. See HdfsPathBuilder and ParallelBlockExecution::handleFailedBlock for file name/content format
+        } catch (IOException ex) {
+            log.error("Cannot read folder: " + ex);
         }
         return matchCommand;
     }

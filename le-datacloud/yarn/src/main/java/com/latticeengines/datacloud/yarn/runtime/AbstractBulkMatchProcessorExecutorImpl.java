@@ -622,7 +622,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         if (outputRecord.getErrorCodes() != null) {
             for (Map.Entry<OutputRecord.ErrorType, List<String>> entry : outputRecord.getErrorCodes().entrySet()) {
                 if (errorCodes.length() > 0) {
-                    errorCodes.append('/');
+                    errorCodes.append("||");
                 }
                 if (errorTypes.length() > 0) {
                     errorTypes.append('|');

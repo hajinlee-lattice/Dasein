@@ -49,6 +49,9 @@ public class DirectPlusRealTimeLookupServiceImpl extends BaseDnBLookupServiceImp
     @Value("${datacloud.dnb.direct.plus.errorcode.jsonpath}")
     private String errorCodeXpath;
 
+    @Value("${datacloud.dnb.direct.plus.errormsg.jsonpath}")
+    private String errorMsgXpath;
+
     @Override
     protected DirectPlusRealTimeLookupServiceImpl self() {
         return _self;
@@ -118,14 +121,16 @@ public class DirectPlusRealTimeLookupServiceImpl extends BaseDnBLookupServiceImp
             context.setDnbCode(parseDnBHttpError(httpEx));
 
             String response = ((HttpClientErrorException) ex).getResponseBodyAsString();
-            String errorCode = (String) retrieveJsonValueFromResponse(getErrorCodePath(), response, false);
+            String directPlusError = ((String) retrieveJsonValueFromResponse(getErrorCodePath(), response, false))
+                    + ":" + (String) retrieveJsonValueFromResponse(getErrorMsgPath(), response, false);
 
-            context.setRawError(errorCode);
+            context.setRawError(directPlusError);
         } else if (ex instanceof LedpException) {
             if (ex.getCause() instanceof HttpClientErrorException) {
                 String response = ((HttpClientErrorException) ex.getCause()).getResponseBodyAsString();
-                String errorCode = (String) retrieveJsonValueFromResponse(getErrorCodePath(), response, false);
-                context.setRawError(errorCode);
+                String directPlusError = (String) retrieveJsonValueFromResponse(getErrorCodePath(), response, false)
+                        + ":" + (String) retrieveJsonValueFromResponse(getErrorMsgPath(), response, false);
+                context.setRawError(directPlusError);
             }
             LedpException ledpEx = (LedpException) ex;
             // If DnB cannot find duns for match input, HttpStatus.NOT_FOUND (LedpCode.LEDP_25038) is returned.
@@ -194,6 +199,10 @@ public class DirectPlusRealTimeLookupServiceImpl extends BaseDnBLookupServiceImp
     @Override
     protected String getErrorCodePath() {
         return errorCodeXpath;
+    }
+
+    protected String getErrorMsgPath() {
+        return errorMsgXpath;
     }
 
     @Override

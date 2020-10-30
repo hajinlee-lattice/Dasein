@@ -89,6 +89,9 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     @Value("${datacloud.dnb.direct.plus.errorcode.jsonpath}")
     private String errorCodeXpath;
 
+    @Value("${datacloud.dnb.direct.plus.errormsg.jsonpath}")
+    private String errorMsgXpath;
+
     @Inject
     private DynamoItemService dynamoItemService;
 
@@ -209,7 +212,8 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     }
 
     private Map<String, Object> generateErrorMap(HttpClientErrorException e) {
-        String errorCode = JsonPath.parse(e.getResponseBodyAsString()).read(errorCodeXpath);
+        String errorCode = JsonPath.parse(e.getResponseBodyAsString()).read(errorCodeXpath)
+                + ":" + JsonPath.parse(e.getResponseBodyAsString()).read(errorMsgXpath);
         return Collections.singletonMap(PrimeAccount.ENRICH_ERROR_CODE, errorCode);
     }
 
