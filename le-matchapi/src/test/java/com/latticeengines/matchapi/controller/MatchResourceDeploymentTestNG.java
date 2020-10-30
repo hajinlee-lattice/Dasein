@@ -43,6 +43,7 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -475,9 +476,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getResult().size(), 1);
         Assert.assertFalse(result.getResult().get(0).isMatched());
-        Assert.assertTrue(result.getResult().get(0).getErrorCodes().containsKey(OutputRecord.ErrorType.MATCH_ERROR));
-        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(OutputRecord.ErrorType.MATCH_ERROR).size(),1);
-        Assert.assertTrue(result.getResult().get(0).getErrorCodes().get(OutputRecord.ErrorType.MATCH_ERROR).get(0).startsWith("10002:"));
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().containsKey(MatchCoreErrorConstants.ErrorType.MATCH_ERROR));
+        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(MatchCoreErrorConstants.ErrorType.MATCH_ERROR).size(),1);
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().get(MatchCoreErrorConstants.ErrorType.MATCH_ERROR).get(0).startsWith("10002:"));
     }
 
     @Test(groups = "deployment")
@@ -488,9 +489,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getResult().size(), 1);
         Assert.assertFalse(result.getResult().get(0).isMatched());
-        Assert.assertTrue(result.getResult().get(0).getErrorCodes().containsKey(OutputRecord.ErrorType.APPEND_ERROR));
-        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(OutputRecord.ErrorType.APPEND_ERROR).size(),1);
-        Assert.assertTrue(result.getResult().get(0).getErrorCodes().get(OutputRecord.ErrorType.APPEND_ERROR).get(0).startsWith("40001:"));
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().containsKey(MatchCoreErrorConstants.ErrorType.APPEND_ERROR));
+        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(MatchCoreErrorConstants.ErrorType.APPEND_ERROR).size(),1);
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().get(MatchCoreErrorConstants.ErrorType.APPEND_ERROR).get(0).startsWith("40001:"));
     }
 
     @DataProvider(name = "recentApprovedVersions", parallel = true)

@@ -84,8 +84,9 @@ public final class MatchConstants {
     public static final String INT_MATCHED_PHONE = "__Matched_Phone__";
 
     // indicate any errors that occur during match/append lookup
-    public static final String MATCH_ERROR_TYPE = "Match_Error_Type";
-    public static final String MATCH_ERROR_CODE = "Match_Error_Code";
+    public static final String MATCH_ERROR_TYPE = "MatchErrorType";
+    public static final String MATCH_ERROR_CODE = "MatchErrorCode";
+    public static final String MATCH_ERROR_INFO = "MatchErrorInfo";
 
     public static final List<String> matchDebugFields = Arrays.asList(INT_MATCHED_DUNS,
             INT_MATCHED_ORIG_DUNS, INT_MATCHED_CONFIDENCE_CODE, INT_MATCHED_MATCH_GRADE,

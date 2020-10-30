@@ -8,10 +8,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OutputRecord {
-    public enum ErrorType { MATCH_ERROR, APPEND_ERROR }
 
     @JsonProperty("RowNumber")
     private Integer rowNumber;
@@ -79,7 +79,7 @@ public class OutputRecord {
     private List<String> errorMessages;
 
     @JsonProperty("ErrorCodes")
-    private Map<ErrorType, List<String>> errorCodes;
+    private Map<MatchCoreErrorConstants.ErrorType, List<String>> errorCodes;
 
     @JsonProperty("DebugValues")
     private List<String> debugValues;
@@ -245,15 +245,15 @@ public class OutputRecord {
         this.errorMessages.add(errorMessage);
     }
 
-    public Map<ErrorType, List<String>> getErrorCodes() {
+    public Map<MatchCoreErrorConstants.ErrorType, List<String>> getErrorCodes() {
         return errorCodes;
     }
 
-    public void setErrorCodes(Map<ErrorType, List<String>> errorCodes) {
+    public void setErrorCodes(Map<MatchCoreErrorConstants.ErrorType, List<String>> errorCodes) {
         this.errorCodes = errorCodes;
     }
 
-    public void addErrorCode(ErrorType type, String code) {
+    public void addErrorCode(MatchCoreErrorConstants.ErrorType type, String code) {
         if (this.errorCodes == null) {
             this.errorCodes = new HashMap<>();
         }

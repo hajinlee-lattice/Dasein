@@ -8,6 +8,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.E
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_REMOVED;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.MATCH_ERROR_INFO;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.MATCH_ERROR_TYPE;
 
 import java.io.IOException;
@@ -586,6 +587,7 @@ public class ProcessorContext {
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
         fieldMap.put(MATCH_ERROR_TYPE, String.class);
         fieldMap.put(MATCH_ERROR_CODE, String.class);
+        fieldMap.put(MATCH_ERROR_INFO, String.class);
         Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
         Schema errorSchema = AvroUtils.constructSchemaWithProperties(schema.getName(), fieldMap, propertiesMap);
         return (Schema) AvroUtils.combineSchemas(schema, errorSchema)[0];

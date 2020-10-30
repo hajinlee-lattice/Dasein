@@ -38,6 +38,7 @@ import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
@@ -371,10 +372,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             // don't copy errors if null or was successful on a later retry
             if (CollectionUtils.isNotEmpty(internalRecord.getErrorMessages()) && internalRecord.getRawError() != null) {
-                outputRecord.addErrorCode(OutputRecord.ErrorType.MATCH_ERROR, internalRecord.getRawError());
+                outputRecord.addErrorCode(MatchCoreErrorConstants.ErrorType.MATCH_ERROR, internalRecord.getRawError());
             }
             if (internalRecord.getFetchResult() != null && internalRecord.getFetchResult().getResult().containsKey(PrimeAccount.ENRICH_ERROR_CODE)) {
-                outputRecord.addErrorCode(OutputRecord.ErrorType.APPEND_ERROR, (String) internalRecord.getFetchResult().getResult().get(PrimeAccount.ENRICH_ERROR_CODE));
+                outputRecord.addErrorCode(MatchCoreErrorConstants.ErrorType.APPEND_ERROR, (String) internalRecord.getFetchResult().getResult().get(PrimeAccount.ENRICH_ERROR_CODE));
             }
 
             outputRecord.setRowNumber(internalRecord.getRowNumber());
