@@ -21,7 +21,7 @@ public interface PlayService {
 
     Play getFullPlayByName(String name, Boolean considerDeleted);
 
-    void publishTalkingPoints(String playName, String customerSpace);
+    void publishTalkingPoints(String playName, String customerSpace, String updatedBy);
 
     List<AttributeLookup> findDependingAttributes(List<Play> plays);
 

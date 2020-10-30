@@ -449,7 +449,7 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public void publishTalkingPoints(String playName, String customerSpace) {
+    public void publishTalkingPoints(String playName, String customerSpace, String updatedBy) {
         if (StringUtils.isBlank(playName)) {
             throw new LedpException(LedpCode.LEDP_18144);
         }
@@ -467,7 +467,7 @@ public class PlayServiceImpl implements PlayService {
                     + " has not been launched yet, cannot publish talking points on public apis yet.");
             return;
         }
-        talkingPointService.publish(playName);
+        talkingPointService.publish(playName, updatedBy);
         play.setLastTalkingPointPublishTime(new Date());
         playEntityMgr.update(play);
     }

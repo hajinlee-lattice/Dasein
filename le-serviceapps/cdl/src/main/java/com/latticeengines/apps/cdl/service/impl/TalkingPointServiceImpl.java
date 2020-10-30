@@ -165,7 +165,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     @Override
-    public void publish(String playName) {
+    public void publish(String playName, String updatedBy) {
         String customerSpace = MultiTenantContext.getCustomerSpace().getTenantId();
         try {
             Play play = playService.getPlayByName(playName, false);
@@ -181,6 +181,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
                 publishedTalkingPointEntityMgr.createOrUpdate(convertToPublished(tp));
             }
             play.setUpdated(new Date(System.currentTimeMillis()));
+            play.setUpdatedBy(updatedBy);
             playService.createOrUpdate(play, false, MultiTenantContext.getTenant().getId());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38014, e, new String[] { playName, customerSpace });

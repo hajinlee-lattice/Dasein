@@ -80,8 +80,10 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
                 log.info(String.format(
                         "DeltaCampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
+                PlayLaunchChannel channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace, playName,
+                        playLaunchId);
                 playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
-                playProxy.publishTalkingPoints(customerSpace, playName);
+                playProxy.publishTalkingPoints(customerSpace, playName, channel.getUpdatedBy());
             }
         } finally {
             cleanupIntermediateFiles(jobExecution);

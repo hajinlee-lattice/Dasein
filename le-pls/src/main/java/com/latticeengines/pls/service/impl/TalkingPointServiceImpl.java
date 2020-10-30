@@ -80,10 +80,11 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     @Override
     public void publish(String playName) {
         Tenant tenant = MultiTenantContext.getTenant();
+        String updatedBy = MultiTenantContext.getEmailAddress();
         if (tenant == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        playProxy.publishTalkingPoints(tenant.getId(), playName);
+        playProxy.publishTalkingPoints(tenant.getId(), playName, updatedBy);
     }
 
     @Override
