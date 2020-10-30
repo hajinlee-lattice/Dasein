@@ -9,7 +9,7 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{CSVUtils, CountryCodeUtils}
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.functions.{col, count, sum}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{Row, DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
@@ -38,8 +38,22 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val rejectedAttrs = config.getRejectedAttrs.asScala
     val displayNameMap: Map[String, String] = config.getDisplayNameMap.asScala.toMap
 
-    val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, displayNameMap)
-    val rejectedCsv = filterRejected(input, classificationAttr, rejectedAttrs, displayNameMap)
+    val columnHeaders = input.columns
+    val errorTypeCol: String = config.getErrorIndicator
+    val errorCodeCol: String = config.getErrorCodeCol
+    val ignoredErrors: Map[String, Set[String]] = config.getIgnoreErrors.asScala.toMap.mapValues(c => c.asScala.toSet)
+    val errorTypeColIndex: Int = columnHeaders.indexOf(errorTypeCol)
+    val errorCodeColIndex: Int = columnHeaders.indexOf(errorCodeCol)
+
+    def isError: Row => Boolean = row => {
+      val errorType = row.get(errorTypeColIndex).asInstanceOf[String]
+      val errorCode = row.get(errorCodeColIndex).asInstanceOf[String]
+      errorType != null && errorCode != null && ignoredErrors.contains(errorType) && ignoredErrors(errorType).contains(errorCode)
+    }
+
+    val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, displayNameMap, isError)
+    val rejectedCsv = filterRejected(input, classificationAttr, rejectedAttrs, displayNameMap, isError)
+    val erroredCsv = filterErrored(input, rejectedAttrs, displayNameMap, isError)
     val (dupReport, dunsCount) = generateDupReport(acceptedDF, matchedDunsAttr)
 
     val report : DataReport = new DataReport
@@ -48,23 +62,30 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     report.setMatchToDUNSReport(matchToDUNSReport)
 
     lattice.outputStr = JsonUtils.serialize(report)
-    lattice.output = acceptedCsv :: rejectedCsv :: dunsCount :: Nil
+    lattice.output = acceptedCsv :: rejectedCsv :: erroredCsv :: dunsCount :: Nil
   }
 
   private def filterAccepted(input: DataFrame, classificationAttr: String, acceptedAttrs: Seq[String], //
-                             displayNameMap: Map[String, String]):
+                             displayNameMap: Map[String, String], errorFilter: Row => Boolean):
   (DataFrame, DataFrame) = {
     val accepted = DnBMatchCandidate.Classification.Accepted.name
-    val acceptedDF = input.filter(col(classificationAttr) === accepted)
+    val acceptedDF = input.filter(col(classificationAttr) === accepted).filter(row => !errorFilter(row))
     (acceptedDF, selectAndRename(acceptedDF, displayNameMap, acceptedAttrs))
   }
 
   private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Seq[String],
-                             displayNameMap: Map[String, String]): DataFrame = {
+                             displayNameMap: Map[String, String], errorFilter: Row => Boolean): DataFrame = {
     val rejected = DnBMatchCandidate.Classification.Rejected.name
-    val rejectedDF = input.filter(col(matchIndicator).isNull || col(matchIndicator) === rejected)
+    val rejectedDF = input.filter(col(matchIndicator).isNull || col(matchIndicator) === rejected).filter(row => !errorFilter(row))
     selectAndRename(rejectedDF, displayNameMap, rejectedAttrs)
   }
+
+  private def filterErrored(input: DataFrame, erroredAttrs: Seq[String],
+                            displayNameMap: Map[String, String], errorFilter: Row => Boolean): DataFrame = {
+    val erroredDF = input.filter(errorFilter)
+    selectAndRename(erroredDF, displayNameMap, erroredAttrs)
+  }
+
 
   private def generateGeoReport(input: DataFrame, countryAttr: String, totalCnt: Long, url: String, user: String,
                                 password: String, key: String, salt: String): DataReport.GeoDistributionReport = {

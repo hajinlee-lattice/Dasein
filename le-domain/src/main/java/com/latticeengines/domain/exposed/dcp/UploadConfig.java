@@ -85,6 +85,10 @@ public class UploadConfig {
         return uploadMatchResultPrefix + "rejected.csv";
     }
 
+    public String getUploadMatchResultErrored() {
+        return uploadMatchResultPrefix + "processing_errors.csv";
+    }
+
     public String getUploadImportedErrorFilePath() {
         return uploadImportedErrorFilePath;
     }

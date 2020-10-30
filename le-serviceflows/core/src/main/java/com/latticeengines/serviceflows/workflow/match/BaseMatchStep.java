@@ -93,9 +93,11 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         String customer = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
         String finalResultTable = getResultTableName();
         String avroResultTableName = finalResultTable;
+        log.info(Boolean.toString(saveToParquet()));
         if (saveToParquet()) {
             avroResultTableName = NamingUtils.timestamp("AvroMatchResult"); // temporary table name
         }
+        log.info(avroResultTableName);
         bulkMatchService.registerResultTable(customer, command, avroResultTableName);
         if (saveToParquet()) {
             saveResultAsParquetTable(avroResultTableName, finalResultTable);

@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.spark.dcp;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
@@ -30,6 +31,15 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     @JsonProperty("ConfidenceCodeAttr")
     private String confidenceCodeAttr;
+
+    @JsonProperty("ErrorIndicator")
+    private String errorIndicator;
+
+    @JsonProperty("ErrorCodeCol")
+    private String errorCodeCol;
+
+    @JsonProperty("IgnoreErrors")
+    private Map<String, Set<String>> ignoreErrors;
 
     @JsonProperty("TotalCount")
     private long totalCount;
@@ -106,6 +116,30 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     public void setCountryAttr(String countryAttr) {
         this.countryAttr = countryAttr;
+    }
+
+    public String getErrorIndicator() {
+        return errorIndicator;
+    }
+
+    public void setErrorIndicator(String errorIndicator) {
+        this.errorIndicator = errorIndicator;
+    }
+
+    public String getErrorCodeCol() {
+        return errorCodeCol;
+    }
+
+    public void setErrorCodeCol(String errorCodeCol) {
+        this.errorCodeCol = errorCodeCol;
+    }
+
+    public Map<String, Set<String>> getIgnoreErrors() {
+        return ignoreErrors;
+    }
+
+    public void setIgnoreErrors(Map<String, Set<String>> ignoreErrors) {
+        this.ignoreErrors = ignoreErrors;
     }
 
     public String getManageDbUrl() {

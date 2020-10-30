@@ -33,6 +33,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.dcp.DataReport;
@@ -125,6 +126,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
         jobConfig.setConfidenceCodeAttr(ConfidenceCode);
 
+        jobConfig.setErrorIndicator(MatchConstants.MATCH_ERROR_TYPE);
+        jobConfig.setErrorCodeCol(MatchConstants.MATCH_ERROR_CODE);
+        jobConfig.setIgnoreErrors(MatchCoreErrorConstants.IGNORE_ERRORS);
+
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         dataBlockDispNames = dataBlockFieldDisplayNames();
         log.info("InputSchema=" + JsonUtils.serialize(cms));
@@ -192,8 +197,18 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        String erroredCsvFilePath = getCsvFilePath(result.getTargets().get(2));
+        String erroredS3Path = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
+                upload.getUploadConfig().getUploadMatchResultRejected());
+        try {
+            if (StringUtils.isNotEmpty(rejectedCsvFilePath)) {
+                copyToS3(erroredCsvFilePath, erroredS3Path);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        updateDunsCount(result.getTargets().get(2), uploadId);
+        updateDunsCount(result.getTargets().get(3), uploadId);
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED, null);
         updateUploadStatistics(result);
     }
