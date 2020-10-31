@@ -119,6 +119,26 @@ public final class SparkUtils {
         return fileCnt;
     }
 
+    public static int moveAvroParquetFiles(@NotNull Configuration yarnConfiguration, @NotNull String srcDir,
+            @NotNull String dstDir, @NotNull String prefix) throws IOException {
+        int fileCnt = 0;
+        for (String avroParquetPath : AvroParquetUtils.listAvroParquetFiles(yarnConfiguration, srcDir, false)) {
+            if (!HdfsUtils.isDirectory(yarnConfiguration, dstDir)) {
+                HdfsUtils.mkdir(yarnConfiguration, dstDir);
+            }
+            Path tgtPath = new Path(avroParquetPath.replace(srcDir, dstDir));
+            String dstName = tgtPath.getParent().toString() + "/" + prefix + tgtPath.getName();
+            Path dstPath = new Path(dstName);
+            Path parent = dstPath.getParent();
+            if (parent != null && !HdfsUtils.fileExists(yarnConfiguration, parent.toString())) {
+                HdfsUtils.mkdir(yarnConfiguration, parent.toString());
+            }
+            HdfsUtils.moveFile(yarnConfiguration, avroParquetPath, dstPath.toString());
+            fileCnt++;
+        }
+        return fileCnt;
+    }
+
     public static Long countRecordsInGlobs(LivySessionService sessionService, SparkJobService sparkJobService,
                                            Configuration yarnConfig, String... globs) {
         if (globs[0].endsWith(".parquet")) { // assuming all paths in the array have the same file type
