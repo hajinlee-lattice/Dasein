@@ -34,14 +34,6 @@ class EMRTracker {
         coreGrp = new EMRScaleGroup(fleet);
     }
 
-    long getCoreMb() {
-        return coreGrp.getNodeMb();
-    }
-
-    int getCoreVCores() {
-        return coreGrp.getNodeVCores();
-    }
-
     int getRunningCore() {
         return coreGrp.getRunning();
     }
@@ -56,14 +48,6 @@ class EMRTracker {
 
     void trackTaskFleet(InstanceFleet fleet) {
         taskGrp = new EMRScaleGroup(fleet);
-    }
-
-    long getTaskMb() {
-        return taskGrp.getNodeMb();
-    }
-
-    int getTaskVCores() {
-        return taskGrp.getNodeVCores();
     }
 
     int getRunningTask() {
