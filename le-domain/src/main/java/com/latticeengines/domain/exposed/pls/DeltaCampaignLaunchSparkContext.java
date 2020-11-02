@@ -138,6 +138,9 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("publishRecommendationsToDB")
     private boolean publishRecommendationsToDB;
 
+    @JsonProperty("useCustomerId")
+    private boolean useCustomerId;
+
     public DeltaCampaignLaunchSparkContext() {
     }
 
@@ -478,6 +481,14 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
 
     public void setDestinationSysName(String destinationSysName) {
         this.destinationSysName = destinationSysName;
+    }
+
+    public boolean getUseCustomerId() {
+        return useCustomerId;
+    }
+
+    public void setUseCustomerId(boolean useCustomerId) {
+        this.useCustomerId = useCustomerId;
     }
 
     public static class DeltaCampaignLaunchSparkContextBuilder {

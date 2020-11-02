@@ -63,6 +63,7 @@ public final class WorkflowJobUtils {
     private static final String PUBLISH_RECOMMENDATION_FOR_S3_LAUNCH = "PublishRecommendationsForS3Launch";
     private static final String CONTACT_ACCOUNT_RATIO_THRESHOLD = "ContactAccountRatioThreshold";
     private static final Long DEFAULT_CONTACT_ACCOUNT_RATIO_THRESHOLD = 100000L;
+    private static final String USE_CUSTOMER_ID = "UseCustomerId";
     private static final String CDL = "CDL";
     private static final String CONTACTS_PER_ACCOUNT_SORT = "/ContactsPerAccountSort";
     private static final String ATTRIBUTE = "/Attribute";
@@ -393,4 +394,17 @@ public final class WorkflowJobUtils {
         taskSettings.add(defaultOwner);
         return taskSettings;
     }
+    public static boolean getUseCustomerId(CustomerSpace customerSpace) {
+        boolean useCustomerID = false;
+        try {
+            String value = getValueFromZK(customerSpace, CDL, USE_CUSTOMER_ID);
+            if (StringUtils.isNotEmpty(value)) {
+                useCustomerID = Boolean.valueOf(value);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get use customer id from ZK for " + customerSpace.getTenantId(), e);
+        }
+        return useCustomerID;
+    }
+
 }
