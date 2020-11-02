@@ -1,16 +1,21 @@
 package com.latticeengines.apps.lp.qbean;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hadoop.yarn.api.records.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 
+import com.amazonaws.services.elasticmapreduce.model.Instance;
+import com.amazonaws.services.elasticmapreduce.model.InstanceFleet;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -68,10 +73,11 @@ public class EMRScalingRunnable implements Runnable {
             throw e;
         }
 
-        initializeEmrTracker();
+        YarnTracker yarnTracker = getYarnTracker();
+        initializeEmrTracker(yarnTracker);
 
         try {
-            reqResource = getYarnTracker().getRequestingResources();
+            reqResource = yarnTracker.getRequestingResources();
         } catch (Exception e) {
             log.error("Failed to retrieve requesting resource submitted to emr cluster "
                     + emrCluster);
@@ -94,30 +100,49 @@ public class EMRScalingRunnable implements Runnable {
         log.debug("Finished processing emr cluster " + emrCluster);
     }
 
-    private void initializeEmrTracker() {
+    private void initializeEmrTracker(YarnTracker yarnTracker) {
         EMRTracker emrTracker = getEMRTracker();
         emrTracker.clear();
 
         InstanceGroup coreGrp = emrService.getCoreGroup(clusterId);
+        List<Instance> coreInstances;
         if (coreGrp != null) {
             emrTracker.trackCoreGrp(coreGrp);
+            coreInstances = emrService.getRunningInstancesInGroup(clusterId, coreGrp.getId(), -1);
+            log.info("Found {} core instances from group {}", coreInstances.size(), coreGrp.getId());
         } else {
-            emrTracker.trackCoreFleet(emrService.getCoreFleet(clusterId));
+            InstanceFleet coreFleet = emrService.getCoreFleet(clusterId);
+            emrTracker.trackCoreFleet(coreFleet);
+            coreInstances = emrService.getRunningInstancesInFleet(clusterId, coreFleet.getId(), -1);
+            log.info("Found {} core instances from fleet {}", coreInstances.size(), coreFleet.getId());
         }
-        coreVCores = emrTracker.getCoreVCores();
-        coreMb = emrTracker.getCoreMb();
+        List<String> coreIps = coreInstances.stream().map(Instance::getPrivateIpAddress).collect(Collectors.toList());
+        yarnTracker.setCoreIps(coreIps);
+        Resource coreResource = yarnTracker.getNodeResourceFromIps(coreIps);
+        coreVCores = coreResource.getVirtualCores();
+        coreMb = coreResource.getMemorySize();
         runningCore = emrTracker.getRunningCore();
         log.debug(String.format("coreMb=%d, coreVCores=%d, runningCores=%d", coreMb, coreVCores, runningCore));
 
         InstanceGroup taskGrp = emrService.getTaskGroup(clusterId);
+        List<Instance> taskInstances;
         if (taskGrp != null) {
             emrTracker.trackTaskGrp(taskGrp);
+            taskInstances = emrService.getRunningInstancesInGroup(clusterId, taskGrp.getId(), 10);
+            log.info("Found {} task instances from group {}", taskInstances.size(), taskGrp.getId());
         } else {
-            emrTracker.trackTaskFleet(emrService.getTaskFleet(clusterId));
+            InstanceFleet taskFleet = emrService.getCoreFleet(clusterId);
+            emrTracker.trackTaskFleet(taskFleet);
+            taskInstances = emrService.getRunningInstancesInFleet(clusterId, taskFleet.getId(), 10);
+            log.info("Found {} task instances from fleet {}", taskInstances.size(), taskFleet.getId());
         }
-        taskVCores = emrTracker.getTaskVCores();
-        taskMb = emrTracker.getTaskMb();
-        log.debug(String.format("taskMb=%d, taskVCores=%d", taskMb, taskVCores));
+        List<String> taskIps = taskInstances.stream().map(Instance::getPrivateIpAddress).collect(Collectors.toList());
+        Resource taskResource = yarnTracker.getNodeResourceFromIps(taskIps);
+        taskVCores = taskResource.getVirtualCores();
+        taskMb = taskResource.getMemorySize();
+        yarnTracker.setTaskVCores(taskVCores);
+        yarnTracker.setTaskMb(taskMb);
+        log.info("clusterId={}, taskMb={}, taskVCores={}", clusterId, taskMb, taskVCores);
     }
 
     private boolean needToScale() {
@@ -301,7 +326,7 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private YarnTracker constructYarnTracker() {
-        return new YarnTracker(emrCluster, clusterId, emrEnvService, taskMb, taskVCores, SLOW_DECOMMISSION_THRESHOLD);
+        return new YarnTracker(emrCluster, clusterId, emrEnvService, SLOW_DECOMMISSION_THRESHOLD);
     }
 
     private EMRTracker getEMRTracker() {

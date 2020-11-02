@@ -3,6 +3,7 @@ package com.latticeengines.apps.lp.qbean;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -42,21 +43,31 @@ class YarnTracker {
     private final String emrCluster;
     private final String clusterId;
 
-    private final long taskMb;
-    private final int taskVCores;
+    private long taskMb;
+    private int taskVCores;
+    private Set<String> coreIps;
 
     private final long slowDecommissionThreshold;
 
     YarnTracker(String emrCluster, String clusterId, EMREnvService emrEnvService, //
-                long taskMb, int taskVCores, long slowDecommissionThreshold) {
+                long slowDecommissionThreshold) {
         this.emrCluster = emrCluster;
         this.clusterId = clusterId;
         this.emrEnvService = emrEnvService;
 
-        this.taskMb = taskMb;
-        this.taskVCores = taskVCores;
-
         this.slowDecommissionThreshold = slowDecommissionThreshold;
+    }
+
+    public void setTaskMb(long taskMb) {
+        this.taskMb = taskMb;
+    }
+
+    public void setTaskVCores(int taskVCores) {
+        this.taskVCores = taskVCores;
+    }
+
+    void setCoreIps(Collection<String> coreIps) {
+        this.coreIps = new HashSet<>(coreIps);
     }
 
     ReqResource getRequestingResources() {
@@ -84,6 +95,36 @@ class YarnTracker {
         return reqResource;
     }
 
+    Resource getNodeResourceFromIps(Iterable<String> privateIps) {
+        for (String privateIp: privateIps) {
+            try {
+                return getNodeResource(privateIp);
+            } catch (Exception e) {
+                log.warn("Failed to get resource from ip {}", privateIp, e);
+            }
+        }
+        throw new RuntimeException("Failed to extract resource from any of the ips: " + privateIps);
+    }
+
+    private Resource getNodeResource(String privateIp) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(context -> {
+            try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
+                yarnClient.start();
+                List<NodeReport> reports = yarnClient.getNodeReports(NodeState.RUNNING, NodeState.NEW);
+                for (NodeReport report: reports) {
+                    String nodeIp = addressToIp(report.getHttpAddress());
+                    if (privateIp.equals(nodeIp)) {
+                        return report.getCapability();
+                    }
+                }
+                throw new RuntimeException("Failed find node report for ip " + privateIp);
+            } catch (IOException | YarnException e) {
+                throw new RuntimeException("Failed find node report for ip " + privateIp, e);
+            }
+        });
+    }
+
     int getIdleTaskNodes() {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         try {
@@ -93,15 +134,13 @@ class YarnTracker {
                         yarnClient.start();
                         List<NodeReport> reports = yarnClient.getNodeReports(NodeState.RUNNING, NodeState.NEW);
                         return reports.stream().mapToInt(report -> {
-                            Resource cap = report.getCapability();
-                            if (cap.getMemorySize() == taskMb && cap.getVirtualCores() == taskVCores) {
-                                // is a task node
-                                Resource used = report.getUsed();
-                                if (used.getVirtualCores() == 0) {
-                                    return 1;
-                                }
+                            String ip = addressToIp(report.getHttpAddress());
+                            boolean isIdleTask = false;
+                            if (!coreIps.contains(ip)) {
+                                // not a core node
+                                isIdleTask = report.getUsed().getVirtualCores() == 0;
                             }
-                            return 0;
+                            return isIdleTask ? 1 : 0;
                         }).sum();
                     }
                 } catch (IOException | YarnException e) {

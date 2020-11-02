@@ -1,5 +1,6 @@
 package com.latticeengines.aws.emr.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,12 +27,14 @@ import com.amazonaws.services.elasticmapreduce.model.ClusterState;
 import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterRequest;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterResult;
+import com.amazonaws.services.elasticmapreduce.model.Instance;
 import com.amazonaws.services.elasticmapreduce.model.InstanceFleet;
 import com.amazonaws.services.elasticmapreduce.model.InstanceFleetModifyConfig;
 import com.amazonaws.services.elasticmapreduce.model.InstanceFleetType;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroup;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupModifyConfig;
 import com.amazonaws.services.elasticmapreduce.model.InstanceGroupType;
+import com.amazonaws.services.elasticmapreduce.model.InstanceState;
 import com.amazonaws.services.elasticmapreduce.model.InvalidRequestException;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersResult;
@@ -39,6 +42,8 @@ import com.amazonaws.services.elasticmapreduce.model.ListInstanceFleetsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListInstanceFleetsResult;
 import com.amazonaws.services.elasticmapreduce.model.ListInstanceGroupsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListInstanceGroupsResult;
+import com.amazonaws.services.elasticmapreduce.model.ListInstancesRequest;
+import com.amazonaws.services.elasticmapreduce.model.ListInstancesResult;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceFleetRequest;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceFleetResult;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsRequest;
@@ -275,6 +280,53 @@ public class EMRServiceImpl implements EMRService {
                 throw e;
             }
         }
+    }
+
+    @Override
+    public List<Instance> getRunningInstancesInGroup(String clusterId, String groupId, int limit) {
+        return getRunningInstances(clusterId, groupId, limit, true);
+    }
+
+    @Override
+    public List<Instance> getRunningInstancesInFleet(String clusterId, String fleetId, int limit) {
+        return getRunningInstances(clusterId, fleetId, limit, false);
+    }
+
+    public List<Instance> getRunningInstances(String clusterId, String grpOrFleetId, int limit, boolean isGrp) {
+        List<Instance> runningInstances = new ArrayList<>();
+        AmazonElasticMapReduce emr = getEmr();
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, null, //
+                Arrays.asList(NoSuchEntityException.class, InvalidRequestException.class));
+        String pageMarker = "first";
+        while (StringUtils.isNotBlank(pageMarker) && (limit < 0 || runningInstances.size() < limit)) {
+            ListInstancesRequest request = new ListInstancesRequest() //
+                    .withClusterId(clusterId) //
+                    .withInstanceStates(InstanceState.RUNNING);
+
+            if (isGrp) {
+                request = request.withInstanceGroupId(grpOrFleetId);
+            } else {
+                request = request.withInstanceFleetId(grpOrFleetId);
+            }
+            if (!"first".equals(pageMarker)) {
+                request = request.withMarker(pageMarker);
+            }
+            final ListInstancesRequest request2 = request;
+            ListInstancesResult result = retry.execute(ctx -> emr.listInstances(request2));
+            pageMarker = result.getMarker();
+            if (limit > 0) {
+                for (Instance instance : result.getInstances()) {
+                    if (runningInstances.size() < limit) {
+                        runningInstances.add(instance);
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                runningInstances.addAll(result.getInstances());
+            }
+        }
+        return runningInstances;
     }
 
     private InstanceFleet getInstanceFleet(String clusterId, InstanceFleetType fleetType) {

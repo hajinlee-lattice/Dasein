@@ -15,6 +15,7 @@ public enum EC2InstanceType {
     m5_xlarge("m5.xlarge", 4, 16), //
     m5_2xlarge("m5.2xlarge", 8, 32), //
     m5_4xlarge("m5.4xlarge", 16, 64), //
+    m5_8xlarge("m5.8xlarge", 32, 128), //
 
     r4_xlarge("r4.xlarge", 4, 30.5), //
     r4_2xlarge("r4.2xlarge", 8, 61), //
