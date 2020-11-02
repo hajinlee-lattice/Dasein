@@ -48,7 +48,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     def isError: Row => Boolean = row => {
       val errorType = row.get(errorTypeColIndex).asInstanceOf[String]
       val errorCode = row.get(errorCodeColIndex).asInstanceOf[String]
-      errorType != null && errorCode != null && ignoredErrors.contains(errorType) && !ignoredErrors(errorType).contains(errorCode)
+      StringUtils.isNotEmpty(errorType) && StringUtils.isNotEmpty(errorCode) && !(ignoredErrors.contains(errorType) && ignoredErrors(errorType).contains(errorCode))
     }
 
     val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, displayNameMap, isError)
@@ -56,7 +56,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val erroredCsv = filterErrored(input, rejectedAttrs, displayNameMap, isError)
     val (dupReport, dunsCount) = generateDupReport(acceptedDF, matchedDunsAttr)
 
-    val report : DataReport = new DataReport
+    val report: DataReport = new DataReport
     report.setGeoDistributionReport(geoReport)
     report.setDuplicationReport(dupReport)
     report.setMatchToDUNSReport(matchToDUNSReport)
@@ -108,7 +108,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
 
   private def generateDupReport(acceptedDF: DataFrame, matchedDunsAttr: String): (DataReport.DuplicationReport,
     DataFrame) = {
-    val dunsCntDF: DataFrame =  acceptedDF.groupBy(matchedDunsAttr).agg(count("*").alias("cnt"))
+    val dunsCntDF: DataFrame = acceptedDF.groupBy(matchedDunsAttr).agg(count("*").alias("cnt"))
       .persist(StorageLevel.DISK_ONLY).checkpoint()
     val uniqueDF: DataFrame = dunsCntDF.filter(col("cnt") === 1)
     val uniqueCnt = if (uniqueDF == null) 0 else uniqueDF.count()
@@ -148,7 +148,7 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[SplitImportMatchResultConfig]): List[HdfsDataUnit] = {
-    val units: List[HdfsDataUnit] = CSVUtils.dfToCSV(spark, compress=false, latticeCtx.targets.take(3), latticeCtx
+    val units: List[HdfsDataUnit] = CSVUtils.dfToCSV(spark, compress = false, latticeCtx.targets.take(3), latticeCtx
       .output.take(3))
     units ::: super.finalizeJob(spark, latticeCtx.targets.drop(3), latticeCtx.output.drop(3))
   }

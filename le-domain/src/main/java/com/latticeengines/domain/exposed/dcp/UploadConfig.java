@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.dcp;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -36,6 +37,12 @@ public class UploadConfig {
 
     @JsonProperty("usageReportFilePath")
     private String usageReportFilePath;
+
+    @JsonProperty("suppressKnownMatchErrors")
+    private Boolean suppressKnownMatchErrors;
+
+    @JsonProperty("downloadableFiles")
+    private Set<DownloadFileType> downloadableFiles;
 
     public String getDropFilePath() {
         return dropFilePath;
@@ -111,6 +118,22 @@ public class UploadConfig {
 
     public void setUsageReportFilePath(String usageReportFilePath) {
         this.usageReportFilePath = usageReportFilePath;
+    }
+
+    public Boolean getSuppressKnownMatchErrors() {
+        return suppressKnownMatchErrors;
+    }
+
+    public void setSuppressKnownMatchErrors(Boolean suppressKnownMatchErrors) {
+        this.suppressKnownMatchErrors = suppressKnownMatchErrors;
+    }
+
+    public Set<DownloadFileType> getDownloadableFiles() {
+        return downloadableFiles;
+    }
+
+    public void setDownloadableFiles(Set<DownloadFileType> downloadableFiles) {
+        this.downloadableFiles = downloadableFiles;
     }
 
     public List<String> getDownloadPaths() {

@@ -10,10 +10,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -38,6 +40,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DownloadFileType;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
@@ -128,7 +131,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
         jobConfig.setErrorIndicator(MatchConstants.MATCH_ERROR_TYPE);
         jobConfig.setErrorCodeCol(MatchConstants.MATCH_ERROR_CODE);
-        jobConfig.setIgnoreErrors(MatchCoreErrorConstants.IGNORE_ERRORS);
+        jobConfig.setIgnoreErrors(stepConfiguration.getSuppressErrors() ? MatchCoreErrorConstants.IGNORE_ERRORS : Collections.emptyMap());
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         dataBlockDispNames = dataBlockFieldDisplayNames();
@@ -178,12 +181,15 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         }
 
         // Copy files from spark workspace to upload result location.
+        // Order must match the output set in Scala
+        Set<DownloadFileType> generatedFiles = EnumSet.noneOf(DownloadFileType.class);
         String acceptedCsvFilePath = getCsvFilePath(result.getTargets().get(0));
         String acceptedS3Path = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
                 upload.getUploadConfig().getUploadMatchResultAccepted());
         try {
             if (StringUtils.isNotEmpty(acceptedCsvFilePath)) {
                 copyToS3(acceptedCsvFilePath, acceptedS3Path);
+                generatedFiles.add(DownloadFileType.MATCHED);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -194,6 +200,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         try {
             if (StringUtils.isNotEmpty(rejectedCsvFilePath)) {
                 copyToS3(rejectedCsvFilePath, rejectedS3Path);
+                generatedFiles.add(DownloadFileType.UNMATCHED);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -204,12 +211,16 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         try {
             if (StringUtils.isNotEmpty(erroredCsvFilePath)) {
                 copyToS3(erroredCsvFilePath, erroredS3Path);
+                generatedFiles.add(DownloadFileType.PROCESS_ERRORS);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         updateDunsCount(result.getTargets().get(3), uploadId);
+
+        upload.getUploadConfig().getDownloadableFiles().addAll(generatedFiles);
+        uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, upload.getUploadConfig());
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED, null);
         updateUploadStatistics(result);
     }
