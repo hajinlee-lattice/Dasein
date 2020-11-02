@@ -109,13 +109,14 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
         List<E> configs = new ArrayList<>();
         String inputTableName = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
         List<Map<String, String>> scoreFieldMaps = getScoreFieldsMap();
-        List<Map<String, Double>> normalizationRatioMaps = shouldLoadNormalizationRatio() ? getNormalizationRatioMap()
+        Map<String, Double> normalizationRatioMaps = shouldLoadNormalizationRatio() ? getNormalizationRatioMap()
                 : null;
         inputTable = metadataProxy.getTable(customerSpace.toString(), inputTableName);
 
         for (int i = 0; i < scoreFieldMaps.size(); i++) {
             E config = initAndSetDataFlowConfig(inputTableName, modelGuidField, percentileLowerBound,
-                    percentileUpperBound, scoreFieldMaps.get(i), normalizationRatioMaps.get(i));
+                    percentileUpperBound, scoreFieldMaps.get(i),
+                    normalizationRatioMaps);
             List<DataUnit> inputUnits = new ArrayList<>();
             inputUnits.add(inputTable.toHdfsDataUnit("calculateEVPercentile" + i));
             config.setInput(inputUnits);
@@ -154,8 +155,7 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
         return resultMaps;
     }
 
-    private List<Map<String, Double>> getNormalizationRatioMap() {
-        List<Map<String, Double>> resultMaps = new ArrayList<>();
+    private Map<String, Double> getNormalizationRatioMap() {
         Map<String, Double> normalizationRatioMap = new HashMap<>();
         List<RatingModelContainer> containers = this.containers;
         String tenantId = configuration.getCustomerSpace().toString();
@@ -167,15 +167,8 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
                     ModelSummary modelSummary = modelSummaryProxy.getModelSummary(tenantId, modelGuid);
                     if (modelSummary.getNormalizationRatio() != null) {
                         normalizationRatioMap.put(modelGuid, modelSummary.getNormalizationRatio());
-                        if (normalizationRatioMap.size() % batchSize == 0) {
-                            resultMaps.add(normalizationRatioMap);
-                            normalizationRatioMap = new HashMap<>();
-                        }
                     }
                 }
-            }
-            if (normalizationRatioMap.size() > 0) {
-                resultMaps.add(normalizationRatioMap);
             }
         } else {
             String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
@@ -183,10 +176,9 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
             ModelSummary modelSummary = modelSummaryProxy.getModelSummary(tenantId, modelGuid);
             if (modelSummary.getNormalizationRatio() != null) {
                 normalizationRatioMap.put(modelGuid, modelSummary.getNormalizationRatio());
-                resultMaps.add(normalizationRatioMap);
             }
         }
-        return resultMaps;
+        return normalizationRatioMap;
     }
 
     private List<RatingModelContainer> getModelContainers() {
