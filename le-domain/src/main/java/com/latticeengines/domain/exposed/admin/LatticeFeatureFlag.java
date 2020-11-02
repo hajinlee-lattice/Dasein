@@ -48,6 +48,7 @@ public enum LatticeFeatureFlag {
     ATTRIBUTE_TOGGLING("AttributeToggling", "Allow multi click behavior for Attributes during query building"), //
     ENABLE_ACXIOM("EnableAcxiom", "Enable Acxiom in ads platform integrations"), //
     ENABLE_IMPORT_V2("EnableImportV2", "Enable Import UI 2.0"), //
+    SSVI_REPORT("SSVI_REPORT", "SSVI_REPORT"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
