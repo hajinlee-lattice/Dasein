@@ -90,7 +90,7 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
     private void replaceSfdcContactId(PlayLaunch playLaunch, Map<String, String> contactDisplayNameMap) {
         String sfdcContactId = playLaunch.getDestinationContactId();
         if (StringUtils.isNotEmpty(sfdcContactId)) {
-            String key = "sfdcContactId";
+            String key = "SfdcContactID";
             String value = contactDisplayNameMap.get(key);
             contactDisplayNameMap.remove(key);
             contactDisplayNameMap.put(sfdcContactId, value);
