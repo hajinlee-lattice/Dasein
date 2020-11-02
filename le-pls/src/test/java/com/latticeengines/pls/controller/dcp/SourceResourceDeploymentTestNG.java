@@ -124,7 +124,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         sourceId = source2.getSourceId();
     }
 
-    @Test(groups = "deployment-dcp")
+    @Test(groups = "deployment-dcp", dependsOnMethods = "testCreateAndGetSource")
     public void testFieldDefinitions() {
         Resource csvResource = new MultipartFileResource(testArtifactService.readTestArtifactAsStream(TEST_DATA_DIR,
                 TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE), TEST_ACCOUNT_DATA_FILE);
@@ -223,7 +223,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         testSourceProxy.deleteSourceById(sourceId);
     }
 
-    @Test(groups = "deployment-dcp")
+    @Test(groups = "deployment-dcp", dependsOnMethods = "testCreateSourceFromFile")
     public void testUpdateSource() {
         // fetch from previous project/source
         FetchFieldDefinitionsResponse fetchResponse = testSourceProxy.getSourceMappings(sourceId,
@@ -239,7 +239,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
         ValidateFieldDefinitionsResponse response =
                 testSourceProxy.validateSourceMappings(fileImportId,
-                        null, validateRequest);
+                        EntityType.Accounts.name(), validateRequest);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.PASS);
 
         // make INVALID change to FieldDefinitionsRecord
@@ -275,13 +275,9 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         validateRequest.setExistingFieldDefinitionsMap(fetchResponse.getExistingFieldDefinitionsMap());
         validateRequest.setAutodetectionResultsMap(fetchResponse.getAutodetectionResultsMap());
         validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
-
-        // TODO: Why is EntityType null in the other calls to validate?
         response = testSourceProxy.validateSourceMappings(fileImportId,
                 EntityType.Accounts.name(), validateRequest);
-        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
 
-        // assert the warning is for the field that was changed
-        // ...
+        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
     }
 }
