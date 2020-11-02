@@ -960,6 +960,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Preconditions.checkNotNull(customerSpace);
 
+        // this step will set mapped
         setSystemFieldMapping(fieldMappingDocument, entity, feedType, customerSpace);
 
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);

@@ -60,7 +60,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
     }
 
     @Test(groups = "deployment")
-    public void verifyFieldMappingValidations() {
+    public void verifyDateFormat() {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_TRANSACTION), ENTITY_TRANSACTION, TRANSACTION_SOURCE_FILE_MISSING,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + TRANSACTION_SOURCE_FILE_MISSING));
@@ -218,19 +218,31 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
 
         boolean externalIdExist = false;
+        boolean parentExternalIdExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
+            // the type for CrmAccount_External_ID is TEXT in DEFAULT_SYSTEM, in this test,
+            // try to set it to be NUMBER
             if ("CrmAccount_External_ID".equals(fieldMapping.getUserField())) {
                 externalIdExist = true;
                 Assert.assertNotNull(fieldMapping.getMappedField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.TEXT);
                 fieldMapping.setFieldType(UserDefinedType.NUMBER);
+                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+            // map two user field to system DEFAULT_SYSTEM
+            if ("Parent_External_ID".equals(fieldMapping.getUserField())) {
+                parentExternalIdExist = true;
+                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
             }
         }
         Assert.assertTrue(externalIdExist);
+        Assert.assertTrue(parentExternalIdExist);
         FieldValidationResult fieldValidationResult =
                 modelingFileMetadataService.validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
                         SOURCE, feedType);
@@ -240,10 +252,11 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         List<FieldValidation> errorValidations =
                 validations.stream().filter(validation -> FieldValidation.ValidationStatus.ERROR.equals(validation.getStatus())).collect(Collectors.toList());
         Assert.assertNotNull(errorValidations);
-        Assert.assertEquals(errorValidations.size(), 1);
+        Assert.assertEquals(errorValidations.size(), 2);
         Map<ValidationCategory, List<FieldValidation>> groupedValidations =
                 fieldValidationResult.getGroupedValidations();
         // one consistency error, the other is data type warning
         Assert.assertEquals(groupedValidations.get(ValidationCategory.DataType).size(), 2);
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 1);
     }
 }
