@@ -2,12 +2,13 @@ package com.latticeengines.domain.exposed.pmml;
 
 import javax.xml.transform.sax.SAXSource;
 
-import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLFilterImpl;
+
+import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 
 public class SkipFilter extends XMLFilterImpl {
 
