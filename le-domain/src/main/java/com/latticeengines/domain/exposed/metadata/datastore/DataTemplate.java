@@ -1,12 +1,11 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
-import java.util.List;
+import org.apache.avro.Schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -14,7 +13,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DataTemplate {
     @JsonProperty("MasterSchema")
-    private List<ColumnMetadata> masterSchema;
+    private Schema masterSchema;
 
     @JsonProperty("Tenant")
     private String tenant;
@@ -25,16 +24,12 @@ public class DataTemplate {
     @JsonProperty("Entity")
     private BusinessEntity entity;
 
-    public List<ColumnMetadata> getMasterSchema() {
+    public Schema getMasterSchema() {
         return masterSchema;
     }
 
-    public void setMasterSchema(List<ColumnMetadata> masterSchema) {
+    public void setMasterSchema(Schema masterSchema) {
         this.masterSchema = masterSchema;
-    }
-
-    public void addMasterSchema(ColumnMetadata columnMetadata) {
-        this.masterSchema.add(columnMetadata);
     }
 
     public String getTenant() {

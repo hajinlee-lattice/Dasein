@@ -43,7 +43,7 @@ public abstract class DataUnit {
     private boolean coalesce;
 
     @JsonProperty("Roles")
-    private Roles roles;
+    private List<Roles> roles;
 
     @JsonProperty("DataTemplateId")
     private String DataTemplateId;
@@ -90,12 +90,20 @@ public abstract class DataUnit {
         this.partitionKeys = partitionKeys;
     }
 
-    public Roles getRoles() {
+    public List<Roles> getRoles() {
         return roles;
     }
 
-    public void setRoles(Roles roles) {
+    public void setRoles(List<Roles> roles) {
         this.roles = roles;
+    }
+
+    public String getDataTemplateId() {
+        return DataTemplateId;
+    }
+
+    public void setDataTemplateId(String dataTemplateId) {
+        DataTemplateId = dataTemplateId;
     }
 
     public enum StorageType {

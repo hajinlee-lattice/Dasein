@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 @Entity
 @Table(name = "DataUnit", //
         indexes = { @Index(name = "IX_NAME", columnList = "Name"),
-                @Index(name = "IX_DATATEMPLATEID_ROLES", columnList = "TenantId, DataTemplateId, Roles") }, //
+                @Index(name = "IX_DATATEMPLATEID", columnList = "TenantId, DataTemplateId") }, //
         uniqueConstraints = {
                 @UniqueConstraint(name = "UX_NAME_TYPE", columnNames = { "TenantId", "Name", "StorageType" }) })
 public class DataUnitEntity extends BaseMultiTenantDocEntity<DataUnit> {
@@ -33,11 +33,5 @@ public class DataUnitEntity extends BaseMultiTenantDocEntity<DataUnit> {
             columnDefinition = "'VARCHAR(200) GENERATED ALWAYS AS (`Document` ->> '$.DataTemplateId')'", //
             insertable = false, updatable = false)
     private String dataTemplateId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Roles", //
-            columnDefinition = "'VARCHAR(20) GENERATED ALWAYS AS (`Document` ->> '$.Roles')'", //
-            insertable = false, updatable = false)
-    private DataUnit.Roles roles;
 
 }
