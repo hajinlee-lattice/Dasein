@@ -45,7 +45,7 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
     private static final Logger log = LoggerFactory.getLogger(PublishActivityAlertsJobTestNG.class);
     private String inputPath;
 
-    @BeforeClass
+    @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
         String fileName = "publish-alerts-input.avro";
