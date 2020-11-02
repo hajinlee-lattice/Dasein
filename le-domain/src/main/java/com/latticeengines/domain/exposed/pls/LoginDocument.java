@@ -58,7 +58,7 @@ public class LoginDocument {
     @JsonProperty("ContractEndDate")
     private LocalDate contractEndDate;
 
-    @JsonProperty("Status")  // TODO can this be an enum?
+    @JsonProperty("Status")
     private String status;
 
     public LoginDocument() {

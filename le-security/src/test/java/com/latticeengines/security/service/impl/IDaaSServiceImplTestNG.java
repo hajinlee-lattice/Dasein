@@ -60,7 +60,7 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         Assert.assertTrue(CollectionUtils.isNotEmpty(loginDocument.getErrors()));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testLoginDoc() {
         Credentials credentials = new Credentials();
         credentials.setUsername(TEST_EMAIL);
@@ -100,7 +100,7 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         userService.createUser(TEST_EMAIL, userRegistration);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testGetSubscriberDetails () {
 
         String subscriptionNumber = "800118741";

@@ -19,6 +19,7 @@ public enum CacheName {
     PrimeMetadataCache(Constants.PrimeMetadataCacheName), //
     IDaaSEntitlementCache(Constants.IDaaSEntitlementCacheName), //
     IDaaSTokenCache(Constants.IDaaSTokenCacheName), //
+    IDaaSSubscriberDetailsCache(Constants.IDaaSSubscriberDetailsCacheName), //
 
     DataCloudCMCache(Constants.DataCloudCMCacheName), //
     DataCloudStatsCache(Constants.DataCloudStatsCacheName), //
@@ -86,6 +87,7 @@ public enum CacheName {
         public static final String PrimeMetadataCacheName = "PrimeMetadataCache";
         public static final String IDaaSTokenCacheName = "IDaaSTokenCacheName";
         public static final String IDaaSEntitlementCacheName = "IDaaSEntitlementCache";
+        public static final String IDaaSSubscriberDetailsCacheName = "IDaaSSubscriberDetailsCache";
         public static final String DataCloudCMCacheName = "DataCloudCMCache";
         public static final String DataCloudStatsCacheName = "DataCloudStatsCache";
         public static final String DataCloudProfileCacheName = "DataCloudProfileCache";
