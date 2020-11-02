@@ -5,10 +5,10 @@ import java.util.List;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.DownloadFileType;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
-import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 
 public interface UploadService {
@@ -20,7 +20,7 @@ public interface UploadService {
 
     UploadDetails getByUploadId(String uploadId, Boolean includeConfig);
 
-    String generateToken(String uploadId, List<UploadFileDownloadConfig.FileType> files);
+    String generateToken(String uploadId, List<DownloadFileType> files);
 
     void sendUploadEmail(UploadEmailInfo uploadEmailInfo);
 
