@@ -150,12 +150,13 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setAcceptedAttrs(acceptedAttrs);
         jobConfig.setDisplayNameMap(displayNameMap);
 
-        log.info("JobConfig=" + JsonUtils.serialize(jobConfig));
+        log.info("JobConfig=" + JsonUtils.pprint(jobConfig));
         return jobConfig;
     }
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
+        log.info(JsonUtils.pprint(result.getTargets()));
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         String uploadId = configuration.getUploadId();
         UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
@@ -199,9 +200,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         }
         String erroredCsvFilePath = getCsvFilePath(result.getTargets().get(2));
         String erroredS3Path = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
-                upload.getUploadConfig().getUploadMatchResultRejected());
+                upload.getUploadConfig().getUploadMatchResultErrored());
         try {
-            if (StringUtils.isNotEmpty(rejectedCsvFilePath)) {
+            if (StringUtils.isNotEmpty(erroredCsvFilePath)) {
                 copyToS3(erroredCsvFilePath, erroredS3Path);
             }
         } catch (IOException e) {
@@ -288,8 +289,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         return attrNames;
     }
 
-    // TODO: MatchConstants.MATCH_ERROR_CODE and MATCH_ERROR_TYPE should be removed from rejected.csv and accepted.csv,
-    // TODO: contains error code from D+ (use to decide whether to put in rejected or error)
     private Map<String, String> convertToDispMap(Collection<ColumnMetadata> cms) {
         Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
         Map<String, String> dispNames = new LinkedHashMap<>();

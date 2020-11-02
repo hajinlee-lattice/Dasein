@@ -67,7 +67,7 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     @Override
     public int getNumTargets() {
-        return 3;
+        return 4; // Accepted, Rejected, Match Core Errors, DUNS Count
     }
 
     public List<String> getAcceptedAttrs() {

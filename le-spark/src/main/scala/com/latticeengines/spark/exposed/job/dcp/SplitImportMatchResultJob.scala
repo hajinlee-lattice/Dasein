@@ -41,14 +41,14 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val columnHeaders = input.columns
     val errorTypeCol: String = config.getErrorIndicator
     val errorCodeCol: String = config.getErrorCodeCol
-    val ignoredErrors: Map[String, Set[String]] = config.getIgnoreErrors.asScala.toMap.mapValues(c => c.asScala.toSet)
+    val ignoredErrors: Map[String, Set[String]] = config.getIgnoreErrors.asScala.toMap.mapValues(_.asScala.toSet).map(identity)
     val errorTypeColIndex: Int = columnHeaders.indexOf(errorTypeCol)
     val errorCodeColIndex: Int = columnHeaders.indexOf(errorCodeCol)
 
     def isError: Row => Boolean = row => {
       val errorType = row.get(errorTypeColIndex).asInstanceOf[String]
       val errorCode = row.get(errorCodeColIndex).asInstanceOf[String]
-      errorType != null && errorCode != null && ignoredErrors.contains(errorType) && ignoredErrors(errorType).contains(errorCode)
+      errorType != null && errorCode != null && ignoredErrors.contains(errorType) && !ignoredErrors(errorType).contains(errorCode)
     }
 
     val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, displayNameMap, isError)
@@ -69,14 +69,14 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
                              displayNameMap: Map[String, String], errorFilter: Row => Boolean):
   (DataFrame, DataFrame) = {
     val accepted = DnBMatchCandidate.Classification.Accepted.name
-    val acceptedDF = input.filter(col(classificationAttr) === accepted).filter(row => !errorFilter(row))
+    val acceptedDF = input.filter(col(classificationAttr) === accepted).filter(!errorFilter(_))
     (acceptedDF, selectAndRename(acceptedDF, displayNameMap, acceptedAttrs))
   }
 
   private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Seq[String],
                              displayNameMap: Map[String, String], errorFilter: Row => Boolean): DataFrame = {
     val rejected = DnBMatchCandidate.Classification.Rejected.name
-    val rejectedDF = input.filter(col(matchIndicator).isNull || col(matchIndicator) === rejected).filter(row => !errorFilter(row))
+    val rejectedDF = input.filter(col(matchIndicator).isNull || col(matchIndicator) === rejected).filter(!errorFilter(_))
     selectAndRename(rejectedDF, displayNameMap, rejectedAttrs)
   }
 
@@ -148,9 +148,9 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[SplitImportMatchResultConfig]): List[HdfsDataUnit] = {
-    val units: List[HdfsDataUnit] = CSVUtils.dfToCSV(spark, compress=false, latticeCtx.targets.take(2), latticeCtx
-      .output.take(2))
-    units ::: super.finalizeJob(spark, latticeCtx.targets.drop(2), latticeCtx.output.drop(2))
+    val units: List[HdfsDataUnit] = CSVUtils.dfToCSV(spark, compress=false, latticeCtx.targets.take(3), latticeCtx
+      .output.take(3))
+    units ::: super.finalizeJob(spark, latticeCtx.targets.drop(3), latticeCtx.output.drop(3))
   }
 
 }
