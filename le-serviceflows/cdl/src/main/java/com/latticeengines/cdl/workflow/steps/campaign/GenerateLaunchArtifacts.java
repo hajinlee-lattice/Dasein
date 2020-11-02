@@ -25,6 +25,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -87,6 +88,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private CampaignLaunchUtils campaignLaunchUtils;
 
     private Set<String> additionalContactAttr = new HashSet<>(Arrays.asList(InterfaceName.FirstName.name(),
             InterfaceName.LastName.name(), InterfaceName.Address_Street_2.name(), InterfaceName.DoNotCall.name(),

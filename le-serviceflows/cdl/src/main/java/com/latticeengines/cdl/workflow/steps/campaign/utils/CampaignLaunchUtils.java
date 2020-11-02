@@ -49,4 +49,8 @@ public final class CampaignLaunchUtils {
             throw new LedpException(LedpCode.LEDP_18240, new String[]{String.valueOf(BusinessEntity.Contact), String.valueOf(contactLimit)});
         }
     }
+
+    public boolean getUseCustomerId(CustomerSpace customerSpace, CDLExternalSystemName cdlExternalSystemName) {
+        return WorkflowJobUtils.getUseCustomerId(customerSpace) && CDLExternalSystemName.Eloqua.equals(cdlExternalSystemName);
+    }
 }

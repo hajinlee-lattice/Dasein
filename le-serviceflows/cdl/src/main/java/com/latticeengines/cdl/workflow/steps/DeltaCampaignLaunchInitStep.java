@@ -155,8 +155,7 @@ public class DeltaCampaignLaunchInitStep
         } else {
             deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
         }
-        deltaCampaignLaunchSparkContext.setUseCustomerId(WorkflowJobUtils.getUseCustomerId(customerSpace)
-                && CDLExternalSystemName.Eloqua.equals(playLaunch.getDestinationSysName()));
+        deltaCampaignLaunchSparkContext.setUseCustomerId(campaignLaunchUtils.getUseCustomerId(customerSpace, playLaunch.getDestinationSysName()));
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();
