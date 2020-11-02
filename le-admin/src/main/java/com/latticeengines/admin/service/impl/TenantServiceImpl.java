@@ -915,7 +915,11 @@ public class TenantServiceImpl implements TenantService {
             log.info("empty subscriber name");
             return null;
         }
-        String tenantName = subscriberName.trim().replace(" ", "_");
+        String tenantName = subscriberName
+                .trim()
+                .replace(" ", "_")
+                .replace(".", "")
+                .replace(",", "");
         String encodedName;
         try {
             encodedName = URLEncoder.encode(tenantName, StandardCharsets.UTF_8.toString());
