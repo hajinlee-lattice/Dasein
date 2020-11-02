@@ -13,4 +13,6 @@ public interface StreamDimensionRepository extends BaseJpaRepository<StreamDimen
     List<StreamDimension> findByNameAndTenantAndStream(String name, Tenant tenant, AtlasStream stream);
 
     List<StreamDimension> findByTenant(Tenant tenant);
+
+    StreamDimension findByPid(long pid);
 }

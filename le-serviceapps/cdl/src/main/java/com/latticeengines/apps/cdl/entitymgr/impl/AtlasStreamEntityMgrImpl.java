@@ -78,6 +78,12 @@ public class AtlasStreamEntityMgrImpl extends JpaEntityMgrRepositoryImpl<AtlasSt
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public AtlasStream findByPid(long pid) {
+        return readerRepository.findByPid(pid);
+    }
+
+    @Override
     public BaseJpaRepository<AtlasStream, Long> getRepository() {
         return writerRepository;
     }

@@ -57,4 +57,10 @@ public class StreamDimensionEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Str
     public BaseJpaRepository<StreamDimension, Long> getRepository() {
         return writerRepository;
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public StreamDimension findByPid(long pid) {
+        return readerRepository.findByPid(pid);
+    }
 }
