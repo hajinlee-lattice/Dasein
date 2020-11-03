@@ -4,13 +4,21 @@ import java.io.Serializable;
 import java.time.Period;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActivityTimelineMetrics implements Serializable {
 
+    @JsonProperty("count")
     private Integer count;
+
+    @JsonProperty("label")
     private String label;
+
+    @JsonProperty("description")
     private String description;
+
+    @JsonProperty("context")
     private String context;
 
     private String METRICS_DESCRIPTION = "in last %d days";
