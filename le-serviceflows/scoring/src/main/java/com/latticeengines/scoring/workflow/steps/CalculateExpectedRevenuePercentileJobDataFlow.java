@@ -35,10 +35,12 @@ public class CalculateExpectedRevenuePercentileJobDataFlow extends
     String getRevenueFieldName() {
         return ScoreResultField.ExpectedRevenue.displayName;
     }
+
     @Override
     boolean shouldLoadNormalizationRatio() {
         return true;
     }
+
     @Override
     String getTargetTableName() {
         return "calculateExpectedRevenuePercentile";
@@ -51,7 +53,6 @@ public class CalculateExpectedRevenuePercentileJobDataFlow extends
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        super.postJobExecution(result);
         if (StringUtils.isNotBlank(result.getOutput())) {
             Map<String, String> targetScoreDerivationOutputs = new HashMap<>();
             Map<String, String> derivationMap = JsonUtils.deserialize(result.getOutput(),
@@ -96,4 +97,5 @@ public class CalculateExpectedRevenuePercentileJobDataFlow extends
 
         return config;
     }
+
 }
