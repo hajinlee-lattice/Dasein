@@ -442,6 +442,13 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_PERIOD_ONLY_TOKEN, Strings.EMPTY);
         }
 
+        try {
+            String periodStrategy = ActivityMetricsGroupUtils.getPeriodStrategyFromTimeRange(timeRange);
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_PERIOD_STRATEGY_TOKEN, periodStrategy);
+        } catch (Exception e) {
+            // Do nothing for now
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_PERIOD_STRATEGY_TOKEN, Strings.EMPTY);
+        }
         return params;
     }
 

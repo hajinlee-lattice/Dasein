@@ -280,7 +280,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             dimensions.forEach(dimensionEntityMgr::create);
             log.info("Create WebVisit stream dimensions for tenant {}. PathPatternCatalog = {}",
                     webVisitStream.getTenant().getId(), pathPtnCatalog);
-            List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitProfile(
+            List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitGroups(
                     tenant.getId(), webVisitStream.getName());
             if (defaultGroups == null || defaultGroups.stream().anyMatch(Objects::isNull)) {
                 throw new IllegalStateException(String.format(
@@ -479,7 +479,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
-    public boolean createDefaultDnbIntentDataTemplate(String customerSpace, String systemDisplayName, boolean processBuyingScore) {
+    public boolean createDefaultDnbIntentDataTemplate(String customerSpace, String systemDisplayName) {
         EntityType entityType = EntityType.CustomIntent;
         S3ImportSystem importSystem = setupSystems(customerSpace, entityType, S3ImportSystem.SystemType.DnbIntent,
                 S3ImportSystem.SystemType.DnbIntent.getDefaultSystemName(), systemDisplayName);
@@ -489,19 +489,14 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 entityType, null);
         log.info("DnbIntentData dataFeedTask unique Id is {}.", intentDataTask.getUniqueId());
         String streamName = String.format(STREAM_NAME_FORMAT, importSystem.getName(), entityType);
-        if (processBuyingScore) {
-            createDnbIntentDataMetadataWithBuyingScore(customerSpace, streamName, intentDataTask);
-        } else {
-            createDnbIntentDataMetadata(customerSpace, streamName, intentDataTask);
-        }
+        createDnbIntentMetadata(customerSpace, streamName, intentDataTask);
         return true;
     }
 
     @Override
     public boolean createDnbIntentDataTemplate(String customerSpace, EntityType entityType,
                                                SimpleTemplateMetadata simpleTemplateMetadata,
-                                               String systemDisplayName,
-                                               boolean processBuyingScore) {
+                                               String systemDisplayName) {
         if (!EntityType.CustomIntent.equals(entityType)) {
             throw new IllegalArgumentException(String.format("createDnbIntentDataTemplate cannot support entityType " +
                     "%s.", entityType));
@@ -513,11 +508,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 entityType, simpleTemplateMetadata);
         log.info("DnbIntentData dataFeedTask unique Id is {}.", intentDataTask.getUniqueId());
         String streamName = String.format(STREAM_NAME_FORMAT, importSystem.getName(), entityType);
-        if (processBuyingScore) {
-            createDnbIntentDataMetadataWithBuyingScore(customerSpace, streamName, intentDataTask);
-        } else {
-            createDnbIntentDataMetadata(customerSpace, streamName, intentDataTask);
-        }
+        createDnbIntentMetadata(customerSpace, streamName, intentDataTask);
         return true;
     }
 
@@ -980,7 +971,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         StreamDimension dimension = createStageDimension(opportunityAtlasStream, stageCatalog);
         dimensionEntityMgr.create(dimension);
         log.info("dimension is {}.", JsonUtils.serialize(dimension));
-        ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(tenant.getId(),
+        ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityGroup(tenant.getId(),
                 opportunityAtlasStream.getName());
         if (defaultGroup == null) {
             throw new IllegalStateException(String.format(
@@ -1007,7 +998,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         dimensionEntityMgr.create(dimension);
         log.info("dimension is {}.", JsonUtils.serialize(dimension));
         List<ActivityMetricsGroup> defaultGroups =
-                activityMetricsGroupService.setupDefaultMarketingProfile(tenant.getId(),
+                activityMetricsGroupService.setupDefaultMarketingGroups(tenant.getId(),
                 marketingAtlasStream.getName());
         if (CollectionUtils.isEmpty(defaultGroups)) {
             throw new IllegalStateException(String.format(
@@ -1015,28 +1006,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         }
     }
 
-    private void createDnbIntentDataMetadata(String customerSpace, String streamName, DataFeedTask task) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
-        AtlasStream stream =
-                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(task).withStreamType(AtlasStream.StreamType.DnbIntentData)
-                        .withName(streamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
-                        .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
-                        .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).build();
-        stream.setStreamId(AtlasStream.generateId());
-        streamEntityMgr.create(stream);
-        log.info("DbIntentData AtlasStream is {}.", JsonUtils.serialize(stream));
-        StreamDimension modelDimension = createDnbIntentDataModelDimension(stream);
-        dimensionEntityMgr.create(modelDimension);
-        log.info("DnbIntentData ModelDimension is {}.", JsonUtils.serialize(modelDimension));
-        List<ActivityMetricsGroup> defaultGroups =
-                activityMetricsGroupService.setupDefaultDnbIntentDataProfile(customerSpace, stream.getName());
-        if (CollectionUtils.isEmpty(defaultGroups)) {
-            throw new IllegalStateException(String.format(
-                    "Failed to setup DnbIntentData metric groups for tenant %s", customerSpace));
-        }
-    }
-
-    private void createDnbIntentDataMetadataWithBuyingScore(String customerSpace, String streamName, DataFeedTask intentDataTask) {
+    private void createDnbIntentMetadata(String customerSpace, String streamName, DataFeedTask intentDataTask) {
         Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         AtlasStream stream = new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(intentDataTask).withStreamType(AtlasStream.StreamType.DnbIntentData)
                 .withName(streamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
@@ -1048,7 +1018,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         StreamDimension modelDimension = createDnbIntentDataModelDimension(stream);
         dimensionEntityMgr.create(modelDimension);
         log.info("DnbIntentData ModelDimension is {}.", JsonUtils.serialize(modelDimension));
-        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultBuyingScoreGroups(customerSpace, stream.getName());
+        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultDnbIntentGroups(customerSpace, stream.getName());
         if (CollectionUtils.isEmpty(defaultGroups)) {
             throw new IllegalStateException(String.format("Failed to setup buying score metrics for tenant %s", customerSpace));
         }

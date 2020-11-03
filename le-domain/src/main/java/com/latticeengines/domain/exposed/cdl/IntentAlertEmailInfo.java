@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.cdl;
 
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.BUYING_STAGE;
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.RESEARCHING_STAGE;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.STAGE_BUYING;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.STAGE_RESEARCHING;
 
 import java.io.Serializable;
 
@@ -20,7 +20,7 @@ public class IntentAlertEmailInfo {
 
     public enum StageType {
 
-        BUY(BUYING_STAGE, "Buying"), RESEARCH(RESEARCHING_STAGE, "Research");
+        BUY(STAGE_BUYING, "Buying"), RESEARCH(STAGE_RESEARCHING, "Research");
 
         private String name;
         private String displayName;

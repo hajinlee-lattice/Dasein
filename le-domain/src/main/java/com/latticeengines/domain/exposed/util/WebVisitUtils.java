@@ -165,7 +165,8 @@ public final class WebVisitUtils {
         return !TOTAL_VISIT_GROUPNAME.equals(group.getGroupName()) || !DEFAULT_TIME_RANGE.equals(timeRange);
     }
 
-    public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group, @NotNull String timeRange, @NotNull Map<String, Object> params) {
+    public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group,
+            @NotNull String timeRange, @NotNull Map<String, Object> params) {
         // any tag for filtering all attrs
         cm.setFilterTags(Arrays.asList(timeRange, FilterOptions.Option.ANY_VALUE));
         if (shouldHideInCategoryTile(cm, group, timeRange)) {

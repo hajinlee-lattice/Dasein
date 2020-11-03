@@ -41,7 +41,7 @@ public class ActivityMetricsProxy extends MicroserviceRestApiProxy {
     }
 
     public boolean setupDefaultWebVisitProfile(String customerSpace, AtlasStream stream) {
-        String url = constructUrl("/customerspaces/{customerSpace}/metrics/setupDefaultWebVisitProfile", customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/metrics/groups/default/webvisit", customerSpace);
         return post("setup default web visit metric groups", url, stream.getName(), Boolean.class);
     }
 }

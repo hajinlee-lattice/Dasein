@@ -701,19 +701,6 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
-    public boolean createDefaultBuyingScoreDataTemplate(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup"
-                + "/defaultDnbIntentData?processBuyingScore=true", shortenCustomerSpace(customerSpace));
-        ResponseDocument<Boolean> responseDocument = post("create default buying score template", url, null,
-                ResponseDocument.class);
-        if (responseDocument.isSuccess()) {
-            return responseDocument.getResult();
-        } else {
-            return false;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
     public String backupTemplate(String customerSpace, String uniqueTaskId) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/backup/{uniqueTaskId}",
                 shortenCustomerSpace(customerSpace), uniqueTaskId);
