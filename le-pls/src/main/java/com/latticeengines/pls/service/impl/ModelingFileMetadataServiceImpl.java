@@ -379,7 +379,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         MetadataResolver resolver = getMetadataResolver(getSourceFile(sourceFileName), fieldMappingDocument, true,
                 standardTable);
 
-        setSystemFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, customerSpace, true);
+        setSystemFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, customerSpace);
         // validate field mapping document
         List<FieldMapping> fieldMappings = fieldMappingDocument.getFieldMappings();
         List<String> ignored = new ArrayList<>();
@@ -961,7 +961,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Preconditions.checkNotNull(customerSpace);
 
         // this step will set mapped
-        setSystemFieldMapping(fieldMappingDocument, entity, feedType, customerSpace, false);
+        setSystemFieldMapping(fieldMappingDocument, entity, feedType, customerSpace);
 
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         Table schemaTable = getSchemaTable(customerSpace, entity, feedType, withoutId);
@@ -1019,14 +1019,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
      * @param customerSpace
      */
     private void setSystemFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity,
-                                       String feedType, CustomerSpace customerSpace, boolean skip) {
+                                       String feedType, CustomerSpace customerSpace) {
         // 1. set system related mapping //only apply to Account / Contact / Transaction
         Set<String> systemIdSet = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity) || BusinessEntity.Transaction.equals(entity)) {
-            if (!skip) {
-                // this special case will be captured by validation step
-                removeDuplicateSystemIdMapping(fieldMappingDocument, systemIdSet);
-            }
+            removeDuplicateSystemIdMapping(fieldMappingDocument, systemIdSet);
             List<FieldMapping> customerLatticeIdList = new ArrayList<>();
             Iterator<FieldMapping> iterator = fieldMappingDocument.getFieldMappings().iterator();
             while (iterator.hasNext()) {

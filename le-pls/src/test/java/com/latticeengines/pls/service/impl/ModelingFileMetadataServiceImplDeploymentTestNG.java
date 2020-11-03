@@ -59,7 +59,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 true);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void verifyDateFormat() {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_TRANSACTION), ENTITY_TRANSACTION, TRANSACTION_SOURCE_FILE_MISSING,
@@ -116,7 +116,6 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
         boolean idExist = false;
         boolean externalIdExist = false;
-        boolean parentExternalIdExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
@@ -135,15 +134,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 Assert.assertNotNull(fieldMapping.getMappedField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.TEXT);
             }
-
-            // map user field to system DEFAULT_SYSTEM, for the below test testFieldMapping_WithOtherTemplate
-            if ("Parent_External_ID".equals(fieldMapping.getUserField())) {
-                parentExternalIdExist = true;
-                fieldMapping.setSystemName(DEFAULT_SYSTEM);
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-            }
         }
-        Assert.assertTrue(parentExternalIdExist);
 
         Assert.assertTrue(idExist);
         Assert.assertTrue(externalIdExist);
@@ -228,6 +219,8 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
 
         boolean externalIdExist = false;
+        boolean parentExternalIdExist = false;
+        boolean accountForPlatform = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
@@ -241,11 +234,25 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 Assert.assertNotNull(fieldMapping.getMappedField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.TEXT);
                 fieldMapping.setFieldType(UserDefinedType.NUMBER);
+            }
+
+            // map user field to DEFAULT_SYSTEM
+            if ("S_Account_For_Platform_Test".equals(fieldMapping.getUserField())) {
+                accountForPlatform = true;
+                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+            // map user field to system DEFAULT_SYSTEM
+            if ("Parent_External_ID".equals(fieldMapping.getUserField())) {
+                parentExternalIdExist = true;
                 fieldMapping.setSystemName(DEFAULT_SYSTEM);
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
             }
         }
         Assert.assertTrue(externalIdExist);
+        Assert.assertTrue(parentExternalIdExist);
+        Assert.assertTrue(accountForPlatform);
+
         FieldValidationResult fieldValidationResult =
                 modelingFileMetadataService.validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
                         SOURCE, feedType);
