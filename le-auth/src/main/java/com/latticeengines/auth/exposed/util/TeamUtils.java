@@ -30,7 +30,7 @@ public final class TeamUtils {
     public static final String GLOBAL_TEAM_ID = "Global_Team";
 
     private static final List<String> TEAM_REGARDLESS_ROLES_DCP = Arrays.asList( //
-            "SUPER_ADMIN", "INTERNAL_ADMIN");
+            "SUPER_ADMIN", "INTERNAL_ADMIN", "EXTERNAL_ADMIN");
 
     private static final Logger log = LoggerFactory.getLogger(TeamUtils.class);
 
