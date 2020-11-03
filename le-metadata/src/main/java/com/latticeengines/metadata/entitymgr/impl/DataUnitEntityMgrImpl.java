@@ -163,7 +163,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     @Override
-    public List<DataUnit> findAllByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Roles role) {
+    public List<DataUnit> findAllByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role) {
         List<DataUnitEntity> entities = readerRepository.findByTenantIdAndDataTemplateId(tenantId, dataTemplateId);
         List<DataUnitEntity> entitiesWithRole = entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role))
                 .collect(Collectors.toList());
