@@ -116,6 +116,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
         boolean idExist = false;
         boolean externalIdExist = false;
+        boolean parentExternalIdExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
@@ -134,7 +135,16 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 Assert.assertNotNull(fieldMapping.getMappedField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.TEXT);
             }
+
+            // map user field to system DEFAULT_SYSTEM, for the below test testFieldMapping_WithOtherTemplate
+            if ("Parent_External_ID".equals(fieldMapping.getUserField())) {
+                parentExternalIdExist = true;
+                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
         }
+        Assert.assertTrue(parentExternalIdExist);
+
         Assert.assertTrue(idExist);
         Assert.assertTrue(externalIdExist);
         modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
@@ -218,14 +228,14 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
 
         boolean externalIdExist = false;
-        boolean parentExternalIdExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
             // the type for CrmAccount_External_ID is TEXT in DEFAULT_SYSTEM, in this test,
-            // try to set it to be NUMBER
+            // try to set it to be NUMBER, this is the first error
+            // map it to default system, this will conflict with the system setting in verifyStandardFields
             if ("CrmAccount_External_ID".equals(fieldMapping.getUserField())) {
                 externalIdExist = true;
                 Assert.assertNotNull(fieldMapping.getMappedField());
@@ -234,19 +244,13 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 fieldMapping.setSystemName(DEFAULT_SYSTEM);
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
             }
-            // map two user field to system DEFAULT_SYSTEM
-            if ("Parent_External_ID".equals(fieldMapping.getUserField())) {
-                parentExternalIdExist = true;
-                fieldMapping.setSystemName(DEFAULT_SYSTEM);
-                fieldMapping.setIdType(FieldMapping.IdType.Account);
-            }
         }
         Assert.assertTrue(externalIdExist);
-        Assert.assertTrue(parentExternalIdExist);
         FieldValidationResult fieldValidationResult =
                 modelingFileMetadataService.validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
                         SOURCE, feedType);
-        log.info(JsonUtils.pprint(fieldValidationResult));
+        log.info("field mapping is : " + JsonUtils.pprint(fieldMappingDocument));
+        log.info("field result is : " + JsonUtils.pprint(fieldValidationResult));
 
         List<FieldValidation> validations = fieldValidationResult.getFieldValidations();
         List<FieldValidation> errorValidations =
