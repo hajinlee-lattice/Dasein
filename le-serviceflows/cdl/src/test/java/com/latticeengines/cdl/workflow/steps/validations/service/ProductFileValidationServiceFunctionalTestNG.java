@@ -18,6 +18,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.CDLWorkflowFunctionalTestNGBase;
 import com.latticeengines.cdl.workflow.steps.validations.service.impl.ProductFileValidationService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -37,22 +39,25 @@ public class ProductFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     @Inject
     private ProductFileValidationService productFileValidationService;
 
-    private static final String PRODUCT_FILE_DESTINATION = "/tmp/validation/product/";
-
-    private String fileName;
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
+        super.setup();
+        CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+        String hdfsDir = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString();
+        fileDestination = hdfsDir + "/product/";
+        if (!HdfsUtils.fileExists(yarnConfiguration, fileDestination)) {
+            HdfsUtils.mkdir(yarnConfiguration, fileDestination);
+        }
+        fileName = "product.avro";
         InputStream in = testArtifactService.readTestArtifactAsStream(TEST_AVRO_DIR, TEST_AVRO_VERSION, "Product1" +
                 ".avro");
-        HdfsUtils.rmdir(yarnConfiguration, PRODUCT_FILE_DESTINATION);
-        fileName = "product.avro";
-        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, in,  PRODUCT_FILE_DESTINATION + fileName);
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, in,  fileDestination + fileName);
     }
 
     @AfterClass(groups = {"functional"})
     public void teardown() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, PRODUCT_FILE_DESTINATION);
+        HdfsUtils.rmdir(yarnConfiguration, fileDestination);
     }
 
     @Override
@@ -79,7 +84,7 @@ public class ProductFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
         ReflectionTestUtils.setField(productFileValidationService, "dataFeedProxy", dataFeedProxy);
 
         ProductFileValidationConfiguration configuration = new ProductFileValidationConfiguration();
-        configuration.setPathList(Collections.singletonList(PRODUCT_FILE_DESTINATION + fileName));
+        configuration.setPathList(Collections.singletonList(fileDestination + fileName));
         configuration.setCustomerSpace(CustomerSpace.parse("test"));
         configuration.setDataFeedTaskId("test");
         List<String> processedRecords = Collections.singletonList("50");
