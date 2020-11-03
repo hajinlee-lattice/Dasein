@@ -2,7 +2,9 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
 import static com.latticeengines.domain.exposed.admin.LatticeModule.TalkingPoint;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.util.ArrayList;
@@ -91,6 +93,7 @@ public class CuratedContactAttributes
     private DataCollection.Version inactive;
     private DataCollection.Version active;
     private boolean resetCuratedContact;
+    private String accountTableName;
     private String contactTableName;
     private String contactSystemTableName;
     private String contactLastActivityTempTableName;
@@ -133,6 +136,7 @@ public class CuratedContactAttributes
         resetCuratedContact = shouldResetCuratedAttributesContext();
         templateSystemMap = dataFeedProxy.getTemplateToSystemMap(customerSpace.toString());
         systemMap = getSystemMap();
+        accountTableName = getAccountTableName();
         contactTableName = getContactTableName();
         contactSystemTableName = getContactSystemTableName();
         contactLastActivityTempTableName = getContactLastActivityDateTableName();
@@ -146,9 +150,11 @@ public class CuratedContactAttributes
         }
 
         List<DataUnit> inputs = new ArrayList<>();
+        Table accountTable = metadataProxy.getTable(customerSpace.getTenantId(), accountTableName);
         Table contactTable = metadataProxy.getTable(customerSpace.getTenantId(), contactTableName);
         inputs.add(contactTable.toHdfsDataUnit("ContactBatchStore"));
-        int inputIdx = 1;
+        inputs.add(accountTable.toHdfsDataUnit("AccountBatchStore"));
+        int inputIdx = 2;
 
         // since it's linked in previous step, check inactive is enough
         Table curatedAttrTable = dataCollectionProxy.getTable(customerSpace.toString(), TABLE_ROLE, inactive);
@@ -166,6 +172,10 @@ public class CuratedContactAttributes
         jobConfig.templateSystemMap = CuratedAttributeUtils.templateSourceMap(templateSystemMap, systemMap);
         jobConfig.templateTypeMap = templateTypeMap;
         jobConfig.attrsToMerge.put(0, CuratedAttributeUtils.attrsMergeFromMasterStore(MASTER_STORE_ENTITY));
+
+        // remove orphan contacts
+        jobConfig.parentMasterTableIdx = 1;
+        jobConfig.joinKeys.put(1, AccountId.name());
 
         if (StringUtils.isNotBlank(contactLastActivityTempTableName)) {
             log.info("Found contact last activity date table = {}, re-calculating LastActivityDate attribute",
@@ -224,7 +234,10 @@ public class CuratedContactAttributes
     }
 
     private boolean shouldExecute() {
-        if (StringUtils.isBlank(contactTableName)) {
+        if (StringUtils.isBlank(accountTableName)) {
+            log.info("No account batch store, skip curated contact step");
+            return false;
+        } else if (StringUtils.isBlank(contactTableName)) {
             log.info("No contact batch store, skip curated contact step");
             return false;
         } else if (resetCuratedContact) {
@@ -309,6 +322,10 @@ public class CuratedContactAttributes
 
     private String getContactTableName() {
         return getTableName(Contact.getBatchStore(), "contact batch store");
+    }
+
+    private String getAccountTableName() {
+        return getTableName(Account.getBatchStore(), "account batch store");
     }
 
     // TODO move duplicate code to common place

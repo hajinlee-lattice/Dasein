@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class GenerateCuratedAttributesConfig extends SparkJobConfig {
@@ -13,7 +14,8 @@ public class GenerateCuratedAttributesConfig extends SparkJobConfig {
     public static final String NAME = "generateCuratedAttrs";
     private static final long serialVersionUID = 7277006448211365773L;
 
-    // [required]: column used as join key to merge attrs
+    // : column used as join key to merge attrs
+    @NotNull
     @JsonProperty
     public String joinKey;
 
@@ -22,8 +24,13 @@ public class GenerateCuratedAttributesConfig extends SparkJobConfig {
     public Integer lastActivityDateInputIdx;
 
     // index of batch store table
+    @NotNull
     @JsonProperty
     public Integer masterTableIdx;
+
+    // index of parent batch store table
+    @JsonProperty
+    public Integer parentMasterTableIdx;
 
     // template name -> system display name
     @JsonProperty
