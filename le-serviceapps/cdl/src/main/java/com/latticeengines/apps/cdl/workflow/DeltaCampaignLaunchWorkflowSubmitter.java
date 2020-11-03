@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationI
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -90,7 +91,7 @@ public class DeltaCampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
     private void replaceSfdcContactId(PlayLaunch playLaunch, Map<String, String> contactDisplayNameMap) {
         String sfdcContactId = playLaunch.getDestinationContactId();
         if (StringUtils.isNotEmpty(sfdcContactId)) {
-            String key = "SfdcContactID";
+            String key = PlaymakerConstants.SfdcContactID;
             String value = contactDisplayNameMap.get(key);
             contactDisplayNameMap.remove(key);
             contactDisplayNameMap.put(sfdcContactId, value);
