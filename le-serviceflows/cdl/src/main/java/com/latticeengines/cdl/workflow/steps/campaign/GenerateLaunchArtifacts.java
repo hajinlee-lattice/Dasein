@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.campaign;
 
-import static com.latticeengines.domain.exposed.pls.Play.TapType;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
 import java.util.ArrayList;
@@ -44,6 +43,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.Play.TapType;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -143,7 +143,27 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             log.info("No Delta Data found, skipping Launch Artifact generation");
             return;
         }
-        List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(), channel.getId());
+
+        version = parseDataCollectionVersion(configuration);
+        attrRepo = parseAttrRepo(configuration);
+        evaluationDate = parseEvaluationDateStr(configuration);
+        boolean contactsDataExists = AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact);
+        if (!contactsDataExists) {
+            log.info("No Contact data found in the Attribute Repo");
+        }
+
+        ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
+        String accountLookupId = launch == null ? channel.getLookupIdMap().getAccountId()
+                : launch.getDestinationAccountId();
+        String contactLookupId = launch == null ? channel.getLookupIdMap().getContactId()
+                : launch.getDestinationContactId();
+        CDLExternalSystemName externalSystemName = launch == null ? channel.getLookupIdMap().getExternalSystemName()
+                : launch.getDestinationSysName();
+        log.info("externalSystemName=" + externalSystemName);
+
+        List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
+                channel.getId());
+
         if (fieldMappingMetadata != null) {
             log.info("For tenant= " + config.getCustomerSpace().getTenantId() + ", playChannelId= " + channel.getId()
                     + ", the columnMetadata size is=" + fieldMappingMetadata.size());
@@ -165,7 +185,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         if (StringUtils.isNotBlank(contactLookupId)) {
             contactLookups.add(new AttributeLookup(BusinessEntity.Contact, contactLookupId));
         }
-        if (campaignLaunchUtils.getUseCustomerId(customerSpace, launch.getDestinationSysName())) {
+        if (campaignLaunchUtils.getUseCustomerId(customerSpace, externalSystemName)) {
             appendCustomerId(accountLookups, InterfaceName.CustomerAccountId, BusinessEntity.Account);
             appendCustomerId(contactLookups, InterfaceName.CustomerContactId, BusinessEntity.Contact);
         }
