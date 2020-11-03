@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -41,7 +42,8 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
     private static final int percentileLowerBound = 5;
     private static final int percentileUpperBound = 99;
 
-    private static int batchSize = 5;
+    @Value("${cdl.scoring.batch.model.size:20}")
+    private static int batchSize;
     private List<RatingModelContainer> containers;
 
     private Table inputTable;
