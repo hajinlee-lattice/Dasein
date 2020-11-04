@@ -97,7 +97,6 @@ public class SegmentResource {
 
     @PostMapping("/listsegment")
     @ResponseBody
-    @Action
     @ApiOperation(value = "Create or update a segment")
     public MetadataSegment createOrUpdateListSegment(@PathVariable String customerSpace, @RequestBody MetadataSegment segment) {
         MetadataSegment res = segmentService.createOrUpdateListSegment(segment);
@@ -105,9 +104,8 @@ public class SegmentResource {
     }
 
     // only update list segment entity
-    @PutMapping("/listsegment")
+    @PostMapping("/sublistsegment")
     @ResponseBody
-    @Action
     @ApiOperation(value = "Create or update a segment")
     public ListSegment updateListSegment(@PathVariable String customerSpace, @RequestBody ListSegment listSegment) {
         return segmentService.updateListSegment(listSegment);
