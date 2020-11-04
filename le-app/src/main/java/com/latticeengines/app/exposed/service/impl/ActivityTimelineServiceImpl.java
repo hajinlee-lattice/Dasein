@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityTimelineMetrics;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -92,10 +94,11 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     }
 
     @Override
-    public DataPage getContactActivities(String accountId, String contactId, String timelinePeriod,
+    public DataPage getContactActivities(String accountId, String contactId, String timelinePeriodStr,
             Set<AtlasStream.StreamType> streamTypes, Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
-        timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultTimelinePeriod;
+        Period timelinePeriod = parseTimePeriod(customerSpace,
+                StringUtils.isNotBlank(timelinePeriodStr) ? timelinePeriodStr : defaultTimelinePeriod);
 
         // Internal AccountId isn't needed for contact activity queries right now
         // Nevertheless look it up to avoid servicing data for invalie
@@ -103,39 +106,54 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         String internalAccountId = getInternalAccountId(accountId, orgInfo, customerSpace);
 
         ActivityTimelineQuery query = buildActivityTimelineQuery(BusinessEntity.Contact, contactId, customerSpace,
-                parseTimePeriod(customerSpace, timelinePeriod));
+                timelinePeriod);
 
         return filterStreamData(activityProxy.getData(customerSpace, null, query), streamTypes);
     }
 
     @Override
-    public Map<String, Integer> getActivityTimelineMetrics(String accountId, String timelinePeriod,
+    public List<ActivityTimelineMetrics> getActivityTimelineMetrics(String accountId, String timelinePeriodStr,
             Map<String, String> orgInfo) {
 
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
         log.info(String.format("Retrieving Activity Timeline Metrics | tenant=%s",
                 CustomerSpace.shortenCustomerSpace(customerSpace)));
 
-        timelinePeriod = StringUtils.isNotBlank(timelinePeriod) ? timelinePeriod : defaultActivityMetricsPeriod;
-        DataPage data = getAccountActivities(customerSpace, accountId, parseTimePeriod(customerSpace, timelinePeriod),
-                orgInfo);
+        Period timelinePeriod = parseTimePeriod(customerSpace,
+                StringUtils.isNotBlank(timelinePeriodStr) ? timelinePeriodStr : defaultActivityMetricsPeriod);
+        DataPage data = getAccountActivities(customerSpace, accountId, timelinePeriod, orgInfo);
 
-        Map<String, Integer> metrics = new HashMap<>();
-        metrics.put("newActivities", dataFilter(data, AtlasStream.StreamType.WebVisit, null).size());
+        int newActivitiesCount = dataFilter(data, AtlasStream.StreamType.WebVisit, null).size();
+        int newIdentifiedContactsCount = (int) dataFilter(data, AtlasStream.StreamType.MarketingActivity,
+                SourceType.MARKETO).stream().filter(t -> t.get(InterfaceName.EventType.name()).equals("New Lead"))
+                        .map(t -> t.get(InterfaceName.ContactId.name())).distinct().count();
+        int newEngagementsCount = dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
+                + dataFilter(data, AtlasStream.StreamType.MarketingActivity, null).size();
+        int newOpportunitiesCount = (int) dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
+                .filter(t -> !t.get(InterfaceName.Detail1.name()).equals("Closed")
+                        && !t.get(InterfaceName.Detail1.name()).equals("Closed Won"))
+                .count();
 
-        metrics.put("newIdentifiedContacts",
-                (int) dataFilter(data, AtlasStream.StreamType.MarketingActivity, SourceType.MARKETO).stream()
-                        .filter(t -> t.get(InterfaceName.EventType.name()).equals("New Lead"))
-                        .map(t -> t.get(InterfaceName.ContactId.name())).distinct().count());
+        List<ActivityTimelineMetrics> metrics = new ArrayList<ActivityTimelineMetrics>();
 
-        metrics.put("newEngagements", dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
-                + dataFilter(data, AtlasStream.StreamType.MarketingActivity, null).size());
+        int days = timelinePeriod.getDays();
+        String description = ActivityTimelineMetrics.MetricsType.getDescription(days);
 
-        metrics.put("newOpportunities",
-                (int) dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
-                        .filter(t -> !t.get(InterfaceName.Detail1.name()).equals("Closed")
-                                && !t.get(InterfaceName.Detail1.name()).equals("Closed Won"))
-                        .count());
+        metrics.add(new ActivityTimelineMetrics(newActivitiesCount,
+                ActivityTimelineMetrics.MetricsType.NewActivity.getLabel(), description,
+                ActivityTimelineMetrics.MetricsType.NewActivity.getContext(days)));
+        if (newIdentifiedContactsCount != 0) {
+            metrics.add(new ActivityTimelineMetrics(newIdentifiedContactsCount,
+                    ActivityTimelineMetrics.MetricsType.NewIdentifiedContacts.getLabel(), description,
+                    ActivityTimelineMetrics.MetricsType.NewIdentifiedContacts.getContext(days)));
+        }
+        metrics.add(new ActivityTimelineMetrics(newEngagementsCount,
+                ActivityTimelineMetrics.MetricsType.Newengagements.getLabel(), description,
+                ActivityTimelineMetrics.MetricsType.Newengagements.getContext(days)));
+        metrics.add(new ActivityTimelineMetrics(newOpportunitiesCount,
+                ActivityTimelineMetrics.MetricsType.NewOpportunities.getLabel(), description,
+                ActivityTimelineMetrics.MetricsType.NewOpportunities.getContext(days)));
+
         return metrics;
     }
 
