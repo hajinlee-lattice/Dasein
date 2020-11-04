@@ -208,9 +208,6 @@ public class ProcessTransactionDeploymentTestNG extends CDLEnd2EndDeploymentTest
                 "matchTransaction", //
                 "profileProductHierarchy", //
                 "mergeTransaction", //
-                "RollupProductStep", //
-                "RollupProductStep", //
-                "RollupProductStep", //
                 "splitTransactionStep", //
                 "splitTransactionStep", //
                 "splitTransactionStep", //
