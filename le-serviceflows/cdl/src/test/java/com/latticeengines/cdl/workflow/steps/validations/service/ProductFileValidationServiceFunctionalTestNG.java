@@ -60,11 +60,6 @@ public class ProductFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
         HdfsUtils.rmdir(yarnConfiguration, fileDestination);
     }
 
-    @Override
-    protected String getFlowBeanName() {
-        return null;
-    }
-
     @Test(groups = "functional")
     public void testProductFileValidations() {
         DataCollectionProxy dataCollectionProxy = Mockito.mock(DataCollectionProxy.class);

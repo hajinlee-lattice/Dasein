@@ -2,7 +2,9 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -12,11 +14,10 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-workflow-context.xml", "classpath:test-serviceflows-cdl-context.xml" })
-public abstract class CDLWorkflowFunctionalTestNGBase extends ServiceFlowsDataFlowFunctionalTestNGBase {
+public abstract class CDLWorkflowFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected static final String TEST_AVRO_DIR = "le-serviceflows/cdl/functional/avro";
     protected static final String TEST_AVRO_VERSION = "1";
@@ -31,6 +32,9 @@ public abstract class CDLWorkflowFunctionalTestNGBase extends ServiceFlowsDataFl
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    protected Configuration yarnConfiguration;
 
     protected Tenant tenant;
 
