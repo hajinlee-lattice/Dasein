@@ -39,12 +39,12 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
     }
 
     public MetadataSegment createOrUpdateListSegment(String customerSpace, MetadataSegment metadataSegment) {
-        String url = constructUrl("/{customerSpace}/segments/listsegment", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/{customerSpace}/segments/list", shortenCustomerSpace(customerSpace));
         return post("createOrUpdateListSegment", url, metadataSegment, MetadataSegment.class);
     }
 
     public ListSegment updateListSegment(String customerSpace, ListSegment listSegment) {
-        String url = constructUrl("/{customerSpace}/segments/listsegment", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/{customerSpace}/segments/list/listsegment", shortenCustomerSpace(customerSpace));
         return put("createOrUpdateListSegment", url, listSegment, ListSegment.class);
     }
 

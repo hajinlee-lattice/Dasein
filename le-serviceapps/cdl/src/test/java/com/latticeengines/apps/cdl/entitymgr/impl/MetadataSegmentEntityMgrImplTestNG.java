@@ -254,16 +254,11 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         segmentDescription = "list-segment-description2";
         metadataSegment.setDisplayName(segmentDisplayName);
         metadataSegment.setDescription(segmentDescription);
-        segmentEntityMgr.updateListSegmentByName(metadataSegment);
+        MetadataSegment existingSegment = segmentEntityMgr.findByName(metadataSegment.getName());
+        segmentEntityMgr.updateListSegment(metadataSegment, existingSegment);
         metadataSegment = segmentEntityMgr.findByName(listSegmentName, true);
         validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
-
-        segmentDisplayName = "list-segment-display-name3";
-        segmentDescription = "list-segment-description3";
-        metadataSegment.setDisplayName(segmentDisplayName);
-        metadataSegment.setDescription(segmentDescription);
-        metadataSegment = segmentEntityMgr.updateListSegmentByExternalInfo(metadataSegment);
-        metadataSegment = segmentEntityMgr.findByName(listSegmentName, true);
+        metadataSegment = segmentEntityMgr.findByExternalInfo(metadataSegment, true);
         validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
     }
 

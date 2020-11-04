@@ -118,22 +118,35 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateListSegment(MetadataSegment segment) {
-        MetadataSegment persistedSegment = null;
-        if (StringUtils.isNotBlank(segment.getName())) {
-            persistedSegment = segmentEntityMgr.updateListSegmentByName(segment);
-        } else if (segment.getListSegment() != null && StringUtils.isNotEmpty(segment.getListSegment().getExternalSystem())
-                && StringUtils.isNotEmpty(segment.getListSegment().getExternalSegmentId())) {
-            persistedSegment = segmentEntityMgr.updateListSegmentByExternalInfo(segment);
+        MetadataSegment persistedSegment;
+        if (StringUtils.isNotEmpty(segment.getName())) {
+            MetadataSegment existingSegment = segmentEntityMgr.findByName(segment.getName());
+            if (existingSegment != null) {
+                persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
+            } else {
+                persistedSegment = createListSegment(segment);
+            }
+        } else if (segment.getListSegment() != null) {
+            MetadataSegment existingSegment = segmentEntityMgr.findByExternalInfo(segment);
+            if (existingSegment != null) {
+                persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
+            } else {
+                persistedSegment = createListSegment(segment);
+            }
         } else {
             segment.setName(NamingUtils.timestamp("Segment"));
-            if (segment.getListSegment() != null) {
-                HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-                segment.getListSegment().setS3DropFolder(pathBuilder.getS3ListSegmentDir(dateStageBucket,
-                        MultiTenantContext.getShortTenantId(), segment.getName()));
-            }
-            persistedSegment = segmentEntityMgr.createListSegment(segment);
+            persistedSegment = createListSegment(segment);
         }
         return persistedSegment;
+    }
+
+    private MetadataSegment createListSegment(MetadataSegment segment) {
+        if (segment.getListSegment() != null) {
+            HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+            segment.getListSegment().setS3DropFolder(pathBuilder.getS3ListSegmentDir(dateStageBucket,
+                    MultiTenantContext.getShortTenantId(), segment.getName()));
+        }
+        return segmentEntityMgr.createListSegment(segment);
     }
 
     @Override

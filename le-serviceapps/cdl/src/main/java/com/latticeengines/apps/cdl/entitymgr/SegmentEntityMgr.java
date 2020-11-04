@@ -20,7 +20,7 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     MetadataSegment updateSegment(MetadataSegment segment, MetadataSegment existingSegment);
 
-    MetadataSegment updateListSegmentByName(MetadataSegment segment);
+    MetadataSegment updateListSegment(MetadataSegment segment, MetadataSegment existingSegment);
 
     MetadataSegment updateSegmentWithoutActionAndAuditing(MetadataSegment segment, MetadataSegment existingSegment);
 
@@ -34,7 +34,7 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     MetadataSegment createListSegment(MetadataSegment segment);
 
-    MetadataSegment updateListSegmentByExternalInfo(MetadataSegment incomingSegment);
-
     MetadataSegment findByExternalInfo(MetadataSegment segment);
+
+    MetadataSegment findByExternalInfo(MetadataSegment segment, boolean inflate);
 }

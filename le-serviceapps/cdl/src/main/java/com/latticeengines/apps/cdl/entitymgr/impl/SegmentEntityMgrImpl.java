@@ -181,43 +181,27 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public MetadataSegment updateListSegmentByName(MetadataSegment incomingSegment) {
-        log.info("Updating list segment by segment name {}.", incomingSegment.getName());
-        MetadataSegment existingSegment = _self.findByName(incomingSegment.getName());
-        return updateListSegment(existingSegment, incomingSegment);
-    }
-
-    private MetadataSegment updateListSegment(MetadataSegment existingSegment, MetadataSegment incomingSegment) {
-        if (existingSegment != null) {
-            cloneForUpdate(existingSegment, incomingSegment);
-            segmentDao.update(existingSegment);
-            return existingSegment;
-        } else {
-            throw new RuntimeException("List segment does not exists");
-        }
+    public MetadataSegment updateListSegment(MetadataSegment incomingSegment, MetadataSegment existingSegment) {
+        cloneForUpdate(existingSegment, incomingSegment);
+        segmentDao.update(existingSegment);
+        return existingSegment;
     }
 
     @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public MetadataSegment updateListSegmentByExternalInfo(MetadataSegment incomingSegment) {
-        if (incomingSegment.getListSegment() != null) {
-            log.info("Updating list segment by external system name {} and external segment id {}.",
-                    incomingSegment.getListSegment().getExternalSystem(), incomingSegment.getListSegment().getExternalSegmentId());
-            MetadataSegment existingSegment = _self.findByExternalInfo(incomingSegment);
-            return updateListSegment(existingSegment, incomingSegment);
-        } else {
-            log.info("Can't update segment with empty list segment info.");
-            throw new RuntimeException("Can't update segment with empty list segment info");
-        }
-    }
-
-    @Override
-    @SoftDeleteConfiguration
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findByExternalInfo(MetadataSegment segment) {
         return segmentDao.findByExternalInfo(segment);
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public MetadataSegment findByExternalInfo(MetadataSegment segment, boolean inflate) {
+        MetadataSegment existingSegment = segmentDao.findByExternalInfo(segment);
+        if (existingSegment != null && inflate) {
+            Hibernate.initialize(existingSegment.getListSegment());
+        }
+        return existingSegment;
+    }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
