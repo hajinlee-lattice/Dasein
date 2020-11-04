@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +17,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 
-@Controller("listSegmentEntityMgr")
+@Component("listSegmentEntityMgr")
 public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<ListSegmentRepository, ListSegment, Long> implements ListSegmentEntityMgr {
 
     @SuppressWarnings("unused")

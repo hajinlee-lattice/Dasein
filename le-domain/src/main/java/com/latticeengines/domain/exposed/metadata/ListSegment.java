@@ -60,10 +60,12 @@ public class ListSegment implements HasPid {
     private String s3DropFolder;
 
     //  Map<String, String> --> <entity --> template id>
+    @JsonProperty("dataTemplates")
     @Column(name = "DATA_TEMPLATES", columnDefinition = "'JSON'")
     @Type(type = "json")
     private Map<String, String> dataTemplates;
 
+    @JsonProperty("csvAdaptor")
     @Column(name = "CSV_ADAPTOR", columnDefinition = "'JSON'")
     @Type(type = "json")
     private CSVAdaptor csvAdaptor;
