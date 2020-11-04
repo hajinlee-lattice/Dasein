@@ -1,7 +1,6 @@
 /*
 * script name - mysql.sql
-* purpose - Base sql file to prepare DB upgrade script.
-* It contains DDL/DML sql queries that can be applied at 'release regression' & 'release window' cycle.
+* purpose - 'Release/Hotfix/Patch' DB changes in production.
 * Ensure to maintain backward compatibility.
 */
 
@@ -14,16 +13,6 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
-      ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH`
-        ADD COLUMN `ADD_RECOMMENDATIONS_TABLE_NAME` VARCHAR(255),
-        ADD COLUMN `DELETE_RECOMMENDATIONS_TABLE_NAME` VARCHAR(255);
-
-ALTER TABLE `PLS_MultiTenant`.`DCP_DATA_REPORT`
-          DROP FOREIGN KEY `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE`;
-
-ALTER TABLE `PLS_MultiTenant`.`DCP_DATA_REPORT`
-ADD CONSTRAINT `FK_DCPDATAREPORT_FKDUNSCOUNT_METADATATABLE` FOREIGN KEY (`FK_DUNS_COUNT`)
-REFERENCES `PLS_MultiTenant`.`METADATA_TABLE` (`PID`) ON DELETE SET NULL;
       
   END //
 -- ##############################################################
