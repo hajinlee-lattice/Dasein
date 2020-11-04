@@ -128,7 +128,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .prefixKeysWith(getPrefix(CacheName.Constants.IDaaSTokenCacheName));
 
         RedisCacheConfiguration idaasSubscriberDetailsCacheConfig = RedisCacheConfiguration.defaultCacheConfig() //
-                .entryTtl(Duration.ofHours(2)) //
+                .entryTtl(Duration.ofDays(2)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
