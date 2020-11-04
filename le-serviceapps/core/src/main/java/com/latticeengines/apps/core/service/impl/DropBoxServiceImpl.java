@@ -98,9 +98,6 @@ public class DropBoxServiceImpl implements DropBoxService {
     @Value("${aws.customer.account.id}")
     private String customerAccountId;
 
-    @Value("${aws.s3.data.stage.bucket}")
-    private String externalSystemBucket;
-
     @Override
     public DropBox create() {
         DropBox dropbox = dropBoxEntityMgr.createDropBox(region);

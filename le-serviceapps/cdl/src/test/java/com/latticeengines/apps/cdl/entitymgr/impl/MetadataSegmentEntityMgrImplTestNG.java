@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
@@ -28,6 +29,7 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -55,6 +57,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
     private String segmentName;
+    private String listSegmentName;
 
     private static final String TABLE_NAME = "Account1";
     private static final String OTHER_SEGMENT_NAME = NamingUtils.uuid("OTHER_SEGMENT_NAME");
@@ -70,6 +73,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
     @BeforeClass(groups = "functional")
     public void setup() {
         segmentName = NamingUtils.uuid("SEGMENT_NAME");
+        listSegmentName = NamingUtils.uuid("LIST_SEGMENT_NAME");
         setupTestEnvironmentWithDataCollection();
         createSegmentInOtherTenant();
 
@@ -199,17 +203,89 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         Assert.assertEquals(retrieved.getUpdated(), updated);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "updateSegment")
+    @Test(groups = "functional", dependsOnMethods = {"updateSegment", "createOrUpdateListSegment"})
     public void deleteSegment() {
         MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
         segmentEntityMgr.delete(retrieved, false, false);
         assertEquals(segmentEntityMgr.getAllDeletedSegments().size(), 1);
-        assertEquals(segmentEntityMgr.findAll().size(), 1);
+        assertEquals(segmentEntityMgr.findAll().size(), 2);
         retrieved = segmentEntityMgr.findByName(segmentName);
-        Assert.assertNotNull(retrieved);
-        Assert.assertTrue(retrieved.getDeleted());
-
+        assertNotNull(retrieved);
+        assertTrue(retrieved.getDeleted());
         segmentEntityMgr.delete(retrieved, false, true);
-        assertEquals(segmentEntityMgr.findAll().size(), 1);
+        assertEquals(segmentEntityMgr.findAll().size(), 2);
+        verifyDelete(false, 1);
+        verifyDelete(true, 1);
+    }
+
+    private void verifyDelete(boolean hardDelete, int totalSize) {
+        MetadataSegment retrieved = segmentEntityMgr.findByName(listSegmentName, hardDelete);
+        segmentEntityMgr.delete(retrieved, false, hardDelete);
+        assertEquals(segmentEntityMgr.findAll().size(), totalSize);
+        retrieved = segmentEntityMgr.findByName(listSegmentName);
+        if (hardDelete) {
+            assertNull(retrieved);
+        } else {
+            assertTrue(retrieved.getDeleted());
+        }
+    }
+
+    @Test(groups = "functional")
+    public void createOrUpdateListSegment() {
+        MetadataSegment metadataSegment = new MetadataSegment();
+        String segmentDisplayName = "list-segment-display-name";
+        String segmentDescription = "list-segment-description";
+        String externalSystem = "dataVision";
+        String externalSegmentId = "dataVisionSegment";
+        String s3DropFolder = "/latticeengines-qa-data-stage/datavision_segment/" + listSegmentName + "/input";
+        ListSegment listSegment = createListSegment(externalSystem, externalSegmentId, s3DropFolder);
+        metadataSegment.setName(listSegmentName);
+        metadataSegment.setDisplayName(segmentDisplayName);
+        metadataSegment.setDescription(segmentDescription);
+        metadataSegment.setDataCollection(dataCollection);
+        metadataSegment.setType(MetadataSegment.SegmentType.List);
+        metadataSegment.setTenant(MultiTenantContext.getTenant());
+        metadataSegment.setListSegment(listSegment);
+        segmentEntityMgr.createListSegment(metadataSegment);
+
+        metadataSegment = segmentEntityMgr.findByName(listSegmentName, true);
+        validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
+        segmentDisplayName = "list-segment-display-name2";
+        segmentDescription = "list-segment-description2";
+        metadataSegment.setDisplayName(segmentDisplayName);
+        metadataSegment.setDescription(segmentDescription);
+        segmentEntityMgr.updateListSegmentByName(metadataSegment);
+        metadataSegment = segmentEntityMgr.findByName(listSegmentName, true);
+        validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
+
+        segmentDisplayName = "list-segment-display-name3";
+        segmentDescription = "list-segment-description3";
+        metadataSegment.setDisplayName(segmentDisplayName);
+        metadataSegment.setDescription(segmentDescription);
+        metadataSegment = segmentEntityMgr.updateListSegmentByExternalInfo(metadataSegment);
+        metadataSegment = segmentEntityMgr.findByName(listSegmentName, true);
+        validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
+    }
+
+    private void validateListSegment(MetadataSegment segment, String displayName, String description,
+                                     String externalSystemName, String externalSegmentId) {
+        assertNotNull(segment);
+        assertEquals(segment.getDescription(), description);
+        assertEquals(segment.getDisplayName(), displayName);
+        assertEquals(segment.getName(), listSegmentName);
+        ListSegment listSegment = segment.getListSegment();
+        assertNotNull(listSegment);
+        assertEquals(listSegment.getExternalSystem(), externalSystemName);
+        assertEquals(listSegment.getExternalSegmentId(), externalSegmentId);
+        assertNotNull(listSegment.getS3DropFolder());
+        assertNotNull(listSegment.getCsvAdaptor());
+    }
+
+    private ListSegment createListSegment(String externalSystem, String externalSegmentId, String s3DropFolder) {
+        ListSegment listSegment = new ListSegment();
+        listSegment.setExternalSystem(externalSystem);
+        listSegment.setExternalSegmentId(externalSegmentId);
+        listSegment.setS3DropFolder(s3DropFolder);
+        return listSegment;
     }
 }

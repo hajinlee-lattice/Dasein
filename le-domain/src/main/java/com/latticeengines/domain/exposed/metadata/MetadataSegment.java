@@ -154,9 +154,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     private SegmentType type;
 
     @JsonProperty("listSegment")
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
-    @JoinColumn(name = "LIST_SEGMENT_ID")
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE, mappedBy = "metadataSegment")
     private ListSegment listSegment;
 
     @JsonProperty("team")
@@ -526,6 +524,9 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setListSegment(ListSegment listSegment) {
         this.listSegment = listSegment;
+        if (this.listSegment != null) {
+            this.listSegment.setMetadataSegment(this);
+        }
     }
 
 

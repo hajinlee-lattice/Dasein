@@ -25,6 +25,7 @@ import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -92,6 +93,24 @@ public class SegmentResource {
         MetadataSegment res = segmentService.createOrUpdateSegment(segment);
         actionService.registerAction(ActionContext.getAction(), user);
         return res;
+    }
+
+    @PostMapping("/listsegment")
+    @ResponseBody
+    @Action
+    @ApiOperation(value = "Create or update a segment")
+    public MetadataSegment createOrUpdateListSegment(@PathVariable String customerSpace, @RequestBody MetadataSegment segment) {
+        MetadataSegment res = segmentService.createOrUpdateListSegment(segment);
+        return res;
+    }
+
+    // only update list segment entity
+    @PutMapping("/listsegment")
+    @ResponseBody
+    @Action
+    @ApiOperation(value = "Create or update a segment")
+    public ListSegment updateListSegment(@PathVariable String customerSpace, @RequestBody ListSegment listSegment) {
+        return segmentService.updateListSegment(listSegment);
     }
 
     @DeleteMapping("/{segmentName}")

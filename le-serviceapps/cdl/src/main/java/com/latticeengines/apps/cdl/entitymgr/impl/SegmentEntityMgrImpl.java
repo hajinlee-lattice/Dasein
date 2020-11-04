@@ -1,7 +1,10 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import static com.latticeengines.domain.exposed.metadata.MetadataSegment.SegmentType;
+
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,6 +14,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,6 +25,7 @@ import com.latticeengines.apps.cdl.dao.SegmentDao;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitable;
 import com.latticeengines.apps.cdl.entitymgr.GraphVisitor;
+import com.latticeengines.apps.cdl.entitymgr.ListSegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.util.ActionContext;
@@ -34,6 +39,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -42,6 +48,7 @@ import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
+import com.latticeengines.domain.exposed.util.SegmentUtils;
 
 @Component("segmentEntityMgr")
 public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
@@ -60,6 +67,14 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Inject
     private RatingAttributeNameParser ratingAttributeNameParser;
 
+    @Inject
+    private ListSegmentEntityMgr listSegmentEntityMgr;
+
+    @Inject
+    private SegmentEntityMgr _self;
+
+    private Random random = new Random();
+
     @Override
     public BaseDao<MetadataSegment> getDao() {
         return segmentDao;
@@ -70,6 +85,17 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Override
     public MetadataSegment findByName(String name) {
         return segmentDao.findByField("name", name);
+    }
+
+    @SoftDeleteConfiguration
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public MetadataSegment findByName(String name, boolean inflate) {
+        MetadataSegment segment = findByName(name);
+        if (segment != null && inflate) {
+            Hibernate.initialize(segment.getListSegment());
+        }
+        return segment;
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
@@ -84,8 +110,11 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
             throw new IllegalArgumentException("Cannot delete master segment");
         }
-        segmentDao.update(segment);
-        segmentDao.deleteByName(segment.getName(), hardDelete);
+        if (hardDelete) {
+            segmentDao.delete(segment);
+        } else {
+            segmentDao.deleteByName(segment.getName(), false);
+        }
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
@@ -101,19 +130,36 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         return segmentDao.getAllDeletedSegments();
     }
 
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public MetadataSegment createSegment(MetadataSegment segment) {
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public MetadataSegment createListSegment(MetadataSegment segment) {
+        segment.setType(SegmentType.List);
         preprocessBeforeCreateOrUpdate(segment);
         populateNullsBeforeCreate(segment);
+        segmentDao.create(segment);
+        ListSegment listSegment = segment.getListSegment();
+        if (listSegment != null) {
+            listSegment.setTenantId(MultiTenantContext.getTenant().getPid());
+            listSegment.setCsvAdaptor(SegmentUtils.getDefaultCSVAdaptor());
+            listSegment.setMetadataSegment(segment);
+            listSegmentEntityMgr.create(segment.getListSegment());
+        }
+        return segment;
+    }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public MetadataSegment createSegment(MetadataSegment segment) {
+        segment.setType(SegmentType.Query);
+        preprocessBeforeCreateOrUpdate(segment);
+        populateNullsBeforeCreate(segment);
         MetadataSegment existing = findByName(segment.getName());
         if (existing != null) {
             throw new RuntimeException("Segment already exists");
         } else {
             segmentDao.create(segment);
-            return segment;
         }
+        return segment;
     }
 
     @Override
@@ -121,7 +167,6 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     public MetadataSegment updateSegment(MetadataSegment segment, MetadataSegment existingSegment) {
         log.info("Updating segment {} with action and auditing", segment.getName());
         preprocessBeforeCreateOrUpdate(segment);
-
         if (existingSegment != null) {
             existingSegment = findByName(existingSegment.getName());
             cloneForUpdate(existingSegment, segment);
@@ -130,16 +175,55 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
             setMetadataSegmentActionContext(existingSegment);
             return existingSegment;
         } else {
-            throw new RuntimeException("Segment does not already exists");
+            throw new RuntimeException("Segment does not exists");
         }
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public MetadataSegment updateListSegmentByName(MetadataSegment incomingSegment) {
+        log.info("Updating list segment by segment name {}.", incomingSegment.getName());
+        MetadataSegment existingSegment = _self.findByName(incomingSegment.getName());
+        return updateListSegment(existingSegment, incomingSegment);
+    }
+
+    private MetadataSegment updateListSegment(MetadataSegment existingSegment, MetadataSegment incomingSegment) {
+        if (existingSegment != null) {
+            cloneForUpdate(existingSegment, incomingSegment);
+            segmentDao.update(existingSegment);
+            return existingSegment;
+        } else {
+            throw new RuntimeException("List segment does not exists");
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public MetadataSegment updateListSegmentByExternalInfo(MetadataSegment incomingSegment) {
+        if (incomingSegment.getListSegment() != null) {
+            log.info("Updating list segment by external system name {} and external segment id {}.",
+                    incomingSegment.getListSegment().getExternalSystem(), incomingSegment.getListSegment().getExternalSegmentId());
+            MetadataSegment existingSegment = _self.findByExternalInfo(incomingSegment);
+            return updateListSegment(existingSegment, incomingSegment);
+        } else {
+            log.info("Can't update segment with empty list segment info.");
+            throw new RuntimeException("Can't update segment with empty list segment info");
+        }
+    }
+
+    @Override
+    @SoftDeleteConfiguration
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public MetadataSegment findByExternalInfo(MetadataSegment segment) {
+        return segmentDao.findByExternalInfo(segment);
+    }
+
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public MetadataSegment updateSegmentWithoutActionAndAuditing(MetadataSegment segment, MetadataSegment existingSegment) {
         log.info("Updating segment {} without action and auditing", existingSegment.getName());
         preprocessBeforeCreateOrUpdate(segment);
-
         if (existingSegment != null) {
             existingSegment = findByName(existingSegment.getName());
             cloneForUpdate(existingSegment, segment);
@@ -159,14 +243,27 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
             segment.setContacts(0L);
         }
         segment.setTeamId(StringUtils.isEmpty(segment.getTeamId()) ? TeamUtils.GLOBAL_TEAM_ID : segment.getTeamId());
+        if (StringUtils.isEmpty(segment.getDisplayName())) {
+            segment.setDisplayName(SegmentUtils.generateDisplayName(MultiTenantContext.getShortTenantId()));
+        }
     }
 
-    private void preprocessBeforeCreateOrUpdate(MetadataSegment segment) {
-        segment.setTenant(MultiTenantContext.getTenant());
+    private void setDataCollection(MetadataSegment segment) {
         if (segment.getDataCollection() == null) {
             DataCollection defaultCollection = dataCollectionEntityMgr.findDefaultCollection();
             segment.setDataCollection(defaultCollection);
         }
+    }
+
+    private void setSegmentName(MetadataSegment segment) {
+        if (StringUtils.isBlank(segment.getName())) {
+            segment.setName(NamingUtils.timestamp("Segment"));
+        }
+    }
+
+    private void preprocessBeforeCreateOrUpdate(MetadataSegment segment) {
+        segment.setTenant(MultiTenantContext.getTenant());
+        setDataCollection(segment);
         MetadataSegment master = findMasterSegment(segment.getDataCollection().getName());
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
             if (master != null && !master.getName().equals(segment.getName())) {
@@ -179,9 +276,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
                         "Segment " + segment.getName() + " is the master segment, cannot change it to non-master.");
             }
         }
-        if (StringUtils.isBlank(segment.getName())) {
-            segment.setName(NamingUtils.timestamp("Segment"));
-        }
+        setSegmentName(segment);
     }
 
     private void setMetadataSegmentActionContext(MetadataSegment metadataSegment) {
@@ -257,11 +352,19 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     }
 
     private MetadataSegment cloneForUpdate(MetadataSegment existing, MetadataSegment incoming) {
-        existing.setAccounts(incoming.getAccounts());
-        existing.setContacts(incoming.getContacts());
-        existing.setDisplayName(incoming.getDisplayName());
+        if (incoming.getAccounts() != null) {
+            existing.setAccounts(incoming.getAccounts());
+        }
+        if (incoming.getContacts() != null) {
+            existing.setContacts(incoming.getContacts());
+        }
+        if (StringUtils.isNotEmpty(incoming.getDisplayName())) {
+            existing.setDisplayName(incoming.getDisplayName());
+        }
         existing.setDescription(incoming.getDescription());
-        existing.setUpdatedBy(incoming.getUpdatedBy());
+        if (StringUtils.isNotEmpty(incoming.getUpdatedBy())) {
+            existing.setUpdatedBy(incoming.getUpdatedBy());
+        }
         if (StringUtils.isNotEmpty(incoming.getTeamId())) {
             existing.setTeamId(incoming.getTeamId());
         }

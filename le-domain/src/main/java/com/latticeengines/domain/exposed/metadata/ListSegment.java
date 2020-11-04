@@ -1,20 +1,23 @@
 package com.latticeengines.domain.exposed.metadata;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +26,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 
 @Entity
+@javax.persistence.Table(name = "METADATA_LIST_SEGMENT")
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -49,22 +52,31 @@ public class ListSegment implements HasPid {
     private String externalSystem;
 
     @JsonProperty("externalSegmentId")
-    @Column(name = "EXTERNAL_SYSTEM_ID")
+    @Column(name = "EXTERNAL_SYSTEM_ID", nullable = false)
     private String externalSegmentId;
 
     @JsonProperty("s3DropFolder")
-    @Column(name = "S3_DROP_FOLDER")
+    @Column(name = "S3_DROP_FOLDER", nullable = false)
     private String s3DropFolder;
 
-    @Column(name = "DATA_TEMPLATES")
-    @Lob
-    @JsonIgnore
-    private String dataTemplates;
+    //  Map<String, String> --> <entity --> template id>
+    @Column(name = "DATA_TEMPLATES", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private Map<String, String> dataTemplates;
 
-    @Column(name = "CSV_ADAPTOR")
-    @Lob
+    @Column(name = "CSV_ADAPTOR", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private CSVAdaptor csvAdaptor;
+
+    @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
-    private byte[] csvAdaptor;
+    private Long tenantId;
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
+    @JoinColumn(name = "FK_SEGMENT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private MetadataSegment metadataSegment;
 
     @Override
     public Long getPid() {
@@ -106,66 +118,39 @@ public class ListSegment implements HasPid {
         this.s3DropFolder = s3DropFolder;
     }
 
-    //  Map<String, String> --> <entity --> template id>
-    @JsonProperty("dataTemplateMap")
-    @Transient
-    public Map<String, String> getDataTemplateMap() {
-        String data = getDataTemplates();
-        if (StringUtils.isEmpty(data)) {
-            return new HashMap<>();
-        }
-        return JsonUtils.deserialize(data, new TypeReference<Map<String, String>>() {
-        });
-
-    }
-
-    @JsonProperty("dataTemplateMap")
-    @Transient
-    public void setDataTemplateMap(Map<String, String> dataTemplateMap) {
-        if (MapUtils.isEmpty(dataTemplateMap)) {
-            setDataTemplates(null);
-            return;
-        }
-        String data = JsonUtils.serialize(dataTemplateMap);
-        setDataTemplates(data);
-    }
-
-    public String getDataTemplates() {
-        return dataTemplates;
-    }
-
-    public void setDataTemplates(String dataTemplates) {
-        this.dataTemplates = dataTemplates;
-    }
-
     @JsonProperty("csvAdaptor")
     @Transient
     public CSVAdaptor getCsvAdaptor() {
-        if (csvAdaptor == null) {
-            return null;
-        }
-        String uncompressedData = new String(CompressionUtils.decompressByteArray(csvAdaptor));
-        if (StringUtils.isNotEmpty(uncompressedData)) {
-            return JsonUtils.deserialize(uncompressedData, CSVAdaptor.class);
-        } else {
-            return null;
-        }
+        return csvAdaptor;
     }
 
     @JsonProperty("csvAdaptor")
     @Transient
     public void setCsvAdaptor(CSVAdaptor csvAdaptor) {
-        if (csvAdaptor == null) {
-            this.csvAdaptor = null;
-            return;
-        }
-        String string = JsonUtils.serialize(csvAdaptor);
-        byte[] payloadData = string.getBytes();
-        try {
-            byte[] compressedData = CompressionUtils.compressByteArray(payloadData);
-            this.csvAdaptor = compressedData;
-        } catch (IOException e) {
-            log.error("Failed to compress payload [" + csvAdaptor + "]", e);
-        }
+        this.csvAdaptor = csvAdaptor;
+    }
+
+    public Map<String, String> getDataTemplates() {
+        return dataTemplates;
+    }
+
+    public void setDataTemplates(Map<String, String> dataTemplates) {
+        this.dataTemplates = dataTemplates;
+    }
+
+    public MetadataSegment getMetadataSegment() {
+        return metadataSegment;
+    }
+
+    public void setMetadataSegment(MetadataSegment metadataSegment) {
+        this.metadataSegment = metadataSegment;
+    }
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 }
