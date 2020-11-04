@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.service.impl;
+package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.service.JourneyStageService;
+import com.latticeengines.apps.cdl.entitymgr.JourneyStageEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -24,13 +24,12 @@ import com.latticeengines.domain.exposed.cdl.activity.StreamFieldToFilter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 
-public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
+public class JourneyStageEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(JourneyStageServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(JourneyStageEntityMgrImplTestNG.class);
 
     @Inject
-    private JourneyStageService journeyStageService;
-
+    private JourneyStageEntityMgr journeyStageEntityMgr;
     private String stageName = "journeyStage1";
     private String stageDescription = "Some Description";
     private String stageDisplayColorCode = "#ColorCode";
@@ -70,13 +69,10 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         journeyStage.setDescription(stageDescription);
         journeyStage.setPriority(priority);
         journeyStage.setTenant(mainTestTenant);
-        JourneyStage created = journeyStageService.createOrUpdate(mainCustomerSpace, journeyStage);
-        log.info("JourneyStage is {}.", JsonUtils.serialize(created));
-        log.info("pid is {}", created.getPid());
-        Assert.assertNotNull(created.getPid());
-        List<JourneyStage> journeyStageList = journeyStageService.findByTenant(mainCustomerSpace);
+        journeyStageEntityMgr.create(journeyStage);
+        List<JourneyStage> journeyStageList = journeyStageEntityMgr.findByTenant(mainTestTenant);
         Assert.assertEquals(journeyStageList.size(), 1);
-        created = journeyStageList.get(0);
+        JourneyStage created = journeyStageList.get(0);
         log.info("JourneyStage is {}.", JsonUtils.serialize(created));
         pid = created.getPid();
         Assert.assertEquals(created.getStageName(), stageName);
@@ -97,11 +93,10 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(createdFilter.get(0).getComparisonType(), filter.getComparisonType());
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testUpdate() {
         AtomicReference<JourneyStage> createdAtom = new AtomicReference<>();
         retry.execute(context -> {
-            createdAtom.set(journeyStageService.findByPid(mainCustomerSpace, pid));
+            createdAtom.set(journeyStageEntityMgr.findByPid(pid));
             Assert.assertNotNull(createdAtom.get());
             return true;
         });
@@ -110,48 +105,14 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(stage.getStageName(), stageName);
         stage.setStageName(updateStageName);
         stage.setDescription(updatedDescription);
-        journeyStageService.createOrUpdate(mainCustomerSpace, stage);
+        journeyStageEntityMgr.createOrUpdate(stage);
         retry.execute(context -> {
-            createdAtom.set(journeyStageService.findByStageName(mainCustomerSpace, updateStageName));
+            createdAtom.set(journeyStageEntityMgr.findByTenantAndStageName(mainTestTenant, updateStageName));
             Assert.assertNotNull(createdAtom.get());
             Assert.assertEquals(createdAtom.get().getDescription(), updatedDescription);
             return true;
         });
         stage = createdAtom.get();
         Assert.assertNotNull(stage);
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "testUpdate")
-    public void testDelete() {
-        AtomicReference<JourneyStage> createdAtom = new AtomicReference<>();
-        retry.execute(context -> {
-            createdAtom.set(journeyStageService.findByPid(mainCustomerSpace, pid));
-            Assert.assertNotNull(createdAtom.get());
-            return true;
-        });
-        JourneyStage stage = createdAtom.get();
-        Assert.assertNotNull(stage);
-        Assert.assertEquals(stage.getStageName(), stageName);
-        journeyStageService.delete(mainCustomerSpace, stage);
-        retry.execute(context -> {
-            createdAtom.set(journeyStageService.findByStageName(mainCustomerSpace, updateStageName));
-            Assert.assertNull(createdAtom.get());
-            return true;
-        });
-        stage = createdAtom.get();
-        Assert.assertNull(stage);
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "testDelete")
-    public void testDefault() {
-        journeyStageService.createDefaultJourneyStages(mainCustomerSpace);
-        AtomicReference<List<JourneyStage>> createdAtom = new AtomicReference<>();
-        retry.execute(context -> {
-            createdAtom.set(journeyStageService.findByTenant(mainCustomerSpace));
-            Assert.assertEquals(createdAtom.get().size(), 8);
-            return true;
-        });
-        List<JourneyStage> journeyStageList = createdAtom.get();
-        Assert.assertEquals(journeyStageList.size(), 8);
     }
 }
