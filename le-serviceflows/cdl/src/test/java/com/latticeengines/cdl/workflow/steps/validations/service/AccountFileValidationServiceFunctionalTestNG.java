@@ -28,10 +28,6 @@ public class AccountFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     @Inject
     private AccountFileValidationService accountFileValidationService;
 
-    @Override
-    protected String getFlowBeanName() {
-        return null;
-    }
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {

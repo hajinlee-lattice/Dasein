@@ -46,10 +46,6 @@ public class ContactFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     public void teardown() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, fileDestination);
     }
-    @Override
-    protected String getFlowBeanName() {
-        return null;
-    }
 
     @Test(groups = "functional")
     public void testContactFileValidations() {
