@@ -19,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -31,6 +32,7 @@ import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.Project;
@@ -111,7 +113,12 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config.setUploadRawFilePath(rawPath);
         config.setUploadMatchResultPrefix(resultsPath);
         config.setUploadTSPrefix(uploadTS);
-        uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+        retry.execute(context -> {
+            uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
+            return true;
+        });
+
         List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
                 Boolean.TRUE, 0, 20);
         Assert.assertNotNull(uploads);
