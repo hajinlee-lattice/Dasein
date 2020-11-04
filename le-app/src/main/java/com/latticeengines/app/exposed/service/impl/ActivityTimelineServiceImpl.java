@@ -136,16 +136,23 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
 
         List<ActivityTimelineMetrics> metrics = new ArrayList<ActivityTimelineMetrics>();
 
-        metrics.add(new ActivityTimelineMetrics(newActivitiesCount, timelinePeriod,
-                ActivityTimelineMetrics.MetricsType.NewActivity));
+        int days = timelinePeriod.getDays();
+        String description = ActivityTimelineMetrics.MetricsType.getDescription(days);
+
+        metrics.add(new ActivityTimelineMetrics(newActivitiesCount,
+                ActivityTimelineMetrics.MetricsType.NewActivity.getLabel(), description,
+                ActivityTimelineMetrics.MetricsType.NewActivity.getContext(days)));
         if (newIdentifiedContactsCount != 0) {
-            metrics.add(new ActivityTimelineMetrics(newIdentifiedContactsCount, timelinePeriod,
-                    ActivityTimelineMetrics.MetricsType.NewIdentifiedContacts));
+            metrics.add(new ActivityTimelineMetrics(newIdentifiedContactsCount,
+                    ActivityTimelineMetrics.MetricsType.NewIdentifiedContacts.getLabel(), description,
+                    ActivityTimelineMetrics.MetricsType.NewIdentifiedContacts.getContext(days)));
         }
-        metrics.add(new ActivityTimelineMetrics(newEngagementsCount, timelinePeriod,
-                ActivityTimelineMetrics.MetricsType.Newengagements));
-        metrics.add(new ActivityTimelineMetrics(newOpportunitiesCount, timelinePeriod,
-                ActivityTimelineMetrics.MetricsType.NewOpportunities));
+        metrics.add(new ActivityTimelineMetrics(newEngagementsCount,
+                ActivityTimelineMetrics.MetricsType.Newengagements.getLabel(), description,
+                ActivityTimelineMetrics.MetricsType.Newengagements.getContext(days)));
+        metrics.add(new ActivityTimelineMetrics(newOpportunitiesCount,
+                ActivityTimelineMetrics.MetricsType.NewOpportunities.getLabel(), description,
+                ActivityTimelineMetrics.MetricsType.NewOpportunities.getContext(days)));
 
         return metrics;
     }

@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.io.Serializable;
-import java.time.Period;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,43 +20,16 @@ public class ActivityTimelineMetrics implements Serializable {
     @JsonProperty("context")
     private String context;
 
-    private String METRICS_DESCRIPTION = "in last %d days";
+    public ActivityTimelineMetrics() {
 
-    private static final String NEW_ACTIVITY_LABEL = "New Page Visits";
-    private static final String NEW_IDENTIFIED_CONTACTS_LABEL = "Identified Contacts";
-    private static final String NEW_ENGAGEMENTS_LABEL = "New Engagements";
-    private static final String NEW_OPPORTUNITIES_LABEL = "New Opportunities";
+    }
 
-    private static final String NEW_ACTIVITY_CONTEXT = "Total number of web activity in the last %d days";
-    private static final String NEW_IDENTIFIED_CONTACTS_CONTEXT = "Total number of new identified contacts from Marketo in the last %d days";
-    private static final String NEW_ENGAGEMENTS_CONTEXT = "Total number of engagements in the last in the last %d days";
-    private static final String NEW_OPPORTUNITIES_CONTEXT = "Number of present open opportunities in the last %d days";
-
-    public ActivityTimelineMetrics(Integer count, Period period, MetricsType type) {
-
-        int days = period.getDays();
+    public ActivityTimelineMetrics(Integer count, String lable, String description, String context) {
 
         this.count = count;
-        this.description = String.format(METRICS_DESCRIPTION, days);
-
-        switch (type) {
-        case NewActivity:
-            this.label = NEW_ACTIVITY_LABEL;
-            this.context = String.format(NEW_ACTIVITY_CONTEXT, days);
-            break;
-        case NewIdentifiedContacts:
-            this.label = NEW_IDENTIFIED_CONTACTS_LABEL;
-            this.context = String.format(NEW_IDENTIFIED_CONTACTS_CONTEXT, days);
-            break;
-        case Newengagements:
-            this.label = NEW_ENGAGEMENTS_LABEL;
-            this.context = String.format(NEW_ENGAGEMENTS_CONTEXT, days);
-            break;
-        case NewOpportunities:
-            this.label = NEW_OPPORTUNITIES_LABEL;
-            this.context = String.format(NEW_OPPORTUNITIES_CONTEXT, days);
-            break;
-        }
+        this.label = lable;
+        this.description = description;
+        this.context = context;
     }
 
     public Integer getCount() {
@@ -76,7 +48,63 @@ public class ActivityTimelineMetrics implements Serializable {
         return context;
     }
 
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
+    }
+
     public enum MetricsType {
-        NewActivity, NewIdentifiedContacts, Newengagements, NewOpportunities
+
+        NewActivity("New Page Visits") {
+            @Override
+            public String getContext(Integer count) {
+                return String.format("Total number of web activity in the last %d days", count);
+            }
+        },
+        NewIdentifiedContacts("Identified Contacts") {
+            @Override
+            public String getContext(Integer count) {
+                return String.format("Total number of new identified contacts from Marketo in the last %d days", count);
+            }
+        },
+        Newengagements("New Engagements") {
+            @Override
+            public String getContext(Integer count) {
+                return String.format("Total number of engagements in the last in the last %d days", count);
+            }
+        },
+        NewOpportunities("New Opportunities") {
+            @Override
+            public String getContext(Integer count) {
+                return String.format("Number of present open opportunities in the last %d days", count);
+            }
+        };
+
+        private String label;
+
+        MetricsType(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return this.label;
+        }
+
+        public static String getDescription(Integer count) {
+            return String.format("in last %d days", count);
+        }
+
+        public abstract String getContext(Integer count);
     }
 }
