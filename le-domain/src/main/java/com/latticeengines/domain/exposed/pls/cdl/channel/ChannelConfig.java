@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
         @Type(value = GoogleDisplayNVideo360ChannelConfig.class, name = "google_display_n_video_360"), //
         @Type(value = MediaMathChannelConfig.class, name = "mediamath"), //
         @Type(value = TradeDeskChannelConfig.class, name = "tradedesk"), //
-        @Type(value = VerizonMediaChannelConfig.class, name = "verizonmedia") //
+        @Type(value = VerizonMediaChannelConfig.class, name = "verizon_media") //
 })
 public interface ChannelConfig {
 
