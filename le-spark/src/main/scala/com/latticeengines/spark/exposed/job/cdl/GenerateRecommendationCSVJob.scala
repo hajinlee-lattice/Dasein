@@ -41,7 +41,7 @@ class GenerateRecommendationCSVJob extends AbstractSparkJob[GenerateRecommendati
         val fmtr = new SimpleDateFormat(generateRecommendationCSVContext.getDateFormat);
         fmtr.setTimeZone(tz)
         val fmtrUdf = udf((ts: Long) => fmtr.format(ts))
-        finalCSVDf.withColumn(InterfaceName.LatticeExportTime.name(), fmtrUdf(lit(now)))
+        finalCSVDf = finalCSVDf.withColumn(InterfaceName.LatticeExportTime.name(), fmtrUdf(lit(now)))
       }
       finalCSVDf
     })
