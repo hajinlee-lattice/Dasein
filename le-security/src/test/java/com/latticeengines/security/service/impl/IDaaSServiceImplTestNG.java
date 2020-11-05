@@ -20,8 +20,6 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
 
-import sun.rmi.log.LogInputStream;
-
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-security-context.xml" })
 public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
