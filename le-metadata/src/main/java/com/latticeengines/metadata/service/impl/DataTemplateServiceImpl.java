@@ -1,84 +1,43 @@
 package com.latticeengines.metadata.service.impl;
 
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
-import com.latticeengines.metadata.mds.NamedDataTemplate;
-import com.latticeengines.metadata.mds.impl.TableTemplate;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
+import com.latticeengines.metadata.entitymgr.DataTemplateEntityMgr;
 import com.latticeengines.metadata.service.DataTemplateService;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.ParallelFlux;
-
-@SuppressWarnings("rawtypes")
 @Service("dataTemplateService")
 public class DataTemplateServiceImpl implements DataTemplateService {
 
+    private static final Logger log = LoggerFactory.getLogger(DataTemplateServiceImpl.class);
+
     @Inject
-    private TableTemplate tableTemplate;
+    private DataTemplateEntityMgr entityMgr;
 
-    private ConcurrentMap<String, NamedDataTemplate> registry;
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<DataUnit> getData(String dataTemplateName, String... namespace) {
-        NamedDataTemplate dataTemplate = getDataTemplate(dataTemplateName);
-        Namespace keys = dataTemplate.parseNameSpace(namespace);
-        return dataTemplate.getData(keys);
+    public String create(DataTemplate dataTemplate) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        return entityMgr.create(tenantId, dataTemplate);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public long getSchemaCount(String dataTemplateName, String... namespace) {
-        NamedDataTemplate dataTemplate = getDataTemplate(dataTemplateName);
-        Namespace keys = dataTemplate.parseNameSpace(namespace);
-        return dataTemplate.countSchema(keys);
+    public DataTemplate findByUuid(String uuid) {
+        return entityMgr.findByUuid(uuid);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Flux<ColumnMetadata> getSchema(String dataTemplateName, String... namespace) {
-        NamedDataTemplate dataTemplate = getDataTemplate(dataTemplateName);
-        Namespace keys = dataTemplate.parseNameSpace(namespace);
-        return dataTemplate.getSchema(keys);
+    public void updateByUuid(String uuid, DataTemplate dataTemplate) {
+        entityMgr.updateByUuid(uuid, dataTemplate);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public ParallelFlux<ColumnMetadata> getUnorderedSchema(String dataTemplateName, String... namespace) {
-        NamedDataTemplate dataTemplate = getDataTemplate(dataTemplateName);
-        Namespace keys = dataTemplate.parseNameSpace(namespace);
-        return dataTemplate.getUnorderedSchema(keys);
+    public void deleteByUuid(String uuid) {
+        entityMgr.deleteByUuid(uuid);
     }
-
-    private NamedDataTemplate getDataTemplate(String dataTemplateName) {
-        registerDataTemplates();
-        if (registry.containsKey(dataTemplateName)) {
-            return registry.get(dataTemplateName);
-        } else {
-            throw new RuntimeException("Cannot find metadata store named " + dataTemplateName);
-        }
-    }
-
-    private void registerDataTemplates() {
-        if (MapUtils.isEmpty(registry)) {
-            registry = new ConcurrentHashMap<>();
-
-            registerDataTemplate(tableTemplate);
-        }
-    }
-
-    private void registerDataTemplate(NamedDataTemplate dataTemplate) {
-        registry.put(dataTemplate.getName(), dataTemplate);
-    }
-
 }

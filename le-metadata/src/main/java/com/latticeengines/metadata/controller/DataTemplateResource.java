@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.metadata.service.DataTemplateService;
+import com.latticeengines.metadata.service.NamedDataTemplateService;
 
 import io.swagger.annotations.Api;
 
@@ -20,13 +20,13 @@ import io.swagger.annotations.Api;
 public class DataTemplateResource {
 
     @Inject
-    private DataTemplateService dataTemplateService;
+    private NamedDataTemplateService namedDataTemplateService;
 
     @GetMapping("/{dtName}/namespace/{namespace}/count")
     public long countSchema( //
             @PathVariable(name = "dtName") String dtName, //
             @PathVariable(name = "namespace") String[] namespace) {
-        return dataTemplateService.getSchemaCount(dtName, namespace);
+        return namedDataTemplateService.getSchemaCount(dtName, namespace);
     }
 
     @GetMapping("/{dtName}/namespace/{namespace}")
@@ -35,9 +35,9 @@ public class DataTemplateResource {
             @PathVariable(name = "namespace") String[] namespace, //
             @RequestParam(name = "unordered", required = false) Boolean unordered) {
         if (Boolean.TRUE.equals(unordered)) {
-            return dataTemplateService.getUnorderedSchema(dtName, namespace);
+            return namedDataTemplateService.getUnorderedSchema(dtName, namespace);
         } else {
-            return dataTemplateService.getSchema(dtName, namespace);
+            return namedDataTemplateService.getSchema(dtName, namespace);
         }
     }
 

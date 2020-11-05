@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataTemplateName;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnitStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
-import com.latticeengines.metadata.service.DataTemplateService;
+import com.latticeengines.metadata.service.NamedDataTemplateService;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -38,25 +38,25 @@ public class TableRoleTemplateImpl implements TableRoleTemplate {
     private static final Scheduler scheduler = Schedulers.newParallel("tablerole-template");
 
     @Inject
-    public TableRoleTemplateImpl(DataTemplateService dataTemplateService, CDLNamespaceService cdlNamespaceService,
-            TableRoleTemplate tableRoleTemplate) {
+    public TableRoleTemplateImpl(NamedDataTemplateService namedDataTemplateService, CDLNamespaceService cdlNamespaceService,
+                                 TableRoleTemplate tableRoleTemplate) {
         this.cdlNamespaceService = cdlNamespaceService;
         this.proxyTemplate = new DataUnitStore<Namespace2<String, String>>() {
             @Override
             public List<DataUnit> getData(Namespace2<String, String> namespace2) {
-                return dataTemplateService.getData(DataTemplateName.Table, namespace2.getCoord1(),
+                return namedDataTemplateService.getData(DataTemplateName.Table, namespace2.getCoord1(),
                         namespace2.getCoord2());
             }
 
             @Override
             public Flux<ColumnMetadata> getSchema(Namespace2<String, String> namespace2) {
-                return dataTemplateService.getSchema(DataTemplateName.Table, namespace2.getCoord1(),
+                return namedDataTemplateService.getSchema(DataTemplateName.Table, namespace2.getCoord1(),
                         namespace2.getCoord2());
             }
 
             @Override
             public ParallelFlux<ColumnMetadata> getUnorderedSchema(Namespace2<String, String> namespace2) {
-                return dataTemplateService.getUnorderedSchema(DataTemplateName.Table, namespace2.getCoord1(),
+                return namedDataTemplateService.getUnorderedSchema(DataTemplateName.Table, namespace2.getCoord1(),
                         namespace2.getCoord2());
             }
         };

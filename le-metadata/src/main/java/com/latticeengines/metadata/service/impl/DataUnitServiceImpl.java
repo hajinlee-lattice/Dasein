@@ -119,4 +119,10 @@ public class DataUnitServiceImpl implements DataUnitService {
         entityMgr.updateSignature(tenantId, dataUnit, signature);
     }
 
+    @Override
+    public List<DataUnit> findAllByDataTemplateIdAndRoleFromReader(String dataTemplateId, DataUnit.Role role) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        return entityMgr.findAllByDataTemplateIdAndRoleFromReader(tenantId, dataTemplateId, role);
+    }
+
 }

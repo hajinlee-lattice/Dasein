@@ -1,10 +1,10 @@
-package com.latticeengines.metadata.service;
+package com.latticeengines.metadata.entitymgr;
 
 import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 
-public interface DataTemplateService {
+public interface DataTemplateEntityMgr {
 
-    String create(DataTemplate dataTemplate);
+    String create(String tenantId, DataTemplate dataTemplate);
 
     DataTemplate findByUuid(String uuid);
 
