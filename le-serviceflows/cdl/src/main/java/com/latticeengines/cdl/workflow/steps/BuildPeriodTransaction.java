@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -21,8 +20,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HashUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -32,7 +30,6 @@ import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.spark.exposed.job.cdl.TransformTxnStreamJob;
 
@@ -118,8 +115,7 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
             SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
                     buildConsolidatedPeriodTxnConfig(periodName, periodTransactionTables, retainTypes));
             String prefix = String.format(CON_PREFIX_FORMAT, periodName);
-            String tableName = TableUtils.getFullTableName(prefix,
-                    HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
+            String tableName = NamingUtils.timestamp(prefix);
             Table table = toTable(tableName, compositeKey, result.getTargets().get(0));
             metadataProxy.createTable(customerSpaceStr, tableName, table);
             return Pair.of(periodName, table);
@@ -145,8 +141,7 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
                 buildAggregatedPeriodTxnConfig(periodTransactionTables, retainTypes));
         String prefix = String.format(AGG_PREFIX_FORMAT, customerSpace.getTenantId());
-        String tableName = TableUtils.getFullTableName(prefix,
-                HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
+        String tableName = NamingUtils.timestamp(prefix);
         Table table = toTable(tableName, compositeKey, result.getTargets().get(0));
         metadataProxy.createTable(customerSpaceStr, tableName, table);
         log.info("Generated aggregated period store: {}", table.getName());
