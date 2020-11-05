@@ -1,5 +1,9 @@
 package com.latticeengines.security.service.impl;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,6 +19,9 @@ import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.LoginTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.service.UserService;
@@ -65,14 +72,22 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         credentials.setPassword(TEST_PASSWORD);
         LoginDocument loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
-        Assert.assertNotNull(loginDocument.getCompanyName());
-        Assert.assertNotNull(loginDocument.getDunsNumber());
-        Assert.assertNotNull(loginDocument.getSubscriberNumber());
-        Assert.assertNotNull(loginDocument.getSubscriptionType());
-        Assert.assertNotNull(loginDocument.getCountryCode());
-        Assert.assertNotNull(loginDocument.getContractStartDate());
-        Assert.assertNotNull(loginDocument.getContractEndDate());
-        Assert.assertNotNull(loginDocument.getStatus());
+        LoginDocument.LoginResult result = loginDocument.getResult();
+        Assert.assertNotNull(result);
+        List<Tenant> tenantList = result.getTenants();
+        Assert.assertNotNull(tenantList);
+        Assert.assertFalse(tenantList.isEmpty());
+        Tenant firstTenant = tenantList.get(0);
+        Assert.assertTrue( firstTenant instanceof LoginTenant );
+        Map<String,LoginTenant> tenantMap = new HashMap<>(tenantList.size());
+        for (Tenant t : tenantList) {
+            tenantMap.put(t.getId(), (LoginTenant) t);
+        }
+        LoginTenant lt = tenantMap.get("LETest1603910712497.LETest1603910712497.Production");
+        Assert.assertNotNull(lt);
+        Assert.assertEquals(lt.getDuns(), "202007226");
+        Assert.assertEquals(lt.getCompanyName(), "D&B Connect Engineering");
+        Assert.assertEquals(lt.getStatus(), TenantStatus.ACTIVE);
     }
 
     @Test(groups = "functional")

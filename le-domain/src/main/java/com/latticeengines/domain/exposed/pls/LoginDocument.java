@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,30 +35,6 @@ public class LoginDocument {
 
     @JsonProperty("Result")
     private LoginResult result;
-
-    @JsonProperty("CompanyName")
-    private String companyName;
-
-    @JsonProperty("DUNS")
-    private String dunsNumber;
-
-    @JsonProperty("SubscriberNumber")
-    private String subscriberNumber;
-
-    @JsonProperty("SubscriptionType")
-    private String subscriptionType;
-
-    @JsonProperty("Country")
-    private String countryCode;
-
-    @JsonProperty("ContractStartDate")
-    private LocalDate contractStartDate;
-
-    @JsonProperty("ContractEndDate")
-    private LocalDate contractEndDate;
-
-    @JsonProperty("Status")
-    private String status;
 
     public LoginDocument() {
 
@@ -141,70 +116,6 @@ public class LoginDocument {
 
     public void setAuthenticationRoute(String authenticationRoute) {
         this.authenticationRoute = authenticationRoute;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public String getDunsNumber() {
-        return dunsNumber;
-    }
-
-    public void setDunsNumber(String dunsNumber) {
-        this.dunsNumber = dunsNumber;
-    }
-
-    public String getSubscriberNumber() {
-        return subscriberNumber;
-    }
-
-    public void setSubscriberNumber(String subscriberNumber) {
-        this.subscriberNumber = subscriberNumber;
-    }
-
-    public String getSubscriptionType() {
-        return subscriptionType;
-    }
-
-    public void setSubscriptionType(String subscriptionType) {
-        this.subscriptionType = subscriptionType;
-    }
-
-    public String getCountryCode() {
-        return countryCode;
-    }
-
-    public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
-    }
-
-    public LocalDate getContractStartDate() {
-        return contractStartDate;
-    }
-
-    public void setContractStartDate(LocalDate contractStartDate) {
-        this.contractStartDate = contractStartDate;
-    }
-
-    public LocalDate getContractEndDate() {
-        return contractEndDate;
-    }
-
-    public void setContractEndDate(LocalDate contractEndDate) {
-        this.contractEndDate = contractEndDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     @Override

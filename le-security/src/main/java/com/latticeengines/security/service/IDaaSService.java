@@ -32,4 +32,6 @@ public interface IDaaSService {
     SubscriberDetails getSubscriberDetails (String subscriberNumber);
 
     boolean doesSubscriberNumberExist(VboRequest vboRequest);
+
+    LoginDocument addSubscriberDetails(LoginDocument doc);
 }
