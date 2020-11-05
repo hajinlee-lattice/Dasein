@@ -30,6 +30,9 @@ CREATE PROCEDURE `UpdateSchema`()
 
       ALTER TABLE `METADATA_SEGMENT`
               ADD COLUMN `TYPE` VARCHAR(255);
+              
+      ALTER TABLE `LOOKUP_ID_MAP `
+              ADD COLUMN `CONFIG_VALUES` VARCHAR(255);
 
   END //
 -- ##############################################################

@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
@@ -18,5 +19,7 @@ public interface LookupIdMappingEntityMgr {
     void deleteLookupIdMap(String id);
 
     LookupIdMap getLookupIdMap(String orgId, CDLExternalSystemType externalSystemType);
+
+    List<LookupIdMap> getLookupIdMapsByExtSysName(CDLExternalSystemName externalSystemName);
 
 }

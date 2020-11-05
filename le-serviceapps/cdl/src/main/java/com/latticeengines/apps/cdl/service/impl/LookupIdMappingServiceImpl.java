@@ -91,23 +91,26 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     }
 
     @Override
-    public LookupIdMap registerExternalSystem(LookupIdMap lookupIdsMap) {
-        LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdsMap.getOrgId(),
-                lookupIdsMap.getExternalSystemType());
+    public LookupIdMap registerExternalSystem(LookupIdMap lookupIdMap) {
+        LookupIdMap existingLookupIdMap = findExistingLookupIdMap(lookupIdMap);
         if (existingLookupIdMap == null) {
-            if (lookupIdsMap.getExternalSystemName() == null) {
+            if (lookupIdMap.getExternalSystemName() == null) {
                 throw new LedpException(LedpCode.LEDP_32000,
                         new String[] { "Cannot register new system without external system name. Supported systems ("
                                 + Arrays.stream(CDLExternalSystemName.values())
                                         .map(CDLExternalSystemName::getDisplayName).collect(Collectors.joining(", "))
                                 + ")" });
             }
-            existingLookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdsMap);
+            existingLookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
         } else {
+            if (lookupIdMap.getExternalSystemType() == CDLExternalSystemType.DSP) {
+                throw new LedpException(LedpCode.LEDP_40071);
+            }
             existingLookupIdMap.setIsRegistered(true);
-            existingLookupIdMap.setExternalAuthentication(lookupIdsMap.getExternalAuthentication());
+            existingLookupIdMap.setExternalAuthentication(lookupIdMap.getExternalAuthentication());
             existingLookupIdMap = lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap);
         }
+
         return populateExportFolder(existingLookupIdMap);
     }
 
@@ -234,6 +237,22 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     @Override
     public LookupIdMap getLookupIdMapByOrgId(String orgId, CDLExternalSystemType externalSystemType) {
         return populateExportFolder(lookupIdMappingEntityMgr.getLookupIdMap(orgId, externalSystemType));
+    }
+
+    private LookupIdMap findExistingLookupIdMap(LookupIdMap lookupIdMap) {
+        CDLExternalSystemName externalSystemName = lookupIdMap.getExternalSystemName();
+        List<LookupIdMap> foundList = lookupIdMappingEntityMgr.getLookupIdMapsByExtSysName(externalSystemName);
+
+        for (LookupIdMap curLookupIdMap : foundList) {
+            if (externalSystemName == CDLExternalSystemName.MediaMath) {
+                return curLookupIdMap;
+            }
+            if (lookupIdMap.getEndDestinationId().equals(curLookupIdMap.getEndDestinationId())) {
+                return curLookupIdMap;
+            }
+        }
+
+        return null;
     }
 
     private LookupIdMap populateExportFolder(LookupIdMap lookupIdMap) {
