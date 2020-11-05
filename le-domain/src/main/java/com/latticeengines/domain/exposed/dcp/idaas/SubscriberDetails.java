@@ -87,6 +87,8 @@ public class SubscriberDetails {
     @JsonProperty("products")
     private List<String> products;
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Address {
 
         @JsonProperty("iso2_country_code")

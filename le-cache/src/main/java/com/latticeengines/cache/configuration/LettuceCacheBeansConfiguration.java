@@ -126,6 +126,13 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.IDaaSTokenCacheName));
+
+        RedisCacheConfiguration idaasSubscriberDetailsCacheConfig = RedisCacheConfiguration.defaultCacheConfig() //
+                .entryTtl(Duration.ofDays(2)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.IDaaSSubscriberDetailsCacheName));
         // =========================
         // END: idaas
         // =========================
@@ -219,6 +226,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.PrimeMetadataCacheName, primeMetadataCacheConfig);
         cacheConfigs.put(CacheName.Constants.IDaaSEntitlementCacheName, idaasEntitlementCacheConfig);
         cacheConfigs.put(CacheName.Constants.IDaaSTokenCacheName, idaasTokenCacheConfig);
+        cacheConfigs.put(CacheName.Constants.IDaaSSubscriberDetailsCacheName, idaasSubscriberDetailsCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.ObjectApiCacheName, objectApiCacheConfig);
         cacheConfigs.put(CacheName.Constants.ServingMetadataCacheName, servingMetadataCache);

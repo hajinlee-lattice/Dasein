@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -52,6 +53,8 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.LoginTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -124,15 +127,55 @@ public class IDaaSServiceImpl implements IDaaSService {
                     log.warn("Failed to generate ticket for external session.", e);
                 }
                 doc = LoginUtils.generateLoginDoc(ticket, gaUserEntityMgr, gaTicketEntityMgr, tenantService);
-                doc.setFirstName(iDaaSUser.getFirstName());
-                doc.setLastName(iDaaSUser.getLastName());
-                doc.getResult().setMustChangePassword(false);
-                doc.getResult().setPasswordLastModified(System.currentTimeMillis());
+                doc = addSubscriberDetails(doc);
             } else {
                 doc.setErrors(Collections.singletonList("The user does not have access to this application."));
             }
         }
         return doc;
+    }
+
+    /**
+     * In each Tenant in the LoginDocument, add SubscriberDetails from IDaaS.  Do this by creating a LoginTenant and replacing the Tenant
+     * objects in the LoginDocument with them.
+     *
+     * @param doc - LoginDocument to add subscriber details to
+     * @return LoginDocument that includes subscriber details
+     */
+    private LoginDocument addSubscriberDetails(LoginDocument doc) {
+        LoginDocument.LoginResult result = doc.getResult();
+        List<Tenant> tenantList = result.getTenants();
+        List<Tenant> augmentedTenantList = tenantList.stream().map(this::addSubscriberDetails).collect(Collectors.toList());
+        doc.getResult().setTenants(augmentedTenantList);
+        return doc;
+    }
+
+    /**
+     * Create a LoginTenant and add additional information from IDaaS to it.
+     * @param tenant - The Tenant to add subscriber details to
+     * @return A new LoginTenant object
+     */
+    private LoginTenant addSubscriberDetails(Tenant tenant) {
+        LoginTenant loginTenant = new LoginTenant(tenant);
+        String subscriberNumber = tenant.getSubscriberNumber();
+        if (StringUtils.isNotBlank(subscriberNumber)) {
+            SubscriberDetails subscriberDetails = _self.getSubscriberDetails(subscriberNumber);
+            if (subscriberDetails != null) {
+                loginTenant.setCompanyName(subscriberDetails.getCompanyName());
+                loginTenant.setDuns(subscriberDetails.getDunsNumber());
+                loginTenant.setSubscriptionType(subscriberDetails.getSubscriberType());
+                loginTenant.setCountry(subscriberDetails.getAddress() != null ? subscriberDetails.getAddress().getCountryCode() : null);
+                loginTenant.setContractStartDate(subscriberDetails.getEffectiveDate());
+                loginTenant.setContractEndDate(subscriberDetails.getExpirationDate());
+            }
+            else {
+                log.warn("SubscriberDetails is null for subscriberNumber {}", subscriberNumber);
+            }
+        }
+        else {
+            log.info("SubscriberNumber is blank for Tenant {}", tenant.getName());
+        }
+        return loginTenant;
     }
 
     private boolean authenticate(Credentials credentials) {
@@ -143,11 +186,13 @@ public class IDaaSServiceImpl implements IDaaSService {
         try {
             return retryTemplate.execute(ctx -> {
                 try (PerformanceTimer timer = new PerformanceTimer("Authenticate user against IDaaS.")) {
-                    ResponseEntity<JsonNode> response = restTemplate.postForEntity(authenticateUri(), iDaaSCreds, JsonNode.class);
+                    ResponseEntity<JsonNode> response = restTemplate.postForEntity(authenticateUri(), iDaaSCreds,
+                            JsonNode.class);
                     if (HttpStatus.OK.equals(response.getStatusCode())) {
                         return true;
                     } else {
-                        log.warn("Cannot authenticate user {} against IDaaS: {}", credentials.getUsername(), response.getBody());
+                        log.warn("Cannot authenticate user {} against IDaaS: {}", credentials.getUsername(),
+                                response.getBody());
                         throw new RuntimeException(JsonUtils.serialize(response.getBody()));
                     }
                 } catch (HttpClientErrorException.Unauthorized e) {
@@ -169,11 +214,11 @@ public class IDaaSServiceImpl implements IDaaSService {
             RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             user = retryTemplate.execute(ctx -> {
                 if (ctx.getRetryCount() > 0) {
-                    log.info("Attempt={} retrying to get IDaaS user for {}", ctx.getRetryCount() + 1,
-                            email, ctx.getLastThrowable());
+                    log.info("Attempt={} retrying to get IDaaS user for {}", ctx.getRetryCount() + 1, email,
+                            ctx.getLastThrowable());
                 }
-                try (PerformanceTimer timer =
-                             new PerformanceTimer(String.format("Check user detail %s in IDaaS.", email))) {
+                try (PerformanceTimer timer = new PerformanceTimer(
+                        String.format("Check user detail %s in IDaaS.", email))) {
                     log.info("sending request to get IDaaS user {}", email);
                     ResponseEntity<IDaaSUser> response = restTemplate.getForEntity(userUri(email), IDaaSUser.class);
                     return response.getBody();
@@ -198,8 +243,8 @@ public class IDaaSServiceImpl implements IDaaSService {
             returnedUser = retryTemplate.execute(ctx -> {
                 try (PerformanceTimer timer = new PerformanceTimer("update user in IDaaS.")) {
                     HttpEntity<IDaaSUser> entity = new HttpEntity<>(user);
-                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.exchange(userUri(email),
-                            HttpMethod.PUT, entity, IDaaSUser.class);
+                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.exchange(userUri(email), HttpMethod.PUT,
+                            entity, IDaaSUser.class);
                     return responseEntity.getBody();
                 } catch (HttpClientErrorException.Unauthorized e) {
                     // TODO(penglong) re-evaluate this part after network is setup
@@ -229,11 +274,10 @@ public class IDaaSServiceImpl implements IDaaSService {
                     log.info("Attempt={} retrying to create IDaaS user for {}", ctx.getRetryCount() + 1, email,
                             ctx.getLastThrowable());
                 }
-                try (PerformanceTimer timer =
-                             new PerformanceTimer(String.format("create user %s in IDaaS.", email))) {
+                try (PerformanceTimer timer = new PerformanceTimer(String.format("create user %s in IDaaS.", email))) {
                     log.info("sending request to create IDaaS user {}", email);
-                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.postForEntity(createUserUri(),
-                            user, IDaaSUser.class);
+                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.postForEntity(createUserUri(), user,
+                            IDaaSUser.class);
                     return responseEntity.getBody();
                 } catch (HttpClientErrorException.Unauthorized e) {
                     // TODO(penglong) re-evaluate this part after network is setup
@@ -269,13 +313,12 @@ public class IDaaSServiceImpl implements IDaaSService {
                     log.info("Attempt={} retrying to add product access to IDaaS user {}", ctx.getRetryCount() + 1,
                             email, ctx.getLastThrowable());
                 }
-                try (PerformanceTimer timer =
-                             new PerformanceTimer(String.format("add product access to user %s.", email))) {
+                try (PerformanceTimer timer = new PerformanceTimer(
+                        String.format("add product access to user %s.", email))) {
                     log.info("sending request to add product access to IDaaS user {}", email);
                     HttpEntity<ProductRequest> entity = new HttpEntity<>(request);
-                    ResponseEntity<IDaaSResponse> responseEntity =
-                            restTemplate.exchange(addProductUri(email), HttpMethod.PUT, entity,
-                                    IDaaSResponse.class);
+                    ResponseEntity<IDaaSResponse> responseEntity = restTemplate.exchange(addProductUri(email),
+                            HttpMethod.PUT, entity, IDaaSResponse.class);
                     return responseEntity.getBody();
                 } catch (Exception e) {
                     // TODO re-evaluate this part after network is setup
@@ -297,7 +340,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         try {
             RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             response = retryTemplate.execute(ctx -> {
-                try (PerformanceTimer timer = new PerformanceTimer("add role to user.")){
+                try (PerformanceTimer timer = new PerformanceTimer("add role to user.")) {
                     HttpEntity<RoleRequest> entity = new HttpEntity<>(request);
                     ResponseEntity<IDaaSResponse> responseEntity = restTemplate.exchange(addRoleUri(email),
                             HttpMethod.PUT, entity, IDaaSResponse.class);
@@ -321,7 +364,8 @@ public class IDaaSServiceImpl implements IDaaSService {
         // Special case of authorization header format
         List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
         ClientHttpRequestInterceptor previous = interceptors.stream()
-                .filter(interceptor -> interceptor instanceof AuthorizationHeaderHttpRequestInterceptor).findAny().get();
+                .filter(interceptor -> interceptor instanceof AuthorizationHeaderHttpRequestInterceptor).findAny()
+                .get();
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
 
         InvitationLinkResponse response = null;
@@ -371,27 +415,28 @@ public class IDaaSServiceImpl implements IDaaSService {
         }
     }
 
+    @Cacheable(cacheNames = CacheName.Constants.IDaaSSubscriberDetailsCacheName, //
+            key ="T(java.lang.String).format(\"%s|idaas-subscriberDetails\", #subscriberNumber)", //
+            unless="#result == null")
     @Override
-    public SubscriberDetails getSubscriberDetails (@NotNull String subscriberNumber)  {
+    public SubscriberDetails getSubscriberDetails(@NotNull String subscriberNumber) {
         refreshToken();
-        SubscriberDetails subscriberDetails=null;
+        SubscriberDetails subscriberDetails = null;
         try {
             RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
             subscriberDetails = retryTemplate.execute(ctx -> {
                 try (PerformanceTimer timer = new PerformanceTimer("Get subscriber_details from IDaaS.")) {
                     URI subscriberDetailsV1URI = createSubscriberDetailsV1Link(subscriberNumber);
-                    ResponseEntity<SuperSubscriberDetails> responseEntity = restTemplate.getForEntity(subscriberDetailsV1URI,
-                            SuperSubscriberDetails.class);
-                    return responseEntity.getBody().getSubscriberDetails();
+                    ResponseEntity<SuperSubscriberDetails> responseEntity = restTemplate
+                            .getForEntity(subscriberDetailsV1URI, SuperSubscriberDetails.class);
+                    return (responseEntity.getBody() != null) ? responseEntity.getBody().getSubscriberDetails() : null;
                 }
             });
-        }
-        catch (HttpClientErrorException hcee) {
-            String msg = String.format("HttpClientErrorException while trying to get subscriber_details " +
-                    "from IDaaS. Error Code %d\nMsg %s", hcee.getRawStatusCode(), hcee.getStatusText());
+        } catch (HttpClientErrorException hcee) {
+            String msg = String.format("HttpClientErrorException while trying to get subscriber_details "
+                    + "from IDaaS. Error Code %d\nMsg %s", hcee.getRawStatusCode(), hcee.getStatusText());
             log.error(msg, hcee);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             String msg = "Exception while trying to get subscription_details from IDaaS.";
             log.error(msg, e);
         }
@@ -399,7 +444,9 @@ public class IDaaSServiceImpl implements IDaaSService {
     }
 
     /**
-     * Check if this subscriber_number is in IDaaS and returns subscriber_details when requested.
+     * Check if this subscriber_number is in IDaaS and returns subscriber_details
+     * when requested.
+     * 
      * @param vboRequest
      * @return
      */
@@ -407,10 +454,9 @@ public class IDaaSServiceImpl implements IDaaSService {
     public boolean doesSubscriberNumberExist(VboRequest vboRequest) {
         String subscriptionNumber = vboRequest.getSubscriber().getSubscriberNumber();
         if (!StringUtils.isEmpty(subscriptionNumber)) {
-            SubscriberDetails subscriberDetails = getSubscriberDetails(subscriptionNumber);
+            SubscriberDetails subscriberDetails = _self.getSubscriberDetails(subscriptionNumber);
             return null != subscriberDetails;
-        }
-        else {
+        } else {
             return false; // no subscriber number in the VBO request.
         }
     }
@@ -432,8 +478,9 @@ public class IDaaSServiceImpl implements IDaaSService {
         restTemplate.setInterceptors(Collections.singletonList(interceptor));
         RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
         JsonNode jsonNode = retryTemplate.execute(ctx -> {
-            try(PerformanceTimer timer = new PerformanceTimer("Get OAuth2 token from IDaaS.")) {
-                ResponseEntity<JsonNode> response = restTemplate.postForEntity(oauthTokenUri(), payload, JsonNode.class);
+            try (PerformanceTimer timer = new PerformanceTimer("Get OAuth2 token from IDaaS.")) {
+                ResponseEntity<JsonNode> response = restTemplate.postForEntity(oauthTokenUri(), payload,
+                        JsonNode.class);
                 JsonNode body = response.getBody();
                 if (body != null) {
                     return body;
@@ -453,7 +500,8 @@ public class IDaaSServiceImpl implements IDaaSService {
                 if (!token.equals(tokenInUse)) {
                     tokenInUse = token;
                     String headerValue = "Bearer " + tokenInUse;
-                    ClientHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(headerValue);
+                    ClientHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(
+                            headerValue);
                     List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
                     interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
                     interceptors.add(authHeader);

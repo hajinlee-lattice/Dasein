@@ -25,6 +25,7 @@ import com.latticeengines.security.service.IDaaSService;
 public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     private static final String TEST_EMAIL = "dcp_dev@lattice-engines.com";
+    private static final String TEST_PASSWORD = "Lattice124!";
 
     @Inject
     private IDaaSService iDaaSService;
@@ -44,7 +45,7 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
     public void testLogin() {
         Credentials credentials = new Credentials();
         credentials.setUsername(TEST_EMAIL);
-        credentials.setPassword("Lattice124!");
+        credentials.setPassword(TEST_PASSWORD);
         LoginDocument loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
         Assert.assertTrue(CollectionUtils.isEmpty(loginDocument.getErrors()));
@@ -55,6 +56,23 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
         Assert.assertTrue(CollectionUtils.isNotEmpty(loginDocument.getErrors()));
+    }
+
+    @Test(groups = "deployment")
+    public void testLoginDoc() {
+        Credentials credentials = new Credentials();
+        credentials.setUsername(TEST_EMAIL);
+        credentials.setPassword(TEST_PASSWORD);
+        LoginDocument loginDocument = iDaaSService.login(credentials);
+        Assert.assertNotNull(loginDocument);
+        Assert.assertNotNull(loginDocument.getCompanyName());
+        Assert.assertNotNull(loginDocument.getDunsNumber());
+        Assert.assertNotNull(loginDocument.getSubscriberNumber());
+        Assert.assertNotNull(loginDocument.getSubscriptionType());
+        Assert.assertNotNull(loginDocument.getCountryCode());
+        Assert.assertNotNull(loginDocument.getContractStartDate());
+        Assert.assertNotNull(loginDocument.getContractEndDate());
+        Assert.assertNotNull(loginDocument.getStatus());
     }
 
     @Test(groups = "functional")
@@ -80,7 +98,7 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         userService.createUser(TEST_EMAIL, userRegistration);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testGetSubscriberDetails () {
 
         String subscriptionNumber = "800118741";
