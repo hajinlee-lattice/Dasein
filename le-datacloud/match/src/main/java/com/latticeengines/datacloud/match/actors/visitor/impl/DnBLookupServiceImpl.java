@@ -431,9 +431,20 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     Iterator<DnBBatchMatchContext> iter = unsubmittedBatches.iterator();
                     while (iter.hasNext()) {
                         DnBBatchMatchContext batchContext = iter.next();
-                        if (batchContext.isSealed() || batchContext.getContexts().size() >= maxBatchSize(batchContext.isUserDirectPlus())
-                                || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) >= 120000
-                                || (System.currentTimeMillis() - batchContext.getCreateTime().getTime()) >= 1800000) {
+                        int maxBatchSize =  maxBatchSize(batchContext.isUserDirectPlus());
+                        int contextSize = batchContext.getContexts().size();
+                        boolean exceedMaxBatchSize = contextSize >= maxBatchSize;
+                        long currentTime = System.currentTimeMillis();
+                        long sinceTimestamp = currentTime - batchContext.getTimestamp().getTime();
+                        long sinceCreateTime = currentTime - batchContext.getCreateTime().getTime();
+                        boolean isSealed = batchContext.isSealed();
+                        if (batchContext.isSealed() //
+                                || batchContext.getContexts().size() >= maxBatchSize(batchContext.isUserDirectPlus()) //
+                                || sinceTimestamp >= 120000 || sinceCreateTime >= 1800000) {
+                            log.info("Add a batch of {} to submit: isSealed={}, " + //
+                                    "exceedMaxBatchSize={}, maxBatchSize={}, sinceTimeStamp={}, sinceCreateTime={}",
+                                    contextSize, isSealed, //
+                                    exceedMaxBatchSize, maxBatchSize, sinceTimestamp, sinceCreateTime);
                             batchContext.setSealed(true);
                             batchesToSubmit.add(batchContext);
                             iter.remove();
