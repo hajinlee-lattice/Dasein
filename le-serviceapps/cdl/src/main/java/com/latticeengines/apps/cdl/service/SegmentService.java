@@ -16,6 +16,8 @@ public interface SegmentService {
 
     MetadataSegment findByName(String name);
 
+    MetadataSegment findListSegmentByName(String name);
+
     MetadataSegment createOrUpdateSegment(MetadataSegment segment);
 
     MetadataSegment createOrUpdateListSegment(MetadataSegment segment);
@@ -56,4 +58,6 @@ public interface SegmentService {
     void deleteMetadataSegmentExport(String exportId);
 
     List<MetadataSegmentExport> getMetadataSegmentExports();
+
+    MetadataSegment findByExternalInfo(MetadataSegment segment);
 }

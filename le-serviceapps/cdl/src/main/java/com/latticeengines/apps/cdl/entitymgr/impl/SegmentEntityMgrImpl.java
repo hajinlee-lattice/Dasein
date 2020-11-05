@@ -190,17 +190,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findByExternalInfo(MetadataSegment segment) {
-        return segmentDao.findByExternalInfo(segment);
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public MetadataSegment findByExternalInfo(MetadataSegment segment, boolean inflate) {
-        MetadataSegment existingSegment = segmentDao.findByExternalInfo(segment);
-        if (existingSegment != null && inflate) {
-            Hibernate.initialize(existingSegment.getListSegment());
-        }
-        return existingSegment;
+        return listSegmentEntityMgr.findMetadataSegmentByExternalInfo(segment.getListSegment().getExternalSystem(),
+                segment.getListSegment().getExternalSegmentId());
     }
 
     @Override

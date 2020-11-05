@@ -201,6 +201,11 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
+    public MetadataSegment findListSegmentByName(String name) {
+        return segmentEntityMgr.findByName(name, true);
+    }
+
+    @Override
     public MetadataSegment findMaster(String collectionName) {
         return segmentEntityMgr.findMasterSegment(collectionName);
     }
@@ -466,5 +471,10 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public List<MetadataSegmentExport> getMetadataSegmentExports() {
         return metadataSegmentExportEntityMgr.findAll();
+    }
+
+    @Override
+    public MetadataSegment findByExternalInfo(MetadataSegment segment) {
+        return segmentEntityMgr.findByExternalInfo(segment);
     }
 }

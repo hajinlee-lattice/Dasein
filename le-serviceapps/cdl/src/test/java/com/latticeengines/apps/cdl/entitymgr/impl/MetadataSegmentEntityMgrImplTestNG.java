@@ -258,7 +258,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         segmentEntityMgr.updateListSegment(metadataSegment, existingSegment);
         metadataSegment = segmentEntityMgr.findByName(listSegmentName, true);
         validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
-        metadataSegment = segmentEntityMgr.findByExternalInfo(metadataSegment, true);
+        metadataSegment = segmentEntityMgr.findByExternalInfo(metadataSegment);
         validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
     }
 

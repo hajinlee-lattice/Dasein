@@ -105,9 +105,23 @@ public class SegmentResource {
 
     @PostMapping("/list/listsegment")
     @ResponseBody
-    @ApiOperation(value = "Only update list segment under metadata segment entity")
+    @ApiOperation(value = "Only update list segment entity under metadata segment")
     public ListSegment updateListSegment(@PathVariable String customerSpace, @RequestBody ListSegment listSegment) {
         return segmentService.updateListSegment(listSegment);
+    }
+
+    @GetMapping("/list")
+    @ResponseBody
+    @ApiOperation(value = "Get list segment by external info")
+    public MetadataSegment getListSegmentByExternalInfo(@RequestBody MetadataSegment segment) {
+        return segmentService.findByExternalInfo(segment);
+    }
+
+    @GetMapping("/list/{segmentName}")
+    @ResponseBody
+    @ApiOperation(value = "Get list segment by name")
+    public MetadataSegment getListSegmentByName(@PathVariable String customerSpace, @PathVariable String segmentName) {
+        return segmentService.findListSegmentByName(segmentName);
     }
 
     @DeleteMapping("/{segmentName}")

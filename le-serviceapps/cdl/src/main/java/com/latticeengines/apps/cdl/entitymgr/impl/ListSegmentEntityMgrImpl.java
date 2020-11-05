@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import javax.inject.Inject;
 
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import com.latticeengines.apps.cdl.repository.writer.ListSegmentWriterRepository
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
 @Component("listSegmentEntityMgr")
 public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<ListSegmentRepository, ListSegment, Long> implements ListSegmentEntityMgr {
@@ -55,6 +57,14 @@ public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Lis
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ListSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
         return readerRepository.findByExternalSystemAndExternalSegmentId(externalSystem, externalSegmentId);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public MetadataSegment findMetadataSegmentByExternalInfo(String externalSystem, String externalSegmentId) {
+        ListSegment listSegment = readerRepository.findByExternalSystemAndExternalSegmentId(externalSystem, externalSegmentId);
+        Hibernate.initialize(listSegment.getMetadataSegment());
+        return listSegment.getMetadataSegment();
     }
 
     private void cloneListSegmentForUpdate(ListSegment existingListSegment, ListSegment incomingListSegment) {
