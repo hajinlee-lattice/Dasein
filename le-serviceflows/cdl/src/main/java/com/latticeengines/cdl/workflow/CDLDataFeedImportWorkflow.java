@@ -11,9 +11,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.DataFeedTaskImportListener;
+import com.latticeengines.cdl.workflow.steps.importdata.AnalyzeImportFile;
 import com.latticeengines.cdl.workflow.steps.importdata.ImportDataFeedTask;
 import com.latticeengines.cdl.workflow.steps.importdata.ImportDataReport;
 import com.latticeengines.cdl.workflow.steps.importdata.ImportDataTableFromS3;
+import com.latticeengines.cdl.workflow.steps.importdata.MatchDataFeedImport;
 import com.latticeengines.cdl.workflow.steps.importdata.PrepareImport;
 import com.latticeengines.cdl.workflow.steps.validations.InputFileValidator;
 import com.latticeengines.cdl.workflow.steps.validations.ValidateProductSpark;
@@ -52,6 +54,12 @@ public class CDLDataFeedImportWorkflow extends AbstractWorkflow<CDLDataFeedImpor
     private ImportDataReport importDataReport;
 
     @Inject
+    private AnalyzeImportFile analyzeImportFile;
+
+    @Inject
+    private MatchDataFeedImport matchDataFeedImport;
+
+    @Inject
     private DataFeedTaskImportListener dataFeedTaskImportListener;
 
     @Inject
@@ -70,6 +78,8 @@ public class CDLDataFeedImportWorkflow extends AbstractWorkflow<CDLDataFeedImpor
             builder = builder.next(inputFileValidator);
         }
         return builder
+                .next(analyzeImportFile) //
+                .next(matchDataFeedImport) //
                 .next(exportDataFeedImportToS3)//
                 .listener(dataFeedTaskImportListener)//
                 .build();
