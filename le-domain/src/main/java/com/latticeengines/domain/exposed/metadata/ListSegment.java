@@ -12,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
@@ -121,13 +120,11 @@ public class ListSegment implements HasPid {
     }
 
     @JsonProperty("csvAdaptor")
-    @Transient
     public CSVAdaptor getCsvAdaptor() {
         return csvAdaptor;
     }
 
     @JsonProperty("csvAdaptor")
-    @Transient
     public void setCsvAdaptor(CSVAdaptor csvAdaptor) {
         this.csvAdaptor = csvAdaptor;
     }
