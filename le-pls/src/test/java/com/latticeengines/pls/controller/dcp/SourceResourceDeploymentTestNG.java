@@ -179,7 +179,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment-dcp")
+    @Test(groups = "deployment-dcp", dependsOnMethods = "testFieldDefinitions")
     public void testCreateSourceFromFile() {
         // create project
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId("testProject_2",
