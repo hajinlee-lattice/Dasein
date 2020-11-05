@@ -56,13 +56,13 @@ public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Lis
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ListSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
-        return readerRepository.findByExternalSystemAndExternalSegmentId(externalSystem, externalSegmentId);
+        return writerRepository.findByExternalSystemAndExternalSegmentId(externalSystem, externalSegmentId);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findMetadataSegmentByExternalInfo(String externalSystem, String externalSegmentId) {
-        ListSegment listSegment = readerRepository.findByExternalSystemAndExternalSegmentId(externalSystem, externalSegmentId);
+        ListSegment listSegment = writerRepository.findByExternalSystemAndExternalSegmentId(externalSystem, externalSegmentId);
         Hibernate.initialize(listSegment.getMetadataSegment());
         return listSegment.getMetadataSegment();
     }
