@@ -15,7 +15,7 @@ public class AdminProxyImpl extends BaseRestApiProxy implements AdminProxy {
 
     @Override
     public void deleteTenant(String contractId, String tenantId) {
-        String url = constructUrl(String.format("/internal/tenants/%s?contractId=%s&deleteZookeeper=true", tenantId,
+        String url = constructUrl(String.format("/internal/tenants/%s?contractId=%s", tenantId,
                 contractId));
         delete("delete tenant", url);
     }

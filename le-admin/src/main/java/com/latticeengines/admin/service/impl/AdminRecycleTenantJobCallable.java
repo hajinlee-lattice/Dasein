@@ -14,13 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -42,8 +38,6 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     @SuppressWarnings("unused")
     private String jobArguments;
 
-    private Camille camille;
-    private String podId;
     private EmailService emailService;
     private UserService userService;
     private AdminProxy adminProxy;
@@ -62,8 +56,6 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        camille = CamilleEnvironment.getCamille();
-        podId = CamilleEnvironment.getPodId();
         List<Tenant> tempTenants = tenantService.getTenantByTypes(Arrays.asList(TenantType.POC, TenantType.STAGING));
         if (CollectionUtils.isNotEmpty(tempTenants)) {
             log.info("Tenants size is " + tempTenants.size());
@@ -108,11 +100,6 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 } else if (currentTime > expiredTime + INACTIVE_PERIOD) {
                     adminProxy.deleteTenant(space.getContractId(), space.getTenantId());
                     log.info(String.format("tenant %s has been deleted", tenant.getName()));
-                    // this is to print some log
-                    Path contractPath = PathBuilder.buildContractPath(podId, space.getContractId());
-                    if (!camille.exists(contractPath)) {
-                        log.info("tenant {} is not in zk", tenant.getId());
-                    }
                 }
 
             }
@@ -128,14 +115,14 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 }
                 long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 long expiredTime = tenantRight.getExpirationDate();
-                if (expiredTime - INACTIVE_PERIOD < currentTime && currentTime < expiredTime) {
+                if (expiredTime - EMAIL_PERIOD < currentTime && currentTime < expiredTime) {
                     int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
                     sendEmail(tenantRight, days);
 
                 } else if (currentTime >= expiredTime) {
                     String tenantId = tenantRight.getGlobalAuthTenant().getId();
                     String userName = tenantRight.getGlobalAuthUser().getEmail();
-                    log.info(String.format(String.format("Quartz job deleted %s from user %s", tenantId, userName)));
+                    log.info(String.format("Quartz job deleted %s from user %s", tenantId, userName));
                     userService.deleteUser(tenantId, userName);
                     sendEmail(tenantRight, 0);
                 }
