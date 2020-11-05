@@ -82,6 +82,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private Map<BusinessEntity, List<ColumnMetadata>> schemaMap;
     private AccountContactExportContext accountContactExportContext = new AccountContactExportContext();
     private boolean entityMatchGA;
+    private boolean dropAccountJoinKey = false;
 
     @Override
     public void execute() {
@@ -165,6 +166,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
         String joinKey = entityMatchGA ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
         accountContactExportConfig.getAccountContactExportContext().setJoinKey(joinKey);
+        accountContactExportConfig.getAccountContactExportContext().setDropAccountJoinKey(dropAccountJoinKey);
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
         return accountContactExportConfig;
     }
@@ -274,12 +276,15 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                 totalSelected++;
             }
         }
-        if (!entityMatchGA && !hasAccountId && totalSelected == 0) {
+        boolean contactWithAccountExport = AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType());
+        boolean addAccountId = totalSelected == 0 || contactWithAccountExport;
+        if (!entityMatchGA && !hasAccountId && addAccountId) {
             addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
         }
-        if (entityMatchGA && !hasCustomerAccountId && totalSelected == 0) {
+        if (entityMatchGA && !hasCustomerAccountId && addAccountId) {
             addAccountId(BusinessEntity.Account, columnMetadataList, customerAccountId);
         }
+        dropAccountJoinKey = (totalSelected == 0 && contactWithAccountExport);
         sortAttribute(columnMetadataList);
         return convertToLookup(columnMetadataList);
     }
