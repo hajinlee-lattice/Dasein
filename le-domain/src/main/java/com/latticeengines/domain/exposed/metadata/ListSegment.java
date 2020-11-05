@@ -119,12 +119,10 @@ public class ListSegment implements HasPid {
         this.s3DropFolder = s3DropFolder;
     }
 
-    @JsonProperty("csvAdaptor")
     public CSVAdaptor getCsvAdaptor() {
         return csvAdaptor;
     }
 
-    @JsonProperty("csvAdaptor")
     public void setCsvAdaptor(CSVAdaptor csvAdaptor) {
         this.csvAdaptor = csvAdaptor;
     }
