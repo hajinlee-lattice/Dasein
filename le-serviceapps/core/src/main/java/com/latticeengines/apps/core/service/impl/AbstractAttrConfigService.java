@@ -434,7 +434,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 runnables.add(runnable);
             });
             ThreadPoolUtils.runInParallel("attr-config", runnables);
-
+            log.info("user provided configs in validation request is " + JsonUtils.serialize(request.getAttrConfigs()));
             ValidationDetails details = attrValidationService.validate(existingAttrConfigs, request.getAttrConfigs(),
                     mode);
             request.setDetails(details);
