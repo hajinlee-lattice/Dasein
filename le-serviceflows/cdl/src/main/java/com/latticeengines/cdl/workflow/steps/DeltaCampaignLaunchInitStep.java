@@ -260,7 +260,7 @@ public class DeltaCampaignLaunchInitStep
         } else {
             throw new LedpException(LedpCode.LEDP_70000);
         }
-        if (CDLExternalSystemName.AWS_S3.name().equals(playLaunchContext.getPlayLaunch().getDestinationSysName())) {
+        if (CDLExternalSystemName.AWS_S3.equals(playLaunchContext.getPlayLaunch().getDestinationSysName())) {
             S3ChannelConfig s3ChannelConfig = (S3ChannelConfig) playLaunchContext.getChannel().getChannelConfig();
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_EXPORT_TIMESTAMP, String.valueOf(s3ChannelConfig.getAddExportTimestamp()));
         }
