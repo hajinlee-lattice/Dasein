@@ -1,5 +1,6 @@
 package com.latticeengines.security.service.impl;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,8 +86,13 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         }
         LoginTenant lt = tenantMap.get("LETest1603910712497.LETest1603910712497.Production");
         Assert.assertNotNull(lt);
-        Assert.assertEquals(lt.getDuns(), "202007226");
         Assert.assertEquals(lt.getCompanyName(), "D&B Connect Engineering");
+        Assert.assertEquals(lt.getDuns(), "202007226");
+        Assert.assertEquals(lt.getSubscriberNumber(), "202007226");
+        Assert.assertEquals(lt.getSubscriptionType(), "Internal");
+        Assert.assertEquals(lt.getCountry(), "US");
+        Assert.assertEquals(lt.getContractStartDate(), new Date(1595376000000L));
+        Assert.assertEquals(lt.getContractEndDate(), new Date(1626912000000L));
         Assert.assertEquals(lt.getStatus(), TenantStatus.ACTIVE);
     }
 
