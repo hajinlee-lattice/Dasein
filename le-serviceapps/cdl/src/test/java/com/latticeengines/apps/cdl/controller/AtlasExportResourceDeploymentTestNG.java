@@ -51,6 +51,8 @@ public class AtlasExportResourceDeploymentTestNG extends CDLDeploymentTestNGBase
     public void testAtlasExportProxy() {
         AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(mainCustomerSpace, exportRecord.getUuid());
         Assert.assertNotNull(atlasExport);
+        Assert.assertNotNull(atlasExport.getExportConfig());
+        Assert.assertTrue(atlasExport.getExportConfig().getAddExportTimestamp());
         String dropFolderPath = atlasExportProxy.getDropFolderExportPath(mainCustomerSpace, atlasExport.getExportType(),
                 atlasExport.getDatePrefix(), false);
         String systemPath = atlasExportProxy.getSystemExportPath(mainCustomerSpace, false);
