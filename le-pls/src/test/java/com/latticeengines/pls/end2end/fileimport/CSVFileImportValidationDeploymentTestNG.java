@@ -90,7 +90,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                         .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
                         .toString(),
                 SourceType.FILE.getName());
-        startCDLImport(accountFile, ENTITY_ACCOUNT);
+        startCDLImport(accountFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
         verifyAvroFileNumber(accountFile, 47, targetPath);
         getDataFeedTask(ENTITY_ACCOUNT);
         String accountIdentifier = accountDataFeedTask.getUniqueId();
@@ -105,7 +105,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
                         .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
                         .toString(),
                 SourceType.FILE.getName());
-        startCDLImport(contactFile, ENTITY_CONTACT);
+        startCDLImport(contactFile, ENTITY_CONTACT, DEFAULT_SYSTEM);
         verifyAvroFileNumber(contactFile, 47, contactPath);
         getDataFeedTask(ENTITY_CONTACT);
         String contactIdentifier = contactDataFeedTask.getUniqueId();
@@ -156,7 +156,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
     @Test(groups = "deployment.import.group1")
     public void testProductNameMissing() {
         SourceFile sourceFile = uploadSourceFile(PRODUCT_SOURCE_FILE, ENTITY_PRODUCT);
-        startCDLImport(sourceFile, ENTITY_PRODUCT);
+        startCDLImport(sourceFile, ENTITY_PRODUCT, DEFAULT_SYSTEM);
         // re-import the file without product name
         sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_PRODUCT), ENTITY_PRODUCT, PRODUCT_BUNDLE_WITHOUT_NAME,

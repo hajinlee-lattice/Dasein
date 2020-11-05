@@ -379,7 +379,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         MetadataResolver resolver = getMetadataResolver(getSourceFile(sourceFileName), fieldMappingDocument, true,
                 standardTable);
 
-        setSystemFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, customerSpace);
+        setSystemFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, customerSpace, true);
         // validate field mapping document
         List<FieldMapping> fieldMappings = fieldMappingDocument.getFieldMappings();
         List<String> ignored = new ArrayList<>();
@@ -960,8 +960,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Preconditions.checkNotNull(customerSpace);
 
-        // this step will set mapped
-        setSystemFieldMapping(fieldMappingDocument, entity, feedType, customerSpace);
+        // this step will set mapped field for match id
+        setSystemFieldMapping(fieldMappingDocument, entity, feedType, customerSpace, false);
 
         boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         Table schemaTable = getSchemaTable(customerSpace, entity, feedType, withoutId);
@@ -1017,13 +1017,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
      * @param entity
      * @param feedType
      * @param customerSpace
+     * @param skip indicates validation step will skip some steps
      */
     private void setSystemFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity,
-                                       String feedType, CustomerSpace customerSpace) {
+                                       String feedType, CustomerSpace customerSpace, boolean skip) {
         // 1. set system related mapping //only apply to Account / Contact / Transaction
         Set<String> systemIdSet = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity) || BusinessEntity.Transaction.equals(entity)) {
-            removeDuplicateSystemIdMapping(fieldMappingDocument, systemIdSet);
+            if (!skip) {
+                removeDuplicateSystemIdMapping(fieldMappingDocument, systemIdSet);
+            }
             List<FieldMapping> customerLatticeIdList = new ArrayList<>();
             Iterator<FieldMapping> iterator = fieldMappingDocument.getFieldMappings().iterator();
             while (iterator.hasNext()) {
@@ -1032,7 +1035,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     setSystemIdMapping(customerSpace, feedType, customerLatticeIdList, fieldMapping);
                 } else {
                     // Assumption: user cannot map column to SystemId, so remove error fieldMapping provided by UI.
-                    if (StringUtils.isNotEmpty(fieldMapping.getMappedField()) && systemIdSet.contains(fieldMapping.getMappedField())) {
+                    if (!skip && StringUtils.isNotEmpty(fieldMapping.getMappedField()) && systemIdSet.contains(fieldMapping.getMappedField())) {
                         iterator.remove();
                     }
                 }
