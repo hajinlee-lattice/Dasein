@@ -142,7 +142,8 @@ public class IDaaSServiceImpl implements IDaaSService {
      * @param doc - LoginDocument to add subscriber details to
      * @return LoginDocument that includes subscriber details
      */
-    private LoginDocument addSubscriberDetails(LoginDocument doc) {
+    @Override
+    public LoginDocument addSubscriberDetails(LoginDocument doc) {
         LoginDocument.LoginResult result = doc.getResult();
         List<Tenant> tenantList = result.getTenants();
         List<Tenant> augmentedTenantList = tenantList.stream().map(this::addSubscriberDetails).collect(Collectors.toList());

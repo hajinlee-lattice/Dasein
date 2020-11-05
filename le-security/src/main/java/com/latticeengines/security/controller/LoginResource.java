@@ -211,6 +211,7 @@ public class LoginResource {
             }
             doc.setSuccess(true);
             doc.setResult(result);
+            doc = iDaaSService.addSubscriberDetails(doc);
         } catch (LedpException e) {
             doc.setErrors(Collections.singletonList(e.getCode().getMessage()));
         }
