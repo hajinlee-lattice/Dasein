@@ -39,6 +39,9 @@ CREATE PROCEDURE `UpdateSchema`()
       UPDATE JOURNEY_STAGE SET DISPLAY_COLOR_CODE='#70BF4A' where STAGE_NAME='Closed';
       UPDATE JOURNEY_STAGE SET DISPLAY_COLOR_CODE='#3FA40F' where STAGE_NAME='Closed-Won';
 
+      ALTER TABLE `PLS_MultiTenant`.`ATLAS_EXPORT`
+		ADD COLUMN `EXPORT_CONFIG` JSON;
+
   END //
 -- ##############################################################
 
