@@ -43,7 +43,7 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
     private static final int percentileUpperBound = 99;
 
     @Value("${cdl.scoring.batch.model.size:20}")
-    private static int batchSize;
+    private int batchSize;
     private List<RatingModelContainer> containers;
 
     private Table inputTable;
