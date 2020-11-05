@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -62,11 +61,6 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     public void setup() {
         setupTestEnvironmentWithDataCollection();
         uniqueDataFeedName = NamingUtils.timestamp(DATA_FEED_NAME);
-    }
-
-    @AfterClass(groups = "functional")
-    public void cleanup() {
-        datafeedTaskEntityMgr.clearTableQueue();
     }
 
     @BeforeMethod(groups = "functional")
@@ -126,7 +120,7 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         extract1.setExtractionTimestamp(DateTime.now().getMillis());
         extract1.setProcessedRecords(1L);
         dataTable.addExtract(extract1);
-        datafeedTaskEntityMgr.addTableToQueue(task, dataTable);
+      //  datafeedTaskEntityMgr.addTableToQueue(task, dataTable);
 
         DataFeedExecution execution = new DataFeedExecution();
         execution.setDataFeed(datafeed);

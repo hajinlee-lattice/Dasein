@@ -48,10 +48,6 @@ public interface DataFeedService {
 
     DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 
-    void resetImport(String customerSpace, String datafeedName);
-
-    void resetImportByEntity(String customerSpace, String datafeedName, String entity);
-
     DataFeed updateEarliestLatestTransaction(String customerSpace, String datafeedName, Integer earliestDayPeriod,
             Integer latestDayPeriod);
 

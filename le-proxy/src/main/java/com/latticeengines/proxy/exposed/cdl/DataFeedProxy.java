@@ -310,39 +310,6 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(res, String.class);
     }
 
-    public void addTableToQueue(String customerSpace, String taskId, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue/{tableName}",
-                shortenCustomerSpace(customerSpace), taskId, tableName);
-        put("addTableToQueue", url);
-    }
-
-    public void addTablesToQueue(String customerSpace, String taskId, List<String> tables) {
-        String baseUrl = "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtablestoqueue";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), taskId);
-        put("addTablesToQueue", url, tables);
-    }
-
-    public List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType,
-            String entity) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}/unconsolidatedextracts",
-                shortenCustomerSpace(customerSpace), source, dataFeedType, entity);
-        List<?> res = get("getExtractPendingInQueue", url, List.class);
-        return JsonUtils.convertList(res, Extract.class);
-    }
-
-    public void resetImport(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/resetimport",
-                shortenCustomerSpace(customerSpace));
-        post("resetImport", url, null, Void.class);
-    }
-
-    public void resetImportByEntity(String customerSpace, String entity) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/resetimport/{entity}",
-                shortenCustomerSpace(customerSpace), entity);
-        post("resetImportByEntity", url, null, Void.class);
-    }
-
     public DataFeed updateEarliestLatestTransaction(String customerSpace, Integer earliestDayPeriod,
             Integer latestDayPeriod) {
         String url = constructUrl(

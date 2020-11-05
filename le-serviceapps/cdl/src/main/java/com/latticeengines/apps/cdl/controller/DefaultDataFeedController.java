@@ -192,22 +192,6 @@ public class DefaultDataFeedController {
         return datafeedService.updateEarliestLatestTransaction(customerSpace, "", earliestDayPeriod, latestDayPeriod);
     }
 
-    @PostMapping("/resetimport")
-    @ResponseBody
-    @ApiOperation(value = "Reset the pending import data for this data feed")
-    public void resetImport(@PathVariable String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        datafeedService.resetImport(customerSpace, "");
-    }
-
-    @PostMapping("/resetimport/{entity}")
-    @ResponseBody
-    @ApiOperation(value = "Reset the pending import data for this data feed")
-    public void resetImportByEntity(@PathVariable String customerSpace, @PathVariable String entity) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        datafeedService.resetImportByEntity(customerSpace, "", entity);
-    }
-
     @GetMapping("/nextinvoketime")
     @ResponseBody
     @ApiOperation(value = "Get tentative next invoke time of scheduled P&A")
