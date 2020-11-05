@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -15,7 +16,13 @@ public interface SegmentService {
 
     MetadataSegment findByName(String name);
 
+    MetadataSegment findListSegmentByName(String name);
+
     MetadataSegment createOrUpdateSegment(MetadataSegment segment);
+
+    MetadataSegment createOrUpdateListSegment(MetadataSegment segment);
+
+    ListSegment updateListSegment(ListSegment segment);
 
     Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck,
             boolean hardDelete);
@@ -51,4 +58,6 @@ public interface SegmentService {
     void deleteMetadataSegmentExport(String exportId);
 
     List<MetadataSegmentExport> getMetadataSegmentExports();
+
+    MetadataSegment findByExternalInfo(MetadataSegment segment);
 }

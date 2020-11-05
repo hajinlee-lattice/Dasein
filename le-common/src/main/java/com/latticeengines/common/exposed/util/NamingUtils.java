@@ -47,8 +47,4 @@ public final class NamingUtils {
         return original + RandomStringUtils.randomAlphanumeric(suffixLength);
     }
 
-    public static String getFormatedDate() {
-        return DATE_FORMAT.format(new Date());
-    }
-
 }

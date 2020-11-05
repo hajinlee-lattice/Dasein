@@ -25,6 +25,7 @@ import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -92,6 +93,35 @@ public class SegmentResource {
         MetadataSegment res = segmentService.createOrUpdateSegment(segment);
         actionService.registerAction(ActionContext.getAction(), user);
         return res;
+    }
+
+    @PostMapping("/list")
+    @ResponseBody
+    @ApiOperation(value = "Create or update a list segment")
+    public MetadataSegment createOrUpdateListSegment(@PathVariable String customerSpace, @RequestBody MetadataSegment segment) {
+        MetadataSegment res = segmentService.createOrUpdateListSegment(segment);
+        return res;
+    }
+
+    @PostMapping("/list/listsegment")
+    @ResponseBody
+    @ApiOperation(value = "Only update list segment entity under metadata segment")
+    public ListSegment updateListSegment(@PathVariable String customerSpace, @RequestBody ListSegment listSegment) {
+        return segmentService.updateListSegment(listSegment);
+    }
+
+    @GetMapping("/list")
+    @ResponseBody
+    @ApiOperation(value = "Get list segment by external info")
+    public MetadataSegment getListSegmentByExternalInfo(@RequestBody MetadataSegment segment) {
+        return segmentService.findByExternalInfo(segment);
+    }
+
+    @GetMapping("/list/{segmentName}")
+    @ResponseBody
+    @ApiOperation(value = "Get list segment by name")
+    public MetadataSegment getListSegmentByName(@PathVariable String customerSpace, @PathVariable String segmentName) {
+        return segmentService.findListSegmentByName(segmentName);
     }
 
     @DeleteMapping("/{segmentName}")

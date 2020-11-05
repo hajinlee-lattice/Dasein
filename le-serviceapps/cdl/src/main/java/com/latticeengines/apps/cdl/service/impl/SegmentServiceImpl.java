@@ -15,9 +15,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.ListSegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.MetadataSegmentExportEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
@@ -37,6 +39,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -47,6 +50,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -58,6 +62,9 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Inject
     private SegmentEntityMgr segmentEntityMgr;
+
+    @Inject
+    private ListSegmentEntityMgr listSegmentEntityMgr;
 
     @Inject
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
@@ -73,6 +80,12 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Inject
     private MetadataSegmentExportEntityMgr metadataSegmentExportEntityMgr;
+
+    @Value("${aws.s3.data.stage.bucket}")
+    private String dateStageBucket;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
@@ -104,8 +117,46 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
+    public MetadataSegment createOrUpdateListSegment(MetadataSegment segment) {
+        MetadataSegment persistedSegment;
+        if (StringUtils.isNotEmpty(segment.getName())) {
+            MetadataSegment existingSegment = segmentEntityMgr.findByName(segment.getName());
+            if (existingSegment != null) {
+                persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
+            } else {
+                persistedSegment = createListSegment(segment);
+            }
+        } else if (segment.getListSegment() != null) {
+            MetadataSegment existingSegment = segmentEntityMgr.findByExternalInfo(segment);
+            if (existingSegment != null) {
+                persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
+            } else {
+                persistedSegment = createListSegment(segment);
+            }
+        } else {
+            segment.setName(NamingUtils.timestamp("Segment"));
+            persistedSegment = createListSegment(segment);
+        }
+        return persistedSegment;
+    }
+
+    private MetadataSegment createListSegment(MetadataSegment segment) {
+        if (segment.getListSegment() != null) {
+            HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+            segment.getListSegment().setS3DropFolder(pathBuilder.getS3ListSegmentDir(dateStageBucket,
+                    MultiTenantContext.getShortTenantId(), segment.getName()));
+        }
+        return segmentEntityMgr.createListSegment(segment);
+    }
+
+    @Override
+    public ListSegment updateListSegment(ListSegment segment) {
+        return listSegmentEntityMgr.updateListSegment(segment);
+    }
+
+    @Override
     public Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck, boolean hardDelete) {
-        MetadataSegment segment = segmentEntityMgr.findByName(segmentName);
+        MetadataSegment segment = segmentEntityMgr.findByName(segmentName, hardDelete);
         if (segment == null) {
             return false;
         }
@@ -147,6 +198,11 @@ public class SegmentServiceImpl implements SegmentService {
         }
         TeamUtils.fillTeamId(segment);
         return segment;
+    }
+
+    @Override
+    public MetadataSegment findListSegmentByName(String name) {
+        return segmentEntityMgr.findByName(name, true);
     }
 
     @Override
@@ -415,5 +471,10 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public List<MetadataSegmentExport> getMetadataSegmentExports() {
         return metadataSegmentExportEntityMgr.findAll();
+    }
+
+    @Override
+    public MetadataSegment findByExternalInfo(MetadataSegment segment) {
+        return segmentEntityMgr.findByExternalInfo(segment);
     }
 }

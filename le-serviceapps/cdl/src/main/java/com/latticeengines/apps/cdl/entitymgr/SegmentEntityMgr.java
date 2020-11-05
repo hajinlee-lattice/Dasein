@@ -20,6 +20,8 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     MetadataSegment updateSegment(MetadataSegment segment, MetadataSegment existingSegment);
 
+    MetadataSegment updateListSegment(MetadataSegment segment, MetadataSegment existingSegment);
+
     MetadataSegment updateSegmentWithoutActionAndAuditing(MetadataSegment segment, MetadataSegment existingSegment);
 
     void delete(MetadataSegment segment, Boolean ignoreDependencyCheck, Boolean hardDelete);
@@ -27,5 +29,11 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
     void revertDelete(String segmentName);
 
     List<String> getAllDeletedSegments();
+
+    MetadataSegment findByName(String name, boolean inflate);
+
+    MetadataSegment createListSegment(MetadataSegment segment);
+
+    MetadataSegment findByExternalInfo(MetadataSegment segment);
 
 }
