@@ -145,6 +145,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         S3ChannelConfig s3ChannelConfig = new S3ChannelConfig();
         s3ChannelConfig.setAudienceName("something");
         s3ChannelConfig.setAttributeSetName("attribute_set_name_s3");
+        s3ChannelConfig.setAddExportTimestamp(true);
         channel4.setIsAlwaysOn(true);
         channel4.setCronScheduleExpression("0 0 12 ? * WED *");
         channel4.setExpirationPeriodString("P3M");
