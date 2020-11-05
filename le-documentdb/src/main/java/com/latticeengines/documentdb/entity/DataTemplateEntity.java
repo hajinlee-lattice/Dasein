@@ -7,8 +7,7 @@ import javax.persistence.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 
 @Entity
-@Table(name = "DataTemplate", //
-        indexes = { @Index(name = "IX_UUID", columnList = "UUID")} )
+@Table(name = "DataTemplate")
 public class DataTemplateEntity extends BaseMultiTenantDocEntity<DataTemplate> {
 
 }
