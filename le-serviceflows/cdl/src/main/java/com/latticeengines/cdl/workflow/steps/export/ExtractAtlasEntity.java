@@ -260,6 +260,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         String customerAccountId = InterfaceName.CustomerAccountId.name();
         boolean hasAccountId = false;
         boolean hasCustomerAccountId = false;
+        int totalSelected = 0;
         for (BusinessEntity entity : BusinessEntity.EXPORT_ACCOUNT_ENTITIES) {
             List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
             for (ColumnMetadata cm : cms) {
@@ -270,12 +271,13 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                     hasCustomerAccountId = true;
                 }
                 columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
+                totalSelected++;
             }
         }
-        if (!entityMatchGA && !hasAccountId && CollectionUtils.isEmpty(columnMetadataList)) {
+        if (!entityMatchGA && !hasAccountId && totalSelected == 0) {
             addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
         }
-        if (entityMatchGA && !hasCustomerAccountId && CollectionUtils.isEmpty(columnMetadataList)) {
+        if (entityMatchGA && !hasCustomerAccountId && totalSelected == 0) {
             addAccountId(BusinessEntity.Account, columnMetadataList, customerAccountId);
         }
         sortAttribute(columnMetadataList);
@@ -291,6 +293,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         boolean hasAccountId = false;
         boolean hasContactId = false;
         boolean hasCustomerAccountId = false;
+        int totalSelected = 0;
         for (BusinessEntity entity : BusinessEntity.EXPORT_CONTACT_ENTITIES) {
             List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
             for (ColumnMetadata cm : cms) {
@@ -304,9 +307,10 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                     hasCustomerAccountId = true;
                 }
                 columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
+                totalSelected++;
             }
         }
-        if (!hasContactId && CollectionUtils.isEmpty(columnMetadataList)) {
+        if (!hasContactId && totalSelected == 0) {
             addContactId(BusinessEntity.Contact, columnMetadataList, contactId);
         }
         boolean contactWithAccountExport = AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType());
