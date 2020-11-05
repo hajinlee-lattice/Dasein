@@ -2,8 +2,6 @@ package com.latticeengines.domain.exposed.security;
 
 import java.util.Date;
 
-import org.apache.commons.beanutils.BeanUtils;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
