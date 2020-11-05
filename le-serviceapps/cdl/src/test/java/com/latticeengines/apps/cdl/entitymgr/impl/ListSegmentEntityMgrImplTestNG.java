@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 import com.latticeengines.domain.exposed.metadata.template.ImportFieldMapping;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -78,7 +77,6 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         assertNotNull(csvAdaptor.getImportFieldMappings());
         assertEquals(csvAdaptor.getImportFieldMappings().size(), 1);
         ImportFieldMapping importFieldMapping = csvAdaptor.getImportFieldMappings().get(0);
-        assertEquals(importFieldMapping.getEntity(), BusinessEntity.Account.name());
         assertEquals(importFieldMapping.getFieldName(), InterfaceName.CompanyName.name());
         assertEquals(importFieldMapping.getFieldType(), UserDefinedType.TEXT);
         assertEquals(importFieldMapping.getUserFieldName(), "Company Name");
@@ -88,7 +86,6 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         CSVAdaptor csvAdaptor = new CSVAdaptor();
         List<ImportFieldMapping> importFieldMappings = new ArrayList<>();
         ImportFieldMapping importFieldMapping = new ImportFieldMapping();
-        importFieldMapping.setEntity(BusinessEntity.Account.name());
         importFieldMapping.setFieldName(InterfaceName.CompanyName.name());
         importFieldMapping.setFieldType(UserDefinedType.TEXT);
         importFieldMapping.setUserFieldName("Company Name");

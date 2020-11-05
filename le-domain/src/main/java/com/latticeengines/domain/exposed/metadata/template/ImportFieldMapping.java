@@ -22,9 +22,6 @@ public class ImportFieldMapping implements Serializable {
     @JsonProperty("fieldType")
     private UserDefinedType fieldType;
 
-    @JsonProperty("entity")
-    private String entity;
-
     public UserDefinedType getFieldType() {
         return fieldType;
     }
@@ -49,11 +46,4 @@ public class ImportFieldMapping implements Serializable {
         this.userFieldName = userFieldName;
     }
 
-    public String getEntity() {
-        return entity;
-    }
-
-    public void setEntity(String entity) {
-        this.entity = entity;
-    }
 }
