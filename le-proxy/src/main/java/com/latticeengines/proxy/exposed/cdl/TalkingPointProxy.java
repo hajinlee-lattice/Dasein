@@ -2,6 +2,7 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -59,7 +60,7 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Proxy
     public void publish(String customerSpace, String playName) {
         String url = constructUrl(URL_PREFIX + "/publish" + "?playName=" + playName,
                 shortenCustomerSpace(customerSpace));
-        post("publish", url, null, String.class);
+        post("publish", url, new HashMap<String, Object>(), String.class);
     }
 
     @SuppressWarnings("unchecked")
