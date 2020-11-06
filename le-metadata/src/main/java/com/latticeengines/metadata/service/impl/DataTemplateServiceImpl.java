@@ -28,16 +28,19 @@ public class DataTemplateServiceImpl implements DataTemplateService {
 
     @Override
     public DataTemplate findByUuid(String uuid) {
-        return entityMgr.findByUuid(uuid);
+        String tenantId = MultiTenantContext.getShortTenantId();
+        return entityMgr.findByUuid(tenantId, uuid);
     }
 
     @Override
     public void updateByUuid(String uuid, DataTemplate dataTemplate) {
-        entityMgr.updateByUuid(uuid, dataTemplate);
+        String tenantId = MultiTenantContext.getShortTenantId();
+        entityMgr.updateByUuid(tenantId, uuid, dataTemplate);
     }
 
     @Override
     public void deleteByUuid(String uuid) {
-        entityMgr.deleteByUuid(uuid);
+        String tenantId = MultiTenantContext.getShortTenantId();
+        entityMgr.deleteByUuid(tenantId, uuid);
     }
 }

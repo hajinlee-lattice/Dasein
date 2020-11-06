@@ -39,7 +39,6 @@ public class DataTemplateServiceImplTestNG extends MetadataFunctionalTestNGBase 
 
     @Test(groups = "functional")
     public void testCrud() throws Exception {
-        System.out.println("------------------------------------------" + testTenantId);
         DataTemplate dataTemplate = new DataTemplate();
         dataTemplate.setName(DATATEMPLATE_NAME);
         dataTemplate.setEntity(BusinessEntity.Account);
