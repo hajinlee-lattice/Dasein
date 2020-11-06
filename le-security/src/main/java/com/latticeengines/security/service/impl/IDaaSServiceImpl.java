@@ -1,5 +1,6 @@
 package com.latticeengines.security.service.impl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,7 +159,16 @@ public class IDaaSServiceImpl implements IDaaSService {
      * @return A new LoginTenant object
      */
     private LoginTenant addSubscriberDetails(Tenant tenant) {
-        LoginTenant loginTenant = new LoginTenant(tenant);
+        LoginTenant loginTenant = new LoginTenant();
+        try {
+            BeanUtils.copyProperties(loginTenant, tenant);
+        } catch (IllegalAccessException iae) {
+            String msg = "IllegalAccessException while trying to copy fields in Tenant to LoginTenant";
+            log.error(msg, iae);
+        } catch (InvocationTargetException ite) {
+            String msg = "InvocationTargetException while trying to copy fields in Tenant to LoginTenant";
+            log.error(msg, ite);
+        }
         String subscriberNumber = tenant.getSubscriberNumber();
         if (StringUtils.isNotBlank(subscriberNumber)) {
             SubscriberDetails subscriberDetails = _self.getSubscriberDetails(subscriberNumber);

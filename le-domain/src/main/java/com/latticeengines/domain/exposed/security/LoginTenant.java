@@ -31,27 +31,6 @@ public class LoginTenant extends Tenant {
     public LoginTenant() {
     }
 
-    /**
-     * Copy the fields from the Tenant we are augmenting to create a LoginTenant.
-     * @param tenant - The Tenant object to copy for use as the base for the LoginTenant
-     */
-    public LoginTenant(Tenant tenant) {
-        this.setId(tenant.getId());
-        this.setName(tenant.getName());
-        this.setPid(tenant.getPid());
-        this.setRegisteredTime(getRegisteredTime());
-        this.setUiVersion(getUiVersion());
-        this.setStatus(tenant.getStatus());
-        this.setTenantType(getTenantType());
-        this.setContract(getContract());
-        this.setEntitledApps(getEntitledApps());
-        this.setSubscriberNumber(getSubscriberNumber());
-        this.setExpiredTime(getExpiredTime());
-        this.setNotificationLevel(tenant.getNotificationLevel());
-        this.setNotificationType(getNotificationType());
-        this.setJobNotificationLevels(getJobNotificationLevels());
-    }
-
     public String getCompanyName() {
         return companyName;
     }
