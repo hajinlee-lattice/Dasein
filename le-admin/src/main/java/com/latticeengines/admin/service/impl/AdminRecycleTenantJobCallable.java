@@ -14,9 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -43,6 +47,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     private AdminProxy adminProxy;
     private com.latticeengines.security.exposed.service.TenantService tenantService;
     private GlobalAuthUserTenantRightEntityMgr userTenantRightEntityMgr;
+
     private static final Logger log = LoggerFactory.getLogger(AdminRecycleTenantJobCallable.class);
 
     public AdminRecycleTenantJobCallable(Builder builder) {
@@ -56,6 +61,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
+        scanInvalidTenants();
         List<Tenant> tempTenants = tenantService.getTenantByTypes(Arrays.asList(TenantType.POC, TenantType.STAGING));
         if (CollectionUtils.isNotEmpty(tempTenants)) {
             log.info("Tenants size is " + tempTenants.size());
@@ -129,6 +135,28 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
             }
         }
         return true;
+    }
+
+    private void scanInvalidTenants() {
+        log.info("begin scanning tenants in DB not in ZK");
+        Camille camille = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        List<String> tenantIds = tenantService.getAllTenantIds();
+        if (CollectionUtils.isNotEmpty(tenantIds)) {
+            for (String id : tenantIds) {
+                CustomerSpace space = CustomerSpace.parse(id);
+                String contractId = space.getContractId();
+                Path path = PathBuilder.buildContractPath(podId, contractId);
+                try {
+                    if (!camille.exists(path)) {
+                        log.info("tenant {} exists in db not in zk", space.getTenantId());
+                    }
+                } catch(Exception e) {
+                    log.info("error occurred when retrieving {}", space.getTenantId());
+                }
+            }
+
+        }
     }
 
     private void sendEmail(GlobalAuthUserTenantRight tenantRight, int days) {

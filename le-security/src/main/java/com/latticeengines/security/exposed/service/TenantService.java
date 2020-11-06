@@ -20,6 +20,8 @@ public interface TenantService {
     
     List<Tenant> getAllTenants();
 
+    List<String> getAllTenantIds();
+
     List<Tenant> getTenantsByStatus(TenantStatus status);
 
     List<Tenant> getTenantByTypes(List<TenantType> types);
