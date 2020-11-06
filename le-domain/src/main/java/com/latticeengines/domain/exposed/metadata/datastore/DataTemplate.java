@@ -21,9 +21,6 @@ public class DataTemplate {
     @JsonProperty("Name")
     private String name;
 
-    @JsonProperty("Entity")
-    private BusinessEntity entity;
-
     public Schema getMasterSchema() {
         return masterSchema;
     }
@@ -46,14 +43,6 @@ public class DataTemplate {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public BusinessEntity getEntity() {
-        return entity;
-    }
-
-    public void setEntity(BusinessEntity entity) {
-        this.entity = entity;
     }
 
 }

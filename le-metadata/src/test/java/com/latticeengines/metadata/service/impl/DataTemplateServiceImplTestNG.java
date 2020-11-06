@@ -41,7 +41,6 @@ public class DataTemplateServiceImplTestNG extends MetadataFunctionalTestNGBase 
     public void testCrud() throws Exception {
         DataTemplate dataTemplate = new DataTemplate();
         dataTemplate.setName(DATATEMPLATE_NAME);
-        dataTemplate.setEntity(BusinessEntity.Account);
         dataTemplate.setTenant(testTenantId);
         String uuid = dataTemplateService.create(dataTemplate);
         Assert.assertNotNull(uuid);
@@ -49,15 +48,15 @@ public class DataTemplateServiceImplTestNG extends MetadataFunctionalTestNGBase 
         Thread.sleep(500);
         DataTemplate foundDataTemplate = dataTemplateService.findByUuid(uuid);
         Assert.assertNotNull(foundDataTemplate);
-        Assert.assertEquals(foundDataTemplate.getEntity(), BusinessEntity.Account);
+        Assert.assertEquals(foundDataTemplate.getName(), DATATEMPLATE_NAME);
 
-        dataTemplate.setEntity(BusinessEntity.Contact);
+        dataTemplate.setName("new_" + DATATEMPLATE_NAME);
         dataTemplateService.updateByUuid(uuid, dataTemplate);
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
                 Collections.singleton(AssertionError.class), null);
         retry.execute(context -> {
             DataTemplate tempDataTemplate = dataTemplateService.findByUuid(uuid);
-            Assert.assertEquals(tempDataTemplate.getEntity(), BusinessEntity.Contact);
+            Assert.assertEquals(foundDataTemplate.getName(), "new_" + DATATEMPLATE_NAME);
             return true;
         });
 
