@@ -11,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvir
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -49,6 +51,7 @@ import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("finishProcessing")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -79,6 +82,9 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
+
+    @Inject
+    private JobService jobService;
 
     @Value("${eai.export.dynamo.accountlookup.signature}")
     private String accountLookupSignature;
@@ -137,6 +143,12 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         if (BooleanUtils.isTrue(getObjectFromContext(NEED_PUBLISH_ACCOUNT_LOOKUP, Boolean.class))) {
             String appId = lookupIdMappingProxy.publishAccountLookup(customerSpace.getTenantId(), accountLookupSignature);
             log.info("Kicked off account lookup publication workflow: {}", appId);
+            JobStatus status = jobService.waitFinalJobStatus(appId, null);
+            if (!FinalApplicationStatus.SUCCEEDED.equals(status.getStatus())) {
+                log.error("Failed to publish account lookup. Check log for details and retry after issue resolved appId: {}", appId);
+            } else {
+                log.info("Finished publishing account lookup to dynamo.");
+            }
         }
     }
 
