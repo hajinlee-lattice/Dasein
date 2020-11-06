@@ -40,25 +40,7 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
         return (MetadataSegment) list.get(0);
     }
 
-    @Override
-    public MetadataSegment findByExternalInfo(MetadataSegment segment) {
-        Session session = sessionFactory.getCurrentSession();
-        Class<MetadataSegment> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "from %s as segment where segment.listSegment.externalSystem  = :externalSystem " +
-                        "and segment.listSegment.externalSegmentId = :externalSegmentId", entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setParameter("externalSystem", segment.getListSegment().getExternalSystem());
-        query.setParameter("externalSegmentId", segment.getListSegment().getExternalSegmentId());
-        List list = query.list();
-        if (list.size() == 0) {
-            return null;
-        } else {
-            return (MetadataSegment) list.get(0);
-        }
-    }
-
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({"rawtypes"})
     @Override
     public List<String> getAllDeletedSegments() {
         Session session = getSessionFactory().getCurrentSession();

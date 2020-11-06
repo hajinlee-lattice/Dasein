@@ -42,8 +42,7 @@ public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Lis
     public ListSegment updateListSegment(ListSegment incomingListSegment) {
         log.info("Updating list segment by external system {} and external segment {}.",
                 incomingListSegment.getExternalSystem(), incomingListSegment.getExternalSegmentId());
-        ListSegment existingListSegment =
-                _self.findByExternalInfo(incomingListSegment.getExternalSystem(), incomingListSegment.getExternalSegmentId());
+        ListSegment existingListSegment = _self.findByExternalInfo(incomingListSegment.getExternalSystem(), incomingListSegment.getExternalSegmentId());
         if (existingListSegment != null) {
             cloneListSegmentForUpdate(existingListSegment, incomingListSegment);
             update(existingListSegment);

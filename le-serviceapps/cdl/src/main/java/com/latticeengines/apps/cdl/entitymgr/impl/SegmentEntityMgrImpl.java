@@ -189,9 +189,19 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
+        return listSegmentEntityMgr.findMetadataSegmentByExternalInfo(externalSystem, externalSegmentId);
+    }
+
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findByExternalInfo(MetadataSegment segment) {
-        return listSegmentEntityMgr.findMetadataSegmentByExternalInfo(segment.getListSegment().getExternalSystem(),
-                segment.getListSegment().getExternalSegmentId());
+        if (segment.getListSegment() != null) {
+            return listSegmentEntityMgr.findMetadataSegmentByExternalInfo(segment.getListSegment().getExternalSystem(),
+                    segment.getListSegment().getExternalSegmentId());
+        } else {
+            return null;
+        }
     }
 
     @Override

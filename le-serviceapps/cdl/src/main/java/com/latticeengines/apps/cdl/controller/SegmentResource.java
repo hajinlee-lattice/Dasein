@@ -23,7 +23,6 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -110,11 +109,11 @@ public class SegmentResource {
         return segmentService.updateListSegment(listSegment);
     }
 
-    @GetMapping("/list")
+    @GetMapping("/list/{externalSystem}/{externalSegmentId}")
     @ResponseBody
     @ApiOperation(value = "Get list segment by external info")
-    public MetadataSegment getListSegmentByExternalInfo(@RequestBody MetadataSegment segment) {
-        return segmentService.findByExternalInfo(segment);
+    public MetadataSegment getListSegmentByExternalInfo(@PathVariable String externalSystem, @PathVariable String externalSegmentId) {
+        return segmentService.findByExternalInfo(externalSystem, externalSegmentId);
     }
 
     @GetMapping("/list/{segmentName}")
@@ -124,12 +123,18 @@ public class SegmentResource {
         return segmentService.findListSegmentByName(segmentName);
     }
 
+    @DeleteMapping("/list")
+    @ApiOperation(value = "Delete a list segment by external info")
+    public boolean deleteSegmentByExternalInfo(@PathVariable String customerSpace, @RequestBody MetadataSegment metadataSegment,
+                                               @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
+        return segmentService.deleteSegmentByExternalInfo(metadataSegment, hardDelete);
+    }
+
     @DeleteMapping("/{segmentName}")
     @ApiOperation(value = "Delete a segment by name")
     public Boolean deleteSegmentByName(@PathVariable String customerSpace,
             @PathVariable String segmentName,
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return segmentService.deleteSegmentByName(segmentName, false, hardDelete);
     }
 

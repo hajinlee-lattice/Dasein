@@ -48,11 +48,18 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return put("createOrUpdateListSegment", url, listSegment, ListSegment.class);
     }
 
+    public MetadataSegment getListSegmentByExternalInfo(String customerSpace, String externalSystem, String externalSegmentId) {
+        String url = constructUrl("/{customerSpace}/segments/list/{externalSystem}/{externalSegmentId}", //
+                shortenCustomerSpace(customerSpace), externalSystem, externalSegmentId);
+        return get("getListSegmentByExternalInfo", url, MetadataSegment.class);
+    }
+
     public MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName) {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}", //
                 shortenCustomerSpace(customerSpace), segmentName);
         return get("getSegment", url, MetadataSegment.class);
     }
+
 
     public MetadataSegmentDTO getMetadataSegmentWithPidByName(String customerSpace, String segmentName) {
         String url = constructUrl("/{customerSpace}/segments/pid/{segmentName}", //
@@ -72,6 +79,13 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
                 "/{customerSpace}/segments/{segmentName}?hard-delete={hardDelete}", //
                 shortenCustomerSpace(customerSpace), segmentName, hardDelete);
         delete("deleteSegmentByName", url);
+    }
+
+    public void deleteSegmentByExternalInfo(String customerSpace, MetadataSegment segment, boolean hardDelete) {
+        String url = constructUrl(
+                "/{customerSpace}/segments/list?hard-delete={hardDelete}", //
+                shortenCustomerSpace(customerSpace), hardDelete);
+        delete("deleteSegmentByExternalInfo", url, segment);
     }
 
     public void revertDeleteSegmentByName(String customerSpace, String segmentName) {

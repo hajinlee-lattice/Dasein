@@ -249,7 +249,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         segmentEntityMgr.createListSegment(metadataSegment);
 
         metadataSegment = segmentEntityMgr.findByName(listSegmentName, true);
-        validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
+        verifyListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
         segmentDisplayName = "list-segment-display-name2";
         segmentDescription = "list-segment-description2";
         metadataSegment.setDisplayName(segmentDisplayName);
@@ -257,13 +257,13 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         MetadataSegment existingSegment = segmentEntityMgr.findByName(metadataSegment.getName());
         segmentEntityMgr.updateListSegment(metadataSegment, existingSegment);
         metadataSegment = segmentEntityMgr.findByName(listSegmentName, true);
-        validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
+        verifyListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
         metadataSegment = segmentEntityMgr.findByExternalInfo(metadataSegment);
-        validateListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
+        verifyListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
     }
 
-    private void validateListSegment(MetadataSegment segment, String displayName, String description,
-                                     String externalSystemName, String externalSegmentId) {
+    private void verifyListSegment(MetadataSegment segment, String displayName, String description,
+                                   String externalSystemName, String externalSegmentId) {
         assertNotNull(segment);
         assertEquals(segment.getDescription(), description);
         assertEquals(segment.getDisplayName(), displayName);
