@@ -24,7 +24,7 @@ CREATE PROCEDURE `UpdateSchema`()
       ) engine = InnoDB;
 
       ALTER TABLE `DataUnit`
-        ADD COLUMN `DataTemplateId` VARCHAR(200);
+        ADD COLUMN `DataTemplateId` VARCHAR(200) GENERATED ALWAYS AS (json_unquote(json_extract(`Document`,'$.DataTemplateId'))) VIRTUAL,
 
       CREATE INDEX IX_DATATEMPLATEID ON `DataUnit` (`TenantId`,`DataTemplateId`);
 
