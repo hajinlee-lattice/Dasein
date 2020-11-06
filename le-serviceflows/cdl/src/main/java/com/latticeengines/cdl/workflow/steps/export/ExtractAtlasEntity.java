@@ -80,7 +80,6 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private AtlasExport atlasExport;
     private AttributeRepository attrRepo;
     private Map<BusinessEntity, List<ColumnMetadata>> schemaMap;
-    private AccountContactExportContext accountContactExportContext = new AccountContactExportContext();
     private boolean entityMatchGA;
     private boolean dropAccountJoinKey = false;
 
@@ -163,10 +162,11 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         } else {
             accountContactExportConfig.setInput(Collections.singletonList(accountDataUnit));
         }
-        accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
+        AccountContactExportContext accountContactExportContext = new AccountContactExportContext();
         String joinKey = entityMatchGA ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
-        accountContactExportConfig.getAccountContactExportContext().setJoinKey(joinKey);
-        accountContactExportConfig.getAccountContactExportContext().setDropAccountJoinKey(dropAccountJoinKey);
+        accountContactExportContext.setJoinKey(joinKey);
+        accountContactExportContext.setDropAccountJoinKey(dropAccountJoinKey);
+        accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
         return accountContactExportConfig;
     }
@@ -262,7 +262,6 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         String customerAccountId = InterfaceName.CustomerAccountId.name();
         boolean hasAccountId = false;
         boolean hasCustomerAccountId = false;
-        int totalSelected = 0;
         for (BusinessEntity entity : BusinessEntity.EXPORT_ACCOUNT_ENTITIES) {
             List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
             for (ColumnMetadata cm : cms) {
@@ -273,18 +272,19 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                     hasCustomerAccountId = true;
                 }
                 columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
-                totalSelected++;
             }
         }
         boolean contactWithAccountExport = AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType());
-        boolean addAccountId = totalSelected == 0 || contactWithAccountExport;
+        boolean hasAttributes = columnMetadataList.stream().flatMap(columnMetadata -> columnMetadata.stream()).findAny().isPresent();
+        boolean addAccountId = hasAttributes || contactWithAccountExport;
+        dropAccountJoinKey = (hasAttributes && contactWithAccountExport);
+        log.info("");
         if (!entityMatchGA && !hasAccountId && addAccountId) {
             addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
         }
         if (entityMatchGA && !hasCustomerAccountId && addAccountId) {
             addAccountId(BusinessEntity.Account, columnMetadataList, customerAccountId);
         }
-        dropAccountJoinKey = (totalSelected == 0 && contactWithAccountExport);
         sortAttribute(columnMetadataList);
         return convertToLookup(columnMetadataList);
     }
@@ -298,7 +298,6 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         boolean hasAccountId = false;
         boolean hasContactId = false;
         boolean hasCustomerAccountId = false;
-        int totalSelected = 0;
         for (BusinessEntity entity : BusinessEntity.EXPORT_CONTACT_ENTITIES) {
             List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
             for (ColumnMetadata cm : cms) {
@@ -312,10 +311,10 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                     hasCustomerAccountId = true;
                 }
                 columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
-                totalSelected++;
             }
         }
-        if (!hasContactId && totalSelected == 0) {
+        boolean hasAttributes = columnMetadataList.stream().flatMap(columnMetadata -> columnMetadata.stream()).findAny().isPresent();
+        if (!hasContactId && hasAttributes) {
             addContactId(BusinessEntity.Contact, columnMetadataList, contactId);
         }
         boolean contactWithAccountExport = AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType());
