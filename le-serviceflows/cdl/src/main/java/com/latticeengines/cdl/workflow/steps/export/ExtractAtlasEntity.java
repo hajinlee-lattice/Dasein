@@ -81,7 +81,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private AttributeRepository attrRepo;
     private Map<BusinessEntity, List<ColumnMetadata>> schemaMap;
     private boolean entityMatchGA;
-    private boolean dropAccountJoinKey = false;
+    private boolean dropAccoutId = false;
 
     @Override
     public void execute() {
@@ -165,7 +165,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         AccountContactExportContext accountContactExportContext = new AccountContactExportContext();
         String joinKey = entityMatchGA ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
         accountContactExportContext.setJoinKey(joinKey);
-        accountContactExportContext.setDropAccountJoinKey(dropAccountJoinKey);
+        accountContactExportContext.setDropAccountId(dropAccoutId);
         accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
         return accountContactExportConfig;
@@ -276,29 +276,19 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         }
         boolean contactWithAccountExport = AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType());
         boolean hasAttributes = columnMetadataList.stream().flatMap(columnMetadata -> columnMetadata.stream()).findAny().isPresent();
-        if (contactWithAccountExport) {
+        if ((!hasAccountId || !hasCustomerAccountId) && hasAttributes) {
+            dropAccoutId = true;
+        }
+        if (contactWithAccountExport || !hasAttributes) {
             if (!entityMatchGA && !hasAccountId) {
-                if (hasAttributes) {
-                    dropAccountJoinKey = true;
-                }
                 addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
             }
             if (entityMatchGA && !hasCustomerAccountId) {
-                if (hasAttributes) {
-                    dropAccountJoinKey = true;
-                }
-                addAccountId(BusinessEntity.Account, columnMetadataList, customerAccountId);
-            }
-        } else {
-            if (!entityMatchGA && !hasAccountId && !hasAttributes) {
-                addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
-            }
-            if (entityMatchGA && !hasCustomerAccountId && !hasAttributes) {
                 addAccountId(BusinessEntity.Account, columnMetadataList, customerAccountId);
             }
         }
         log.info("getting account lookup: hasAttributes: " + hasAttributes + ", contactWithAccountExport: " + contactWithAccountExport +
-                ", dropAccountJoinKey:" + dropAccountJoinKey);
+                ", dropAccountJoinKey:" + dropAccoutId);
         sortAttribute(columnMetadataList);
         return convertToLookup(columnMetadataList);
     }

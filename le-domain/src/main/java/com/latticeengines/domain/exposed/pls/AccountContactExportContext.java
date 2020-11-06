@@ -25,8 +25,8 @@ public class AccountContactExportContext implements Serializable {
     @JsonProperty("JoinKey")
     private String joinKey;
 
-    @JsonProperty("dropAccountJoinKey")
-    private boolean dropAccountJoinKey;
+    @JsonProperty("dropAccountId")
+    private boolean dropAccountId;
 
 
     public AccountContactExportContext() {
@@ -42,11 +42,11 @@ public class AccountContactExportContext implements Serializable {
         this.joinKey = joinKey;
     }
 
-    public boolean isDropAccountJoinKey() {
-        return dropAccountJoinKey;
+    public boolean isDropAccountId() {
+        return dropAccountId;
     }
 
-    public void setDropAccountJoinKey(boolean dropAccountJoinKey) {
-        this.dropAccountJoinKey = dropAccountJoinKey;
+    public void setDropAccountId(boolean dropAccountId) {
+        this.dropAccountId = dropAccountId;
     }
 }
