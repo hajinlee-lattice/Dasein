@@ -108,7 +108,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     private static final String MATCH_TO_ACCOUNT_ID_SECTION = "Match to Accounts - ID";
     private static final String MATCH_TO_CONTACT_ID_SECTION = "Match to Contacts - ID";
     private static final String ACCOUNT_FIELD_NAME = "AccountId";
-    private static final List<String> CONTACT_FIELD_NAME = Arrays.asList("ContactId", "leadId");
+    private static final List<String> CONTACT_FIELD_NAME = Arrays.asList("ContactId", "leadId", "LeadId", "prospect_id");
     private static final String DEFAULTSYSTEM = "DefaultSystem";
     private static final String STREAM_NAME_FORMAT = "%s_%s";
 
