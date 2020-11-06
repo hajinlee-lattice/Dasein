@@ -23,6 +23,8 @@ CREATE PROCEDURE `UpdateSchema`()
         PRIMARY KEY (`UUID`)
       ) engine = InnoDB;
 
+      CREATE INDEX IX_TENANTID ON `DataTemplate` (`TenantId`,`UUID`);
+
       ALTER TABLE `DataUnit`
         ADD COLUMN `DataTemplateId` VARCHAR(200) GENERATED ALWAYS AS (json_unquote(json_extract(`Document`,'$.DataTemplateId'))) VIRTUAL,
 

@@ -8,6 +8,6 @@ import com.latticeengines.documentdb.repository.MultiTenantDocumentRepository;
 @NoRepositoryBean
 public interface DataTemplateRepository extends MultiTenantDocumentRepository<DataTemplateEntity> {
 
-    DataTemplateEntity findByUuid(String uuid);
+    DataTemplateEntity findByTenantIdAndUuid(String tenantId, String uuid);
 
 }

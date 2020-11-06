@@ -6,10 +6,10 @@ public interface DataTemplateEntityMgr {
 
     String create(String tenantId, DataTemplate dataTemplate);
 
-    DataTemplate findByUuid(String uuid);
+    DataTemplate findByUuid(String tenantId, String uuid);
 
-    void updateByUuid(String uuid, DataTemplate dataTemplate);
+    void updateByUuid(String tenantId, String uuid, DataTemplate dataTemplate);
 
-    void deleteByUuid(String uuid);
+    void deleteByUuid(String tenantId, String uuid);
 
 }

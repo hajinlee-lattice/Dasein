@@ -43,14 +43,14 @@ public class DataTemplateEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataTem
     }
 
     @Override
-    public DataTemplate findByUuid(String uuid) {
-        DataTemplateEntity dataTemplateEntity = repository.findByUuid(uuid);
+    public DataTemplate findByUuid(String tenantId, String uuid) {
+        DataTemplateEntity dataTemplateEntity = readerRepository.findByTenantIdAndUuid(tenantId, uuid);
         return dataTemplateEntity.getDocument();
     }
 
     @Override
-    public void updateByUuid(String uuid, DataTemplate dataTemplate) {
-        DataTemplateEntity existing = repository.findByUuid(uuid);
+    public void updateByUuid(String tenantId, String uuid, DataTemplate dataTemplate) {
+        DataTemplateEntity existing = repository.findByTenantIdAndUuid(tenantId, uuid);
         if (existing != null) {
             existing.setDocument(dataTemplate);
             repository.save(existing);
@@ -58,8 +58,8 @@ public class DataTemplateEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataTem
     }
 
     @Override
-    public void deleteByUuid(String uuid) {
-        DataTemplateEntity existing = repository.findByUuid(uuid);
+    public void deleteByUuid(String tenantId, String uuid) {
+        DataTemplateEntity existing = repository.findByTenantIdAndUuid(tenantId, uuid);
         if (existing != null) {
             repository.delete(existing);
         }
