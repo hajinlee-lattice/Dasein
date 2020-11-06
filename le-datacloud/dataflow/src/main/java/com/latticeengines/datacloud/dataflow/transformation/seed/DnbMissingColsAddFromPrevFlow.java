@@ -68,6 +68,9 @@ public class DnbMissingColsAddFromPrevFlow extends ConfigurableFlowBase<DnBAddMi
         }
         // Find missing columns in current file compared to previous
         for (FieldMetadata column : oldSchema) {
+            if (fieldsToPopulateNull.contains(column.getFieldName())) {
+                dataTypeOfFieldToPopulateNull.add(column);
+            }
             if (!newSchemaFields.contains(column.getFieldName())) {
                 // Removes fields which are not required to add in new version
                 if (!fieldsToRemove.isEmpty() && fieldsToRemove.contains(column.getFieldName())) {
@@ -108,7 +111,8 @@ public class DnbMissingColsAddFromPrevFlow extends ConfigurableFlowBase<DnBAddMi
                     .discard(new FieldList(fieldsToPopulateNull));
         }
 
-        // Fields that we require to keep in metadata and cleanup in terms of values
+        // Fields that we require to keep in metadata and cleanup in terms of
+        // values
         for (FieldMetadata emptyField : dataTypeOfFieldToPopulateNull) {
             newDnbSeed = newDnbSeed //
                     .addColumnWithFixedValue(emptyField.getFieldName(), null, emptyField.getJavaType());

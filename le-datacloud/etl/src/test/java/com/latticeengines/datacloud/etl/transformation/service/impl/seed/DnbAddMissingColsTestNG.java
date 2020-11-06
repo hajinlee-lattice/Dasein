@@ -77,7 +77,7 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
         conf.setDomain("LE_DOMAIN");
         conf.setDuns("DUNS_NUMBER");
         conf.setFieldsToRemove(Arrays.asList("LE_Last_Upload_Date", "LE_NUMBER_OF_LOCATIONS"));
-        conf.setFieldsToPopulateNull(Arrays.asList("SALES_VOLUME_RELIABILITY_CODE"));
+        conf.setFieldsToPopulateNull(Arrays.asList("SALES_VOLUME_RELIABILITY_CODE", "LE_INDUSTRY"));
         return JsonUtils.serialize(conf);
     }
 
@@ -144,14 +144,14 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
     // SALES_VOLUME_RELIABILITY_CODE, EMPLOYEES_TOTAL,
     // EMPLOYEES_TOTAL_RELIABILITY_CODE,
     // EMPLOYEES_HERE,EMPLOYEES_HERE_RELIABILITY_CODE,LE_INDUSTRY
-    private Object[][] expectedData = new Object[][] { { 1, "abc.com", "1234", 0L, null, 1, "01", 1, "01", "GHI" }, //
+    private Object[][] expectedData = new Object[][] { { 1, "abc.com", "1234", 0L, null, 1, "01", 1, "01", null }, //
             { 2, null, null, 0L, null, 1, "02", 1, "02", null }, //
-            { 3, null, "9101", 1L, null, 0, "03", 1, "03", "JJJ" }, //
+            { 3, null, "9101", 1L, null, 0, "03", 1, "03", null }, //
             { 4, "mno.com", null, 1L, null, 0, "04", 1, "04", null }, //
-            { 5, "mno.com", "1011", 1L, null, 1, "05", 0, "05", "FGH" }, //
+            { 5, "mno.com", "1011", 1L, null, 1, "05", 0, "05", null }, //
             { 6, "ste.com", null, 1L, null, 1, "02", 0, "02", null }, //
             { 7, "uvw.com", "1112", 0L, null, 0, "06", 0, "06", null }, //
-            { 8, "def.com", "5678", 0L, null, 0, "05", 0, "05", "KLM" }, //
+            { 8, "def.com", "5678", 0L, null, 0, "05", 0, "05", null }, //
             { 9, null, null, 1L, null, 20, "03", 20, "03", null }, //
     };
 
