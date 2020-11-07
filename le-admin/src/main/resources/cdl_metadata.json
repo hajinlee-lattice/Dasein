@@ -94,6 +94,24 @@
         "Type": "string",
         "Required": false
       }
+    },
+    {
+      "Node": "ContactsPerAccountSortAttribute",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
+    },
+    {
+      "Node": "ContactsPerAccountSortDirection",
+      "Data": {
+        "Type": "options",
+        "Required": false,
+        "Options": [
+          "ASC",
+          "DESC"
+        ]
+      }
     }
   ]
 }

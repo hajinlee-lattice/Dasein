@@ -9,17 +9,23 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignFrontEndQueryBuilder;
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -34,16 +40,22 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUniverseStepConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchUniverseJobConfig;
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.query.util.AttrRepoUtils;
+import com.latticeengines.spark.exposed.job.cdl.GenerateLaunchUniverseJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("generateLaunchUniverse")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUniverseStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(GenerateLaunchUniverse.class);
+
+    private static final String CONTACTS_PER_ACCOUNT_SORT_ATTRIBUTE = "ContactsPerAccountSortAttribute";
+    private static final String CONTACTS_PER_ACCOUNT_SORT_DIRECTION = "ContactsPerAccountSortDirection";
 
     @Inject
     private PeriodProxy periodProxy;
@@ -53,6 +65,15 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
 
     @Inject
     private CampaignLaunchUtils campaignLaunchUtils;
+
+    @Value("${datacloud.manage.url}")
+    private String url;
+
+    @Value("${datacloud.manage.user}")
+    private String user;
+
+    @Value("${datacloud.manage.password.encrypted}")
+    private String password;
 
     private DataCollection.Version version;
     private String evaluationDate;
@@ -91,6 +112,9 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         }
 
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
+        BusinessEntity mainEntity = channelConfig.getAudienceType().asBusinessEntity();
+        Long maxAccountsToLaunch = channel.getMaxAccountsToLaunch();
+        boolean useContactsPerAccountLimit = hasContactsPerAccountLimit(channel, mainEntity);
         Set<RatingBucketName> launchBuckets = launch == null ? channel.getBucketsToLaunch()
                 : launch.getBucketsToLaunch();
         String lookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
@@ -99,7 +123,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
 
         // 1) setup queries from play and channel settings
         FrontEndQuery frontEndquery = new CampaignFrontEndQueryBuilder.Builder() //
-                .mainEntity(channelConfig.getAudienceType().asBusinessEntity()) //
+                .mainEntity(mainEntity) //
                 .customerSpace(customerSpace) //
                 .baseAccountRestriction(play.getTargetSegment().getAccountRestriction()) //
                 .baseContactRestriction(contactsDataExists ? play.getTargetSegment().getContactRestriction() : null)
@@ -110,7 +134,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 .isSuppressAccountsWithoutWebsiteOrCompanyName(ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(
                         channel.getLookupIdMap().getExternalSystemName(), channelConfig))
                 .bucketsToLaunch(launchBuckets) //
-                .limit(channel.getMaxAccountsToLaunch()) //
+                .limit(maxAccountsToLaunch, useContactsPerAccountLimit) //
                 .lookupId(lookupId) //
                 .launchUnScored(launchUnScored) //
                 .destinationSystemName(externalSystemName) //
@@ -120,8 +144,17 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
 
         log.info("Full Launch Universe Query: " + frontEndquery.toString());
 
+        // 2) get DataFrame for Account and Contact
         HdfsDataUnit launchUniverseDataUnit = executeSparkJob(frontEndquery);
         log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
+
+        // 3) check for 'Contacts per Account' limit
+        if (useContactsPerAccountLimit) {
+            Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
+            launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
+                    maxContactsPerAccount, maxAccountsToLaunch, customerSpace);
+        }
+
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
     }
 
@@ -160,7 +193,6 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                     }
                 }
 
-                // 2. get DataFrame for Account and Contact
                 HdfsDataUnit launchDataUniverseDataUnit = getEntityQueryData(frontEndQuery, true);
 
                 log.info("FullLaunchUniverseDataUnit: " + JsonUtils.serialize(launchDataUniverseDataUnit));
@@ -170,6 +202,90 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             }
         });
 
+    }
+
+    private boolean hasContactsPerAccountLimit(PlayLaunchChannel channel, BusinessEntity mainEntity) {
+        return (mainEntity == BusinessEntity.Contact) && (channel.getMaxContactsPerAccount() != null);
+    }
+
+    private HdfsDataUnit executeSparkJobContactsPerAccount(HdfsDataUnit launchDataUniverseDataUnit, //
+            Long maxContactsPerAccount, Long maxAccountsToLaunch, CustomerSpace customerSpace) {
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(2);
+        return retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
+                log.warn("Previous failure:", ctx.getLastThrowable());
+            }
+
+            try {
+                startSparkSQLSession(getHdfsPaths(attrRepo), false);
+
+                String sortAttr = getSortAttributeFromZK(customerSpace);
+                String sortDir = getSortDirFromZK(customerSpace);
+                GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig( //
+                        launchDataUniverseDataUnit, getRandomWorkspace(), maxContactsPerAccount, //
+                        maxAccountsToLaunch, sortAttr, sortDir);
+
+                String encryptionKey = CipherUtils.generateKey();
+                String saltHint = CipherUtils.generateKey();
+                config.setManageDbUrl(url);
+                config.setUser(user);
+                config.setEncryptionKey(encryptionKey);
+                config.setSaltHint(saltHint);
+                config.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
+                log.info("Executing GenerateLaunchUniverseJob with config: " + JsonUtils.serialize(config));
+
+                SparkJobResult result = executeSparkJob(GenerateLaunchUniverseJob.class, config);
+                log.info("GenerateLaunchUniverseJob Results: " + JsonUtils.serialize(result));
+
+                HdfsDataUnit launchUniverseDataUnit = result.getTargets().get(0);
+
+                return launchUniverseDataUnit;
+            } finally {
+                stopSparkSQLSession();
+            }
+        });
+    }
+
+    private String getSortAttributeFromZK(CustomerSpace customerSpace) {
+        Camille camille = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        String sortAttr = CONTACTS_PER_ACCOUNT_SORT_ATTRIBUTE;
+
+        try {
+            Path path = PathBuilder.buildContactsPerAccountSortAttributePath(podId, customerSpace);
+            if (camille.exists(path)) {
+                sortAttr = camille.get(path).getData();
+                log.info("Found tenant override sort attribute: ", sortAttr);
+            } else {
+                log.info("Tenant sort attribute not found. Using default");
+            }
+        } catch (Exception e) {
+            log.warn("Tenant sort attribute found but unable to read: ", e);
+        }
+
+        return sortAttr;
+    }
+
+    private String getSortDirFromZK(CustomerSpace customerSpace) {
+        Camille camille = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        String sortDir = CONTACTS_PER_ACCOUNT_SORT_DIRECTION;
+
+        try {
+            Path path = PathBuilder.buildContactsPerAccountSortDirectionPath(podId, customerSpace);
+            if (camille.exists(path)) {
+                sortDir = camille.get(path).getData();
+                log.info("Found tenant override sort direction: ", sortDir);
+            } else {
+                log.info("Tenant sort direction not found. Using default");
+            }
+        } catch (Exception e) {
+            log.warn("Tenant sort direction found but unable to read: ", e);
+        }
+
+        return sortDir;
     }
 
     private long limitToCheck(long userConfiguredLimit, long queryCount) {

@@ -121,6 +121,10 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Column(name = "MAX_ACCOUNTS_TO_LAUNCH")
     private Long maxAccountsToLaunch;
 
+    @JsonProperty("maxContactsPerAccount")
+    @Column(name = "MAX_CONTACTS_PER_ACCOUNT")
+    private Long maxContactsPerAccount;
+
     @JsonProperty("cronScheduleExpression")
     @Column(name = "CRON_SCHEDULE_EXPRESSION")
     private String cronScheduleExpression;
@@ -318,6 +322,14 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
 
     public void setMaxAccountsToLaunch(Long maxAccountsToLaunch) {
         this.maxAccountsToLaunch = maxAccountsToLaunch;
+    }
+
+    public Long getMaxContactsPerAccount() {
+        return maxContactsPerAccount;
+    }
+
+    public void setMaxContactsPerAccount(Long maxContactsPerAccount) {
+        this.maxContactsPerAccount = maxContactsPerAccount;
     }
 
     public Set<RatingBucketName> getBucketsToLaunch() {

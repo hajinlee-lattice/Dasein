@@ -51,6 +51,9 @@ public final class PathConstants {
 
     public static final String ERROR_CATEGORY_FILE = "error-category.json";
 
+    public static final String CONTACTS_PER_ACCOUNT_SORT_ATTRIBUTE = "ContactsPerAccountSortAttribute";
+    public static final String CONTACTS_PER_ACCOUNT_SORT_DIRECTION = "ContactsPerAccountSortDirection";
+
     /*-
      * list of tenant that will NOT be force rebuild txn (on the first PA)
      * to migrate off CustomerAccountId
