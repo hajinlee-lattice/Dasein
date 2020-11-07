@@ -5,4 +5,5 @@ import com.latticeengines.domain.exposed.metadata.ListSegment;
 
 public interface ListSegmentRepository extends BaseJpaRepository<ListSegment, Long> {
 
+    ListSegment findByExternalSystemAndExternalSegmentId(String externalSystem, String externalSegmentId);
 }

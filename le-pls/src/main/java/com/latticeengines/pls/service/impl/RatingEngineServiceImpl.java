@@ -82,7 +82,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     public RatingEngineSummary getRatingEngineSummary(String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         RatingEngineSummary ratingEngineSummary = ratingEngineProxy.getRatingEngineSummary(tenant.getId(), ratingEngineId);
-        teamWrapperService.fillTeamInfo(ratingEngineSummary, false);
+        teamWrapperService.fillTeamInfo(ratingEngineSummary, true);
         return ratingEngineSummary;
     }
 

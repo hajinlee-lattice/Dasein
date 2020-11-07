@@ -27,6 +27,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityTimelineMetrics;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -97,8 +98,7 @@ public class ActivityTimelineResource {
                 contactId, accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
                 customerSpace.getTenantId()));
         return activityTimelineService.getContactActivities(accountId, contactId, timelinePeriod,
-                CollectionUtils.isEmpty(streamTypes) ? getDefaultStreams() : streamTypes,
-                getOrgInfo(authToken));
+                CollectionUtils.isEmpty(streamTypes) ? getDefaultStreams() : streamTypes, getOrgInfo(authToken));
     }
 
     @GetMapping("/journey-stage-configuration")
@@ -117,7 +117,7 @@ public class ActivityTimelineResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve metrics for an account")
     @SuppressWarnings("ConstantConditions")
-    public Map<String, Integer> getMetrics(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+    public List<ActivityTimelineMetrics> getMetrics(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId,
             @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
 

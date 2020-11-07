@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,8 +17,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HashUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -29,7 +27,6 @@ import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.spark.exposed.job.cdl.TransformTxnStreamJob;
 
 @Component
@@ -96,8 +93,7 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
     }
 
     private void saveBatchStore(HdfsDataUnit consolidatedTxnDU) {
-        String tableName = TableUtils.getFullTableName(BATCH_PREFIX,
-                HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
+        String tableName = NamingUtils.timestamp(BATCH_PREFIX);
         Table consolidatedTxnTable = dirToTable(tableName, compositeKey, consolidatedTxnDU);
         metadataProxy.createTable(customerSpaceStr, tableName, consolidatedTxnTable);
         dataCollectionProxy.upsertTable(customerSpaceStr, tableName, TableRoleInCollection.ConsolidatedDailyTransaction,
@@ -111,8 +107,8 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
             String tableName = dailyTxnServingStoreTable.getName();
             log.info("Retrieved daily transaction serving store from context: {}. Going through shortcut mode.",
                     tableName);
-            dataCollectionProxy.upsertTable(customerSpaceStr, tableName,
-                    TableRoleInCollection.AggregatedTransaction, inactive);
+            dataCollectionProxy.upsertTable(customerSpaceStr, tableName, TableRoleInCollection.AggregatedTransaction,
+                    inactive);
             exportTableRoleToRedshift(dailyTxnServingStoreTable, TableRoleInCollection.AggregatedTransaction);
         } else {
             SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
@@ -123,8 +119,7 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
 
     private void saveServingStore(HdfsDataUnit aggregatedTxnDU) {
         String prefix = String.format(SERVING_PREFIX, customerSpace.getTenantId());
-        String tableName = TableUtils.getFullTableName(prefix,
-                HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
+        String tableName = NamingUtils.timestamp(prefix);
         Table aggregatedTxnTable = toTable(tableName, compositeKey, aggregatedTxnDU);
         metadataProxy.createTable(customerSpaceStr, tableName, aggregatedTxnTable);
         dataCollectionProxy.upsertTable(customerSpaceStr, tableName, TableRoleInCollection.AggregatedTransaction,

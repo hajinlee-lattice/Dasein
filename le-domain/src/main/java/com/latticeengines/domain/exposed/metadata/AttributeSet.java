@@ -94,7 +94,7 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
     @JsonProperty("tenant")
     private Tenant tenant;
 
-    //  Map<String, List<String>> --> <category --> list of attribute ids>
+    //  Map<String, Set<String>> --> <category --> list of attribute ids>
     @JsonProperty("attributesMap")
     @Transient
     public Map<String, Set<String>> getAttributesMap() {

@@ -12,9 +12,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.CDLWorkflowFunctionalTestNGBase;
 import com.latticeengines.cdl.workflow.steps.validations.service.impl.AccountFileValidationService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.AccountFileValidationConfiguration;
@@ -25,26 +28,24 @@ public class AccountFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
     @Inject
     private AccountFileValidationService accountFileValidationService;
 
-    private static final String ACCOUNT_FILE_DESTINATION = "/tmp/validation/account/";
-
-    private String fileName;
-
-    @Override
-    protected String getFlowBeanName() {
-        return null;
-    }
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        InputStream in = testArtifactService.readTestArtifactAsStream(TEST_AVRO_DIR, TEST_AVRO_VERSION, "Account1.avro");
-        HdfsUtils.rmdir(yarnConfiguration, ACCOUNT_FILE_DESTINATION);
+        super.setup();
+        CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+        String hdfsDir = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString();
+        fileDestination = hdfsDir + "/account/";
+        if (!HdfsUtils.fileExists(yarnConfiguration, fileDestination)) {
+            HdfsUtils.mkdir(yarnConfiguration, fileDestination);
+        }
         fileName = "account.avro";
-        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, in, ACCOUNT_FILE_DESTINATION + fileName);
+        InputStream in = testArtifactService.readTestArtifactAsStream(TEST_AVRO_DIR, TEST_AVRO_VERSION, "Account1.avro");
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, in, fileDestination + fileName);
     }
 
     @AfterClass(groups = {"functional"})
     public void teardown() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, ACCOUNT_FILE_DESTINATION);
+        HdfsUtils.rmdir(yarnConfiguration, fileDestination);
     }
 
     @Test(groups = "functional")
@@ -53,7 +54,7 @@ public class AccountFileValidationServiceFunctionalTestNG extends CDLWorkflowFun
         configuration.setEntity(BusinessEntity.Account);
         configuration.setEnableEntityMatch(false);
         configuration.setEnableEntityMatchGA(false);
-        configuration.setPathList(Collections.singletonList(ACCOUNT_FILE_DESTINATION + fileName));
+        configuration.setPathList(Collections.singletonList(fileDestination + fileName));
 
         List<String> processedRecords = Collections.singletonList("1000");
         EntityValidationSummary summary = accountFileValidationService.validate(configuration, processedRecords);

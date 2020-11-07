@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConf
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeltaCampaignLaunchUtils
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions.{col, count, from_unixtime, lit, rank, sum, to_timestamp, when}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
@@ -61,7 +61,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       val baseAddRecDf = recommendationDf.checkpoint(eager = true)
       // only populate one contact record for each account when it is sales force launch, this table will be used for
       // generating both DB and CSV record
-      if (CDLExternalSystemName.Salesforce.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName)) {
+      if (!completeContactTable.rdd.isEmpty && CDLExternalSystemName.Salesforce.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName)) {
         val rowNumber: String = "rowNumber"
         completeContactTable = completeContactTable.withColumn(rowNumber, rank().over(Window.partitionBy(joinKey).orderBy(InterfaceName.ContactId.name()))).filter(col(rowNumber) <= 1).drop(rowNumber)
       }

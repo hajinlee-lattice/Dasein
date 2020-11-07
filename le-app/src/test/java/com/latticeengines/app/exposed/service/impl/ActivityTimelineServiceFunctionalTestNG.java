@@ -32,6 +32,7 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityTimelineMetrics;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -79,14 +80,24 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
 
     @Test(groups = "functional")
     public void testGetMetrics() {
-        Map<String, Integer> metrics = activityTimelineService.getActivityTimelineMetrics(TEST_ACCOUNT_ID, null, null);
-        Assert.assertEquals(metrics.get("newActivities").intValue(), 139);
+        List<ActivityTimelineMetrics> metrics = activityTimelineService.getActivityTimelineMetrics(TEST_ACCOUNT_ID,
+                null, null);
 
-        Assert.assertEquals(metrics.get("newIdentifiedContacts").intValue(), 0);
+        Assert.assertEquals(metrics.get(0).getLabel(), "New Page Visits");
+        Assert.assertEquals(metrics.get(0).getCount().intValue(), 139);
+        Assert.assertEquals(metrics.get(0).getDescription(), "in last 10 days");
+        Assert.assertEquals(metrics.get(0).getContext(), "Total number of web activity in the last 10 days");
 
-        Assert.assertEquals(metrics.get("newEngagements").intValue(), 207);
+        Assert.assertEquals(metrics.get(1).getLabel(), "New Engagements");
+        Assert.assertEquals(metrics.get(1).getCount().intValue(), 207);
+        Assert.assertEquals(metrics.get(1).getDescription(), "in last 10 days");
+        Assert.assertEquals(metrics.get(1).getContext(), "Total number of engagements in the last in the last 10 days");
 
-        Assert.assertEquals(metrics.get("newOpportunities").intValue(), 97);
+        Assert.assertEquals(metrics.get(2).getLabel(), "New Opportunities");
+        Assert.assertEquals(metrics.get(2).getCount().intValue(), 97);
+        Assert.assertEquals(metrics.get(2).getDescription(), "in last 10 days");
+        Assert.assertEquals(metrics.get(2).getContext(), "Number of present open opportunities in the last 10 days");
+
     }
 
     @Test(groups = "functional", dependsOnMethods = "testGetMetrics")

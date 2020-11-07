@@ -1,5 +1,10 @@
 package com.latticeengines.security.service.impl;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,6 +20,9 @@ import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.LoginTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.service.UserService;
@@ -25,6 +33,7 @@ import com.latticeengines.security.service.IDaaSService;
 public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     private static final String TEST_EMAIL = "dcp_dev@lattice-engines.com";
+    private static final String TEST_PASSWORD = "Lattice124!";
 
     @Inject
     private IDaaSService iDaaSService;
@@ -44,7 +53,7 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
     public void testLogin() {
         Credentials credentials = new Credentials();
         credentials.setUsername(TEST_EMAIL);
-        credentials.setPassword("Lattice124!");
+        credentials.setPassword(TEST_PASSWORD);
         LoginDocument loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
         Assert.assertTrue(CollectionUtils.isEmpty(loginDocument.getErrors()));
@@ -55,6 +64,36 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
         Assert.assertTrue(CollectionUtils.isNotEmpty(loginDocument.getErrors()));
+    }
+
+    @Test(groups = "deployment")
+    public void testLoginDoc() {
+        Credentials credentials = new Credentials();
+        credentials.setUsername(TEST_EMAIL);
+        credentials.setPassword(TEST_PASSWORD);
+        LoginDocument loginDocument = iDaaSService.login(credentials);
+        Assert.assertNotNull(loginDocument);
+        LoginDocument.LoginResult result = loginDocument.getResult();
+        Assert.assertNotNull(result);
+        List<Tenant> tenantList = result.getTenants();
+        Assert.assertNotNull(tenantList);
+        Assert.assertFalse(tenantList.isEmpty());
+        Tenant firstTenant = tenantList.get(0);
+        Assert.assertTrue( firstTenant instanceof LoginTenant );
+        Map<String,LoginTenant> tenantMap = new HashMap<>(tenantList.size());
+        for (Tenant t : tenantList) {
+            tenantMap.put(t.getId(), (LoginTenant) t);
+        }
+        LoginTenant lt = tenantMap.get("LETest1603910712497.LETest1603910712497.Production");
+        Assert.assertNotNull(lt);
+        Assert.assertEquals(lt.getCompanyName(), "D&B Connect Engineering");
+        Assert.assertEquals(lt.getDuns(), "202007226");
+        Assert.assertEquals(lt.getSubscriberNumber(), "202007226");
+        Assert.assertEquals(lt.getSubscriptionType(), "Internal");
+        Assert.assertEquals(lt.getCountry(), "US");
+        Assert.assertEquals(lt.getContractStartDate(), new Date(1595376000000L));
+        Assert.assertEquals(lt.getContractEndDate(), new Date(1626912000000L));
+        Assert.assertEquals(lt.getStatus(), TenantStatus.ACTIVE);
     }
 
     @Test(groups = "functional")
@@ -80,7 +119,7 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         userService.createUser(TEST_EMAIL, userRegistration);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testGetSubscriberDetails () {
 
         String subscriptionNumber = "800118741";

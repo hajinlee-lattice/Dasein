@@ -18,20 +18,17 @@ import scala.collection.mutable
 class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttributesConfig] {
   override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateCuratedAttributesConfig]): Unit = {
     val config: GenerateCuratedAttributesConfig = lattice.config
-    val masterTableIdx = Option(config.masterTableIdx)
     val lastActivityDateIdx = Option(config.lastActivityDateInputIdx)
     val attrsToMerge = config.attrsToMerge.asScala.mapValues(_.asScala)
     val specialJoinKeys = config.joinKeys.asScala
     val templateSystemMap = config.templateSystemMap.asScala
     val templateTypeMap = config.templateTypeMap.asScala
+    val masterDf = lattice.input(config.masterTableIdx)
 
     // calculation
     val optLastActivityDf = if (lastActivityDateIdx.isDefined) {
       val lastActivityDf = lattice.input(config.lastActivityDateInputIdx)
-      Some(masterTableIdx
-        .map(lattice.input(_))
-        .map(mergeLastActivityDate(lastActivityDf, _, config.joinKey, config.columnsToIncludeFromMaster.asScala.toList))
-        .getOrElse(lastActivityDf.select(config.joinKey, LastActivityDate.name)))
+      Some(mergeLastActivityDate(lastActivityDf, masterDf, config.joinKey, config.columnsToIncludeFromMaster.asScala.toList))
     } else {
       None: Option[DataFrame]
     }
@@ -59,7 +56,23 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
       }
     }
 
-    lattice.output = mdf :: Nil
+    lattice.output = filterOrphanRecords(mdf, lattice) :: Nil
+  }
+
+  private def filterOrphanRecords(df: DataFrame, lattice: LatticeContext[GenerateCuratedAttributesConfig]): DataFrame = {
+    val config = lattice.config
+    val masterDf = lattice.input(config.masterTableIdx)
+    val masterJoinKey = config.joinKey
+    val specialJoinKeys = config.joinKeys.asScala
+    Option(config.parentMasterTableIdx).map { idx =>
+      val parentJoinKey = specialJoinKeys(idx)
+      val parentDf = lattice.input(idx)
+      parentDf
+        .select(parentJoinKey)
+        .join(masterDf.select(parentJoinKey, masterJoinKey), parentJoinKey) // non-orphan contacts
+        .drop(parentJoinKey)
+        .join(df, Seq(masterJoinKey), "inner")
+    } getOrElse (df)
   }
 
   // generate a seq of all target attributes

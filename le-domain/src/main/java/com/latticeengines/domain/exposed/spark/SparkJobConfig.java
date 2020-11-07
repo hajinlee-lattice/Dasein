@@ -94,8 +94,6 @@ import com.latticeengines.domain.exposed.spark.stats.FindChangedProfileConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
 
-import reactor.core.publisher.Flux;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect( //
@@ -249,20 +247,7 @@ public abstract class SparkJobConfig implements Serializable {
     @JsonIgnore
     public List<HdfsDataUnit> getTargets() {
         if (getNumTargets() > 0) {
-            Map<Integer, DataUnit.DataFormat> specialFmts = getSpecialTargets();
-            String root;
-            if (workspace.endsWith("/")) {
-                root = workspace.substring(0, workspace.lastIndexOf("/"));
-            } else {
-                root = workspace;
-            }
-            return Flux.range(0, getNumTargets()).map(idx -> {
-                HdfsDataUnit dataUnit = HdfsDataUnit.fromPath(root + "/Output" + (idx + 1));
-                if (specialFmts != null && specialFmts.containsKey(idx)) {
-                    dataUnit.setDataFormat(specialFmts.get(idx));
-                }
-                return dataUnit;
-            }).collectList().block();
+            return SparkConfigUtils.getTargetUnits(workspace, getSpecialTargets(), getNumTargets());
         } else {
             return Collections.emptyList();
         }

@@ -1,7 +1,6 @@
 /*
 * script name - mysql.sql
-* purpose - Base sql file to prepare DB upgrade script.
-* It contains DDL/DML sql queries that can be applied at 'release regression' & 'release window' cycle.
+* purpose - 'Release/Hotfix/Patch' DB changes in production.
 * Ensure to maintain backward compatibility.
 */
 

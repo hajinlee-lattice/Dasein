@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl.seed;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -75,6 +76,8 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
         DnBAddMissingColsConfig conf = new DnBAddMissingColsConfig();
         conf.setDomain("LE_DOMAIN");
         conf.setDuns("DUNS_NUMBER");
+        conf.setFieldsToRemove(Arrays.asList("LE_Last_Upload_Date", "LE_NUMBER_OF_LOCATIONS"));
+        conf.setFieldsToPopulateNull(Arrays.asList("SALES_VOLUME_RELIABILITY_CODE", "LE_INDUSTRY"));
         return JsonUtils.serialize(conf);
     }
 
@@ -140,18 +143,16 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
     // ID, LE_DOMAIN, DUNS_NUMBER, SALES_VOLUME_US_DOLLARS,
     // SALES_VOLUME_RELIABILITY_CODE, EMPLOYEES_TOTAL,
     // EMPLOYEES_TOTAL_RELIABILITY_CODE,
-    // EMPLOYEES_HERE,EMPLOYEES_HERE_RELIABILITY_CODE,LE_INDUSTRY,
-    // LE_NUMBER_OF_LOCATIONS, LE_Last_Upload_Date
-    private Object[][] expectedData = new Object[][] {
-            { 1, "abc.com", "1234", 0L, "12", 1, "01", 1, "01", "GHI", 1, 1234L }, //
-            { 2, null, null, 0L, "20", 1, "02", 1, "02", null, null, null }, //
-            { 3, null, "9101", 1L, "15", 0, "03", 1, "03", "JJJ", 2, 0L }, //
-            { 4, "mno.com", null, 1L, "16", 0, "04", 1, "04", null, null, null }, //
-            { 5, "mno.com", "1011", 1L, "15", 1, "05", 0, "05", "FGH", 4, 5678L }, //
-            { 6, "ste.com", null, 1L, "14", 1, "02", 0, "02", null, null, null }, //
-            { 7, "uvw.com", "1112", 0L, "13", 0, "06", 0, "06", null, null, null }, //
-            { 8, "def.com", "5678", 0L, "12", 0, "05", 0, "05", "KLM", 2, 2345L }, //
-            { 9, null, null, 1L, "11", 20, "03", 20, "03", null, null, null }, //
+    // EMPLOYEES_HERE,EMPLOYEES_HERE_RELIABILITY_CODE,LE_INDUSTRY
+    private Object[][] expectedData = new Object[][] { { 1, "abc.com", "1234", 0L, null, 1, "01", 1, "01", null }, //
+            { 2, null, null, 0L, null, 1, "02", 1, "02", null }, //
+            { 3, null, "9101", 1L, null, 0, "03", 1, "03", null }, //
+            { 4, "mno.com", null, 1L, null, 0, "04", 1, "04", null }, //
+            { 5, "mno.com", "1011", 1L, null, 1, "05", 0, "05", null }, //
+            { 6, "ste.com", null, 1L, null, 1, "02", 0, "02", null }, //
+            { 7, "uvw.com", "1112", 0L, null, 0, "06", 0, "06", null }, //
+            { 8, "def.com", "5678", 0L, null, 0, "05", 0, "05", null }, //
+            { 9, null, null, 1L, null, 20, "03", 20, "03", null }, //
     };
 
     @Override
@@ -175,8 +176,6 @@ public class DnbAddMissingColsTestNG extends PipelineTransformationTestNGBase {
             Assert.assertTrue(isObjEquals(record.get("EMPLOYEES_HERE"), expectedResult[7]));
             Assert.assertTrue(isObjEquals(record.get("EMPLOYEES_HERE_RELIABILITY_CODE"), expectedResult[8]));
             Assert.assertTrue(isObjEquals(record.get("LE_INDUSTRY"), expectedResult[9]));
-            Assert.assertTrue(isObjEquals(record.get("LE_NUMBER_OF_LOCATIONS"), expectedResult[10]));
-            Assert.assertTrue(isObjEquals(record.get("LE_Last_Upload_Date"), expectedResult[11]));
             rowNum++;
         }
         Assert.assertEquals(rowNum, expectedMap.size());

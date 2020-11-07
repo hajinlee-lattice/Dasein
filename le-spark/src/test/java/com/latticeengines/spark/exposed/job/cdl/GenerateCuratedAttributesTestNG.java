@@ -15,10 +15,12 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfC
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -121,6 +123,15 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
         return true;
     }
 
+    @Override
+    protected List<String> getInputOrder() {
+        return getInputUnits() //
+                .keySet() //
+                .stream() //
+                .sorted(Comparator.comparing(Function.identity())) //
+                .collect(Collectors.toList());
+    }
+
     private void prepareTestData() {
         // AccountId, LastActivityDate
         Object[][] lastActivityDate = new Object[][] { //
@@ -169,15 +180,22 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
 
         // ContactId, AccountId, CDLCreatedTemplate, CDLUpdatedTime, CompanyName,
         // CustomerContactId
-        Object[][] account = new Object[][] { //
+        Object[][] contact = new Object[][] { //
                 { "C1", "A1", "tmpl1", 123L, "Company 1", "CC1" }, //
                 { "C2", "A2", "tmpl2", 115L, "Company 2", "CC2" }, //
                 { "C3", "A3", "tmpl1", 35L, "Company 3", "CC3" }, //
-                { "C4", "A4", "tmpl1", 10531L, "Company 4", "CC4" }, //
-                { "C5", "A5", "tmpl3", 1L, "Company 5", "CC5" }, //
+                { "C4", "A4", "tmpl1", 10531L, "Company 4", "CC4" }, // orphan
+                { "C5", "A5", "tmpl3", 1L, "Company 5", "CC5" }, // orphan
         };
-        uploadHdfsDataUnit(account, CT_BATCH_STORE_FIELDS);
+        uploadHdfsDataUnit(contact, CT_BATCH_STORE_FIELDS);
 
+        // AccountId, CDLCreatedTemplate, CDLUpdatedTime, CompanyName, CustomerAccountId
+        Object[][] account = new Object[][] { //
+                { "A1", "tmpl1", 123L, "Company 1", "CA1" }, //
+                { "A2", "tmpl2", 115L, "Company 2", "CA2" }, //
+                { "A3", "tmpl1", 35L, "Company 3", "CA3" }, //
+        };
+        uploadHdfsDataUnit(account, ACC_BATCH_STORE_FIELDS);
     }
 
     private GenerateCuratedAttributesConfig baseConfig() {
@@ -210,6 +228,8 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
         config.columnsToIncludeFromMaster = Collections.singletonList(AccountId.name());
         config.lastActivityDateInputIdx = 4;
         config.masterTableIdx = 5;
+        config.parentMasterTableIdx = 6;
+        config.joinKeys.put(6, AccountId.name());
 
         return config;
     }

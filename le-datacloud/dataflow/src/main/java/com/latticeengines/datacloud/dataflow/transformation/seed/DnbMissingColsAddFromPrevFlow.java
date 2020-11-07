@@ -46,15 +46,36 @@ public class DnbMissingColsAddFromPrevFlow extends ConfigurableFlowBase<DnBAddMi
         List<FieldMetadata> newSchema = newDnbSeed.getSchema();
         List<FieldMetadata> oldSchema = prevDnbSeed.getSchema();
         Set<String> newSchemaFields = new HashSet<>();
-        for (FieldMetadata field : newSchema) {
-            newSchemaFields.add(field.getFieldName());
-        }
+        Set<String> fieldsToRemove = new HashSet<>();
+        List<String> fieldsToPopulateNull = new ArrayList<>();
+        List<FieldMetadata> dataTypeOfFieldToPopulateNull = new ArrayList<>();
+
         List<String> missingCols = new ArrayList<String>();
         List<FieldMetadata> missFieldMetaInfo = new ArrayList<>();
         DnBAddMissingColsConfig config = getTransformerConfig(parameters);
+
+        if (config.getFieldsToRemove().size() != 0)
+            fieldsToRemove.addAll(config.getFieldsToRemove());
+
+        if (config.getFieldsToPopulateNull().size() != 0)
+            fieldsToPopulateNull.addAll(config.getFieldsToPopulateNull());
+
+        for (FieldMetadata field : newSchema) {
+            newSchemaFields.add(field.getFieldName());
+            if (fieldsToPopulateNull.contains(field.getFieldName())) {
+                dataTypeOfFieldToPopulateNull.add(field);
+            }
+        }
         // Find missing columns in current file compared to previous
         for (FieldMetadata column : oldSchema) {
+            if (fieldsToPopulateNull.contains(column.getFieldName())) {
+                dataTypeOfFieldToPopulateNull.add(column);
+            }
             if (!newSchemaFields.contains(column.getFieldName())) {
+                // Removes fields which are not required to add in new version
+                if (!fieldsToRemove.isEmpty() && fieldsToRemove.contains(column.getFieldName())) {
+                    continue;
+                }
                 missingCols.add(column.getFieldName());
                 missFieldMetaInfo.add(column);
             }
@@ -62,28 +83,41 @@ public class DnbMissingColsAddFromPrevFlow extends ConfigurableFlowBase<DnBAddMi
         missingCols.add(config.getDomain());
         missingCols.add(config.getDuns());
         prevDnbSeed = prevDnbSeed.retain(new FieldList(missingCols));
+
         prevDnbSeed = prevDnbSeed //
                 .rename(new FieldList(config.getDomain(), config.getDuns()),
                         new FieldList(RENAME + config.getDomain(), RENAME + config.getDuns()));
         missingCols.remove(config.getDomain());
         missingCols.remove(config.getDuns());
         Node addNullRecords = newDnbSeed //
-                .filter(String.format("%s == null && %s == null", config.getDomain(),
-                        config.getDuns()), new FieldList(config.getDomain(), config.getDuns()));
+                .filter(String.format("%s == null && %s == null", config.getDomain(), config.getDuns()),
+                        new FieldList(config.getDomain(), config.getDuns()));
         newDnbSeed = newDnbSeed //
-                .filter(String.format("%s != null || %s != null", config.getDomain(),
-                        config.getDuns()), new FieldList(config.getDomain(), config.getDuns()))
+                .filter(String.format("%s != null || %s != null", config.getDomain(), config.getDuns()),
+                        new FieldList(config.getDomain(), config.getDuns()))
                 .join(new FieldList(config.getDomain(), config.getDuns()), prevDnbSeed,
-                        new FieldList(RENAME + config.getDomain(), RENAME + config.getDuns()),
-                        JoinType.LEFT) //
+                        new FieldList(RENAME + config.getDomain(), RENAME + config.getDuns()), JoinType.LEFT) //
                 .discard(new FieldList(RENAME + config.getDomain(), RENAME + config.getDuns()));
-        
+
         for (FieldMetadata fieldMeta : missFieldMetaInfo) {
             addNullRecords = addNullRecords.addColumnWithFixedValue(fieldMeta.getFieldName(), null,
                     fieldMeta.getJavaType());
         }
         newDnbSeed = newDnbSeed //
                 .merge(addNullRecords);
+
+        if (!fieldsToPopulateNull.isEmpty()) {
+            newDnbSeed = newDnbSeed //
+                    .discard(new FieldList(fieldsToPopulateNull));
+        }
+
+        // Fields that we require to keep in metadata and cleanup in terms of
+        // values
+        for (FieldMetadata emptyField : dataTypeOfFieldToPopulateNull) {
+            newDnbSeed = newDnbSeed //
+                    .addColumnWithFixedValue(emptyField.getFieldName(), null, emptyField.getJavaType());
+        }
+
         return newDnbSeed;
     }
 

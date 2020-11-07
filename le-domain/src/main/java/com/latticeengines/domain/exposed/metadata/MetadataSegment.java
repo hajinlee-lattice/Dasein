@@ -11,12 +11,15 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -144,6 +147,15 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Column(name = "TEAM_ID")
     @JsonProperty("teamId")
     private String teamId;
+
+    @JsonProperty("type")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TYPE")
+    private SegmentType type;
+
+    @JsonProperty("listSegment")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE, mappedBy = "metadataSegment")
+    private ListSegment listSegment;
 
     @JsonProperty("team")
     @Transient
@@ -497,6 +509,26 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     public void setViewOnly(boolean viewOnly) {
         this.viewOnly = viewOnly;
     }
+
+    public SegmentType getType() {
+        return type;
+    }
+
+    public void setType(SegmentType type) {
+        this.type = type;
+    }
+
+    public ListSegment getListSegment() {
+        return listSegment;
+    }
+
+    public void setListSegment(ListSegment listSegment) {
+        this.listSegment = listSegment;
+        if (this.listSegment != null) {
+            this.listSegment.setMetadataSegment(this);
+        }
+    }
+
 
     public enum SegmentType {
         Query, List
