@@ -276,14 +276,17 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         }
         boolean contactWithAccountExport = AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType());
         boolean hasAttributes = columnMetadataList.stream().flatMap(columnMetadata -> columnMetadata.stream()).findAny().isPresent();
-        if ((!hasAccountId || !hasCustomerAccountId) && hasAttributes) {
-            dropAccoutId = true;
-        }
         if (contactWithAccountExport || !hasAttributes) {
             if (!entityMatchGA && !hasAccountId) {
+                if (hasAttributes) {
+                    dropAccoutId = true;
+                }
                 addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
             }
             if (entityMatchGA && !hasCustomerAccountId) {
+                if (hasAttributes) {
+                    dropAccoutId = true;
+                }
                 addAccountId(BusinessEntity.Account, columnMetadataList, customerAccountId);
             }
         }
