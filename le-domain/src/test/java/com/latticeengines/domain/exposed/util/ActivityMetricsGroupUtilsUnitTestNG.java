@@ -100,6 +100,12 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
         ActivityMetricsGroupUtils.toTimeFilters(timeRange);
     }
 
+    @Test(groups = "unit", dataProvider = "periodStrategyProvider")
+    private void testGetPeriodStrategyFromTimeRange(String timeRange, String expectedStrategy) {
+        String actual = ActivityMetricsGroupUtils.getPeriodStrategyFromTimeRange(timeRange);
+        Assert.assertEquals(expectedStrategy, actual);
+    }
+
     @DataProvider(name = "groupNameProvider")
     public Object[][] groupNameProvider() {
         return new Object[][]{
@@ -129,7 +135,10 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
                 {"w_1_w", "Last 1 week"},
                 {"w_2_w", "Last 2 weeks"},
                 {"b_2_4_w", "Between 2 and 4 weeks"},
-                {"ev_w", ""} // all periods filters don't need description
+                {"ev_w", ""}, // all periods filters don't need description
+                {"wi_0_w", "Current week till today"},
+                {"wi_1_w", "1 week till today"},
+                {"wi_2_w", "2 weeks till today"}
         };
     }
 
@@ -201,6 +210,14 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
                 { timeRangeWithOperator(ComparisonType.BEFORE) }, //
                 { timeRangeWithOperator(ComparisonType.BETWEEN_DATE) } //
         }; //
+    }
+
+    @DataProvider(name = "periodStrategyProvider")
+    private Object[][] periodStrategyProvider() {
+        return new Object[][] { //
+                {"w_2_w", Week.name().toLowerCase()}, //
+                {"wi_0_w", Week.name().toLowerCase()} //
+        };
     }
 
     private TimeFilter withinTimeFilter(String period, int val) {

@@ -20,6 +20,7 @@ import org.apache.logging.log4j.util.Strings;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.TemplateUtils;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -42,6 +43,7 @@ public final class ActivityMetricsGroupUtils {
     private static final Character FILL_CHAR = 'x';
     private static final BiMap<String, String> RELATION_STR = new ImmutableBiMap.Builder<String, String>() //
             .put(ComparisonType.WITHIN.toString(), "w") //
+            .put(ComparisonType.WITHIN_INCLUDE.toString(), "wi") //
             .put(ComparisonType.BETWEEN.toString(), "b") //
             .put(ComparisonType.EVER.toString(), "ev") //
             .build();
@@ -49,8 +51,9 @@ public final class ActivityMetricsGroupUtils {
             .put(PeriodStrategy.Template.Week.toString(), "w").build();
 
     // (operator in timeRange tmpl) <--> (description)
-    private static final BiMap<String, String> RELATION_DESCRIPTION = new ImmutableBiMap.Builder<String, String>()
+    private static final Map<String, String> RELATION_DESCRIPTION = new ImmutableMap.Builder<String, String>()
             .put("w", "Last") // within
+            .put("wi", "") // within include
             .put("b", "Between") // between
             .put("ev", "")
             .build();
@@ -101,7 +104,8 @@ public final class ActivityMetricsGroupUtils {
             return Collections.emptyList();
         }
         switch (timeRange.getOperator()) {
-            case WITHIN: return withinTimeFilters(timeRange.getPeriods(), timeRange.getParamSet());
+            case WITHIN: return withinTimeFilters(timeRange.getPeriods(), timeRange.getParamSet(), false);
+            case WITHIN_INCLUDE: return withinTimeFilters(timeRange.getPeriods(), timeRange.getParamSet(), true);
             case EVER: return everTimeFilters(timeRange.getPeriods());
             default: throw new UnsupportedOperationException(String.format("Comparison type %s is not supported", timeRange.getOperator()));
         }
@@ -124,6 +128,7 @@ public final class ActivityMetricsGroupUtils {
         String op = fragments[0];
         switch (op) {
             case "w":
+            case "wi":
                 try {
                     return parseSingleVars(fragments);
                 } catch (ParseException e) {
@@ -173,7 +178,10 @@ public final class ActivityMetricsGroupUtils {
                 descTemplate = StringTemplateConstants.DOUBLE_VAL_TIME_RANGE_DESC;
                 break;
             case "ev":
-                return Strings.EMPTY; // "ever" no need for description
+                return Strings.EMPTY; // no need for description
+            case "wi":
+                descTemplate = StringTemplateConstants.TILL_CURRENT_DESC;
+                break;
             default:
                 throw new IllegalArgumentException("Unknown operator " + op);
         }
@@ -182,7 +190,7 @@ public final class ActivityMetricsGroupUtils {
         String periodLetter = fragments[fragments.length - 1];
         String[] params = ArrayUtils.subarray(fragments, 1, fragments.length - 1);
         Map<String, Object> map = new HashMap<>();
-        map.put("operator", getValueFromBiMap(RELATION_DESCRIPTION, operatorLetter).toString());
+        map.put("operator", RELATION_DESCRIPTION.get(operatorLetter));
         map.put("period", getValueFromBiMap(PERIOD_STR.inverse(), periodLetter).toString().toLowerCase());
         map.put("params", params);
         checkPlural(map, params);
@@ -204,6 +212,12 @@ public final class ActivityMetricsGroupUtils {
         map.put("params", Collections.singletonList(param));
         checkPlural(map, new String[]{param.toString()});
         return TemplateUtils.renderByMap(descTemplate, map);
+    }
+
+    public static String getPeriodStrategyFromTimeRange(String timeRange) {
+        String[] fragments = timeRange.split("_");
+        String periodLetter = fragments[fragments.length - 1];
+        return getValueFromBiMap(PERIOD_STR.inverse(), periodLetter).toString().toLowerCase();
     }
 
     private static Object getValueFromBiMap(BiMap<?, ?> map, Object key) {
@@ -229,14 +243,15 @@ public final class ActivityMetricsGroupUtils {
         }
     }
 
-    private static List<TimeFilter> withinTimeFilters(Set<String> periods, Set<List<Integer>> paramSet) {
+    private static List<TimeFilter> withinTimeFilters(Set<String> periods, Set<List<Integer>> paramSet, boolean includeCurrent) {
         if (CollectionUtils.isEmpty(periods) || CollectionUtils.isEmpty(paramSet)) {
             return Collections.emptyList();
         }
         List<TimeFilter> timeFilters = new ArrayList<>();
         for (String period : periods) {
             for (List<Integer> params : paramSet) {
-                timeFilters.add(TimeFilter.within(params.get(0), period));
+                TimeFilter filter = includeCurrent ? TimeFilter.withinInclude(params.get(0), period) : TimeFilter.within(params.get(0), period);
+                timeFilters.add(filter);
             }
         }
         return timeFilters;

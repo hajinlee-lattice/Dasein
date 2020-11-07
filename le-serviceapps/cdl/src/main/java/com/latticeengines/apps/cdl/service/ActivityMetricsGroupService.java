@@ -11,13 +11,11 @@ public interface ActivityMetricsGroupService {
 
     List<ActivityMetricsGroup> findByStream(String customerSpace, AtlasStream stream);
 
-    List<ActivityMetricsGroup> setupDefaultWebVisitProfile(String customerSpace, String streamName);
+    List<ActivityMetricsGroup> setupDefaultWebVisitGroups(String customerSpace, String streamName);
 
-    ActivityMetricsGroup setUpDefaultOpportunityProfile(String customerSpace, String streamName);
+    ActivityMetricsGroup setUpDefaultOpportunityGroup(String customerSpace, String streamName);
 
-    List<ActivityMetricsGroup> setupDefaultMarketingProfile(String customerSpace, String streamName);
+    List<ActivityMetricsGroup> setupDefaultMarketingGroups(String customerSpace, String streamName);
 
-    List<ActivityMetricsGroup> setupDefaultDnbIntentDataProfile(String customerSpace, String streamName);
-
-    List<ActivityMetricsGroup> setupDefaultBuyingScoreGroups(String customerSpace, String streamName);
+    List<ActivityMetricsGroup> setupDefaultDnbIntentGroups(String customerSpace, String streamName);
 }
