@@ -112,7 +112,7 @@ public class SegmentResource {
     @GetMapping("/list/{externalSystem}/{externalSegmentId}")
     @ResponseBody
     @ApiOperation(value = "Get list segment by external info")
-    public MetadataSegment getListSegmentByExternalInfo(@PathVariable String externalSystem, @PathVariable String externalSegmentId) {
+    public MetadataSegment getListSegmentByExternalInfo(@PathVariable String customerSpace, @PathVariable String externalSystem, @PathVariable String externalSegmentId) {
         return segmentService.findByExternalInfo(externalSystem, externalSegmentId);
     }
 
