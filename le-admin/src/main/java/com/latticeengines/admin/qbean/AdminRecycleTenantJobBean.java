@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.admin.service.impl.AdminRecycleTenantJobCallable;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.proxy.exposed.admin.AdminProxy;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
 @Component("adminRecycleTenantJob")
@@ -25,10 +27,10 @@ public class AdminRecycleTenantJobBean implements QuartzJobBean {
     private UserService userService;
 
     @Inject
-    private com.latticeengines.admin.service.TenantService adminTenantService;
+    private AdminProxy adminProxy;
 
     @Inject
-    private com.latticeengines.security.exposed.service.TenantService tenantService;
+    private TenantService tenantService;
 
     @Inject
     private GlobalAuthUserTenantRightEntityMgr GlobalAuthUserTenantRightEntityMgr;
@@ -39,7 +41,7 @@ public class AdminRecycleTenantJobBean implements QuartzJobBean {
 
         AdminRecycleTenantJobCallable.Builder builder = new AdminRecycleTenantJobCallable.Builder();
         builder.jobArguments(jobArguments).emailService(emailService).userService(userService)
-                .adminTenantService(adminTenantService).securityTenantService(tenantService)
+                .adminProxy(adminProxy).securityTenantService(tenantService)
                 .userTenantRightEntityMgr(GlobalAuthUserTenantRightEntityMgr);
         return new AdminRecycleTenantJobCallable(builder);
     }

@@ -119,6 +119,11 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public List<String> getAllTenantIds() {
+        return tenantEntityMgr.getAllTenantId();
+    }
+
+    @Override
     public List<Tenant> getTenantsByStatus(TenantStatus status) {
         return tenantEntityMgr.findAllByStatus(status);
     }
