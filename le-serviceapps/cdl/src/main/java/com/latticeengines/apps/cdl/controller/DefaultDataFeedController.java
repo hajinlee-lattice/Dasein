@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -74,14 +75,15 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedMaintenanceMode(customerSpace, maintenanceMode);
     }
 
-    @PostMapping("/jobtype/{jobType}/startexecution")
+    @PostMapping("/jobtype/{jobType}/jobId/{jobId}/startexecution")
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
             @PathVariable DataFeedExecutionJobType jobType, //
-            @RequestBody long jobId) {
+            @PathVariable Long jobId, //
+            @RequestBody(required = false) List<Long> actionIds) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.startExecution(customerSpace, "", jobType, jobId);
+        return datafeedService.startExecution(customerSpace, "", jobType, jobId, actionIds);
     }
 
     @PostMapping("/jobtype/{jobType}/restartexecution")

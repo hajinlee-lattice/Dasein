@@ -143,7 +143,6 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -749,9 +748,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         extract.setExtractionTimestamp(now.getTime());
         List<String> tableNames = dataFeedProxy.registerExtract(customerSpace.toString(), feedTaskId, templateName,
                 extract);
-        Action action = registerImportAction(feedTaskId, numRecords, tableNames,
+        registerImportAction(feedTaskId, numRecords, tableNames,
                 sourceType == SourceType.VISIDB ? CDLConstants.DEFAULT_VISIDB_USER : INITIATOR);
-        registerImportWorkflow(customerSpace, action, feedTaskId);
     }
 
     private Table getMockTemplate(BusinessEntity entity, String suffix, String feedType) {
@@ -845,7 +843,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return registerMockDataFeedTask(entity, suffix, feedType, SourceType.FILE);
     }
 
-    private Action registerImportAction(String feedTaskId, long count, List<String> tableNames, String initiator) {
+    private void registerImportAction(String feedTaskId, long count, List<String> tableNames, String initiator) {
         log.info(String.format("Registering action for dataFeedTask=%s", feedTaskId));
         ImportActionConfiguration configuration = new ImportActionConfiguration();
         configuration.setDataFeedTaskId(feedTaskId);
@@ -858,24 +856,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         action.setDescription(feedTaskId);
         action.setTrackingPid(null);
         action.setActionConfiguration(configuration);
-        return actionProxy.createAction(mainCustomerSpace, action);
-    }
-
-    private void registerImportWorkflow(CustomerSpace customerSpace, Action action, String feedTaskId) {
-        Job failedJob = new Job();
-        failedJob.setJobType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName());
-        String appId = String.format("application_%s", System.currentTimeMillis());
-        failedJob.setApplicationId(appId);
-        failedJob.setUser(INITIATOR);
-        failedJob.setErrorCode(LedpCode.LEDP_00002);
-        failedJob.setErrorMsg("ac");
-        failedJob.setInputs(new HashMap<>());
-        failedJob.getInputs().put(WorkflowContextConstants.Inputs.ACTION_ID, String.valueOf(action.getPid()));
-        workflowProxy.createFailedWorkflowJob(mainTestTenant.getId(), failedJob);
-
-        DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace.toString(), feedTaskId);
-        task.setActiveJob(appId);
-        dataFeedProxy.updateDataFeedTask(customerSpace.toString(), task, true);
+        actionProxy.createAction(mainCustomerSpace, action);
     }
 
     void importData(BusinessEntity entity, String s3FileName) {

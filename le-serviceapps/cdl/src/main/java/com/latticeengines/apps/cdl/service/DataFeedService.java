@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 public interface DataFeedService {
 
     DataFeedExecution startExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobTyp,
-                                     long jobId);
+                                     long jobId, List<Long> actionIds);
 
     DataFeed findDataFeedByName(String customerSpace, String datafeedName);
 

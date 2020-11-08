@@ -120,7 +120,6 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         extract1.setExtractionTimestamp(DateTime.now().getMillis());
         extract1.setProcessedRecords(1L);
         dataTable.addExtract(extract1);
-      //  datafeedTaskEntityMgr.addTableToQueue(task, dataTable);
 
         DataFeedExecution execution = new DataFeedExecution();
         execution.setDataFeed(datafeed);

@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
@@ -183,12 +185,21 @@ public class DataFeedServiceImpl implements DataFeedService {
         return execution;
     }
 
+    /**
+     *
+     * @param customerSpace
+     * @param datafeedName
+     * @param jobType
+     * @param jobId
+     * @param actionIds action ids are used to start PA execution
+     * @return
+     */
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public DataFeedExecution startExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType,
-            long jobId) {
+            long jobId, List<Long> actionIds) {
         if (DataFeedExecutionJobType.PA == jobType) {
-            return startPnAExecution(customerSpace, datafeedName, jobId);
+            return startPnAExecution(customerSpace, datafeedName, jobId, actionIds);
         } else if (DataFeedExecutionJobType.CDLOperation == jobType) {
             Job job = workflowProxy.getWorkflowExecution(String.valueOf(jobId), customerSpace);
             Map<String, String> inputs = job.getInputs();
@@ -201,7 +212,8 @@ public class DataFeedServiceImpl implements DataFeedService {
         return datafeedEntityMgr.findByName(datafeedName).getActiveExecution();
     }
 
-    private DataFeedExecution startPnAExecution(String customerSpace, String datafeedName, long jobId) {
+    private DataFeedExecution startPnAExecution(String customerSpace, String datafeedName, long jobId,
+                                                List<Long> actionIds) {
         DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
         if (datafeed == null) {
             log.info("Can't find data feed");
@@ -210,7 +222,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
         List<DataFeedImport> imports = new ArrayList<>();
         List<DataFeedTask> tasks = datafeed.getTasks();
-        tasks.forEach(task -> imports.addAll(createImports(task, customerSpace)));
+        imports.addAll(createImports(tasks, actionIds, customerSpace));
         log.info("imports for processanalyze are: " + imports);
 
         imports.sort(Comparator.comparingLong(dataFeedImport -> dataFeedImport.getDataTable().getPid()));
@@ -230,43 +242,45 @@ public class DataFeedServiceImpl implements DataFeedService {
         return execution;
     }
 
-    private List<DataFeedImport> createImports(DataFeedTask task, String customerSpace) {
+    private List<DataFeedImport> createImports(List<DataFeedTask> tasks, List<Long> actionIds, String customerSpace) {
         List<DataFeedImport> imports = new ArrayList<>();
 
-        String appId = task.getActiveJob();
-        if (StringUtils.isNotBlank(appId)) {
-            Job job = workflowProxy.getWorkflowJobFromApplicationId(appId, customerSpace);
-            if (job != null) {
-                Map<String, String> inputs = job.getInputs();
-                String actionIdStr = inputs.get(WorkflowContextConstants.Inputs.ACTION_ID);
-                if (StringUtils.isNotBlank(actionIdStr)) {
-                    Long actionId = Long.valueOf(actionIdStr);
-                    Action action = actionService.findByPid(actionId);
-                    ImportActionConfiguration config = (ImportActionConfiguration) action.getActionConfiguration();
-                    if (config.getImportCount() == 0) {
-                        log.info("action {} doesn't have import rows", actionIdStr);
-                        return imports;
-                    }
-                    List<String> tableNames = config.getRegisteredTables();
-                    if (CollectionUtils.isNotEmpty(tableNames)) {
-                        tableNames.forEach(tableName -> {
-                            Table dataTable = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
-                            if (dataTable != null) {
-                                task.setImportData(dataTable);
-                                imports.add(DataFeedImportUtils.createImportFromTask(task));
-                            }
-                        });
-                    } else {
-                        log.info("action {} doesn't have table to be registered", actionIdStr);
-                    }
-                } else {
-                    log.info("input context is empty from job {}", job.getId());
+        if (CollectionUtils.isEmpty(actionIds)) {
+            log.info("action Ids are empty from PA");
+            return imports;
+        }
+
+        if (CollectionUtils.isEmpty(tasks)) {
+            log.info("tasks are empty.");
+            return imports;
+        }
+
+        List<Action> actions = actionService.findByPidIn(actionIds);
+        if (CollectionUtils.isNotEmpty(actions)) {
+            Map<String, DataFeedTask> IdToTask = tasks.stream().collect(Collectors.toMap(DataFeedTask::getUniqueId,
+                    e -> e));
+            for (Action action : actions) {
+                ImportActionConfiguration config = (ImportActionConfiguration) action.getActionConfiguration();
+                if (config.getImportCount() == 0) {
+                    log.info("action {} doesn't have import rows", action.getPid());
+                    continue;
                 }
-            } else {
-                log.info("job is null from app {}", appId);
+                String uniqueId = config.getDataFeedTaskId();
+                DataFeedTask task = IdToTask.get(uniqueId);
+                Preconditions.checkNotNull(task, String.format("task should not be empty %s", uniqueId));
+                List<String> tableNames = config.getRegisteredTables();
+                if (CollectionUtils.isNotEmpty(tableNames)) {
+                    tableNames.forEach(tableName -> {
+                        Table dataTable = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
+                        if (dataTable != null) {
+                            task.setImportData(dataTable);
+                            imports.add(DataFeedImportUtils.createImportFromTask(task));
+                        }
+                    });
+                } else {
+                    log.info("action {} doesn't have table to be registered", action.getPid());
+                }
             }
-        } else {
-            log.info("data feed task {} has no active app id", task.getUniqueId());
         }
         return imports;
 

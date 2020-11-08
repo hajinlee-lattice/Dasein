@@ -88,22 +88,16 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private DataFeed datafeed = new DataFeed();
 
+    private Long actionId;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
         dataFeedName = NamingUtils.timestamp("datafeed");
-        Action action = new Action();
-        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
-        ImportActionConfiguration config = new ImportActionConfiguration();
-        action.setActionConfiguration(config);
-        config.setImportCount(100L);
-        config.setRegisteredTables(Collections.singletonList("dataTable"));
-        actionService.create(action);
         Job job = new Job();
         job.setJobStatus(JobStatus.FAILED);
         job.setInputs(new HashMap<>());
         job.getInputs().put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, Status.Active.getName());
-        job.getInputs().put(WorkflowContextConstants.Inputs.ACTION_ID, String.valueOf(action.getPid()));
 
         DataCollection dataCollection = new DataCollection();
         dataCollection.setName(NamingUtils.timestamp("DATA_COLLECTION_NAME"));
@@ -145,16 +139,26 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         task.setStartTime(new Date());
         task.setLastImported(new Date());
         task.setLastUpdated(new Date());
-        task.setUniqueId(UUID.randomUUID().toString());
+        String uniqueId = UUID.randomUUID().toString();
+        task.setUniqueId(uniqueId);
         datafeed.addTask(task);
+
+        Action action = new Action();
+        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        ImportActionConfiguration config = new ImportActionConfiguration();
+        action.setActionConfiguration(config);
+        config.setImportCount(100L);
+        config.setRegisteredTables(Collections.singletonList("dataTable"));
+        config.setDataFeedTaskId(uniqueId);
+        actionService.create(action);
+        actionId = action.getPid();
 
         WorkflowProxy workflowProxy = mock(WorkflowProxy.class);
         when(workflowProxy.getWorkflowExecution(anyString(), anyString())).thenReturn(job);
-        when(workflowProxy.getWorkflowJobFromApplicationId(anyString(), anyString())).thenReturn(job);
-        MetadataService metadataProxy = mock(MetadataService.class);
-        when(metadataProxy.getTable(any(CustomerSpace.class), anyString())).thenReturn(dataTable);
+        MetadataService metadataService = mock(MetadataService.class);
+        when(metadataService.getTable(any(CustomerSpace.class), anyString())).thenReturn(dataTable);
         datafeedService = new DataFeedServiceImpl(datafeedEntityMgr, datafeedExecutionEntityMgr, datafeedTaskEntityMgr,
-                dataCollectionService, datafeedTaskService, workflowProxy, actionService, metadataProxy);
+                dataCollectionService, datafeedTaskService, workflowProxy, actionService, metadataService);
         datafeedService.createDataFeed(MultiTenantContext.getTenant().getId(), dataCollection.getName(), datafeed);
     }
 
@@ -191,7 +195,8 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         log.info("started locking execution");
         datafeedService.lockExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA);
         log.info("already locked execution");
-        assertNotNull(datafeedService.startExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA, 2L)
+        assertNotNull(datafeedService.startExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA, 2L,
+                Collections.singletonList(actionId))
                 .getImports());
         DataFeed df = datafeedService.findDataFeedByName(customerSpace, dataFeedName);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
@@ -245,7 +250,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(exec0.getStatus(), DataFeedExecution.Status.Failed);
 
         DataFeedExecution exec1 = datafeedService.startExecution(MultiTenantContext.getTenant().getId(), dataFeedName,
-                DataFeedExecutionJobType.PA, workflowId + 1L);
+                DataFeedExecutionJobType.PA, workflowId + 1L, Collections.singletonList(actionId));
         df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), dataFeedName);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 

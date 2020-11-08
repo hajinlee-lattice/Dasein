@@ -657,7 +657,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 newDataFeedTask.setEntity(dataFeedTask.getEntity());
                 newDataFeedTask.setFeedType(dataFeedTask.getFeedType());
                 newDataFeedTask.setSource(dataFeedTask.getSource());
-                newDataFeedTask.setActiveJob("NotSpecified");
+                newDataFeedTask.setActiveJob("Not specified");
                 newDataFeedTask.setSourceConfig("Not specified");
                 newDataFeedTask.setStartTime(dataFeedTask.getStartTime());
                 newDataFeedTask.setLastImported(dataFeedTask.getLastImported());
