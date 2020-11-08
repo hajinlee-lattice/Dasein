@@ -10,4 +10,6 @@ public interface SegmentDao extends BaseDao<MetadataSegment> {
     MetadataSegment findMasterSegment(String collectionName);
 
     List<String> getAllDeletedSegments();
+
+    MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId);
 }

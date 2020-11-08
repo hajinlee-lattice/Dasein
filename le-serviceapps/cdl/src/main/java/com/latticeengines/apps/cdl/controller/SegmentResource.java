@@ -102,7 +102,7 @@ public class SegmentResource {
         return res;
     }
 
-    @PostMapping("/list/listsegment")
+    @PutMapping("/list/listsegment")
     @ResponseBody
     @ApiOperation(value = "Only update list segment entity under metadata segment")
     public ListSegment updateListSegment(@PathVariable String customerSpace, @RequestBody ListSegment listSegment) {
@@ -123,11 +123,12 @@ public class SegmentResource {
         return segmentService.findListSegmentByName(segmentName);
     }
 
-    @DeleteMapping("/list")
+    @DeleteMapping("/list/{externalSystem}/{externalSegmentId}")
     @ApiOperation(value = "Delete a list segment by external info")
-    public boolean deleteSegmentByExternalInfo(@PathVariable String customerSpace, @RequestBody MetadataSegment metadataSegment,
+    public boolean deleteSegmentByExternalInfo(@PathVariable String customerSpace,
+                                               @PathVariable String externalSystem, @PathVariable String externalSegmentId,
                                                @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
-        return segmentService.deleteSegmentByExternalInfo(metadataSegment, hardDelete);
+        return segmentService.deleteSegmentByExternalInfo(externalSystem, externalSegmentId, hardDelete);
     }
 
     @DeleteMapping("/{segmentName}")

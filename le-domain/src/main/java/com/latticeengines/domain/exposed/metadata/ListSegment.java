@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
@@ -30,7 +31,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_LIST_SEGMENT")
+@javax.persistence.Table(name = "METADATA_LIST_SEGMENT", uniqueConstraints = {@UniqueConstraint(columnNames = {
+        "TENANT_ID", "EXTERNAL_SYSTEM", "EXTERNAL_SEGMENT_ID"})})
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -51,7 +53,7 @@ public class ListSegment implements HasPid {
     private String externalSystem;
 
     @JsonProperty("externalSegmentId")
-    @Column(name = "EXTERNAL_SYSTEM_ID", nullable = false)
+    @Column(name = "EXTERNAL_SEGMENT_ID", nullable = false)
     private String externalSegmentId;
 
     @JsonProperty("s3DropFolder")

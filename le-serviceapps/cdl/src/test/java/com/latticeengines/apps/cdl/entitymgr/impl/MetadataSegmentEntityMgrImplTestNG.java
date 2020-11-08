@@ -260,6 +260,9 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         verifyListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
         metadataSegment = segmentEntityMgr.findByExternalInfo(metadataSegment);
         verifyListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
+        metadataSegment = segmentEntityMgr.findByExternalInfo(metadataSegment.getListSegment().getExternalSystem(),
+                metadataSegment.getListSegment().getExternalSegmentId());
+        verifyListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
     }
 
     private void verifyListSegment(MetadataSegment segment, String displayName, String description,

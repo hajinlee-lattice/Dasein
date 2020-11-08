@@ -26,7 +26,7 @@ public interface SegmentService {
 
     Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck, boolean hardDelete);
 
-    boolean deleteSegmentByExternalInfo(MetadataSegment metadataSegment, boolean hardDelete);
+    boolean deleteSegmentByExternalInfo(String externalSystem, String externalSegmentId, boolean hardDelete);
 
     Boolean revertDeleteSegmentByName(String segmentName);
 

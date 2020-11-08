@@ -140,9 +140,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         ListSegment listSegment = segment.getListSegment();
         if (listSegment != null) {
             listSegment.setTenantId(MultiTenantContext.getTenant().getPid());
-            listSegment.setCsvAdaptor(SegmentUtils.getDefaultCSVAdaptor());
             listSegment.setMetadataSegment(segment);
-            listSegmentEntityMgr.create(segment.getListSegment());
+            listSegmentEntityMgr.create(listSegment);
         }
         return segment;
     }
@@ -190,15 +189,15 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
-        return listSegmentEntityMgr.findMetadataSegmentByExternalInfo(externalSystem, externalSegmentId);
+        MetadataSegment metadataSegment = segmentDao.findByExternalInfo(externalSystem, externalSegmentId);
+        Hibernate.initialize(metadataSegment.getListSegment());
+        return metadataSegment;
     }
-
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findByExternalInfo(MetadataSegment segment) {
         if (segment.getListSegment() != null) {
-            return listSegmentEntityMgr.findMetadataSegmentByExternalInfo(segment.getListSegment().getExternalSystem(),
-                    segment.getListSegment().getExternalSegmentId());
+            return segmentDao.findByExternalInfo(segment.getListSegment().getExternalSystem(), segment.getListSegment().getExternalSegmentId());
         } else {
             return null;
         }

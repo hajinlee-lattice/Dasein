@@ -54,6 +54,12 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return get("getListSegmentByExternalInfo", url, MetadataSegment.class);
     }
 
+    public MetadataSegment getListSegmentByName(String customerSpace, String segmentName) {
+        String url = constructUrl("/{customerSpace}/segments/list/{segmentName}", //
+                shortenCustomerSpace(customerSpace), segmentName);
+        return get("getSegment", url, MetadataSegment.class);
+    }
+
     public MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName) {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}", //
                 shortenCustomerSpace(customerSpace), segmentName);

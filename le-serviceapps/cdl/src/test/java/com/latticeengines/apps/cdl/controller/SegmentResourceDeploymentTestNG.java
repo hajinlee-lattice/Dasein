@@ -8,10 +8,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -27,6 +29,12 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Inject
     private SegmentProxy segmentProxy;
 
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.s3.data.stage.bucket}")
+    private String dateStageBucket;
+
     private String listSegmentName;
 
     @BeforeClass(groups = "deployment")
@@ -35,7 +43,7 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         MultiTenantContext.setTenant(mainTestTenant);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testCrudListSegment() {
         String tenantId = mainTestTenant.getId();
         MetadataSegment metadataSegment = new MetadataSegment();
@@ -53,7 +61,7 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         metadataSegment.setListSegment(listSegment);
 
         segmentProxy.createOrUpdateListSegment(tenantId, metadataSegment);
-        metadataSegment = segmentProxy.getMetadataSegmentByName(tenantId, listSegmentName);
+        metadataSegment = segmentProxy.getListSegmentByName(tenantId, listSegmentName);
         verifyMetadataSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
         segmentDisplayName = "list-segment-display-name2";
         segmentDescription = "list-segment-description2";
@@ -61,21 +69,20 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         metadataSegment.setDescription(segmentDescription);
 
         segmentProxy.createOrUpdateSegment(tenantId, metadataSegment);
-        metadataSegment = segmentProxy.getMetadataSegmentByName(tenantId, listSegmentName);
+        metadataSegment = segmentProxy.getListSegmentByName(tenantId, listSegmentName);
         verifyMetadataSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
         metadataSegment = segmentProxy.getListSegmentByExternalInfo(tenantId, externalSystem, externalSegmentId);
         verifyMetadataSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
 
         listSegment.setCsvAdaptor(generateCSVAdaptor());
         segmentProxy.updateListSegment(tenantId, listSegment);
-        metadataSegment = segmentProxy.getMetadataSegmentByName(tenantId, listSegmentName);
+        metadataSegment = segmentProxy.getListSegmentByName(tenantId, listSegmentName);
         assertNotNull(metadataSegment);
         verifyListSegment(metadataSegment.getListSegment());
 
         segmentProxy.deleteSegmentByExternalInfo(tenantId, metadataSegment, false);
         assertEquals(segmentProxy.getMetadataSegments(tenantId).size(), 0);
     }
-
 
     private void verifyListSegment(ListSegment listSegment) {
         assertNotNull(listSegment);
@@ -112,6 +119,7 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         assertEquals(listSegment.getExternalSegmentId(), externalSegmentId);
         assertNotNull(listSegment.getS3DropFolder());
         assertNotNull(listSegment.getCsvAdaptor());
+        assertNotNull(listSegment.getCsvAdaptor().getImportFieldMappings());
     }
 
     private ListSegment createListSegment(String externalSystem, String externalSegmentId) {
