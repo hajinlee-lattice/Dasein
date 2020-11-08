@@ -874,10 +874,6 @@ public class TenantServiceImpl implements TenantService {
         }
     }
 
-    private void saveVboRequestLog(String traceId, String tenantName, VboRequest vboRequest, VboResponse vboResponse) {
-
-    }
-
     private Scope startAdminSpan(String tenantName, long startTimeStamp) {
         Tracer tracer = GlobalTracer.get();
         Span span = tracer.buildSpan("Bootstrap Tenant - " + tenantName)
