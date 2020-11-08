@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.metadata.datastore;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -38,6 +39,12 @@ public abstract class DataUnit {
 
     @JsonProperty("DataFormat")
     private DataFormat dataFormat;
+
+    @JsonProperty("Roles")
+    private List<Role> roles;
+
+    @JsonProperty("DataTemplateId")
+    private String DataTemplateId;
 
     public abstract StorageType getStorageType();
 
@@ -81,6 +88,22 @@ public abstract class DataUnit {
         this.partitionKeys = partitionKeys;
     }
 
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    public String getDataTemplateId() {
+        return DataTemplateId;
+    }
+
+    public void setDataTemplateId(String dataTemplateId) {
+        DataTemplateId = dataTemplateId;
+    }
+
     public enum StorageType {
         Dynamo, Hdfs, Redshift, S3, MySQL, Presto, Athena
     }
@@ -89,4 +112,18 @@ public abstract class DataUnit {
         AVRO, PARQUET, CSV
     }
 
+    public enum Role {
+        Master, Import, Snapshot, Serving, Unknown;
+
+        @JsonCreator
+        public static Role safeValueOf(String string) {
+            try {
+                return Role.valueOf(string);
+            } catch (IllegalArgumentException e) {
+                return Unknown;
+            }
+        }
+    }
 }
+
+
