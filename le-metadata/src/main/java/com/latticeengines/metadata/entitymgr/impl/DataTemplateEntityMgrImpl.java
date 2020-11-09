@@ -45,7 +45,10 @@ public class DataTemplateEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataTem
     @Override
     public DataTemplate findByUuid(String tenantId, String uuid) {
         DataTemplateEntity dataTemplateEntity = readerRepository.findByTenantIdAndUuid(tenantId, uuid);
-        return dataTemplateEntity.getDocument();
+        if (dataTemplateEntity != null){
+            return dataTemplateEntity.getDocument();
+        }
+        return null;
     }
 
     @Override

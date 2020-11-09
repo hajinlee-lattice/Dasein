@@ -26,7 +26,7 @@ CREATE PROCEDURE `UpdateSchema`()
       CREATE INDEX IX_TENANTID ON `DataTemplate` (`TenantId`,`UUID`);
 
       ALTER TABLE `DataUnit`
-        ADD COLUMN `DataTemplateId` VARCHAR(200) GENERATED ALWAYS AS (json_unquote(json_extract(`Document`,'$.DataTemplateId'))) VIRTUAL,
+        ADD COLUMN `DataTemplateId` VARCHAR(200) GENERATED ALWAYS AS (json_unquote(json_extract(`Document`,'$.DataTemplateId'))) VIRTUAL;
 
       CREATE INDEX IX_DATATEMPLATEID ON `DataUnit` (`TenantId`,`DataTemplateId`);
 
