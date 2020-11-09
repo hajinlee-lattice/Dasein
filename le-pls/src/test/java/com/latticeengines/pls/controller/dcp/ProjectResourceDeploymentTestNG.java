@@ -174,7 +174,7 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String url = getRestAPIHostPort() + "/pls/teams/teamId/" + project.getTeamId();
         restTemplate.put(url, teamData);
         cleanupSession(AccessLevel.BUSINESS_ANALYST);
-        switchToExternalAdmin(false);
+        switchToBusinessAnalyst(false);
         projectList = testProjectProxy.getAllProjects(false, true);
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         // The Business analyst should now be able to see 2 projects.
