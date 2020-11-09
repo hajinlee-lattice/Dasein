@@ -55,7 +55,7 @@ public class DataTemplateServiceImplTestNG extends MetadataFunctionalTestNGBase 
                 Collections.singleton(AssertionError.class), null);
         retry.execute(context -> {
             DataTemplate tempDataTemplate = dataTemplateService.findByUuid(uuid);
-            Assert.assertEquals(foundDataTemplate.getName(), "new_" + DATATEMPLATE_NAME);
+            Assert.assertEquals(tempDataTemplate.getName(), "new_" + DATATEMPLATE_NAME);
             return true;
         });
 
