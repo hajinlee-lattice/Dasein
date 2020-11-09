@@ -81,7 +81,7 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         verifyListSegment(metadataSegment.getListSegment());
 
         segmentProxy.deleteSegmentByExternalInfo(tenantId, metadataSegment, false);
-        assertEquals(segmentProxy.getMetadataSegments(tenantId).size(), 0);
+        assertEquals(segmentProxy.getMetadataSegments(tenantId).size(), 1);
     }
 
     private void verifyListSegment(ListSegment listSegment) {

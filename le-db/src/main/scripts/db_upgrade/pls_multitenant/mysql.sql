@@ -13,6 +13,7 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
+      DROP TABLE IF EXISTS `METADATA_LIST_SEGMENT`;
       CREATE TABLE `METADATA_LIST_SEGMENT` (
         `PID` bigint(20) NOT NULL AUTO_INCREMENT,
         `CSV_ADAPTOR` json DEFAULT NULL,

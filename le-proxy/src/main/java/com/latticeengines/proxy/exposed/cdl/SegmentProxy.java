@@ -90,7 +90,8 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
     public void deleteSegmentByExternalInfo(String customerSpace, MetadataSegment segment, boolean hardDelete) {
         String url = constructUrl(
                 "/{customerSpace}/segments/list/{externalSystem}/{externalSegmentId}?hard-delete={hardDelete}", //
-                shortenCustomerSpace(customerSpace), segment.getListSegment().getExternalSystem(), segment.getListSegment().getExternalSegmentId());
+                shortenCustomerSpace(customerSpace), segment.getListSegment().getExternalSystem(),
+                segment.getListSegment().getExternalSegmentId(), hardDelete);
         delete("deleteSegmentByExternalInfo", url);
     }
 
