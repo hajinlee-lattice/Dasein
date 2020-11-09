@@ -4,9 +4,13 @@ import static com.latticeengines.domain.exposed.pls.ActionType.HARD_DELETE;
 import static com.latticeengines.domain.exposed.pls.ActionType.SOFT_DELETE;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +49,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -611,6 +616,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 job.setSubJobs(updateJobsWithActionId(expandActions(actions, null), null));
             }
         }
+        updateEstimateScheduleTime(job, schedulingStatus);
         return job;
     }
 
@@ -693,6 +699,64 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
         }
         job.setStartTimestamp(nextInvokeDate);
+    }
+
+    /*
+     * Update estimate invoke time for autoscheduling 1) 2 hours after last import
+     * job 2) check if in peace period 3)start at next day if no auto schedule quota
+     */
+    private void updateEstimateScheduleTime(Job job, SchedulingStatus schedulingStatus) {
+        boolean allowAutoSchedule = false;
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        try {
+            allowAutoSchedule = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+        } catch (Exception e) {
+            log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
+        }
+        if (allowAutoSchedule && job.getSubJobs() != null) {
+            try {
+                List<Job> importJobs = job.getSubJobs().stream()
+                        .filter(subJob -> subJob.getJobType().equals(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName()))
+                        .collect(Collectors.toList());
+                if (importJobs.stream().anyMatch(subJob -> subJob.isRunning())) {
+                    return;
+                }
+                Job latestImportJob = Collections.max(importJobs, Comparator.comparing(Job::getEndTimestamp));
+                if (latestImportJob != null && latestImportJob.getEndTimestamp() != null) {
+                    ZoneId timezone = batonService.getTenantTimezone(customerSpace);
+                    long autoScheduleQuota = MapUtils.emptyIfNull(schedulingStatus.getRemainingPaQuota())
+                            .getOrDefault(SchedulerConstants.QUOTA_AUTO_SCHEDULE, 0L);
+                    Instant now = Instant.now();
+                    Instant importTime = latestImportJob.getEndTimestamp().toInstant().plus(2L, ChronoUnit.HOURS);
+                    Instant estimateStartTime = importTime.isAfter(now) ? importTime : now;
+
+                    if (SchedulingPAUtils.isInPeacePeriod(estimateStartTime, timezone, autoScheduleQuota)) {
+                        Pair<Instant, Instant> period = SchedulingPAUtils.calculatePeacePeriod(estimateStartTime,
+                                timezone, autoScheduleQuota);
+                        if (period != null) {
+                            estimateStartTime = period.getRight();
+                        }
+                    }
+
+                    Instant quotaTime = now;
+                    if (autoScheduleQuota <= 0) {
+                        quotaTime = now.atZone(timezone).plus(1L, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS)
+                                .toInstant();
+                    }
+                    estimateStartTime = quotaTime.isAfter(estimateStartTime) ? quotaTime : estimateStartTime;
+
+                    // update only when schedule time is not now
+                    if (job.getSchedulingInfo() != null && estimateStartTime.isAfter(now)) {
+                        job.getSchedulingInfo().setEstimateTimestamp(Date.from(estimateStartTime));
+                    }
+                    log.info("estimate auto schedule time for for tenant {} is {} ",
+                            MultiTenantContext.getShortTenantId(), estimateStartTime.toString());
+                }
+            } catch (Exception e) {
+                log.warn(String.format("Getting estimate schedule time for tenant %s has error",
+                        MultiTenantContext.getShortTenantId()), e);
+            }
+        }
     }
 
     @VisibleForTesting
