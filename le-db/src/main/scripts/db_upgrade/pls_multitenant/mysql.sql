@@ -31,6 +31,10 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `METADATA_SEGMENT`
               ADD COLUMN `TYPE` VARCHAR(255);
 
+      -- author: lucascl@dnb.com, JIRA: DCP-1838, Product: D&B Connect
+      ALTER TABLE `DCP_DATA_REPORT`
+              ADD COLUMN `ROLLUP_STATUS` VARCHAR(255);
+
   END //
 -- ##############################################################
 

@@ -410,6 +410,13 @@ public class DataReportServiceImpl implements DataReportService {
         }
     }
 
+    @Override
+    public void updateRollupStatus(String customerSpace, DataReportRecord.RollupStatus rollupStatus) {
+        DataReportRecord.Level level = DataReportRecord.Level.Tenant;
+        String ownerId = CustomerSpace.shortenCustomerSpace(customerSpace);
+        dataReportEntityMgr.updateDataReportRollupStatus(rollupStatus, level, ownerId);
+    }
+
     private Set<Long> getDataReportUnderOwnerId(DataReportRecord.Level level, String ownerId){
         Set<Long> idToBeRemoved = new HashSet<>();
         switch (level) {

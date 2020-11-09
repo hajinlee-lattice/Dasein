@@ -187,4 +187,11 @@ public class DataReportResource {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataReportService.copyDataReportToParent(customerSpace, level, ownerId);
     }
+
+    @PutMapping("/rollup_status")
+    @ApiOperation(value = "Update the value of RollupStatus")
+    public void updateRollupStatus(@PathVariable String customerSpace, @RequestParam DataReportRecord.RollupStatus rollupStatus) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataReportService.updateRollupStatus(customerSpace, rollupStatus);
+    }
 }

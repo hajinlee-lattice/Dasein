@@ -268,4 +268,10 @@ public class DataReportEntityMgrImpl
     public void deleteDataReportRecords(Set<Long> pids) {
         dataReportDao.deleteDataReportRecords(pids);
     }
+
+    @Override
+    @Transactional(transactionManager = "jpaTransactionManager", propagation = Propagation.REQUIRED)
+    public void updateDataReportRollupStatus(DataReportRecord.RollupStatus status, DataReportRecord.Level level, String ownerId) {
+        dataReportWriterRepository.updateDataReportRollupStatus(status, level, ownerId);
+    }
 }
