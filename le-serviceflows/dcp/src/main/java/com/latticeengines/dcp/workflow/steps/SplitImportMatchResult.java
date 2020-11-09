@@ -159,7 +159,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        log.info(JsonUtils.pprint(result.getTargets()));
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         String uploadId = configuration.getUploadId();
         UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);

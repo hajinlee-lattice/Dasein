@@ -93,11 +93,9 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
         String customer = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
         String finalResultTable = getResultTableName();
         String avroResultTableName = finalResultTable;
-        log.info(Boolean.toString(saveToParquet()));
         if (saveToParquet()) {
             avroResultTableName = NamingUtils.timestamp("AvroMatchResult"); // temporary table name
         }
-        log.info(avroResultTableName);
         bulkMatchService.registerResultTable(customer, command, avroResultTableName);
         if (saveToParquet()) {
             saveResultAsParquetTable(avroResultTableName, finalResultTable);
@@ -174,7 +172,6 @@ public abstract class BaseMatchStep<S extends BaseStepConfiguration> extends Bas
     private void saveResultAsParquetTable(String avroResultTableName, String targetTableName) {
         Table avroResultTable = metadataProxy.getTable(customerSpace.toString(), avroResultTableName);
         HdfsDataUnit avroResult = avroResultTable.toHdfsDataUnit("AvroResult");
-        log.info(avroResult.getPath());
         CopyConfig copyConfig = new CopyConfig();
         copyConfig.setInput(Collections.singletonList(avroResult));
         copyConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);

@@ -87,7 +87,6 @@ public abstract class BaseDnBLookupServiceImpl<T> {
             String response = sendRequest(url, entity, apiType);
             parseResponse(response, context, apiType);
         } catch (Exception ex) {
-            log.error("Exception caught: " + ex);
             parseError(ex, context);
         }
     }

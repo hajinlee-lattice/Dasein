@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
-import com.latticeengines.domain.exposed.datacloud.match.MatchBlockErrorData;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -365,7 +364,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     .rowsMatched(count.intValue()) //
                     .newEntityCounts(outputNewEntityCnts) //
                     .matchResults(entityMatchResultMap) //
-                    .status(allSuccess ? MatchStatus.FINISHED : MatchStatus.PARTIAL_SUCCESS) //
+                    .status(MatchStatus.FINISHED) //
                     .progress(1f) //
                     .commit();
             setupErrorExport();
@@ -566,18 +565,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
         try {
             String blockError = HdfsUtils.getHdfsFileContents(yarnConfiguration, blockErrorFile);
-
-            // Each batch is given its own file, to avoid overwrites (especially by failTheWorkflowWithErrorMessage)
-            String matchErrorFile = hdfsPathBuilder.constructErrorFileForBatchError(rootOperationUid, blockOperationUid).toString();
-
-            DataCloudJobConfiguration config = configMap.get(blockOperationUid);
-
-            // Record info necessary to determine error and input fields
-            MatchBlockErrorData fileContents = new MatchBlockErrorData();
-            fileContents.setContainerPath(failedAppId.toString());
-            fileContents.setErrorFilePath(blockErrorFile);
-            fileContents.setInputAvro(config.getAvroPath());
-            HdfsUtils.writeToFile(yarnConfiguration, matchErrorFile, JsonUtils.serialize(fileContents));
+            String matchErrorFile = hdfsPathBuilder.constructMatchErrorFile(rootOperationUid).toString();
+            HdfsUtils.writeToFile(yarnConfiguration, matchErrorFile, errorMsg + "\n" + blockError);
 
             errorMsg += blockError.split("\n")[0];
         } catch (Exception e) {
@@ -585,7 +574,10 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     + " : " + e.getMessage());
         }
 
-        if (terminalStatus == MatchStatus.ABORTED) {
+        DataCloudJobConfiguration jobConfig = configMap.get(blockOperationUid);
+
+        if (terminalStatus == MatchStatus.ABORTED
+                || !BusinessEntity.PrimeAccount.toString().equals(jobConfig.getMatchInput().getTargetEntity())) {
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir)
                     .status(terminalStatus) //

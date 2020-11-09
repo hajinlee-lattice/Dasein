@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DownloadFileType;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.Project;
@@ -141,7 +142,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         UploadDetails upload = uploadList.get(0);
         uploadId = upload.getUploadId();
 
-        verifyImport();
+        verifyImport(false);
 
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
@@ -226,6 +227,29 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         }
     }
 
+    @Test(groups = "deployment", dependsOnMethods = "testImport")
+    public void testProcessingErrors() {
+
+        DCPImportRequest request = new DCPImportRequest();
+        request.setProjectId(projectDetails.getProjectId());
+        request.setSourceId(source.getSourceId());
+        request.setS3FileKey(s3FileKey);
+        request.setUserId(USER);
+        request.setSuppressKnownMatchErrors(false);
+        ApplicationId applicationId = uploadProxy.startImport(mainCustomerSpace, request);
+        JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
+                Boolean.FALSE, 0, 20);
+        Assert.assertNotNull(uploadList);
+        Assert.assertEquals(uploadList.size(), 1);
+        UploadDetails upload = uploadList.get(0);
+        uploadId = upload.getUploadId();
+
+        verifyImport(true);
+    }
+
     private void setEnrichmentLayout() {
         EnrichmentLayout enrichmentLayout = new EnrichmentLayout();
         enrichmentLayout.setSourceId(source.getSourceId());
@@ -277,7 +301,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(saved.getElements().contains("registeredname"));
     }
 
-    private void verifyImport() {
+    private void verifyImport(boolean containsProcessingErrors) {
         UploadDetails upload = uploadProxy.getUploadByUploadId(mainCustomerSpace, uploadId, Boolean.TRUE);
         log.info(JsonUtils.serialize(upload));
         Assert.assertNotNull(upload);
@@ -297,11 +321,16 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         if (upload.getStatistics().getImportStats().getFailedIngested() > 0) {
             System.out.println("Found " + upload.getStatistics().getImportStats().getFailedIngested() +
                     " errors.  Verifying error file.");
+            Assert.assertTrue(upload.getUploadConfig().getDownloadableFiles().contains(DownloadFileType.IMPORT_ERRORS));
             verifyErrorFile(upload);
         } else {
+            Assert.assertFalse(upload.getUploadConfig().getDownloadableFiles().contains(DownloadFileType.IMPORT_ERRORS));
             System.out.println("No ingestion errors found, skipping error file validation.");
         }
-        verifyMatchResult(upload);
+
+        Assert.assertEquals(upload.getUploadConfig().getDownloadableFiles().contains(DownloadFileType.PROCESS_ERRORS), containsProcessingErrors);
+
+        verifyMatchResult(upload, containsProcessingErrors);
         verifyUploadStats(upload);
         verifyDownload(upload);
         verifyDataReport();
@@ -366,7 +395,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 matchStats.getPendingReviewCnt() + matchStats.getUnmatched()), importStats.getSuccessfullyIngested());
     }
 
-    private void verifyMatchResult(UploadDetails upload) {
+    private void verifyMatchResult(UploadDetails upload, boolean containsProcessingErrors) {
         String uploadId = upload.getUploadId();
         String matchResultName = uploadService.getMatchResultTableName(mainCustomerSpace, uploadId);
         Assert.assertNotNull(matchResultName);
@@ -387,6 +416,14 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(s3Service.objectExist(bucket, rejectedPath));
         verifyCsvContent(bucket, acceptedPath);
         verifyCsvContent(bucket, rejectedPath);
+
+        if (containsProcessingErrors) {
+            String processingErrorsPath = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
+                    upload.getUploadConfig().getUploadMatchResultErrored());
+            System.out.println("processing_errors=" + processingErrorsPath);
+            Assert.assertTrue(s3Service.objectExist(bucket, processingErrorsPath));
+            verifyCsvContent(bucket, processingErrorsPath);
+        }
     }
 
     private void verifyCsvContent(String bucket, String path) {

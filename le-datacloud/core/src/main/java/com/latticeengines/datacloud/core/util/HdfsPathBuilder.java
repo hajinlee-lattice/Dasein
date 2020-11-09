@@ -284,15 +284,6 @@ public class HdfsPathBuilder {
         return constructMatchOutputDir(rootOperationUid).append(fileName);
     }
 
-    public Path constructErrorFileForBatchError(String rootOperationUid, String blockOperationUid) {
-        if (StringUtils.isBlank(blockOperationUid))
-            return constructMatchErrorFile(rootOperationUid);
-
-        String fileName = MATCH_PREFIX + replaceHyphenAndMakeLowercase(rootOperationUid) + HYPHEN
-                + replaceHyphenAndMakeLowercase(blockOperationUid) + ERR_FILE_EXTENSION;
-        return constructMatchOutputDir(rootOperationUid).append(fileName);
-    }
-
     public Path constructMatchSchemaFile(String rootOperationUid) {
         String fileName = MATCH_PREFIX + replaceHyphenAndMakeLowercase(rootOperationUid) + AVRO_SCHEMA_FILE_EXTENSION;
         return constructMatchOutputDir(rootOperationUid).append(fileName);
