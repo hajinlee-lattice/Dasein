@@ -34,7 +34,7 @@ public class DataVisionSegmentResource {
 
     @GetMapping("/{externalSystem}/{externalSegmentId}")
     public MetadataSegment getSegmentByExternalInfo(@PathVariable String customerSpace, @PathVariable String externalSystem,
-                                       @PathVariable String externalSegmentId) {
+                                                    @PathVariable String externalSegmentId) {
         return segmentProxy.getListSegmentByExternalInfo(customerSpace, externalSystem, externalSegmentId);
     }
 
@@ -53,9 +53,9 @@ public class DataVisionSegmentResource {
         return metadataSegment;
     }
 
-    @DeleteMapping("")
-    public boolean deleteSegment(@PathVariable String customerSpace, @RequestBody ListSegmentRequest request) {
-        segmentProxy.deleteSegmentByExternalInfo(customerSpace, convertFromRequest(request), false);
+    @DeleteMapping("/{externalSystem}/{externalSegmentId}")
+    public boolean deleteSegment(@PathVariable String customerSpace, @PathVariable String externalSystem, @PathVariable String externalSegmentId) {
+        segmentProxy.deleteSegmentByExternalInfo(customerSpace, externalSystem, externalSegmentId, false);
         return true;
     }
 }
