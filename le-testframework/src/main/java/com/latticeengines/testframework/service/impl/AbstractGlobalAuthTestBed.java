@@ -175,6 +175,15 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_ADMIN, tenant, overWriteTeams);
     }
 
+    @Override
+    public void switchToBusinessAnalyst(Tenant tenant) {
+        switchToTheSessionWithAccessLevel(AccessLevel.BUSINESS_ANALYST, tenant, true);
+    }
+
+    @Override
+    public void switchToBusinessAnalyst(Tenant tenant, boolean overwriteTeams) {
+        switchToTheSessionWithAccessLevel(AccessLevel.BUSINESS_ANALYST, tenant, overwriteTeams);
+    }
 
     @Override
     public void switchToExternalUser(Tenant tenant) {

@@ -137,12 +137,12 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         Assert.assertEquals(projectList.size(), 4);
 
-        // Switch to an External Admin.  They cannot see the Super Admin's projects.
-        switchToExternalAdmin();
+        // Switch to an Business Analyst.  They cannot see the Super Admin's projects.
+        switchToBusinessAnalyst();
         projectList = testProjectProxy.getAllProjects(false, true);
         Assert.assertTrue(CollectionUtils.isEmpty(projectList));
 
-        // Add a project as an External Admin.
+        // Add a project as an Business Analyst.
         ProjectDetails projectDetail3 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME,
                 Project.ProjectType.Type1, DESCRIPTION);
         assertNotNull(projectDetail3);
@@ -163,21 +163,21 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         Assert.assertEquals(projectList.size(), 5);
 
-        // Create a team that includes the External Admin and System Admin, so that the External Admin can see an
+        // Create a team that includes the External Admin and System Admin, so that the Business Analyst can see an
         // additional project.
         ProjectDetails project = testProjectProxy.getProjectByProjectId(PROJECT_ID);
         GlobalTeamData teamData = new GlobalTeamData();
         teamData.setTeamName(project.getProjectId());
-        String externalAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        String externalAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.BUSINESS_ANALYST);
         String superAdminUser = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN);
         teamData.setTeamMembers(Sets.newHashSet(externalAdminUser, superAdminUser));
         String url = getRestAPIHostPort() + "/pls/teams/teamId/" + project.getTeamId();
         restTemplate.put(url, teamData);
-        cleanupSession(AccessLevel.EXTERNAL_ADMIN);
+        cleanupSession(AccessLevel.BUSINESS_ANALYST);
         switchToExternalAdmin(false);
         projectList = testProjectProxy.getAllProjects(false, true);
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
-        // The External Admin should now be able to see 2 projects.
+        // The Business analyst should now be able to see 2 projects.
         Assert.assertEquals(projectList.size(), 2);
     }
 }
