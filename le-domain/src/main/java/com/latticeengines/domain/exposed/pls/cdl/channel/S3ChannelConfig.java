@@ -24,10 +24,13 @@ public class S3ChannelConfig implements ChannelConfig {
     private String s3CampaignExportDir;
 
     @JsonProperty("includeExportAttributes")
-    private boolean includeExportAttributes = false;
+    private boolean includeExportAttributes;
 
     @JsonProperty("attributeSetName")
     private String attributeSetName;
+
+    @JsonProperty("addExportTimestamp")
+    private boolean addExportTimestamp;
 
     public Long getAccountLimit() {
         return accountLimit;
@@ -132,6 +135,7 @@ public class S3ChannelConfig implements ChannelConfig {
         s3ChannelConfig.setS3CampaignExportDir(newS3ChannelConfig.getS3CampaignExportDir());
         s3ChannelConfig.setIncludeExportAttributes(newS3ChannelConfig.isIncludeExportAttributes());
         s3ChannelConfig.setAttributeSetName(newS3ChannelConfig.getAttributeSetName());
+        s3ChannelConfig.setAddExportTimestamp(newS3ChannelConfig.getAddExportTimestamp());
         return this;
     }
 
@@ -141,5 +145,13 @@ public class S3ChannelConfig implements ChannelConfig {
 
     public void setAttributeSetName(String attributeSetName) {
         this.attributeSetName = attributeSetName;
+    }
+
+    public boolean getAddExportTimestamp() {
+        return addExportTimestamp;
+    }
+
+    public void setAddExportTimestamp(boolean addExportTimestamp) {
+        this.addExportTimestamp = addExportTimestamp;
     }
 }

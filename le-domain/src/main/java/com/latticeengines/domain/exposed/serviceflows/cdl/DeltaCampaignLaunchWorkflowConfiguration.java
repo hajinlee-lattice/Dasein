@@ -40,6 +40,8 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     public static final String CREATE_ADD_CSV_DATA_FRAME = "CREATE_ADD_CSV_DATA_FRAME";
     public static final String CREATE_DELETE_CSV_DATA_FRAME = "CREATE_DELETE_CSV_DATA_FRAME";
 
+    public static final String ADD_EXPORT_TIMESTAMP = "ADD_EXPORT_TIMESTAMP";
+
     public static final String NAME_SPACE = "NAME_SPACE";
     public static final String CONTACT_ATTR_PREFIX = "ContactRenamed_";
 

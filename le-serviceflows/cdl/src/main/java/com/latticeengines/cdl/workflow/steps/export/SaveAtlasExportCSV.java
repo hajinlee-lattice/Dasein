@@ -80,32 +80,40 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
         return stepConfiguration.getCustomerSpace();
     }
 
+    private boolean getAddExportTimestamp(AtlasExport exportRecord) {
+        if (exportRecord.getExportConfig() != null) {
+            return exportRecord.getExportConfig().getAddExportTimestamp();
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public void execute() {
-        customerSpace = parseCustomerSpace(configuration);
-        inputUnits = getMapObjectFromContext(ATLAS_EXPORT_DATA_UNIT, ExportEntity.class, HdfsDataUnit.class);
-        inputUnits.forEach((exportEntity, hdfsDataUnit) -> {
-            ConvertToCSVConfig config = new ConvertToCSVConfig();
-            config.setInput(Collections.singletonList(hdfsDataUnit));
-            config.setDateAttrsFmt(getDateAttrFmtMap(exportEntity));
-            config.setDisplayNames(getDisplayNameMap(exportEntity));
-            config.setTimeZone("UTC");
-            config.setWorkspace(getRandomWorkspace());
-            config.setCompress(configuration.isCompressResult());
-            if (configuration.isAddExportTimestamp()) {
-                config.setExportTimeAttr(InterfaceName.LatticeExportTime.name());
-            }
-            log.info("Submit spark job to convert " + exportEntity + " csv.");
-            SparkJobResult result = runSparkJob(ConvertToCSVJob.class, config);
-            outputUnits.put(exportEntity, result.getTargets().get(0));
-        });
-
         AtlasExport exportRecord = WorkflowStaticContext.getObject(ATLAS_EXPORT, AtlasExport.class);
         if (exportRecord == null) {
             log.error(String.format("Cannot find atlas export record for id: %s, skip save data",
                     configuration.getAtlasExportId()));
             return;
         }
+        boolean addExportTimestamp = getAddExportTimestamp(exportRecord);
+        customerSpace = parseCustomerSpace(configuration);
+        inputUnits = getMapObjectFromContext(ATLAS_EXPORT_DATA_UNIT, ExportEntity.class, HdfsDataUnit.class);
+        inputUnits.forEach((exportEntity, hdfsDataUnit) -> {
+            ConvertToCSVConfig config = new ConvertToCSVConfig();
+            config.setInput(Collections.singletonList(hdfsDataUnit));
+            config.setDateAttrsFmt(getDateAttrFmtMap(exportEntity, addExportTimestamp));
+            config.setDisplayNames(getDisplayNameMap(exportEntity));
+            config.setTimeZone("UTC");
+            config.setWorkspace(getRandomWorkspace());
+            config.setCompress(configuration.isCompressResult());
+            if (addExportTimestamp) {
+                config.setExportTimeAttr(InterfaceName.LatticeExportTime.name());
+            }
+            log.info("Submit spark job to convert " + exportEntity + " csv.");
+            SparkJobResult result = runSparkJob(ConvertToCSVJob.class, config);
+            outputUnits.put(exportEntity, result.getTargets().get(0));
+        });
         outputUnits.forEach(((exportEntity, hdfsDataUnit) -> {
             String outputDir = hdfsDataUnit.getPath();
             String csvGzPath;
@@ -211,7 +219,7 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
         return displayNameMap;
     }
 
-    private Map<String, String> getDateAttrFmtMap(ExportEntity exportEntity) {
+    private Map<String, String> getDateAttrFmtMap(ExportEntity exportEntity, boolean addExportTimestamp) {
         List<ColumnMetadata> schema = getExportSchema(exportEntity);
         Map<String, String> dateFmtMap = new HashMap<>();
         schema.forEach(cm -> {
@@ -227,7 +235,7 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
                 }
             }
         });
-        if (configuration.isAddExportTimestamp()) {
+        if (addExportTimestamp) {
             dateFmtMap.put(InterfaceName.LatticeExportTime.name(), ISO_8601);
         }
         return dateFmtMap;

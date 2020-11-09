@@ -29,6 +29,7 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.export.AtlasExportConfig;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
@@ -148,6 +149,11 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId , HasAuditing
     @JsonProperty("attributeSetName")
     @Column(name = "ATTRIBUTE_SET_NAME")
     private String attributeSetName;
+
+    @JsonProperty("exportConfig")
+    @Column(name = "EXPORT_CONFIG", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private AtlasExportConfig exportConfig;
 
     @Override
     public Long getPid() {
@@ -326,5 +332,13 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId , HasAuditing
 
     public void setAttributeSetName(String attributeSetName) {
         this.attributeSetName = attributeSetName;
+    }
+
+    public AtlasExportConfig getExportConfig() {
+        return exportConfig;
+    }
+
+    public void setExportConfig(AtlasExportConfig exportConfig) {
+        this.exportConfig = exportConfig;
     }
 }

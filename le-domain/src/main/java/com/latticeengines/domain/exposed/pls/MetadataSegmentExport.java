@@ -136,6 +136,10 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @Transient
     private String attributeSetName;
 
+    @JsonProperty("addExportTimestamp")
+    @Transient
+    private boolean addExportTimestamp;
+
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
     private Long tenantId;
@@ -312,6 +316,14 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
 
     public void setAttributeSetName(String attributeSetName) {
         this.attributeSetName = attributeSetName;
+    }
+
+    public boolean getAddExportTimestamp() {
+        return addExportTimestamp;
+    }
+
+    public void setAddExportTimestamp(boolean addExportTimestamp) {
+        this.addExportTimestamp = addExportTimestamp;
     }
 
     public enum Status {
