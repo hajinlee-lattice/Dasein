@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,10 @@ import com.latticeengines.spark.exposed.job.dcp.RollupDataReportJob;
 public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfiguration, RollupDataReportConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(RollupDataReport.class);
+
+
+    @Value("${dcp.report.rollup.threshold}")
+    private int threshold;
 
     @Inject
     private DataReportProxy dataReportProxy;
@@ -113,6 +118,10 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
             config.setUpdatedOwnerIds(updatedOwnerIds);
             config.setParentIdToChildren(parentIdToChildren);
             config.setNumTargets(updatedOwnerIds.size());
+        }
+        int targetSize = config.getNumTargets();
+        if (targetSize > threshold) {
+            log.warn("rollup job will generate {} duns count for owner Id {} with level {}", targetSize, rootId, level);
         }
         return config;
     }
