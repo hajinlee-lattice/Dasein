@@ -37,7 +37,7 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private String listSegmentName;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
         MultiTenantContext.setTenant(mainTestTenant);
