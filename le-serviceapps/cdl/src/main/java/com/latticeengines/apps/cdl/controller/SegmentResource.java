@@ -55,6 +55,13 @@ public class SegmentResource {
         return segmentService.getSegments();
     }
 
+    @GetMapping("/list")
+    @ResponseBody
+    @ApiOperation(value = "Get all list segments")
+    public List<MetadataSegment> getListSegments(@PathVariable String customerSpace) {
+        return segmentService.getListSegments();
+    }
+
     @GetMapping("/{segmentName}")
     @ResponseBody
     @ApiOperation(value = "Get segment by name")

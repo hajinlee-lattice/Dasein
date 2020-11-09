@@ -80,6 +80,12 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(raw, MetadataSegment.class);
     }
 
+    public List<MetadataSegment> getLiSegments(String customerSpace) {
+        String url = constructUrl("/{customerSpace}/segments/list", shortenCustomerSpace(customerSpace));
+        List raw = get("getLiSegments", url, List.class);
+        return JsonUtils.convertList(raw, MetadataSegment.class);
+    }
+
     public void deleteSegmentByName(String customerSpace, String segmentName, boolean hardDelete) {
         String url = constructUrl(
                 "/{customerSpace}/segments/{segmentName}?hard-delete={hardDelete}", //

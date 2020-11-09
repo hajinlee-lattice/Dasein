@@ -28,8 +28,8 @@ public class DataVisionSegmentResource {
     private SegmentProxy segmentProxy;
 
     @GetMapping("")
-    public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
-        return segmentProxy.getMetadataSegments(customerSpace);
+    public List<MetadataSegment> getListSegments(@PathVariable String customerSpace) {
+        return segmentProxy.getLiSegments(customerSpace);
     }
 
     @GetMapping("/{externalSystem}/{externalSegmentId}")
