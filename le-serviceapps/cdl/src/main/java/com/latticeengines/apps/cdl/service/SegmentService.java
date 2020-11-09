@@ -34,6 +34,8 @@ public interface SegmentService {
 
     List<MetadataSegment> getSegments();
 
+    List<MetadataSegment> getListSegments();
+
     MetadataSegment findMaster(String collectionName);
 
     StatisticsContainer getStats(String segmentName, DataCollection.Version version);

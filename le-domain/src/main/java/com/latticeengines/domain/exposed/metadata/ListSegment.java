@@ -31,8 +31,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_LIST_SEGMENT", uniqueConstraints = {@UniqueConstraint(columnNames = {
-        "TENANT_ID", "EXTERNAL_SYSTEM", "EXTERNAL_SEGMENT_ID"})})
+@javax.persistence.Table(name = "METADATA_LIST_SEGMENT")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)

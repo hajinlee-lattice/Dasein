@@ -215,6 +215,11 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
+    public List<MetadataSegment> getListSegments() {
+        return segmentEntityMgr.findByType(MetadataSegment.SegmentType.List);
+    }
+
+    @Override
     public MetadataSegment findByName(String name) {
         MetadataSegment segment = segmentEntityMgr.findByName(name);
         if (segment != null && Boolean.TRUE.equals(segment.getCountsOutdated())) {

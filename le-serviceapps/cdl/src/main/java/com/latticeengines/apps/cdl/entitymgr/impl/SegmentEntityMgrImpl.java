@@ -87,6 +87,12 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         return segmentDao.findByField("name", name);
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<MetadataSegment> findByType(SegmentType type) {
+        return segmentDao.findAllByField("type", type);
+    }
+
     @SoftDeleteConfiguration
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
@@ -190,7 +196,6 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
         MetadataSegment metadataSegment = segmentDao.findByExternalInfo(externalSystem, externalSegmentId);
-        Hibernate.initialize(metadataSegment.getListSegment());
         return metadataSegment;
     }
 

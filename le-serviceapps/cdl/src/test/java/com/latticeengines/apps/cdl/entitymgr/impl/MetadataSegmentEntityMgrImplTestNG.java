@@ -8,6 +8,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -263,6 +264,8 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         metadataSegment = segmentEntityMgr.findByExternalInfo(metadataSegment.getListSegment().getExternalSystem(),
                 metadataSegment.getListSegment().getExternalSegmentId());
         verifyListSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
+        List<MetadataSegment> lists = segmentEntityMgr.findByType(MetadataSegment.SegmentType.List);
+        assertEquals(lists.size(), 1);
     }
 
     private void verifyListSegment(MetadataSegment segment, String displayName, String description,
@@ -276,7 +279,6 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         assertEquals(listSegment.getExternalSystem(), externalSystemName);
         assertEquals(listSegment.getExternalSegmentId(), externalSegmentId);
         assertNotNull(listSegment.getS3DropFolder());
-        assertNotNull(listSegment.getCsvAdaptor());
     }
 
     private ListSegment createListSegment(String externalSystem, String externalSegmentId, String s3DropFolder) {

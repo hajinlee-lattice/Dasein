@@ -80,6 +80,12 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(raw, MetadataSegment.class);
     }
 
+    public List<MetadataSegment> getLiSegments(String customerSpace) {
+        String url = constructUrl("/{customerSpace}/segments/list", shortenCustomerSpace(customerSpace));
+        List raw = get("getLiSegments", url, List.class);
+        return JsonUtils.convertList(raw, MetadataSegment.class);
+    }
+
     public void deleteSegmentByName(String customerSpace, String segmentName, boolean hardDelete) {
         String url = constructUrl(
                 "/{customerSpace}/segments/{segmentName}?hard-delete={hardDelete}", //
@@ -87,11 +93,10 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         delete("deleteSegmentByName", url);
     }
 
-    public void deleteSegmentByExternalInfo(String customerSpace, MetadataSegment segment, boolean hardDelete) {
+    public void deleteSegmentByExternalInfo(String customerSpace, String externalSystem, String externalSegmentId, boolean hardDelete) {
         String url = constructUrl(
                 "/{customerSpace}/segments/list/{externalSystem}/{externalSegmentId}?hard-delete={hardDelete}", //
-                shortenCustomerSpace(customerSpace), segment.getListSegment().getExternalSystem(),
-                segment.getListSegment().getExternalSegmentId(), hardDelete);
+                shortenCustomerSpace(customerSpace), externalSystem, externalSegmentId, hardDelete);
         delete("deleteSegmentByExternalInfo", url);
     }
 

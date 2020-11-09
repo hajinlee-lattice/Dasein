@@ -10,6 +10,8 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     MetadataSegment findByName(String name);
 
+    List<MetadataSegment> findByType(MetadataSegment.SegmentType type);
+
     List<MetadataSegment> findAllInCollection(String collectionName);
 
     MetadataSegment findMasterSegment(String collectionName);
