@@ -52,6 +52,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.Status;
 import com.latticeengines.domain.exposed.exception.UIAction;
+import com.latticeengines.domain.exposed.exception.UIActionCode;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.exception.UIActionUtils;
 import com.latticeengines.domain.exposed.exception.UIMessage;
@@ -840,7 +841,10 @@ public class CDLResource {
                     customerSpace.toString(), systemName, entityType);
         } catch (RuntimeException e) {
             log.error("Download DimensionMetadata csv Failed: " + e.getMessage());
-            throw new LedpException(LedpCode.LEDP_40076, new String[]{e.getMessage()});
+            String title = "500 Internal Server Error Occurred.";
+            UIActionCode code = UIActionCode.fromLedpCode(LedpCode.LEDP_40076);
+            UIAction action = UIActionUtils.generateUIError(title, View.Banner, code);
+            throw UIActionException.fromAction(action);
         }
     }
 
