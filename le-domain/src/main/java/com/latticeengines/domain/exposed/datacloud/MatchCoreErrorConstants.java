@@ -9,9 +9,10 @@ import com.google.common.collect.ImmutableSet;
 public class MatchCoreErrorConstants {
     protected MatchCoreErrorConstants() {}
 
-    public enum ErrorType { MATCH_ERROR, APPEND_ERROR }
+    public enum ErrorType { MATCH_ERROR, APPEND_ERROR, BATCH_FAILURE }
 
-    public static final Set<String> LOOKUP_NON_ERRORS = ImmutableSet.of("20505");
+    // Error codes that should not be treated as match core errors
+    public static final Set<String> LOOKUP_NON_ERRORS = ImmutableSet.of("20505", "10002");
     public static final Set<String> APPEND_NON_ERRORS = ImmutableSet.of("40001");
 
     public static final Map<String, Set<String>> IGNORE_ERRORS = ImmutableMap.of(ErrorType.MATCH_ERROR.name(), LOOKUP_NON_ERRORS, ErrorType.APPEND_ERROR.name(), APPEND_NON_ERRORS);

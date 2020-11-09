@@ -48,7 +48,8 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     def isError: Row => Boolean = row => {
       val errorType = row.get(errorTypeColIndex).asInstanceOf[String]
       val errorCode = row.get(errorCodeColIndex).asInstanceOf[String]
-      StringUtils.isNotEmpty(errorType) && StringUtils.isNotEmpty(errorCode) && !(ignoredErrors.contains(errorType) && ignoredErrors(errorType).contains(errorCode))
+
+      StringUtils.isNotEmpty(errorType) && (!ignoredErrors.contains(errorType) || (StringUtils.isNotEmpty(errorCode) && !ignoredErrors(errorType).contains(errorCode)))
     }
 
     val (acceptedDF, acceptedCsv) = filterAccepted(input, classificationAttr, acceptedAttrs, displayNameMap, isError)
