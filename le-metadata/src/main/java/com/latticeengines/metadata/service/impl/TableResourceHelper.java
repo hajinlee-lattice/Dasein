@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.persistence.Column;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,6 @@ import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.service.MetadataService;
-
-import io.micrometer.core.instrument.util.StringUtils;
 
 @Component("tableResourceHelper")
 public class TableResourceHelper {
@@ -71,20 +70,20 @@ public class TableResourceHelper {
         return mdService.getTableAttributes(space, tableName, pageable);
     }
 
-    private static Set<String> whitelist_Columns = null;
+    private static Set<String> whitelistColumns = null;
     public boolean testIsValidColumn(String columnName) {
-        if (null == whitelist_Columns) {
-            whitelist_Columns = new HashSet<>();
+        if (null == whitelistColumns) {
+            whitelistColumns = new HashSet<>();
             for(Field field : Attribute.class.getDeclaredFields()) {
                 if (field.isAnnotationPresent(Column.class)) {
-                    whitelist_Columns.add(field.getAnnotation(Column.class).name().toLowerCase());
+                    whitelistColumns.add(field.getAnnotation(Column.class).name().toLowerCase());
                 }
             }
         }
 
         if (!StringUtils.isEmpty(columnName)) {
-            if (null != whitelist_Columns && whitelist_Columns.size() > 0) {
-                return whitelist_Columns.contains(columnName.toLowerCase());
+            if (null != whitelistColumns && whitelistColumns.size() > 0) {
+                return whitelistColumns.contains(columnName.toLowerCase());
             }
         }
         return false;
