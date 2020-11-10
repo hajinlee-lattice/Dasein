@@ -55,8 +55,8 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -88,9 +88,6 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Value("${aws.s3.data.stage.bucket}")
     private String dateStageBucket;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
 
     private final String listSegmentCSVAdaptorPath = "metadata/ListSegmentCSVAdaptor.json";
 
@@ -163,8 +160,7 @@ public class SegmentServiceImpl implements SegmentService {
     private MetadataSegment createListSegment(MetadataSegment segment) {
         if (segment.getListSegment() != null) {
             ListSegment listSegment = segment.getListSegment();
-            HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-            listSegment.setS3DropFolder(pathBuilder.getS3ListSegmentDir(dateStageBucket, MultiTenantContext.getShortTenantId(), segment.getName()));
+            listSegment.setS3DropFolder(S3PathBuilder.getS3ListSegmentDir(dateStageBucket, MultiTenantContext.getShortTenantId(), segment.getName()));
             listSegment.setCsvAdaptor(readCSVAdaptor());
         }
         return segmentEntityMgr.createListSegment(segment);
