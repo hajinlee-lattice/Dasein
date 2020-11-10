@@ -122,7 +122,7 @@ public class RecalculatePercentileScoreJobDataFlow
             List<DataUnit> inputUnits = new ArrayList<>();
             inputUnits.add(inputTable.toHdfsDataUnit("calculatePercentileScore" + i));
             jobConfig.setInput(inputUnits);
-
+            configs.add(jobConfig);
         }
 
         setSparkMaxResultSize(sparkMaxResultSize);
