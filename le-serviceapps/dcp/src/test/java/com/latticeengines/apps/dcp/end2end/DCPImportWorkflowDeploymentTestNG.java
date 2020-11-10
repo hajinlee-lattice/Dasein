@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
@@ -233,9 +234,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         enrichmentLayout.setDomain(DataDomain.SalesMarketing);
         enrichmentLayout.setRecordType(DataRecordType.Domain);
         enrichmentLayout.setElements(Arrays.asList( //
-                "duns_number", //
-                "primaryname", //
-                "countryisoalpha2code", //
                 "primaryaddr_country_isoalpha2code", //
                 "primaryaddr_country_name", //
                 "primaryaddr_county_name", //
@@ -261,7 +259,10 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "primaryaddr_latitude", //
                 "primaryaddr_longitude", //
                 "numberofemployees_employeefiguresdate", //
-                "registeredname" //
+                "registeredname", //
+                "primaryname", //
+                "duns_number", //
+                "countryisoalpha2code" //
         ));
         ResponseDocument<String> response =  enrichmentLayoutService.create(mainCustomerSpace, enrichmentLayout);
         Assert.assertNotNull(response);
@@ -465,6 +466,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private void verifyOutputHeaders(List<String> headers) {
         System.out.println(headers);
+
         Assert.assertTrue(headers.contains("Company Name")); // in spec
         Assert.assertTrue(headers.contains("Country")); // in spec
         Assert.assertFalse(headers.contains("Test Date 2")); // not in spec
@@ -474,6 +476,17 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             Assert.assertTrue(headers.contains("Registered Name")); // in enrichment layout
             Assert.assertTrue(headers.contains("Primary Address Region Abreviated Name")); // in enrichment layout
             Assert.assertFalse(headers.contains("Primary Address Region Name")); // not in enrichment layout
+            Assert.assertTrue(headers.contains("Matched D-U-N-S Number"));
+
+            // verify match/candidate column order
+            int start = headers.indexOf("Matched D-U-N-S Number");
+            int schema_size = MatchConstants.MATCH_SCHEMA.size();
+            Assert.assertEquals(headers.subList(start, start + schema_size), MatchConstants.MATCH_SCHEMA);
+
+            // verify base info column order
+            start = headers.indexOf("D-U-N-S Number");
+            schema_size = MatchConstants.BASE_SCHEMA.size();
+            Assert.assertEquals(headers.subList(start, start + schema_size), MatchConstants.BASE_SCHEMA);
         }
     }
 

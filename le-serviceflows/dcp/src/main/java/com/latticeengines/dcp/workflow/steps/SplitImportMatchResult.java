@@ -134,7 +134,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             boolean isFromDataBlock = isFromDataBlock(cm);
             return isCustomer && !isIdToExclude && !isFromDataBlock;
         }).collect(Collectors.toList());
-        // Map<String, String> rejectedAttrs = convertToDispMap(rejectedCms);
         List<String> rejectedAttrs = sortOutputAttrs(rejectedCms);
         jobConfig.setRejectedAttrs(rejectedAttrs);
 
@@ -246,7 +245,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     private List<String> sortOutputAttrs(Collection<ColumnMetadata> cms) {
         Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
         List<ColumnMetadata> customerAttrs = new ArrayList<>();
-        List<ColumnMetadata> dataBlockAttrs = new ArrayList<>();
+        LinkedHashMap<String, ColumnMetadata> dataBlockAttrMap = new LinkedHashMap<>();
         List<ColumnMetadata> candidateAttrs = new ArrayList<>();
         List<ColumnMetadata> otherAttrs = new ArrayList<>();
         // MatchedDuns belongs to candidate attribute
@@ -255,7 +254,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             if (MatchedDuns.equals(cm.getAttrName())) {
                 duns = cm;
             } else if (dataBlockDispNames.containsKey(cm.getAttrName())) {
-                dataBlockAttrs.add(cm);
+                dataBlockAttrMap.put(dataBlockDispNames.get(cm.getAttrName()), cm);
             } else if (candidateFieldDispNames.containsKey(cm.getAttrName())) {
                 candidateAttrs.add(cm);
             } else if ((cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL)){
@@ -264,6 +263,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                 otherAttrs.add(cm);
             }
         }
+        // order base + enrichment columns
+        List<ColumnMetadata> dataBlockAttrs = order_attributes(dataBlockAttrMap, MatchConstants.BASE_SCHEMA);
+
         List<String> attrNames = new ArrayList<>();
         customerAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
         attrNames.add(duns.getAttrName());
@@ -381,6 +383,21 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             dispNames.put(primeColumn.getPrimeColumnId(), primeColumn.getDisplayName());
         }
         return dispNames;
+    }
+
+    public List<ColumnMetadata> order_attributes(LinkedHashMap<String, ColumnMetadata> attrMap, List<String> schema) {
+        List<ColumnMetadata> orderedAttrs = new ArrayList<>();
+        // when present, add schema values in order
+        for (String e: schema) {
+            if (attrMap.containsKey(e)) {
+                orderedAttrs.add(attrMap.get(e));
+                attrMap.remove(e);
+            }
+        }
+        // add remaining attributes, maintaining initial order
+        orderedAttrs.addAll(attrMap.values());
+
+        return orderedAttrs;
     }
 
 }
