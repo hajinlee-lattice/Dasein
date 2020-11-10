@@ -122,3 +122,7 @@ alias deploy-props='bash $WSHOME/le-dev/scripts/deploy_props.sh'
 alias toggle-ms='bash $WSHOME/le-dev/scripts/toggle_ms.sh'
 
 alias aws-login='python $WSHOME/le-dev/scripts/aws-login.py'
+
+# alias presto-cli='docker exec -it le_presto presto --server localhost:8889 --catalog hive --schema default'
+alias presto-cli='${PRESTO_HOME}/bin/presto-cli --server localhost:8889 --catalog hive --schema default'
+

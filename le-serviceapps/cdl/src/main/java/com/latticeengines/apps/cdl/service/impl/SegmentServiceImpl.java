@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.ListSegmentEntityMgr;
@@ -42,6 +46,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -50,8 +55,8 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -84,8 +89,7 @@ public class SegmentServiceImpl implements SegmentService {
     @Value("${aws.s3.data.stage.bucket}")
     private String dateStageBucket;
 
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
+    private final String listSegmentCSVAdaptorPath = "metadata/ListSegmentCSVAdaptor.json";
 
     @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
@@ -103,7 +107,6 @@ public class SegmentServiceImpl implements SegmentService {
             segment.setName(NamingUtils.timestamp("Segment"));
             persistedSegment = segmentEntityMgr.createSegment(segment);
         }
-
         if (persistedSegment != null) {
             try {
                 Map<BusinessEntity, Long> counts = updateSegmentCounts(persistedSegment);
@@ -140,11 +143,25 @@ public class SegmentServiceImpl implements SegmentService {
         return persistedSegment;
     }
 
+    private CSVAdaptor readCSVAdaptor() {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(listSegmentCSVAdaptorPath)) {
+            String csvAdaptor = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
+            return JsonUtils.deserialize(csvAdaptor, CSVAdaptor.class);
+        } catch (IOException exception) {
+            throw new LedpException(LedpCode.LEDP_00002, "Can't read " + listSegmentCSVAdaptorPath, exception);
+        }
+    }
+
+    public static void main(String[] args) {
+        SegmentServiceImpl segmentService = new SegmentServiceImpl();
+        segmentService.readCSVAdaptor();
+    }
+
     private MetadataSegment createListSegment(MetadataSegment segment) {
         if (segment.getListSegment() != null) {
-            HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-            segment.getListSegment().setS3DropFolder(pathBuilder.getS3ListSegmentDir(dateStageBucket,
-                    MultiTenantContext.getShortTenantId(), segment.getName()));
+            ListSegment listSegment = segment.getListSegment();
+            listSegment.setS3DropFolder(S3PathBuilder.getS3ListSegmentDir(dateStageBucket, MultiTenantContext.getShortTenantId(), segment.getName()));
+            listSegment.setCsvAdaptor(readCSVAdaptor());
         }
         return segmentEntityMgr.createListSegment(segment);
     }
@@ -165,6 +182,16 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
+    public boolean deleteSegmentByExternalInfo(String externalSystem, String externalSegmentId, boolean hardDelete) {
+        MetadataSegment segment = segmentEntityMgr.findByExternalInfo(externalSystem, externalSegmentId);
+        if (segment == null) {
+            return false;
+        }
+        segmentEntityMgr.delete(segment, true, hardDelete);
+        return true;
+    }
+
+    @Override
     public Boolean revertDeleteSegmentByName(String segmentName) {
         segmentEntityMgr.revertDelete(segmentName);
         return true;
@@ -181,6 +208,11 @@ public class SegmentServiceImpl implements SegmentService {
         List<MetadataSegment> result = segmentEntityMgr.findAllInCollection(collectionName);
         result.stream().forEach(segment -> TeamUtils.fillTeamId(segment));
         return result;
+    }
+
+    @Override
+    public List<MetadataSegment> getListSegments() {
+        return segmentEntityMgr.findByType(MetadataSegment.SegmentType.List);
     }
 
     @Override
@@ -474,7 +506,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public MetadataSegment findByExternalInfo(MetadataSegment segment) {
-        return segmentEntityMgr.findByExternalInfo(segment);
+    public MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
+        return segmentEntityMgr.findByExternalInfo(externalSystem, externalSegmentId);
     }
 }

@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
@@ -258,6 +259,10 @@ public class DeltaCampaignLaunchInitStep
             processHDFSDataUnit(String.format("DeletedRecommendations_%s", config.getExecutionId()), deleteRecommendationDataUnit, primaryKey, DELETED_RECOMMENDATION_TABLE);
         } else {
             throw new LedpException(LedpCode.LEDP_70000);
+        }
+        if (CDLExternalSystemName.AWS_S3.equals(playLaunchContext.getPlayLaunch().getDestinationSysName())) {
+            S3ChannelConfig s3ChannelConfig = (S3ChannelConfig) playLaunchContext.getChannel().getChannelConfig();
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_EXPORT_TIMESTAMP, String.valueOf(s3ChannelConfig.getAddExportTimestamp()));
         }
         playProxy.updatePlayLaunch(customerSpace.getTenantId(), playLaunchContext.getPlayName(),
                 playLaunchContext.getPlayLaunchId(), playLaunchContext.getPlayLaunch());

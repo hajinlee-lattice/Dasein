@@ -105,6 +105,11 @@
             <artifactId>le-redshiftdb</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-prestodb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- YARN MiniCluster -->
         <dependency>

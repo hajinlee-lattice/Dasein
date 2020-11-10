@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -10,13 +11,18 @@ import javax.inject.Inject;
 import javax.persistence.RollbackException;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImpl;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -28,6 +34,11 @@ import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.PrestoDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -37,7 +48,11 @@ import com.latticeengines.metadata.annotation.NoCustomSpaceAndType;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
+import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.metadata.service.MetadataService;
+import com.latticeengines.prestodb.exposed.service.AthenaService;
+import com.latticeengines.prestodb.exposed.service.PrestoConnectionService;
+import com.latticeengines.prestodb.exposed.service.PrestoDbService;
 
 @Component("mdService")
 public class MetadataServiceImpl implements MetadataService {
@@ -55,6 +70,21 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    private Configuration yarnConfiguration;
+
+    @Inject
+    private PrestoConnectionService prestoConnectionService;
+
+    @Inject
+    private PrestoDbService prestoDbService;
+
+    @Inject
+    private AthenaService athenaService;
+
+    @Inject
+    private DataUnitService dataUnitService;
 
     @Override
     public Table getTable(CustomerSpace customerSpace, String name) {
@@ -269,5 +299,75 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public List<Table> findAllWithExpiredRetentionPolicy(int index, int max) {
         return tableEntityMgr.findAllWithExpiredRetentionPolicy(index, max);
+    }
+
+    @Override
+    public PrestoDataUnit registerPrestoDataUnit(CustomerSpace customerSpace, String tableName) {
+        if (TableType.DATATABLE.equals(tableTypeHolder.getTableType())) {
+            String clusterId = prestoConnectionService.getClusterId();
+            PrestoDataUnit oldDataUnit = (PrestoDataUnit) //
+                    dataUnitService.findByNameTypeFromReader(tableName, DataUnit.StorageType.Presto);
+            if (oldDataUnit != null) {
+                Set<String> clusterIds = oldDataUnit.getPrestoTableNames().keySet();
+                log.info("Already found a presto data unit named {} in clusters {}", tableName, clusterIds);
+                if (clusterIds.contains(clusterId) && //
+                        prestoDbService.tableExists(oldDataUnit.getPrestoTableName(clusterId))) {
+                    log.info("No need to register presto data unit named {} in cluster {}", tableName, clusterId);
+                    return oldDataUnit;
+                }
+            }
+
+            Table table = getTable(customerSpace, tableName);
+            Preconditions.checkNotNull(table, //
+                    "Cannot find table named " + tableName + " in " + customerSpace.getTenantId());
+            HdfsDataUnit hdfsDataUnit = table.toHdfsDataUnit(tableName);
+            String path = hdfsDataUnit.getPath();
+            Preconditions.checkArgument(StringUtils.isNotBlank(path), //
+                    "Table " + tableName + " does not have a hdfs path.");
+            boolean fileExists;
+            String dir = PathUtils.toParquetOrAvroDir(path);
+            try {
+                fileExists = HdfsUtils.fileExists(yarnConfiguration, dir);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to check if path exists in hdfs: " + dir);
+            }
+            if (!fileExists) {
+                throw new IllegalStateException("Hdfs path " + path + " does not exists in cluster " + clusterId + ".");
+            }
+            log.info("Going to register presto data unit using hdfs path {}", path);
+            hdfsDataUnit.setTenant(customerSpace.getTenantId());
+            PrestoDataUnit newDataUnit = prestoDbService.saveDataUnit(hdfsDataUnit);
+            if (oldDataUnit != null) {
+                log.info("Register an existing presto data unit named {} in cluster {}", tableName, clusterId);
+                oldDataUnit.addPrestoTableName(clusterId, newDataUnit.getPrestoTableName(clusterId));
+                return (PrestoDataUnit) dataUnitService.createOrUpdateByNameAndStorageType(oldDataUnit);
+            } else {
+                log.info("Register a new presto data unit named {} in cluster {}", tableName, clusterId);
+                return (PrestoDataUnit) dataUnitService.createOrUpdateByNameAndStorageType(newDataUnit);
+            }
+        } else {
+            throw new IllegalStateException("Can only register data table to presto");
+        }
+    }
+
+    @Override
+    public AthenaDataUnit registerAthenaDataUnit(CustomerSpace customerSpace, String tableName) {
+        if (TableType.DATATABLE.equals(tableTypeHolder.getTableType())) {
+            // find athena data unit
+            AthenaDataUnit oldDataUnit = (AthenaDataUnit) //
+                    dataUnitService.findByNameTypeFromReader(tableName, DataUnit.StorageType.Athena);
+            if (oldDataUnit != null && athenaService.tableExists(oldDataUnit.getAthenaTable())) {
+                log.info("Already found a athena data unit named {} : {}", tableName, oldDataUnit.getAthenaTable());
+                return oldDataUnit;
+            }
+            // find s3 data unit
+            S3DataUnit s3DataUnit = (S3DataUnit) //
+                    dataUnitService.findByNameTypeFromReader(tableName, DataUnit.StorageType.S3);
+            Preconditions.checkNotNull(s3DataUnit, "Cannot find s3 data unit named " + tableName);
+            AthenaDataUnit athenaDataUnit = athenaService.saveDataUnit(s3DataUnit);
+            return (AthenaDataUnit) dataUnitService.createOrUpdateByNameAndStorageType(athenaDataUnit);
+        } else {
+            throw new IllegalStateException("Can only register data table to presto");
+        }
     }
 }

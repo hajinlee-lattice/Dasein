@@ -12,6 +12,8 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.PrestoDataUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -62,4 +64,8 @@ public interface MetadataService {
     void updateTableRetentionPolicies(CustomerSpace customerSpace, RetentionPolicyUpdateDetail retentionPolicyUpdateDetail);
 
     void updateImportTableUpdatedBy(CustomerSpace space, Table table);
+
+    PrestoDataUnit registerPrestoDataUnit(CustomerSpace customerSpace, String tableName);
+
+    AthenaDataUnit registerAthenaDataUnit(CustomerSpace customerSpace, String tableName);
 }

@@ -48,11 +48,24 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return put("createOrUpdateListSegment", url, listSegment, ListSegment.class);
     }
 
+    public MetadataSegment getListSegmentByExternalInfo(String customerSpace, String externalSystem, String externalSegmentId) {
+        String url = constructUrl("/{customerSpace}/segments/list/{externalSystem}/{externalSegmentId}", //
+                shortenCustomerSpace(customerSpace), externalSystem, externalSegmentId);
+        return get("getListSegmentByExternalInfo", url, MetadataSegment.class);
+    }
+
+    public MetadataSegment getListSegmentByName(String customerSpace, String segmentName) {
+        String url = constructUrl("/{customerSpace}/segments/list/{segmentName}", //
+                shortenCustomerSpace(customerSpace), segmentName);
+        return get("getSegment", url, MetadataSegment.class);
+    }
+
     public MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName) {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}", //
                 shortenCustomerSpace(customerSpace), segmentName);
         return get("getSegment", url, MetadataSegment.class);
     }
+
 
     public MetadataSegmentDTO getMetadataSegmentWithPidByName(String customerSpace, String segmentName) {
         String url = constructUrl("/{customerSpace}/segments/pid/{segmentName}", //
@@ -67,11 +80,24 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(raw, MetadataSegment.class);
     }
 
+    public List<MetadataSegment> getLiSegments(String customerSpace) {
+        String url = constructUrl("/{customerSpace}/segments/list", shortenCustomerSpace(customerSpace));
+        List raw = get("getLiSegments", url, List.class);
+        return JsonUtils.convertList(raw, MetadataSegment.class);
+    }
+
     public void deleteSegmentByName(String customerSpace, String segmentName, boolean hardDelete) {
         String url = constructUrl(
                 "/{customerSpace}/segments/{segmentName}?hard-delete={hardDelete}", //
                 shortenCustomerSpace(customerSpace), segmentName, hardDelete);
         delete("deleteSegmentByName", url);
+    }
+
+    public void deleteSegmentByExternalInfo(String customerSpace, String externalSystem, String externalSegmentId, boolean hardDelete) {
+        String url = constructUrl(
+                "/{customerSpace}/segments/list/{externalSystem}/{externalSegmentId}?hard-delete={hardDelete}", //
+                shortenCustomerSpace(customerSpace), externalSystem, externalSegmentId, hardDelete);
+        delete("deleteSegmentByExternalInfo", url);
     }
 
     public void revertDeleteSegmentByName(String customerSpace, String segmentName) {

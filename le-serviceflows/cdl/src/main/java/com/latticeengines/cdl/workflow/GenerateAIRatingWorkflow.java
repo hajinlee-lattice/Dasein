@@ -19,6 +19,7 @@ import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataF
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculateExpectedRevenueDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculatePercentileScoreDataFlow;
+import com.latticeengines.scoring.workflow.steps.RecalculatePercentileScoreJobDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
@@ -46,8 +47,12 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     @Inject
     private ScoreEventTable scoreEventTable;
 
+    // TODO: pending migration
     @Inject
     private RecalculatePercentileScoreDataFlow recalculatePercentileScore;
+
+    @Inject
+    private RecalculatePercentileScoreJobDataFlow recalculatePercentileScoreJob;
 
     @Inject
     private CalculatePredictedRevenuePercentileDataFlow calculatePredictedRevenuePercentileDataFlow;
@@ -85,7 +90,7 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
                 .next(scoreEventTable); //
         if (!isLPI) {
             builder //
-                    .next(recalculatePercentileScore) //
+                    .next(recalculatePercentileScoreJob) //
                     .next(calculatePredictedRevenuePercentileDataFlow) //
                     .next(recalculateExpectedRevenueDataFlow) //
                     .next(calculateExpectedRevenuePercentileJobDataFlow) //

@@ -20,19 +20,16 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.BaseScoringDataFlowStepConfiguration;
-import com.latticeengines.domain.exposed.spark.SparkConfigUtils;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunBatchSparkJob;
-import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 
 public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends BaseScoringDataFlowStepConfiguration, E extends SparkJobConfig>
         extends RunBatchSparkJob<T, E> {
@@ -63,7 +60,7 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
 
     @Override
     protected void postJobExecutions(List<SparkJobResult> results) {
-        SparkJobResult mergeResult = mergeResult(results);
+        SparkJobResult mergeResult = CalculateScoreUtils.mergeResult(results, getRandomWorkspace(), yarnConfiguration);
         String customer = configuration.getCustomerSpace().toString();
         String targetTableName = NamingUtils.uuid(getTargetTableName());
         Table targetTable = toTable(targetTableName, mergeResult.getTargets().get(0));
@@ -74,30 +71,6 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
         for (SparkJobResult result : results) {
             postJobExecution(result);
         }
-
-    }
-
-    private SparkJobResult mergeResult(List<SparkJobResult> results) {
-        if (results.size() == 1) {
-            return results.get(0);
-        }
-        String workspace = getRandomWorkspace();
-        List<HdfsDataUnit> tgtDataUnits = SparkConfigUtils.getTargetUnits(workspace, null, 1);
-        long total = 0;
-        for (int i = 0; i < results.size(); i++) {
-            SparkJobResult result = results.get(i);
-            try {
-                SparkUtils.moveAvroParquetFiles(yarnConfiguration, result.getTargets().get(0).getPath(),
-                        tgtDataUnits.get(0).getPath(), "batch" + i + "_");
-                total += result.getTargets().get(0).getCount();
-            } catch (Exception ex) {
-                throw new RuntimeException("Can not merge data unit file!", ex);
-            }
-        }
-        tgtDataUnits.get(0).setCount(total);
-        SparkJobResult jobResult = new SparkJobResult();
-        jobResult.setTargets(tgtDataUnits);
-        return jobResult;
     }
 
     private void overlayMetadata(Table targetTable) {
@@ -111,14 +84,12 @@ public abstract class AbstractCalculateRevenuePercentileJobDataFlow<T extends Ba
         List<E> configs = new ArrayList<>();
         String inputTableName = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
         List<Map<String, String>> scoreFieldMaps = getScoreFieldsMap();
-        Map<String, Double> normalizationRatioMaps = shouldLoadNormalizationRatio() ? getNormalizationRatioMap()
-                : null;
+        Map<String, Double> normalizationRatioMaps = shouldLoadNormalizationRatio() ? getNormalizationRatioMap() : null;
         inputTable = metadataProxy.getTable(customerSpace.toString(), inputTableName);
 
         for (int i = 0; i < scoreFieldMaps.size(); i++) {
             E config = initAndSetDataFlowConfig(inputTableName, modelGuidField, percentileLowerBound,
-                    percentileUpperBound, scoreFieldMaps.get(i),
-                    normalizationRatioMaps);
+                    percentileUpperBound, scoreFieldMaps.get(i), normalizationRatioMaps);
             List<DataUnit> inputUnits = new ArrayList<>();
             inputUnits.add(inputTable.toHdfsDataUnit("calculateEVPercentile" + i));
             config.setInput(inputUnits);

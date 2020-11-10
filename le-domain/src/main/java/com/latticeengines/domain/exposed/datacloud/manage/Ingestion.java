@@ -236,6 +236,7 @@ public class Ingestion implements HasPid, Serializable {
         SFTP, // generic
         API, // generic
         S3, // only for datacloud collector
+        S3_INTERNAL, // only for ingesting data under internal S3 folder
         BW_RAW, // only for datacloud collector
         PATCH_BOOK // only for datacloud patch book;
     }

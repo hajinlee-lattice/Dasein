@@ -14,22 +14,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.proxy.exposed.admin.AdminProxy;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
 public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
-    private static final long inAcessPeriod = TimeUnit.DAYS.toMillis(30);
-    private static final long emailPeriod = TimeUnit.DAYS.toMillis(14);
-    private static final List<String> userLevels = AccessLevel.getInternalAccessLevel().stream()
+    private static final long INACTIVE_PERIOD = TimeUnit.DAYS.toMillis(30);
+    private static final long EMAIL_PERIOD = TimeUnit.DAYS.toMillis(14);
+    private static final List<String> userLevels =
+            AccessLevel.getInternalAccessLevel().stream()
             .map(accessLevel -> accessLevel.toString())
             .collect(Collectors.toList());
     @SuppressWarnings("unused")
@@ -37,22 +44,24 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
     private EmailService emailService;
     private UserService userService;
-    private com.latticeengines.admin.service.TenantService adminTenantService;
+    private AdminProxy adminProxy;
     private com.latticeengines.security.exposed.service.TenantService tenantService;
     private GlobalAuthUserTenantRightEntityMgr userTenantRightEntityMgr;
+
     private static final Logger log = LoggerFactory.getLogger(AdminRecycleTenantJobCallable.class);
 
     public AdminRecycleTenantJobCallable(Builder builder) {
         this.jobArguments = builder.jobArguments;
         this.emailService = builder.emailService;
         this.userService = builder.userService;
-        this.adminTenantService = builder.adminTenantService;
+        this.adminProxy = builder.adminProxy;
         this.tenantService = builder.tenantService;
         this.userTenantRightEntityMgr = builder.userTenantRightEntityMgr;
     }
 
     @Override
     public Boolean call() throws Exception {
+        scanInvalidTenants();
         List<Tenant> tempTenants = tenantService.getTenantByTypes(Arrays.asList(TenantType.POC, TenantType.STAGING));
         if (CollectionUtils.isNotEmpty(tempTenants)) {
             log.info("Tenants size is " + tempTenants.size());
@@ -63,8 +72,9 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 }
                 long expiredTime = tenant.getExpiredTime();
                 long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                CustomerSpace space = CustomerSpace.parse(tenant.getId());
                 // send email two weeks before user can't access tenant
-                if (expiredTime - emailPeriod < currentTime && currentTime < expiredTime) {
+                if (expiredTime - EMAIL_PERIOD < currentTime && currentTime < expiredTime) {
                     int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
                     List<User> users = userService.getUsers(tenant.getId());
                     users.forEach(user -> {
@@ -78,11 +88,12 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                     tenant.setStatus(TenantStatus.INACTIVE);
                     tenantService.updateTenant(tenant);
                     log.info(String.format("change tenant %s status to inactive", tenant.getName()));
-                } else if (expiredTime + inAcessPeriod - emailPeriod < currentTime
-                        && currentTime < expiredTime + inAcessPeriod) {
+                } else if (expiredTime + INACTIVE_PERIOD - EMAIL_PERIOD < currentTime
+                        && currentTime < expiredTime + INACTIVE_PERIOD) {
                     // send email to user who can visit tenant two weeks before
                     // delete tenant
-                    int days = (int) Math.ceil((expiredTime + inAcessPeriod - currentTime) / TimeUnit.DAYS.toMillis(1));
+                    int days =
+                            (int) Math.ceil((expiredTime + INACTIVE_PERIOD - currentTime) / TimeUnit.DAYS.toMillis(1));
                     List<User> users = userService.getUsers(tenant.getId());
                     users.forEach(user -> {
                         if (userLevels.contains(user.getAccessLevel())) {
@@ -92,11 +103,11 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                         }
                     });
 
-                } else if (currentTime > expiredTime + inAcessPeriod) {
-                    CustomerSpace space = CustomerSpace.parse(tenant.getId());
-                    adminTenantService.deleteTenant("_defaultUser", space.getContractId(), space.getTenantId(), true);
+                } else if (currentTime > expiredTime + INACTIVE_PERIOD) {
+                    adminProxy.deleteTenant(space.getContractId(), space.getTenantId());
                     log.info(String.format("tenant %s has been deleted", tenant.getName()));
                 }
+
             }
         }
 
@@ -110,20 +121,42 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 }
                 long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 long expiredTime = tenantRight.getExpirationDate();
-                if (expiredTime - emailPeriod < currentTime && currentTime < expiredTime) {
+                if (expiredTime - EMAIL_PERIOD < currentTime && currentTime < expiredTime) {
                     int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
                     sendEmail(tenantRight, days);
 
                 } else if (currentTime >= expiredTime) {
                     String tenantId = tenantRight.getGlobalAuthTenant().getId();
                     String userName = tenantRight.getGlobalAuthUser().getEmail();
-                    log.info(String.format(String.format("Quartz job deleted %s from user %s", tenantId, userName)));
+                    log.info(String.format("Quartz job deleted %s from user %s", tenantId, userName));
                     userService.deleteUser(tenantId, userName);
                     sendEmail(tenantRight, 0);
                 }
             }
         }
         return true;
+    }
+
+    private void scanInvalidTenants() {
+        log.info("begin scanning tenants in DB not in ZK");
+        Camille camille = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        List<String> tenantIds = tenantService.getAllTenantIds();
+        if (CollectionUtils.isNotEmpty(tenantIds)) {
+            for (String id : tenantIds) {
+                CustomerSpace space = CustomerSpace.parse(id);
+                String contractId = space.getContractId();
+                Path path = PathBuilder.buildContractPath(podId, contractId);
+                try {
+                    if (!camille.exists(path)) {
+                        log.info("tenant {} exists in db not in zk", space.getTenantId());
+                    }
+                } catch(Exception e) {
+                    log.info("error occurred when retrieving {}", space.getTenantId());
+                }
+            }
+
+        }
     }
 
     private void sendEmail(GlobalAuthUserTenantRight tenantRight, int days) {
@@ -142,7 +175,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         private String jobArguments;
         private EmailService emailService;
         private UserService userService;
-        private com.latticeengines.admin.service.TenantService adminTenantService;
+        private AdminProxy adminProxy;
         private com.latticeengines.security.exposed.service.TenantService tenantService;
         private GlobalAuthUserTenantRightEntityMgr userTenantRightEntityMgr;
 
@@ -165,13 +198,12 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder adminTenantService(com.latticeengines.admin.service.TenantService adminTenantService) {
-            this.adminTenantService = adminTenantService;
+        public Builder adminProxy(AdminProxy adminProxy) {
+            this.adminProxy = adminProxy;
             return this;
         }
 
-        public Builder securityTenantService(
-                com.latticeengines.security.exposed.service.TenantService tenantService) {
+        public Builder securityTenantService(TenantService tenantService) {
             this.tenantService = tenantService;
             return this;
         }

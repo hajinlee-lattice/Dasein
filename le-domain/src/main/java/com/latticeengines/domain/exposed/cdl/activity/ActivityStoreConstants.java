@@ -10,8 +10,8 @@ public final class ActivityStoreConstants {
     }
 
     public static class DnbIntent {
-        public static final String BUYING_STAGE = "Buying";
-        public static final String RESEARCHING_STAGE = "Researching";
+        public static final String STAGE_BUYING = "Buying";
+        public static final String STAGE_RESEARCHING = "Researching";
         public static final double BUYING_STAGE_THRESHOLD = 0.5;
     }
 

@@ -76,13 +76,13 @@ public class DateAttrsQuerySparkSQLTestNG extends QueryServiceImplTestNGBase
         long count;
         if (SPARK_BATCH_USER.equals(sqlUser)) {
             String sql = eventQueryService.getQueryStr(frontEndQuery, EventType.Scoring, //
-                    DataCollection.Version.Blue);
+                    SPARK_BATCH_USER, DataCollection.Version.Blue);
             System.out.println("========== " + fileName + " ==========");
             System.out.println(sql);
             System.out.println("========== " + fileName + " ==========");
-            count = eventQueryServiceSparkSQL.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+            count = eventQueryServiceSparkSQL.getScoringCount(frontEndQuery, SPARK_BATCH_USER, DataCollection.Version.Blue);
         } else {
-            count = eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+            count = eventQueryService.getScoringCount(frontEndQuery, SEGMENT_USER, DataCollection.Version.Blue);
         }
         testAndAssertCountFromTester(sqlUser, count, 0L);
     }

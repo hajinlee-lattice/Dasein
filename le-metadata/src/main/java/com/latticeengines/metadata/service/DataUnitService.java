@@ -25,4 +25,6 @@ public interface DataUnitService {
     List<DataUnit> findByStorageType(DataUnit.StorageType storageType);
 
     void updateSignature(DataUnit dataUnit, String signature);
+
+    List<DataUnit> findAllByDataTemplateIdAndRoleFromReader(String dataTemplateId, DataUnit.Role role);
 }

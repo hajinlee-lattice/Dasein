@@ -497,7 +497,7 @@ public abstract class BaseRestApiProxy {
         RetryTemplate retry = getRetryTemplate(method, HttpMethod.DELETE, url, false, body);
         retry.execute((RetryCallback<Void, RuntimeException>) context -> {
             logInvocation(method, url, HttpMethod.DELETE, context.getRetryCount() + 1);
-            restTemplate.delete(url);
+            restTemplate.delete(url, body);
             return null;
         });
     }

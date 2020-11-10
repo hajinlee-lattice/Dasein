@@ -58,10 +58,13 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
         createDeleteCsvDataFrame = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
+        boolean addExportTimeStamp = Boolean.toString(true).equals(
+                getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_EXPORT_TIMESTAMP));
         log.info("createAddCsvDataFrame=" + createAddCsvDataFrame + ", createDeleteCsvDataFrame="
-                + createDeleteCsvDataFrame);
+                + createDeleteCsvDataFrame + ", addExportTimeStamp=" + addExportTimeStamp);
         GenerateRecommendationCSVConfig generateRecommendationCSVConfig = new GenerateRecommendationCSVConfig();
         GenerateRecommendationCSVContext generateRecommendationCSVContext = new GenerateRecommendationCSVContext();
+        generateRecommendationCSVContext.setAddExportTimestamp(addExportTimeStamp);
         generateRecommendationCSVConfig.setGenerateRecommendationCSVContext(generateRecommendationCSVContext);
         int target = 0;
         List<DataUnit> inputs = new ArrayList<>();

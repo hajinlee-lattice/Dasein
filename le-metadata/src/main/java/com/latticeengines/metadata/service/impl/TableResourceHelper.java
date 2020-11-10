@@ -25,6 +25,8 @@ import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.PrestoDataUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -227,5 +229,15 @@ public class TableResourceHelper {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.updateTableRetentionPolicies(space, retentionPolicyUpdateDetail);
         return true;
+    }
+
+    public PrestoDataUnit registerPrestoDataUnit(String customerSpace, String tableName) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.registerPrestoDataUnit(space, tableName);
+    }
+
+    public AthenaDataUnit registerAthenaDataUnit(String customerSpace, String tableName) {
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.registerAthenaDataUnit(space, tableName);
     }
 }

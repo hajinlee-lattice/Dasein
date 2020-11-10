@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
@@ -60,21 +59,21 @@ public class ActivityMetricsResource {
         return new ActivityMetricsWithAction(saved, action);
     }
 
-    @PostMapping("/setupDefaultWebVisitProfile")
+    @PostMapping("/groups/default/webvisit")
     @ApiOperation(value = "Setup default web visit metric groups for total visit and source medium")
-    public Boolean setupDefaultWebVisitProfile(@PathVariable String customerSpace,
+    public Boolean setupDefaultWebVisitGroups(@PathVariable String customerSpace,
             @RequestBody String streamName) {
-        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitProfile(customerSpace, streamName);
+        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultWebVisitGroups(customerSpace, streamName);
         if (defaultGroups == null || defaultGroups.stream().anyMatch(Objects::isNull)) {
             throw new IllegalStateException(String.format("Failed to setup default web visit metric groups for tenant %s", customerSpace));
         }
         return true;
     }
 
-    @PostMapping("/setupDefaultOpportunityProfile")
+    @PostMapping("/groups/default/opportunity")
     @ApiOperation(value = "Setup default opportunity metric groups for opportunity by stage")
-    public Boolean setupDefaultOpportunityProfile(@PathVariable String customerSpace, @RequestBody String streamName) {
-        ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(customerSpace,
+    public Boolean setupDefaultOpportunityGroups(@PathVariable String customerSpace, @RequestBody String streamName) {
+        ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityGroup(customerSpace,
                 streamName);
         if (defaultGroup == null) {
             throw new IllegalStateException(String.format("Failed to setup default Opportunity metric groups for tenant %s",
@@ -83,39 +82,27 @@ public class ActivityMetricsResource {
         return true;
     }
 
-    @PostMapping("/setupDefaultMarketingProfile")
+    @PostMapping("/groups/default/marketing")
     @ApiOperation(value = "Setup default marketing metric groups")
-    public Boolean setupDefaultMarketingProfile(@PathVariable String customerSpace, @RequestBody String streamName) {
-        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultMarketingProfile(customerSpace,
+    public Boolean setupDefaultMarketingGroups(@PathVariable String customerSpace, @RequestBody String streamName) {
+        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultMarketingGroups(customerSpace,
                 streamName);
-        if (defaultGroups == null || defaultGroups.size() != 2) {
+        if (defaultGroups == null) {
             throw new IllegalStateException(String.format("Failed to setup default marketing metric groups for tenant %s",
                     customerSpace));
         }
         return true;
     }
 
-    @PostMapping("/setupDefaultIntentProfile")
+    @PostMapping("/groups/default/intent")
     @ApiOperation(value = "Setup default intent metric groups")
-    public Boolean setupDefaultIntentProfile(@PathVariable String customerSpace,
-                                             @RequestBody String streamName,
-                                             @RequestParam(value = "processBuyingScore", required = false, defaultValue = "true") boolean processBuyingScore) {
-        if (processBuyingScore) {
-            List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultBuyingScoreGroups(customerSpace,
-                    streamName);
-            if (defaultGroups == null || defaultGroups.size() != 3) {
-                throw new IllegalStateException(String.format("Failed to setup default intent with buying score metric groups for tenant %s",
-                        customerSpace));
-            }
-            return true;
-        } else {
-            List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultDnbIntentDataProfile(customerSpace,
-                    streamName);
-            if (defaultGroups == null || defaultGroups.size() != 2) {
-                throw new IllegalStateException(String.format("Failed to setup default intent metric groups for tenant %s",
-                        customerSpace));
-            }
-            return true;
+    public Boolean setupDefaultIntentGroups(@PathVariable String customerSpace, @RequestBody String streamName) {
+        List<ActivityMetricsGroup> defaultGroups = activityMetricsGroupService.setupDefaultDnbIntentGroups(customerSpace,
+                streamName);
+        if (defaultGroups == null) {
+            throw new IllegalStateException(String.format("Failed to setup default intent with buying score metric groups for tenant %s",
+                    customerSpace));
         }
+        return true;
     }
 }

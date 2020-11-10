@@ -23,9 +23,6 @@ public class ListSegmentRequest {
     @JsonProperty("displayName")
     private String displayName;
 
-    @JsonProperty("tenantId")
-    private String tenantId;
-
     public String getExternalSystem() {
         return externalSystem;
     }
@@ -48,13 +45,5 @@ public class ListSegmentRequest {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 }

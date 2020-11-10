@@ -90,4 +90,16 @@ public class BitCodecUtilsUnitTestNG {
         }
     }
 
+    @Test(groups = "unit")
+    public void testShiftAndMask() {
+        int lowestBit = 50;
+        int numBits = 4;
+        long encoded = BitCodecUtils.setBits(0L, lowestBit, numBits, 5);
+        long mask = BitCodecUtils.bitMask(0L, 0, numBits);
+        int value = (int) ((encoded >> (long) lowestBit) & mask);
+        long mask2 = mask << (long) lowestBit;
+        int value2 = (int) ((encoded & mask2) / Math.pow(2, lowestBit));
+        Assert.assertEquals(value, value2);
+    }
+
 }

@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import javax.inject.Inject;
 
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,6 @@ import com.latticeengines.apps.cdl.repository.writer.ListSegmentWriterRepository
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
 @Component("listSegmentEntityMgr")
 public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<ListSegmentRepository, ListSegment, Long> implements ListSegmentEntityMgr {
@@ -42,8 +40,7 @@ public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Lis
     public ListSegment updateListSegment(ListSegment incomingListSegment) {
         log.info("Updating list segment by external system {} and external segment {}.",
                 incomingListSegment.getExternalSystem(), incomingListSegment.getExternalSegmentId());
-        ListSegment existingListSegment =
-                _self.findByExternalInfo(incomingListSegment.getExternalSystem(), incomingListSegment.getExternalSegmentId());
+        ListSegment existingListSegment = _self.findByExternalInfo(incomingListSegment.getExternalSystem(), incomingListSegment.getExternalSegmentId());
         if (existingListSegment != null) {
             cloneListSegmentForUpdate(existingListSegment, incomingListSegment);
             update(existingListSegment);
@@ -59,16 +56,8 @@ public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Lis
         return writerRepository.findByExternalSystemAndExternalSegmentId(externalSystem, externalSegmentId);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public MetadataSegment findMetadataSegmentByExternalInfo(String externalSystem, String externalSegmentId) {
-        ListSegment listSegment = writerRepository.findByExternalSystemAndExternalSegmentId(externalSystem, externalSegmentId);
-        Hibernate.initialize(listSegment.getMetadataSegment());
-        return listSegment.getMetadataSegment();
-    }
-
     private void cloneListSegmentForUpdate(ListSegment existingListSegment, ListSegment incomingListSegment) {
-        if (existingListSegment.getCsvAdaptor() != null) {
+        if (incomingListSegment.getCsvAdaptor() != null) {
             existingListSegment.setCsvAdaptor(incomingListSegment.getCsvAdaptor());
         }
     }

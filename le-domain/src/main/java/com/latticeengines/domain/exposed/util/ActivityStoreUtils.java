@@ -63,6 +63,7 @@ public class ActivityStoreUtils {
      */
     public static ActivityTimeRange defaultTimeRange() {
         Set<List<Integer>> paramSet = new HashSet<>();
+        paramSet.add(Collections.singletonList(1));
         paramSet.add(Collections.singletonList(2));
         paramSet.add(Collections.singletonList(4));
         paramSet.add(Collections.singletonList(8));
@@ -71,6 +72,24 @@ public class ActivityStoreUtils {
         timeRange.setOperator(ComparisonType.WITHIN);
         timeRange.setPeriods(Collections.singleton(PeriodStrategy.Template.Week.name()));
         timeRange.setParamSet(paramSet);
+        return timeRange;
+    }
+
+    public static ActivityTimeRange currentWeekTimeRange() {
+        Set<List<Integer>> paramSet = new HashSet<>();
+        paramSet.add(Collections.singletonList(0));
+        ActivityTimeRange timeRange = new ActivityTimeRange();
+        timeRange.setOperator(ComparisonType.WITHIN_INCLUDE);
+        timeRange.setPeriods(Collections.singleton(PeriodStrategy.Template.Week.name()));
+        timeRange.setParamSet(paramSet);
+        return timeRange;
+    }
+
+    public static ActivityTimeRange timelessRange() {
+        ActivityTimeRange timeRange = new ActivityTimeRange();
+        timeRange.setOperator(ComparisonType.EVER);
+        timeRange.setPeriods(Collections.singleton(PeriodStrategy.Template.Week.name()));
+        timeRange.setParamSet(null);
         return timeRange;
     }
 
@@ -84,17 +103,23 @@ public class ActivityStoreUtils {
         filterOptions.setLabel("Timeframe");
         List<FilterOptions.Option> options = new ArrayList<>();
         options.add(FilterOptions.Option.anyAttrOption());
-        options.addAll(ActivityMetricsGroupUtils.toTimeFilters(ActivityStoreUtils.defaultTimeRange()) //
+        options.addAll(ActivityMetricsGroupUtils.toTimeFilters(defaultTimeRange()) //
                 .stream() //
-                .map(timeFilter -> {
-                    FilterOptions.Option option = new FilterOptions.Option();
-                    option.setValue(ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
-                    option.setDisplayName(filterOptionDisplayName(timeFilter));
-                    return option;
-                }) //
+                .map(ActivityStoreUtils::timeFilterToFilterOption) //
+                .collect(Collectors.toList()));
+        options.addAll(ActivityMetricsGroupUtils.toTimeFilters(currentWeekTimeRange())
+                .stream() //
+                .map(ActivityStoreUtils::timeFilterToFilterOption) //
                 .collect(Collectors.toList()));
         filterOptions.setOptions(options);
         return filterOptions;
+    }
+
+    private static FilterOptions.Option timeFilterToFilterOption(TimeFilter timeFilter) {
+        FilterOptions.Option option = new FilterOptions.Option();
+        option.setValue(ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
+        option.setDisplayName(filterOptionDisplayName(timeFilter));
+        return option;
     }
 
     /*-
@@ -108,13 +133,12 @@ public class ActivityStoreUtils {
      * time filter to display name in option drop down
      */
     public static String filterOptionDisplayName(@NotNull TimeFilter filter) {
-        if (filter.getRelation() != ComparisonType.WITHIN) {
-            String msg = String.format("Relation %s is not supported", filter.getRelation());
-            throw new UnsupportedOperationException(msg);
+        switch (filter.getRelation()) {
+            // e.g., Last 2 Weeks
+            case WITHIN: return String.format("Last %s %ss", filter.getValues().get(0).toString(), filter.getPeriod());
+            case WITHIN_INCLUDE: return ActivityMetricsGroupUtils.timeRangeTmplToDescription(ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(filter));
+            default: throw new UnsupportedOperationException(String.format("Relation %s is not supported", filter.getRelation()));
         }
-
-        // e.g., Last 2 Weeks
-        return String.format("Last %s %ss", filter.getValues().get(0).toString(), filter.getPeriod());
     }
 
     public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull String timeRange,

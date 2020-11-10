@@ -118,6 +118,12 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
     protected void switchToExternalAdmin() {
         testBed.switchToExternalAdmin(mainTestTenant);
     }
+    protected void switchToBusinessAnalyst() {
+        testBed.switchToBusinessAnalyst(mainTestTenant);
+    }
+    protected void switchToBusinessAnalyst(boolean overWriteTeams) {
+        testBed.switchToBusinessAnalyst(mainTestTenant, overWriteTeams);
+    }
     protected void switchToExternalUser() {
         testBed.switchToExternalUser(mainTestTenant);
     }

@@ -131,7 +131,6 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         }
         Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery);
         preprocess(map, attrRepo, timeTranslator);
-        ConcurrentMap<String, ConcreteRestriction> tempLists = new ConcurrentHashMap<>();
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, isCountQuery);
         if (isCountQuery && !Boolean.TRUE.equals(frontEndQuery.getDistinct())) {
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
