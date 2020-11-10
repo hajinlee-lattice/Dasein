@@ -60,7 +60,8 @@ public class AnalyzeImportFile extends RunSparkJob<ImportDataFeedTaskConfigurati
         InputPresenceConfig config = new InputPresenceConfig();
         config.setInput(dataUnits);
         config.setInputNames(ImmutableSet.of(InterfaceName.DUNS.name(), InterfaceName.Website.name(),
-                InterfaceName.CompanyName.name()));
+                InterfaceName.CompanyName.name(), InterfaceName.Email.name()));
+        config.setExcludeEmpty(Boolean.TRUE);
         return config;
     }
 
@@ -71,7 +72,8 @@ public class AnalyzeImportFile extends RunSparkJob<ImportDataFeedTaskConfigurati
         ImportFileSignature fileSignature = new ImportFileSignature();
         if (MapUtils.isNotEmpty(map)) {
             fileSignature.setHasDUNS(map.containsKey(InterfaceName.DUNS.name()) && map.get(InterfaceName.DUNS.name()) > 0L);
-            fileSignature.setHasDomain(map.containsKey(InterfaceName.Website.name()) && map.get(InterfaceName.Website.name()) > 0L);
+            fileSignature.setHasDomain((map.containsKey(InterfaceName.Website.name()) && map.get(InterfaceName.Website.name()) > 0L)
+                    || (map.containsKey(InterfaceName.Email.name())) && map.get(InterfaceName.Email.name()) > 0L);
             fileSignature.setHasCompanyName(map.containsKey(InterfaceName.CompanyName.name()) && map.get(InterfaceName.CompanyName.name()) > 0L);
         }
         putObjectInContext(IMPORT_FILE_SIGNATURE, fileSignature);

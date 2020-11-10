@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +33,13 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportFileSignature;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
 import com.latticeengines.serviceflows.workflow.match.BulkMatchService;
@@ -50,7 +53,15 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Name, InterfaceName.CompanyName.name());
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.DUNS, InterfaceName.DUNS.name());
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Domain, InterfaceName.Website.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.City, InterfaceName.City.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.State, InterfaceName.State.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Country, InterfaceName.Country.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Zipcode, InterfaceName.PostalCode.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address, InterfaceName.Address_Street_1.name());
+        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address2, InterfaceName.Address_Street_2.name());
     }
+
 
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
@@ -58,11 +69,17 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
     @Inject
     private BulkMatchService bulkMatchService;
 
+    @Inject
+    private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private BusinessEntity entity;
+
     @Override
     public void execute() {
         log.info("Executing spark step " + getClass().getSimpleName());
         if (skipMatch()) {
-            log.info("Import file does not have CompanyName or DUNS or Website. Skip match");
+            log.info("Match condition not meet, skip match!");
             return;
         }
         customerSpace = parseCustomerSpace(configuration);
@@ -71,7 +88,6 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
             List<MatchCommand> matchCommandList = new ArrayList<>();
             for (String avroPath: inputAvroPathList) {
                 MatchInput input = constructMatchInput(avroPath);
-                preMatchProcessing(input);
                 if (!OperationalMode.isEntityMatch(input.getOperationalMode())) {
                     input.setDataCloudOnly(true);
                 }
@@ -85,8 +101,25 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
     }
 
     private boolean skipMatch() {
+        if (StringUtils.isEmpty(configuration.getDataFeedTaskId())) {
+            log.error("Import DataFeedTaskId is empty!");
+            return true;
+        }
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),
+                configuration.getDataFeedTaskId());
+        if (!BusinessEntity.Account.name().equalsIgnoreCase(dataFeedTask.getEntity()) &&
+                !BusinessEntity.Contact.name().equalsIgnoreCase(dataFeedTask.getEntity())) {
+            log.info("The import is not Account or Contact, skip match import.");
+            return true;
+        }
+        entity = BusinessEntity.getByName(dataFeedTask.getEntity());
+        log.info("Import match entity: " + entity.name());
         ImportFileSignature signature = getObjectFromContext(IMPORT_FILE_SIGNATURE, ImportFileSignature.class);
-        return !(signature.getHasCompanyName() || signature.getHasDomain() || signature.getHasDUNS());
+        if (!(signature.getHasCompanyName() || signature.getHasDomain() || signature.getHasDUNS())) {
+            log.info("Import file does not have CompanyName or DUNS or Website. Skip match");
+            return true;
+        }
+        return false;
     }
 
     private List<String> getInputAvroPathList() {
@@ -103,23 +136,11 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
         return importJobDetail.getPathDetail();
     }
 
-    private void preMatchProcessing(MatchInput matchInput) {
-        matchInput.setTargetEntity(BusinessEntity.LatticeAccount.name());
-        matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
-        matchInput.setMatchDebugEnabled(false);
-
-        List<Column> columns = Collections.singletonList(new Column(ATTR_LDC_DUNS));
-        ColumnSelection columnSelection = new ColumnSelection();
-        columnSelection.setColumns(columns);
-        matchInput.setCustomSelection(columnSelection);
-    }
-
     protected void postMatchProcessing(List<MatchCommand> commandList) {
         String customer = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
         String finalResultTable = NamingUtils.timestamp("DataFeedImportMatchResult");
 
         bulkMatchService.registerResultTable(customer, commandList, finalResultTable);
-//        putStringValueInContext(MATCH_RESULT_TABLE_NAME, finalResultTable);
         saveOutputValue(WorkflowContextConstants.Outputs.MATCH_RESULT_TABLE_NAME, finalResultTable);
     }
 
@@ -136,7 +157,18 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
         Map<MatchKey, List<String>> keyMap = getKeyMap(inputFields);
         matchInput.setKeyMap(keyMap);
         matchInput.setSkipKeyResolution(true);
+        matchInput.setTargetEntity(BusinessEntity.LatticeAccount.name());
+        matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
+        matchInput.setMatchDebugEnabled(false);
+        matchInput.setCustomSelection(getColumnSelection());
         return matchInput;
+    }
+
+    private ColumnSelection getColumnSelection() {
+        List<Column> columns = Collections.singletonList(new Column(ATTR_LDC_DUNS));
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columns);
+        return columnSelection;
     }
 
     protected Map<MatchKey, List<String>> getKeyMap(Set<String> inputFields) {
@@ -147,6 +179,14 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
                 keyMap.put(key, Collections.singletonList(col));
             }
         });
+        if (BusinessEntity.Contact.equals(entity) && inputFields.contains(InterfaceName.Email.name())) {
+            List<String> domains = new ArrayList<>();
+            domains.add(InterfaceName.Email.name());
+            if (keyMap.containsKey(MatchKey.Domain)) {
+                domains.addAll(keyMap.get(MatchKey.Domain));
+            }
+            keyMap.put(MatchKey.Domain, domains);
+        }
         return keyMap;
     }
 
