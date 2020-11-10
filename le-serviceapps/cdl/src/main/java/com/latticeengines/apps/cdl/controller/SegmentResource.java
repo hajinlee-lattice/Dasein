@@ -23,6 +23,7 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.cdl.SegmentImportRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -230,5 +231,12 @@ public class SegmentResource {
     public void deleteMetadataSegmentExport(@PathVariable("customerSpace") String customerSpace, //
                                             @PathVariable("exportId") String exportId) {
         segmentService.deleteMetadataSegmentExport(exportId);
+    }
+
+    @PostMapping("/startimport")
+    @ResponseBody
+    @ApiOperation(value = "start segment import")
+    public String createOrUpdateListSegment(@PathVariable String customerSpace, @RequestBody SegmentImportRequest segmentImportRequest) {
+        return "";
     }
 }
