@@ -101,6 +101,20 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-prestodb</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-prestodb</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- adding scope to provided is to avoid packaging them into shaded jar -->
         <!-- all runtime dependencies from le-parent are provided or test -->
         <dependency>

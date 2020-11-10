@@ -28,10 +28,9 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/rating")
 public class RatingResource {
 
-    private final RatingQueryService ratingQueryService;
-
     private static final String SEGMENT_USER = RedshiftQueryProvider.USER_SEGMENT;
     private static final String BATCH_USER = RedshiftQueryProvider.USER_BATCH;
+    private final RatingQueryService ratingQueryService;
 
     @Inject
     public RatingResource(RatingQueryService ratingQueryService) {
@@ -41,9 +40,10 @@ public class RatingResource {
     @PostMapping("/count")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-            @RequestParam(value = "version", required = false) DataCollection.Version version,
-                         @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+    public Long getCount(@PathVariable String customerSpace, //
+            @RequestBody FrontEndQuery frontEndQuery,
+            @RequestParam(value = "version", required = false) DataCollection.Version version, //
+            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
         if (StringUtils.isBlank(sqlUser)) {
             sqlUser = SEGMENT_USER;
         }
@@ -53,9 +53,9 @@ public class RatingResource {
     @PostMapping("/data")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-            @RequestParam(value = "version", required = false) DataCollection.Version version,
-                                  @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+    public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery, //
+            @RequestParam(value = "version", required = false) DataCollection.Version version, //
+            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
         final String finalSqlUser = StringUtils.isBlank(sqlUser) ? BATCH_USER : sqlUser;
         return ratingQueryService.getData(frontEndQuery, version, finalSqlUser);
     }
@@ -63,20 +63,24 @@ public class RatingResource {
     @PostMapping("/query")
     @ResponseBody
     @ApiOperation(value = "Retrieve the SQL for the specified query")
-    public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-                           @RequestParam(value = "version", required = false) DataCollection.Version version,
-                           @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation) {
-        return ratingQueryService.getQueryStr(frontEndQuery, version, BATCH_USER);
+    public String getQuery(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery, //
+            @RequestParam(value = "sqlUser", required = false) String sqlUser, //
+            @RequestParam(value = "version", required = false) DataCollection.Version version, //
+            @RequestParam(value = "enforceTranslation", required = false, defaultValue = "false") Boolean enforceTranslation) {
+        if (StringUtils.isBlank(sqlUser)) {
+            sqlUser = BATCH_USER;
+        }
+        return ratingQueryService.getQueryStr(frontEndQuery, version, sqlUser);
     }
 
     @PostMapping("/coverage")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rating count for the specified query")
-    @InvocationMeter(name ="rating-rating-coverage", measurment = "objectapi")
+    @InvocationMeter(name = "rating-rating-coverage", measurment = "objectapi")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
             @RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,
-                                            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
+            @RequestParam(value = "sqlUser", required = false) String sqlUser) {
         if (StringUtils.isBlank(sqlUser)) {
             sqlUser = SEGMENT_USER;
         }

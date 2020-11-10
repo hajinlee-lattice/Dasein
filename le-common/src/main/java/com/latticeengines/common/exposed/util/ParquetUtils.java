@@ -36,17 +36,23 @@ public final class ParquetUtils {
             throw new IllegalArgumentException("Cannot find any file matching glob " + globPath);
         }
         String filePath = matchedFiles.get(0);
+        if (!globPath.startsWith("/")) {
+            String rootFolder = filePath.substring(0, filePath.indexOf("/", 1));
+            String server = globPath.substring(0, globPath.indexOf(rootFolder));
+            filePath = server + filePath;
+        }
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        final String finalPath = filePath;
         return retry.execute(ctx -> {
             try {
-                InputFile inputFile = HadoopInputFile.fromPath(new Path(filePath), configuration);
+                InputFile inputFile = HadoopInputFile.fromPath(new Path(finalPath), configuration);
                 try (ParquetFileReader reader = ParquetFileReader.open(inputFile)) {
                     AvroSchemaConverter converter = new AvroSchemaConverter(configuration);
                     MessageType parquetSchema = reader.getFileMetaData().getSchema();
                     return converter.convert(parquetSchema);
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Failed to parse schema for parquet file " + filePath);
+                throw new RuntimeException("Failed to parse schema for parquet file " + finalPath);
             }
         });
     }
