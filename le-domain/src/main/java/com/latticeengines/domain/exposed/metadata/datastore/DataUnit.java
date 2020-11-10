@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = S3DataUnit.class, name = "S3"), //
         @JsonSubTypes.Type(value = PrestoDataUnit.class, name = "Presto"), //
         @JsonSubTypes.Type(value = AthenaDataUnit.class, name = "Athena"), //
-        @JsonSubTypes.Type(value = MySQLDataUnit.class, name = "MySQL"), //
         @JsonSubTypes.Type(value = HdfsDataUnit.class, name = "Hdfs"), //
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
