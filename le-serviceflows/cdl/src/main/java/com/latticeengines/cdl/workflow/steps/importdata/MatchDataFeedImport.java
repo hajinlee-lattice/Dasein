@@ -17,6 +17,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -48,21 +49,6 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
 
     private static final Logger log = LoggerFactory.getLogger(MatchDataFeedImport.class);
 
-    static final Map<MatchKey, String> MATCH_KEYS_TO_DISPLAY_NAMES = new HashMap<>();
-    static {
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Name, InterfaceName.CompanyName.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.DUNS, InterfaceName.DUNS.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Domain, InterfaceName.Website.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.City, InterfaceName.City.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.State, InterfaceName.State.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Country, InterfaceName.Country.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Zipcode, InterfaceName.PostalCode.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address, InterfaceName.Address_Street_1.name());
-        MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.Address2, InterfaceName.Address_Street_2.name());
-    }
-
-
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
 
@@ -72,8 +58,10 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
     @Inject
     private DataFeedProxy dataFeedProxy;
 
-    @Inject
     private BusinessEntity entity;
+
+    @Value("${cdl.pa.use.directplus}")
+    private boolean useDirectPlus;
 
     @Override
     public void execute() {
@@ -161,6 +149,12 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
         matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
         matchInput.setMatchDebugEnabled(false);
         matchInput.setCustomSelection(getColumnSelection());
+
+        matchInput.setPartialMatchEnabled(true);
+        matchInput.setUseDnBCache(true);
+        matchInput.setUseRemoteDnB(true);
+        matchInput.setUseDirectPlus(useDirectPlus);
+
         return matchInput;
     }
 
@@ -172,7 +166,7 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
     }
 
     protected Map<MatchKey, List<String>> getKeyMap(Set<String> inputFields) {
-        Map<MatchKey, String> potentialKeyMap = new HashMap<>(MATCH_KEYS_TO_DISPLAY_NAMES);
+        Map<MatchKey, String> potentialKeyMap = new HashMap<>(MatchKey.LDC_MATCH_KEY_STD_FLDS);
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         potentialKeyMap.forEach((key, col) -> {
             if (inputFields.contains(col)) {
