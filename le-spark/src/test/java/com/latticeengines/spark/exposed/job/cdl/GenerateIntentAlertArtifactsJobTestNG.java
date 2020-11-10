@@ -85,8 +85,7 @@ public class GenerateIntentAlertArtifactsJobTestNG extends SparkJobFunctionalTes
         config.setDimensionMetadata(dimensionMetadata);
         config.setSelectedAttributes(SELECTED_ATTRIBUTES);
 
-        SparkJobResult result = runSparkJob(GenerateIntentAlertArtifactsJob.class, config, inputs,
-                String.format("/tmp/%s/%s/GenerateIntentAlertArtifactsJob", leStack, this.getClass().getSimpleName()));
+        SparkJobResult result = runSparkJob(GenerateIntentAlertArtifactsJob.class, config);
         log.info("Result = {}", JsonUtils.serialize(result));
         verify(result, Arrays.asList(this::verifyNewAccounts, this::verifyAllAccounts));
     }
