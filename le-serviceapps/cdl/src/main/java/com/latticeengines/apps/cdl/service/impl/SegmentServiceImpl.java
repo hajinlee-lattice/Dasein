@@ -122,15 +122,16 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public MetadataSegment createOrUpdateListSegment(MetadataSegment segment) {
         MetadataSegment persistedSegment;
-        if (StringUtils.isNotEmpty(segment.getName())) {
-            MetadataSegment existingSegment = segmentEntityMgr.findByName(segment.getName());
+        if (segment.getListSegment() != null) {
+            MetadataSegment existingSegment = segmentEntityMgr.findByExternalInfo(segment);
             if (existingSegment != null) {
                 persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
             } else {
+                segment.setName(NamingUtils.timestamp("Segment"));
                 persistedSegment = createListSegment(segment);
             }
-        } else if (segment.getListSegment() != null) {
-            MetadataSegment existingSegment = segmentEntityMgr.findByExternalInfo(segment);
+        } else if (StringUtils.isNotEmpty(segment.getName())) {
+            MetadataSegment existingSegment = segmentEntityMgr.findByName(segment.getName());
             if (existingSegment != null) {
                 persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
             } else {
@@ -160,7 +161,10 @@ public class SegmentServiceImpl implements SegmentService {
     private MetadataSegment createListSegment(MetadataSegment segment) {
         if (segment.getListSegment() != null) {
             ListSegment listSegment = segment.getListSegment();
-            listSegment.setS3DropFolder(S3PathBuilder.getS3ListSegmentDir(dateStageBucket, MultiTenantContext.getShortTenantId(), segment.getName()));
+            String s3Path = S3PathBuilder.getS3ListSegmentDir(dateStageBucket, MultiTenantContext.getShortTenantId(), segment.getName());
+            s3Path = s3Path //
+                    .replaceFirst("s3a:", "s3:").replaceFirst("s3n:", "s3:");
+            listSegment.setS3DropFolder(s3Path);
             listSegment.setCsvAdaptor(readCSVAdaptor());
         }
         return segmentEntityMgr.createListSegment(segment);
