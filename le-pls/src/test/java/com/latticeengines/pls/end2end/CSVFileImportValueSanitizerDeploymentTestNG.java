@@ -96,8 +96,9 @@ public class CSVFileImportValueSanitizerDeploymentTestNG extends CSVFileImportDe
         for (int i = 0; i < records.size(); i++) {
             if (i == 0) {
                 Assert.assertEquals(records.get(i).get(InterfaceName.PhoneNumber.name()).toString(), "123-456-7890");
+            } else {
+                Assert.assertNull(records.get(i).get(InterfaceName.PhoneNumber.name()));
             }
-            Assert.assertNull(records.get(i).get(InterfaceName.PhoneNumber.name()));
         }
     }
 
