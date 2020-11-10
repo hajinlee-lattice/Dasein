@@ -121,7 +121,8 @@ public class RollupDataReport extends RunSparkJob<RollupDataReportStepConfigurat
         }
         int targetSize = config.getNumTargets();
         if (targetSize > threshold) {
-            log.warn("rollup job will generate {} duns count for owner Id {} with level {}", targetSize, rootId, level);
+            log.warn("Rollup job will generate {} duns count, ownerId={}, level={}, tenant={}", targetSize, rootId,
+                    level, customerSpace);
         }
         return config;
     }
