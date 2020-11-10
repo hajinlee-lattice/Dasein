@@ -47,7 +47,7 @@ object PercentileCalculationHelper {
     calculatePercentileByFieldName(context.modelGuidFieldName, context.scoreCountFieldName,
       originalScoreFieldName, context.percentileFieldName, context.standardScoreField, secondarySortFieldName,
       context.minPct, context.maxPct, node, context.targetScoreDerivationInputs, context.targetScoreDerivationOutputs,
-      context.originalScoreFieldMap, targetScoreDerivation)
+      context.originalScoreFieldMap, targetScoreDerivation, true)
   }
 
   def calculatePercentileByFieldName(modelGuidFieldName: String, scoreCountFieldName: String,
@@ -56,9 +56,9 @@ object PercentileCalculationHelper {
     targetScoreDerivationInputs: Map[String, String],
     targetScoreDerivationOutputs: MMap[String, String],
     originalScoreFieldMap: Map[String, String],
-    targetScoreDerivation: Boolean): DataFrame = {
+    targetScoreDerivation: Boolean, skipProbability: Boolean): DataFrame = {
 
-    if (ScoreResultField.RawScore.displayName == originalScoreFieldName) {
+    if ((ScoreResultField.RawScore.displayName == originalScoreFieldName) && skipProbability) {
       return nodeInput
     }
 
