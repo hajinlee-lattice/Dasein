@@ -5,10 +5,13 @@ import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -60,6 +63,8 @@ import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.SplitImportMatchResultJob;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -134,7 +139,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             boolean isFromDataBlock = isFromDataBlock(cm);
             return isCustomer && !isIdToExclude && !isFromDataBlock;
         }).collect(Collectors.toList());
-        // Map<String, String> rejectedAttrs = convertToDispMap(rejectedCms);
         List<String> rejectedAttrs = sortOutputAttrs(rejectedCms);
         jobConfig.setRejectedAttrs(rejectedAttrs);
 
@@ -231,8 +235,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         matchToDUNSReport.setUnmatched(unmatchedCnt);
         dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
                 configuration.getUploadId(), report);
-
-
     }
 
     private String getCsvFilePath(HdfsDataUnit dataUnit) {
@@ -241,6 +243,64 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         } else {
             return getFirstCsvFilePath(dataUnit);
         }
+    }
+
+    private String getUploadS3Path() {
+        String matchResultName = getStringValueFromContext(MATCH_RESULT_TABLE_NAME);
+        Table matchResult = metadataProxy.getTable(configuration.getCustomerSpace().toString(), matchResultName);
+        HdfsDataUnit input = matchResult.toHdfsDataUnit("input");
+        return input.getPath();
+    }
+
+    private List<String> getCustomerFileHeaders() {
+        List<String> headers = new ArrayList<>();
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
+        String filePath = getUploadS3Path();
+
+        if (s3Service.objectExist(dropBoxSummary.getBucket(), filePath)) {
+            InputStream inputStream = s3Service.readObjectAsStream(dropBoxSummary.getBucket(), filePath);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            try (CSVReader csvReader = new CSVReader(inputStreamReader)) {
+                String[] nextRecord = csvReader.readNext();
+                headers.addAll(Arrays.asList(nextRecord));
+            } catch (IOException e) {
+                log.error("Error reading S3 file", e);
+            }
+        } else {
+            log.error("Import file does not exist at the given path " + filePath);
+        }
+        return headers;
+    }
+
+    private List<ColumnMetadata> sortCustomerAttrs(List<ColumnMetadata> attrs) {
+        List<ColumnMetadata> sortedCustomerAttrs = new ArrayList<>();
+
+        List<String> customerHeaders = getCustomerFileHeaders();
+        List<ColumnMetadata> otherAttrs = new ArrayList<>();
+        Map<ColumnMetadata, Integer> columnToCustomerIndex = new HashMap<>();
+
+        attrs.stream().forEach(columnMetadata -> {
+            int index = customerHeaders.indexOf(columnMetadata.getAttrName());
+            if (index == -1) {
+                otherAttrs.add(columnMetadata);
+            } else {
+                columnToCustomerIndex.put(columnMetadata, index);
+            }
+        });
+
+        Comparator<Map.Entry<ColumnMetadata, Integer>> compareByIndex = new Comparator<Map.Entry<ColumnMetadata, Integer>>() {
+            @Override
+            public int compare(Map.Entry<ColumnMetadata, Integer> o1, Map.Entry<ColumnMetadata, Integer> o2) {
+                return o1.getValue().compareTo(o2.getValue());
+            }
+        };
+
+        columnToCustomerIndex.entrySet().stream().sorted(compareByIndex).forEach(columnMetadataIntegerEntry -> {
+            sortedCustomerAttrs.add(columnMetadataIntegerEntry.getKey());
+        });
+
+        sortedCustomerAttrs.addAll(otherAttrs);
+        return sortedCustomerAttrs;
     }
 
     private List<String> sortOutputAttrs(Collection<ColumnMetadata> cms) {
@@ -265,7 +325,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             }
         }
         List<String> attrNames = new ArrayList<>();
-        customerAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
+        List<ColumnMetadata> sortedCustomerAttrs = sortCustomerAttrs(customerAttrs);
+        sortedCustomerAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
         attrNames.add(duns.getAttrName());
         candidateAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
         dataBlockAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
@@ -296,7 +357,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                 otherAttrs.add(cm);
             }
         }
-        customerAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
+        List<ColumnMetadata> sortedCustomerAttrs = sortCustomerAttrs(customerAttrs);
+        sortedCustomerAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
         if (duns != null) {
             dispNames.put(MatchedDuns, candidateFieldDispNames.get(MatchedDuns));
         }
