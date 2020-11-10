@@ -32,6 +32,8 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -71,6 +73,7 @@ public class AccountLookupToDynamoStep extends BaseExportToDynamo<AccountLookupT
             throw new UnsupportedOperationException(
                     String.format("Failed to retrieve lookup table for tenant %s", customerSpace.getTenantId()));
         }
+        markTablesInDataCollection(lookupTable);
         String lookupTablePath = lookupTable.getExtracts().get(0).getPath();
         log.info("Retrieved lookup table {} with path {}", lookupTable.getName(), lookupTablePath);
         HdfsToDynamoConfiguration eaiConfig = generateEaiConfig(lookupTable.getName(), lookupTablePath);
@@ -168,5 +171,14 @@ public class AccountLookupToDynamoStep extends BaseExportToDynamo<AccountLookupT
         unit.setPartitionKey(InterfaceName.AtlasLookupKey.name());
         unit.setSignature(configuration.getDynamoSignature());
         return unit;
+    }
+
+    private void markTablesInDataCollection(Table lookupTable) {
+        String customerSpace = configuration.getCustomerSpace().toString();
+        DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpace);
+        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, version);
+        List<String> tableNames = Collections.singletonList(lookupTable.getName());
+        status.setAccountLookupSource(tableNames);
+        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace, status, version);
     }
 }
