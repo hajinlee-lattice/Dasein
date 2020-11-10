@@ -80,6 +80,9 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         play = testPlayCreationHelper.getPlay();
         playLaunch = testPlayCreationHelper.getPlayLaunch();
 
+        List<Recommendation> recommendations = recommendationEntityMgr.findAll();
+        Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
+
         List<Long> tenantIds = recommendationEntityMgr.getAllTenantIds();
         Assert.assertTrue(CollectionUtils.isNotEmpty(tenantIds));
 
