@@ -68,6 +68,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskConfig;
+import com.latticeengines.domain.exposed.metadata.datafeed.sanitizer.PhoneValueSanitizer;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -210,9 +212,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     sendS3TemplateChangeEmail(customerSpace.toString(), dataFeedTask, user, false);
                 }
             }
-            dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta,
-                    customerSpace.toString());
-            return dataFeedTask.getUniqueId();
         } else {
             dataFeedMetadataService.applyAttributePrefix(cdlExternalSystemService, customerSpace.toString(), newMeta,
                     schemaTable, null);
@@ -239,6 +238,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             } else {
                 dataFeedTask.setTemplateDisplayName(feedType);
             }
+            // set default DataFeedTaskConfig when create DataFeedTask
+            dataFeedTask.setDataFeedTaskConfig(getDefaultTaskConfig(entity));
+
             dataFeedTaskService.createDataFeedTask(customerSpace.toString(), dataFeedTask);
             if (StringUtils.isEmpty(S3PathBuilder.getSystemNameFromFeedType(feedType))) {
                 String objectName = S3PathBuilder.getFolderNameFromFeedType(feedType);
@@ -254,10 +256,21 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             if (sendEmail) {
                 sendS3TemplateChangeEmail(customerSpace.toString(), dataFeedTask, user, true);
             }
-            dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta,
-                    customerSpace.toString());
-            return dataFeedTask.getUniqueId();
         }
+        dataFeedMetadataService.autoSetCDLExternalSystem(cdlExternalSystemService, newMeta,
+                customerSpace.toString());
+        return dataFeedTask.getUniqueId();
+    }
+
+    private DataFeedTaskConfig getDefaultTaskConfig(String entity) {
+        if (BusinessEntity.Account.name().equalsIgnoreCase(entity) || BusinessEntity.Contact.name().equalsIgnoreCase(entity)) {
+            DataFeedTaskConfig config = new DataFeedTaskConfig();
+            PhoneValueSanitizer phoneValueRegulator = new PhoneValueSanitizer();
+            phoneValueRegulator.setTrim(Boolean.TRUE);
+            config.addSanitizer(phoneValueRegulator);
+            return config;
+        }
+        return null;
     }
 
     private Table getSchemaTable(CustomerSpace customerSpace, String feedType, String entity, boolean withoutId,
