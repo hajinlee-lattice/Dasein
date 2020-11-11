@@ -1,13 +1,17 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.persistence.Column;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +68,25 @@ public class TableResourceHelper {
         log.info(String.format("getTableAttributes(%s, %s, %s)", customerSpace, tableName, pageable));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.getTableAttributes(space, tableName, pageable);
+    }
+
+    private static Set<String> whitelistColumns = null;
+    public boolean testIsValidColumn(String columnName) {
+        if (null == whitelistColumns) {
+            whitelistColumns = new HashSet<>();
+            for(Field field : Attribute.class.getDeclaredFields()) {
+                if (field.isAnnotationPresent(Column.class)) {
+                    whitelistColumns.add(field.getAnnotation(Column.class).name().toLowerCase());
+                }
+            }
+        }
+
+        if (!StringUtils.isEmpty(columnName)) {
+            if (null != whitelistColumns && whitelistColumns.size() > 0) {
+                return whitelistColumns.contains(columnName.toLowerCase());
+            }
+        }
+        return false;
     }
 
     public ModelingMetadata getTableMetadata(String customerSpace, String tableName) {
@@ -216,5 +239,4 @@ public class TableResourceHelper {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.registerAthenaDataUnit(space, tableName);
     }
-
 }

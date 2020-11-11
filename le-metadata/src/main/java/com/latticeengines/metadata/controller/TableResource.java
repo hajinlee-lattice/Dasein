@@ -71,7 +71,9 @@ public class TableResource extends BaseRestResource {
             @RequestParam(value = "size", required = false) Integer size,
             @RequestParam(value = "sort_dir", required = false) Direction sortDirection,
             @RequestParam(value = "sort_col", required = false) String sortColumn) {
-        Pageable pageRequest = getPageRequest(page, size, sortDirection, sortColumn);
+        Pageable pageRequest = tableResourceHelper.testIsValidColumn(sortColumn) ?
+                getPageRequest(page, size, sortDirection, sortColumn) :
+                getPageRequest(page, size, sortDirection, null);
         return tableResourceHelper.getTableAttributes(customerSpace, tableName, pageRequest);
     }
 
