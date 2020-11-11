@@ -40,6 +40,8 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
     private static final String[] FIELDS4 = { InterfaceName.Id.name(), "prefix__" + InterfaceName.AccountId.name(),
             "AID1", "AID2" };
 
+    private static final String[] FIELDS5 = { InterfaceName.Id.name(), "AID1", "AID2", "Expect_Remove" };
+
     @Test(groups = "functional")
     public void test() {
         List<Runnable> runnables = new ArrayList<>();
@@ -47,6 +49,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         runnables.add(this::test2);
         runnables.add(this::test3);
         runnables.add(this::test4);
+        runnables.add(this::test5);
         ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
 
@@ -346,6 +349,81 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertEquals(rows, expectedResult.length);
         return true;
     }
+
+    /**
+     * Test Exclude attribute
+     */
+    private void test5() {
+        List<String> orderedInput = uploadDataTest5();
+        log.info("Inputs for test3: {}", String.join(",", orderedInput));
+
+        MergeImportsConfig config = new MergeImportsConfig();
+        config.setDedupSrc(false);
+        config.setJoinKey(null);
+        config.setAddTimestamps(false);
+        config.setCloneSrcFields(new String[][] { //
+                // Copy AID1 to AID1_COPY
+                { "AID1", "AID1_COPY" },
+                // Cannot copy NON_EXISTS1 to NON_EXISTS1_COPY
+                { "NON_EXISTS1", "NON_EXISTS1_COPY" } });
+        config.setRenameSrcFields(new String[][] { //
+                // Rename AID1 to AID1_NEW
+                { "AID1", "AID1_NEW" }, //
+                // Cannot rename NON_EXISTS2 to NON_EXISTS2_NEW
+                { "NON_EXISTS2", "NON_EXISTS2_NEW" },
+                // Cannot rename due to AccountId already exists
+                { "AID2", InterfaceName.Id.name() } });
+        config.setExcludeAttrs(Collections.singletonList("Expect_Remove"));
+        SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace5());
+        verify(result, Collections.singletonList(this::verifyTarget5));
+    }
+
+    private List<String> uploadDataTest5() {
+        List<String> orderedInput = new ArrayList<>();
+        List<Pair<String, Class<?>>> fields = new ArrayList<>();
+        for (String field : FIELDS5) {
+            fields.add(Pair.of(field, String.class));
+        }
+        Object[][] data = new Object[][] { //
+                { "1", "A1", "B1", "R1" }, //
+                { "2", "A2", "B2", "R2" }, //
+        };
+        orderedInput.add(uploadHdfsDataUnit(data, fields));
+
+        data = new Object[][] { //
+                { "3", "A1", "B1", "R3" }, //
+                { "4", "A3", "B3", "R4" }, //
+        };
+        orderedInput.add(uploadHdfsDataUnit(data, fields));
+        return orderedInput;
+    }
+
+    private String getWorkspace5() {
+        return String.format("/tmp/%s/%s/Test5", leStack, this.getClass().getSimpleName());
+    }
+
+    private Boolean verifyTarget5(HdfsDataUnit tgt) {
+        // Id, AID1_COPY, AID1_NEW, AID2
+        Object[][] expectedResult = new String[][] { //
+                { "1", "A1", "A1", "B1" }, //
+                { "2", "A2", "A2", "B2" }, //
+                { "3", "A1", "A1", "B1" }, //
+                { "4", "A3", "A3", "B3" }, //
+        };
+        Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
+                .collect(Collectors.toMap(arr -> (String) arr[0], Arrays::asList));
+        Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
+        int rows = 0;
+        for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
+            String[] expectedFlds = { InterfaceName.Id.name(), "AID1_COPY", "AID1_NEW", "AID2" };
+            Assert.assertNull(record.getSchema().getField("Expect_Remove"));
+            verifyTargetData(expectedFlds, expectedMap, record, "");
+            rows++;
+        }
+        Assert.assertEquals(rows, expectedResult.length);
+        return true;
+    }
+
 
     /******************
      * Shared methods

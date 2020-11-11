@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATTR_LDC_DUNS;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
@@ -355,6 +356,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setDedupSrc(true);
         config.setJoinKey(joinKey);
         config.setAddTimestamps(true);
+        config.setExcludeAttrs(Collections.singletonList(ATTR_LDC_DUNS));
         if (hasSystemBatch) {
             config.setHasSystem(true);
         }

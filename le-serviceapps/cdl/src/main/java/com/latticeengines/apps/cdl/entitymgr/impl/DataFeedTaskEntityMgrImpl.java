@@ -184,7 +184,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public List<String> registerExtract(DataFeedTask datafeedTask, String tableName, Extract extract) {
         Table templateTable = getTemplate(tableName);
-        String registeredTableName = registerExtractTable(templateTable, extract, datafeedTask);
+        String registeredTableName = registerExtractTable(templateTable, extract);
         updateDataFeedTaskAfterRegister(datafeedTask);
         return Collections.singletonList(registeredTableName);
     }
@@ -194,11 +194,24 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     public List<String> registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts) {
         Table templateTable = getTemplate(tableName);
         List<String> registeredTables = new ArrayList<>();
-        for (int i = 0; i < extracts.size(); i++) {
-            Extract extract = extracts.get(i);
-            registeredTables.add(registerExtractTable(templateTable, extract, datafeedTask));
+        for (Extract extract : extracts) {
+            registeredTables.add(registerExtractTable(templateTable, extract));
         }
         updateDataFeedTaskAfterRegister(datafeedTask);
+        return registeredTables;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public List<String> registerImportData(DataFeedTask dataFeedTask, String dataTableName) {
+        Table dataTable = tableEntityMgr.findByName(dataTableName);
+        List<String> registeredTables = new ArrayList<>();
+        if (dataTable != null && CollectionUtils.isNotEmpty(dataTable.getExtracts())) {
+            for (Extract extract : dataTable.getExtracts()) {
+                registeredTables.add(registerExtractTable(dataTable, extract));
+            }
+            updateDataFeedTaskAfterRegister(dataFeedTask);
+        }
         return registeredTables;
     }
 
@@ -210,8 +223,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         return templateTable;
     }
 
-    private String registerExtractTable(Table template, Extract extract, DataFeedTask datafeedTask) {
-        Table cloneTable = TableUtils.clone(template, NamingUtils.uuid("DataTable"));
+    private String registerExtractTable(Table template, Extract extract) {
+        Table cloneTable = TableUtils.clone(template, NamingUtils.uuid("DataTable"), true);
+        cloneTable.setExtracts(new ArrayList<>());
         cloneTable.setTenant(MultiTenantContext.getTenant());
         cloneTable.addExtract(extract);
         log.info(String.format("Adding extract to new data table %s", template.getName()));

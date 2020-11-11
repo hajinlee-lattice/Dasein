@@ -53,13 +53,14 @@ public class UpsertTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of("Id", Integer.class), //
                 Pair.of("Attr1", String.class), //
                 Pair.of("Attr2", Long.class), //
-                Pair.of("Attr3", Boolean.class) //
+                Pair.of("Attr3", Boolean.class), //
+                Pair.of("Expect_Remove", String.class) //
         );
         data = new Object[][] { //
-                {2, "22", null, true}, //
-                {3, "23", -3L, false}, //
-                {4, "24", null, null}, //
-                {5, "25", -5L, false} //
+                {2, "22", null, true, "R1"}, //
+                {3, "23", -3L, false, "R2"}, //
+                {4, "24", null, null, "R3"}, //
+                {5, "25", -5L, false, "R4"} //
         };
         uploadHdfsDataUnit(data, fields);
     }
@@ -69,7 +70,8 @@ public class UpsertTestNG extends SparkJobFunctionalTestNGBase {
         return new Object[][] { //
                 { getJoinByConfig(),  getJoinByVerifier() }, //
                 { getAttr2FromLhsConfig(), getAttr2FromLhsByVerifier() }, //
-                { getNotOverwriteNullConfig(), getNotOverwriteNullVerifier() } //
+                { getNotOverwriteNullConfig(), getNotOverwriteNullVerifier() }, //
+                { getRemoveExtraColumnConfig(), getRemoveExtraColumnVerifier() } //
         };
     }
 
@@ -197,6 +199,7 @@ public class UpsertTestNG extends SparkJobFunctionalTestNGBase {
         return new UpsertResultVerifier() {
             @Override
             public void verifyRecord(GenericRecord record) {
+                Assert.assertNotNull(record.getSchema().getField("Expect_Remove"));
                 int id = (int) record.get("Id");
                 String attr1 = record.get("Attr1") == null ? null : record.get("Attr1").toString();
                 Long attr2 = record.get("Attr2") == null ? null : (long) record.get("Attr2");
@@ -230,6 +233,27 @@ public class UpsertTestNG extends SparkJobFunctionalTestNGBase {
                     default:
                         Assert.fail("Should not see a record with id " + id + ": " + record.toString());
                 }
+            }
+
+            @Override
+            public void verifyCount(int count) {
+
+            }
+        };
+    }
+
+    private UpsertConfig getRemoveExtraColumnConfig() {
+        UpsertConfig config = UpsertConfig.joinBy("Id");
+        config.setNotOverwriteByNull(true);
+        config.setExcludeAttrs(Arrays.asList("Expect_Remove", "Something_else"));
+        return config;
+    }
+
+    private UpsertResultVerifier getRemoveExtraColumnVerifier() {
+        return new UpsertResultVerifier() {
+            @Override
+            public void verifyRecord(GenericRecord record) {
+                Assert.assertNull(record.getSchema().getField("Expect_Remove"));
             }
 
             @Override

@@ -28,6 +28,9 @@ public class MergeImportsConfig extends SparkJobConfig {
     @JsonProperty("Templates")
     private List<String> templates;
 
+    @JsonProperty("ExcludeAttrs")
+    private List<String> excludeAttrs;
+
     @JsonProperty("AddTimestamps")
     private boolean addTimestamps; // add cdl timestamp cols
 
@@ -140,4 +143,11 @@ public class MergeImportsConfig extends SparkJobConfig {
         this.templates = templates;
     }
 
+    public List<String> getExcludeAttrs() {
+        return excludeAttrs;
+    }
+
+    public void setExcludeAttrs(List<String> excludeAttrs) {
+        this.excludeAttrs = excludeAttrs;
+    }
 }
