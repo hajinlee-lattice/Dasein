@@ -110,7 +110,7 @@ public class RecalculatePercentileScoreJobDataFlow
             jobConfig.percentileLowerBound = percentileLowerBound;
             jobConfig.percentileUpperBound = percentileUpperBound;
             jobConfig.targetScoreDerivation = configuration.isTargetScoreDerivation();
-
+            jobConfig.originalScoreFieldMap = scoreFieldMap;
             jobConfig.targetScoreDerivationInputs = //
                     ExpectedRevenueDataFlowUtil.getTargetScoreFiDerivationInputs( //
                             configuration.getCustomerSpace(), yarnConfiguration, modelSummaryProxy, scoreFieldMap);
