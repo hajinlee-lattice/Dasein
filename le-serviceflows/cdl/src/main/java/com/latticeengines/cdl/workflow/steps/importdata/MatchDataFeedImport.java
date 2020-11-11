@@ -18,6 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -45,6 +48,8 @@ import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
 import com.latticeengines.serviceflows.workflow.match.BulkMatchService;
 
+@Component("matchDataFeedImport")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(MatchDataFeedImport.class);
@@ -66,11 +71,11 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
     @Override
     public void execute() {
         log.info("Executing spark step " + getClass().getSimpleName());
+        customerSpace = configuration.getCustomerSpace();
         if (skipMatch()) {
             log.info("Match condition not meet, skip match!");
             return;
         }
-        customerSpace = parseCustomerSpace(configuration);
         List<String> inputAvroPathList = getInputAvroPathList();
         if (CollectionUtils.isNotEmpty(inputAvroPathList)) {
             List<MatchCommand> matchCommandList = new ArrayList<>();
@@ -154,6 +159,8 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(true);
         matchInput.setUseDirectPlus(useDirectPlus);
+        matchInput.setExcludePublicDomain(false);
+        matchInput.setPublicDomainAsNormalDomain(false);
 
         return matchInput;
     }

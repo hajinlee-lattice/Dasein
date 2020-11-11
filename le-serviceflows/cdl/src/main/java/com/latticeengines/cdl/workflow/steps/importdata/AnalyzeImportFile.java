@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportFileSignature;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -30,7 +31,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.InputPresenceJob;
 
-@Component
+@Component("analyzeImportFile")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AnalyzeImportFile extends RunSparkJob<ImportDataFeedTaskConfiguration, InputPresenceConfig> {
 
@@ -56,7 +57,8 @@ public class AnalyzeImportFile extends RunSparkJob<ImportDataFeedTaskConfigurati
             log.error("EAI import job {} not exists, or cannot find import data.", applicationId);
             return null;
         }
-        List<DataUnit> dataUnits = importJobDetail.getPathDetail().stream().map(HdfsDataUnit::fromPath).collect(Collectors.toList());
+        List<DataUnit> dataUnits = importJobDetail.getPathDetail().stream()
+                .map(inputPath -> HdfsDataUnit.fromPath(PathUtils.stripoutProtocol(inputPath))).collect(Collectors.toList());
         InputPresenceConfig config = new InputPresenceConfig();
         config.setInput(dataUnits);
         config.setInputNames(ImmutableSet.of(InterfaceName.DUNS.name(), InterfaceName.Website.name(),
