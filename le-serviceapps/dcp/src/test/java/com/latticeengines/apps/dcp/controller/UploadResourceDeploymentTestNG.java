@@ -192,7 +192,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(zipFile);
         List<FileHeader> fileHeaders = zipFile.getFileHeaders();
         Assert.assertNotNull(fileHeaders);
-        Assert.assertEquals(fileHeaders.size(), 4);
+        Assert.assertEquals(fileHeaders.size(), 5);
         String tmp = System.getProperty("java.io.tmpdir");
         if (tmp.endsWith("/")) {
             tmp = tmp.substring(0, tmp.length() - 1);
@@ -202,12 +202,12 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         File destDir = new File(destPath);
         Assert.assertTrue(destDir.isDirectory());
         String[] files = destDir.list();
-        Assert.assertEquals(ArrayUtils.getLength(files), 4);
+        Assert.assertEquals(ArrayUtils.getLength(files), 5);
 
         // Check the correct file names for each
         List<String> fileNames = Arrays.asList(destDir.list());
         Assert.assertTrue(fileNames.contains("file2.csv"));
-        Assert.assertTrue(fileNames.contains("file2_Error.csv"));
+        Assert.assertTrue(fileNames.contains("file2_Ingestion_Errors.csv"));
         Assert.assertTrue(fileNames.contains("file2_Matched.csv"));
         Assert.assertTrue(fileNames.contains("file2_Unmatched.csv"));
         Assert.assertTrue(fileNames.contains("file2_Processing_Errors.csv"));
@@ -226,8 +226,8 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             boolean includeErrors = ((i / 8) % 2 == 1);
             boolean includeProcessing = ((i / 16) % 2 == 1);
 
-            Boolean[] includes = {includeRaw, includeMatched, includeUnmatched, includeErrors};
-            int numFiles = (int) Arrays.stream(includes).filter(x -> x).count();
+            Boolean[] includes = {includeRaw, includeMatched, includeUnmatched, includeErrors, includeProcessing};
+            int numFiles = (int) Arrays.stream(includes).filter(Boolean::booleanValue).count();
 
             String downloadParams = "";
             if (includeRaw) {
@@ -261,7 +261,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             Assert.assertEquals(includeRaw, fileNames.contains("file2.csv"));
             Assert.assertEquals(includeMatched, fileNames.contains("file2_Matched.csv"));
             Assert.assertEquals(includeUnmatched, fileNames.contains("file2_Unmatched.csv"));
-            Assert.assertEquals(includeErrors, fileNames.contains("file2_Error.csv"));
+            Assert.assertEquals(includeErrors, fileNames.contains("file2_Ingestion_Errors.csv"));
             Assert.assertEquals(includeProcessing, fileNames.contains("file2_Processing_Errors.csv"));
         }
     }

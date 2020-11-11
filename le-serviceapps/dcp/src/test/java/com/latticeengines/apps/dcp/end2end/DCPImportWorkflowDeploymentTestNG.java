@@ -547,10 +547,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                     mceIdx = headers.indexOf("Processing Error Type");
                     mcecIdx = headers.indexOf("Processing Error Code");
                 } else {
-                    log.info(nextRecord[0]);
-                    log.info(nextRecord[mceIdx]);
-                    log.info(nextRecord[mcecIdx]);
-
                     Assert.assertEquals(StringUtils.isNotEmpty(nextRecord[mceIdx]), shouldContainErrors);
                     Assert.assertEquals(StringUtils.isNotEmpty(nextRecord[mcecIdx]), shouldContainErrors);
                 }

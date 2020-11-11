@@ -44,9 +44,6 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
      * Bound to whole travel
      **************************/
 
-    // The error codes as supplied in the D+ response
-    private List<String> dnbErrors = new ArrayList<>();
-
     private String dataCloudVersion;
 
     // MatchInput only provides immutable field values. Don't make another copy in MatchTraveler.  Don't make
