@@ -2,6 +2,8 @@ package com.latticeengines.cdl.workflow.steps.campaign;
 
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -30,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -54,8 +57,12 @@ import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUniverseStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(GenerateLaunchUniverse.class);
 
-    private static final String CONTACTS_PER_ACCOUNT_SORT_ATTRIBUTE = "ContactsPerAccountSortAttribute";
-    private static final String CONTACTS_PER_ACCOUNT_SORT_DIRECTION = "ContactsPerAccountSortDirection";
+    private static final String CDL = "CDL";
+    private static final String CONTACTS_PER_ACCOUNT_SORT = "/ContactsPerAccountSort";
+    private static final String ATTRIBUTE = "/Attribute";
+    private static final String DIRECTION = "/Direction";
+    private static final String CDL_UPDATED_TIME = "CDLUpdatedTime";
+    private static final String DESC = "DESC";
 
     @Inject
     private PeriodProxy periodProxy;
@@ -65,15 +72,6 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
 
     @Inject
     private CampaignLaunchUtils campaignLaunchUtils;
-
-    @Value("${datacloud.manage.url}")
-    private String url;
-
-    @Value("${datacloud.manage.user}")
-    private String user;
-
-    @Value("${datacloud.manage.password.encrypted}")
-    private String password;
 
     private DataCollection.Version version;
     private String evaluationDate;
@@ -223,17 +221,13 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
 
                 String sortAttr = getSortAttributeFromZK(customerSpace);
                 String sortDir = getSortDirFromZK(customerSpace);
-                GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig( //
-                        launchDataUniverseDataUnit, getRandomWorkspace(), maxContactsPerAccount, //
-                        maxAccountsToLaunch, sortAttr, sortDir);
 
-                String encryptionKey = CipherUtils.generateKey();
-                String saltHint = CipherUtils.generateKey();
-                config.setManageDbUrl(url);
-                config.setUser(user);
-                config.setEncryptionKey(encryptionKey);
-                config.setSaltHint(saltHint);
-                config.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
+                List<DataUnit> inputUnits = new ArrayList<>();
+                inputUnits.add(launchDataUniverseDataUnit);
+
+                GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig( //
+                        getRandomWorkspace(), maxContactsPerAccount, maxAccountsToLaunch, sortAttr, sortDir);
+
                 log.info("Executing GenerateLaunchUniverseJob with config: " + JsonUtils.serialize(config));
 
                 SparkJobResult result = executeSparkJob(GenerateLaunchUniverseJob.class, config);
@@ -249,12 +243,14 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
     }
 
     private String getSortAttributeFromZK(CustomerSpace customerSpace) {
-        Camille camille = CamilleEnvironment.getCamille();
-        String podId = CamilleEnvironment.getPodId();
-        String sortAttr = CONTACTS_PER_ACCOUNT_SORT_ATTRIBUTE;
+        Path path = null;
+        String sortAttr = CDL_UPDATED_TIME;
 
         try {
-            Path path = PathBuilder.buildContactsPerAccountSortAttributePath(podId, customerSpace);
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            path = PathBuilder.buildCustomerSpaceServicePath(podId, customerSpace, CDL)
+                    .append(CONTACTS_PER_ACCOUNT_SORT).append(ATTRIBUTE);
             if (camille.exists(path)) {
                 sortAttr = camille.get(path).getData();
                 log.info("Found tenant override sort attribute: ", sortAttr);
@@ -269,12 +265,14 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
     }
 
     private String getSortDirFromZK(CustomerSpace customerSpace) {
-        Camille camille = CamilleEnvironment.getCamille();
-        String podId = CamilleEnvironment.getPodId();
-        String sortDir = CONTACTS_PER_ACCOUNT_SORT_DIRECTION;
+        Path path = null;
+        String sortDir = DESC;
 
         try {
-            Path path = PathBuilder.buildContactsPerAccountSortDirectionPath(podId, customerSpace);
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            path = PathBuilder.buildCustomerSpaceServicePath(podId, customerSpace, CDL)
+                    .append(CONTACTS_PER_ACCOUNT_SORT).append(DIRECTION);
             if (camille.exists(path)) {
                 sortDir = camille.get(path).getData();
                 log.info("Found tenant override sort direction: ", sortDir);

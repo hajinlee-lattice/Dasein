@@ -80,12 +80,11 @@
       "Data": ""
     },
     {
-      "Node": "ContactsPerAccountSortAttribute",
-      "Data": "CDLUpdatedTime"
-    },
-    {
-      "Node": "ContactsPerAccountSortDirection",
-      "Data": "DESC"
+      "Node": "ContactsPerAccountSort",
+      "Children": [
+        {"Node": "Attribute", "Data": "CDLUpdatedTime"},
+        {"Node": "Direction", "Data": "DESC"}
+      ]
     }
   ]
 }

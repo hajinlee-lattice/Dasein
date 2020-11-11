@@ -1,12 +1,11 @@
 package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchUniverseJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{col, row_number}
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 
 class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJobConfig] {
@@ -14,32 +13,20 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
   override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateLaunchUniverseJobConfig]): Unit = {
 
     val config: GenerateLaunchUniverseJobConfig = lattice.config
-    val launchData = loadHdfsUnit(spark, config.getLaunchData.asInstanceOf[HdfsDataUnit])
+    val input : DataFrame = lattice.input.head
     val accountId = InterfaceName.AccountId.name()
     val maxContactsPerAccount = config.getMaxContactsPerAccount
     val maxAccountsToLaunch = config.getMaxAccountsToLaunch
     val sortAttr = config.getContactsPerAccountSortAttribute
     val sortDir = config.getContactsPerAccountSortDirection
 
-    logSpark("launchData schema is as follows:")
-    launchData.printSchema
+    logSpark("Input schema is as follows:")
+    input.printSchema
 
-    var trimmedData = launchData
-    var w = Window.partitionBy(accountId)
+    var trimmedData = input
 
-    if (maxContactsPerAccount != null) {
-      val rowNumber = "rowNumber"
-
-      if (sortDir == "DESC") {
-        w = w.orderBy(col(sortAttr).desc)
-      } else {
-        w = w.orderBy(col(sortAttr))
-      }
-
-      trimmedData = launchData
-        .withColumn(rowNumber, row_number.over(w))
-        .filter(col(rowNumber) <= maxContactsPerAccount)
-        .drop(rowNumber)
+    if (input.columns.contains(sortAttr) && maxContactsPerAccount != null) {
+      trimmedData = limitContactsPerAccount(trimmedData, accountId, sortAttr, sortDir, maxContactsPerAccount)
     }
 
     if (maxAccountsToLaunch != null) {
@@ -49,4 +36,18 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     lattice.output = List(trimmedData)
   }
 
+  def limitContactsPerAccount(trimmedData: DataFrame, accountId: String, sortAttr: String, sortDir: String, maxContactsPerAccount: Long): DataFrame = {
+    val rowNumber = "rowNumber"
+    var w = Window.partitionBy(accountId)
+    if (sortDir == "DESC") {
+      w = w.orderBy(col(sortAttr).desc)
+    } else {
+      w = w.orderBy(col(sortAttr))
+    }
+
+    trimmedData
+      .withColumn(rowNumber, row_number.over(w))
+      .filter(col(rowNumber) <= maxContactsPerAccount.toInt)
+      .drop(rowNumber)
+  }
 }
