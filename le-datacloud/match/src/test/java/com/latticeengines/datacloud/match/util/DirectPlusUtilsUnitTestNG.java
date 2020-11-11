@@ -37,7 +37,19 @@ public class DirectPlusUtilsUnitTestNG {
         DirectPlusUtils.parseJsonResponse(response, context, DnBAPIType.REALTIME_ENTITY);
         Assert.assertTrue(CollectionUtils.isNotEmpty(context.getCandidates()));
         for (DnBMatchCandidate candidate: context.getCandidates()) {
+            // System.out.println(JsonUtils.pprint(candidate));
             Assert.assertNotNull(candidate.getDuns());
+
+            if ("060902413".equals(candidate.getDuns())) {
+                // verify family tree roles
+                Assert.assertTrue(CollectionUtils.isNotEmpty(candidate.getFamilyTreeRoles()));
+                Assert.assertEquals(candidate.getFamilyTreeRoles().get(0), "Parent / Headquarters");
+
+                // verify exclusion flags
+                Assert.assertFalse(candidate.getMailUndeliverable());
+                Assert.assertFalse(candidate.getUnreachable());
+            }
+
             NameLocation nameLocation = candidate.getNameLocation();
             Assert.assertNotNull(nameLocation);
             if ("060902413".equals(candidate.getDuns())) {
