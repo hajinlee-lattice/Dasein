@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.apps.cdl.entitymgr.DashboardFilterEntityMgr;
 import com.latticeengines.apps.cdl.service.DashboardFilterService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.dashboard.Dashboard;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
 
 @Service("dashboardFilterService")
@@ -28,15 +27,10 @@ public class DashboardFilterServiceImpl implements DashboardFilterService {
             log.error("DashboardFilter can't be null.");
             return null;
         }
-        DashboardFilter dashboardFilter1 = dashboardFilterEntityMgr.findByNameAndDashboard(dashboardFilter.getName(),
-                dashboardFilter.getDashboard());
+        DashboardFilter dashboardFilter1 = dashboardFilterEntityMgr.findByPid(dashboardFilter.getPid());
         if (dashboardFilter1 == null) {
             dashboardFilter1 = new DashboardFilter();
-        } else if (dashboardFilter.getPid() == null || (dashboardFilter.getPid() != null && !dashboardFilter.getPid().equals(dashboardFilter1.getPid()))) {
-            log.error("already exist an DashboardFilter, name: {}, Dashboard: {} in this tenant.",
-                    dashboardFilter.getName(), dashboardFilter.getDashboard());
         }
-        dashboardFilter1.setDashboard(dashboardFilter.getDashboard());
         dashboardFilter1.setFilterValue(dashboardFilter.getFilterValue());
         dashboardFilter1.setName(dashboardFilter.getName());
         dashboardFilter1.setTenant(MultiTenantContext.getTenant());
@@ -50,14 +44,9 @@ public class DashboardFilterServiceImpl implements DashboardFilterService {
             log.error("DashboardFilter can't be null.");
             return;
         }
-        DashboardFilter dashboardFilter1 = dashboardFilterEntityMgr.findByNameAndDashboard(dashboardFilter.getName(),
-                dashboardFilter.getDashboard());
+        DashboardFilter dashboardFilter1 = dashboardFilterEntityMgr.findByPid(dashboardFilter.getPid());
         if (dashboardFilter1 == null) {
-            log.error("can't find match dashboardFilter item in db. input dashboardFilter is {}.", dashboardFilter);
-            return;
-        }
-        if (!dashboardFilter.getPid().equals(dashboardFilter1.getPid())) {
-            log.error("input item can't match the db item, input: {}, db: {}.", dashboardFilter, dashboardFilter1);
+            log.error("can't find dashboardFilter item in db. input dashboardFilter is {}.", dashboardFilter);
             return;
         }
         dashboardFilterEntityMgr.delete(dashboardFilter1);
@@ -69,13 +58,8 @@ public class DashboardFilterServiceImpl implements DashboardFilterService {
     }
 
     @Override
-    public DashboardFilter findByNameAndDashboard(String customerSpace, String name, Dashboard dashboard) {
-        return dashboardFilterEntityMgr.findByNameAndDashboard(name, dashboard);
-    }
-
-    @Override
-    public List<DashboardFilter> findAllByDashboard(String customerSpace, Dashboard dashboard) {
-        return dashboardFilterEntityMgr.findAllByDashboard(dashboard);
+    public DashboardFilter findByName(String customerSpace, String name) {
+        return dashboardFilterEntityMgr.findByName(name);
     }
 
     @Override

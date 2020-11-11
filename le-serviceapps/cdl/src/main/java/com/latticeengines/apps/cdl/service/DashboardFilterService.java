@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.cdl.dashboard.Dashboard;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
 
 public interface DashboardFilterService {
@@ -13,9 +12,7 @@ public interface DashboardFilterService {
 
     DashboardFilter findByPid(String customerSpace, Long pid);
 
-    DashboardFilter findByNameAndDashboard(String customerSpace, String name, Dashboard dashboard);
-
-    List<DashboardFilter> findAllByDashboard(String customerSpace, Dashboard dashboard);
+    DashboardFilter findByName(String customerSpace, String name);
 
     List<DashboardFilter> findAllByTenant(String customerSpace);
 }

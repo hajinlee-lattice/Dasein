@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "DASHBOARD_FILTER", uniqueConstraints = { //
-        @UniqueConstraint(columnNames = { "NAME", "FK_TENANT_ID", "DASHBOARD_PID" }) })
+        @UniqueConstraint(columnNames = { "NAME", "FK_TENANT_ID" }) })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DashboardFilter implements HasPid, HasTenant, Serializable {
@@ -44,11 +44,6 @@ public class DashboardFilter implements HasPid, HasTenant, Serializable {
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
-
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "DASHBOARD_PID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Dashboard dashboard;
 
     @Column(name = "NAME", nullable = false)
     @JsonProperty("name")
@@ -76,14 +71,6 @@ public class DashboardFilter implements HasPid, HasTenant, Serializable {
     @Override
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
-    }
-
-    public Dashboard getDashboard() {
-        return dashboard;
-    }
-
-    public void setDashboard(Dashboard dashboard) {
-        this.dashboard = dashboard;
     }
 
     public String getName() {

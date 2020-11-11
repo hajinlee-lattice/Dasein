@@ -33,13 +33,9 @@ public class DashboardServiceImpl implements DashboardService {
             return null;
         }
         Tenant tenant = MultiTenantContext.getTenant();
-        Dashboard dashboard1 = dashboardEntityMgr.findByTenantAndName(tenant, dashboard.getName());
+        Dashboard dashboard1 = dashboardEntityMgr.findByPid(dashboard.getPid());
         if (dashboard1 == null) {
             dashboard1 = new Dashboard();
-        } else if (dashboard.getPid() == null || (dashboard.getPid() != null && !dashboard.getPid().equals(dashboard1.getPid()))) {
-            log.error("Dashboard name {} already exist in DashBoard Table, customerSpace is {}", dashboard.getName(),
-                    customerSpace);
-            return null;
         }
         dashboard1.setName(dashboard.getName());
         dashboard1.setDashboardUrl(dashboard.getDashboardUrl());
@@ -60,10 +56,8 @@ public class DashboardServiceImpl implements DashboardService {
             return false;
         }
         Tenant tenant = MultiTenantContext.getTenant();
-        Dashboard dashboard1 = dashboardEntityMgr.findByTenantAndName(tenant, dashboard.getName());
-        if (!dashboard.getPid().equals(dashboard1.getPid())) {
-            log.error("customerSpace: {}, dashboard pid is {}, find db dashboard pid is {}, didn't match, can't " +
-                            "delete.", customerSpace, dashboard.getName(), dashboard1.getName());
+        Dashboard dashboard1 = dashboardEntityMgr.findByPid(dashboard.getPid());
+        if (dashboard1 == null) {
             return false;
         }
         dashboardEntityMgr.delete(dashboard1);

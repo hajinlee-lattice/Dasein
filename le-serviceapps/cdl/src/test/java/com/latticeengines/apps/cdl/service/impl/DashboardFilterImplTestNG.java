@@ -14,11 +14,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.DashboardFilterService;
-import com.latticeengines.apps.cdl.service.DashboardService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
-import com.latticeengines.domain.exposed.cdl.dashboard.Dashboard;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
 
 public class DashboardFilterImplTestNG extends CDLFunctionalTestNGBase {
@@ -26,18 +24,13 @@ public class DashboardFilterImplTestNG extends CDLFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(DashboardFilterImplTestNG.class);
 
     @Inject
-    private DashboardService dashboardService;
-    @Inject
     private DashboardFilterService dashboardFilterService;
 
-    private String dashboardName = "dashboard1";
-    private String dashboardUrl = "www.dnb.com/<Industry>";
     private String filterName = "filter1";
     private String updateFilterName = "DateStr";
     private String filterValue = "{\"year\", \"month\", \"day\"}";
     private RetryTemplate retry;
     private Long filterPid;
-    private Dashboard created;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -48,23 +41,10 @@ public class DashboardFilterImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCreate() {
-        Dashboard dashboard = new Dashboard();
-        dashboard.setName(dashboardName);
-        dashboard.setDashboardUrl(dashboardUrl);
-        dashboard.setTenant(mainTestTenant);
-        created = dashboardService.createOrUpdate(mainCustomerSpace, dashboard);
-        log.info("Dashboard is {}.", JsonUtils.serialize(created));
-        log.info("pid is {}", created.getPid());
-        Assert.assertNotNull(created.getPid());
-        List<Dashboard> dashboardList = dashboardService.findAllByTenant(mainCustomerSpace);
-        Assert.assertEquals(dashboardList.size(), 1);
-        Assert.assertEquals(dashboardList.get(0).getName(), dashboardName);
-        Assert.assertEquals(dashboardList.get(0).getDashboardUrl(), dashboardUrl);
         DashboardFilter filter = new DashboardFilter();
         filter.setName(filterName);
         filter.setFilterValue(filterValue);
         filter.setTenant(mainTestTenant);
-        filter.setDashboard(created);
         DashboardFilter createdFilter = dashboardFilterService.createOrUpdate(mainCustomerSpace, filter);
         log.info("DashboardFilter is {}.", JsonUtils.serialize(createdFilter));
         log.info("DashboardFilter pid is {}", createdFilter.getPid());
@@ -90,8 +70,7 @@ public class DashboardFilterImplTestNG extends CDLFunctionalTestNGBase {
         filter.setName(updateFilterName);
         dashboardFilterService.createOrUpdate(mainCustomerSpace, filter);
         retry.execute(context -> {
-            createdAtom.set(dashboardFilterService.findByNameAndDashboard(mainCustomerSpace, updateFilterName,
-                    created));
+            createdAtom.set(dashboardFilterService.findByName(mainCustomerSpace, updateFilterName));
             Assert.assertNotNull(createdAtom.get());
             return true;
         });
@@ -99,7 +78,7 @@ public class DashboardFilterImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(updateFilter.getPid(), filterPid);
         AtomicReference<List<DashboardFilter>> createdAtom1 = new AtomicReference<>();
         retry.execute(context -> {
-            createdAtom1.set(dashboardFilterService.findAllByDashboard(mainCustomerSpace, created));
+            createdAtom1.set(dashboardFilterService.findAllByTenant(mainCustomerSpace));
             Assert.assertEquals(createdAtom1.get().size(), 1);
             return true;
         });
@@ -108,7 +87,7 @@ public class DashboardFilterImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(dashboardFilterList.get(0).getName(), updateFilterName);
         dashboardFilterService.delete(mainCustomerSpace, updateFilter);
         retry.execute(context -> {
-            createdAtom1.set(dashboardFilterService.findAllByDashboard(mainCustomerSpace, created));
+            createdAtom1.set(dashboardFilterService.findAllByTenant(mainCustomerSpace));
             Assert.assertEquals(createdAtom1.get().size(), 0);
             return true;
         });

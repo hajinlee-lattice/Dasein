@@ -14,7 +14,6 @@ import com.latticeengines.apps.cdl.repository.reader.DashboardFilterReaderReposi
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.dashboard.Dashboard;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -34,16 +33,9 @@ public class DashboardFilterEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Das
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public DashboardFilter findByNameAndDashboard(String name, Dashboard dashboard) {
+    public DashboardFilter findByName(String name) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return readerRepository.findByNameAndDashboardAndTenant(name, dashboard, tenant);
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<DashboardFilter> findAllByDashboard(Dashboard dashboard) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        return readerRepository.findAllByDashboardAndTenant(dashboard, tenant);
+        return readerRepository.findByNameAndTenant(name, tenant);
     }
 
     @Override
