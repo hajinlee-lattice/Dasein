@@ -32,11 +32,11 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("ConfidenceCodeAttr")
     private String confidenceCodeAttr;
 
-    @JsonProperty("ErrorIndicator")
-    private String errorIndicator;
+    @JsonProperty("ErrorIndicatorAttr")
+    private String errorIndicatorAttr;
 
-    @JsonProperty("ErrorCodeCol")
-    private String errorCodeCol;
+    @JsonProperty("ErrorCodeAttr")
+    private String errorCodeAttr;
 
     @JsonProperty("IgnoreErrors")
     private Map<String, Set<String>> ignoreErrors;
@@ -118,20 +118,20 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
         this.countryAttr = countryAttr;
     }
 
-    public String getErrorIndicator() {
-        return errorIndicator;
+    public String getErrorIndicatorAttr() {
+        return errorIndicatorAttr;
     }
 
-    public void setErrorIndicator(String errorIndicator) {
-        this.errorIndicator = errorIndicator;
+    public void setErrorIndicatorAttr(String errorIndicatorAttr) {
+        this.errorIndicatorAttr = errorIndicatorAttr;
     }
 
-    public String getErrorCodeCol() {
-        return errorCodeCol;
+    public String getErrorCodeAttr() {
+        return errorCodeAttr;
     }
 
-    public void setErrorCodeCol(String errorCodeCol) {
-        this.errorCodeCol = errorCodeCol;
+    public void setErrorCodeAttr(String errorCodeAttr) {
+        this.errorCodeAttr = errorCodeAttr;
     }
 
     public Map<String, Set<String>> getIgnoreErrors() {

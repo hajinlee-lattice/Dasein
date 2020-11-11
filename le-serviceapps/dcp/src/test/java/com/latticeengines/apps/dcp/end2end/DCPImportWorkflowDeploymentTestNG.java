@@ -30,6 +30,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.core.service.WorkflowJobService;
 import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
@@ -40,6 +41,7 @@ import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants;
@@ -59,7 +61,9 @@ import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
+import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
@@ -110,6 +114,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private EnrichmentLayoutService enrichmentLayoutService;
+
+    @Inject
+    private WorkflowJobService workflowJobService;
 
     private ProjectDetails projectDetails;
     private Source source;
@@ -175,6 +182,31 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(upload.getUploadDiagnostics().getLastErrorMessage());
     }
 
+    @Test(groups = "deployment", dependsOnMethods = "testImport")
+    public void testProcessingErrors() {
+
+        DCPImportRequest request = new DCPImportRequest();
+        request.setProjectId(projectDetails.getProjectId());
+        request.setSourceId(source.getSourceId());
+        request.setS3FileKey(s3FileKey);
+        request.setUserId(USER);
+        request.setSuppressKnownMatchErrors(false);
+        ApplicationId applicationId = uploadProxy.startImport(mainCustomerSpace, request);
+        JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
+        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
+                Boolean.FALSE, 0, 20);
+        Assert.assertNotNull(uploadList);
+        Assert.assertEquals(uploadList.size(), 3);
+
+        Job submittedJob = workflowJobService.findByApplicationId(applicationId.toString());
+        uploadId = submittedJob.getInputs().get(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
+        log.info(uploadId);
+
+        verifyImport(true);
+    }
+
     @Test(groups = "deployment", dependsOnMethods = "testErrorImport")
     public void testMissingRequired() {
 
@@ -196,7 +228,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
                 Boolean.FALSE, 0, 20);
         Assert.assertNotNull(uploadList);
-        Assert.assertEquals(uploadList.size(), 3);
+        Assert.assertEquals(uploadList.size(), 4);
         UploadDetails upload = uploadList.get(0).getUploadId().equals(uploadId) ? uploadList.get(1) : uploadList.get(0);
         Assert.assertEquals(upload.getStatus(), Upload.Status.ERROR);
         Assert.assertNotNull(upload.getUploadDiagnostics().getApplicationId());
@@ -225,29 +257,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         }catch (Exception e){
             log.info("got exception if source or upload have been deleted");
         }
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "testImport")
-    public void testProcessingErrors() {
-
-        DCPImportRequest request = new DCPImportRequest();
-        request.setProjectId(projectDetails.getProjectId());
-        request.setSourceId(source.getSourceId());
-        request.setS3FileKey(s3FileKey);
-        request.setUserId(USER);
-        request.setSuppressKnownMatchErrors(false);
-        ApplicationId applicationId = uploadProxy.startImport(mainCustomerSpace, request);
-        JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
-        Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-
-        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
-                Boolean.FALSE, 0, 20);
-        Assert.assertNotNull(uploadList);
-        Assert.assertEquals(uploadList.size(), 1);
-        UploadDetails upload = uploadList.get(0);
-        uploadId = upload.getUploadId();
-
-        verifyImport(true);
     }
 
     private void setEnrichmentLayout() {
@@ -418,11 +427,14 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         verifyCsvContent(bucket, rejectedPath);
 
         if (containsProcessingErrors) {
+            verifyProcessingErrors(bucket, acceptedPath, false);
+
             String processingErrorsPath = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
                     upload.getUploadConfig().getUploadMatchResultErrored());
             System.out.println("processing_errors=" + processingErrorsPath);
             Assert.assertTrue(s3Service.objectExist(bucket, processingErrorsPath));
             verifyCsvContent(bucket, processingErrorsPath);
+            verifyProcessingErrors(bucket, processingErrorsPath, true);
         }
     }
 
@@ -433,12 +445,17 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             String[] nextRecord = csvReader.readNext();
             int count = 0;
             List<String> headers = new ArrayList<>();
+
             int idIdx = -1;
             int nameIdx = -1;
             int dunsIdx = -1;
             int ccIdx = -1;
             int rnIdx = -1;
             int mtIdx = -1;
+            int mceIdx = -1;
+            int mcecIdx = -1;
+            int mceiIdx = -1;
+
             while (nextRecord != null && (count++) < 100) {
                 if (count == 1) {
                     headers.addAll(Arrays.asList(nextRecord));
@@ -449,8 +466,13 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                     ccIdx = headers.indexOf("Match Confidence Code");
                     rnIdx = headers.indexOf("Registration Number");
                     mtIdx = headers.indexOf("Match Type");
+                    mceIdx = headers.indexOf("Processing Error Type");
+                    mcecIdx = headers.indexOf("Processing Error Code");
+                    mceiIdx = headers.indexOf("Processing Error Details");
                     Assert.assertTrue(idIdx < dunsIdx);
                     Assert.assertTrue(dunsIdx < ccIdx);
+                    Assert.assertTrue(mceIdx < mcecIdx);
+                    Assert.assertTrue(mcecIdx < mceiIdx);
                 } else {
                     String customerId = nextRecord[idIdx];
                     String matchType = nextRecord[mtIdx];
@@ -490,10 +512,50 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                         Assert.assertTrue(Integer.parseInt(confidenceCode) < 6);
                     } else {
                         String companyName = nextRecord[nameIdx];
+
+                        if ("000\"".equals(companyName)) {
+                            Assert.assertEquals(nextRecord[mceIdx], MatchCoreErrorConstants.ErrorType.MATCH_ERROR.name());
+                            Assert.assertEquals(nextRecord[mcecIdx], "10002");
+                        }
                         Assert.assertTrue(StringUtils.isNotBlank(companyName)); // Original Name is non-empty
                     }
                     nextRecord = csvReader.readNext();
                 }
+            }
+        } catch (IOException e) {
+            Assert.fail("Failed to read output csv", e);
+        }
+    }
+
+    private void verifyProcessingErrors(String bucket, String path, boolean shouldContainErrors) {
+
+        log.info(path);
+        InputStream is = s3Service.readObjectAsStream(bucket, path);
+        InputStreamReader reader = new InputStreamReader(is);
+        try (CSVReader csvReader = new CSVReader(reader)) {
+            String[] nextRecord = csvReader.readNext();
+            int count = 0;
+            List<String> headers = new ArrayList<>();
+
+            int mceIdx = -1;
+            int mcecIdx = -1;
+
+            while (nextRecord != null && (count++) < 100) {
+                if (count == 1) {
+                    headers.addAll(Arrays.asList(nextRecord));
+                    verifyOutputHeaders(headers);
+                    mceIdx = headers.indexOf("Processing Error Type");
+                    mcecIdx = headers.indexOf("Processing Error Code");
+                } else {
+                    log.info(nextRecord[0]);
+                    log.info(nextRecord[mceIdx]);
+                    log.info(nextRecord[mcecIdx]);
+
+                    Assert.assertEquals(StringUtils.isNotEmpty(nextRecord[mceIdx]), shouldContainErrors);
+                    Assert.assertEquals(StringUtils.isNotEmpty(nextRecord[mcecIdx]), shouldContainErrors);
+                }
+
+                nextRecord = csvReader.readNext();
             }
         } catch (IOException e) {
             Assert.fail("Failed to read output csv", e);
@@ -512,6 +574,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             Assert.assertTrue(headers.contains("Primary Address Region Abreviated Name")); // in enrichment layout
             Assert.assertFalse(headers.contains("Primary Address Region Name")); // not in enrichment layout
         }
+
+        MatchCoreErrorConstants.CSV_HEADER_MAP.values().forEach(errorHeader -> Assert.assertTrue(headers.contains(errorHeader)));
     }
 
     private void verifyDownload(UploadDetails upload) {

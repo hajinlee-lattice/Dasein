@@ -39,8 +39,8 @@ class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultC
     val displayNameMap: Map[String, String] = config.getDisplayNameMap.asScala.toMap
 
     val columnHeaders = input.columns
-    val errorTypeCol: String = config.getErrorIndicator
-    val errorCodeCol: String = config.getErrorCodeCol
+    val errorTypeCol: String = config.getErrorIndicatorAttr
+    val errorCodeCol: String = config.getErrorCodeAttr
     val ignoredErrors: Map[String, Set[String]] = config.getIgnoreErrors.asScala.toMap.mapValues(_.asScala.toSet).map(identity)
     val errorTypeColIndex: Int = columnHeaders.indexOf(errorTypeCol)
     val errorCodeColIndex: Int = columnHeaders.indexOf(errorCodeCol)
