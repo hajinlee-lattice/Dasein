@@ -556,6 +556,8 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
 
         SchedulingResult.Detail detail = result.getDetails().get(tenantId);
+        cleanTenantInfo(detail);
+
         if(!isRetry){
             try {
                 String lastActionTimeKey = CacheName.LastActionTimeCache.getKeyForCache(tenantId);
@@ -566,6 +568,15 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
         log.info("Scheduled PA for tenant='{}', applicationId='{}', isRetry='{}', detail='{}', schedulerName='{}'",
                 tenantId, appId.toString(), isRetry, JsonUtils.serialize(detail), schedulerName);
+    }
+
+    private void cleanTenantInfo(SchedulingResult.Detail detail) {
+        if (detail == null || detail.getTenantActivity() == null) {
+            return;
+        }
+
+        // timezone object contains too much info to be logged
+        detail.getTenantActivity().setTimezone(null);
     }
 
     private void updateRetryCount(String tenantId) {
