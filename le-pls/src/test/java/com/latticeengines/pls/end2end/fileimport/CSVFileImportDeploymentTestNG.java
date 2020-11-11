@@ -1,4 +1,4 @@
-package com.latticeengines.pls.end2end;
+package com.latticeengines.pls.end2end.fileimport;
 
 import static com.latticeengines.common.exposed.util.TimeStampConvertUtils.computeTimestamp;
 import static org.testng.Assert.assertEquals;

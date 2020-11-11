@@ -1,4 +1,4 @@
-package com.latticeengines.pls.end2end;
+package com.latticeengines.pls.end2end.fileimport;
 
 import org.joda.time.DateTime;
 import org.testng.Assert;

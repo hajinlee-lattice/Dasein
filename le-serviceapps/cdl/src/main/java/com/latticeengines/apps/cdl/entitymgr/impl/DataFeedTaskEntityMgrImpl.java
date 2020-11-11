@@ -225,6 +225,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     private String registerExtractTable(Table template, Extract extract) {
         Table cloneTable = TableUtils.clone(template, NamingUtils.uuid("DataTable"), true);
+        cloneTable.setExtracts(new ArrayList<>());
         cloneTable.setTenant(MultiTenantContext.getTenant());
         cloneTable.addExtract(extract);
         log.info(String.format("Adding extract to new data table %s", template.getName()));

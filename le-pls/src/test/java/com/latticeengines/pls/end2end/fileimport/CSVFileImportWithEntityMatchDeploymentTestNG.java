@@ -1,4 +1,4 @@
-package com.latticeengines.pls.end2end;
+package com.latticeengines.pls.end2end.fileimport;
 
 import java.io.IOException;
 import java.util.Comparator;
