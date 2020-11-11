@@ -80,6 +80,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.LatticeFieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -730,6 +731,7 @@ public class CDLServiceImpl implements CDLService {
         for (TemplateFieldPreview fieldPreview : templatePreview) {
             if (standardAttrNames.contains(fieldPreview.getNameInTemplate())) {
                 fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                fieldPreview.setLatticeFieldCategory(LatticeFieldCategory.MatchField);
                 standardPreview
                         .removeIf(preview -> preview.getNameInTemplate().equals(fieldPreview.getNameInTemplate()));
             } else {
@@ -738,6 +740,7 @@ public class CDLServiceImpl implements CDLService {
         }
         standardPreview.forEach(preview -> {
             preview.setUnmapped(true);
+            preview.setLatticeFieldCategory(LatticeFieldCategory.Other);
             preview.setFieldCategory(FieldCategory.LatticeField);
         });
         templatePreview.addAll(standardPreview);

@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.LatticeFieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -144,6 +145,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         for (TemplateFieldPreview preview : previewList) {
             if (preview.getNameInTemplate().equalsIgnoreCase("user_crmaccount_external_id")) {
                 Assert.assertEquals(preview.getFieldCategory(), FieldCategory.LatticeField);
+                Assert.assertEquals(preview.getLatticeFieldCategory(), LatticeFieldCategory.UniqueId);
             }
         }
     }
