@@ -170,13 +170,16 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         StringInputStream sis4 = new StringInputStream("rejected");
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadMatchResultRejected(), sis4, true);
 
+        StringInputStream sis5 = new StringInputStream("processing_errors");
+        s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadMatchResultErrored(), sis5, true);
+
         // drop file to another upload
         List<UploadDetails> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW, Boolean.TRUE, 0, 20);
         Assert.assertNotNull(uploads2);
         Assert.assertEquals(uploads2.size(), 1);
         UploadDetails upload2 = uploads2.get(0);
-        StringInputStream sis5 = new StringInputStream("file3");
-        s3Service.uploadInputStream(bucket, upload2.getUploadConfig().getUploadRawFilePath(), sis5, true);
+        StringInputStream sis6 = new StringInputStream("file3");
+        s3Service.uploadInputStream(bucket, upload2.getUploadConfig().getUploadRawFilePath(), sis6, true);
 
         RestTemplate template = testBed.getRestTemplate();
         String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
@@ -207,6 +210,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(fileNames.contains("file2_Error.csv"));
         Assert.assertTrue(fileNames.contains("file2_Matched.csv"));
         Assert.assertTrue(fileNames.contains("file2_Unmatched.csv"));
+        Assert.assertTrue(fileNames.contains("file2_Processing_Errors.csv"));
         FileUtils.forceDelete(destDir);
     }
 
@@ -215,11 +219,12 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         RestTemplate template = testBed.getRestTemplate();
         String tokenUrlBase = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort, uploadId);
 
-        for (int i = 1; i <= 15; ++i) {
+        for (int i = 1; i <= 31; ++i) {
             boolean includeRaw = (i % 2 == 1);
             boolean includeMatched = ((i / 2) % 2 == 1);
             boolean includeUnmatched = ((i / 4) % 2 == 1);
             boolean includeErrors = ((i / 8) % 2 == 1);
+            boolean includeProcessing = ((i / 16) % 2 == 1);
 
             Boolean[] includes = {includeRaw, includeMatched, includeUnmatched, includeErrors};
             int numFiles = (int) Arrays.stream(includes).filter(x -> x).count();
@@ -236,6 +241,9 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             }
             if (includeErrors) {
                 downloadParams = downloadParams + ",IMPORT_ERRORS";
+            }
+            if (includeProcessing) {
+                downloadParams = downloadParams + ",PROCESS_ERRORS";
             }
             downloadParams = downloadParams.substring(1);
 
@@ -254,6 +262,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             Assert.assertEquals(includeMatched, fileNames.contains("file2_Matched.csv"));
             Assert.assertEquals(includeUnmatched, fileNames.contains("file2_Unmatched.csv"));
             Assert.assertEquals(includeErrors, fileNames.contains("file2_Error.csv"));
+            Assert.assertEquals(includeProcessing, fileNames.contains("file2_Processing_Errors.csv"));
         }
     }
 
