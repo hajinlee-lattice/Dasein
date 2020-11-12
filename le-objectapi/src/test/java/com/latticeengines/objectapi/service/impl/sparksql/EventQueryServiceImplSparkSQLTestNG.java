@@ -124,7 +124,7 @@ public class EventQueryServiceImplSparkSQLTestNG extends EventQueryServiceImplTe
         System.out.println(sql);
         long count = eventQueryServiceSparkSql.getScoringCount(frontEndQuery, SPARK_BATCH_USER, DataCollection.Version.Blue);
         Assert.assertEquals(count, 5692L);
-        long count2 = eventQueryService.getScoringCount(frontEndQuery, SPARK_BATCH_USER, DataCollection.Version.Blue);
+        long count2 = eventQueryService.getScoringCount(frontEndQuery, SEGMENT_USER, DataCollection.Version.Blue);
         Assert.assertEquals(count2, count);
     }
 
@@ -169,7 +169,7 @@ public class EventQueryServiceImplSparkSQLTestNG extends EventQueryServiceImplTe
         System.out.println(sql);
         long count = eventQueryServiceSparkSql.getScoringCount(frontEndQuery, SPARK_BATCH_USER, DataCollection.Version.Blue);
         Assert.assertEquals(count, 27327L);
-        long count2 = eventQueryService.getScoringCount(frontEndQuery, SPARK_BATCH_USER, DataCollection.Version.Blue);
+        long count2 = eventQueryService.getScoringCount(frontEndQuery, SEGMENT_USER, DataCollection.Version.Blue);
         Assert.assertEquals(count2, count);
     }
 }
