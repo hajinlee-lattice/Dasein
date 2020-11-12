@@ -35,8 +35,6 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Value("${aws.s3.data.stage.bucket}")
     private String dateStageBucket;
 
-    private String listSegmentName;
-
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
@@ -51,17 +49,17 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         String segmentDescription = "list-segment-description";
         String externalSystem = "dataVision";
         String externalSegmentId = "dataVisionSegment";
-        listSegmentName = NamingUtils.uuid("listSegment");
+        String listSegmentName;
         ListSegment listSegment = createListSegment(externalSystem, externalSegmentId);
-        metadataSegment.setName(listSegmentName);
         metadataSegment.setDisplayName(segmentDisplayName);
         metadataSegment.setDescription(segmentDescription);
         metadataSegment.setType(MetadataSegment.SegmentType.List);
         metadataSegment.setTenant(MultiTenantContext.getTenant());
         metadataSegment.setListSegment(listSegment);
 
-        segmentProxy.createOrUpdateListSegment(tenantId, metadataSegment);
-        metadataSegment = segmentProxy.getListSegmentByName(tenantId, listSegmentName);
+        MetadataSegment createdSegment = segmentProxy.createOrUpdateListSegment(tenantId, metadataSegment);
+        listSegmentName = createdSegment.getName();
+        metadataSegment = segmentProxy.getListSegmentByName(tenantId, createdSegment.getName());
         verifyMetadataSegment(metadataSegment, segmentDisplayName, segmentDescription, externalSystem, externalSegmentId);
         segmentDisplayName = "list-segment-display-name2";
         segmentDescription = "list-segment-description2";
@@ -114,7 +112,6 @@ public class SegmentResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         assertNotNull(segment);
         assertEquals(segment.getDescription(), description);
         assertEquals(segment.getDisplayName(), displayName);
-        assertEquals(segment.getName(), listSegmentName);
         ListSegment listSegment = segment.getListSegment();
         assertNotNull(listSegment);
         assertEquals(listSegment.getExternalSystem(), externalSystemName);
