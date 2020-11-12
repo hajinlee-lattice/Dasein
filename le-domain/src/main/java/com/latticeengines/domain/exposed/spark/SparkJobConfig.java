@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.spark.ScoreAggregateJ
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CalculateExpectedRevenuePercentileJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CombineInputTableWithScoreJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig;
+import com.latticeengines.domain.exposed.serviceflows.scoring.spark.RecalculateExpectedRevenueJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.RecalculatePercentileScoreJobConfig;
 import com.latticeengines.domain.exposed.spark.am.MapAttributeTxfmrConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
@@ -123,6 +124,7 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = CombineInputTableWithScoreJobConfig.class, name = CombineInputTableWithScoreJobConfig.NAME), //
         @JsonSubTypes.Type(value = CalculateExpectedRevenuePercentileJobConfig.class, name = CalculateExpectedRevenuePercentileJobConfig.NAME), //
         @JsonSubTypes.Type(value = RecalculatePercentileScoreJobConfig.class, name = RecalculatePercentileScoreJobConfig.NAME), //
+        @JsonSubTypes.Type(value = RecalculateExpectedRevenueJobConfig.class, name = RecalculateExpectedRevenueJobConfig.NAME), //
         @JsonSubTypes.Type(value = CreateCdlEventTableJobConfig.class, name = CreateCdlEventTableJobConfig.NAME), //
         @JsonSubTypes.Type(value = CreateEventTableFilterJobConfig.class, name = CreateEventTableFilterJobConfig.NAME), //
         @JsonSubTypes.Type(value = MergeSystemBatchConfig.class, name = MergeSystemBatchConfig.NAME), //

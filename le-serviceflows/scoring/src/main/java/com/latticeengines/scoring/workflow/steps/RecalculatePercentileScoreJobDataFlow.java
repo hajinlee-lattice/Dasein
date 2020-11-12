@@ -7,11 +7,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -34,8 +30,6 @@ import com.latticeengines.spark.exposed.job.score.RecalculatePercentileScoreJob;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RecalculatePercentileScoreJobDataFlow
         extends RunBatchSparkJob<RecalculatePercentileScoreDataFlowConfiguration, RecalculatePercentileScoreJobConfig> {
-
-    private static final Logger log = LoggerFactory.getLogger(RecalculatePercentileScoreJobDataFlow.class);
 
     private static final String rawScoreField = ScoreResultField.RawScore.displayName;
 
@@ -74,27 +68,8 @@ public class RecalculatePercentileScoreJobDataFlow
         Map<String, String> allScoreFieldMap = ExpectedRevenueDataFlowUtil
                 .getScoreFieldsMap(getListObjectFromContext(RATING_MODELS, RatingModelContainer.class));
         String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
-        List<Map<String, String>> scoreFieldMaps = new ArrayList<>();
-        Map<String, String> scoreFieldMapBatch = new HashMap<>();
-        if (MapUtils.isNotEmpty(allScoreFieldMap)) {
-            for (String modelId : allScoreFieldMap.keySet()) {
-                String scoreField = scoreFieldMapBatch.get(modelId);
-                scoreFieldMapBatch.put(modelId, scoreField);
-                if (scoreFieldMapBatch.size() >= batchSize) {
-                    scoreFieldMaps.add(scoreFieldMapBatch);
-                    scoreFieldMapBatch = new HashMap<>();
-                }
-            }
-            if (scoreFieldMapBatch.size() > 0) {
-                scoreFieldMaps.add(scoreFieldMapBatch);
-            }
-        } else if (StringUtils.isNotBlank(modelGuid)) {
-            log.info(String.format("Using individual modelGuid %s to set scoreFieldMap", modelGuid));
-            scoreFieldMapBatch.put(modelGuid, ScoreResultField.RawScore.displayName);
-            scoreFieldMaps.add(scoreFieldMapBatch);
-        } else {
-            throw new RuntimeException("Couldn't find any valid scoreFieldMap or individual modelGuid");
-        }
+        List<Map<String, String>> scoreFieldMaps = CalculateScoreUtils.batchScoreFieldMaps(allScoreFieldMap, modelGuid,
+                ScoreResultField.RawScore.displayName, batchSize);
 
         String inputTableName = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
         inputTable = metadataProxy.getTable(customerSpace.toString(), inputTableName);

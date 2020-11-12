@@ -18,6 +18,7 @@ import com.latticeengines.scoring.workflow.steps.CalculatePredictedRevenuePercen
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculateExpectedRevenueDataFlow;
+import com.latticeengines.scoring.workflow.steps.RecalculateExpectedRevenueJobDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculatePercentileScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculatePercentileScoreJobDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
@@ -57,15 +58,18 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     @Inject
     private CalculatePredictedRevenuePercentileDataFlow calculatePredictedRevenuePercentileDataFlow;
 
+    // TODO: pending migration
     @Inject
     private RecalculateExpectedRevenueDataFlow recalculateExpectedRevenueDataFlow;
+    @Inject
+    private RecalculateExpectedRevenueJobDataFlow recalculateExpectedRevenueJob;
 
     // TODO: pending migration
     @Inject
     private CalculateExpectedRevenuePercentileDataFlow calculateExpectedRevenuePercentileDataFlow;
 
     @Inject
-    private CalculateExpectedRevenuePercentileJobDataFlow calculateExpectedRevenuePercentileJobDataFlow;
+    private CalculateExpectedRevenuePercentileJobDataFlow calculateExpectedRevenuePercentileJob;
 
     @Inject
     private ScoreAggregateFlow scoreAggregate;
@@ -92,8 +96,8 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
             builder //
                     .next(recalculatePercentileScoreJob) //
                     .next(calculatePredictedRevenuePercentileDataFlow) //
-                    .next(recalculateExpectedRevenueDataFlow) //
-                    .next(calculateExpectedRevenuePercentileJobDataFlow) //
+                    .next(recalculateExpectedRevenueJob) //
+                    .next(calculateExpectedRevenuePercentileJob) //
                     .next(scoreAggregate); //
         }
         return builder //
