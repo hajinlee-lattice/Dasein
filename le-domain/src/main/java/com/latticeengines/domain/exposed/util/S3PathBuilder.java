@@ -15,7 +15,7 @@ public final class S3PathBuilder {
     public static String DEFAULT_SYSTEM = "DefaultSystem";
 
     private static String uiDisplayS3Dir_old = "%s/dropfolder/%s/Templates/%s/";
-    private static String s3DataVisionSegmentDir = "/%/datavision_segment/%s/%s";
+    private static String s3DataVisionSegmentDir = "/%s/datavision_segment/%s/%s";
 
     private static final String SPLIT_CHART = "_";
 
