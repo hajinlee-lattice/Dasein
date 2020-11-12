@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.pls.end2end.fileimport.CSVFileImportDeploymentTestNGBase;
 
 public class CSVFileImportValueSanitizerDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
