@@ -78,7 +78,11 @@ public final class DirectPlusUtils {
                     .map(ExclusionCriterion::getUrlParam).collect(Collectors.toList()), ",");
             parts.add("exclusionCriteria=" + exclusions);
         }
-        return StringUtils.join(parts, "&");
+        String params = StringUtils.join(parts, "&");
+        if (log.isDebugEnabled()) {
+            log.debug("params={}", params);
+        }
+        return params;
     }
 
     private static List<String> getLocationParams(NameLocation nl) {
@@ -287,6 +291,22 @@ public final class DirectPlusUtils {
         JsonNode orgNode = JsonUtils.tryGetJsonNode(jsonNode, "organization");
         NameLocation nameLocation = parseNameLocation(orgNode);
         candidate.setNameLocation(nameLocation);
+        candidate.setUnreachable(nameLocation.getUnreachable());
+
+        JsonNode familyTreeNode = JsonUtils.tryGetJsonNode(jsonNode, "organization", "corporateLinkage", "familytreeRolesPlayed");
+        if (familyTreeNode instanceof ArrayNode) {
+            List<String> roles = new ArrayList<>();
+            for (JsonNode node: familyTreeNode) {
+                String role = node.get("description").asText();
+                roles.add(role);
+            }
+            candidate.setFamilyTreeRoles(roles);
+        }
+        Boolean isMailUndeliverable = JsonUtils.parseBooleanValueAtPath(jsonNode, "organization", "dunsControlStatus", "isMailUndeliverable");
+        candidate.setMailUndeliverable(isMailUndeliverable);
+
+        // FIXME: (DCP-2144) not sure how to parse isMarketable
+        // candidate.setMarketable(?);
 
         JsonNode insightNode = JsonUtils.tryGetJsonNode(jsonNode, "matchQualityInformation");
         if (insightNode != null) {
@@ -306,6 +326,7 @@ public final class DirectPlusUtils {
                 String phoneNumber = JsonUtils.parseStringValueAtPath(phoneNode, "telephoneNumber");
                 if (StringUtils.isNotBlank(phoneNumber)) {
                     nameLocation.setPhoneNumber(phoneNumber);
+                    nameLocation.setUnreachable(JsonUtils.parseBooleanValueAtPath(phoneNode, "isUnreachable"));
                     break;
                 }
             }
