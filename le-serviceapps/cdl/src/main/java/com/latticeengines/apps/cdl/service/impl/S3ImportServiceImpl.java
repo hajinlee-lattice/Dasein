@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -173,13 +174,20 @@ public class S3ImportServiceImpl implements S3ImportService {
 
     @Override
     public void updateMessageUrl() {
-        S3ImportMessageType messageType = isDCPStack ? S3ImportMessageType.DCP : S3ImportMessageType.Atlas;
-        List<S3ImportMessage> messageList = s3ImportMessageService.getMessageWithoutHostUrlByType(messageType);
+        List<S3ImportMessage> messageList = new ArrayList<>();
+        if (isDCPStack) {
+            messageList = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.DCP);
+        } else {
+            messageList = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.Atlas);
+            List<S3ImportMessage> messageListSegment = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.LISTSEGMENT);
+            messageList.addAll(messageListSegment);
+        }
+
         if (CollectionUtils.isNotEmpty(messageList)) {
             log.info("Current stack: " + currentStack + " hostUrl: " + hostUrl + " isDCPStack: " + isDCPStack);
             for (S3ImportMessage message : messageList) {
                 String tenantId;
-                if (!S3ImportMessageType.LISTSEGMENT.equals(messageType)) {
+                if (!S3ImportMessageType.LISTSEGMENT.equals(message.getMessageType())) {
                     Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
                     if (tenant == null) {
                         log.error("Cannot find DropBox Owner: " + message.getDropBox().getDropBox());
@@ -190,7 +198,7 @@ public class S3ImportServiceImpl implements S3ImportService {
                     tenantId = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
                             S3ImportMessageUtils.KeyPart.TENANT_ID);
                 }
-                if (shouldSet(tenantId, messageType)) {
+                if (shouldSet(tenantId, message.getMessageType())) {
                     log.info("Set message " + message.getKey() + " with hostUrl: " + hostUrl);
                     s3ImportMessageService.updateHostUrl(message.getKey(), hostUrl);
                 }
