@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
+import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
@@ -64,6 +65,9 @@ public class InternalResource {
     @Inject
     private BatonService batonService;
 
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
     @GetMapping("services/options")
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
@@ -97,7 +101,7 @@ public class InternalResource {
     @ResponseBody
     @ApiOperation(value = "Get all tenants ids")
     public List<String> getTenants() {
-        Collection<TenantDocument> tenants = tenantService.getTenantsInCache(null);
+        Collection<TenantDocument> tenants = tenantEntityMgr.getTenantsInCache(null);
         if (CollectionUtils.isNotEmpty(tenants)) {
             return tenants.stream().map(doc -> doc.getSpace().toString()).collect(Collectors.toList());
         } else {

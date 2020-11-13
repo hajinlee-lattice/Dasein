@@ -138,15 +138,13 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         log.info("begin scanning invalid tenants.");
         List<String> tenantIds = tenantService.getAllTenantIds();
         List<String> tenantIdsFromZK = adminProxy.getAllTenantIds();
-        if (CollectionUtils.isNotEmpty(tenantIds)) {
-            if (CollectionUtils.isNotEmpty(tenantIdsFromZK)) {
-                Set<String> idsInDBNotZK =
-                        tenantIds.stream().filter(id -> !tenantIdsFromZK.contains(id)).collect(Collectors.toSet());
-                Set<String> idsInZKNotDB =
-                        tenantIdsFromZK.stream().filter(id -> !tenantIds.contains(id)).collect(Collectors.toSet());
-                log.info("tenants in db not in zk are {}", idsInDBNotZK);
-                log.info("tenants in zk not in db are {}", idsInZKNotDB);
-            }
+        if (CollectionUtils.isNotEmpty(tenantIds) && CollectionUtils.isNotEmpty(tenantIdsFromZK)) {
+            Set<String> idsInDBNotZK =
+                    tenantIds.stream().filter(id -> !tenantIdsFromZK.contains(id)).collect(Collectors.toSet());
+            Set<String> idsInZKNotDB =
+                    tenantIdsFromZK.stream().filter(id -> !tenantIds.contains(id)).collect(Collectors.toSet());
+            log.info("tenants in db not in zk are {}", idsInDBNotZK);
+            log.info("tenants in zk not in db are {}", idsInZKNotDB);
         }
     }
 
