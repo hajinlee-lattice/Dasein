@@ -31,6 +31,7 @@ public final class JourneyStageUtils {
                 closedWonStage(tenant), //
                 closedStage(tenant), //
                 opportunityStage(tenant), //
+                contactInquiryStage(tenant), //
                 knownEngagedStage(tenant), //
                 engagedStage(tenant), //
                 awareStage(tenant), //
@@ -39,18 +40,23 @@ public final class JourneyStageUtils {
     }
 
     private static JourneyStage closedWonStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Closed-Won", "Opportunity is closed-won", 7, "#3FA40F",
+        return stage(tenant, "Closed-Won", "Opportunity is closed-won", 8, "#3FA40F",
                 predicate(Opportunity, 1, closedFilter(), wonFilter()));
     }
 
     private static JourneyStage closedStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Closed", "Opportunity is closed", 6, "#70BF4A",
+        return stage(tenant, "Closed", "Opportunity is closed", 7, "#70BF4A",
                 predicate(Opportunity, 1, closedFilter()));
     }
 
     private static JourneyStage opportunityStage(@NotNull Tenant tenant) {
-        return stage(tenant, "Opportunity", "Opportunity on Account", 5, "#33BDB7",
+        return stage(tenant, "Opportunity", "Opportunity on Account", 6, "#33BDB7",
                 predicate(Opportunity, 1, notClosedFilter()));
+    }
+
+    private static JourneyStage contactInquiryStage(@NotNull Tenant tenant) {
+        return stage(tenant, "Contact Inquiry", "Contact has taken action", 5, "#8E71B2",
+                predicate(MarketingActivity, 1, 90, formFilledFilter()));
     }
 
     private static JourneyStage knownEngagedStage(@NotNull Tenant tenant) {
@@ -104,6 +110,14 @@ public final class JourneyStageUtils {
         filter.setComparisonType(ComparisonType.EQUAL);
         filter.setColumnName(InterfaceName.EventType);
         filter.setColumnValue("WebVisit");
+        return filter;
+    }
+
+    private static StreamFieldToFilter formFilledFilter() {
+        StreamFieldToFilter filter = new StreamFieldToFilter();
+        filter.setComparisonType(ComparisonType.EQUAL);
+        filter.setColumnName(InterfaceName.EventType);
+        filter.setColumnValue("Form Filled");
         return filter;
     }
 
