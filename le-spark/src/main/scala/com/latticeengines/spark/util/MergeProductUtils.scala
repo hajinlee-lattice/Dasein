@@ -130,7 +130,7 @@ private[spark] object MergeProductUtils {
       .withColumn(Description, col(s"agg.$Description"))
       .withColumn(Bundle, col(s"agg.$Bundle"))
       .withColumn(Status, lit(ProductStatus.Active.name))
-      .withColumn(BundleDescription, lit(literal = null).cast(StringType))
+      .withColumn(BundleDescription, col(Description))
       .withColumn(BundleId, idUdf(col(Bundle)))
       .withColumn(Priority, lit(1).cast(IntegerType))
       .select(Id, Name, Description, Bundle, BundleId, BundleDescription, Priority, Status)
