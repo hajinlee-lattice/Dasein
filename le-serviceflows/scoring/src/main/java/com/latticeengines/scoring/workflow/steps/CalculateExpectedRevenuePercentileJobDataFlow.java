@@ -1,10 +1,8 @@
 package com.latticeengines.scoring.workflow.steps;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,10 +10,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
-import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CalculateExpectedRevenuePercentileJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CalculateExpectedRevenuePercentileDataFlowConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -53,19 +49,8 @@ public class CalculateExpectedRevenuePercentileJobDataFlow extends
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        if (StringUtils.isNotBlank(result.getOutput())) {
-            Map<String, String> targetScoreDerivationOutputs = new HashMap<>();
-            Map<String, String> derivationMap = JsonUtils.deserialize(result.getOutput(),
-                    new TypeReference<Map<String, String>>() {
-                    });
-            for (String modelId : derivationMap.keySet()) {
-                ScoreDerivation der = JsonUtils.deserialize(derivationMap.get(modelId), ScoreDerivation.class);
-                targetScoreDerivationOutputs.put(modelId, JsonUtils.serialize(der));
-            }
-            ExpectedRevenueDataFlowUtil.writeTargetScoreFiDerivationOutputs( //
-                    configuration.getCustomerSpace(), yarnConfiguration, modelSummaryProxy,
-                    targetScoreDerivationOutputs);
-        }
+        CalculateScoreUtils.writeTargetScoreDerivations(result, configuration.getCustomerSpace(), yarnConfiguration,
+                modelSummaryProxy);
     }
 
     @Override

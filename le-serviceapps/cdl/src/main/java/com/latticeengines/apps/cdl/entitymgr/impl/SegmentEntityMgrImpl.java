@@ -87,6 +87,12 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         return segmentDao.findByField("name", name);
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<MetadataSegment> findByType(SegmentType type) {
+        return segmentDao.findAllByField("type", type);
+    }
+
     @SoftDeleteConfiguration
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
@@ -140,9 +146,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         ListSegment listSegment = segment.getListSegment();
         if (listSegment != null) {
             listSegment.setTenantId(MultiTenantContext.getTenant().getPid());
-            listSegment.setCsvAdaptor(SegmentUtils.getDefaultCSVAdaptor());
             listSegment.setMetadataSegment(segment);
-            listSegmentEntityMgr.create(segment.getListSegment());
+            listSegmentEntityMgr.create(listSegment);
         }
         return segment;
     }
@@ -189,9 +194,18 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
+        MetadataSegment metadataSegment = segmentDao.findByExternalInfo(externalSystem, externalSegmentId);
+        return metadataSegment;
+    }
+
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findByExternalInfo(MetadataSegment segment) {
-        return listSegmentEntityMgr.findMetadataSegmentByExternalInfo(segment.getListSegment().getExternalSystem(),
-                segment.getListSegment().getExternalSegmentId());
+        if (segment.getListSegment() != null) {
+            return segmentDao.findByExternalInfo(segment.getListSegment().getExternalSystem(), segment.getListSegment().getExternalSegmentId());
+        } else {
+            return null;
+        }
     }
 
     @Override

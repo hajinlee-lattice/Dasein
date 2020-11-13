@@ -8,6 +8,8 @@ public interface TransactionService {
 
     String getMaxTransactionDate(DataCollection.Version version);
 
+    String getMaxTransactionDate(DataCollection.Version version, String sqlUser);
+
     TimeFilterTranslator getTimeFilterTranslator(String evaluationDate);
 
     boolean needTimeFilterTranslator(FrontEndQuery frontEndQuery);

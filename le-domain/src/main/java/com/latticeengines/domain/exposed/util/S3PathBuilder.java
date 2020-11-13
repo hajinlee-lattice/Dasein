@@ -15,12 +15,18 @@ public final class S3PathBuilder {
     public static String DEFAULT_SYSTEM = "DefaultSystem";
 
     private static String uiDisplayS3Dir_old = "%s/dropfolder/%s/Templates/%s/";
+    private static String s3DataVisionSegmentDir = "/%s/datavision_segment/%s/%s";
 
     private static final String SPLIT_CHART = "_";
 
     public static String getUiDisplayS3Dir(String bucket, String dropBox, String folderName) {
         return String.format(uiDisplayS3Dir_old, bucket, dropBox, folderName);
     }
+
+    public static String getS3ListSegmentDir(String s3Bucket, String tenantId, String segmentName) {
+        return String.format(s3DataVisionSegmentDir, s3Bucket, tenantId, segmentName);
+    }
+
 
     public static String getSystemNameFromFeedType(String feedType) {//new path feedType=systemName#folderName
         if (StringUtils.isEmpty(feedType)) {

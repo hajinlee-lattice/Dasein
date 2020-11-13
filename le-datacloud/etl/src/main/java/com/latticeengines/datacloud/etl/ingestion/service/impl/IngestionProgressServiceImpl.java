@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.BWRawDestination;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Configuration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Destination;
+import com.latticeengines.domain.exposed.datacloud.ingestion.S3InternalConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
@@ -115,7 +116,8 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             }
             String destStr = JsonUtils.serialize(destination);
             if (destStr.length() > 1000) {
-                throw new IllegalArgumentException("Serialized destination config is longer than 1000 chars: " + destStr);
+                throw new IllegalArgumentException(
+                        "Serialized destination config is longer than 1000 chars: " + destStr);
             }
             progress.setDestination(destStr);
             progress.setSource(file);
@@ -136,6 +138,16 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
             progress.setSource(PatchBook.TABLE_NAME);
             progress.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
             progress.setDestination(ingestionDir.append(progress.getVersion()).toString());
+            break;
+        case S3_INTERNAL:
+            // For S3_INTERNAL, we directly distcp latest version under source folder into
+            // hdfs ingestion folder
+            S3InternalConfiguration s3InternalConfig = (S3InternalConfiguration) ingestion.getProviderConfiguration();
+            String sourceName = s3InternalConfig.getSourceNameOnHdfs();
+            progress.setSource(sourceName);
+            version = file.substring(file.lastIndexOf("/")+1);
+            progress.setVersion(version);
+            progress.setDestination(ingestionDir.append(version).toString());
             break;
         default:
             throw new UnsupportedOperationException(
@@ -165,7 +177,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     @Override
     public CamelRouteConfiguration createCamelRouteConfiguration(IngestionProgress progress) {
         switch (progress.getIngestion().getIngestionType()) {
-            case SFTP:
+        case SFTP:
             return createSftpToHdfsRouteConfiguration(progress);
         default:
             throw new UnsupportedOperationException(
@@ -173,11 +185,9 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
         }
     }
 
-    private SftpToHdfsRouteConfiguration createSftpToHdfsRouteConfiguration(
-            IngestionProgress progress) {
+    private SftpToHdfsRouteConfiguration createSftpToHdfsRouteConfiguration(IngestionProgress progress) {
         SftpToHdfsRouteConfiguration config = new SftpToHdfsRouteConfiguration();
-        SftpConfiguration sftpConfig = (SftpConfiguration) progress.getIngestion()
-                .getProviderConfiguration();
+        SftpConfiguration sftpConfig = (SftpConfiguration) progress.getIngestion().getProviderConfiguration();
         Path sourcePath = new Path(progress.getSource());
         Path destPath = new Path(progress.getDestination());
         config.setFileName(sourcePath.getName());
@@ -209,8 +219,7 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
     }
 
     @Override
-    public IngestionProgress updateSubmittedProgress(IngestionProgress progress,
-            String applicationId) {
+    public IngestionProgress updateSubmittedProgress(IngestionProgress progress, String applicationId) {
         progress.setApplicationId(applicationId);
         progress.setLatestStatusUpdate(new Date());
         progress.setStartTime(new Date());
@@ -223,8 +232,8 @@ public class IngestionProgressServiceImpl implements IngestionProgressService {
 
     @Override
     public IngestionProgress updateInvalidProgress(IngestionProgress progress, String message) {
-        return new IngestionProgressUpdaterImpl(progress).status(ProgressStatus.FAILED)
-                .errorMessage(message).commit(false);
+        return new IngestionProgressUpdaterImpl(progress).status(ProgressStatus.FAILED).errorMessage(message)
+                .commit(false);
     }
 
     @Override

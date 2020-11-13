@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -159,6 +160,14 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     public List<DataUnit> findAllByTypeFromReader(String tenantId, DataUnit.StorageType storageType) {
         List<DataUnitEntity> entities = readerRepository.findByTenantIdAndStorageType(tenantId, storageType);
         return convertList(entities, true);
+    }
+
+    @Override
+    public List<DataUnit> findAllByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role) {
+        List<DataUnitEntity> entities = readerRepository.findByTenantIdAndDataTemplateId(tenantId, dataTemplateId);
+        List<DataUnitEntity> entitiesWithRole = entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role))
+                .collect(Collectors.toList());
+        return convertList(entitiesWithRole, true);
     }
 
     @Override

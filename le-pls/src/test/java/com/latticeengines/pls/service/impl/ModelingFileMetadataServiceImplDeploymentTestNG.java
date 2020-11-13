@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldValidationResult;
 import com.latticeengines.domain.exposed.pls.frontend.ValidationCategory;
-import com.latticeengines.pls.end2end.CSVFileImportDeploymentTestNGBase;
+import com.latticeengines.pls.end2end.fileimport.CSVFileImportDeploymentTestNGBase;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 

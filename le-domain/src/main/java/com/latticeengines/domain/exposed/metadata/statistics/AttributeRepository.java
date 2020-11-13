@@ -53,7 +53,7 @@ public class AttributeRepository {
     public AttributeRepository() {
     }
 
-    private AttributeRepository(CustomerSpace customerSpace, String collectionName, String redshiftPartition,
+    public AttributeRepository(CustomerSpace customerSpace, String collectionName, String redshiftPartition,
             Map<AttributeLookup, ColumnMetadata> cmMap,
             Map<TableRoleInCollection, String> tableNameMap) {
         this.collectionName = collectionName;

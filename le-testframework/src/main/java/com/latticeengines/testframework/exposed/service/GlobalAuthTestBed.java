@@ -70,6 +70,10 @@ public interface GlobalAuthTestBed {
 
     void switchToExternalAdmin(Tenant tenant, boolean overWriteTeams);
 
+    void switchToBusinessAnalyst(Tenant tenant);
+
+    void switchToBusinessAnalyst(Tenant tenant, boolean overWriteTeams);
+
     void switchToExternalUser(Tenant tenant);
 
     void switchToThirdPartyUser(Tenant tenant);
@@ -84,7 +88,11 @@ public interface GlobalAuthTestBed {
 
     void cleanupPlsHdfs();
 
+    void cleanupPrestoDb();
+
     void cleanupRedshift();
+
+    void cleanupAthena();
 
     void overwriteFeatureFlag(Tenant tenant, String featureFlagName, boolean value);
 

@@ -1,21 +1,15 @@
 package com.latticeengines.metadata.service;
 
-import java.util.List;
-
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.ParallelFlux;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 
 public interface DataTemplateService {
 
-    List<DataUnit> getData(String dataTemplateName, String... namespace);
+    String create(DataTemplate dataTemplate);
 
-    long getSchemaCount(String dataTemplateName, String... namespace);
+    DataTemplate findByUuid(String uuid);
 
-    Flux<ColumnMetadata> getSchema(String dataTemplateName, String... namespace);
+    void updateByUuid(String uuid, DataTemplate dataTemplate);
 
-    ParallelFlux<ColumnMetadata> getUnorderedSchema(String dataTemplateName, String... namespace);
+    void deleteByUuid(String uuid);
 
 }

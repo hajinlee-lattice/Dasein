@@ -42,6 +42,9 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     @Resource(name = "ingestionPatchBookProviderService")
     private IngestionProviderService ingestionPatchBookProviderService;
 
+    @Resource(name = "ingestionS3InternalProviderService")
+    private IngestionProviderService ingestionS3InternalProviderService;
+
     private IngestionProgress progress;
 
     @Override
@@ -69,6 +72,9 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                 break;
             case PATCH_BOOK:
                 ingestionPatchBookProviderService.ingest(progress);
+                break;
+            case S3_INTERNAL:
+                ingestionS3InternalProviderService.ingest(progress);
                 break;
             default:
                 throw new UnsupportedOperationException(

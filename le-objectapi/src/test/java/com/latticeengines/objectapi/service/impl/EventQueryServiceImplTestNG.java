@@ -1,6 +1,7 @@
 package com.latticeengines.objectapi.service.impl;
 
 import static com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor.SPARK_TEST_GROUP;
+import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
+
 public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @Inject
@@ -139,7 +141,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        getEventQueryService(sqlUser).getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
+        getEventQueryService(sqlUser).getScoringTuples(frontEndQuery, sqlUser, DataCollection.Version.Blue);
     }
 
     @Test(groups = { "functional", SPARK_TEST_GROUP }, dataProvider = "userContexts")
@@ -164,7 +166,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     @Test(groups = "functional", dataProvider = "userContexts")
     public void testDP6881(String sqlUser, String queryContext) {
         EventFrontEndQuery frontEndQuery = loadEventFrontEndQueryFromResource("dp6881.json");
-        long count = getEventQueryService(sqlUser).getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
+        long count = getEventQueryService(sqlUser).getTrainingCount(frontEndQuery, sqlUser, DataCollection.Version.Blue);
         testAndAssertCount(sqlUser, count, 8501);
     }
 
@@ -181,7 +183,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 frontEndQuery.getSegmentQuery().setEvaluationDateStr(maxTransactionDate);
             }
             String sql = eventQueryService.getQueryStr(frontEndQuery, EventType.Scoring, //
-                    DataCollection.Version.Blue);
+                    SPARK_BATCH_USER, DataCollection.Version.Blue);
             System.out.println("========== " + fileName + " ==========");
             System.out.println(sql);
             System.out.println("========== " + fileName + " ==========");
@@ -212,8 +214,8 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setTargetProductIds(Collections.singletonList(getProductId()));
         frontEndQuery.setPeriodName("Month");
         System.out.println(eventQueryService.getQueryStr(frontEndQuery, //
-                EventType.Scoring, DataCollection.Version.Blue));
-        return getEventQueryService(sqlUser).getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+                EventType.Scoring, sqlUser, DataCollection.Version.Blue));
+        return getEventQueryService(sqlUser).getScoringCount(frontEndQuery, sqlUser, DataCollection.Version.Blue);
     }
 
     private long countRestrictionForScoringUsingSegmentQuery(String sqlUser, Restriction restriction) {
@@ -229,8 +231,8 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         eventQuery.setTargetProductIds(Collections.singletonList(getProductId()));
         eventQuery.setPeriodName("Month");
         System.out.println(eventQueryService.getQueryStr(eventQuery, //
-                EventType.Scoring, DataCollection.Version.Blue));
-        return getEventQueryService(sqlUser).getScoringCount(eventQuery, DataCollection.Version.Blue);
+                EventType.Scoring, sqlUser, DataCollection.Version.Blue));
+        return getEventQueryService(sqlUser).getScoringCount(eventQuery, sqlUser, DataCollection.Version.Blue);
     }
 
     private DataPage retrieveScoringDataByRestriction(String sqlUser, Restriction restriction, int numTuples) {
@@ -242,7 +244,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setPageFilter(new PageFilter(0, numTuples));
         frontEndQuery.setTargetProductIds(Collections.singletonList(getProductId()));
         frontEndQuery.setPeriodName("Month");
-        return getEventQueryService(sqlUser).getScoringTuples(frontEndQuery, DataCollection.Version.Blue);
+        return getEventQueryService(sqlUser).getScoringTuples(frontEndQuery, sqlUser, DataCollection.Version.Blue);
     }
 
     private long countTxnBktForTraining(String sqlUser, Bucket.Transaction txn) {
@@ -256,7 +258,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
-        return getEventQueryService(sqlUser).getTrainingCount(frontEndQuery, DataCollection.Version.Blue);
+        return getEventQueryService(sqlUser).getTrainingCount(frontEndQuery, sqlUser, DataCollection.Version.Blue);
     }
 
     private long countTxnBktForEvent(String sqlUser, Bucket.Transaction txn) {
@@ -277,7 +279,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));
         frontEndQuery.setPeriodName("Month");
-        return getEventQueryService(sqlUser).getEventCount(frontEndQuery, DataCollection.Version.Blue);
+        return getEventQueryService(sqlUser).getEventCount(frontEndQuery, sqlUser, DataCollection.Version.Blue);
     }
 
 }

@@ -125,14 +125,14 @@ public class ProcessorContext {
     @Value("${datacloud.yarn.fetchonly.num.threads}")
     private int fetchonlyThreadPool;
 
+    @Value("${datacloud.yarn.fetchonly.group.size}")
+    private int fetchonlyGroupSize;
+
     @Value("${datacloud.yarn.actors.group.size}")
     private int actorsGroupSize;
 
     @Value("${datacloud.yarn.prime.group.size}")
     private int primeGroupSize;
-
-    @Value("${datacloud.yarn.prime.num.threads}")
-    private int primeThreadPool;
 
     private static final Long TIME_OUT_PER_10K = TimeUnit.MINUTES.toMillis(20);
 
@@ -483,13 +483,10 @@ public class ProcessorContext {
         if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
             groupSize = actorsGroupSize;
             numThreads = actorsThreadPool;
-            if (OperationalMode.MULTI_CANDIDATES.equals(originalInput.getOperationalMode())) { // multi-candidate
+            if (useRemoteDnB) {
                 groupSize = primeGroupSize;
-                numThreads = primeThreadPool;
-            } else if (useRemoteDnB) {
-                groupSize = 128;
             } else if (originalInput.isFetchOnly()) {
-                groupSize = 500;
+                groupSize = fetchonlyGroupSize;
                 numThreads = fetchonlyThreadPool;
             }
         } else {

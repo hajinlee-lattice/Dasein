@@ -50,6 +50,9 @@ public enum UIActionCode {
     FILE_UPLOAD_001(Level.User, LedpCode.LEDP_18109, "Problem reading csv file header: ${message}"),
     FILE_UPLOAD_002(Level.User, LedpCode.LEDP_40055),
 
+    // download
+    FILE_DOWNLOAD_001(Level.User, LedpCode.LEDP_40076),
+
     // dcp
     DCP_IMPORT_001(Level.User, LedpCode.LEDP_60010, "Upload failed because no records could be ingested successfully"),
     DCP_IMPORT_002(Level.User, LedpCode.LEDP_60011, "Project is not entitled to use company entity resolution data block!"),

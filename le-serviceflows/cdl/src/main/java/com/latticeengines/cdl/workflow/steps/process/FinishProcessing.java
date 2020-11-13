@@ -142,12 +142,16 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         // publish account lookup and create dynamo data unit
         if (BooleanUtils.isTrue(getObjectFromContext(NEED_PUBLISH_ACCOUNT_LOOKUP, Boolean.class))) {
             String appId = lookupIdMappingProxy.publishAccountLookup(customerSpace.getTenantId(), accountLookupSignature);
-            log.info("Kicked off account lookup publication workflow: {}", appId);
-            JobStatus status = jobService.waitFinalJobStatus(appId, null);
-            if (!FinalApplicationStatus.SUCCEEDED.equals(status.getStatus())) {
-                log.error("Failed to publish account lookup. Check log for details and retry after issue resolved appId: {}", appId);
+            if (StringUtils.isNotBlank(appId)) {
+                log.info("Kicked off account lookup publication workflow: {}", appId);
+                JobStatus status = jobService.waitFinalJobStatus(appId, null);
+                if (!FinalApplicationStatus.SUCCEEDED.equals(status.getStatus())) {
+                    log.error("Failed to publish account lookup. Check log for details and retry after issue resolved appId: {}", appId);
+                } else {
+                    log.info("Finished publishing account lookup to dynamo.");
+                }
             } else {
-                log.info("Finished publishing account lookup to dynamo.");
+                log.error("Failed to invoke account lookup publication.");
             }
         }
     }

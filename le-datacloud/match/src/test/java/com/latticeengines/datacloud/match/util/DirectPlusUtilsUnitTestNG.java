@@ -32,15 +32,29 @@ public class DirectPlusUtilsUnitTestNG {
 
     @Test
     public void parseIdentityLocatingResult() {
+        String topCandidateDuns = "060902413"; // given in the test resource json
+
         DnBMatchContext context = new DnBMatchContext();
         String response = readMockResponse("cleanseMatch");
         DirectPlusUtils.parseJsonResponse(response, context, DnBAPIType.REALTIME_ENTITY);
         Assert.assertTrue(CollectionUtils.isNotEmpty(context.getCandidates()));
         for (DnBMatchCandidate candidate: context.getCandidates()) {
+            // System.out.println(JsonUtils.pprint(candidate));
             Assert.assertNotNull(candidate.getDuns());
+
+            if (topCandidateDuns.equals(candidate.getDuns())) {
+                // verify family tree roles
+                Assert.assertTrue(CollectionUtils.isNotEmpty(candidate.getFamilyTreeRoles()));
+                Assert.assertEquals(candidate.getFamilyTreeRoles().get(0), "Parent / Headquarters");
+
+                // verify exclusion flags
+                Assert.assertFalse(candidate.getMailUndeliverable());
+                Assert.assertFalse(candidate.getUnreachable());
+            }
+
             NameLocation nameLocation = candidate.getNameLocation();
             Assert.assertNotNull(nameLocation);
-            if ("060902413".equals(candidate.getDuns())) {
+            if (topCandidateDuns.equals(candidate.getDuns())) {
                 Assert.assertNotNull(nameLocation.getStreet());
                 Assert.assertNotEquals(nameLocation.getStreet(), "null");
                 Assert.assertNotNull(nameLocation.getState());

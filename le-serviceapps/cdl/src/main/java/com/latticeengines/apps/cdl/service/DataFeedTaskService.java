@@ -42,6 +42,8 @@ public interface DataFeedTaskService {
 
     List<String> registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts);
 
+    List<String> registerImportData(String customerSpace, String taskUniqueId, String dataTable);
+
     void addTableToQueue(String customerSpace, String taskUniqueId, String tableName);
 
     void addTablesToQueue(String customerSpace, String taskUniqueId, List<String> tableNames);

@@ -25,4 +25,8 @@ public class SparkQueryProvider extends QueryProvider {
         return new SparkSQLQueryFactory(configuration, null);
     }
 
+    protected String getCacheKey(AttributeRepository repository, String sqlUser) {
+        return sqlUser;
+    }
+
 }

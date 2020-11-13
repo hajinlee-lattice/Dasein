@@ -18,18 +18,23 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
     import spark.implicits._
     
     val config: UpsertConfig = lattice.config
+    val discardAttrs: List[String] = if (config.getExcludeAttrs == null) List() else config.getExcludeAttrs.asScala.toList
     
     if (lattice.input.length == 1) {
-      lattice.output = 
+      var result =
         if (!config.isAddInputSystemBatch) {
-            lattice.input
+            lattice.input.head
           } else {
             if (config.getBatchTemplateName == null) {
-              addTemplatePrefixForInput(lattice.input.head, Seq(config.getJoinKey)) :: Nil
+              addTemplatePrefixForInput(lattice.input.head, Seq(config.getJoinKey))
             } else {
-              addTemplatePrefix(lattice.input.head, config.getBatchTemplateName,  Seq(config.getJoinKey)) :: Nil
+              addTemplatePrefix(lattice.input.head, config.getBatchTemplateName,  Seq(config.getJoinKey))
             }
           }
+      if (discardAttrs.nonEmpty) {
+        result = result.drop(discardAttrs: _*)
+      }
+      lattice.output = result :: Nil
     } else {
       val switchSide = config.getSwitchSides != null && config.getSwitchSides
       val lhsDf = if (switchSide) lattice.input(1) else lattice.input.head
@@ -39,15 +44,18 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
       val colsFromLhs: Set[String] = if (config.getColsFromLhs == null) Set() else config.getColsFromLhs.asScala.toSet
       val overwriteByNull: Boolean =
         if (config.getNotOverwriteByNull == null) true else !config.getNotOverwriteByNull.booleanValue()
-        
-      if (!config.isAddInputSystemBatch) {
-        val merged = MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull = overwriteByNull)
-        lattice.output = merged :: Nil
-      } else {
-         var templates = rhsDf.select(templateColumn).as[String].collect.toSet.toList
-         val merged = upsertSystemBatch(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull, config.getBatchTemplateName, templates) 
-        lattice.output = merged :: Nil
+
+      var merged =
+        if (!config.isAddInputSystemBatch) {
+          MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull = overwriteByNull)
+        } else {
+          val templates = rhsDf.select(templateColumn).as[String].collect.toSet.toList
+          upsertSystemBatch(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull, config.getBatchTemplateName, templates)
+        }
+      if (discardAttrs.nonEmpty) {
+        merged = merged.drop(discardAttrs: _*)
       }
+      lattice.output = merged :: Nil
     }
   }
   

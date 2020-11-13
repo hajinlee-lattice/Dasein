@@ -16,7 +16,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = SqlToSourceConfiguration.class, name = "SqlToSourceConfiguration"),
         @JsonSubTypes.Type(value = S3Configuration.class, name = "S3Configuration"),
         @JsonSubTypes.Type(value = BWRawConfiguration.class, name = "BWRawConfiguration"),
-        @JsonSubTypes.Type(value = PatchBookConfiguration.class, name = "PatchBookConfiguration"), })
+        @JsonSubTypes.Type(value = PatchBookConfiguration.class, name = "PatchBookConfiguration"),
+        @JsonSubTypes.Type(value = S3InternalConfiguration.class, name = "S3InternalConfiguration"), })
 public abstract class ProviderConfiguration {
 
     // Names of subclass extending ProviderConfiguration

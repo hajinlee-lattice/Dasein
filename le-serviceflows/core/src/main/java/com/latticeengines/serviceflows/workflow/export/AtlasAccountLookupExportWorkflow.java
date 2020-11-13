@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -54,6 +55,9 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
 
     @Value("${eai.export.dynamo.accountlookup.signature}")
     private String accountLookupSignature;
+
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublishDynamo;
 
     private String targetLookupSignature;
 
@@ -87,6 +91,7 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
             return;
         }
         log.info("Going to populate changelist to account lookup: " + configs);
+        markTablesInDataCollection(configs);
         log.info("Using dynamo table {}",
                 String.format("%s_%s", ACCOUNT_LOOKUP_DATA_UNIT_NAME, targetLookupSignature));
         List<AccountLookupExporter> exporters = getLookupExporters(configs);
@@ -131,7 +136,13 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
     private boolean shouldPublishDynamo() {
         boolean enableTp = batonService.hasModule(configuration.getCustomerSpace(), TalkingPoint);
         boolean hasAccount360 = batonService.isEnabled(configuration.getCustomerSpace(), ENABLE_ACCOUNT360);
-        return hasAccount360 || enableTp;
+        return !skipPublishDynamo && (hasAccount360 || enableTp);
+    }
+
+    private void markTablesInDataCollection(List<DynamoExportConfig> configs) {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        List<String> tableNames = configs.stream().map(DynamoExportConfig::getTableName).collect(Collectors.toList());
+        status.setAccountLookupSource(tableNames);
     }
 
     protected class AccountLookupExporter extends Exporter {

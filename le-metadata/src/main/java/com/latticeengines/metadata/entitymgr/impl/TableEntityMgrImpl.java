@@ -124,7 +124,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
         if (entity.getExtracts() != null) {
             for (Extract extract : entity.getExtracts()) {
-                extractDao.create(extract);
+                extractDao.createOrUpdate(extract);
             }
         }
 

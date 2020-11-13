@@ -302,6 +302,14 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(res, String.class);
     }
 
+    public List<String> registerImportData(String customerSpace, String taskId, String dataTableName) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerimportdata/{dataTableName}",
+                shortenCustomerSpace(customerSpace), taskId, dataTableName);
+        List<?> res = post("registerImportData", url, null, List.class);
+        return JsonUtils.convertList(res, String.class);
+    }
+
     public void addTableToQueue(String customerSpace, String taskId, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);

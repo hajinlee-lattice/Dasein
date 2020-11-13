@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,6 +19,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.latticeengines.cdl.workflow.steps.AggPeriodTransactionStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -34,7 +34,6 @@ import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.util.ApsGeneratorUtils;
-import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -77,18 +76,17 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
     protected void preScriptExecution() {
         active = dataCollectionProxy.getActiveVersion(configuration.getCustomer());
         inactive = active.complement();
-        List<Table> periodTables = getPeriodTables(configuration);
-        if (periodTables == null) {
-            log.warn("Aps generation is disabled or there's not metadata table for period aggregated table!");
-            skipScriptExecution = true;
-            return;
-        }
         String rollingPeriod = configuration.getRollingPeriod();
         if (StringUtils.isBlank(rollingPeriod)) {
             throw new RuntimeException("Must specify rolling period in configuration.");
         }
         log.info("Rolling Period=" + rollingPeriod);
-        periodTable = PeriodStrategyUtils.findPeriodTableFromStrategyName(periodTables, rollingPeriod);
+        periodTable = getPeriodTable(rollingPeriod);
+        if (periodTable == null) {
+            log.warn("Aps generation is disabled or there's not metadata table for period aggregated table!");
+            skipScriptExecution = true;
+            return;
+        }
         log.info("Period Transaction Table=" + periodTable.getName());
 
         productMap = loadProductMap();
@@ -106,8 +104,8 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
         params.put("AccountIdKey", "AccountId");
         params.put("PeriodIdKey", "PeriodId");
         params.put("ProductIdKey", "ProductId");
-        params.put("AmountKey", "TotalAmount");
-        params.put("QuantityKey", "TotalQuantity");
+        params.put("AmountKey", "Amount");
+        params.put("QuantityKey", "Quantity");
         params.put("ProductTypeKey", "ProductType");
         params.put("ApsImputationEnabledKey", getConfiguration().isApsImputationEnabled() + "");
         return JsonUtils.convertValue(params, JsonNode.class);
@@ -125,23 +123,32 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
 
     @Override
     protected List<DataUnit> getInputUnits() {
-        HdfsDataUnit txnInput = periodTable.toHdfsDataUnit("Transaction");
+        HdfsDataUnit txnInput = periodTable.partitionedToHdfsDataUnit("Transaction",
+                Collections.singletonList(InterfaceName.PeriodId.name()));
         return Collections.singletonList(txnInput);
     }
 
-    private List<Table> getPeriodTables(ApsGenerationStepConfiguration config) {
-        List<Table> periodTables = dataCollectionProxy.getTables(config.getCustomer(),
-                TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
-        if (CollectionUtils.isEmpty(periodTables)) {
-            periodTables = dataCollectionProxy.getTables(config.getCustomer(),
-                    TableRoleInCollection.ConsolidatedPeriodTransaction, active);
-            if (CollectionUtils.isNotEmpty(periodTables)) {
-                log.info("Found period stores in active version " + active);
-            }
-        } else {
-            log.info("Found period stores in inactive version " + inactive);
+    private Table getPeriodTable(String periodName) {
+        String signature = String.format(AggPeriodTransactionStep.PERIOD_TXN_PREFIX_FMT, ProductType.Analytic.name(),
+                periodName);
+        String periodTableName = getPeriodTableName(signature, inactive);
+        if (StringUtils.isNotBlank(periodTableName)) {
+            log.info("Found {} period table in inactive version {}: {}", periodName, inactive, periodTableName);
+            return metadataProxy.getTable(configuration.getCustomer(), periodTableName);
         }
-        return periodTables;
+        periodTableName = getPeriodTableName(signature, active);
+        if (StringUtils.isNotBlank(periodTableName)) {
+            log.info("Found {} period table in active version {}: {}", periodName, active, periodTableName);
+            return metadataProxy.getTable(configuration.getCustomer(), periodTableName);
+        }
+        return null;
+    }
+
+    private String getPeriodTableName(String signature, DataCollection.Version version) {
+        Map<String, String> periodTableNames = dataCollectionProxy.getTableNamesWithSignatures(
+                configuration.getCustomer(), TableRoleInCollection.PeriodTransactionStream, version,
+                Collections.singletonList(signature));
+        return periodTableNames.get(signature);
     }
 
     private Map<String, List<Product>> loadProductMap() {

@@ -47,3 +47,22 @@ if [[ -n "${J8_HOME}" ]]; then
 else
     "${LIVY_HOME}/bin/livy-server" start
 fi
+
+if [[ -n "${HIVE_HOME}" ]]; then
+  ps -ef | grep HiveMetaStore > hive_process
+  pid=$(cat hive_process | grep org.apache.hadoop.hive.metastore.HiveMetaStore | cut -d ' ' -f 2)
+  if [[ -n ${pid} ]]; then
+    echo "Found hive metastore pid ${pid}, going to kill it"
+    kill -9 ${pid}
+  fi
+  pushd ${HIVE_HOME}
+  nohup bin/hiveserver2 --service metastore > log/metastore.log &
+  popd
+
+  if [[ -n "${PRESTO_HOME}" ]]; then
+    pushd ${PRESTO_HOME}
+    bin/launcher start
+    popd
+  fi
+
+fi

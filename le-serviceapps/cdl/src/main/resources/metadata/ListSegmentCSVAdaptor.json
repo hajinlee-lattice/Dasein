@@ -1,0 +1,84 @@
+{
+  "importFieldMappings":[
+    {
+      "fieldName":"CompanyName",
+      "userFieldName":"Company Name",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"SFDC_ACCOUNT_ID",
+      "userFieldName":"Company External ID",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"Website",
+      "userFieldName":"URL",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"Industry",
+      "userFieldName":"US SIC 1987 Description",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"SFDC_CONTACT_ID",
+      "userFieldName":"Contact External ID",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"Contact_Address_Street_1",
+      "userFieldName":"Address Line 1",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"Contact_Address_Street_2",
+      "userFieldName":"Address Line 2",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"ContactCity",
+      "userFieldName":"City",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"ContactState",
+      "userFieldName":"State or Province Name",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"ContactCountry",
+      "userFieldName":"Country/Region Name",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"Email",
+      "userFieldName":"Email",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"FirstName",
+      "userFieldName":"First Name",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"LastName",
+      "userFieldName":"Last Name",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"PhoneNumber",
+      "userFieldName":"Direct Phone",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"ContactPostalCode",
+      "userFieldName":"Postal Code",
+      "fieldType":"TEXT"
+    },
+    {
+      "fieldName":"Title",
+      "userFieldName":"Title",
+      "fieldType":"TEXT"
+    }
+  ]
+}

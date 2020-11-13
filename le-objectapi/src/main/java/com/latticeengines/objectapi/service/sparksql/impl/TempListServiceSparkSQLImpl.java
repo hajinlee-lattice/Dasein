@@ -31,7 +31,8 @@ public class TempListServiceSparkSQLImpl implements TempListService {
     private LivySession livySession;
 
     @Override
-    public String createTempListIfNotExists(ConcreteRestriction restriction, Class<?> fieldClz, String redshiftPartition) {
+    public String createTempListIfNotExists(ConcreteRestriction restriction, Class<?> fieldClz, //
+                                     String sqlUser, String redshiftPartition) {
         String checksum = TempListUtils.getCheckSum(restriction, fieldClz);
         String tempTableName;
         if (tempListTables.containsKey(checksum)) {

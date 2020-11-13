@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -34,11 +35,16 @@ public class ExportDataFeedImportToS3 extends BaseImportExportS3<ImportExportS3S
     protected void buildRequests(List<ImportExportRequest> requests) {
         List<String> pathList = new LinkedList<>();
         String outputTableName = getOutputValue(WorkflowContextConstants.Outputs.RENAME_AND_MATCH_TABLE);
+        String matchTableName = getOutputValue(WorkflowContextConstants.Outputs.MATCH_RESULT_TABLE_NAME);
         // If has gone through the RenameAndMatchStep
         if (StringUtils.isNotEmpty(outputTableName)) {
             Table outputTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), outputTableName);
             pathList = outputTable.getExtracts().stream().map(extract -> extract.getPath())
                                            .collect(Collectors.toList());
+
+        } else if (StringUtils.isNotEmpty(matchTableName)) {
+            Table outputTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), matchTableName);
+            pathList = outputTable.getExtracts().stream().map(Extract::getPath).collect(Collectors.toList());
 
         } else { // keep as it is when RenameAndMatchStep has been skipped
             String applicationId = getOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID);

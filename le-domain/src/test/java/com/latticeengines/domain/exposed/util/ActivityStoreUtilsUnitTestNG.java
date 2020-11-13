@@ -6,6 +6,9 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.query.TimeFilter;
+
 public class ActivityStoreUtilsUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "modifyPatternTestData")
@@ -16,6 +19,11 @@ public class ActivityStoreUtilsUnitTestNG {
         Assert.assertEquals(isValidRegex(regexStr), isValidPtn,
                 "Pattern: " + ptn + " Modified Pattern: " + expectedModifiedPtn
                         + " doesn't have the expected validity as regex");
+    }
+
+    @Test(groups = "unit", dataProvider = "filterProviderForOptionDisplayName")
+    private void testFilterOptionDisplayName(TimeFilter filter, String expected) {
+        Assert.assertEquals(ActivityStoreUtils.filterOptionDisplayName(filter), expected);
     }
 
     private boolean isValidRegex(String regexStr) {
@@ -41,6 +49,16 @@ public class ActivityStoreUtilsUnitTestNG {
                 { null, null, false }, //
                 { "[", "[", false }, //
                 { "*[*", ".*[.*", false }, //
+        };
+    }
+
+    @DataProvider(name = "filterProviderForOptionDisplayName")
+    private Object[][] filterProviderForOptionDisplayName() {
+        return new Object[][] {
+                {TimeFilter.within(1, PeriodStrategy.Template.Week.name()), "Last 1 Weeks"},
+                {TimeFilter.within(2, PeriodStrategy.Template.Week.name()), "Last 2 Weeks"},
+                {TimeFilter.withinInclude(0, PeriodStrategy.Template.Week.name()), "Current week till today"},
+                {TimeFilter.withinInclude(2, PeriodStrategy.Template.Week.name()), "2 weeks till today"}
         };
     }
 }

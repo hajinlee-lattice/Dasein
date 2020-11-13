@@ -197,6 +197,15 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.registerExtracts(customerSpace, taskId, tableName, extracts);
     }
 
+    @PostMapping("/{taskId}/registerimportdata/{dataTableName}")
+    @ResponseBody
+    @ApiOperation(value = "Update data feed task")
+    public List<String> registerImportData(@PathVariable String customerSpace, @PathVariable String taskId,
+                                         @PathVariable String dataTableName) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.registerImportData(customerSpace, taskId, dataTableName);
+    }
+
     @PutMapping("/{taskId}/addtabletoqueue/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Add table to data feed task table queue")
