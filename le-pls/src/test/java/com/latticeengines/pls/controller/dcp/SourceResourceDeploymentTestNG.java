@@ -140,16 +140,10 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
                 testSourceFile.getFileImportId());
         Assert.assertTrue(MapUtils.isNotEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
 
-        ValidateFieldDefinitionsRequest validateRequest = new ValidateFieldDefinitionsRequest();
-        validateRequest.setCurrentFieldDefinitionsRecord(fetchResponse.getCurrentFieldDefinitionsRecord());
-        validateRequest.setExistingFieldDefinitionsMap(fetchResponse.getExistingFieldDefinitionsMap());
-        validateRequest.setAutodetectionResultsMap(fetchResponse.getAutodetectionResultsMap());
-        validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
-
-        ValidateFieldDefinitionsResponse response =
-                testSourceProxy.validateSourceMappings(testSourceFile.getFileImportId(),
-               null, validateRequest);
-
+        FieldDefinitionsRecord validateRecord = fetchResponse.getCurrentFieldDefinitionsRecord();
+        ValidateFieldDefinitionsResponse response = validateRequest(fetchResponse,
+                validateRecord, null,
+                testSourceFile.getFileImportId());
         Assert.assertNotEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
 
         // get source mappings for source
@@ -160,7 +154,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         UpdateSourceRequest updateSourceRequest = new UpdateSourceRequest();
         updateSourceRequest.setDisplayName("testSourceAfterUpdate");
-        updateSourceRequest.setFieldDefinitionsRecord(validateRequest.getCurrentFieldDefinitionsRecord());
+        updateSourceRequest.setFieldDefinitionsRecord(validateRecord);
         updateSourceRequest.setFileImportId(testSourceFile.getFileImportId());
         updateSourceRequest.setSourceId(sourceId);
         Source retrievedSource = testSourceProxy.updateSource(updateSourceRequest);
@@ -219,36 +213,39 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Source retrieved = allSources.get(0);
         Assert.assertEquals(retrieved.getSourceId(), sourceId);
         Assert.assertFalse(StringUtils.isEmpty(retrieved.getDropFullPath()));
-
-        testSourceProxy.deleteSourceById(sourceId);
     }
 
     @Test(groups = "deployment-dcp", dependsOnMethods = "testCreateSourceFromFile")
     public void testUpdateSource() {
         // fetch from previous project/source
         FetchFieldDefinitionsResponse fetchResponse = testSourceProxy.getSourceMappings(sourceId,
-                EntityType.Accounts.name(),
-                fileImportId);
+                EntityType.Accounts.name(), fileImportId);
         Assert.assertTrue(MapUtils.isNotEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
 
-        // validate (no change); assert PASS
-        ValidateFieldDefinitionsRequest validateRequest = new ValidateFieldDefinitionsRequest();
-        validateRequest.setCurrentFieldDefinitionsRecord(fetchResponse.getCurrentFieldDefinitionsRecord());
-        validateRequest.setExistingFieldDefinitionsMap(fetchResponse.getExistingFieldDefinitionsMap());
-        validateRequest.setAutodetectionResultsMap(fetchResponse.getAutodetectionResultsMap());
-        validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
-        ValidateFieldDefinitionsResponse response =
-                testSourceProxy.validateSourceMappings(fileImportId,
-                        EntityType.Accounts.name(), validateRequest);
+        // validate (no change); assert validation success
+        ValidateFieldDefinitionsResponse response = validateRequest(fetchResponse,
+                fetchResponse.getCurrentFieldDefinitionsRecord(), EntityType.Accounts.name(), fileImportId);
         Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.PASS);
 
-        // make INVALID change to FieldDefinitionsRecord
-        FieldDefinitionsRecord record = validateRequest.getCurrentFieldDefinitionsRecord();
+        // make INVALID change to FieldDefinitionsRecord; assert validation errors/warnings
+        FieldDefinitionsRecord record = fetchResponse.getCurrentFieldDefinitionsRecord();
         FieldDefinition fd = record.getFieldDefinition("companyInformation","CompanyName");
         Assert.assertNotNull(fd);
         fd.setFieldType(UserDefinedType.BOOLEAN);
 
-        // updateSource with invalid FieldDefinitionsRecord, new displayName
+        response = validateRequest(fetchResponse, record, EntityType.Accounts.name(), fileImportId);
+        Assert.assertNotEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.PASS);
+
+        // make VALID change to FieldDefinitionsRecord; assert validation success
+        fd.setFieldType(UserDefinedType.TEXT);
+        fd = record.getFieldDefinition("uniqueIds", "CustomerId");
+        Assert.assertNotNull(fd);
+        fd.setColumnName("MarketoAccountID");
+
+        response = validateRequest(fetchResponse, record, EntityType.Accounts.name(), fileImportId);
+        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.PASS);
+
+        // commit valid changes
         UpdateSourceRequest updateSourceRequest = new UpdateSourceRequest();
         updateSourceRequest.setDisplayName("updatedSource");
         updateSourceRequest.setFieldDefinitionsRecord(record);
@@ -259,25 +256,26 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(updatedSource);
         Assert.assertEquals(updatedSource.getSourceDisplayName(), "updatedSource");
 
-        // fetch updatedSource; assert FieldDefinitionsRecord changes persist
+        // fetch; assert changes persist
         fetchResponse = testSourceProxy.getSourceMappings(sourceId,
                 EntityType.Accounts.name(),
                 fileImportId);
-        fd = fetchResponse.getCurrentFieldDefinitionsRecord().getFieldDefinition(
-                "companyInformation", "CompanyName");
-
         Assert.assertTrue(MapUtils.isNotEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
-        Assert.assertEquals(fd.getFieldType(), UserDefinedType.BOOLEAN);
 
-        // validate updatedSource (invalid change); assert ERROR
-        validateRequest = new ValidateFieldDefinitionsRequest();
-        validateRequest.setCurrentFieldDefinitionsRecord(fetchResponse.getCurrentFieldDefinitionsRecord());
-        validateRequest.setExistingFieldDefinitionsMap(fetchResponse.getExistingFieldDefinitionsMap());
-        validateRequest.setAutodetectionResultsMap(fetchResponse.getAutodetectionResultsMap());
-        validateRequest.setImportWorkflowSpec(fetchResponse.getImportWorkflowSpec());
-        response = testSourceProxy.validateSourceMappings(fileImportId,
-                EntityType.Accounts.name(), validateRequest);
+        fd = fetchResponse.getCurrentFieldDefinitionsRecord().getFieldDefinition(
+                "uniqueIds", "CustomerId");
+        Assert.assertEquals(fd.getColumnName(), "MarketoAccountID");
+    }
 
-        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
+    private ValidateFieldDefinitionsResponse validateRequest(
+            FetchFieldDefinitionsResponse f, FieldDefinitionsRecord record, String entity, String fileImportId)
+    {
+        ValidateFieldDefinitionsRequest request = new ValidateFieldDefinitionsRequest();
+        request.setCurrentFieldDefinitionsRecord(record);
+        request.setExistingFieldDefinitionsMap(f.getExistingFieldDefinitionsMap());
+        request.setAutodetectionResultsMap(f.getAutodetectionResultsMap());
+        request.setImportWorkflowSpec(f.getImportWorkflowSpec());
+
+        return testSourceProxy.validateSourceMappings(fileImportId, entity, request);
     }
 }
