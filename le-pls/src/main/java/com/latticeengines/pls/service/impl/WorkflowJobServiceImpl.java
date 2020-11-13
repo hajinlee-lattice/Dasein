@@ -619,7 +619,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
             updateEstimateScheduleTime(job, schedulingStatus, actions);
         }
-
         return job;
     }
 
@@ -729,13 +728,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     Instant now = Instant.now();
                     Instant estimateStartTime = now;
 
-                    Action firstImportAction = Collections.max(actions, Comparator.comparing(Action::getCreated));
+                    Action firstImportAction = Collections.min(actions, Comparator.comparing(Action::getCreated));
                     if (firstImportAction != null && firstImportAction.getCreated() != null) {
                         Instant importTime = firstImportAction.getCreated().toInstant()
                                 .plus(FirstActionTimePending.FIRSTACTION_PENDING_HOUR, ChronoUnit.HOURS);
                         estimateStartTime = getLatestInstant(estimateStartTime, importTime);
                     }
-                    Action lastImportAction = Collections.min(actions, Comparator.comparing(Action::getCreated));
+                    Action lastImportAction = Collections.max(actions, Comparator.comparing(Action::getCreated));
                     if (lastImportAction != null && lastImportAction.getCreated() != null) {
                         Instant importTime = lastImportAction.getCreated().toInstant()
                                 .plus(LastActionTimePending.LASTACTION_PENDING_MINITE, ChronoUnit.MINUTES);
