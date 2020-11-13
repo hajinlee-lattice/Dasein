@@ -273,32 +273,21 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     }
 
     private List<ColumnMetadata> sortCustomerAttrs(List<ColumnMetadata> attrs) {
-        List<ColumnMetadata> sortedCustomerAttrs = new ArrayList<>();
+        List<ColumnMetadata> sortedCustomerAttrs = new ArrayList<>(attrs.size());
 
         List<String> customerHeaders = getCustomerFileHeaders();
         List<ColumnMetadata> otherAttrs = new ArrayList<>();
-        Map<ColumnMetadata, Integer> columnToCustomerIndex = new HashMap<>();
 
         attrs.stream().forEach(columnMetadata -> {
-            int index = customerHeaders.indexOf(columnMetadata.getAttrName());
+            int index = customerHeaders.indexOf(columnMetadata.getDisplayName());
             if (index == -1) {
                 otherAttrs.add(columnMetadata);
             } else {
-                columnToCustomerIndex.put(columnMetadata, index);
+                sortedCustomerAttrs.add(index, columnMetadata);
             }
         });
 
-        Comparator<Map.Entry<ColumnMetadata, Integer>> compareByIndex = new Comparator<Map.Entry<ColumnMetadata, Integer>>() {
-            @Override
-            public int compare(Map.Entry<ColumnMetadata, Integer> o1, Map.Entry<ColumnMetadata, Integer> o2) {
-                return o1.getValue().compareTo(o2.getValue());
-            }
-        };
-
-        columnToCustomerIndex.entrySet().stream().sorted(compareByIndex).forEach(columnMetadataIntegerEntry -> {
-            sortedCustomerAttrs.add(columnMetadataIntegerEntry.getKey());
-        });
-
+        sortedCustomerAttrs.removeIf(columnMetadata -> columnMetadata == null);
         sortedCustomerAttrs.addAll(otherAttrs);
         return sortedCustomerAttrs;
     }
@@ -357,8 +346,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                 otherAttrs.add(cm);
             }
         }
-        List<ColumnMetadata> sortedCustomerAttrs = sortCustomerAttrs(customerAttrs);
-        sortedCustomerAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
+        customerAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
         if (duns != null) {
             dispNames.put(MatchedDuns, candidateFieldDispNames.get(MatchedDuns));
         }
