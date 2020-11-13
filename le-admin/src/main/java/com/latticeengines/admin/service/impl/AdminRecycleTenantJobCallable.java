@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -14,13 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -138,24 +135,18 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     }
 
     private void scanInvalidTenants() {
-        log.info("begin scanning tenants in DB not in ZK");
-        Camille camille = CamilleEnvironment.getCamille();
-        String podId = CamilleEnvironment.getPodId();
+        log.info("begin scanning invalid tenants.");
         List<String> tenantIds = tenantService.getAllTenantIds();
+        List<String> tenantIdsFromZK = adminProxy.getAllTenantIds();
         if (CollectionUtils.isNotEmpty(tenantIds)) {
-            for (String id : tenantIds) {
-                CustomerSpace space = CustomerSpace.parse(id);
-                String contractId = space.getContractId();
-                Path path = PathBuilder.buildContractPath(podId, contractId);
-                try {
-                    if (!camille.exists(path)) {
-                        log.info("tenant {} exists in db not in zk", space.getTenantId());
-                    }
-                } catch(Exception e) {
-                    log.info("error occurred when retrieving {}", space.getTenantId());
-                }
+            if (CollectionUtils.isNotEmpty(tenantIdsFromZK)) {
+                Set<String> idsInDBNotZK =
+                        tenantIds.stream().filter(id -> !tenantIdsFromZK.contains(id)).collect(Collectors.toSet());
+                Set<String> idsInZKNotDB =
+                        tenantIdsFromZK.stream().filter(id -> !tenantIds.contains(id)).collect(Collectors.toSet());
+                log.info("tenants in db not in zk are {}", idsInDBNotZK);
+                log.info("tenants in zk not in db are {}", idsInZKNotDB);
             }
-
         }
     }
 
