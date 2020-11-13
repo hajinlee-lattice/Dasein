@@ -111,7 +111,6 @@ public enum BusinessEntity implements GraphNode {
             WebVisitProfile, //
             Opportunity, //
             AccountMarketingActivity, //
-            ContactMarketingActivity, //
             CustomIntent
     );
     public static final Set<BusinessEntity> COMPANY_PROFILE_ACCOUNT_ENTITIES = TALKING_POINT_ACCOUNT_ENTITIES;
