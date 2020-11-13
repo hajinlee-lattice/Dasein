@@ -72,7 +72,7 @@ public class CSVFileImportValueSanitizerDeploymentTestNG extends CSVFileImportDe
         Assert.assertNotNull(sourceFile);
         Assert.assertNotNull(dataFeedTaskId);
 
-        startCDLImport(sourceFile, ENTITY_ACCOUNT);
+        startCDLImport(sourceFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
 
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, dataFeedTaskId);
         Assert.assertNotNull(dataFeedTask);
