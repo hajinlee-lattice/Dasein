@@ -111,7 +111,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
 
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         BusinessEntity mainEntity = channelConfig.getAudienceType().asBusinessEntity();
-        Long maxAccountsToLaunch = channel.getMaxAccountsToLaunch();
+        Long maxEntitiesToLaunch = channel.getMaxEntitiesToLaunch();
         boolean useContactsPerAccountLimit = hasContactsPerAccountLimit(channel, mainEntity);
         Set<RatingBucketName> launchBuckets = launch == null ? channel.getBucketsToLaunch()
                 : launch.getBucketsToLaunch();
@@ -132,7 +132,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 .isSuppressAccountsWithoutWebsiteOrCompanyName(ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(
                         channel.getLookupIdMap().getExternalSystemName(), channelConfig))
                 .bucketsToLaunch(launchBuckets) //
-                .limit(maxAccountsToLaunch, useContactsPerAccountLimit) //
+                .limit(maxEntitiesToLaunch, useContactsPerAccountLimit) //
                 .lookupId(lookupId) //
                 .launchUnScored(launchUnScored) //
                 .destinationSystemName(externalSystemName) //
@@ -150,7 +150,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         if (useContactsPerAccountLimit) {
             Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
             launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
-                    maxContactsPerAccount, maxAccountsToLaunch, customerSpace);
+                    maxContactsPerAccount, maxEntitiesToLaunch, customerSpace);
         }
 
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
@@ -207,7 +207,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
     }
 
     private HdfsDataUnit executeSparkJobContactsPerAccount(HdfsDataUnit launchDataUniverseDataUnit, //
-            Long maxContactsPerAccount, Long maxAccountsToLaunch, CustomerSpace customerSpace) {
+            Long maxContactsPerAccount, Long maxEntitiesToLaunch, CustomerSpace customerSpace) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -226,7 +226,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 inputUnits.add(launchDataUniverseDataUnit);
 
                 GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig( //
-                        getRandomWorkspace(), maxContactsPerAccount, maxAccountsToLaunch, sortAttr, sortDir);
+                        getRandomWorkspace(), maxContactsPerAccount, maxEntitiesToLaunch, sortAttr, sortDir);
 
                 log.info("Executing GenerateLaunchUniverseJob with config: " + JsonUtils.serialize(config));
 

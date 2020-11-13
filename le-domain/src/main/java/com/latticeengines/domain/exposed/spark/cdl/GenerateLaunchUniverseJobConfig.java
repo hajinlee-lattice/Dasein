@@ -10,8 +10,8 @@ public class GenerateLaunchUniverseJobConfig extends SparkJobConfig {
     @JsonProperty("MaxContactsPerAccount")
     private Long maxContactsPerAccount;
 
-    @JsonProperty("MaxAccountsToLaunch")
-    private Long maxAccountsToLaunch;
+    @JsonProperty("MaxEntitiesToLaunch")
+    private Long maxEntitiesToLaunch;
 
     @JsonProperty("ContactsPerAccountSortAttribute")
     private String contactsPerAccountSortAttribute;
@@ -23,11 +23,11 @@ public class GenerateLaunchUniverseJobConfig extends SparkJobConfig {
     }
 
     public GenerateLaunchUniverseJobConfig(String workSpace,
-            Long maxContactsPerAccount, Long maxAccountsToLaunch,
+            Long maxContactsPerAccount, Long maxEntitiesToLaunch,
             String contactsPerAccountSortAttribute, String contactsPerAccountSortDirection) {
         this.setWorkspace(workSpace);
         this.maxContactsPerAccount = maxContactsPerAccount;
-        this.maxAccountsToLaunch = maxAccountsToLaunch;
+        this.maxEntitiesToLaunch = maxEntitiesToLaunch;
         this.contactsPerAccountSortAttribute = contactsPerAccountSortAttribute;
         this.contactsPerAccountSortDirection = contactsPerAccountSortDirection;
     }
@@ -46,12 +46,12 @@ public class GenerateLaunchUniverseJobConfig extends SparkJobConfig {
         this.maxContactsPerAccount = maxContactsPerAccount;
     }
 
-    public Long getMaxAccountsToLaunch() {
-        return maxAccountsToLaunch;
+    public Long getMaxEntitiesToLaunch() {
+        return maxEntitiesToLaunch;
     }
 
-    public void setMaxAccountsToLaunch(Long maxAccountsToLaunch) {
-        this.maxAccountsToLaunch = maxAccountsToLaunch;
+    public void setMaxEntitiesToLaunch(Long maxEntitiesToLaunch) {
+        this.maxEntitiesToLaunch = maxEntitiesToLaunch;
     }
 
     public String getContactsPerAccountSortAttribute() {

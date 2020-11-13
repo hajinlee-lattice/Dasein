@@ -16,7 +16,7 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     val input : DataFrame = lattice.input.head
     val accountId = InterfaceName.AccountId.name()
     val maxContactsPerAccount = config.getMaxContactsPerAccount
-    val maxAccountsToLaunch = config.getMaxAccountsToLaunch
+    val maxEntitiesToLaunch = config.getMaxEntitiesToLaunch
     val sortAttr = config.getContactsPerAccountSortAttribute
     val sortDir = config.getContactsPerAccountSortDirection
 
@@ -29,8 +29,8 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
       trimmedData = limitContactsPerAccount(trimmedData, accountId, sortAttr, sortDir, maxContactsPerAccount)
     }
 
-    if (maxAccountsToLaunch != null) {
-      trimmedData = trimmedData.limit(maxAccountsToLaunch.toInt)
+    if (maxEntitiesToLaunch != null) {
+      trimmedData = trimmedData.limit(maxEntitiesToLaunch.toInt)
     }
 
     lattice.output = List(trimmedData)
