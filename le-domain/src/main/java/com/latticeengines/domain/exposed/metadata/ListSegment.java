@@ -51,7 +51,7 @@ public class ListSegment implements HasPid {
     private String externalSystem;
 
     @JsonProperty("externalSegmentId")
-    @Column(name = "EXTERNAL_SYSTEM_ID", nullable = false)
+    @Column(name = "EXTERNAL_SEGMENT_ID", nullable = false)
     private String externalSegmentId;
 
     @JsonProperty("s3DropFolder")

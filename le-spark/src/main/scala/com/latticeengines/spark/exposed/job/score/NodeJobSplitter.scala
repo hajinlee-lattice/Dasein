@@ -1,6 +1,6 @@
 package com.latticeengines.spark.exposed.job.score
 
-import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField
 
 import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.functions.{col}
@@ -8,7 +8,23 @@ import org.apache.spark.sql.{DataFrame}
 import org.apache.spark.storage.StorageLevel
 
 object NodeJobSplitter {
-  
+      def splitRevenue(input: DataFrame, originalScoreFieldMap:Map[String, String], modelGuidFieldName: String) = {
+        val modelList: ListBuffer[String] = ListBuffer()
+        val revenueModelList: ListBuffer[String] = ListBuffer()
+        for ((modelGuid, scoreField) <- originalScoreFieldMap) {
+            val isNotRevenue:Boolean = (ScoreResultField.RawScore.displayName == 
+              originalScoreFieldMap.getOrElse(modelGuid, ScoreResultField.RawScore.displayName))
+            if (isNotRevenue) {
+                modelList += modelGuid
+            } else {
+                revenueModelList += modelGuid
+            }
+        }
+        val model = createNodeInList(input, modelGuidFieldName, modelList.toList)
+        val revenueModel = createNodeInList(input, modelGuidFieldName, revenueModelList.toList)
+        (model, revenueModel)
+    }
+      
      def splitEv(input: DataFrame, originalScoreFieldMap:Map[String, String], modelGuidFieldName: String) = {
         val modelList: ListBuffer[String] = ListBuffer()
         val predictedModelList: ListBuffer[String] = ListBuffer()

@@ -13,7 +13,23 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
-      
+      CREATE TABLE `DataTemplate` (
+        `UUID` varchar(36) NOT NULL,
+        `CreatedDate` datetime,
+        `Document` json,
+        `LastModifiedDate` datetime,
+        `TenantId` varchar(255) NOT NULL,
+        PRIMARY KEY (`UUID`)
+      ) engine = InnoDB;
+
+      CREATE INDEX IX_TENANTID ON `DataTemplate` (`TenantId`,`UUID`);
+
+      ALTER TABLE `DataUnit`
+        ADD COLUMN `DataTemplateId` VARCHAR(200) GENERATED ALWAYS AS (json_unquote(json_extract(`Document`,'$.DataTemplateId'))) VIRTUAL;
+
+      CREATE INDEX IX_DATATEMPLATEID ON `DataUnit` (`TenantId`,`DataTemplateId`);
+
+
   END //
 -- ##############################################################
 

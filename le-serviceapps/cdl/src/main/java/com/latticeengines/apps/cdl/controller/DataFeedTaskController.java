@@ -100,7 +100,7 @@ public class DataFeedTaskController {
 
     @PostMapping("/import/{taskIdentifier}")
     @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
+    @ApiOperation(value = "Start Vdb import job")
     @NoCustomerSpace
     public ResponseDocument<String> startImportJobForVdb(@PathVariable String customerSpace,
             @PathVariable String taskIdentifier, @RequestBody VdbLoadTableConfig vdbLoadTableConfig) {
@@ -111,7 +111,7 @@ public class DataFeedTaskController {
 
     @PostMapping("/import/internal/{taskIdentifier}")
     @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
+    @ApiOperation(value = "Start import job")
     @NoCustomerSpace
     public ResponseDocument<String> startImportJob(@PathVariable String customerSpace,
             @PathVariable String taskIdentifier,
@@ -134,7 +134,7 @@ public class DataFeedTaskController {
 
     @PostMapping("/s3import")
     @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
+    @ApiOperation(value = "Start import job from S3")
     @NoCustomerSpace
     public ResponseDocument<String> startImportJobForS3(@PathVariable String customerSpace,
             @RequestBody S3FileToHdfsConfiguration s3FileToHdfsConfiguration) {
@@ -150,7 +150,7 @@ public class DataFeedTaskController {
 
     @PostMapping("/reset")
     @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
+    @ApiOperation(value = "Reset Import")
     public ResponseDocument<Boolean> resetImport(@PathVariable String customerSpace,
             @RequestParam(value = "entity", required = false) BusinessEntity entity) {
         if (dataFeedTaskManagerService.resetImport(customerSpace, entity)) {
@@ -388,14 +388,13 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Create a default DnbIntentData template")
     public ResponseDocument<Boolean> createDefaultDnbIntentDataTemplate(@PathVariable String customerSpace,
                                                                         @RequestParam(value = "systemDisplayName", required = false) String systemDisplayName,
-                                                                        @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA,
-                                                                        @RequestParam(value = "processBuyingScore", required = false, defaultValue = "true") boolean processBuyingScore) {
+                                                                        @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
         if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create DnbIntentData template."));
         }
         try {
-            Boolean result = dataFeedTaskTemplateService.createDefaultDnbIntentDataTemplate(customerSpace, systemDisplayName, processBuyingScore);
+            Boolean result = dataFeedTaskTemplateService.createDefaultDnbIntentDataTemplate(customerSpace, systemDisplayName);
             return ResponseDocument.successResponse(result);
         } catch (Exception e) {
             log.error("Create Default DnbIntentData template failed with error: {}", e.toString());
@@ -411,8 +410,7 @@ public class DataFeedTaskController {
     public ResponseDocument<Boolean> createDnbIntentDataTemplate(@PathVariable String customerSpace,
                                                                  @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata,
                                                                  @RequestParam(value = "systemDisplayName", required = false) String systemDisplayName,
-                                                                 @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA,
-                                                                 @RequestParam(value = "processBuyingScore", required = false, defaultValue = "true") boolean processBuyingScore) {
+                                                                 @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
         if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create DnbIntentData template."));
@@ -420,7 +418,7 @@ public class DataFeedTaskController {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         try {
             return ResponseDocument.successResponse(dataFeedTaskTemplateService.createDnbIntentDataTemplate(customerSpace,
-                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata, systemDisplayName, processBuyingScore));
+                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata, systemDisplayName));
         } catch (Exception e) {
             log.error("Create DnbIntentData template failed with error: {}", e.toString());
             String stacktrace = ExceptionUtils.getStackTrace(e);

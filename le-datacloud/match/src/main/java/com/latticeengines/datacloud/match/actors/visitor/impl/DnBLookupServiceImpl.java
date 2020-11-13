@@ -59,7 +59,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 
@@ -431,9 +430,20 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     Iterator<DnBBatchMatchContext> iter = unsubmittedBatches.iterator();
                     while (iter.hasNext()) {
                         DnBBatchMatchContext batchContext = iter.next();
-                        if (batchContext.isSealed() || batchContext.getContexts().size() >= maxBatchSize(batchContext.isUserDirectPlus())
-                                || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) >= 120000
-                                || (System.currentTimeMillis() - batchContext.getCreateTime().getTime()) >= 1800000) {
+                        int maxBatchSize =  maxBatchSize(batchContext.isUserDirectPlus());
+                        int contextSize = batchContext.getContexts().size();
+                        boolean exceedMaxBatchSize = contextSize >= maxBatchSize;
+                        long currentTime = System.currentTimeMillis();
+                        long sinceTimestamp = currentTime - batchContext.getTimestamp().getTime();
+                        long sinceCreateTime = currentTime - batchContext.getCreateTime().getTime();
+                        boolean isSealed = batchContext.isSealed();
+                        if (batchContext.isSealed() //
+                                || batchContext.getContexts().size() >= maxBatchSize(batchContext.isUserDirectPlus()) //
+                                || sinceTimestamp >= 120000 || sinceCreateTime >= 1800000) {
+                            log.info("Add a batch of {} to submit: isSealed={}, " + //
+                                    "exceedMaxBatchSize={}, maxBatchSize={}, sinceTimeStamp={}, sinceCreateTime={}",
+                                    contextSize, isSealed, //
+                                    exceedMaxBatchSize, maxBatchSize, sinceTimestamp, sinceCreateTime);
                             batchContext.setSealed(true);
                             batchesToSubmit.add(batchContext);
                             iter.remove();
@@ -800,16 +810,13 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         return res;
     }
 
-    private boolean isMultiCandidates(DataSourceLookupRequest request) {
-        return OperationalMode.MULTI_CANDIDATES.equals(request.getMatchTravelerContext().getOperationalMode());
-    }
-
     private void setMatchRule(DnBMatchContext context, DplusMatchConfig config) {
         if (config != null) {
             NameLocation nl = context.getInputNameLocation();
+            DplusMatchRule matchRule = config.getBaseRule();
             if (nl != null && CollectionUtils.isNotEmpty(config.getSpecialRules())) {
                 String inputCode = nl.getCountryCode();
-                DplusMatchRule matchRule = config.getSpecialRules().stream().filter(sr -> {
+                matchRule = config.getSpecialRules().stream().filter(sr -> {
                     if (MatchKey.Country.equals(sr.getMatchKey())) {
                         return sr.getAllowedValues().stream().anyMatch(v -> {
                             String filterCode = countryCodeService.getCountryCode(v);
@@ -820,10 +827,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     }
                     return false;
                 }).map(DplusMatchConfig.SpeicalRule::getSpecialRule).findFirst().orElse(config.getBaseRule());
-                context.setMatchRule(matchRule);
-            } else {
-                context.setMatchRule(config.getBaseRule());
             }
+            context.setMatchRule(matchRule);
         }
     }
 

@@ -145,6 +145,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         S3ChannelConfig s3ChannelConfig = new S3ChannelConfig();
         s3ChannelConfig.setAudienceName("something");
         s3ChannelConfig.setAttributeSetName("attribute_set_name_s3");
+        s3ChannelConfig.setAddExportTimestamp(true);
         channel4.setIsAlwaysOn(true);
         channel4.setCronScheduleExpression("0 0 12 ? * WED *");
         channel4.setExpirationPeriodString("P3M");
@@ -290,6 +291,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
             Assert.assertNotNull(updatedChannel.get());
             log.info("Channel4 id is {}.", channel4.getId());
             Assert.assertEquals(((S3ChannelConfig) updatedChannel.get().getChannelConfig()).getAttributeSetName(), AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
+            Assert.assertEquals(((S3ChannelConfig) updatedChannel.get().getChannelConfig()).getAddExportTimestamp(), true);
             return true;
         });
     }

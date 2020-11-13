@@ -41,7 +41,7 @@ public class RedshiftSQLQuery<T> extends BaseSQLQuery<T> {
         return new RedshiftDateTimeExpressionTemplate();
     }
 
-    private class RedshiftDateTimeExpressionTemplate implements DateTimeExpressionTemplate {
+    private static class RedshiftDateTimeExpressionTemplate implements DateTimeExpressionTemplate {
 
         private static final String CURRENT_DATE = "GETDATE()";
 

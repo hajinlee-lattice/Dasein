@@ -11,6 +11,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -35,21 +37,19 @@ public class InputPresenceJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of(InterfaceName.DUNS.name(), String.class) //
     );
 
-    @Test(groups = "functional")
-    private void test() {
-        uploadData();
-        InputPresenceConfig config = new InputPresenceConfig();
-        config.setInputNames(new HashSet<>(
-                Arrays.asList(InterfaceName.Id.name(),
-                        InterfaceName.CompanyName.name(),
-                        InterfaceName.City.name(),
-                        InterfaceName.State.name(),
-                        InterfaceName.Country.name(),
-                        InterfaceName.PostalCode.name(),
-                        InterfaceName.PhoneNumber.name(),
-                        InterfaceName.DUNS.name())));
+    private ThreadLocal<InputPresenceJobOutputVerifier> localVerifier;
 
-        SparkJobResult result = runSparkJob(InputPresenceJob.class, config);
+    @BeforeClass(groups = "functional")
+    public void setup() {
+        super.setup();
+        uploadData();
+    }
+
+    @Test(groups = "functional", dataProvider = "inputPresenceTests")
+    public void test(InputPresenceConfig jobConfig, InputPresenceJobOutputVerifier verifier) {
+        SparkJobResult result = runSparkJob(InputPresenceJob.class, jobConfig);
+        localVerifier = new ThreadLocal<>();
+        localVerifier.set(verifier);
         verifyResult(result);
     }
 
@@ -69,20 +69,81 @@ public class InputPresenceJobTestNG extends SparkJobFunctionalTestNGBase {
 
     @Override
     protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
+    }
+
+    @DataProvider(name = "inputPresenceTests")
+    public Object[][] provideInputPresenceTestData() {
+        return new Object[][] { //
+                { getStandardPresenceConfig(),  getStandardOutputVerifier() }, //
+                { getExcludeEmptyPresenceConfig(), getExcludeEmptyOutputVerifier() } //
+        };
     }
 
     @Override
     protected void verifyOutput(String output) {
         Map<String, Long> map = JsonUtils.convertMap(JsonUtils.deserialize(output, Map.class), String.class,
                 Long.class);
-        Assert.assertEquals(map.get(InterfaceName.Id.name()), Long.valueOf(6));
-        Assert.assertEquals(map.get(InterfaceName.CompanyName.name()), Long.valueOf(6));
-        Assert.assertEquals(map.get(InterfaceName.City.name()), Long.valueOf(6));
-        Assert.assertEquals(map.get(InterfaceName.State.name()), Long.valueOf(5));
-        Assert.assertEquals(map.get(InterfaceName.Country.name()), Long.valueOf(6));
-        Assert.assertEquals(map.get(InterfaceName.PostalCode.name()), Long.valueOf(3));
-        Assert.assertEquals(map.get(InterfaceName.PhoneNumber.name()), Long.valueOf(3));
-        Assert.assertEquals(map.get(InterfaceName.DUNS.name()), Long.valueOf(3));
+        final InputPresenceJobOutputVerifier verifier = localVerifier.get();
+        verifier.verifyOutput(map);
+    }
+
+    private InputPresenceConfig getStandardPresenceConfig() {
+        InputPresenceConfig config = new InputPresenceConfig();
+        config.setInputNames(new HashSet<>(
+                Arrays.asList(InterfaceName.Id.name(),
+                        InterfaceName.CompanyName.name(),
+                        InterfaceName.City.name(),
+                        InterfaceName.State.name(),
+                        InterfaceName.Country.name(),
+                        InterfaceName.PostalCode.name(),
+                        InterfaceName.PhoneNumber.name(),
+                        InterfaceName.DUNS.name())));
+        return config;
+    }
+
+    private InputPresenceJobOutputVerifier getStandardOutputVerifier() {
+        return map -> {
+            Assert.assertEquals(map.get(InterfaceName.Id.name()), Long.valueOf(6));
+            Assert.assertEquals(map.get(InterfaceName.CompanyName.name()), Long.valueOf(6));
+            Assert.assertEquals(map.get(InterfaceName.City.name()), Long.valueOf(6));
+            Assert.assertEquals(map.get(InterfaceName.State.name()), Long.valueOf(5));
+            Assert.assertEquals(map.get(InterfaceName.Country.name()), Long.valueOf(6));
+            Assert.assertEquals(map.get(InterfaceName.PostalCode.name()), Long.valueOf(3));
+            Assert.assertEquals(map.get(InterfaceName.PhoneNumber.name()), Long.valueOf(3));
+            Assert.assertEquals(map.get(InterfaceName.DUNS.name()), Long.valueOf(3));
+        };
+    }
+
+    private InputPresenceConfig getExcludeEmptyPresenceConfig() {
+        InputPresenceConfig config = new InputPresenceConfig();
+        config.setInputNames(new HashSet<>(
+                Arrays.asList(InterfaceName.Id.name(),
+                        InterfaceName.CompanyName.name(),
+                        InterfaceName.City.name(),
+                        InterfaceName.State.name(),
+                        InterfaceName.Country.name(),
+                        InterfaceName.PostalCode.name(),
+                        InterfaceName.PhoneNumber.name(),
+                        InterfaceName.DUNS.name())));
+        config.setExcludeEmpty(Boolean.TRUE);
+        return config;
+    }
+
+    private InputPresenceJobOutputVerifier getExcludeEmptyOutputVerifier() {
+        return map -> {
+            Assert.assertEquals(map.get(InterfaceName.Id.name()), Long.valueOf(6));
+            Assert.assertEquals(map.get(InterfaceName.CompanyName.name()), Long.valueOf(6));
+            Assert.assertEquals(map.get(InterfaceName.City.name()), Long.valueOf(6));
+            Assert.assertEquals(map.get(InterfaceName.State.name()), Long.valueOf(5));
+            Assert.assertEquals(map.get(InterfaceName.Country.name()), Long.valueOf(6));
+            Assert.assertEquals(map.get(InterfaceName.PostalCode.name()), Long.valueOf(2));
+            Assert.assertEquals(map.get(InterfaceName.PhoneNumber.name()), Long.valueOf(3));
+            Assert.assertEquals(map.get(InterfaceName.DUNS.name()), Long.valueOf(3));
+        };
+    }
+
+    private interface InputPresenceJobOutputVerifier {
+        void verifyOutput(Map<String, Long> map);
     }
 }

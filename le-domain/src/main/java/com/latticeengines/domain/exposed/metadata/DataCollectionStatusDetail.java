@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +116,9 @@ public class DataCollectionStatusDetail implements Serializable {
 
     @JsonProperty("IntentAlertVersion")
     private String intentAlertVersion;
+
+    @JsonProperty("accountLookupSource")
+    private List<String> accountLookupSource = new ArrayList<>();
 
     public Integer getMinTxnDate() {
         return minTxnDate;
@@ -334,5 +338,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setIntentAlertVersion(String intentAlertVersion) {
         this.intentAlertVersion = intentAlertVersion;
+    }
+
+    public List<String> getAccountLookupSource() {
+        return accountLookupSource;
+    }
+
+    public void setAccountLookupSource(List<String> accountLookupSource) {
+        this.accountLookupSource = accountLookupSource;
     }
 }

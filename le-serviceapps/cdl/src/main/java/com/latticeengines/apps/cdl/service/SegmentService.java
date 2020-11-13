@@ -24,14 +24,17 @@ public interface SegmentService {
 
     ListSegment updateListSegment(ListSegment segment);
 
-    Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck,
-            boolean hardDelete);
+    Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck, boolean hardDelete);
+
+    boolean deleteSegmentByExternalInfo(String externalSystem, String externalSegmentId, boolean hardDelete);
 
     Boolean revertDeleteSegmentByName(String segmentName);
 
     List<String> getAllDeletedSegments();
 
     List<MetadataSegment> getSegments();
+
+    List<MetadataSegment> getListSegments();
 
     MetadataSegment findMaster(String collectionName);
 
@@ -59,5 +62,5 @@ public interface SegmentService {
 
     List<MetadataSegmentExport> getMetadataSegmentExports();
 
-    MetadataSegment findByExternalInfo(MetadataSegment segment);
+    MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId);
 }

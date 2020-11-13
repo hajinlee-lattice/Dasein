@@ -111,6 +111,8 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
             return;
         }
 
+        // periodName -> tableName
+        Map<String, String> signatureTableName = new HashMap<>();
         Map<String, Table> consolidatedPeriodTxnTables = periodStrategies.stream().map(periodName -> {
             SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
                     buildConsolidatedPeriodTxnConfig(periodName, periodTransactionTables, retainTypes));
@@ -118,12 +120,12 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
             String tableName = NamingUtils.timestamp(prefix);
             Table table = toTable(tableName, compositeKey, result.getTargets().get(0));
             metadataProxy.createTable(customerSpaceStr, tableName, table);
+            signatureTableName.put(periodName, table.getName());
             return Pair.of(periodName, table);
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
-        List<String> tableNames = consolidatedPeriodTxnTables.values().stream().map(Table::getName)
-                .collect(Collectors.toList());
+        List<String> tableNames = new ArrayList<>(signatureTableName.values());
         log.info("Generated consolidated period stores: {}", tableNames);
-        dataCollectionProxy.upsertTables(customerSpaceStr, tableNames, TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+        dataCollectionProxy.upsertTablesWithSignatures(customerSpaceStr, signatureTableName, TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
         exportToS3AndAddToContext(consolidatedPeriodTxnTables, PERIOD_TRXN_TABLE_NAMES_BY_PERIOD_NAME);
     }
 

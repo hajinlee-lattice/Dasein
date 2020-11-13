@@ -148,10 +148,10 @@ public class TimeFilterTranslatorUnitTestNG {
         BusinessCalendar c = new BusinessCalendar();
         c.setLongerMonth(1);
         c.setMode(STARTING_DATE);
-        c.setStartingDate("NOV-30");
-        TimeFilterTranslator translator = new TimeFilterTranslator(Collections.singletonList(new PeriodStrategy(c, PeriodStrategy.Template.Week)), "2019-11-30");
+        c.setStartingDate("JAN-01");
+        TimeFilterTranslator translator = new TimeFilterTranslator(Collections.singletonList(new PeriodStrategy(c, PeriodStrategy.Template.Week)), "2017-08-01");
         TimeFilter filter = new TimeFilter(//
-                ComparisonType.WITHIN, PeriodStrategy.Template.Week.name(), Collections.singletonList(2));
+                ComparisonType.WITHIN_INCLUDE, PeriodStrategy.Template.Week.name(), Collections.singletonList(12));
         System.out.println(translator.translateRange(filter));
         System.out.println(translator.periodIdRangeToDateRange("Week", translator.translateRange(filter)));
     }

@@ -167,7 +167,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             if (processorContext.isPartialMatch()) {
                 return;
             }
-        } while (futures.size() > NUM_10K * 5);
+        } while (futures.size() > NUM_10K * 10); // control number of futures in memory
     }
 
     private void processRecords(ProcessorContext processorContext, Long startTime,

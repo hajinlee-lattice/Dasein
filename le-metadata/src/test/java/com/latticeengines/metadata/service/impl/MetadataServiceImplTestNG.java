@@ -7,18 +7,23 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -26,6 +31,9 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeFixer;
@@ -34,13 +42,22 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.JdbcStorage;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.PrestoDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.metadata.service.MetadataService;
+import com.latticeengines.prestodb.exposed.service.AthenaService;
+import com.latticeengines.prestodb.exposed.service.PrestoConnectionService;
+import com.latticeengines.prestodb.exposed.service.PrestoDbService;
+
 public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(MetadataServiceImplTestNG.class);
@@ -50,6 +67,27 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Inject
     private TableTypeHolder tableTypeHolder;
+
+    @Inject
+    private PrestoConnectionService prestoConnectionService;
+
+    @Inject
+    private PrestoDbService prestoDbService;
+
+    @Inject
+    private AthenaService athenaService;
+
+    @Inject
+    private DataUnitService dataUnitService;
+
+    @Value("${common.le.stack}")
+    private String leStack;
+
+    @Value("${aws.test.s3.bucket}")
+    private String s3Bucket;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -109,6 +147,108 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
     public void getTables() {
         List<Table> tables = mdService.getTables(CustomerSpace.parse(customerSpace1));
         assertEquals(tables.size(), 1);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "getTable" })
+    public void registerPrestoDataUnit() {
+        CustomerSpace customerSpace = CustomerSpace.parse(customerSpace1);
+        List<Table> tables = mdService.getTables(customerSpace);
+        assertEquals(tables.size(), 1);
+
+        // test first registration
+        PrestoDataUnit prestoDataUnit = mdService.registerPrestoDataUnit(customerSpace, TABLE1);
+        Assert.assertNotNull(prestoDataUnit);
+        Assert.assertEquals(prestoDataUnit.getTenant(), customerSpace.getTenantId());
+        Assert.assertEquals(prestoDataUnit.getName(), TABLE1);
+        String clusterId = prestoConnectionService.getClusterId();
+        String tableName = prestoDataUnit.getPrestoTableName(clusterId);
+        Assert.assertTrue(prestoDbService.tableExists(tableName));
+        DataSource dataSource = prestoConnectionService.getPrestoDataSource();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        Long count = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM " + tableName, Long.class);
+        Assert.assertEquals(count, Long.valueOf(550));
+
+        // test idempotent
+        prestoDataUnit = mdService.registerPrestoDataUnit(customerSpace, TABLE1);
+        Assert.assertNotNull(prestoDataUnit);
+        Assert.assertEquals(prestoDataUnit.getTenant(), customerSpace.getTenantId());
+        Assert.assertEquals(prestoDataUnit.getName(), TABLE1);
+        String tableName2 = prestoDataUnit.getPrestoTableName(clusterId);
+        Assert.assertEquals(tableName2, tableName);
+        Assert.assertTrue(prestoDbService.tableExists(tableName));
+        Long count2 = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM " + tableName, Long.class);
+        Assert.assertEquals(count2, count);
+
+        prestoDbService.deleteTableIfExists(tableName);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "getTable" })
+    public void registerAthenaDataUnit() {
+        CustomerSpace customerSpace = CustomerSpace.parse(customerSpace1);
+        List<Table> tables = mdService.getTables(customerSpace);
+        assertEquals(tables.size(), 1);
+
+        // setup s3 data unit
+        String s3Prefix = leStack + "/MetadataServiceImplTest/" + TABLE1;
+        String s3Protocol = Boolean.TRUE.equals(useEmr) ? "s3a" : "s3n";
+        String s3Dir = s3Protocol + "://" + s3Bucket + "/" + s3Prefix;
+        Table table = mdService.getTable(customerSpace, TABLE1);
+        String hdfsDir = table.toHdfsDataUnit("table").getPath();
+        hdfsDir = PathUtils.toParquetOrAvroDir(hdfsDir);
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, s3Dir)) {
+                HdfsUtils.rmdir(yarnConfiguration, s3Dir);
+            }
+            log.info("Copying from {} to {}", hdfsDir, s3Dir);
+            HdfsUtils.copyFiles(yarnConfiguration, hdfsDir, s3Dir);
+        } catch (Exception e) {
+            Assert.fail("Failed to move test data to S3", e);
+        }
+
+        S3DataUnit s3DataUnit = new S3DataUnit();
+        s3DataUnit.setTenant(customerSpace.getTenantId());
+        s3DataUnit.setName(TABLE1);
+        s3DataUnit.setBucket(s3Bucket);
+        s3DataUnit.setPrefix(s3Prefix);
+        s3DataUnit.setDataFormat(DataUnit.DataFormat.AVRO);
+        String tableName = null;
+        AthenaDataUnit athenaDataUnit = null;
+        try {
+            dataUnitService.createOrUpdateByNameAndStorageType(s3DataUnit);
+            RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                    Collections.singleton(AssertionError.class), null);
+            SleepUtils.sleep(500L);
+            retry.execute(ctx -> {
+                Assert.assertNotNull(dataUnitService.findByNameTypeFromReader(TABLE1, DataUnit.StorageType.S3));
+                return true;
+            });
+            athenaDataUnit = mdService.registerAthenaDataUnit(customerSpace, TABLE1);
+            Assert.assertNotNull(athenaDataUnit);
+            Assert.assertEquals(athenaDataUnit.getTenant(), customerSpace.getTenantId());
+            Assert.assertEquals(athenaDataUnit.getName(), TABLE1);
+            tableName = athenaDataUnit.getAthenaTable();
+            Assert.assertTrue(athenaService.tableExists(tableName));
+            Long count = athenaService.queryObject("SELECT COUNT(1) FROM " + tableName, Long.class);
+            Assert.assertEquals(count, Long.valueOf(550));
+
+            dataUnitService.delete(athenaDataUnit);
+            Assert.assertFalse(athenaService.tableExists(tableName));
+        } finally {
+            dataUnitService.delete(s3DataUnit);
+            if (athenaDataUnit != null) {
+                dataUnitService.delete(athenaDataUnit);
+            }
+            try {
+                if (HdfsUtils.fileExists(yarnConfiguration, s3Dir)) {
+                    HdfsUtils.rmdir(yarnConfiguration, s3Dir);
+                }
+            } catch (Exception e) {
+                Assert.fail("Failed to move test data to S3", e);
+            }
+            if (StringUtils.isNotBlank(tableName)) {
+                athenaService.deleteTableIfExists(tableName);
+            }
+        }
     }
 
     @Test(groups = "functional", dependsOnMethods = { "getTables" })

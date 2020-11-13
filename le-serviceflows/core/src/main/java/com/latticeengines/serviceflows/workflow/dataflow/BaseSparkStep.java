@@ -276,7 +276,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         return exportToS3(table, true);
     }
 
-    private boolean exportToS3(Table table, boolean sync) {
+    protected boolean exportToS3(Table table, boolean sync) {
         String tableName = table.getName();
         boolean shouldSkip = Boolean.TRUE.equals(getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class));
         if (!shouldSkip) {
@@ -303,7 +303,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         return shouldSkip;
     }
 
-    private ExecutorService getS3ExporterPool() {
+    protected ExecutorService getS3ExporterPool() {
         if (s3ExporterPool == null) {
             s3ExporterPool = Executors.newFixedThreadPool(4);
         }

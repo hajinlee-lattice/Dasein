@@ -80,8 +80,8 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private AtlasExport atlasExport;
     private AttributeRepository attrRepo;
     private Map<BusinessEntity, List<ColumnMetadata>> schemaMap;
-    private AccountContactExportContext accountContactExportContext = new AccountContactExportContext();
     private boolean entityMatchGA;
+    private boolean dropAccoutId = false;
 
     @Override
     public void execute() {
@@ -162,9 +162,11 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         } else {
             accountContactExportConfig.setInput(Collections.singletonList(accountDataUnit));
         }
-        accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
+        AccountContactExportContext accountContactExportContext = new AccountContactExportContext();
         String joinKey = entityMatchGA ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
-        accountContactExportConfig.getAccountContactExportContext().setJoinKey(joinKey);
+        accountContactExportContext.setJoinKey(joinKey);
+        accountContactExportContext.setDropAccountId(dropAccoutId);
+        accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
         return accountContactExportConfig;
     }
@@ -272,12 +274,24 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                 columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
             }
         }
-        if (!entityMatchGA && !hasAccountId) {
-            addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
+        boolean contactWithAccountExport = AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType());
+        boolean hasAttributes = columnMetadataList.stream().flatMap(columnMetadata -> columnMetadata.stream()).findAny().isPresent();
+        if (contactWithAccountExport || !hasAttributes) {
+            if (!entityMatchGA && !hasAccountId) {
+                if (hasAttributes) {
+                    dropAccoutId = true;
+                }
+                addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
+            }
+            if (entityMatchGA && !hasCustomerAccountId) {
+                if (hasAttributes) {
+                    dropAccoutId = true;
+                }
+                addAccountId(BusinessEntity.Account, columnMetadataList, customerAccountId);
+            }
         }
-        if (entityMatchGA && !hasCustomerAccountId) {
-            addAccountId(BusinessEntity.Account, columnMetadataList, customerAccountId);
-        }
+        log.info("getting account lookup: hasAttributes: " + hasAttributes + ", contactWithAccountExport: " + contactWithAccountExport +
+                ", dropAccountJoinKey:" + dropAccoutId);
         sortAttribute(columnMetadataList);
         return convertToLookup(columnMetadataList);
     }
@@ -306,13 +320,16 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
                 columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
             }
         }
-        if (!hasContactId) {
+        boolean hasAttributes = columnMetadataList.stream().flatMap(columnMetadata -> columnMetadata.stream()).findAny().isPresent();
+        boolean contactWithAccountExport = AtlasExportType.ACCOUNT_AND_CONTACT.equals(atlasExport.getExportType());
+        if (!hasContactId && !hasAttributes) {
             addContactId(BusinessEntity.Contact, columnMetadataList, contactId);
         }
-        if (!entityMatchGA && !hasAccountId) {
+        log.info("getting contact lookup: hasAttributes: " + hasAttributes + ", contactWithAccountExport: " + contactWithAccountExport);
+        if (!entityMatchGA && !hasAccountId && contactWithAccountExport) {
             addAccountId(BusinessEntity.Contact, columnMetadataList, accountId);
         }
-        if (entityMatchGA && !hasCustomerAccountId) {
+        if (entityMatchGA && !hasCustomerAccountId && contactWithAccountExport) {
             addAccountId(BusinessEntity.Contact, columnMetadataList, customerAccountId);
         }
         sortAttribute(columnMetadataList);

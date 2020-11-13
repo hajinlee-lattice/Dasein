@@ -18,7 +18,7 @@
     "stage_name": "Closed-Won",
     "display_name": "Closed-Won",
     "description": "Opportunity is closed-won",
-    "display_color_code": "#059142",
+    "display_color_code": "#3FA40F",
     "priority": 7,
     "predicates": [
       {
@@ -64,7 +64,7 @@
     "stage_name": "Closed",
     "display_name": "Closed",
     "description": "Opportunity is closed",
-    "display_color_code": "#07da63",
+    "display_color_code": "#70BF4A",
     "priority": 6,
     "predicates": [
       {
@@ -104,7 +104,7 @@
     "stage_name": "Opportunity",
     "display_name": "Opportunity",
     "description": "Opportunity on Account",
-    "display_color_code": "#0C99BA",
+    "display_color_code": "#33BDB7",
     "priority": 5,
     "predicates": [
       {
@@ -144,7 +144,7 @@
     "stage_name": "Known Engaged",
     "display_name": "Known Engaged",
     "description": "Account is being engaged with",
-    "display_color_code": "#59bfff",
+    "display_color_code": "#2A5587",
     "priority": 4,
     "predicates": [
       {
@@ -184,7 +184,7 @@
     "stage_name": "Engaged",
     "display_name": "Engaged",
     "description": "Account has website visits",
-    "display_color_code": "#055a8c",
+    "display_color_code": "#457EBA",
     "priority": 3,
     "predicates": [
       {
@@ -217,7 +217,7 @@
     "stage_name": "Aware",
     "display_name": "Aware",
     "description": "Account is showing interest",
-    "display_color_code": "#094c72",
+    "display_color_code": "#51C1ED",
     "priority": 2,
     "predicates": [
       {
@@ -250,7 +250,7 @@
     "stage_name": "Dark",
     "display_name": "Dark",
     "description": "No Activity",
-    "display_color_code": "#0c3953",
+    "display_color_code": "#BCC9DB",
     "priority": 1,
     "predicates": [
       {

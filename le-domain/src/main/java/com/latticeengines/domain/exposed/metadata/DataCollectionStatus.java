@@ -431,4 +431,14 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     public void setIntentAlertVersion(String intentAlertVersion) {
         this.detail.setIntentAlertVersion(intentAlertVersion);
     }
+
+    @JsonProperty("accountLookupSource")
+    public void setAccountLookupSource(List<String> accountLookupSource) {
+        this.detail.setAccountLookupSource(accountLookupSource);
+    }
+
+    @JsonProperty("accountLookupSource")
+    public List<String> getAccountLookupSource() {
+        return this.detail.getAccountLookupSource();
+    }
 }

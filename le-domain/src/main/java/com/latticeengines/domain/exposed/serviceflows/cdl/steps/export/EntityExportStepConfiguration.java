@@ -26,9 +26,6 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
     @JsonProperty("atlas_export_id")
     private String atlasExportId;
 
-    @JsonProperty("add_export_timestamp")
-    private boolean addExportTimestamp;
-
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
     }
@@ -75,13 +72,5 @@ public class EntityExportStepConfiguration extends BaseStepConfiguration {
 
     public void setAtlasExportId(String atlasExportId) {
         this.atlasExportId = atlasExportId;
-    }
-
-    public boolean isAddExportTimestamp() {
-        return addExportTimestamp;
-    }
-
-    public void setAddExportTimestamp(boolean addExportTimestamp) {
-        this.addExportTimestamp = addExportTimestamp;
     }
 }

@@ -4,6 +4,7 @@ import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 
 public interface TempListService {
 
-    String createTempListIfNotExists(ConcreteRestriction restriction, Class<?> fieldClz, String redshiftPartition);
+    String createTempListIfNotExists(ConcreteRestriction restriction, Class<?> fieldClz, //
+                                     String sqlUser, String redshiftPartition);
 
 }

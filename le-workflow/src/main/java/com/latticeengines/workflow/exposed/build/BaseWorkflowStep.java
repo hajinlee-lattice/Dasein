@@ -135,6 +135,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String TRANSFORM_PIPELINE_VERSION = "TRANSFORM_PIPELINE_VERSION";
     protected static final String EVENT_COUNTER_MAP = "EVENT_COUNTER_MAP";
     protected static final String ENTITY_VALIDATION_SUMMARY = "ENTITY_VALIDATION_SUMMARY";
+    protected static final String IMPORT_FILE_SIGNATURE = "IMPORT_FILE_SIGNATURE";
 
     // DCP
     protected static final String UPLOAD_STATS = "UPLOAD_STATS";

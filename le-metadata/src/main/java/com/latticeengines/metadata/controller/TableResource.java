@@ -23,6 +23,8 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.PrestoDataUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -69,7 +71,9 @@ public class TableResource extends BaseRestResource {
             @RequestParam(value = "size", required = false) Integer size,
             @RequestParam(value = "sort_dir", required = false) Direction sortDirection,
             @RequestParam(value = "sort_col", required = false) String sortColumn) {
-        Pageable pageRequest = getPageRequest(page, size, sortDirection, sortColumn);
+        Pageable pageRequest = tableResourceHelper.testIsValidColumn(sortColumn) ?
+                getPageRequest(page, size, sortDirection, sortColumn) :
+                getPageRequest(page, size, sortDirection, null);
         return tableResourceHelper.getTableAttributes(customerSpace, tableName, pageRequest);
     }
 
@@ -189,4 +193,21 @@ public class TableResource extends BaseRestResource {
                                                 @RequestBody RetentionPolicyUpdateDetail retentionPolicyUpdateDetail) {
         return tableResourceHelper.updateTableRetentionPolicies(customerSpace, retentionPolicyUpdateDetail);
     }
+
+    @PostMapping("/tables/{tableName}/presto-unit")
+    @ResponseBody
+    @ApiOperation(value = "Register presto data unit for a table, if feasible")
+    public PrestoDataUnit registerPrestoDataUnit(@PathVariable String customerSpace, //
+                                      @PathVariable String tableName) {
+        return tableResourceHelper.registerPrestoDataUnit(customerSpace, tableName);
+    }
+
+    @PostMapping("/tables/{tableName}/athena-unit")
+    @ResponseBody
+    @ApiOperation(value = "Register athena data unit for a table, if feasible")
+    public AthenaDataUnit registerAthenaDataUnit(@PathVariable String customerSpace, //
+                                      @PathVariable String tableName) {
+        return tableResourceHelper.registerAthenaDataUnit(customerSpace, tableName);
+    }
+
 }

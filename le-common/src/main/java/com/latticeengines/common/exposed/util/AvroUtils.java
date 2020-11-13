@@ -226,7 +226,32 @@ public final class AvroUtils {
         if (matches.size() == 0) {
             throw new RuntimeException(String.format("No such file could be found: %s", path));
         }
-        return AvroUtils.getSchema(config, new Path(matches.get(0)));
+        String file = matches.get(0);
+        if (!path.startsWith("/")) {
+            String rootFolder = file.substring(0, file.indexOf("/", 1));
+            String server = path.substring(0, path.indexOf(rootFolder));
+            return AvroUtils.getSchema(config, new Path(server + file));
+        }
+        return AvroUtils.getSchema(config, new Path(file));
+    }
+
+    public static String getFilePathFromGlob(Configuration config, String path) {
+        List<String> matches;
+        try {
+            matches = HdfsUtils.getFilesByGlob(config, path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (matches.size() == 0) {
+            throw new RuntimeException(String.format("No such file could be found: %s", path));
+        }
+        String file = matches.get(0);
+        if (!path.startsWith("/")) {
+            String rootFolder = file.substring(0, file.indexOf("/", 1));
+            String server = path.substring(0, path.indexOf(rootFolder));
+            return server + file;
+        }
+        return file;
     }
 
     public static List<GenericRecord> getDataFromGlob(Configuration configuration, String path) {
@@ -406,6 +431,15 @@ public final class AvroUtils {
             fieldAssembler = constructFieldWithType(fieldAssembler, fieldBuilder, type);
         }
         return fieldAssembler.endRecord();
+    }
+
+    public static List<Pair<String, Class<?>>> parseSchema(Schema schema) {
+        List<Pair<String, Class<?>>> pairs = new ArrayList<>();
+        for (Field field: schema.getFields()) {
+            Class<?> clz = getJavaType(getType(field));
+            pairs.add(Pair.of(field.name(), clz));
+        }
+        return pairs;
     }
 
     public static Schema constructSchema(String tableName, List<Pair<String, Class<?>>> columns) {
@@ -1660,6 +1694,7 @@ public final class AvroUtils {
             HdfsUtils.rmdir(yarnConfiguration, dirPath);
         }
         writeToHdfsFile(yarnConfiguration, schema, dirPath + File.separator + fileName, records, true);
+        // writeToHdfsFile(yarnConfiguration, schema, dirPath + File.separator + fileName, records, false);
     }
 
     public static boolean isValidColumn(String column) {

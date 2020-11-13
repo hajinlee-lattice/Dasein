@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -27,6 +29,8 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
     private DataUnitService dataUnitService;
 
     private String testTenantId;
+
+    private static final String DATATEMPLATE_ID = "DataTempLateId";
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -67,6 +71,31 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
         });
     }
 
+    @Test(groups = "functional")
+    public void testFindByDataTemplateIdAndRole() throws Exception {
+        String dataUnitStr = "{\"Roles\":[\"Master\", \"Test\"], \"StorageType\":\"Dynamo\"}";
+        DataUnit dataUnit = JsonUtils.deserialize(dataUnitStr, DynamoDataUnit.class);
+
+        String name = NamingUtils.timestamp("Dynamo");
+        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name));
+        Assert.assertNotNull(unit);
+        Assert.assertTrue(unit instanceof DynamoDataUnit);
+
+        Thread.sleep(500);
+        List<DataUnit> found = dataUnitService.findAllByDataTemplateIdAndRoleFromReader(DATATEMPLATE_ID, DataUnit.Role.Master);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(found));
+        Assert.assertTrue(found.get(0) instanceof DynamoDataUnit);
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
+
+        dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
+        retry.execute(context -> {
+            Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));
+            return true;
+        });
+    }
+
     private DynamoDataUnit createDynamoUnit(String name) {
         DynamoDataUnit dataUnit = new DynamoDataUnit();
         dataUnit.setName(name);
@@ -74,6 +103,11 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
         dataUnit.setPartitionKey("pk");
         dataUnit.setSortKey("sk");
         dataUnit.setSignature("0000");
+        dataUnit.setDataTemplateId(DATATEMPLATE_ID);
+        List<DataUnit.Role> roles = new ArrayList<DataUnit.Role>();
+        roles.add(DataUnit.Role.Master);
+        roles.add(DataUnit.Role.Import);
+        dataUnit.setRoles(roles);
         return dataUnit;
     }
 

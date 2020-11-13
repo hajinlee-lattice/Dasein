@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -34,6 +35,12 @@ public class GenerateRecommendationCSVContext implements Serializable {
     @JsonProperty("DisplayNames")
     private Map<String, String> displayNames;
 
+    @JsonProperty("addExportTimestamp")
+    private boolean addExportTimestamp;
+
+    @JsonProperty("dateFormat")
+    private String dateFormat = ConvertToCSVConfig.ISO_8601;
+
     public boolean isIgnoreAccountsWithoutContacts() {
         return ignoreAccountsWithoutContacts;
     }
@@ -56,5 +63,21 @@ public class GenerateRecommendationCSVContext implements Serializable {
 
     public void setDisplayNames(Map<String, String> displayNames) {
         this.displayNames = displayNames;
+    }
+
+    public boolean getAddExportTimestamp() {
+        return addExportTimestamp;
+    }
+
+    public void setAddExportTimestamp(boolean addExportTimestamp) {
+        this.addExportTimestamp = addExportTimestamp;
+    }
+
+    public String getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
     }
 }

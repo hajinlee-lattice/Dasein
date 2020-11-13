@@ -10,6 +10,8 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     MetadataSegment findByName(String name);
 
+    List<MetadataSegment> findByType(MetadataSegment.SegmentType type);
+
     List<MetadataSegment> findAllInCollection(String collectionName);
 
     MetadataSegment findMasterSegment(String collectionName);
@@ -34,6 +36,7 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     MetadataSegment createListSegment(MetadataSegment segment);
 
-    MetadataSegment findByExternalInfo(MetadataSegment segment);
+    MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId);
 
+    MetadataSegment findByExternalInfo(MetadataSegment segment);
 }

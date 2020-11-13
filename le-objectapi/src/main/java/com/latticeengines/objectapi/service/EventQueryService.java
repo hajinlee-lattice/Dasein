@@ -7,17 +7,17 @@ import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
 public interface EventQueryService {
-    long getScoringCount(EventFrontEndQuery frontEndQuery, DataCollection.Version version);
+    long getScoringCount(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version);
 
-    long getTrainingCount(EventFrontEndQuery frontEndQuery, DataCollection.Version version);
+    long getTrainingCount(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version);
 
-    long getEventCount(EventFrontEndQuery frontEndQuery, DataCollection.Version version);
+    long getEventCount(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version);
 
-    DataPage getScoringTuples(EventFrontEndQuery frontEndQuery, DataCollection.Version version);
+    DataPage getScoringTuples(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version);
 
-    DataPage getTrainingTuples(EventFrontEndQuery frontEndQuery, DataCollection.Version version);
+    DataPage getTrainingTuples(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version);
 
-    DataPage getEventTuples(EventFrontEndQuery frontEndQuery, DataCollection.Version version);
+    DataPage getEventTuples(EventFrontEndQuery frontEndQuery, String sqlUser, DataCollection.Version version);
 
-    String getQueryStr(EventFrontEndQuery frontEndQuery, EventType eventType, Version version);
+    String getQueryStr(EventFrontEndQuery frontEndQuery, EventType eventType, String sqlUser, Version version);
 }

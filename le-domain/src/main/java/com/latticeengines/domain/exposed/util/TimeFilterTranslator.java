@@ -116,7 +116,6 @@ public class TimeFilterTranslator implements Serializable {
         ComparisonType operator = timeFilter.getRelation();
         switch (operator) {
         case EVER:
-            return null;
         case IS_EMPTY:
             return null;
         case WITHIN:

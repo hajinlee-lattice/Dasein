@@ -1,12 +1,15 @@
 package com.latticeengines.admin.controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
+import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
@@ -29,6 +33,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.Components.ComponentsMap;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -60,6 +65,9 @@ public class InternalResource {
     @Inject
     private BatonService batonService;
 
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
     @GetMapping("services/options")
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
@@ -86,6 +94,18 @@ public class InternalResource {
                 throw new LedpException(LedpCode.LEDP_19105,
                         new String[] { patch.getOptions().toString(), patch.getDefaultOption() });
             }
+        }
+    }
+
+    @GetMapping("/tenants")
+    @ResponseBody
+    @ApiOperation(value = "Get all tenants ids")
+    public List<String> getTenants() {
+        Collection<TenantDocument> tenants = tenantEntityMgr.getTenantsInCache(null);
+        if (CollectionUtils.isNotEmpty(tenants)) {
+            return tenants.stream().map(doc -> doc.getSpace().toString()).collect(Collectors.toList());
+        } else {
+            return new ArrayList<>();
         }
     }
 

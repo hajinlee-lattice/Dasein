@@ -1,8 +1,13 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = S3DataUnit.class, name = "S3"), //
         @JsonSubTypes.Type(value = PrestoDataUnit.class, name = "Presto"), //
         @JsonSubTypes.Type(value = AthenaDataUnit.class, name = "Athena"), //
-        @JsonSubTypes.Type(value = MySQLDataUnit.class, name = "MySQL"), //
         @JsonSubTypes.Type(value = HdfsDataUnit.class, name = "Hdfs"), //
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -26,6 +30,9 @@ public abstract class DataUnit {
 
     @JsonProperty("PartitionKeys")
     private List<String> partitionKeys;
+
+    @JsonProperty("TypedPartitionKeys")
+    private List<Pair<String, String>> typedPartitionKeys;
 
     @JsonProperty("Tenant")
     private String tenant;
@@ -38,6 +45,12 @@ public abstract class DataUnit {
 
     @JsonProperty("DataFormat")
     private DataFormat dataFormat;
+
+    @JsonProperty("Roles")
+    private List<Role> roles;
+
+    @JsonProperty("DataTemplateId")
+    private String DataTemplateId;
 
     public abstract StorageType getStorageType();
 
@@ -81,12 +94,67 @@ public abstract class DataUnit {
         this.partitionKeys = partitionKeys;
     }
 
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    public String getDataTemplateId() {
+        return DataTemplateId;
+    }
+
+    public void setDataTemplateId(String dataTemplateId) {
+        DataTemplateId = dataTemplateId;
+    }
+
+    public List<Pair<String, String>> getTypedPartitionKeys() {
+        return typedPartitionKeys;
+    }
+
+    public void setTypedPartitionKeys(Collection<Pair<String, String>> typedPartitionKeys) {
+        this.typedPartitionKeys = new ArrayList<>(typedPartitionKeys);
+    }
     public enum StorageType {
-        Dynamo, Hdfs, Redshift, S3, MySQL, Presto, Athena
+        Dynamo, Hdfs, Redshift, S3, Presto, Athena, Unknown;
+
+        @JsonCreator
+        public static StorageType safeValueOf(String string) {
+            try {
+                return StorageType.valueOf(string);
+            } catch (IllegalArgumentException e) {
+                return Unknown;
+            }
+        }
     }
 
     public enum DataFormat {
-        AVRO, PARQUET, CSV
+        AVRO, PARQUET, CSV, UNKOWN;
+
+        @JsonCreator
+        public static DataFormat safeValueOf(String string) {
+            try {
+                return DataFormat.valueOf(string);
+            } catch (IllegalArgumentException e) {
+                return UNKOWN;
+            }
+        }
     }
 
+    public enum Role {
+        Master, Import, Snapshot, Serving, Unknown;
+
+        @JsonCreator
+        public static Role safeValueOf(String string) {
+            try {
+                return Role.valueOf(string);
+            } catch (IllegalArgumentException e) {
+                return Unknown;
+            }
+        }
+    }
 }
+
+

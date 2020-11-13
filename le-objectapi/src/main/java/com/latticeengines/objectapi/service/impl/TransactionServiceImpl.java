@@ -69,6 +69,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public String getMaxTransactionDate(DataCollection.Version version, String sqlUser) {
+        //FIXME: implement for Presto and Athena
+        return getMaxTransactionDate(version);
+    }
+
+    @Override
     public TimeFilterTranslator getTimeFilterTranslator(String evaluationDate) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         initializeTimeTranslatorCache();

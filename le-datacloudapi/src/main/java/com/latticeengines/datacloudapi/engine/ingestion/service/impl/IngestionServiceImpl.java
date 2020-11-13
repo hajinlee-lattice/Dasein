@@ -74,6 +74,12 @@ public class IngestionServiceImpl implements IngestionService {
     @Resource(name = "ingestionBWRawProviderService")
     private IngestionProviderService bwRawProviderService;
 
+    @Resource(name = "ingestionS3InternalProviderService")
+    private IngestionProviderService s3InternalProviderService;
+
+    @Resource(name = "ingestionS3Provider")
+    private IngestionProviderService s3ProviderService;
+
     public static final int ULTIMATE_RETRIES = 1000;
 
     @Override
@@ -87,8 +93,7 @@ public class IngestionServiceImpl implements IngestionService {
     }
 
     @Override
-    public IngestionProgress ingest(String ingestionName, IngestionRequest request,
-            String hdfsPod, boolean immediate) {
+    public IngestionProgress ingest(String ingestionName, IngestionRequest request, String hdfsPod, boolean immediate) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
@@ -97,9 +102,8 @@ public class IngestionServiceImpl implements IngestionService {
         IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion, request.getSubmitter(),
                 request.getFileName(), request.getSourceVersion());
         if (ingestionValidator.isDuplicateProgress(progress)) {
-            return ingestionProgressService.updateInvalidProgress(progress,
-                    "There is already a progress ingesting " + progress.getSource() + " to "
-                            + progress.getDestination());
+            return ingestionProgressService.updateInvalidProgress(progress, "There is already a progress ingesting "
+                    + progress.getSource() + " to " + progress.getDestination());
         }
         if (immediate) {
             // 1. Progress needs to be saved first before submitting to workflow
@@ -141,11 +145,8 @@ public class IngestionServiceImpl implements IngestionService {
                 if (report == null || report.getYarnApplicationState() == null
                         || report.getYarnApplicationState().equals(YarnApplicationState.FAILED)
                         || report.getYarnApplicationState().equals(YarnApplicationState.KILLED)) {
-                    progress = ingestionProgressService.updateProgress(progress)
-                            .status(ProgressStatus.FAILED)
-                            .errorMessage(
-                                    "Found application status to be FAILED or KILLED in the scan")
-                            .commit(true);
+                    progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
+                            .errorMessage("Found application status to be FAILED or KILLED in the scan").commit(true);
                     log.info("Killed progress: " + progress.toString());
                 }
             } catch (Exception e) {
@@ -154,18 +155,14 @@ public class IngestionServiceImpl implements IngestionService {
                     // ApplicationId no longer exist in RM.
                     // ApplicationNotFoundException is nested exception inside
                     // YarnSystemException
-                    progress = ingestionProgressService.updateProgress(progress)
-                            .status(ProgressStatus.FAILED)
+                    progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
                             // Should not retry for this case
-                            .retries(ULTIMATE_RETRIES)
-                            .errorMessage("Application doesn't exist in RM")
-                            .commit(true);
+                            .retries(ULTIMATE_RETRIES).errorMessage("Application doesn't exist in RM").commit(true);
                     log.info("Killed progress: " + progress.toString());
                 }
             }
         }
     }
-
 
     private void ingestAll() {
         List<Ingestion> ingestions = ingestionEntityMgr.findAll();
@@ -185,7 +182,7 @@ public class IngestionServiceImpl implements IngestionService {
     }
 
     /**
-     * Only support ingestion type SFTP, API and BW_RAW in scan
+     * Only support ingestion type SFTP, API, S3_INTERNAL and BW_RAW in scan
      */
     private List<IngestionProgress> createDraftProgresses(Ingestion ingestion) {
         List<IngestionProgress> progresses = new ArrayList<>();
@@ -214,6 +211,22 @@ public class IngestionServiceImpl implements IngestionService {
                 progresses.add(progress);
             }
             break;
+        case S3:
+            missingFiles = s3ProviderService.getMissingFiles(ingestion);
+            for (String file : missingFiles) {
+                IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion,
+                        PropDataConstants.SCAN_SUBMITTER, file, null);
+                progresses.add(progress);
+            }
+            break;
+        case S3_INTERNAL:
+            missingFiles = s3InternalProviderService.getMissingFiles(ingestion);
+            for (String file : missingFiles) {
+                IngestionProgress progress = ingestionProgressService.createDraftProgress(ingestion,
+                        PropDataConstants.SCAN_SUBMITTER, file, null);
+                progresses.add(progress);
+            }
+            break;
         default:
             break;
         }
@@ -222,12 +235,9 @@ public class IngestionServiceImpl implements IngestionService {
 
     private List<IngestionProgress> kickoffAll() {
         List<IngestionProgress> progresses = new ArrayList<IngestionProgress>();
-        List<IngestionProgress> newProgresses = ingestionProgressService
-                .getNewIngestionProgresses();
-        List<IngestionProgress> retryFailedProgresses = ingestionProgressService
-                .getRetryFailedProgresses();
-        List<IngestionProgress> processingProgresses = ingestionProgressService
-                .getProcessingProgresses();
+        List<IngestionProgress> newProgresses = ingestionProgressService.getNewIngestionProgresses();
+        List<IngestionProgress> retryFailedProgresses = ingestionProgressService.getRetryFailedProgresses();
+        List<IngestionProgress> processingProgresses = ingestionProgressService.getProcessingProgresses();
         Map<String, Integer> processingIngestion = new HashMap<String, Integer>();
         for (IngestionProgress progress : processingProgresses) {
             if (!processingIngestion.containsKey(progress.getIngestionName())) {
@@ -286,10 +296,8 @@ public class IngestionServiceImpl implements IngestionService {
 
     private IngestionProgress submit(IngestionProgress progress) {
         ApplicationId applicationId = submitWorkflow(progress);
-        progress = ingestionProgressService.updateSubmittedProgress(progress,
-                applicationId.toString());
-        log.info("Submitted workflow for progress [" + progress + "]. ApplicationID = "
-                + applicationId.toString());
+        progress = ingestionProgressService.updateSubmittedProgress(progress, applicationId.toString());
+        log.info("Submitted workflow for progress [" + progress + "]. ApplicationID = " + applicationId.toString());
         return progress;
     }
 

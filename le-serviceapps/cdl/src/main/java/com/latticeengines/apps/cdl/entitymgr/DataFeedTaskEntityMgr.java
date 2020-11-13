@@ -25,6 +25,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     List<String> registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts);
 
+    List<String> registerImportData(DataFeedTask dataFeedTask, String dataTableName);
+
     void addTableToQueue(DataFeedTask dataFeedTask, Table table);
 
     void addTableToQueue(String dataFeedTaskUniqueId, String tableName);

@@ -236,6 +236,17 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
+    public List<String> registerImportData(String customerSpace, String taskUniqueId, String dataTable) {
+        DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
+        DataFeed dataFeed = dataFeedTask.getDataFeed();
+        if (dataFeed.getStatus() == DataFeed.Status.Initing) {
+            // log.info("Skip registering extract for feed in initing state");
+            return Collections.emptyList();
+        }
+        return dataFeedTaskEntityMgr.registerImportData(dataFeedTask, dataTable);
+    }
+
+    @Override
     public void addTableToQueue(String customerSpace, String taskUniqueId, String tableName) {
         dataFeedTaskEntityMgr.addTableToQueue(taskUniqueId, tableName);
     }

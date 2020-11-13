@@ -41,15 +41,15 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
     }
 
     @Override
-    public MetadataSegment findByExternalInfo(MetadataSegment segment) {
+    public MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
         Session session = sessionFactory.getCurrentSession();
         Class<MetadataSegment> entityClz = getEntityClass();
         String queryStr = String.format(
                 "from %s as segment where segment.listSegment.externalSystem  = :externalSystem " +
                         "and segment.listSegment.externalSegmentId = :externalSegmentId", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setParameter("externalSystem", segment.getListSegment().getExternalSystem());
-        query.setParameter("externalSegmentId", segment.getListSegment().getExternalSegmentId());
+        query.setParameter("externalSystem", externalSystem);
+        query.setParameter("externalSegmentId", externalSegmentId);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -58,25 +58,19 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
         }
     }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({"rawtypes"})
     @Override
     public List<String> getAllDeletedSegments() {
         Session session = getSessionFactory().getCurrentSession();
-
         Class<MetadataSegment> entityClz = getEntityClass();
         String selectQueryStr = "SELECT name " //
                 + "FROM %s " //
                 + "WHERE deleted = :deleted ";
-
         selectQueryStr += "ORDER BY updated DESC ";
-
         selectQueryStr = String.format(selectQueryStr, entityClz.getSimpleName());
-
         Query query = session.createQuery(selectQueryStr);
         query.setParameter("deleted", Boolean.TRUE);
-
         List<?> rawResult = query.getResultList();
-
         if (CollectionUtils.isEmpty(rawResult)) {
             return new ArrayList<String>();
         }

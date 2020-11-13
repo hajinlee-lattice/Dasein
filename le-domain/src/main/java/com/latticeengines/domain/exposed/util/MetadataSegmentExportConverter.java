@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.util;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
+import com.latticeengines.domain.exposed.cdl.export.AtlasExportConfig;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 
 public final class MetadataSegmentExportConverter {
@@ -33,6 +34,9 @@ public final class MetadataSegmentExportConverter {
         atlasExport.setCreated(metadataSegmentExport.getCreated());
         atlasExport.setUpdated(metadataSegmentExport.getUpdated());
         atlasExport.setAttributeSetName(metadataSegmentExport.getAttributeSetName());
+        AtlasExportConfig atlasExportConfig = new AtlasExportConfig();
+        atlasExportConfig.setAddExportTimestamp(metadataSegmentExport.getAddExportTimestamp());
+        atlasExport.setExportConfig(atlasExportConfig);
         return atlasExport;
     }
 

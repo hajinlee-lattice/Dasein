@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.service.impl;
 
+import static com.latticeengines.query.factory.RedshiftQueryProvider.USER_SEGMENT;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.util.List;
@@ -52,7 +53,7 @@ public class PurchaseHistoryServiceImplTestNG extends AbstractTestNGSpringContex
 
     @Test(groups = "manual")
     public void testGetAllSpendAnalyticsSegments() {
-        DataPage result = purchaseHistoryService.getAllSpendAnalyticsSegments();
+        DataPage result = purchaseHistoryService.getAllSpendAnalyticsSegments(USER_SEGMENT);
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getData().size(), 3);
     }
@@ -60,7 +61,7 @@ public class PurchaseHistoryServiceImplTestNG extends AbstractTestNGSpringContex
     @Test(groups = "manual")
     public void TestGetPeriodTransactionsForSegmentAccounts() {
         List<PeriodTransaction> results = purchaseHistoryService.getPeriodTransactionsForSegmentAccounts("SpendSegment",
-                "Month", ProductType.Spending);
+                "Month", ProductType.Spending, USER_SEGMENT);
     }
 
 }
