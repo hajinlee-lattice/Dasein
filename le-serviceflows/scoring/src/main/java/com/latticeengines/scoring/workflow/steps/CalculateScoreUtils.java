@@ -1,11 +1,15 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -18,6 +22,8 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 
 public class CalculateScoreUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(CalculateScoreUtils.class);
 
     private CalculateScoreUtils() {
     }
@@ -59,5 +65,31 @@ public class CalculateScoreUtils {
         SparkJobResult jobResult = new SparkJobResult();
         jobResult.setTargets(tgtDataUnits);
         return jobResult;
+    }
+
+    public static List<Map<String, String>> batchScoreFieldMaps(Map<String, String> allScoreFieldMap, String modelGuid,
+            String rawScoreField, int batchSize) {
+        List<Map<String, String>> scoreFieldMaps = new ArrayList<>();
+        Map<String, String> scoreFieldMapBatch = new HashMap<>();
+        if (MapUtils.isNotEmpty(allScoreFieldMap)) {
+            for (String modelId : allScoreFieldMap.keySet()) {
+                String scoreField = scoreFieldMapBatch.get(modelId);
+                scoreFieldMapBatch.put(modelId, scoreField);
+                if (scoreFieldMapBatch.size() >= batchSize) {
+                    scoreFieldMaps.add(scoreFieldMapBatch);
+                    scoreFieldMapBatch = new HashMap<>();
+                }
+            }
+            if (scoreFieldMapBatch.size() > 0) {
+                scoreFieldMaps.add(scoreFieldMapBatch);
+            }
+        } else if (StringUtils.isNotBlank(modelGuid)) {
+            log.info(String.format("Using individual modelGuid %s to set scoreFieldMap", modelGuid));
+            scoreFieldMapBatch.put(modelGuid, rawScoreField);
+            scoreFieldMaps.add(scoreFieldMapBatch);
+        } else {
+            throw new RuntimeException("Couldn't find any valid scoreFieldMap or individual modelGuid");
+        }
+        return scoreFieldMaps;
     }
 }
