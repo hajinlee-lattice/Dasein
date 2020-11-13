@@ -271,7 +271,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         TenantDocument tenantDocument = tenantService.getTenant(customerSpace.getContractId(),
                 customerSpace.getTenantId());
         FeatureFlagValueMap ffMap = tenantDocument.getFeatureFlags();
-        Assert.assertTrue(ffMap.get(FLAG2_ID));
+        // There's an update for default flag:
+        // 1. Before update: if a flag not belonging to current products, it will always return it's default value.
+        // 2. After update: if a flag not belonging to current products, it will be removed from returned feature flag map.
+        Assert.assertNull(ffMap.get(FLAG2_ID));
 
         featureFlagService.undefineFlag(FLAG2_ID);
     }
