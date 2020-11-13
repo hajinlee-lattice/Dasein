@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
 
         List<TransformationStepConfig> steps = new ArrayList<>();
-        List<String> convertedRematchTableNames = getConvertedRematchTableNames();
+        rematchInputTableNames = ListUtils.emptyIfNull(getConvertedRematchTableNames());
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
             Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
@@ -64,14 +65,14 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 TransformationStepConfig mergeImports = concatImports(null, preProcessFlds.getLeft(),
                         preProcessFlds.getRight(), null, -1);
                 steps.add(mergeImports);
-                if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
+                if (CollectionUtils.isNotEmpty(rematchInputTableNames)) {
                     TransformationStepConfig matchImport = matchAccount(steps.size() - 1, null, null);
                     steps.add(matchImport);
                 }
             }
-            if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
+            if (CollectionUtils.isNotEmpty(rematchInputTableNames)) {
                 TransformationStepConfig mergeSystemBatchStoreAndImport = concatImports(null, preProcessFlds.getLeft(),
-                        preProcessFlds.getRight(), convertedRematchTableNames, steps.size() - 1);
+                        preProcessFlds.getRight(), rematchInputTableNames, steps.size() - 1);
                 steps.add(mergeSystemBatchStoreAndImport);
                 // If has rematch fake imports, filter out those columns after concat all imports
                 TransformationStepConfig filterImports = filterColumnsFromImports(steps.size() - 1);
@@ -87,7 +88,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
         if (!batonService.shouldSkipFuzzyMatchInPA(customerSpace.getTenantId())) {
             TransformationStepConfig match = matchAccount(steps.size() - 1, matchTargetTablePrefix,
-                    convertedRematchTableNames);
+                    rematchInputTableNames);
             steps.add(match);
         }
 
