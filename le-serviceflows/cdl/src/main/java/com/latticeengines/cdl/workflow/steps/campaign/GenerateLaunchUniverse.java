@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
@@ -23,7 +22,6 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignFrontEndQueryBuilder;
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -219,8 +217,9 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
 
-                String sortAttr = getSortAttributeFromZK(customerSpace);
-                String sortDir = getSortDirFromZK(customerSpace);
+                List<String> sortConfig = getSortConfigFromZK(customerSpace);
+                String sortAttr = sortConfig.get(0);
+                String sortDir = sortConfig.get(1);
 
                 List<DataUnit> inputUnits = new ArrayList<>();
                 inputUnits.add(launchDataUniverseDataUnit);
@@ -242,48 +241,40 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         });
     }
 
-    private String getSortAttributeFromZK(CustomerSpace customerSpace) {
-        Path path = null;
+    private List<String> getSortConfigFromZK(CustomerSpace customerSpace) {
+        List<String> sortConfig = new ArrayList<>();
+        Path attrPath = null;
+        Path dirPath = null;
         String sortAttr = CDL_UPDATED_TIME;
-
-        try {
-            Camille camille = CamilleEnvironment.getCamille();
-            String podId = CamilleEnvironment.getPodId();
-            path = PathBuilder.buildCustomerSpaceServicePath(podId, customerSpace, CDL)
-                    .append(CONTACTS_PER_ACCOUNT_SORT).append(ATTRIBUTE);
-            if (camille.exists(path)) {
-                sortAttr = camille.get(path).getData();
-                log.info("Found tenant override sort attribute: ", sortAttr);
-            } else {
-                log.info("Tenant sort attribute not found. Using default");
-            }
-        } catch (Exception e) {
-            log.warn("Tenant sort attribute found but unable to read: ", e);
-        }
-
-        return sortAttr;
-    }
-
-    private String getSortDirFromZK(CustomerSpace customerSpace) {
-        Path path = null;
         String sortDir = DESC;
 
         try {
             Camille camille = CamilleEnvironment.getCamille();
             String podId = CamilleEnvironment.getPodId();
-            path = PathBuilder.buildCustomerSpaceServicePath(podId, customerSpace, CDL)
+            attrPath = PathBuilder.buildCustomerSpaceServicePath(podId, customerSpace, CDL)
+                    .append(CONTACTS_PER_ACCOUNT_SORT).append(ATTRIBUTE);
+            if (camille.exists(attrPath)) {
+                sortAttr = camille.get(attrPath).getData();
+                log.info("Found tenant override sort attribute: ", sortAttr);
+            } else {
+                log.info("Tenant sort attribute not found. Using default");
+            }
+
+            dirPath = PathBuilder.buildCustomerSpaceServicePath(podId, customerSpace, CDL)
                     .append(CONTACTS_PER_ACCOUNT_SORT).append(DIRECTION);
-            if (camille.exists(path)) {
-                sortDir = camille.get(path).getData();
+            if (camille.exists(dirPath)) {
+                sortDir = camille.get(dirPath).getData();
                 log.info("Found tenant override sort direction: ", sortDir);
             } else {
                 log.info("Tenant sort direction not found. Using default");
             }
         } catch (Exception e) {
-            log.warn("Tenant sort direction found but unable to read: ", e);
+            log.warn("Tenant sort config found but unable to read: ", e);
         }
 
-        return sortDir;
+        sortConfig.add(sortAttr);
+        sortConfig.add(sortDir);
+        return sortConfig;
     }
 
     private long limitToCheck(long userConfiguredLimit, long queryCount) {

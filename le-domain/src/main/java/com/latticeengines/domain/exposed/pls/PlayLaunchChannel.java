@@ -118,7 +118,7 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     private LaunchType launchType;
 
     @JsonProperty("maxEntitiesToLaunch")
-    @Column(name = "MAX_ACCOUNTS_TO_LAUNCH")
+    @Column(name = "MAX_ENTITIES_TO_LAUNCH")
     private Long maxEntitiesToLaunch;
 
     @JsonProperty("maxContactsPerAccount")

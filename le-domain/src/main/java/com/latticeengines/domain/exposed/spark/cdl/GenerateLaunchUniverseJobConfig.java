@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class GenerateLaunchUniverseJobConfig extends SparkJobConfig {
