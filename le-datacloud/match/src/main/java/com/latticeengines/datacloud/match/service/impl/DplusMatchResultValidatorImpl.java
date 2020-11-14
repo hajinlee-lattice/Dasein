@@ -3,7 +3,6 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Accepted;
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Classification.Rejected;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -63,23 +62,22 @@ public class DplusMatchResultValidatorImpl implements DnBMatchResultValidator {
     }
 
     private DnBMatchCandidate.Classification classifyCandidate(DnBMatchCandidate candidate, DplusMatchRule matchRule) {
-        DnBMatchCandidate.Classification classification = Rejected;
         // exclusion criteria
-        boolean shouldExclude = false;
-        List<ExclusionCriterion> criteria = new ArrayList<>(matchRule.getExclusionCriteria());
-        if (CollectionUtils.isNotEmpty(criteria)) {
-            for (ExclusionCriterion criterion: criteria) {
+        if (CollectionUtils.isNotEmpty(matchRule.getExclusionCriteria())) {
+            boolean shouldExclude = false;
+            for (ExclusionCriterion criterion : matchRule.getExclusionCriteria()) {
                 if (shouldExclude(candidate, criterion)) {
                     log.warn("Should exclude candidate with duns={} by criterion={}", candidate.getDuns(), criterion);
                     shouldExclude = true;
                 }
             }
-        }
-        if (shouldExclude) {
-            return Rejected;
+            if (shouldExclude) {
+                return Rejected;
+            }
         }
 
         // other match rules
+        DnBMatchCandidate.Classification classification = Rejected;
         DnBMatchInsight insight = candidate.getMatchInsight();
         DplusMatchRule.ClassificationCriterion ac = matchRule.getAcceptCriterion();
         int confidenceCode = insight.getConfidenceCode();
