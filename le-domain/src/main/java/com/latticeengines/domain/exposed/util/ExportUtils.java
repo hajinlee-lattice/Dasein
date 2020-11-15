@@ -39,7 +39,6 @@ public final class ExportUtils {
     private static class DisplayData {
 
         private ColumnMetadata columnMetadata;
-
         private boolean displayNameUpdated;
 
         private DisplayData(ColumnMetadata columnMetadata, boolean displayNameUpdated) {

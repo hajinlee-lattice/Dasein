@@ -194,8 +194,8 @@ public class DeltaCampaignLaunchInitStep
     private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
         List<ColumnMetadata> columnMetadata = playLaunchContext.getFieldMappingMetadata();
         if (CollectionUtils.isNotEmpty(columnMetadata)) {
-            Map<String, String> contactDisplayNames = new HashMap<>();
             Map<String, String> accountDisplayNames = new HashMap<>();
+            Map<String, String> contactDisplayNames = new HashMap<>();
             Map<String, String> displayNameMap = ExportUtils.getDisplayNameMap(ExportEntity.AccountContact, columnMetadata);
             int prefixLength = ExportUtils.CONTACT_ATTR_PREFIX.length();
             displayNameMap.entrySet().stream().forEach(entry ->
@@ -208,7 +208,6 @@ public class DeltaCampaignLaunchInitStep
             });
             log.info("accountDisplayNames map: " + accountDisplayNames);
             log.info("contactDisplayNames map: " + contactDisplayNames);
-
             putObjectInContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES, accountDisplayNames);
             putObjectInContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES, contactDisplayNames);
         }
