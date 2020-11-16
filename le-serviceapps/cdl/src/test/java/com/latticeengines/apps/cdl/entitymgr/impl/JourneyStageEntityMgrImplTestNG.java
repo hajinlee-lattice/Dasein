@@ -93,6 +93,7 @@ public class JourneyStageEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(createdFilter.get(0).getComparisonType(), filter.getComparisonType());
     }
 
+    @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testUpdate() {
         AtomicReference<JourneyStage> createdAtom = new AtomicReference<>();
         retry.execute(context -> {
@@ -114,5 +115,27 @@ public class JourneyStageEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         });
         stage = createdAtom.get();
         Assert.assertNotNull(stage);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testUpdate")
+    public void testDelete() {
+        AtomicReference<JourneyStage> createdAtom = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom.set(journeyStageEntityMgr.findByPid(pid));
+            Assert.assertNotNull(createdAtom.get());
+            return true;
+        });
+        JourneyStage stage = createdAtom.get();
+        Assert.assertNotNull(stage);
+        Assert.assertEquals(stage.getStageName(), updateStageName);
+        stage.setTenant(null);
+        journeyStageEntityMgr.delete(stage);
+        retry.execute(context -> {
+            createdAtom.set(journeyStageEntityMgr.findByTenantAndStageName(mainTestTenant, updateStageName));
+            Assert.assertNull(createdAtom.get());
+            return true;
+        });
+        stage = createdAtom.get();
+        Assert.assertNull(stage);
     }
 }
