@@ -77,9 +77,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     protected Map<String, ExportFieldMetadataDefaults> getDefaultExportFieldsMapForAudienceType(
             CDLExternalSystemName systemName, AudienceType audienceType) {
         return defaultExportFieldMetadataService.getExportEnabledAttributesForAudienceType(systemName,
-                audienceType)
-                .stream()
-                .collect(Collectors.toMap(ExportFieldMetadataDefaults::getAttrName, Function.identity()));
+                audienceType).stream().collect(Collectors.toMap(ExportFieldMetadataDefaults::getAttrName, Function.identity()));
     }
 
     /*
