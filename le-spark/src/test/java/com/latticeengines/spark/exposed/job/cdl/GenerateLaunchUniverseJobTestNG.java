@@ -29,6 +29,7 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
     private static final Logger log = LoggerFactory.getLogger(GenerateLaunchUniverseJobTestNG.class);
 
     private static final String CDL_UPDATED_TIME = InterfaceName.CDLUpdatedTime.name();
+    private static final String DESC = "DESC";
 
     @Inject
     private Configuration yarnConfiguration;
@@ -41,6 +42,7 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
         config.setMaxContactsPerAccount(2L);
         config.setMaxEntitiesToLaunch(20L);
         config.setContactsPerAccountSortAttribute(CDL_UPDATED_TIME);
+        config.setContactsPerAccountSortDirection(DESC);
 
         log.info("Config: " + JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(GenerateLaunchUniverseJob.class, config);
@@ -69,6 +71,7 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
         config.setMaxContactsPerAccount(2L);
         config.setMaxEntitiesToLaunch(13L);
         config.setContactsPerAccountSortAttribute(CDL_UPDATED_TIME);
+        config.setContactsPerAccountSortDirection(DESC);
 
         log.info("Config: " + JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(GenerateLaunchUniverseJob.class, config);
