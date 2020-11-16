@@ -332,9 +332,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                         // make it as if old job is still running
                         job.setJobStatus(JobStatus.RUNNING);
                     }
-                    // when job failed and no further retry will be performed, not set the flag
+                    // when job is running, set the flag
                     // since UI will display a different tooltip
-                    if (job.getJobStatus() != JobStatus.FAILED) {
+                    if (job.isRunning()) {
                         job.setJobRetried(true);
                     }
 
