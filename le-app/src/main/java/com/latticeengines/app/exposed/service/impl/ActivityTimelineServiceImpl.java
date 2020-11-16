@@ -135,7 +135,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
 
         int newActivitiesCount = dataFilter(data, AtlasStream.StreamType.WebVisit, null).size();
         int newContactsCount = contactData.getData().stream()
-                .filter(t -> (Long) t.get(InterfaceName.CreatedDate.name()) >= cutoffTimeStamp.toEpochMilli())
+                .filter(t -> (Long) t.get(InterfaceName.CDLCreatedTime.name()) >= cutoffTimeStamp.toEpochMilli())
                 .collect(Collectors.toList()).size();
         newContactsCount += newIdentifiedContactsCount;
         int newEngagementsCount = dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
