@@ -66,13 +66,13 @@ public class ActivityTimelineMetrics implements Serializable {
 
     public enum MetricsType {
 
-        NewActivity("New Page Visits") {
+        NewActivities("New Activities") {
             @Override
             public String getContext(Integer count) {
                 return String.format("Total number of web activity in the last %d days", count);
             }
         },
-        NewIdentifiedContacts("Identified Contacts") {
+        NewContacts("New Contacts") {
             @Override
             public String getContext(Integer count) {
                 return String.format("Total number of new identified contacts from Marketo in the last %d days", count);
@@ -101,8 +101,12 @@ public class ActivityTimelineMetrics implements Serializable {
             return this.label;
         }
 
-        public static String getDescription(Integer count) {
-            return String.format("in last %d days", count);
+        public static String getDescription(Integer count, Integer days) {
+
+            if (count.equals(0)) {
+                return String.valueOf(count);
+            }
+            return String.format("%d in last %d days", count, days);
         }
 
         public abstract String getContext(Integer count);
