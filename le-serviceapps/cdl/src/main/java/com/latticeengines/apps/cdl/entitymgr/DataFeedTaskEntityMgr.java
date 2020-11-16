@@ -8,30 +8,18 @@ import org.springframework.data.domain.Pageable;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 
 public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedTask, Long> {
-
-    void clearTableQueue();
-
-    void clearTableQueuePerTask(DataFeedTask task);
 
     List<String> registerExtract(DataFeedTask dataFeedTask, String tableName, Extract extract);
 
     List<String> registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts);
 
     List<String> registerImportData(DataFeedTask dataFeedTask, String dataTableName);
-
-    void addTableToQueue(DataFeedTask dataFeedTask, Table table);
-
-    void addTableToQueue(String dataFeedTaskUniqueId, String tableName);
-
-    void addTablesToQueue(String dataFeedTaskUniqueId, List<String> tableNames);
 
     DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, DataFeed datafeed);
 
@@ -61,10 +49,6 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
     void update(DataFeedTask task, Date startTime);
 
     void update(DataFeedTask datafeedTask, Status status, Date lastImported);
-
-    List<Extract> getExtractsPendingInQueue(DataFeedTask task);
-
-    List<DataFeedTaskTable> getInflatedDataFeedTaskTables(DataFeedTask task);
 
     void setDeleted(Long pid, Boolean deleted);
 

@@ -1,9 +1,7 @@
 package com.latticeengines.domain.exposed.metadata.datafeed;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -174,10 +172,6 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     @JsonProperty("import_system_name")
     @Transient
     private String importSystemName;
-
-    @JsonIgnore
-    @Transient
-    private List<DataFeedTaskTable> tables = new ArrayList<>();
 
     @Override
     public Long getPid() {
@@ -377,14 +371,6 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
 
     public void setS3ImportStatus(S3ImportStatus s3ImportStatus) {
         this.s3ImportStatus = s3ImportStatus;
-    }
-
-    public List<DataFeedTaskTable> getTables() {
-        return tables;
-    }
-
-    public void setTables(List<DataFeedTaskTable> tables) {
-        this.tables = tables;
     }
 
     public Date getLastUpdated() {

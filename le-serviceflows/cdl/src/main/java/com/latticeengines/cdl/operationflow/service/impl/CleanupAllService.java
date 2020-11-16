@@ -145,7 +145,6 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
                     TableRoleInCollection.ConsolidatedDailyTransaction);
             dataCollectionProxy.resetTable(config.getCustomerSpace(),
                     TableRoleInCollection.ConsolidatedPeriodTransaction);
-            dataFeedProxy.resetImport(customerSpace);
         } else if (entity == BusinessEntity.Transaction) {
             cleanupRedshift(config.getCustomerSpace(),
                     Arrays.asList(TableRoleInCollection.ConsolidatedRawTransaction,
@@ -162,7 +161,6 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
                     TableRoleInCollection.ConsolidatedDailyTransaction);
             dataCollectionProxy.resetTable(config.getCustomerSpace(),
                     TableRoleInCollection.ConsolidatedPeriodTransaction);
-            dataFeedProxy.resetImportByEntity(customerSpace, entity.name());
         } else if (entity == BusinessEntity.Account || entity == BusinessEntity.Contact
                 || entity == BusinessEntity.Product) {
             cleanupRedshift(config.getCustomerSpace(), Arrays.asList(config.getEntity().getBatchStore()),
@@ -170,7 +168,6 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
             cleanupS3(config.getCustomerSpace(), Arrays.asList(config.getEntity().getBatchStore()),
                     Arrays.asList(DataCollection.Version.Blue, DataCollection.Version.Green));
             dataCollectionProxy.resetTable(config.getCustomerSpace(), config.getEntity().getBatchStore());
-            dataFeedProxy.resetImportByEntity(customerSpace, entity.name());
         } else {
             log.info(String.format("current Business entity is %s;", entity.name()));
             throw new RuntimeException(String.format("current Business entity is %s, unsupported", entity.name()));

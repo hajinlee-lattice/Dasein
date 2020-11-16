@@ -44,14 +44,6 @@ public interface DataFeedTaskService {
 
     List<String> registerImportData(String customerSpace, String taskUniqueId, String dataTable);
 
-    void addTableToQueue(String customerSpace, String taskUniqueId, String tableName);
-
-    void addTablesToQueue(String customerSpace, String taskUniqueId, List<String> tableNames);
-
-    List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType, String entity);
-
-    void resetImport(String customerSpace, DataFeedTask datafeedTask);
-
     List<Table> getTemplateTables(String customerSpace, String entity);
 
     S3ImportSystem getImportSystemByTaskId(String customerSpace, String taskUniqueId);
