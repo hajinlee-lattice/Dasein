@@ -549,16 +549,22 @@ public class CDLResource {
             EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
             log.info("1. Get standard template");
             Table standardTable;
+            BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
             if (entityType != null && templateDisplay.getS3ImportSystem() != null) {
                 standardTable = SchemaRepository.instance().getSchema(templateDisplay.getS3ImportSystem().getSystemType(),
                         entityType, enableEntityMatch, batonService.onlyEntityMatchGAEnabled(customerSpace));
             } else {
                 standardTable = SchemaRepository.instance().getSchema(
-                        BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch,
+                        entity, true, false, enableEntityMatch,
                         batonService.onlyEntityMatchGAEnabled(customerSpace));
             }
+            Set<String> matchingFields =
+                    SchemaRepository.instance().matchingAttributes(entity, enableEntityMatch)
+                            .stream()
+                            .map(Attribute::getName)
+                            .collect(Collectors.toSet());
             List<TemplateFieldPreview> fieldPreviews = cdlService.getTemplatePreview(customerSpace.toString(),
-                    dataFeedTask.getImportTemplate(), standardTable);
+                    dataFeedTask.getImportTemplate(), standardTable, matchingFields);
             if (CollectionUtils.isEmpty(fieldPreviews)) {
                 return fieldPreviews;
             }
@@ -724,12 +730,13 @@ public class CDLResource {
             boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
             EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
             Table standardTable;
+            BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
             if (entityType != null && templateDisplay.getS3ImportSystem() != null) {
                 standardTable = SchemaRepository.instance().getSchema(templateDisplay.getS3ImportSystem().getSystemType(),
                         entityType, enableEntityMatch, batonService.onlyEntityMatchGAEnabled(customerSpace));
             } else {
                 standardTable = SchemaRepository.instance().getSchema(
-                        BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch,
+                        entity, true, false, enableEntityMatch,
                         batonService.onlyEntityMatchGAEnabled(customerSpace));
             }
             Table templateTable = dataFeedTask.getImportTemplate();
@@ -740,9 +747,11 @@ public class CDLResource {
                             .stream()
                             .collect(Collectors.toMap(Attribute::getName, Attribute::getDisplayName));
             List<S3ImportSystem> systemList = cdlService.getAllS3ImportSystem(customerSpace.toString());
+            Set<String> matchingNames = SchemaRepository.instance().matchingAttributes(entity, enableEntityMatch)
+                    .stream().map(Attribute::getName).collect(Collectors.toSet());
             Set<String> systemIds =
                     updateUniqueAndMatchIdField(cdlService.getTemplatePreview(customerSpace.toString(), templateTable
-                            , standardTable), systemList, entityType, templateDisplay.getS3ImportSystem());
+                            , standardTable, matchingNames), systemList, entityType, templateDisplay.getS3ImportSystem());
             templateTable.getAttributes().forEach(attribute -> attribute.setSourceAttrName(attribute.getSourceAttrName() == null ? attribute.getDisplayName() : attribute.getSourceAttrName()));
             updateTableDisplayName(templateTable, nameMapping, standardNameMapping, systemIds);
             updateTableDisplayName(standardTable, nameMapping, standardNameMapping, systemIds);

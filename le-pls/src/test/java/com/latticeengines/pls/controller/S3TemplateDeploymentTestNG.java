@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.exception.UIAction;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -142,12 +143,22 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         List<?> list = restTemplate.postForObject(getRestAPIHostPort() + url, requestEntity, List.class);
         List<TemplateFieldPreview> previewList = JsonUtils.convertList(list, TemplateFieldPreview.class);
         Assert.assertNotNull(previewList);
+        boolean dunsExist = false;
+        boolean externalIdExist = false;
         for (TemplateFieldPreview preview : previewList) {
             if (preview.getNameInTemplate().equalsIgnoreCase("user_crmaccount_external_id")) {
                 Assert.assertEquals(preview.getFieldCategory(), FieldCategory.LatticeField);
                 Assert.assertEquals(preview.getLatticeFieldCategory(), LatticeFieldCategory.UniqueId);
+                externalIdExist = true;
+            }
+            if (preview.getNameInTemplate().equals(InterfaceName.DUNS.name())) {
+                Assert.assertEquals(preview.getFieldCategory(), FieldCategory.LatticeField);
+                Assert.assertEquals(preview.getLatticeFieldCategory(), LatticeFieldCategory.MatchField);
+                dunsExist = true;
             }
         }
+        Assert.assertTrue(dunsExist);
+        Assert.assertTrue(externalIdExist);
     }
 
 
