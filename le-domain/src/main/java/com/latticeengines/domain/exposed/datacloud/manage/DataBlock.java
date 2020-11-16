@@ -147,12 +147,16 @@ public class DataBlock {
         @JsonProperty("displayName")
         private String displayName;
 
+        @JsonProperty("example")
+        private String example;
+
         // for jackson
         private Element() {}
 
         public Element(PrimeColumn primeColumn) {
             this.elementId = primeColumn.getColumnId();
             this.displayName = primeColumn.getDisplayName();
+            this.example = primeColumn.getExample();
         }
 
     }
