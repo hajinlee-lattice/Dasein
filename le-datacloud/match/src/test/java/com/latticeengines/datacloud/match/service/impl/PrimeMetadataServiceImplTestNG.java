@@ -59,6 +59,49 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertEquals(primeColumns.size(), 2);
     }
 
+    @Test(groups = "functional")
+    private void testContainsExample() {
+        List<String> lst = Arrays.asList( //
+                "duns_number", //
+                "primaryname", //
+                "banks_name", //
+                "summary_text", //
+                "latestfin_dataprovider_desc", //
+                "non_exist_element_1", //
+                "non_exist_element_2");
+        List<PrimeColumn> primeColumns = primeMetadataService.getPrimeColumns(lst);
+        Assert.assertEquals(primeColumns.size(), 5);
+        for (PrimeColumn pc : primeColumns) {
+            switch (pc.getJsonPath()) {
+            case "organization.duns":
+                Assert.assertEquals(pc.getExample(), "804735132",
+                        String.format("For JSON path for %s ", pc.getJsonPath()));
+                break;
+            case "organization.primaryName":
+                Assert.assertEquals(pc.getExample(), "GORMAN MANUFACTURING COMPANY, INC.",
+                        String.format("For JSON path for %s ", pc.getJsonPath()));
+                break;
+            case "organization.banks.name":
+                Assert.assertEquals(pc.getExample(), "Bank of My Country",
+                        String.format("JSON path for %s ", pc.getJsonPath()));
+                break;
+            case "organization.latestFinancials.dataProvider.description":
+                Assert.assertNotEquals(pc.getExample(), "Her Majesty's Secret Service");
+                Assert.assertEquals(pc.getExample(), "Her Majesty's Revenue and Customs",
+                        String.format("JSON path for %s ", pc.getJsonPath()));
+                break;
+            case "organization.summary.text":
+                Assert.assertEquals(pc.getExample(), "The popularity of the widget fueled AB Corp's strong revenue and "
+                        + "earnings growth in the past decade. The company's revenue and profit hit all-time highs in 2017, "
+                        + "coming in at $234 million and $53 million, respectively. Revenue and earnings fell back in 2018 "
+                        + "with weaker widget sales.", String.format("JSON path for %s ", pc.getJsonPath()));
+                break;
+            default:
+                Assert.fail(String.format("JSON Path %s does not correspond to a known PrimeColumn", pc.getJsonPath()));
+            }
+        }
+    }
+
     @Test(groups = "functional", dataProvider = "blockElements")
     private void testResolveBlocks(List<String> elementIds, int expectedBlocks) {
         List<PrimeColumn> primeColumns = primeMetadataService.getPrimeColumns(elementIds);
@@ -103,7 +146,7 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
 
         return blocks;
     }
-    
+
     @DataProvider(name = "blockElements")
     private Object[][] provideBlockElements() {
         List<String> lst1 = Arrays.asList( //
