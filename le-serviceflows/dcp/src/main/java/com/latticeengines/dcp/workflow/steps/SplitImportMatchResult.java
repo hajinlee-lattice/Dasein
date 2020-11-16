@@ -246,10 +246,14 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     }
 
     private String getUploadS3Path() {
-        String matchResultName = getStringValueFromContext(MATCH_RESULT_TABLE_NAME);
-        Table matchResult = metadataProxy.getTable(configuration.getCustomerSpace().toString(), matchResultName);
-        HdfsDataUnit input = matchResult.toHdfsDataUnit("input");
-        return input.getPath();
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
+        String uploadId = configuration.getUploadId();
+        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
+        String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
+        String s3Path = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
+            upload.getUploadConfig().getUploadMatchResultAccepted());
+        return s3Path;
     }
 
     private List<String> getCustomerFileHeaders() {
