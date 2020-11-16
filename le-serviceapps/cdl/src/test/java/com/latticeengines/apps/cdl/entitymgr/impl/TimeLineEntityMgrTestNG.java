@@ -127,6 +127,7 @@ public class TimeLineEntityMgrTestNG extends CDLFunctionalTestNGBase {
         });
         List<TimeLine> timeLines = createdAtom1.get();
         Assert.assertEquals(timeLines.size(), 1);
+        created.setTenant(null);
         timeLineEntityMgr.delete(created);
         retry.execute(context -> {
             createdAtom.set(timeLineEntityMgr.findByTimeLineId(timeLine1.getTimelineId()));
