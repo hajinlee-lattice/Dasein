@@ -60,7 +60,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
     }
 
     @Test(groups = "deployment")
-    public void verifyFieldMappingValidations() {
+    public void verifyDateFormat() {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_TRANSACTION), ENTITY_TRANSACTION, TRANSACTION_SOURCE_FILE_MISSING,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + TRANSACTION_SOURCE_FILE_MISSING));
@@ -135,14 +135,15 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.TEXT);
             }
         }
+
         Assert.assertTrue(idExist);
         Assert.assertTrue(externalIdExist);
         modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
                 feedType);
 
-        startCDLImport(sourceFile, ENTITY_ACCOUNT);
+        startCDLImport(sourceFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
 
-        // upload same file, then modify mapping
+        // upload same file, then edit template
         sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
@@ -216,34 +217,73 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         String feedType = getFeedTypeByEntity(OTHER_SYSTEM, ENTITY_ACCOUNT);
         FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
                 .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
-
-        boolean externalIdExist = false;
+        boolean parentExternalIdExist = false;
+        FieldMapping externalMapping = null;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
             }
+            // the type for CrmAccount_External_ID is TEXT in DEFAULT_SYSTEM, in this test,
+            // try to set it to be NUMBER, this is the first error
             if ("CrmAccount_External_ID".equals(fieldMapping.getUserField())) {
-                externalIdExist = true;
+                externalMapping = fieldMapping;
                 Assert.assertNotNull(fieldMapping.getMappedField());
                 Assert.assertEquals(fieldMapping.getFieldType(), UserDefinedType.TEXT);
                 fieldMapping.setFieldType(UserDefinedType.NUMBER);
             }
+            // map user field to system DEFAULT_SYSTEM
+            if ("Parent_External_ID".equals(fieldMapping.getUserField())) {
+                parentExternalIdExist = true;
+                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
         }
-        Assert.assertTrue(externalIdExist);
+        Assert.assertTrue(parentExternalIdExist);
+        Assert.assertNotNull(externalMapping);
+
         FieldValidationResult fieldValidationResult =
                 modelingFileMetadataService.validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
                         SOURCE, feedType);
-        log.info(JsonUtils.pprint(fieldValidationResult));
+        log.info("field result is: " + JsonUtils.pprint(fieldValidationResult));
 
-        List<FieldValidation> validations = fieldValidationResult.getFieldValidations();
-        List<FieldValidation> errorValidations =
-                validations.stream().filter(validation -> FieldValidation.ValidationStatus.ERROR.equals(validation.getStatus())).collect(Collectors.toList());
-        Assert.assertNotNull(errorValidations);
-        Assert.assertEquals(errorValidations.size(), 1);
+        // one data type error which conflicts with the user field in default system,
+        // the other one is set as NUMBER but appears to only have TEXT values
+        Assert.assertEquals(fieldValidationResult.getGroupedValidations().get(ValidationCategory.DataType).size(), 2);
+
+        // change back for create template
+        externalMapping.setFieldType(UserDefinedType.TEXT);
+        modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
+                SOURCE, feedType);
+        startCDLImport(sourceFile, ENTITY_ACCOUNT, OTHER_SYSTEM);
+
+        // edit the template
+        sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, ACCOUNT_SOURCE_FILE,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + ACCOUNT_SOURCE_FILE));
+
+        fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(sourceFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+        boolean accountForPlatform = false;
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+            // map user field to DEFAULT_SYSTEM, this will cause  with setting when create template
+            if ("S_Account_For_Platform_Test".equals(fieldMapping.getUserField())) {
+                accountForPlatform = true;
+                fieldMapping.setSystemName(DEFAULT_SYSTEM);
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+            }
+        }
+        Assert.assertTrue(accountForPlatform);
+        fieldValidationResult = modelingFileMetadataService.validateFieldMappings(sourceFile.getName(),
+                fieldMappingDocument, ENTITY_ACCOUNT, SOURCE, feedType);
+        log.info("field result is: " + JsonUtils.pprint(fieldValidationResult));
         Map<ValidationCategory, List<FieldValidation>> groupedValidations =
                 fieldValidationResult.getGroupedValidations();
-        // one consistency error, the other is data type warning
-        Assert.assertEquals(groupedValidations.get(ValidationCategory.DataType).size(), 2);
+        // error is Multiple user fields are mapped to standard field ,
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 1);
     }
 }

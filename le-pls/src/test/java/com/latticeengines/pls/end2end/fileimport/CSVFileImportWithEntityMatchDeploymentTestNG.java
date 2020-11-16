@@ -64,7 +64,7 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
                         .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
                         .toString(),
                 SourceType.FILE.getName());
-        startCDLImport(accountFile, ENTITY_ACCOUNT);
+        startCDLImport(accountFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
         // Spaces/Production/Data/Tables/File/DataFeed1/DataFeed1-Account/Extracts/2019-05-10-17-30-32/SourceFile_file_1557480309588_csv/Extracts/2019-05-10-17-30-32
         verifyAvroFileNumber(accountFile, 48, targetPath);
         SourceFile contactFile = uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
@@ -73,7 +73,7 @@ public class CSVFileImportWithEntityMatchDeploymentTestNG extends CSVFileImportD
                         .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
                         .toString(),
                 SourceType.FILE.getName());
-        startCDLImport(contactFile, ENTITY_CONTACT);
+        startCDLImport(contactFile, ENTITY_CONTACT, DEFAULT_SYSTEM);
         // verify the contact number not change
         verifyAvroFileNumber(contactFile, 50, contactPath);
         SourceFile productFile = uploadSourceFile(PRODUCT_HIERARCHY_SOURCE_FILE, ENTITY_PRODUCT);
