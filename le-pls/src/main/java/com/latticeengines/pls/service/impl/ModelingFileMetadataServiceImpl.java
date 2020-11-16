@@ -398,8 +398,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> standardAttrNames =
                 standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
 
-        // 1. check user field to standard field 2. check user field to matched system
-        checkMultipleUserFieldsMappedToLatticeField(fieldMappings, standardAttrNames, groupedValidations, validations);
+        // 1. check user field to standard field
+        // 2. check user field to matched system
+        // 3. check unique id
+        String systemName = EntityTypeUtils.getSystemName(feedType);
+        EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
+        FieldMapping.IdType idType = getIdTypeFromEntityType(entityType);
+        checkColumnMapping(fieldMappings, standardAttrNames, groupedValidations, validations, systemName, idType);
 
         compareStandardFields(templateTable, fieldMappingDocument, standardTable, validations, groupedValidations,
                 customerSpace,
@@ -518,10 +523,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return fieldValidationResult;
     }
 
-    private void checkMultipleUserFieldsMappedToLatticeField(List<FieldMapping> fieldMappings,
-                                                              Set<String> standardAttrNames,
-                                                              Map<ValidationCategory, List<FieldValidation>> groupedValidations,
-                                                              List<FieldValidation> validations) {
+    private void checkColumnMapping(List<FieldMapping> fieldMappings, Set<String> standardAttrNames,
+                                    Map<ValidationCategory, List<FieldValidation>> groupedValidations,
+                                    List<FieldValidation> validations, String systemName,
+                                    FieldMapping.IdType idType) {
         Set<String> mappedStandardFields = new HashSet<>();
         Set<String> mappingKeys = new HashSet<>();
         for (FieldMapping fieldMapping : fieldMappings) {
@@ -559,6 +564,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
             }
         }
+        if (idType != null) {
+            String uniqueKey = idType + "|" + systemName;
+            if (!mappingKeys.contains(uniqueKey)) {
+                String message = "Unique id is not set";
+                FieldValidation validation = createValidation(null,
+                        null,
+                        ValidationStatus.ERROR, message);
+                validations.add(validation);
+                groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
+            }
+        }
+
     }
 
     private void compareStandardFields(Table templateTable,
@@ -1140,6 +1157,19 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 break;
         }
         return match;
+    }
+
+    private FieldMapping.IdType getIdTypeFromEntityType(EntityType entityType) {
+        switch(entityType) {
+            case Accounts:
+                return FieldMapping.IdType.Account;
+            case Contacts:
+                return FieldMapping.IdType.Contact;
+            case Leads:
+                return FieldMapping.IdType.Lead;
+            default:
+                return null;
+        }
     }
 
     private void setMappingSystemId(CustomerSpace customerSpace, List<FieldMapping> customerLatticeIdList, FieldMapping fieldMapping) {

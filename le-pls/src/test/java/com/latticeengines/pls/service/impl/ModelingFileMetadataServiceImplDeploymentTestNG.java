@@ -154,10 +154,16 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         boolean latitudeExist = false;
         idExist = false;
         boolean websiteExist = false;
+        boolean uniqueIdExist = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
                 fieldMapping.setMappedField(fieldMapping.getUserField());
                 fieldMapping.setMappedToLatticeField(false);
+            }
+            if (DEFAULT_SYSTEM.equals(fieldMapping.getSystemName()) && FieldMapping.IdType.Account == fieldMapping.getIdType()) {
+                uniqueIdExist = true;
+                fieldMapping.setSystemName(null);
+                fieldMapping.setIdType(null);
             }
             // unmap the standard field, this will trigger 2 warnings and one error
             if ("ID".equals(fieldMapping.getUserField())) {
@@ -181,6 +187,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         Assert.assertTrue(latitudeExist);
         Assert.assertTrue(idExist);
         Assert.assertTrue(websiteExist);
+        Assert.assertTrue(uniqueIdExist);
 
         FieldValidationResult fieldValidationResult =
                 modelingFileMetadataService.validateFieldMappings(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT,
@@ -191,18 +198,18 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
                 .filter(validation -> FieldValidation.ValidationStatus.WARNING.equals(validation.getStatus()))
                 .collect(Collectors.toList());
         Assert.assertNotNull(warningValidations);
-        Assert.assertEquals(warningValidations.size(), 6);
+        Assert.assertEquals(warningValidations.size(), 7);
 
         Map<ValidationCategory, List<FieldValidation>> groupedValidations =
                 fieldValidationResult.getGroupedValidations();
-        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 6);
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 7);
 
 
         // verify error
         List<FieldValidation> errorValidations =
                 validations.stream().filter(validation -> FieldValidation.ValidationStatus.ERROR.equals(validation.getStatus())).collect(Collectors.toList());
         Assert.assertNotNull(errorValidations);
-        Assert.assertEquals(errorValidations.size(), 0);
+        Assert.assertEquals(errorValidations.size(), 1);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "verifyStandardFields")
