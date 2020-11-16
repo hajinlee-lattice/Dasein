@@ -271,7 +271,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setPlay(play);
         playLaunch.setPlayLaunchChannel(playLaunchChannel);
         playLaunch.setLaunchState(state != null ? state : LaunchState.Canceled);
-        playLaunch.setTopNCount(playLaunchChannel.getMaxAccountsToLaunch());
+        playLaunch.setTopNCount(playLaunchChannel.getMaxEntitiesToLaunch());
         playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
         playLaunch.setLaunchUnscored(playLaunchChannel.getLaunchUnscored());
         playLaunch.setDestinationOrgId(playLaunchChannel.getLookupIdMap().getOrgId());
