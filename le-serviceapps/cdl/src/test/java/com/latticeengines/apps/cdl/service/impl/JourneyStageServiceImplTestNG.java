@@ -131,7 +131,7 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         });
         JourneyStage stage = createdAtom.get();
         Assert.assertNotNull(stage);
-        Assert.assertEquals(stage.getStageName(), stageName);
+        Assert.assertEquals(stage.getStageName(), updateStageName);
         journeyStageService.delete(mainCustomerSpace, stage);
         retry.execute(context -> {
             createdAtom.set(journeyStageService.findByStageName(mainCustomerSpace, updateStageName));
