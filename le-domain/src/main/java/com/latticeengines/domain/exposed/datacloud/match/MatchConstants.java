@@ -99,24 +99,4 @@ public final class MatchConstants {
     static final String RTS = Predefined.RTS.getName();
 
     public static final long TERMINATE_EXECUTOR_TIMEOUT_MS = 30_000;
-
-    // Match (Candidate) column ordering. Keep consistent with DirectPlusCandidateServiceImpl
-    public static final List<String> MATCH_SCHEMA = Arrays.asList(
-            "Matched D-U-N-S Number",
-            "Match Type",
-            "Match Confidence Code",
-            "Match Grade",
-            "Match Data Profile",
-            "Name Match Score",
-            "Match Candidate Operating Status",
-            "Match Primary Business Name",
-            "Match ISO Alpha 2 Char Country Code"
-    );
-
-    // Base Enrichment column ordering.
-    public static final List<String> BASE_SCHEMA = Arrays.asList(
-            "D-U-N-S Number", //
-            "Primary Business Name", //
-            "ISO Alpha 2 Char Country Code" //
-    );
 }

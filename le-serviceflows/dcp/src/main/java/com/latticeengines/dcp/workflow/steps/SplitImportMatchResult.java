@@ -67,6 +67,12 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
     private static final Logger log = LoggerFactory.getLogger(SplitImportMatchResult.class);
 
+    private static final List<String> BASE_SCHEMA = Arrays.asList(
+            "duns_number", //
+            "primaryname", //
+            "countryisoalpha2code" //
+    );
+
     @Inject
     private UploadProxy uploadProxy;
 
@@ -254,7 +260,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             if (MatchedDuns.equals(cm.getAttrName())) {
                 duns = cm;
             } else if (dataBlockDispNames.containsKey(cm.getAttrName())) {
-                dataBlockAttrMap.put(dataBlockDispNames.get(cm.getAttrName()), cm);
+                dataBlockAttrMap.put(cm.getAttrName(), cm);
             } else if (candidateFieldDispNames.containsKey(cm.getAttrName())) {
                 candidateAttrs.add(cm);
             } else if ((cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL)){
@@ -264,7 +270,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             }
         }
         // order base + enrichment columns
-        List<ColumnMetadata> dataBlockAttrs = order_attributes(dataBlockAttrMap, MatchConstants.BASE_SCHEMA);
+        List<ColumnMetadata> dataBlockAttrs = orderAttributes(dataBlockAttrMap, BASE_SCHEMA);
 
         List<String> attrNames = new ArrayList<>();
         customerAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
@@ -385,7 +391,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         return dispNames;
     }
 
-    public List<ColumnMetadata> order_attributes(LinkedHashMap<String, ColumnMetadata> attrMap, List<String> schema) {
+    private List<ColumnMetadata> orderAttributes(LinkedHashMap<String, ColumnMetadata> attrMap, List<String> schema) {
         List<ColumnMetadata> orderedAttrs = new ArrayList<>();
         // when present, add schema values in order
         for (String e: schema) {

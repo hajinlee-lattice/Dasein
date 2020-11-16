@@ -42,7 +42,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
-import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.VboUsageConstants;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
@@ -83,6 +82,24 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     protected static final String TEST_TEMPLATE_VERSION = "4";
 
     private static final String USER = "test@dnb.com";
+
+    public static final List<String> MATCH_COLUMNS = Arrays.asList(
+            "Matched D-U-N-S Number",
+            "Match Type",
+            "Match Confidence Code",
+            "Match Grade",
+            "Match Data Profile",
+            "Name Match Score",
+            "Match Candidate Operating Status",
+            "Match Primary Business Name",
+            "Match ISO Alpha 2 Char Country Code"
+    );
+
+    public static final List<String> BASE_COLUMNS = Arrays.asList(
+            "D-U-N-S Number", //
+            "Primary Business Name", //
+            "ISO Alpha 2 Char Country Code" //
+    );
 
     @Inject
     private DropBoxProxy dropBoxProxy;
@@ -480,13 +497,11 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
             // verify match/candidate column order
             int start = headers.indexOf("Matched D-U-N-S Number");
-            int schema_size = MatchConstants.MATCH_SCHEMA.size();
-            Assert.assertEquals(headers.subList(start, start + schema_size), MatchConstants.MATCH_SCHEMA);
+            Assert.assertEquals(headers.subList(start, start + MATCH_COLUMNS.size()), MATCH_COLUMNS);
 
             // verify base info column order
             start = headers.indexOf("D-U-N-S Number");
-            schema_size = MatchConstants.BASE_SCHEMA.size();
-            Assert.assertEquals(headers.subList(start, start + schema_size), MatchConstants.BASE_SCHEMA);
+            Assert.assertEquals(headers.subList(start, start + BASE_COLUMNS.size()), BASE_COLUMNS);
         }
     }
 
