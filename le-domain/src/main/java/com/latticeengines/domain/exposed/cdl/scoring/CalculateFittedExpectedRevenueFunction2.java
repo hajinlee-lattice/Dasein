@@ -33,9 +33,10 @@ public class CalculateFittedExpectedRevenueFunction2 implements Serializable {
 
         double[] result = new double[2];
         double fittedExpectedRevenue = expectedRevenueFitter.calculate(percentile);
-        double normalizedExpectedRevenue = fittedExpectedRevenue / normalizationRatio;
+        double normalizedExpectedRevenue = normalizationRatio == 0 ? 0 : fittedExpectedRevenue / normalizationRatio;
         double adjustedProbability = probability >= minAllowedProbability ? probability : minAllowedProbability;
-        double adjustedPredictedRevenue = normalizedExpectedRevenue / adjustedProbability;
+        double adjustedPredictedRevenue = adjustedProbability == 0 ? 0
+                : normalizedExpectedRevenue / adjustedProbability;
         try {
             adjustedPredictedRevenue = BigDecimal.valueOf(adjustedPredictedRevenue)
                     .setScale(PREDICTED_REVENUE_PRECISION, RoundingMode.HALF_UP).doubleValue();

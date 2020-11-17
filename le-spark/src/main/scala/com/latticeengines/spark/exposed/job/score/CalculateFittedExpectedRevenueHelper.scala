@@ -1,6 +1,5 @@
 package com.latticeengines.spark.exposed.job.score
 
-import org.apache.commons.collections4.MapUtils
 import com.latticeengines.domain.exposed.cdl.scoring.CalculateFittedExpectedRevenueFunction2
 import com.latticeengines.domain.exposed.scoring.ScoreResultField
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType
@@ -58,10 +57,13 @@ object CalculateFittedExpectedRevenueHelper {
     def getAvgProbabilityTestDataset(context: ParsedContext, modelGuid: String): Double = {
         var avgProbabilityTestDataset:Double = 0
         if (!context.scoreDerivationMaps.isEmpty
-                && MapUtils.isNotEmpty(context.scoreDerivationMaps.get(modelGuid).orNull)
-                && context.scoreDerivationMaps.get(modelGuid).get.get(ScoreDerivationType.PROBABILITY) != null) {
-            avgProbabilityTestDataset = context.scoreDerivationMaps.get(modelGuid).get
+                && context.scoreDerivationMaps.contains(modelGuid)
+                && context.scoreDerivationMaps(modelGuid).get(ScoreDerivationType.PROBABILITY) != null) {
+            avgProbabilityTestDataset = context.scoreDerivationMaps(modelGuid)
                     .get(ScoreDerivationType.PROBABILITY).averageProbability
+             println("----- BEGIN SCRIPT OUTPUT -----")
+             println(s"modelGuid=${modelGuid}, avgProbabilityTestDataset=${avgProbabilityTestDataset}")
+             println("----- END SCRIPT OUTPUT -----")
         }
         return avgProbabilityTestDataset
     }
