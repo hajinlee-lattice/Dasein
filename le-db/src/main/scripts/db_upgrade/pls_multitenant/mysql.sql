@@ -30,6 +30,9 @@ CREATE PROCEDURE `UpdateSchema`()
               
       ALTER TABLE `METADATA_SEGMENT`
               ADD COLUMN `TYPE` VARCHAR(255);
+            
+      ALTER TABLE `LOOKUP_ID_MAP`
+              ADD COLUMN `CONFIG_VALUES` json;
 
       ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH_CHANNEL`
         ADD COLUMN `MAX_CONTACTS_PER_ACCOUNT` BIGINT(20);
