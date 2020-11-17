@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -74,6 +75,18 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
 
     private static final String componentName = "CDL";
 
+    private static final String descriptionNoDataSource = "N/A";
+
+    private static Map<ActivityTimelineMetrics.MetricsType, List<AtlasStream.StreamType>> streamTypeListMap = new HashMap<ActivityTimelineMetrics.MetricsType, List<AtlasStream.StreamType>>() {
+        {
+            put(ActivityTimelineMetrics.MetricsType.NewActivities, Arrays.asList(AtlasStream.StreamType.WebVisit));
+            put(ActivityTimelineMetrics.MetricsType.Newengagements,
+                    Arrays.asList(AtlasStream.StreamType.MarketingActivity, AtlasStream.StreamType.Opportunity));
+            put(ActivityTimelineMetrics.MetricsType.NewOpportunities,
+                    Arrays.asList(AtlasStream.StreamType.Opportunity));
+        }
+    };
+
     @Override
     public DataPage getAccountActivities(String accountId, String timelinePeriodStr, String backPeriodStr,
             Set<AtlasStream.StreamType> streamTypes, Map<String, String> orgInfo) {
@@ -123,10 +136,19 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                 StringUtils.isNotBlank(timelinePeriodStr) ? timelinePeriodStr : defaultActivityMetricsPeriod);
         DataPage data = getAccountActivities(customerSpace, accountId, timelinePeriod, orgInfo);
 
-        int newActivitiesCount = dataFilter(data, AtlasStream.StreamType.WebVisit, null).size();
+        DataPage contactData = dataLakeService.getAllContactsByAccountId(accountId, orgInfo);
+        Instant cutoffTimeStamp = getTimeWindowFromPeriod(customerSpace, timelinePeriod).getLeft();
+
         int newIdentifiedContactsCount = (int) dataFilter(data, AtlasStream.StreamType.MarketingActivity,
                 SourceType.MARKETO).stream().filter(t -> t.get(InterfaceName.EventType.name()).equals("New Lead"))
                         .map(t -> t.get(InterfaceName.ContactId.name())).distinct().count();
+
+        int newActivitiesCount = dataFilter(data, AtlasStream.StreamType.WebVisit, null).size();
+        int newContactsCount = contactData.getData().stream()
+                .filter(t -> t.get(InterfaceName.CDLCreatedTime.name()) != null)
+                .filter(t -> (Long) t.get(InterfaceName.CDLCreatedTime.name()) >= cutoffTimeStamp.toEpochMilli())
+                .collect(Collectors.toList()).size();
+        newContactsCount += newIdentifiedContactsCount;
         int newEngagementsCount = dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
                 + dataFilter(data, AtlasStream.StreamType.MarketingActivity, null).size();
         int newOpportunitiesCount = (int) dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
@@ -134,27 +156,53 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                         && !t.get(InterfaceName.Detail1.name()).equals("Closed Won"))
                 .count();
 
-        List<ActivityTimelineMetrics> metrics = new ArrayList<ActivityTimelineMetrics>();
-
+        List<AtlasStream> streams = activityStoreProxy.getStreams(customerSpace);
         int days = timelinePeriod.getDays();
-        String description = ActivityTimelineMetrics.MetricsType.getDescription(days);
 
-        metrics.add(new ActivityTimelineMetrics(newActivitiesCount,
-                ActivityTimelineMetrics.MetricsType.NewActivity.getLabel(), description,
-                ActivityTimelineMetrics.MetricsType.NewActivity.getContext(days)));
-        if (newIdentifiedContactsCount != 0) {
-            metrics.add(new ActivityTimelineMetrics(newIdentifiedContactsCount,
-                    ActivityTimelineMetrics.MetricsType.NewIdentifiedContacts.getLabel(), description,
-                    ActivityTimelineMetrics.MetricsType.NewIdentifiedContacts.getContext(days)));
-        }
-        metrics.add(new ActivityTimelineMetrics(newEngagementsCount,
-                ActivityTimelineMetrics.MetricsType.Newengagements.getLabel(), description,
-                ActivityTimelineMetrics.MetricsType.Newengagements.getContext(days)));
-        metrics.add(new ActivityTimelineMetrics(newOpportunitiesCount,
-                ActivityTimelineMetrics.MetricsType.NewOpportunities.getLabel(), description,
-                ActivityTimelineMetrics.MetricsType.NewOpportunities.getContext(days)));
+        List<ActivityTimelineMetrics> metrics = new ArrayList<ActivityTimelineMetrics>();
+        metrics.add(getActivityTimelineMetrics(newActivitiesCount, ActivityTimelineMetrics.MetricsType.NewActivities,
+                days, streams));
+        metrics.add(getActivityTimelineMetrics(newContactsCount, ActivityTimelineMetrics.MetricsType.NewContacts, days,
+                streams));
+        metrics.add(getActivityTimelineMetrics(newEngagementsCount, ActivityTimelineMetrics.MetricsType.Newengagements,
+                days, streams));
+        metrics.add(getActivityTimelineMetrics(newOpportunitiesCount,
+                ActivityTimelineMetrics.MetricsType.NewOpportunities, days, streams));
 
         return metrics;
+    }
+
+    private ActivityTimelineMetrics getActivityTimelineMetrics(Integer count,
+            ActivityTimelineMetrics.MetricsType metricsType, Integer days, List<AtlasStream> streams) {
+
+        List<AtlasStream.StreamType> streamTypes = streamTypeListMap.containsKey(metricsType)
+                ? streamTypeListMap.get(metricsType)
+                : new ArrayList<AtlasStream.StreamType>();
+
+        String description = getDescription(streams, streamTypes, count, days);
+        String label = metricsType.getLabel();
+        String context = metricsType.getContext(days);
+
+        return new ActivityTimelineMetrics(count, label, description, context);
+    }
+
+    private String getDescription(List<AtlasStream> streams, List<AtlasStream.StreamType> streamTypes,
+            Integer metricsCount, Integer days) {
+
+        if (!hasDataSources(streams, streamTypes) && !streamTypes.isEmpty()) {
+            return descriptionNoDataSource;
+        } else {
+            return ActivityTimelineMetrics.MetricsType.getDescription(metricsCount, days);
+        }
+    }
+
+    private Boolean hasDataSources(List<AtlasStream> streams, List<AtlasStream.StreamType> streamTypes) {
+
+        boolean hasDataSource = false;
+
+        hasDataSource = streamTypes.stream().anyMatch(
+                streamType -> streams.stream().filter(stream -> (stream.getStreamType() == streamType)).count() > 0);
+        return hasDataSource;
     }
 
     private DataPage filterStreamData(DataPage dataPage, Set<AtlasStream.StreamType> streamTypes) {
