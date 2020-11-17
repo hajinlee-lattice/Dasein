@@ -98,8 +98,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
         Assert.assertEquals(metrics.get(1).getLabel(), "New Contacts");
         Assert.assertEquals(metrics.get(1).getCount().intValue(), 0);
         Assert.assertEquals(metrics.get(1).getDescription(), "0");
-        Assert.assertEquals(metrics.get(1).getContext(),
-                "Total number of new identified contacts from Marketo in the last 10 days");
+        Assert.assertEquals(metrics.get(1).getContext(), "Total number of new contacts in the last 10 days");
 
         Assert.assertEquals(metrics.get(2).getLabel(), "New Engagements");
         Assert.assertEquals(metrics.get(2).getCount().intValue(), 207);

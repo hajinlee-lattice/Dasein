@@ -75,7 +75,7 @@ public class ActivityTimelineMetrics implements Serializable {
         NewContacts("New Contacts") {
             @Override
             public String getContext(Integer count) {
-                return String.format("Total number of new identified contacts from Marketo in the last %d days", count);
+                return String.format("Total number of new contacts in the last %d days", count);
             }
         },
         Newengagements("New Engagements") {
