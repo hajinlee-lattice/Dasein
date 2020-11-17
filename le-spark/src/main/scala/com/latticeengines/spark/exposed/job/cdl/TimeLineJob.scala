@@ -148,7 +148,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
                 }
                 //contactId
                 shapeTableDf.join(contactTable.select(ContactId.name, AccountId.name(), ContactName
-                  .name()), Seq(ContactId.name))
+                  .name(), Title.name()), Seq(ContactId.name))
               } else {
                 table
               }

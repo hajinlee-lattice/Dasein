@@ -90,7 +90,7 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
 
     @Override
     protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
-        return Arrays.asList(verifyTimeLineFn("master", 18, 6), verifyTimeLineFn("diff", 7, 6),
+        return Arrays.asList(verifyTimeLineFn("master", 20, 7), verifyTimeLineFn("diff", 8, 7),
                 verifyJourneyStageFn(getExpectedStageNames()));
     }
 
@@ -172,10 +172,11 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
                 newTimelineRecord("a6", Opportunity, "Closed Won"), //
 
                 oldTimelineRecord("a8", WebVisit, "Page 1"), // old visit, no existing stage
-
                 /*-
                  * accounts with no current records (qualify for default stage): a8
                  */
+
+                newTimelineRecordWithEventType("a9", "Form Filled", MarketingActivity, null)
         };
 
         Object[][] diffData = new Object[][] { //
@@ -207,6 +208,7 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
         stageNames.put("a6", "Closed-Won");
         stageNames.put("a7", "Dark");
         stageNames.put("a8", "Dark");
+        stageNames.put("a9", "Contact Inquiry");
         return stageNames;
     }
 
@@ -221,5 +223,11 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
                 "p", "s", "r", 0L, // not testing pk, sk, uuid and timestamp for now
                 accountId, "fake event", type == null ? null : type.name(), null, detail1, null, //
         };
+    }
+
+    private Object[] newTimelineRecordWithEventType(String accountId, String eventType, AtlasStream.StreamType type, String detail1) {
+        Object[] row = newTimelineRecord(accountId, type, detail1);
+        row[5] = eventType;
+        return row;
     }
 }
