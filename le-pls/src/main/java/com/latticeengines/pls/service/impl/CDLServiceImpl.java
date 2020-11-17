@@ -749,7 +749,6 @@ public class CDLServiceImpl implements CDLService {
             } else {
                 preview.setLatticeFieldCategory(LatticeFieldCategory.Other);
             }
-            preview.setLatticeFieldCategory(LatticeFieldCategory.Other);
             preview.setFieldCategory(FieldCategory.LatticeField);
         });
         templatePreview.addAll(standardPreview);

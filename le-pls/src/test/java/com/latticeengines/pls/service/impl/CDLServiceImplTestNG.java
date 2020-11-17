@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -9,9 +10,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
+import com.latticeengines.domain.exposed.pls.frontend.LatticeFieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -39,9 +42,9 @@ public class CDLServiceImplTestNG extends PlsFunctionalTestNGBase {
         attr.setTimeFormatString("00-00-00 12H");
         templateTable.addAttribute(attr);
         templateTable.removeAttribute("Website");
-        templateTable.removeAttribute("Email");
+        templateTable.removeAttribute(InterfaceName.Email.name());
         List<TemplateFieldPreview> templatePreview = cdlService.getTemplatePreview(mainTestTenant.getId(), templateTable,
-                standardTable);
+                standardTable, Collections.singleton(InterfaceName.Email.name()));
         Assert.assertNotNull(templatePreview);
         Assert.assertTrue(templatePreview.size() > 1);
         TemplateFieldPreview fieldPreview =
@@ -55,5 +58,6 @@ public class CDLServiceImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertTrue(email.isUnmapped());
         Assert.assertEquals(website.getFieldCategory(), FieldCategory.LatticeField);
         Assert.assertEquals(email.getFieldCategory(), FieldCategory.LatticeField);
+        Assert.assertEquals(email.getLatticeFieldCategory(), LatticeFieldCategory.MatchField);
     }
 }
