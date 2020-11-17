@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.EVScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CalculateExpectedRevenuePercentileParameters.ScoreDerivationType;
+import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CalculateExpectedRevenuePercentileJobConfig;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
 
@@ -92,6 +93,46 @@ public final class ExpectedRevenueDataFlowUtil {
                 } else {
                     ScoreDerivation scoreDerivation = JsonUtils.deserialize(scoreDerivationStr, ScoreDerivation.class);
                     scoreDerivationInfo.put(ScoreDerivationType.PROBABILITY, scoreDerivation);
+
+                }
+
+                log.info(String.format("getScoreDerivationMap - modelId = %s, scoreDerivationInfo = %s", modelId,
+                        JsonUtils.serialize(scoreDerivationInfo)));
+                scoreDerivationMap.put(modelId, scoreDerivationInfo);
+
+            }
+        });
+        return scoreDerivationMap;
+    }
+
+    public static Map<String, Map<CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType, ScoreDerivation>> getNewScoreDerivationMap(
+            CustomerSpace customerSpace, Configuration yarnConfiguration, ModelSummaryProxy modelSummaryProxy,
+            Map<String, String> modelFieldMap, String fieldNameForEVIdentification, boolean loadOnlyForEVModel) {
+        ScoreArtifactRetriever scoreArtifactRetriever = new ScoreArtifactRetriever(modelSummaryProxy,
+                yarnConfiguration);
+        Map<String, Map<CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType, ScoreDerivation>> scoreDerivationMap = new HashMap<>();
+        modelFieldMap.entrySet().stream().forEach(entry -> {
+            String modelId = entry.getKey();
+            boolean isEV = fieldNameForEVIdentification.equals(entry.getValue());
+            if (!loadOnlyForEVModel || isEV) {
+                String scoreDerivationStr = scoreArtifactRetriever.getScoreDerivation(customerSpace, modelId, isEV);
+
+                Map<CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType, ScoreDerivation> scoreDerivationInfo = new HashMap<>();
+
+                if (isEV) {
+                    EVScoreDerivation evScoreDerivation = JsonUtils.deserialize(scoreDerivationStr,
+                            EVScoreDerivation.class);
+
+                    scoreDerivationInfo.put(CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType.EV,
+                            evScoreDerivation.getEVScoreDerivation());
+                    scoreDerivationInfo.put(CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType.PROBABILITY,
+                            evScoreDerivation.getProbabilityScoreDerivation());
+                    scoreDerivationInfo.put(CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType.REVENUE,
+                            evScoreDerivation.getRevenueScoreDerivation());
+                } else {
+                    ScoreDerivation scoreDerivation = JsonUtils.deserialize(scoreDerivationStr, ScoreDerivation.class);
+                    scoreDerivationInfo.put(CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType.PROBABILITY,
+                            scoreDerivation);
 
                 }
 
