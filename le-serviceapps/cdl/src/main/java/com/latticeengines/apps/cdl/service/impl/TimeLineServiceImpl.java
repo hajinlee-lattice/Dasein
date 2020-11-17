@@ -83,7 +83,8 @@ public class TimeLineServiceImpl implements TimeLineService {
                     timeLine.getName(), timeLine.getTimelineId());
             return;
         }
-        timeLineEntityMgr.delete(timeLine);
+        oldTimeline.setTenant(null);
+        timeLineEntityMgr.delete(oldTimeline);
     }
 
     private void createDefaultTimeline(String customerSpace, BusinessEntity entity, String timelineName) {

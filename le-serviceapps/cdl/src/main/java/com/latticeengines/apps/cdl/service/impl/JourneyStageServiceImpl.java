@@ -90,6 +90,7 @@ public class JourneyStageServiceImpl implements JourneyStageService {
                     journeyStage.getStageName(), journeyStage.getPid());
             return;
         }
+        oldJourneyStage.setTenant(null);
         journeyStageEntityMgr.delete(oldJourneyStage);
     }
 
