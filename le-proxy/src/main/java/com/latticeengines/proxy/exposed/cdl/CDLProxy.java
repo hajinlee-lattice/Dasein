@@ -816,10 +816,10 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
     }
 
-    public ApplicationId startSegmentImport(String customerSpace, SegmentImportRequest request) {
-        String baseUrl = "/customerspaces/{customerSpace}/segments/startimport";
+    public ApplicationId importListSegment(String customerSpace, SegmentImportRequest request) {
+        String baseUrl = "/customerspaces/{customerSpace}/segments/importListSegment";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
-        String appIdStr = post("Start Segment import", url, request, String.class);
+        String appIdStr = post("Start import listsegment", url, request, String.class);
         return ApplicationIdUtils.toApplicationIdObj(appIdStr);
     }
 }

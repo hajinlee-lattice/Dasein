@@ -147,7 +147,14 @@ public class S3ImportServiceImpl implements S3ImportService {
         for (S3ImportMessage message : messageList) {
             try {
                 log.info("Start processing : " + message.getKey());
-                if (dropBoxSet.contains(message.getDropBox().getDropBox())) {
+                if (S3ImportMessageType.LISTSEGMENT.equals(message.getMessageType())){
+                    String segmentIndex = S3ImportMessageUtils.getSegmentIndex(message);
+                    if (dropBoxSet.contains(segmentIndex)) {
+                        log.info(String.format("Already submitted one import for segment: %s",
+                                segmentIndex));
+                        continue;
+                    }
+                } else if (dropBoxSet.contains(message.getDropBox().getDropBox())) {
                     log.info(String.format("Already submitted one import for dropBox: %s",
                             message.getDropBox().getDropBox()));
                     continue;
@@ -339,7 +346,7 @@ public class S3ImportServiceImpl implements S3ImportService {
         log.info(String.format("Process ListSegment import with Tenant %s, segment %s, File %s", tenantId, segmentName,
                 fileName));
         if (submitListSegmentImport(tenantId, segmentName, message.getKey(), message.getHostUrl())) {
-            dropBoxSet.add(message.getDropBox().getDropBox());
+            dropBoxSet.add(S3ImportMessageUtils.getSegmentIndex(message));
             s3ImportMessageService.deleteMessage(message);
         }
     }
@@ -350,7 +357,7 @@ public class S3ImportServiceImpl implements S3ImportService {
         request.setS3FileKey(key);
         try {
             CDLProxy cdlProxy = new CDLProxy(hostUrl);
-            ApplicationId applicationId = cdlProxy.startSegmentImport(tenantId, request);
+            ApplicationId applicationId = cdlProxy.importListSegment(tenantId, request);
             log.info("Start segment import by applicationId : " + applicationId.toString());
             return true;
         } catch (Exception e) {

@@ -8,6 +8,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
+import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 
 public final class S3ImportMessageUtils {
@@ -55,6 +56,7 @@ public final class S3ImportMessageUtils {
                 skip = PS_SHARE.equals(feedType);
                 break;
             case DCP:
+            case LISTSEGMENT:
                 break;
             default:
                 skip = true;
@@ -146,6 +148,14 @@ public final class S3ImportMessageUtils {
         if (StringUtils.isNotEmpty(systemName))
             return String.format(FEED_TYPE_PATTERN, systemName, folderName);
         return folderName;
+    }
+
+    public static String getSegmentIndex(S3ImportMessage message) {
+        String tenantId = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
+                S3ImportMessageUtils.KeyPart.TENANT_ID);
+        String segmentName = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
+                S3ImportMessageUtils.KeyPart.SEGMENT_NAME);
+        return tenantId + "_" + segmentName;
     }
 
     public enum KeyPart {

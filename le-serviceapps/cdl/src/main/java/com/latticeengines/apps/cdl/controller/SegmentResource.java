@@ -233,7 +233,7 @@ public class SegmentResource {
         segmentService.deleteMetadataSegmentExport(exportId);
     }
 
-    @PostMapping("/startimport")
+    @PostMapping("/importListSegment")
     @ResponseBody
     @ApiOperation(value = "start segment import")
     public String createOrUpdateListSegment(@PathVariable String customerSpace, @RequestBody SegmentImportRequest segmentImportRequest) {
