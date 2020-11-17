@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LookupIdMapConfigValuesLookup {
+
+    protected LookupIdMapConfigValuesLookup() {
+        throw new UnsupportedOperationException();
+    }
+
     static final Map<CDLExternalSystemName, String> EXT_SYS_NAME_TO_END_DEST_ID = new HashMap<>();
     static {
         EXT_SYS_NAME_TO_END_DEST_ID.put(CDLExternalSystemName.Adobe_Audience_Mgr,

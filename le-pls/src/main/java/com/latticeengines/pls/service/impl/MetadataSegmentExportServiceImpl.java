@@ -1,6 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,11 +27,8 @@ import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.MetadataSegmentExportConverter;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
@@ -41,7 +37,6 @@ import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Component("metadataSegmentExportService")
 public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportService {
@@ -68,9 +63,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
     @Inject
     private BatonService batonService;
-
-    @Inject
-    private ServingStoreProxy servingStoreProxy;
 
     @Value("${pls.segment.export.max}")
     private Long maxEntryLimitForExport;
@@ -110,7 +102,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         String customerSpaceStr = customerSpace.toString();
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpaceStr);
         setCreatedBy(metadataSegmentExportJob);
-        checkExportAttribute(metadataSegmentExportJob, customerSpaceStr, version);
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
@@ -121,23 +112,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         request.setSaveToDropfolder(false);
         cdlProxy.entityExport(customerSpaceStr, request);
         return MetadataSegmentExportConverter.convertToMetadataSegmentExport(atlasExportProxy.findAtlasExportById(customerSpaceStr, atlasExport.getUuid()));
-    }
-
-    private void checkExportAttribute(MetadataSegmentExport metadataSegmentExport, String customerSpace,
-            DataCollection.Version version) {
-        List<ColumnMetadata> cms = new ArrayList<>();
-        if (AtlasExportType.ACCOUNT_AND_CONTACT.equals(metadataSegmentExport.getType())) {
-            cms = servingStoreProxy.getAccountMetadata(customerSpace, ColumnSelection.Predefined.Enrichment, version);
-            cms.addAll(servingStoreProxy.getContactMetadata(customerSpace, ColumnSelection.Predefined.Enrichment, version));
-        } else if (AtlasExportType.ACCOUNT.equals(metadataSegmentExport.getType())) {
-            cms = servingStoreProxy.getAccountMetadata(customerSpace, ColumnSelection.Predefined.Enrichment, version);
-        } else if (AtlasExportType.CONTACT.equals(metadataSegmentExport.getType())) {
-            cms = servingStoreProxy.getContactMetadata(customerSpace, ColumnSelection.Predefined.Enrichment, version);
-        }
-        log.info("Total attributes for export = " + CollectionUtils.size(cms));
-        if (cms.size() == 0) {
-            throw new LedpException(LedpCode.LEDP_18231, new String[] { metadataSegmentExport.getType().name() });
-        }
     }
 
     private void setCreatedBy(MetadataSegmentExport metadataSegmentExportJob) {
@@ -184,9 +158,9 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         }
     }
 
-    private String getFilePath(String filePath, String fileName){
+    private String getFilePath(String filePath, String fileName) {
         StringBuffer result = new StringBuffer();
-       return result.append(filePath ).append(fileName).toString();
+        return result.append(filePath).append(fileName).toString();
     }
 
     private void downloadAtlasExport(String customerSpace, String exportId, HttpServletRequest request,
