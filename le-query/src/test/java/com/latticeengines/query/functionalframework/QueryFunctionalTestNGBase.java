@@ -134,15 +134,29 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     }
 
     protected long testGetCountAndAssert(String sqlUser, Query query, long expectedCount) {
-        return testGetCountAndAssert(attrRepo, sqlUser, query, expectedCount);
+        return testGetCountAndAssert(attrRepo, sqlUser, query, expectedCount, true);
+    }
+
+    protected long testGetCountAndAssert(String sqlUser, Query query, long expectedCount, boolean runIdempotentTest) {
+        return testGetCountAndAssert(attrRepo, sqlUser, query, expectedCount, runIdempotentTest);
     }
 
     protected long testGetCountAndAssert(AttributeRepository attrRepo, String sqlUser, Query query, long expectedCount) {
+        return testGetCountAndAssert(attrRepo, sqlUser, query, expectedCount, true);
+    }
+
+    protected long testGetCountAndAssert(AttributeRepository attrRepo, String sqlUser, Query query, long expectedCount,
+                                         boolean runIdempotentTest) {
         long count = queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         Assert.assertEquals(count, expectedCount);
-        // test idempotent
-        count = queryEvaluatorService.getCount(attrRepo, query, sqlUser);
-        Assert.assertEquals(count, expectedCount);
+        if (runIdempotentTest) {
+            // test idempotent
+            log.info("Start to run idempotent test.");
+            count = queryEvaluatorService.getCount(attrRepo, query, sqlUser);
+            Assert.assertEquals(count, expectedCount);
+        } else {
+            log.info("Skip idempotent test.");
+        }
         return count;
     }
 

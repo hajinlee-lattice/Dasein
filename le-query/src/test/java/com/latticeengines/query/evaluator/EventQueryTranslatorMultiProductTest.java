@@ -382,7 +382,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 5966);
+        testGetCountAndAssert(sqlUser, query, 5966, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -395,7 +395,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 2862);
+        testGetCountAndAssert(sqlUser, query, 2862, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -408,7 +408,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 76987);
+        testGetCountAndAssert(sqlUser, query, 76987, false);
     }
 
     // @Test(groups = "functional", dataProvider = "userContexts")
@@ -421,7 +421,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 68680);
+        testGetCountAndAssert(sqlUser, query, 68680, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -436,7 +436,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 88959);
+        testGetCountAndAssert(sqlUser, query, 88959, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -449,7 +449,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 96058);
+        testGetCountAndAssert(sqlUser, query, 96058, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -463,7 +463,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 210);
+        testGetCountAndAssert(sqlUser, query, 210, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -477,7 +477,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 13985);
+        testGetCountAndAssert(sqlUser, query, 13985, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -490,7 +490,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1196);
+        testGetCountAndAssert(sqlUser, query, 1196, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -504,7 +504,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 3795);
+        testGetCountAndAssert(sqlUser, query, 3795, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -518,7 +518,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 318);
+        testGetCountAndAssert(sqlUser, query, 318, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -532,7 +532,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 6023);
+        testGetCountAndAssert(sqlUser, query, 6023, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -546,7 +546,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 4464);
+        testGetCountAndAssert(sqlUser, query, 4464, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -560,7 +560,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 2881);
+        testGetCountAndAssert(sqlUser, query, 2881, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -577,7 +577,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 85989);
+        testGetCountAndAssert(sqlUser, query, 85989, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -591,7 +591,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 82723);
+        testGetCountAndAssert(sqlUser, query, 82723, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -605,7 +605,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 776);
+        testGetCountAndAssert(sqlUser, query, 776, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -619,7 +619,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 95895);
+        testGetCountAndAssert(sqlUser, query, 95895, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -633,7 +633,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 95949);
+        testGetCountAndAssert(sqlUser, query, 95949, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -647,7 +647,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 97);
+        testGetCountAndAssert(sqlUser, query, 97, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -661,7 +661,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 596);
+        testGetCountAndAssert(sqlUser, query, 596, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -675,7 +675,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 317);
+        testGetCountAndAssert(sqlUser, query, 317, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -689,7 +689,7 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 89763);
+        testGetCountAndAssert(sqlUser, query, 89763, false);
     }
 
     public static class EnhancedEventQueryTranslator extends EventQueryTranslator {
