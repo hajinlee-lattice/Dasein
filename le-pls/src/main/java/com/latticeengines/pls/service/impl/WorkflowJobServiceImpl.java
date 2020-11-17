@@ -103,7 +103,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             "consolidateandpublishworkflow", //
             "profileandpublishworkflow", //
             "timelineexportworkflow", //
-            "generateintentemailalertworkflow" };
+            "generateintentemailalertworkflow", //
+            "campaigndeltacalculationworkflow", //
+            "deltacampaignlaunchworkflow" };
     private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
             Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
