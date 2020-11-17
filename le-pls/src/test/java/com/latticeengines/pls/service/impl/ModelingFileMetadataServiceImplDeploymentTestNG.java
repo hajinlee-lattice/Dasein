@@ -290,7 +290,8 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
         log.info("field result is: " + JsonUtils.pprint(fieldValidationResult));
         Map<ValidationCategory, List<FieldValidation>> groupedValidations =
                 fieldValidationResult.getGroupedValidations();
-        // error is Multiple user fields are mapped to standard field ,
-        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 1);
+        //1 error is Multiple user fields are mapped to standard field
+        // 2. no field mapped to OTHER_SYSTEM, no unique id set
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 2);
     }
 }
