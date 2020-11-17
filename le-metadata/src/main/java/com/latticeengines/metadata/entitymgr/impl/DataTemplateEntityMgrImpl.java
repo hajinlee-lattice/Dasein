@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -55,8 +56,20 @@ public class DataTemplateEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataTem
     public void updateByUuid(String tenantId, String uuid, DataTemplate dataTemplate) {
         DataTemplateEntity existing = repository.findByTenantIdAndUuid(tenantId, uuid);
         if (existing != null) {
+            cloneDataTemplate(existing.getDocument(), dataTemplate);
             existing.setDocument(dataTemplate);
             repository.save(existing);
+        }
+    }
+
+    private void cloneDataTemplate(DataTemplate existing, DataTemplate incoming) {
+        if (existing != null) {
+            if (StringUtils.isNotEmpty(incoming.getTenant())) {
+                existing.setTenant(incoming.getTenant());
+            }
+            if (incoming.getMasterSchema() != null) {
+                existing.setMasterSchema(incoming.getMasterSchema());
+            }
         }
     }
 

@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -55,6 +57,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", ThreadPoolUtils.NUM_CORES * 2);
 
     @Override
+    @Transactional(transactionManager = "documentTransactionManager", propagation = Propagation.REQUIRED)
     public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit) {
         String name = dataUnit.getName();
         dataUnit.setTenant(tenantId);
@@ -65,10 +68,28 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         }
         DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (existing == null) {
-            return createNewDataUnit(tenantId, dataUnit);
+            dataUnit = createNewDataUnit(tenantId, dataUnit);
+            removeMasterRole(dataUnit);
+            return dataUnit;
         } else {
             return updateExistingDataUnit(dataUnit, existing);
         }
+    }
+
+    private void removeMasterRole(DataUnit dataUnit) {
+        List<DataUnit.Role> roles = dataUnit.getRoles();
+        if (CollectionUtils.isNotEmpty(roles) && roles.contains(DataUnit.Role.Master)) {
+            List<DataUnitEntity> dataUnitEntities = findEntitiesByDataTemplateIdAndRoleFromReader(dataUnit.getTenant(),
+                    dataUnit.getDataTemplateId(), DataUnit.Role.Master);
+            for (DataUnitEntity entity : dataUnitEntities) {
+                entity.getDocument().getRoles().remove(DataUnit.Role.Master);
+            }
+            repository.saveAll(dataUnitEntities);
+        }
+    }
+
+    private void purgeOlsSnapShot() {
+
     }
 
     @Override
@@ -168,6 +189,23 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         List<DataUnitEntity> entitiesWithRole = entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role))
                 .collect(Collectors.toList());
         return convertList(entitiesWithRole, true);
+    }
+
+    private List<DataUnitEntity> findEntitiesByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role) {
+        List<DataUnitEntity> entities = readerRepository.findByTenantIdAndDataTemplateId(tenantId, dataTemplateId);
+        return entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role)).collect(Collectors.toList());
+    }
+
+    @Override
+    public DataUnit findByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role) {
+        List<DataUnitEntity> entities = readerRepository.findByTenantIdAndDataTemplateId(tenantId, dataTemplateId);
+        List<DataUnitEntity> entitiesWithRole = entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(entitiesWithRole)) {
+            return convertEntity(entitiesWithRole.get(0));
+        } else {
+            return null;
+        }
     }
 
     @Override

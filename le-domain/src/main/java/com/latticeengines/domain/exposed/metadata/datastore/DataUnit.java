@@ -52,6 +52,9 @@ public abstract class DataUnit {
     @JsonProperty("DataTemplateId")
     private String DataTemplateId;
 
+    @JsonProperty("retentionPolicy")
+    private String retentionPolicy;
+
     public abstract StorageType getStorageType();
 
     public String getTenant() {
@@ -117,6 +120,15 @@ public abstract class DataUnit {
     public void setTypedPartitionKeys(Collection<Pair<String, String>> typedPartitionKeys) {
         this.typedPartitionKeys = new ArrayList<>(typedPartitionKeys);
     }
+
+    public String getRetentionPolicy() {
+        return retentionPolicy;
+    }
+
+    public void setRetentionPolicy(String retentionPolicy) {
+        this.retentionPolicy = retentionPolicy;
+    }
+
     public enum StorageType {
         Dynamo, Hdfs, Redshift, S3, Presto, Athena, Unknown;
 
@@ -131,7 +143,7 @@ public abstract class DataUnit {
     }
 
     public enum DataFormat {
-        AVRO, PARQUET, CSV, UNKOWN;
+        AVRO, PARQUET, CSV, ZIP, UNKOWN;
 
         @JsonCreator
         public static DataFormat safeValueOf(String string) {

@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
+import org.apache.commons.collections4.MapUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -38,6 +39,8 @@ import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 public class ListSegment implements HasPid {
 
     private static final Logger log = LoggerFactory.getLogger(ListSegment.class);
+
+    public static final String RAW_IMPORT = "RawImport";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -88,7 +91,6 @@ public class ListSegment implements HasPid {
     public void setPid(Long pid) {
         this.pid = pid;
     }
-
 
     @Override
     public String toString() {
@@ -149,5 +151,13 @@ public class ListSegment implements HasPid {
 
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getTemplateId(String templateKey) {
+        if (MapUtils.isNotEmpty(dataTemplates)) {
+            return dataTemplates.get(templateKey);
+        } else {
+            return null;
+        }
     }
 }

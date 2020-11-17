@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateEventTableFilterJobConf
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.ExtractListSegmentCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateIntentAlertArtifactsConfig;
@@ -190,7 +191,8 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME), //
         @JsonSubTypes.Type(value = PublishActivityAlertsJobConfig.class, name = PublishActivityAlertsJobConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateRecommendationCSVConfig.class, name = GenerateRecommendationCSVConfig.NAME), //
-        @JsonSubTypes.Type(value = GenerateIntentAlertArtifactsConfig.class, name = GenerateIntentAlertArtifactsConfig.NAME) //
+        @JsonSubTypes.Type(value = GenerateIntentAlertArtifactsConfig.class, name = GenerateIntentAlertArtifactsConfig.NAME), //
+        @JsonSubTypes.Type(value = ExtractListSegmentCSVConfig.class, name = ExtractListSegmentCSVConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
 

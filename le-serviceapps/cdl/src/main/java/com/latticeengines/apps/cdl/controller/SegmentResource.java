@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.annotation.Action;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.apps.cdl.workflow.ImportListSegmentWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.cdl.SegmentImportRequest;
+import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -48,6 +50,9 @@ public class SegmentResource {
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private ImportListSegmentWorkflowSubmitter listSegmentWorkflowSubmitter;
 
     @GetMapping("")
     @ResponseBody
@@ -74,7 +79,7 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies")
     public Map<String, List<String>> getDependencies(@PathVariable String customerSpace,
-            @PathVariable String segmentName) throws Exception {
+                                                     @PathVariable String segmentName) throws Exception {
         log.info(String.format("get all dependencies for segmentName=%s", segmentName));
         return segmentService.getDependencies(segmentName);
     }
@@ -95,8 +100,8 @@ public class SegmentResource {
     @Action
     @ApiOperation(value = "Create or update a segment")
     public MetadataSegment createOrUpdateSegment(@PathVariable String customerSpace,
-            @RequestBody MetadataSegment segment,
-            @RequestParam(value = "user", required = false, defaultValue = "DEFAULT_USER") String user) {
+                                                 @RequestBody MetadataSegment segment,
+                                                 @RequestParam(value = "user", required = false, defaultValue = "DEFAULT_USER") String user) {
         MetadataSegment res = segmentService.createOrUpdateSegment(segment);
         actionService.registerAction(ActionContext.getAction(), user);
         return res;
@@ -139,11 +144,19 @@ public class SegmentResource {
         return segmentService.deleteSegmentByExternalInfo(externalSystem, externalSegmentId, hardDelete);
     }
 
+    @PostMapping("/list/{segmentName}/datetemplate")
+    @ResponseBody
+    @ApiOperation(value = "Create or update a date template for list segment")
+    public String createOrUpdateDataUnit(@PathVariable String customerSpace,
+                                         @PathVariable String segmentName, @RequestBody CreateDataTemplateRequest segment) {
+        return segmentService.createOrUpdateDataTemplate(segmentName, segment);
+    }
+
     @DeleteMapping("/{segmentName}")
     @ApiOperation(value = "Delete a segment by name")
     public Boolean deleteSegmentByName(@PathVariable String customerSpace,
-            @PathVariable String segmentName,
-            @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
+                                       @PathVariable String segmentName,
+                                       @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         return segmentService.deleteSegmentByName(segmentName, false, hardDelete);
     }
 
@@ -151,7 +164,7 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Revert segment deletion given its name")
     public Boolean revertDeleteRatingEngine(@PathVariable String customerSpace,
-            @PathVariable String segmentName) {
+                                            @PathVariable String segmentName) {
         segmentService.revertDeleteSegmentByName(segmentName);
         return true;
     }
@@ -167,7 +180,7 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Get segment by name")
     public StatisticsContainer getSegmentStats(@PathVariable String customerSpace, @PathVariable String segmentName,
-            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+                                               @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return segmentService.getStats(segmentName, version);
     }
 
@@ -175,7 +188,7 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Upsert stats to a segment")
     public SimpleBooleanResponse upsertStatsToSegment(@PathVariable String customerSpace,
-            @PathVariable String segmentName, @RequestBody StatisticsContainer statisticsContainer) {
+                                                      @PathVariable String segmentName, @RequestBody StatisticsContainer statisticsContainer) {
         segmentService.upsertStats(segmentName, statisticsContainer);
         return SimpleBooleanResponse.successResponse();
     }
@@ -184,7 +197,7 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Update counts for a segment")
     public Map<BusinessEntity, Long> updateSegmentCount(@PathVariable String customerSpace,
-            @PathVariable String segmentName) {
+                                                        @PathVariable String segmentName) {
         return segmentService.updateSegmentCounts(segmentName);
     }
 
@@ -199,7 +212,7 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "get attributes for segments")
     public List<AttributeLookup> findDependingAttributes(@PathVariable String customerSpace,
-            @RequestBody List<MetadataSegment> metadataSegments) {
+                                                         @RequestBody List<MetadataSegment> metadataSegments) {
         return segmentService.findDependingAttributes(metadataSegments);
     }
 

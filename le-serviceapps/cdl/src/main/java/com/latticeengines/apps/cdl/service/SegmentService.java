@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
 import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
@@ -63,4 +64,6 @@ public interface SegmentService {
     List<MetadataSegmentExport> getMetadataSegmentExports();
 
     MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId);
+
+    String createOrUpdateDataTemplate(String segmentName, CreateDataTemplateRequest request);
 }
