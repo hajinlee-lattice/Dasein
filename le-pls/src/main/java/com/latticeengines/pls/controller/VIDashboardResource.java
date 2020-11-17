@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilterValue;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,23 +31,40 @@ public class VIDashboardResource {
     @GetMapping("/dashboards")
     @ResponseBody
     @ApiOperation("get all related dashboards")
-    public Map<String, String> getDashboardList() {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
-            throw new LedpException(LedpCode.LEDP_18217);
-        }
-        return getMockDashboards();
+    public DashboardResponse getDashboardList() {
+        // TODO hook up with real database
+        DashboardResponse res = new DashboardResponse();
+        res.setDashboardUrls(getMockDashboards());
+        res.setFilters(getMockFilterValue());
+        return res;
     }
 
-    @GetMapping("/dashboardFilters")
-    @ResponseBody
-    @ApiOperation("get all related dashboards")
-    public Map<String, List<DashboardFilterValue>> getDashboardFilterList() {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
-            throw new LedpException(LedpCode.LEDP_18217);
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private class DashboardResponse {
+
+        @JsonProperty("dashboard_urls")
+        private Map<String, String> dashboardUrls;
+
+        @JsonProperty("filters")
+        private Map<String, List<DashboardFilterValue>> filters;
+
+        public Map<String, String> getDashboardUrls() {
+            return dashboardUrls;
         }
-        return getMockFilterValue();
+
+        public void setDashboardUrls(Map<String, String> dashboardUrls) {
+            this.dashboardUrls = dashboardUrls;
+        }
+
+        public Map<String, List<DashboardFilterValue>> getFilters() {
+            return filters;
+        }
+
+        public void setFilters(Map<String, List<DashboardFilterValue>> filters) {
+            this.filters = filters;
+        }
     }
 
     private Map<String, List<DashboardFilterValue>> getMockFilterValue() {
@@ -104,41 +121,47 @@ public class VIDashboardResource {
     private Map<String, String> getMockDashboards() {
         Map<String, String> dashboards = new HashMap<>();
         dashboards.put("employee", "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws" +
-                ".com/_plugin/kibana/app/kibana?global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/5d58a290-2339-11eb-bcb2-2f4292783cad?_g=(filters:!()," +
-                "refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:''," +
-                "filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:b42b0450-1e7f-11eb-a43a-5d33a24fd950," +
-                "key:LE_EMPLOYEE_RANGE.keyword,negate:!f,params:(query:'<EMPLOYEE_FILTER>'),type:phrase),query:(match_phrase:" +
-                "(LE_EMPLOYEE_RANGE.keyword:'<EMPLOYEE_FILTER>')))),fullScreenMode:!f,options:(hidePanelTitles:!f," +
-                "useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_company_employee,viewMode:view)");
-        dashboards.put("industry", "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws.com/_plugin/kibana/app/kibana?global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/7eac1ee0-232a-11eb-bcb2-2f4292783cad?_g=" +
-                "(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:''," +
-                "filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f," +
-                "index:b42b0450-1e7f-11eb-a43a-5d33a24fd950,key:LE_INDUSTRY.keyword,negate:!f,params:" +
-                "(query:'<INDUSTRY_FILTER>'),type:phrase),query:(match_phrase:(LE_INDUSTRY.keyword:'<INDUSTRY_FILTER>')" +
-                "))),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:'')," +
-                "timeRestore:!f,title:ssvi_poc_m41_company_industry,viewMode:view)");
-        dashboards.put("location", "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws.com/_plugin/kibana/app/kibana?global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/86e9e880-2334-11eb-a43a-5d33a24fd950?_g=" +
-                "(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:''," +
-                "filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f," +
-                "index:b42b0450-1e7f-11eb-a43a-5d33a24fd950,key:LDC_State.keyword,negate:!f,params:(query:<LOCATION_FILTER>)" +
-                ",type:phrase),query:(match_phrase:(LDC_State.keyword:<LOCATION_FILTER>)))),fullScreenMode:!f," +
-                "options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_company_location,viewMode:view)");
+                ".com/_plugin/kibana/app/kibana?security_tenant=private&global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/5d58a290-2339-11eb-bcb2-2f4292783cad?embed=true&_g=(filters:!(),"
+                + "refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:'',"
+                + "filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:b42b0450-1e7f-11eb-a43a-5d33a24fd950,"
+                + "key:LE_EMPLOYEE_RANGE.keyword,negate:!f,params:(query:'<EMPLOYEE_FILTER>'),type:phrase),query:(match_phrase:"
+                + "(LE_EMPLOYEE_RANGE.keyword:'<EMPLOYEE_FILTER>')))),fullScreenMode:!f,options:(hidePanelTitles:!f,"
+                + "useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_company_employee,viewMode:view)");
+        dashboards.put("industry",
+                "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws.com/_plugin/kibana/app/kibana?security_tenant=private&global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/"
+                        + "7eac1ee0-232a-11eb-bcb2-2f4292783cad?embed=true&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:'',"
+                        + "filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,"
+                        + "index:b42b0450-1e7f-11eb-a43a-5d33a24fd950,key:LE_INDUSTRY.keyword,negate:!f,params:"
+                        + "(query:'<INDUSTRY_FILTER>'),type:phrase),query:(match_phrase:(LE_INDUSTRY.keyword:'<INDUSTRY_FILTER>')"
+                        + "))),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),"
+                        + "timeRestore:!f,title:ssvi_poc_m41_company_industry,viewMode:view)");
+        dashboards.put("location",
+                "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws.com/_plugin/kibana/app/kibana?security_tenant=private&global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/86e9e880-2334-11eb-a43a-5d33a24fd950?embed=true&_g="
+                        + "(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:'',"
+                        + "filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,"
+                        + "index:b42b0450-1e7f-11eb-a43a-5d33a24fd950,key:LDC_State.keyword,negate:!f,params:(query:<LOCATION_FILTER>)"
+                        + ",type:phrase),query:(match_phrase:(LDC_State.keyword:<LOCATION_FILTER>)))),fullScreenMode:!f,"
+                        + "options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_company_location,viewMode:view)");
         dashboards.put("revenue", "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws" +
-                ".com/_plugin/kibana/app/kibana?global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/a2f89ba0-2336-11eb-a43a-5d33a24fd950?_g=" +
+                ".com/_plugin/kibana/app/kibana?security_tenant=private&global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/a2f89ba0-2336-11eb-a43a-5d33a24fd950?embed=true&_g="
+                +
                 "(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:''," +
                 "filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f," +
                 "index:b42b0450-1e7f-11eb-a43a-5d33a24fd950,key:LE_REVENUE_RANGE.keyword,negate:!f,params:" +
                 "(query:'<REVENUE_FILTER>'),type:phrase),query:(match_phrase:(LE_REVENUE_RANGE.keyword:'<REVENUE_FILTER>'))))," +
                 "fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_company_revenue,viewMode:view)");
         dashboards.put("page", "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws" +
-                ".com/_plugin/kibana/app/kibana?global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/62ff2e40-233d-11eb-bcb2-2f4292783cad?_g=(filters:!()," +
+                ".com/_plugin/kibana/app/kibana?security_tenant=private&global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/62ff2e40-233d-11eb-bcb2-2f4292783cad?embed=true&_g=(filters:!(),"
+                +
                 "refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:'',filters:!(" +
                 "('$state':(store:appState),meta:(alias:!n,disabled:!f,index:b42b0450-1e7f-11eb-a43a-5d33a24fd950," +
                 "key:UrlCategories.keyword,negate:!f,params:(query:'<PAGE_FILTER>'),type:phrase),query:" +
                 "(match_phrase:(UrlCategories.keyword:'<PAGE_FILTER>')))),fullScreenMode:!f,options:" +
                 "(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_page_by_group,viewMode:view)");
-        dashboards.put("pagegroup", "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws.com/_plugin/kibana/app/kibana?global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/b346c1d0-2340-11eb-a43a-5d33a24fd950?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_page_by_page,viewMode:view)");
-        dashboards.put("overview", "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws.com/_plugin/kibana/app/kibana?global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/cce9ae10-22df-11eb-bcb2-2f4292783cad?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!t,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_v1_overview,viewMode:view)");
+        dashboards.put("pagegroup",
+                "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws.com/_plugin/kibana/app/kibana?security_tenant=private&global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/b346c1d0-2340-11eb-a43a-5d33a24fd950?embed=true&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!f,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_page_by_page,viewMode:view)");
+        dashboards.put("overview",
+                "https://internal-kibana-internal-1262013531.us-east-1.elb.amazonaws.com/_plugin/kibana/app/kibana?security_tenant=private&global_auth_token=<GLOBAL_AUTH_TOKEN>#/dashboard/cce9ae10-22df-11eb-bcb2-2f4292783cad?embed=true&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-<TIME_FILTER>,to:now))&_a=(description:'',filters:!(),fullScreenMode:!f,options:(hidePanelTitles:!t,useMargins:!t),query:(language:kuery,query:''),timeRestore:!f,title:ssvi_poc_m41_v1_overview,viewMode:view)");
         return dashboards;
     }
 }

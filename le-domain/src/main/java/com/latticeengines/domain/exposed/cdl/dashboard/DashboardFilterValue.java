@@ -26,7 +26,7 @@ public class DashboardFilterValue {
     }
 
     public static final class Builder {
-        private DashboardFilterValue dashboardFilterValue;
+        private final DashboardFilterValue dashboardFilterValue = new DashboardFilterValue();
 
         public Builder withDisplayName(String displayName) {
             dashboardFilterValue.setDisplayName(displayName);
