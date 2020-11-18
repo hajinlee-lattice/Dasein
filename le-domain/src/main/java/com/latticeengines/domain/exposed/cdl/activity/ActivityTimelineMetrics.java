@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ActivityTimelineMetrics implements Serializable {
 
     @JsonProperty("count")
-    private Integer count;
+    private String count;
 
     @JsonProperty("label")
     private String label;
@@ -24,7 +24,7 @@ public class ActivityTimelineMetrics implements Serializable {
 
     }
 
-    public ActivityTimelineMetrics(Integer count, String lable, String description, String context) {
+    public ActivityTimelineMetrics(String count, String lable, String description, String context) {
 
         this.count = count;
         this.label = lable;
@@ -32,7 +32,7 @@ public class ActivityTimelineMetrics implements Serializable {
         this.context = context;
     }
 
-    public Integer getCount() {
+    public String getCount() {
         return count;
     }
 
@@ -48,7 +48,7 @@ public class ActivityTimelineMetrics implements Serializable {
         return context;
     }
 
-    public void setCount(Integer count) {
+    public void setCount(String count) {
         this.count = count;
     }
 
@@ -102,11 +102,10 @@ public class ActivityTimelineMetrics implements Serializable {
         }
 
         public static String getDescription(Integer count, Integer days) {
-
             if (count.equals(0)) {
-                return String.valueOf(count);
+                return "";
             }
-            return String.format("%d in last %d days", count, days);
+            return String.format(" in last %d days", days);
         }
 
         public abstract String getContext(Integer count);
