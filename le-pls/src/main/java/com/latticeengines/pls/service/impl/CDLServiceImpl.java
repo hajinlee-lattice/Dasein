@@ -259,7 +259,7 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public UIAction softDelete(DeleteRequest deleteRequest) {
+    public UIAction delete(DeleteRequest deleteRequest) {
         log.info(deleteRequest.toString());
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         UIAction uiAction = new UIAction();
@@ -274,7 +274,6 @@ public class CDLServiceImpl implements CDLService {
         try {
             String email = MultiTenantContext.getEmailAddress();
             deleteRequest.setUser(email);
-            deleteRequest.setHardDelete(false);
             cdlProxy.registerDeleteData(customerSpace.toString(), deleteRequest);
         } catch (RuntimeException e) {
             uiAction.setTitle(DELETE_FAIL_TITLE);

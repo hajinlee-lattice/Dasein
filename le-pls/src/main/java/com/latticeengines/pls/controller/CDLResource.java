@@ -333,7 +333,9 @@ public class CDLResource {
     @PostMapping("/soft-delete")
     @ApiOperation(value = "Start cleanup job")
     public Map<String, UIAction> softDelete(@RequestBody DeleteRequest deleteRequest) {
-        UIAction uiAction = cdlService.softDelete(deleteRequest);
+        // FIXME this API is now used for both soft/hard delete, coordinate with UI for
+        // the endpoint url change
+        UIAction uiAction = cdlService.delete(deleteRequest);
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 

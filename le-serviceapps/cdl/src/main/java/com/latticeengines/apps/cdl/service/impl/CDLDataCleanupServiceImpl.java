@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -259,7 +260,8 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
             String msg = String.format("Entity type %s is not supported for deletion", deleteEntityType);
             throw new IllegalArgumentException(msg);
         }
-        validateDeleteIdEntity(idEntity, deleteEntityType, request.getFilename());
+        validateDeleteIdEntity(BooleanUtils.isTrue(request.getHardDelete()), idEntity, deleteEntityType,
+                request.getFilename());
         validateDeleteIdSystem(customerSpace, idSystem, idEntity);
         validateAndStandardizeDeleteDateRange(request);
         addStreamIds(customerSpace, request);
@@ -357,7 +359,12 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         }
     }
 
-    private void validateDeleteIdEntity(BusinessEntity idEntity, EntityType deleteEntityType, String deleteFilename) {
+    private void validateDeleteIdEntity(boolean hardDelete, BusinessEntity idEntity, EntityType deleteEntityType,
+            String deleteFilename) {
+        if (hardDelete && deleteEntityType != Accounts) {
+            String msg = String.format("Hard delete %s is not supported yet", deleteEntityType);
+            throw new UnsupportedOperationException(msg);
+        }
         if (idEntity != null && deleteEntityType != null
                 && !ALLOW_DELETION_ENTITIES.get(deleteEntityType).contains(idEntity)) {
             // validate delete entity & id entity are compatible
