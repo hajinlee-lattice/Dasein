@@ -24,8 +24,8 @@ import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.cdl.workflow.ImportListSegmentWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.cdl.SegmentImportRequest;
 import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
+import com.latticeengines.domain.exposed.cdl.SegmentImportRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -249,7 +249,7 @@ public class SegmentResource {
     @PostMapping("/importListSegment")
     @ResponseBody
     @ApiOperation(value = "start segment import")
-    public String createOrUpdateListSegment(@PathVariable String customerSpace, @RequestBody SegmentImportRequest segmentImportRequest) {
+    public String importListSegmentCSV(@PathVariable String customerSpace, @RequestBody SegmentImportRequest segmentImportRequest) {
         return "";
     }
 }
