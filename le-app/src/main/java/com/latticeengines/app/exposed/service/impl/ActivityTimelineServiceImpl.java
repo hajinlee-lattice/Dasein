@@ -179,18 +179,27 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                 ? streamTypeListMap.get(metricsType)
                 : new ArrayList<AtlasStream.StreamType>();
 
+        String countStr = getCountStr(streams, streamTypes, count);
         String description = getDescription(streams, streamTypes, count, days);
         String label = metricsType.getLabel();
         String context = metricsType.getContext(days);
 
-        return new ActivityTimelineMetrics(count, label, description, context);
+        return new ActivityTimelineMetrics(countStr, label, description, context);
+    }
+
+    private String getCountStr(List<AtlasStream> streams, List<AtlasStream.StreamType> streamTypes,
+            Integer metricsCount) {
+        if (!hasDataSources(streams, streamTypes) && !streamTypes.isEmpty()) {
+            return descriptionNoDataSource;
+        } else {
+            return String.valueOf(metricsCount);
+        }
     }
 
     private String getDescription(List<AtlasStream> streams, List<AtlasStream.StreamType> streamTypes,
             Integer metricsCount, Integer days) {
-
         if (!hasDataSources(streams, streamTypes) && !streamTypes.isEmpty()) {
-            return descriptionNoDataSource;
+            return ActivityTimelineMetrics.MetricsType.getDescription(0, days);
         } else {
             return ActivityTimelineMetrics.MetricsType.getDescription(metricsCount, days);
         }

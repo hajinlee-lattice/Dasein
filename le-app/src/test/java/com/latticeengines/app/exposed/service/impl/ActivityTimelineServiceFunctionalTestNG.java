@@ -91,23 +91,23 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
                 null, null);
 
         Assert.assertEquals(metrics.get(0).getLabel(), "New Activities");
-        Assert.assertEquals(metrics.get(0).getCount().intValue(), 139);
-        Assert.assertEquals(metrics.get(0).getDescription(), "139 in last 10 days");
+        Assert.assertEquals(String.valueOf(metrics.get(0).getCount()), "139");
+        Assert.assertEquals(metrics.get(0).getDescription(), " in last 10 days");
         Assert.assertEquals(metrics.get(0).getContext(), "Total number of web activity in the last 10 days");
 
         Assert.assertEquals(metrics.get(1).getLabel(), "New Contacts");
-        Assert.assertEquals(metrics.get(1).getCount().intValue(), 0);
-        Assert.assertEquals(metrics.get(1).getDescription(), "0");
+        Assert.assertEquals(String.valueOf(metrics.get(1).getCount()), "0");
+        Assert.assertEquals(metrics.get(1).getDescription(), "");
         Assert.assertEquals(metrics.get(1).getContext(), "Total number of new contacts in the last 10 days");
 
         Assert.assertEquals(metrics.get(2).getLabel(), "New Engagements");
-        Assert.assertEquals(metrics.get(2).getCount().intValue(), 207);
-        Assert.assertEquals(metrics.get(2).getDescription(), "207 in last 10 days");
+        Assert.assertEquals(String.valueOf(metrics.get(2).getCount()), "207");
+        Assert.assertEquals(metrics.get(2).getDescription(), " in last 10 days");
         Assert.assertEquals(metrics.get(2).getContext(), "Total number of engagements in the last in the last 10 days");
 
         Assert.assertEquals(metrics.get(3).getLabel(), "New Opportunities");
-        Assert.assertEquals(metrics.get(3).getCount().intValue(), 97);
-        Assert.assertEquals(metrics.get(3).getDescription(), "97 in last 10 days");
+        Assert.assertEquals(String.valueOf(metrics.get(3).getCount()), "97");
+        Assert.assertEquals(metrics.get(3).getDescription(), " in last 10 days");
         Assert.assertEquals(metrics.get(3).getContext(), "Number of present open opportunities in the last 10 days");
 
     }
