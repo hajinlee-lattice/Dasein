@@ -382,9 +382,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         // The reason for the score change is still unknown, might be DC 2.0.16
         // release.
         // int[] newExpected = { 96, 89, 96, 94 }; // LDC 2.0.21 or before
-        // int[] newExpected = { 83, 87, 89, 85 }; // LDC 2.0.23
         // int[] newExpected = { 68, 87, 89, 85 }; // LDC 2.0.24
-        int[] newExpected = { 68, 89, 78, 85 }; // LDC 2.0.25
+        // int[] newExpected = { 68, 89, 78, 85 }; // LDC 2.0.25
+        int[] newExpected = { 68, 87, 78, 85 }; // LDC 2.0.26
         for (int score : newExpected) {
             expectedScores.add(score);
         }
