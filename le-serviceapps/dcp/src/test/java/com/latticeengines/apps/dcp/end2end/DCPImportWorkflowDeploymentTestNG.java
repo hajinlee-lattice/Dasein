@@ -193,7 +193,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.FAILED);
         List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
-                Boolean.FALSE, 0, 20);
+                Boolean.TRUE, 0, 20);
         Assert.assertNotNull(uploadList);
         Assert.assertEquals(uploadList.size(), 3);
         UploadDetails upload = uploadList.get(0).getUploadId().equals(uploadId) ? uploadList.get(1) : uploadList.get(0);
@@ -201,6 +201,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(upload.getUploadDiagnostics().getApplicationId());
         System.out.println(upload.getUploadDiagnostics().getLastErrorMessage());
         Assert.assertNotNull(upload.getUploadDiagnostics().getLastErrorMessage());
+        Assert.assertNotNull(upload.getUploadConfig().getUploadImportedErrorFilePath());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testMissingRequired")

@@ -172,9 +172,9 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
                     CollectionUtils.size(pathList), CollectionUtils.size(processedRecords)));
             throw new RuntimeException("Error in extract info, skip register data table!");
         }
-        updateUploadStatistics(eaiImportJobDetail);
         String resultPath = extractResultPath(eaiImportJobDetail);
         copyErrorFile(customerSpace, upload, dropBoxSummary, eaiImportJobDetail, resultPath);
+        updateUploadStatistics(eaiImportJobDetail);
     }
 
     private void copyErrorFile(String customerSpace, UploadDetails upload, DropBoxSummary dropBoxSummary,
