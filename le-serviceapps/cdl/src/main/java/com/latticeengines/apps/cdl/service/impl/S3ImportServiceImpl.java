@@ -129,7 +129,7 @@ public class S3ImportServiceImpl implements S3ImportService {
         } else if (S3ImportMessageType.DCP.equals(messageType)) {
             return parts[parts.length - 1].toLowerCase().endsWith(".csv");
         } else if (S3ImportMessageType.LISTSEGMENT.equals(messageType)) {
-            return parts[parts.length - 1].toLowerCase().endsWith(".csv");
+            return parts[parts.length - 1].toLowerCase().endsWith(".zip");
         }
         else {
             return false;
