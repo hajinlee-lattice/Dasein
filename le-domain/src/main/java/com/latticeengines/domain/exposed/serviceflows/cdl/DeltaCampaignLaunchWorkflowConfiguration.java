@@ -43,7 +43,6 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     public static final String ADD_EXPORT_TIMESTAMP = "ADD_EXPORT_TIMESTAMP";
 
     public static final String NAME_SPACE = "NAME_SPACE";
-    public static final String CONTACT_ATTR_PREFIX = "ContactRenamed_";
 
     public static class Builder {
         private DeltaCampaignLaunchWorkflowConfiguration configuration = new DeltaCampaignLaunchWorkflowConfiguration();

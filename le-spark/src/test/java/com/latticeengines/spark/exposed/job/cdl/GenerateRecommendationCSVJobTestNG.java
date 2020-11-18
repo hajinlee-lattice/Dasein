@@ -26,9 +26,9 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.RecommendationColumnName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
+import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNGBase {
@@ -89,7 +89,7 @@ public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNG
             Assert.assertEquals(records.getRecords().size(), 50L);
             Assert.assertTrue(headerMap.containsKey(InterfaceName.DUNS.name()));
             Assert.assertTrue(headerMap.containsKey(InterfaceName.DoNotMail.name()));
-            Assert.assertTrue(headerMap.get(InterfaceName.DoNotMail.name()) < headerMap.get(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.CreatedDate.name()));
+            Assert.assertTrue(headerMap.get(InterfaceName.DoNotMail.name()) < headerMap.get(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.CreatedDate.name()));
             Assert.assertTrue(headerMap.get(InterfaceName.DUNS.name()) < headerMap.get(InterfaceName.DoNotMail.name()));
             Assert.assertTrue(headerMap.containsKey("Customer" + InterfaceName.CompanyName.name()));
         } catch (IOException e) {
@@ -116,20 +116,20 @@ public class GenerateRecommendationCSVJobTestNG extends SparkJobFunctionalTestNG
                 Pair.of(RecommendationColumnName.PLAY_ID.name(), String.class), //
                 Pair.of(RecommendationColumnName.LAUNCH_ID.name(), String.class), //
                 Pair.of(RecommendationColumnName.SYNC_DESTINATION.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.CustomerContactId.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.CompanyName.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Email.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactName.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.City.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.State.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Country.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.PostalCode.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.PhoneNumber.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Title.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.FirstName.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.LastName.name(), String.class), //
-                Pair.of(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.CreatedDate.name(), String.class) //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.CustomerContactId.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.CompanyName.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Email.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactName.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.City.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.State.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Country.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.PostalCode.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.PhoneNumber.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Title.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.FirstName.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.LastName.name(), String.class), //
+                Pair.of(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.CreatedDate.name(), String.class) //
         );
         accounts = new Object[][]{{"0L", "0000", "destinationAccountId", "Lattice", "Lattice Engines", 98, "A", "1000",
                 "www.lattice-engines.com", "01/01/2019"}, //
