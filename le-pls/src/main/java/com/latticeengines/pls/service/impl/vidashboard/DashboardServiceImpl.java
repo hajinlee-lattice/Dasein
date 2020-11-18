@@ -30,7 +30,6 @@ public class DashboardServiceImpl implements DashboardService {
 
     private static final Logger log = LoggerFactory.getLogger(DashboardServiceImpl.class);
 
-    private static final String RESOURCE_ROOT = "com/latticeengines/pls/service/kibanaitems/";
     private static final String INDEX_PATTERN_PREFIX = "index-pattern:";
     private static final String VISUALIZATION_PREFIX = "visualization:";
     private static final String DASHBOARD_PREFIX = "dashboard:";
@@ -62,7 +61,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     private void createIndexPattern() {
         String json = "";
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("service/kibanaitems/data_index_pattern.json")) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("kibanaitems/data_index_pattern.json")) {
             json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read data_index_pattern", exception);
@@ -83,7 +82,7 @@ public class DashboardServiceImpl implements DashboardService {
         if (StringUtils.isEmpty(indexPatternName)) {
             return;
         }
-        String filePath = "service/kibanaitems/employee_panel";
+        String filePath = "kibanaitems/employee_panel";
         for (int i = 0; i < 5; i++) {
             String json = "";
             try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(String.format("%s/panel_%s.json", filePath, i))) {
@@ -108,13 +107,13 @@ public class DashboardServiceImpl implements DashboardService {
             return;
         }
         String json = "";
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("service/kibanaitems/employee_dashboard.json")) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("kibanaitems/employee_dashboard.json")) {
             json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read employee_dashboard", exception);
         }
         indexPatternName = "test_data_joy";
-        indexPatternId = String.format("%s%s", INDEX_PATTERN_PREFIX, UuidUtil.getTimeBasedUuid());
+        indexPatternId = String.format("%s%s", DASHBOARD_PREFIX, UuidUtil.getTimeBasedUuid());
         log.info("indexPatternId is {}.", indexPatternId);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         Date date = new Date(System.currentTimeMillis());
