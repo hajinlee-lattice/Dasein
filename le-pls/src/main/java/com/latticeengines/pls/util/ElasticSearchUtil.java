@@ -55,8 +55,8 @@ public final class ElasticSearchUtil {
         try {
             if (client.indices().exists(new GetIndexRequest(indexName), RequestOptions.DEFAULT)) {
                 IndexRequest indexRequest = new IndexRequest(indexName, null, docId);
-                log.info("indexrequest: {}.", indexRequest.toString());
                 indexRequest.source(jsonString, XContentType.JSON);
+                log.info("indexrequest: {}.", indexRequest.toString());
                 IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
                 log.info(indexResponse.toString());
             }

@@ -67,6 +67,7 @@ public class DashboardServiceImpl implements DashboardService {
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read data_index_pattern", exception);
         }
+        log.info("file is {}", json);
         indexPatternName = "test_data_joy";
         indexPatternId = String.format("%s%s", INDEX_PATTERN_PREFIX, UuidUtil.getTimeBasedUuid());
         log.info("indexPatternId is {}.", indexPatternId);
@@ -74,6 +75,7 @@ public class DashboardServiceImpl implements DashboardService {
         Date date = new Date(System.currentTimeMillis());
         json = json.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER,
                 formatter.format(date));
+        log.info("replaced json is {}.", json);
         ElasticSearchUtil.createDocument(client, kibanaIndex, indexPatternId, json);
     }
 
