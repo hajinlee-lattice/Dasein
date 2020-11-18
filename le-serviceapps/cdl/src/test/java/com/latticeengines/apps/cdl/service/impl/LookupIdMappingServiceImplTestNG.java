@@ -143,7 +143,31 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "testBasicOperations")
-    public void testCreateDuplicateLookupIdMaps() {
+    public void testRegisterLookupIdMapValidation() {
+        LookupIdMap lookupIdMap = createLookupIdMap(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                CDLExternalSystemType.DSP, CDLExternalSystemName.Adobe_Audience_Mgr);
+
+        try {
+            lookupIdMappingLaunchService.registerExternalSystem(lookupIdMap);
+            Assert.fail("Registering new lookupIdMap should have failed.");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_32000);
+        }
+
+        lookupIdMap = createLookupIdMap(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
+                CDLExternalSystemType.ADS, null);
+
+        try {
+            lookupIdMappingLaunchService.registerExternalSystem(lookupIdMap);
+            Assert.fail("Registering new lookupIdMap should have failed.");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_32000);
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testBasicOperations")
+    public void testRegisterDuplicateLookupIdMaps() {
         String endDestId = "end_dest_id_123";
 
         Map<String, String> configValues = new HashMap<String, String>();

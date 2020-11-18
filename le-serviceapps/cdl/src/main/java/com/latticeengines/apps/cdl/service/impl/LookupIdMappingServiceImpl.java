@@ -92,6 +92,11 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
     @Override
     public LookupIdMap registerExternalSystem(LookupIdMap lookupIdMap) {
+        if (StringUtils.isEmpty(lookupIdMap.getEndDestinationId())) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Cannot register new system without external system id." });
+        }
+
         LookupIdMap existingLookupIdMap = findExistingLookupIdMap(lookupIdMap);
         if (existingLookupIdMap == null) {
             if (lookupIdMap.getExternalSystemName() == null) {
