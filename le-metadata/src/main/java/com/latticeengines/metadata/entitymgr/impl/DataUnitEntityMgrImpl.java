@@ -26,6 +26,8 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.repository.document.reader.DataUnitCrossTenantReaderRepository;
 import com.latticeengines.metadata.repository.document.reader.DataUnitReaderRepository;
@@ -56,6 +58,8 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", ThreadPoolUtils.NUM_CORES * 2);
 
+    private int purgeSize = 3;
+
     @Override
     @Transactional(transactionManager = "documentTransactionManager", propagation = Propagation.REQUIRED)
     public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit) {
@@ -69,7 +73,6 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (existing == null) {
             dataUnit = createNewDataUnit(tenantId, dataUnit);
-            removeMasterRole(dataUnit);
             return dataUnit;
         } else {
             return updateExistingDataUnit(dataUnit, existing);
@@ -79,7 +82,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     private void removeMasterRole(DataUnit dataUnit) {
         List<DataUnit.Role> roles = dataUnit.getRoles();
         if (CollectionUtils.isNotEmpty(roles) && roles.contains(DataUnit.Role.Master)) {
-            List<DataUnitEntity> dataUnitEntities = findEntitiesByDataTemplateIdAndRoleFromReader(dataUnit.getTenant(),
+            List<DataUnitEntity> dataUnitEntities = findDataUnitEntitiesByDataTemplateIdAndRoleFromReader(dataUnit.getTenant(),
                     dataUnit.getDataTemplateId(), DataUnit.Role.Master);
             for (DataUnitEntity entity : dataUnitEntities) {
                 entity.getDocument().getRoles().remove(DataUnit.Role.Master);
@@ -88,8 +91,20 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         }
     }
 
-    private void purgeOlsSnapShot() {
-
+    private void purgeOlsSnapShot(DataUnit dataUnit) {
+        List<DataUnitEntity> dataUnitEntities = findDataUnitEntitiesNeedToPurge(dataUnit, DataUnit.Role.Snapshot);
+        if (CollectionUtils.isNotEmpty(dataUnitEntities)) {
+            if (dataUnitEntities.size() > purgeSize) {
+                List<DataUnitEntity> entitiesToPurge = dataUnitEntities.subList(0, dataUnitEntities.size() - purgeSize);
+                Runnable runnable = () -> {
+                    for (DataUnitEntity dataUnitEntity : entitiesToPurge) {
+                        dataUnitEntity.getDocument().setRetentionPolicy(RetentionPolicyUtil.toRetentionPolicyStr(7, RetentionPolicyTimeUnit.DAY));
+                    }
+                    repository.saveAll(dataUnitEntities);
+                };
+                service.submit(runnable);
+            }
+        }
     }
 
     @Override
@@ -161,6 +176,8 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         reformatS3DataUnit(dataUnit);
         newEntity.setDocument(dataUnit);
         DataUnitEntity saved = repository.save(newEntity);
+        removeMasterRole(dataUnit);
+        purgeOlsSnapShot(dataUnit);
         return convertEntity(saved);
     }
 
@@ -191,9 +208,16 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         return convertList(entitiesWithRole, true);
     }
 
-    private List<DataUnitEntity> findEntitiesByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role) {
+    private List<DataUnitEntity> findDataUnitEntitiesByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role) {
         List<DataUnitEntity> entities = readerRepository.findByTenantIdAndDataTemplateId(tenantId, dataTemplateId);
         return entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role)).collect(Collectors.toList());
+    }
+
+    private List<DataUnitEntity> findDataUnitEntitiesNeedToPurge(DataUnit dataUnit, DataUnit.Role role) {
+        List<DataUnitEntity> entities = readerRepository.
+                findByTenantIdAndDataTemplateIdOrderByCreatedDate(dataUnit.getTenant(), dataUnit.getDataTemplateId());
+        return entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role) &&
+                RetentionPolicyUtil.getExpireTimeByRetentionPolicyStr(dataUnit.getRetentionPolicy()) == -1).collect(Collectors.toList());
     }
 
     @Override
