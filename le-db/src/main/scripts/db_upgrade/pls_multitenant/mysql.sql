@@ -51,6 +51,9 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `PLS_MultiTenant`.`ATLAS_EXPORT`
 		ADD COLUMN `EXPORT_CONFIG` JSON;
 
+	  ALTER TABLE `PLS_MultiTenant`.`ATLAS_S3_IMPORT_MESSAGE`
+            CHANGE COLUMN `FK_DROP_BOX` `FK_DROP_BOX` BIGINT(20) NULL;
+
   END //
 -- ##############################################################
 
