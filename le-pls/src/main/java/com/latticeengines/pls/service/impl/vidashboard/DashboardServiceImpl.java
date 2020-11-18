@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.util.UuidUtil;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
@@ -17,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
 
 import com.latticeengines.pls.service.vidashboard.DashboardService;
 import com.latticeengines.pls.util.ElasticSearchUtil;
