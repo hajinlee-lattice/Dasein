@@ -650,6 +650,13 @@
         <security:intercept-url pattern="/pls/internal/emails/**" access="hasRole('INTERNAL_USER')"/>
         <security:custom-filter ref="internalRestServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
+    <security:http use-expressions="true"
+                   pattern="/pls/vidashboards/**"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+    </security:http>
 
 </beans>
 

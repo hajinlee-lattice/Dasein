@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilterValue;
+import com.latticeengines.pls.service.vidashboard.DashboardService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +31,9 @@ public class VIDashboardResource {
 
     private static final Logger log = LoggerFactory.getLogger(VIDashboardResource.class);
 
+    @Inject
+    private DashboardService dashboardService;
+
     @GetMapping("/dashboards")
     @ResponseBody
     @ApiOperation("get all related dashboards")
@@ -37,6 +43,13 @@ public class VIDashboardResource {
         res.setDashboardUrls(getMockDashboards());
         res.setFilters(getMockFilterValue());
         return res;
+    }
+
+    @GetMapping("/createDashboard")
+    @ResponseBody
+    @ApiOperation("create dashboards")
+    public void createDashboard() {
+        dashboardService.create();
     }
 
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
