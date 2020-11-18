@@ -18,6 +18,7 @@ import org.elasticsearch.cluster.health.ClusterIndexHealth;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,8 @@ public final class ElasticSearchUtil {
         try {
             if (client.indices().exists(new GetIndexRequest(indexName), RequestOptions.DEFAULT)) {
                 IndexRequest indexRequest = new IndexRequest(indexName, null, docId);
-                indexRequest.source(jsonString);
+                log.info("indexrequest: {}.", indexRequest.toString());
+                indexRequest.source(jsonString, XContentType.JSON);
                 IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
                 log.info(indexResponse.toString());
             }
