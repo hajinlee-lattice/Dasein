@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.graph.VertexType;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayGroup;
@@ -127,10 +128,16 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
             if (StringUtils.isBlank(segmentName)) {
                 throw new LedpException(LedpCode.LEDP_18207);
             }
-            MetadataSegment selSegment = segmentEntityMgr.findByName(segmentName.trim());
-            play.setTargetSegment(selSegment);
+            MetadataSegment segment = segmentEntityMgr.findByName(segmentName.trim());
+            play.setTargetSegment(segment);
+            ListSegment listSegment = segment.getListSegment();
+            if (segment.getListSegment() != null) {
+                play.setTapType(Play.TapType.ListSegment);
+                play.setTapId(segmentName);
+                play.setAccountTemplateId(listSegment.getDataTemplates().get(BusinessEntity.Account.name()));
+                play.setContactTemplateId(listSegment.getDataTemplates().get(BusinessEntity.Contact.name()));
+            }
         }
-
         if (play.getName() == null) {
             play.setName(play.generateNameStr());
         }

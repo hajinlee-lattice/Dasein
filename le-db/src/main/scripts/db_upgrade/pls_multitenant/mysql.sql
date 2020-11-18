@@ -30,6 +30,12 @@ CREATE PROCEDURE `UpdateSchema`()
               
       ALTER TABLE `METADATA_SEGMENT`
               ADD COLUMN `TYPE` VARCHAR(255);
+
+      ALTER TABLE `PLAY`
+              ADD COLUMN `TAP_TYPE` VARCHAR(255),
+              ADD COLUMN `TAP_ID` VARCHAR(255),
+              ADD COLUMN `ACCOUNT_TEMPLATE_ID` VARCHAR(255),
+              ADD COLUMN `CONTACT_TEMPLATE_ID` VARCHAR(255);
             
       ALTER TABLE `LOOKUP_ID_MAP`
               ADD COLUMN `CONFIG_VALUES` json;
