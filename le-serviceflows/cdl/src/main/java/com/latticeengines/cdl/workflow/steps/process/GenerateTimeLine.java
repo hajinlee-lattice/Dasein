@@ -111,8 +111,8 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
             dcStatus.setTimelineRebuildFlag(Boolean.FALSE);
         }
         timelineVersionMap = MapUtils.emptyIfNull(dcStatus.getTimelineVersionMap());
-        activeTimelineMasterTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
-                TableRoleInCollection.TimelineProfile, active, null);
+        activeTimelineMasterTableNames = MapUtils.emptyIfNull(dataCollectionProxy.getTableNamesWithSignatures(
+                customerSpace.toString(), TableRoleInCollection.TimelineProfile, active, null));
         checkRebuild();
         bumpVersion();
         dcStatus.setTimelineVersionMap(timelineVersionMap);
@@ -344,10 +344,16 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         } else {
             List<TimeLine> newTimelineList =
                     configuration.getTimeLineList().stream()
-                            .filter(timeline -> !timelineVersionMap.containsKey(timeline.getTimelineId()))
+                            .filter(timeline -> !activeTimelineMasterTableNames.containsKey(timeline.getTimelineId()))
                             .collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(newTimelineList)) {
+                String timelineIds = newTimelineList.stream().map(TimeLine::getTimelineId)
+                        .collect(Collectors.joining(","));
+                log.info("Timeline {} do not have batch store table in active version {}. Rebuilding timeline.",
+                        timelineIds, active);
                 needRebuild = true;
+            } else {
+                log.info("All timeline have batch store table in active verion {}. Appending timeline.", active);
             }
         }
     }
