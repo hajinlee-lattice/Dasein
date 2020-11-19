@@ -63,6 +63,7 @@ public class DashboardServiceImpl implements DashboardService {
         String json = "";
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("kibanaitems/data_index_pattern.json")) {
             json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
+            log.info("json is {}", json);
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read data_index_pattern", exception);
         }
