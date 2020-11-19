@@ -77,9 +77,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     private static final String componentName = "CDL";
 
     private static final String messageNoDataSource = "N/A";
-
     private static final String BUYING = "BUYING";
-
     private static final String RESEARCHING = "RESEARCHING";
 
     private static Map<ActivityTimelineMetrics.MetricsType, List<AtlasStream.StreamType>> streamTypeListMap = new HashMap<ActivityTimelineMetrics.MetricsType, List<AtlasStream.StreamType>>() {
