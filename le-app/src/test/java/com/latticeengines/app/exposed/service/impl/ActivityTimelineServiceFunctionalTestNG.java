@@ -91,24 +91,29 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
                 null, null);
 
         Assert.assertEquals(metrics.get(0).getLabel(), "New Activities");
-        Assert.assertEquals(String.valueOf(metrics.get(0).getCount()), "139");
+        Assert.assertEquals(String.valueOf(metrics.get(0).getMessage()), "139");
         Assert.assertEquals(metrics.get(0).getDescription(), " in last 10 days");
         Assert.assertEquals(metrics.get(0).getContext(), "Total number of web activity in the last 10 days");
 
         Assert.assertEquals(metrics.get(1).getLabel(), "New Contacts");
-        Assert.assertEquals(String.valueOf(metrics.get(1).getCount()), "0");
+        Assert.assertEquals(String.valueOf(metrics.get(1).getMessage()), "0");
         Assert.assertEquals(metrics.get(1).getDescription(), "");
         Assert.assertEquals(metrics.get(1).getContext(), "Total number of new contacts in the last 10 days");
 
         Assert.assertEquals(metrics.get(2).getLabel(), "New Engagements");
-        Assert.assertEquals(String.valueOf(metrics.get(2).getCount()), "207");
+        Assert.assertEquals(String.valueOf(metrics.get(2).getMessage()), "207");
         Assert.assertEquals(metrics.get(2).getDescription(), " in last 10 days");
         Assert.assertEquals(metrics.get(2).getContext(), "Total number of engagements in the last in the last 10 days");
 
         Assert.assertEquals(metrics.get(3).getLabel(), "New Opportunities");
-        Assert.assertEquals(String.valueOf(metrics.get(3).getCount()), "97");
+        Assert.assertEquals(String.valueOf(metrics.get(3).getMessage()), "97");
         Assert.assertEquals(metrics.get(3).getDescription(), " in last 10 days");
         Assert.assertEquals(metrics.get(3).getContext(), "Number of present open opportunities in the last 10 days");
+
+        Assert.assertEquals(metrics.get(4).getLabel(), "Account Intent");
+        Assert.assertEquals(String.valueOf(metrics.get(4).getMessage()), "BUYING");
+        Assert.assertEquals(metrics.get(4).getDescription(), "");
+        Assert.assertEquals(metrics.get(4).getContext(), "Acount-level Intent");
 
     }
 
@@ -118,7 +123,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
                 .getAccountActivities(TEST_ACCOUNT_ID, null, null, //
                         Arrays.stream(AtlasStream.StreamType.values()).collect(Collectors.toSet()), null)
                 .getData();
-        Assert.assertEquals(dataWithbackStage.size(), 305);
+        Assert.assertEquals(dataWithbackStage.size(), 306);
         Map<String, Object> backStageEvent = dataWithbackStage.get(dataWithbackStage.size() - 1);
         Assert.assertEquals(backStageEvent.get("StreamType"), "JourneyStage");
         Assert.assertEquals(backStageEvent.get("Detail1"), "Engaged");
@@ -150,7 +155,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
                 .getAccountActivities(TEST_ACCOUNT_ID, null, null, //
                         Arrays.stream(AtlasStream.StreamType.values()).collect(Collectors.toSet()), null)
                 .getData();
-        Assert.assertEquals(dataWithbackStage.size(), 157);
+        Assert.assertEquals(dataWithbackStage.size(), 158);
         Map<String, Object> backStageEvent = dataWithbackStage.get(dataWithbackStage.size() - 1);
         Assert.assertEquals(backStageEvent.get("StreamType"), "JourneyStage");
         Assert.assertEquals(backStageEvent.get("Detail1"), "Dark");
