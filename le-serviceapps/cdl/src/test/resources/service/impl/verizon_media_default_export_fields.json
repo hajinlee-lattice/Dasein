@@ -7,7 +7,6 @@
       "externalSystemName":"Verizon_Media",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["ACCOUNTS"]
    }
 ]

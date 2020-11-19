@@ -21,8 +21,6 @@ public interface ExportFieldMetadataDefaultsEntityMgr {
     List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldMetadataForAudienceType(
             CDLExternalSystemName systemName, AudienceType audienceType);
 
-    List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFieldMetadata(CDLExternalSystemName systemName);
-
     List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
             List<ExportFieldMetadataDefaults> defaultFields);
 
