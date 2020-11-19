@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -243,6 +244,10 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     }
 
     public Map<String, String> getConfigValues() {
+        if (configValues == null) {
+            return new HashMap<String, String>();
+        }
+
         return configValues;
     }
 
@@ -301,7 +306,8 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     public String getEndDestinationId() {
         if (LookupIdMapConfigValuesLookup.containsEndDestinationIdKey(externalSystemName)) {
             String configValueKey = LookupIdMapConfigValuesLookup.getEndDestinationIdKey(externalSystemName);
-            return configValues.get(configValueKey);
+
+            return getConfigValues().get(configValueKey);
         }
 
         return orgId;
