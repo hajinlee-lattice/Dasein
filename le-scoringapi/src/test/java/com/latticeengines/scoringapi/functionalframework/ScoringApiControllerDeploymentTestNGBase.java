@@ -384,7 +384,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         // int[] newExpected = { 96, 89, 96, 94 }; // LDC 2.0.21 or before
         // int[] newExpected = { 68, 87, 89, 85 }; // LDC 2.0.24
         // int[] newExpected = { 68, 89, 78, 85 }; // LDC 2.0.25
-        int[] newExpected = { 68, 87, 78, 85 }; // LDC 2.0.26
+        int[] newExpected = { 68, 87, 75, 85 }; // LDC 2.0.26
         for (int score : newExpected) {
             expectedScores.add(score);
         }
