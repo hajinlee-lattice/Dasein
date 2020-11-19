@@ -34,6 +34,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
+import com.latticeengines.domain.exposed.cdl.LookupIdMapConfigValuesLookup;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -615,6 +616,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         lookupIdMap.setAccountId(accountId);
         lookupIdMap.setProspectOwner(prospectOwner);
         lookupIdMap.setContactId(contactId);
+        lookupIdMap.setConfigValues(createLookupIdMapConfigValues(systemName, orgName));
 
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
     }
@@ -627,8 +629,19 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         lookupIdMap.setExternalSystemName(systemName);
         lookupIdMap.setOrgId(orgName + "_" + CURRENT_TIME_MILLIS);
         lookupIdMap.setOrgName(orgName);
-
+        lookupIdMap.setConfigValues(createLookupIdMapConfigValues(systemName, orgName));
+        
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
+    }
+
+    private Map<String, String> createLookupIdMapConfigValues(CDLExternalSystemName systemName, String orgName) {
+        Map<String, String> configValues = new HashMap<>();
+        if (LookupIdMapConfigValuesLookup.containsEndDestinationIdKey(systemName)) {
+            String endDestIdKey = LookupIdMapConfigValuesLookup.getEndDestinationIdKey(systemName);
+            String endDestIdValue = orgName + "_" + CURRENT_TIME_MILLIS;
+            configValues.put(endDestIdKey, endDestIdValue);
+        }
+        return configValues;
     }
 
     private void compareEntityInMetadata(
