@@ -116,7 +116,6 @@ public final class ExpectedRevenueDataFlowUtil {
             boolean isEV = fieldNameForEVIdentification.equals(entry.getValue());
             if (!loadOnlyForEVModel || isEV) {
                 String scoreDerivationStr = scoreArtifactRetriever.getScoreDerivation(customerSpace, modelId, isEV);
-
                 Map<CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType, ScoreDerivation> scoreDerivationInfo = new HashMap<>();
 
                 if (isEV) {
@@ -133,13 +132,10 @@ public final class ExpectedRevenueDataFlowUtil {
                     ScoreDerivation scoreDerivation = JsonUtils.deserialize(scoreDerivationStr, ScoreDerivation.class);
                     scoreDerivationInfo.put(CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType.PROBABILITY,
                             scoreDerivation);
-
                 }
-
                 log.info(String.format("getScoreDerivationMap - modelId = %s, scoreDerivationInfo = %s", modelId,
                         JsonUtils.serialize(scoreDerivationInfo)));
                 scoreDerivationMap.put(modelId, scoreDerivationInfo);
-
             }
         });
         return scoreDerivationMap;
