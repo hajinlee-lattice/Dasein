@@ -183,6 +183,23 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Transient
     private boolean viewOnly;
 
+    @JsonProperty("tapType")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TAP_TYPE")
+    private TapType tapType;
+
+    @JsonProperty("tapId")
+    @Column(name = "TAP_ID")
+    private String tapId;
+
+    @JsonProperty("accountTemplateId")
+    @Column(name = "ACCOUNT_TEMPLATE_ID")
+    private String accountTemplateId;
+
+    @JsonProperty("contactTemplateId")
+    @Column(name = "CONTACT_TEMPLATE_ID")
+    private String contactTemplateId;
+
     public Play() {
     }
 
@@ -423,5 +440,41 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Override
     public void setTeam(GlobalTeam team) {
         targetSegment.setTeam(team);
+    }
+
+    public TapType getTapType() {
+        return tapType;
+    }
+
+    public void setTapType(TapType tapType) {
+        this.tapType = tapType;
+    }
+
+    public String getTapId() {
+        return tapId;
+    }
+
+    public void setTapId(String tapId) {
+        this.tapId = tapId;
+    }
+
+    public String getAccountTemplateId() {
+        return accountTemplateId;
+    }
+
+    public void setAccountTemplateId(String accountTemplateId) {
+        this.accountTemplateId = accountTemplateId;
+    }
+
+    public String getContactTemplateId() {
+        return contactTemplateId;
+    }
+
+    public void setContactTemplateId(String contactTemplateId) {
+        this.contactTemplateId = contactTemplateId;
+    }
+
+    public enum TapType {
+        ListSegment
     }
 }
