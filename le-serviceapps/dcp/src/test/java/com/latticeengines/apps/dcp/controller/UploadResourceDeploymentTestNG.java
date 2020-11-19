@@ -115,25 +115,31 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config.setUploadTSPrefix(uploadTS);
         uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
 
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
-        List<UploadDetails> uploads = retry.execute(context -> uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
-            Boolean.TRUE, 0, 20));
-        Assert.assertNotNull(uploads);
-        Assert.assertEquals(uploads.size(), 1);
-        UploadDetails retrievedUpload = uploads.get(0);
-        UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
-        Assert.assertEquals(retrievedConfig.getUploadMatchResultPrefix(), resultsPath);
-        Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), uploadTS);
-        Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
-        Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5,  Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace,
+            source.getSourceId(), null, Boolean.TRUE, 0, 20);
+            Assert.assertNotNull(uploads);
+            Assert.assertEquals(uploads.size(), 1);
+            UploadDetails retrievedUpload = uploads.get(0);
+            UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
+            Assert.assertEquals(retrievedConfig.getUploadMatchResultPrefix(), resultsPath);
+            Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), uploadTS);
+            Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
+            Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
+            return true;
+        });
 
         uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getUploadId(), Upload.Status.MATCH_STARTED, null);
-        uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED, Boolean.FALSE, 0, 20);
-        Assert.assertNotNull(uploads);
-        Assert.assertEquals(uploads.size(), 1);
-        retrievedUpload = uploads.get(0);
-        Assert.assertEquals(retrievedUpload.getStatus(), Upload.Status.MATCH_STARTED);
-
+        retry.execute(context -> {
+            List<UploadDetails>  uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(),
+                    Upload.Status.MATCH_STARTED, Boolean.FALSE, 0, 20);
+            Assert.assertNotNull(uploads);
+            Assert.assertEquals(uploads.size(), 1);
+            UploadDetails retrievedUpload = uploads.get(0);
+            Assert.assertEquals(retrievedUpload.getStatus(), Upload.Status.MATCH_STARTED);
+            return true;
+        });
         // create another upload
         UploadConfig config2 = new UploadConfig();
         UploadRequest uploadRequest2 = new UploadRequest();
