@@ -53,7 +53,8 @@ public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTes
                 if (columnMeta.getCategory().equals(Category.INTENT)) {
                     Assert.assertEquals(columnMeta.getDataLicense(), BOMBORA);
                 }
-                if (columnMeta.getCategory().equals(Category.INTENT)
+                if ((columnMeta.getCategory().equals(Category.INTENT)
+                        || columnMeta.getCategory().equals(Category.COVID_19))
                         && !Boolean.TRUE.equals(columnMeta.getShouldDeprecate())) {
                     Assert.assertEquals(columnMeta.getRefreshFrequency(), RefreshFrequency.WEEK);
                 } else {
