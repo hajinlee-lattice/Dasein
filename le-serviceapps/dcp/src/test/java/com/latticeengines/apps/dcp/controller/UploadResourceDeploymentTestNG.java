@@ -113,14 +113,11 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config.setUploadRawFilePath(rawPath);
         config.setUploadMatchResultPrefix(resultsPath);
         config.setUploadTSPrefix(uploadTS);
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
-        retry.execute(context -> {
-            uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
-            return true;
-        });
+        uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
 
-        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
-                Boolean.TRUE, 0, 20);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+        List<UploadDetails> uploads = retry.execute(context -> uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
+            Boolean.TRUE, 0, 20));
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         UploadDetails retrievedUpload = uploads.get(0);
