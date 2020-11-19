@@ -39,7 +39,7 @@ public interface CDLService {
 
     void importFileToS3(String customerSpace, String templateFileName, String s3Path);
 
-    UIAction softDelete(DeleteRequest deleteRequest);
+    UIAction delete(DeleteRequest deleteRequest);
 
     UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
                      CleanupOperationType cleanupOperationType);
