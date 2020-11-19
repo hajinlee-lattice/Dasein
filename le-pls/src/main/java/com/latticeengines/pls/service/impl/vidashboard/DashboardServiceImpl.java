@@ -41,6 +41,8 @@ public class DashboardServiceImpl implements DashboardService {
     private static final String DASHBOARD_NAME_PLACEHOLDER = "<DASHBOARD_NAME>";
     private static final String NAME_PLACEHOLDER = "<NAME>";
 
+    private static final String PATH_PREFIX = "com/latticeengines/pls/kibanaitems/%s";
+
 
     @Inject
     private RestHighLevelClient client;
@@ -61,7 +63,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     private void createIndexPattern() {
         String json = "";
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("kibanaitems/data_index_pattern.json")) {
+        try (InputStream inputStream =
+                     getClass().getClassLoader().getResourceAsStream(String.format(PATH_PREFIX, "data_index_pattern" +
+                             ".json"))) {
             json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
             log.info("json is {}", json);
         } catch (IOException exception) {
@@ -83,10 +87,11 @@ public class DashboardServiceImpl implements DashboardService {
         if (StringUtils.isEmpty(indexPatternName)) {
             return;
         }
-        String filePath = "kibanaitems/employee_panel";
         for (int i = 0; i < 5; i++) {
             String json = "";
-            try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(String.format("%s/panel_%s.json", filePath, i))) {
+            try (InputStream inputStream =
+                         getClass().getClassLoader().getResourceAsStream(String.format(PATH_PREFIX, String.format(
+                                 "employee_panel/panel_%s.json", i)))) {
                 json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
             } catch (IOException exception) {
                 throw new LedpException(LedpCode.LEDP_00002, "Can't read panel file", exception);
@@ -108,7 +113,8 @@ public class DashboardServiceImpl implements DashboardService {
             return;
         }
         String json = "";
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("kibanaitems/employee_dashboard.json")) {
+        try (InputStream inputStream =
+                     getClass().getClassLoader().getResourceAsStream(String.format(PATH_PREFIX, "employee_dashboard.json"))) {
             json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read employee_dashboard", exception);
