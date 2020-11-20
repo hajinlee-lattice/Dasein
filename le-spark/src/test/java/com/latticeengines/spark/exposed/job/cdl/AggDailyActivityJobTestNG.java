@@ -57,8 +57,8 @@ import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 import com.latticeengines.spark.util.DeriveAttrsUtils;
 
@@ -173,7 +173,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         AggDailyActivityConfig config = incrConfig(true);
         SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
         log.info("Output metadata: {}", result.getOutput());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertNotNull(outputMetadata);
         Assert.assertTrue(MapUtils.isNotEmpty(outputMetadata.getMetadata()));
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
@@ -186,7 +186,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         AggDailyActivityConfig config = incrConfig(false);
         SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
         log.info("Output metadata: {}", result.getOutput());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertNotNull(outputMetadata);
         Assert.assertTrue(MapUtils.isNotEmpty(outputMetadata.getMetadata()));
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
@@ -199,7 +199,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         AggDailyActivityConfig config = incrReducerConfig();
         SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
         log.info("Output metadata: {}", result.getOutput());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertNotNull(outputMetadata);
         Assert.assertTrue(MapUtils.isNotEmpty(outputMetadata.getMetadata()));
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
@@ -248,9 +248,9 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private AggDailyActivityConfig incrConfig(boolean withBatch) {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(0);
         if (!withBatch) {
             details.setLabels(Collections.singletonList(ActivityMetricsGroupUtils.NO_BATCH));
@@ -272,9 +272,9 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private AggDailyActivityConfig incrReducerConfig() {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(0);
         detailsMap.put(STREAM_ID, details);
         inputMetadata.setMetadata(detailsMap);
@@ -294,9 +294,9 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private AggDailyActivityConfig intentBaseConfig() {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(0);
         detailsMap.put(STREAM_ID, details);
         inputMetadata.setMetadata(detailsMap);
@@ -313,9 +313,9 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private AggDailyActivityConfig intentIncrConfig() {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(0);
         detailsMap.put(STREAM_ID, details);
         inputMetadata.setMetadata(detailsMap);
@@ -333,9 +333,9 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private AggDailyActivityConfig buyingScoreConfig() {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(0);
         detailsMap.put(STREAM_ID, details);
         inputMetadata.setMetadata(detailsMap);
@@ -353,9 +353,9 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private AggDailyActivityConfig buyingScoreIncrConfig() {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(0);
         detailsMap.put(STREAM_ID, details);
         inputMetadata.setMetadata(detailsMap);
@@ -384,9 +384,9 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                 ProductType.name()
         ));
         config.currentEpochMilli = DAY_0_EPOCH;
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(0);
         detailsMap.put(STREAM_ID, details);
         inputMetadata.setMetadata(detailsMap);
@@ -755,9 +755,9 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private AggDailyActivityConfig baseConfig() {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(0);
         detailsMap.put(STREAM_ID, details);
         inputMetadata.setMetadata(detailsMap);

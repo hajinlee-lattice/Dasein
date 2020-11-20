@@ -13,10 +13,10 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessT
 public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
-        private ProcessTransactionWorkflowConfiguration configuration = new ProcessTransactionWorkflowConfiguration();
-        private ProcessTransactionStepConfiguration processTransactionStepConfiguration = new ProcessTransactionStepConfiguration();
-        private UpdateTransactionWorkflowConfiguration.Builder updateTransactionWorkflowBuilder = new UpdateTransactionWorkflowConfiguration.Builder();
-        private RebuildTransactionWorkflowConfiguration.Builder rebuildTransactionWorkflowBuilder = new RebuildTransactionWorkflowConfiguration.Builder();
+        private final ProcessTransactionWorkflowConfiguration configuration = new ProcessTransactionWorkflowConfiguration();
+        private final ProcessTransactionStepConfiguration processTransactionStepConfiguration = new ProcessTransactionStepConfiguration();
+        private final UpdateTransactionWorkflowConfiguration.Builder updateTransactionWorkflowBuilder = new UpdateTransactionWorkflowConfiguration.Builder();
+        private final RebuildTransactionWorkflowConfiguration.Builder rebuildTransactionWorkflowBuilder = new RebuildTransactionWorkflowConfiguration.Builder();
 
         public Builder actionIds(List<Long> actionIds) {
             processTransactionStepConfiguration.setActionIds(actionIds);
@@ -68,6 +68,11 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
             processTransactionStepConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             rebuildTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             updateTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
+        public Builder apsRollingPeriod(String apsRollingPeriod) {
+            rebuildTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
             return this;
         }
 

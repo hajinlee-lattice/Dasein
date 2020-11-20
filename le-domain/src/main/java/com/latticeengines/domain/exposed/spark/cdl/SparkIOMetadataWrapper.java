@@ -1,25 +1,40 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ActivityStoreSparkIOMetadata {
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
-    private Map<String, Details> metadata; // id (streamId, groupId, etc.) -> details
+public class SparkIOMetadataWrapper {
 
-    public Map<String, Details> getMetadata() {
+    private Map<String, Partition> metadata = new HashMap<>(); // id (streamId, groupId, etc.) -> partition
+
+    public Map<String, Partition> getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(Map<String, Details> metadata) {
+    public void setMetadata(Map<String, Partition> metadata) {
         this.metadata = metadata;
     }
 
-    public static class Details {
+    public void addPartition(@NotNull String partitionId, @NotNull Partition partition) {
+        metadata.put(partitionId, partition);
+    }
+
+    public static class Partition {
 
         private int startIdx; // start index of input df sequence for id (streamId, groupId, etc.)
 
         private List<String> labels; // labels for dataFrames in a section of input (periodName, etc.)
+
+        public Partition() {
+        }
+
+        public Partition(int startIdx, List<String> labels) {
+            this.startIdx = startIdx;
+            this.labels = labels;
+        }
 
         public int getStartIdx() {
             return startIdx;

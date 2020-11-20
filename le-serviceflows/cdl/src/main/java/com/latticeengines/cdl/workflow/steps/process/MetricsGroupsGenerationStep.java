@@ -42,9 +42,9 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
@@ -107,14 +107,14 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         streamMetadataCache = new ConcurrentHashMap<>();
         streams.forEach(this::updateStreamMetadataCache);
         putStringValueInContext(ACTIVITY_STREAM_METADATA_CACHE, JsonUtils.serialize(streamMetadataCache));
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> detailsMap = new HashMap<>();
         int idx = 0;
         for (AtlasStream stream : streams) {
             String streamId = stream.getStreamId();
             List<String> periods = stream.getPeriods();
 
-            Details details = new Details();
+            Partition details = new Partition();
             details.setStartIdx(idx);
             details.setLabels(periods);
             detailsMap.put(streamId, details);
@@ -168,11 +168,11 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         }
     }
 
-    private void appendBatchStore(BusinessEntity entity, List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata) {
+    private void appendBatchStore(BusinessEntity entity, List<DataUnit> inputs, SparkIOMetadataWrapper inputMetadata) {
         Table batchStoreTable = getBatchStoreTable(entity);
         if (batchStoreTable != null) {
             inputs.add(batchStoreTable.toHdfsDataUnit(BusinessEntity.Account.name()));
-            Details accountBatchStoreDetails = new Details();
+            Partition accountBatchStoreDetails = new Partition();
             accountBatchStoreDetails.setStartIdx(inputs.size() - 1);
             inputMetadata.getMetadata().put(entity.name(), accountBatchStoreDetails);
         } else {
@@ -201,7 +201,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         String outputMetadataStr = result.getOutput();
         log.info("Generated output metadata: {}", outputMetadataStr);
         log.info("Generated {} output metrics tables", result.getTargets().size());
-        Map<String, Details> outputMetadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
+        Map<String, Partition> outputMetadata = JsonUtils.deserialize(outputMetadataStr, SparkIOMetadataWrapper.class).getMetadata();
         Map<String, Table> signatureTables = new HashMap<>();
         Set<String> entityIds = ImmutableSet.of(InterfaceName.AccountId.name(), InterfaceName.ContactId.name());
         Map<BusinessEntity, List<String>> servingEntityCategoricalAttrs = new HashMap<>();

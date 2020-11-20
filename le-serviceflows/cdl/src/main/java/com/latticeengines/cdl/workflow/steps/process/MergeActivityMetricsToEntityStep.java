@@ -61,8 +61,8 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
@@ -145,12 +145,12 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
             return null;
         } else {
-            ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-            Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+            SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+            Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
             AtomicInteger index = new AtomicInteger();
             List<DataUnit> inputs = new ArrayList<>();
             mergedTablesMap.forEach((mergedTableLabel, groupsToMerge) -> {
-                ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+                SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
                 details.setStartIdx(index.get());
                 details.setLabels(groupsToMerge.stream().map(ActivityMetricsGroup::getGroupId).collect(Collectors.toList()));
                 detailsMap.put(mergedTableLabel, details);
@@ -191,8 +191,8 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         log.info("Linked existing metrics to inactive version {}: {}", inactive, relinkedMetrics);
     }
 
-    private void appendActiveActivityMetrics(List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata, List<ActivityMetricsGroup> groups) {
-        Map<String, ActivityStoreSparkIOMetadata.Details> metadataMap = inputMetadata.getMetadata();
+    private void appendActiveActivityMetrics(List<DataUnit> inputs, SparkIOMetadataWrapper inputMetadata, List<ActivityMetricsGroup> groups) {
+        Map<String, SparkIOMetadataWrapper.Partition> metadataMap = inputMetadata.getMetadata();
         groups.forEach(group -> {
             TableRoleInCollection servingStore = getServingStore(group.getCategory());
             if (!tableCache.containsKey(servingStore)) {
@@ -201,7 +201,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             Table activeMetrics = tableCache.get(servingStore);
             if (activeMetrics != null && metadataMap.get(servingStore.name()) == null) {
                 log.info("Found activity metrics {} from previous version {}.", servingStore, active);
-                ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+                SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
                 details.setStartIdx(inputs.size());
                 metadataMap.put(servingStore.name(), details);
                 inputs.add(activeMetrics.toHdfsDataUnit(null));
@@ -239,7 +239,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         log.info("Generated output metadata: {}", outputMetadataStr);
         log.info("Generated {} merged tables", result.getTargets().size());
         // entity_servingEntity -> table index, attributes to deprecate
-        Map<String, ActivityStoreSparkIOMetadata.Details> outputMetadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
+        Map<String, SparkIOMetadataWrapper.Partition> outputMetadata = JsonUtils.deserialize(outputMetadataStr, SparkIOMetadataWrapper.class).getMetadata();
         Map<TableRoleInCollection, Map<String, String>> signatureTableNames = new HashMap<>();
         Map<String, Table> mergedMetricsGroupTables = new HashMap<>();
         outputMetadata.forEach((mergedTableLabel, details) -> {

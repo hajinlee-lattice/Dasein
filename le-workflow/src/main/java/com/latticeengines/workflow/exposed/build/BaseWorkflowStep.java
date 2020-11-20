@@ -326,6 +326,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
     protected static final String MERGED_METRICS_GROUP_TABLE_NAME = "MERGED_METRICS_GROUP_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
+    protected static final String SPENDING_ANALYSIS_PERIOD_TABLE_NAME = "SPENDING_ANALYSIS_PERIOD_TABLE_NAME";
     protected static final String TIMELINE_MASTER_TABLE_NAME = "TIMELINE_MASTER_TABLE_NAME";
     protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
     protected static final String JOURNEY_STAGE_TABLE_NAME = "JOURNEY_STAGE_TABLE_NAME";

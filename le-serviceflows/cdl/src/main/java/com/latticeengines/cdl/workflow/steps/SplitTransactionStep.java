@@ -27,9 +27,9 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.CountProductTypeConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition;
 import com.latticeengines.domain.exposed.spark.cdl.SplitTransactionConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.spark.exposed.job.cdl.CountProductTypeJob;
@@ -83,8 +83,8 @@ public class SplitTransactionStep extends BaseProcessAnalyzeSparkStep<ProcessTra
     private void finishing(SparkJobResult result) {
         log.info("Output metadata: {}", result.getOutput());
         List<HdfsDataUnit> outputs = result.getTargets();
-        Map<String, Details> outputMetadata = JsonUtils
-                .deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
+        Map<String, Partition> outputMetadata = JsonUtils
+                .deserialize(result.getOutput(), SparkIOMetadataWrapper.class).getMetadata();
         Map<String, Table> splitTables = new HashMap<>(); // product type -> table
         outputMetadata.forEach((productType, details) -> {
             String prefixFormat = String.format(RAW_TXN_ACTIVITY_FORMAT, productType);
