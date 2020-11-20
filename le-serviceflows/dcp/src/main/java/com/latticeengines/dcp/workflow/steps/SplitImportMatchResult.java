@@ -266,7 +266,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             return getFirstCsvFilePath(dataUnit);
         }
     }
-
+    
     private List<String> sortOutputAttrs(Collection<ColumnMetadata> cms) {
         Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
         List<ColumnMetadata> customerAttrs = new ArrayList<>();
