@@ -69,7 +69,7 @@ public class ActivityStoreUtils {
         paramSet.add(Collections.singletonList(8));
         paramSet.add(Collections.singletonList(12));
         ActivityTimeRange timeRange = new ActivityTimeRange();
-        timeRange.setOperator(ComparisonType.WITHIN);
+        timeRange.setOperator(ComparisonType.WITHIN_INCLUDE);
         timeRange.setPeriods(Collections.singleton(PeriodStrategy.Template.Week.name()));
         timeRange.setParamSet(paramSet);
         return timeRange;
