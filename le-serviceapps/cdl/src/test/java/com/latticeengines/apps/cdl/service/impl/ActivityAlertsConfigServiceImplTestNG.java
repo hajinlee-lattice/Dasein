@@ -7,6 +7,8 @@ import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConsta
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_PAGE_NAME;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_PAGE_VISITS;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_RE_ENGAGED_CONTACTS;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_TITLES;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_TITLE_CNT;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +45,7 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
 
         defaults = activityAlertsConfigService.createDefaultActivityAlertsConfigs(mainCustomerSpace);
         Assert.assertNotNull(defaults);
-        Assert.assertEquals(defaults.size(), 4);
+        Assert.assertEquals(defaults.size(), 9);
 
         verifyDefaultAlertConfig(defaults);
 
@@ -62,17 +64,84 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
         input.put(COL_ALERT_DATA, data);
         String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
-                "10 visits to the About Us page have occurred meaning they are looking to buy, check your 2 active contacts.");
+                "<span class=\"item-insights-bold\">10 visits</span> to the <span class=\"item-insights-bold\">About Us</span> page have occurred meaning they are looking to buy, check your <span class=\"item-insights-bold\">2 active</span> contacts.");
 
-        alertConfig = defaults.stream().filter(a -> a.getAlertHeader().equals("Increased Activity on Product Pages"))
-                .findFirst().orElse(null);
+        alertConfig = defaults.stream().filter(a -> a.getAlertHeader().equals("Anonymous Web Visits")).findFirst()
+                .orElse(null);
         Assert.assertNotNull(alertConfig);
         rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
-                "10 visits to your About Us page suggests you'll need to prospect into those personas.");
+                "Your web pages had <span class=\"item-insights-bold\">10 anonymous visits</span> from this company in the last 10 days.");
+
+        alertConfig = defaults.stream().filter(a -> a.getAlertHeader().equals("Known Web Visits")).findFirst()
+                .orElse(null);
+        Assert.assertNotNull(alertConfig);
+        rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
+        Assert.assertEquals(rendered,
+                "You have <span class=\"item-insights-bold\">2 known contacts</span> among the visitors that are engaging with you.");
 
         verifyReEngagedAlertConfig(defaults);
         verifyHasShownIntentAlertConfig(defaults);
+        verifyAcitiveContactsAndWebVisits(defaults);
+        verifyIntentAroundProductPages(defaults);
+    }
+
+    private void verifyAcitiveContactsAndWebVisits(List<ActivityAlertsConfig> configs) {
+        Map<String, Object> input = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
+        data.put(COL_ACTIVE_CONTACTS, 5);
+        data.put(COL_TITLE_CNT, 3);
+        data.put(COL_TITLES, "IT Director,Marketing Ops Manager,IT Admin");
+        input.put(COL_ALERT_DATA, data);
+
+        ActivityAlertsConfig alertConfig = configs.stream() //
+                .filter(a -> a.getName().equals(ActivityStoreConstants.Alert.ACTIVE_CONTACT_WEB_VISITS)) //
+                .findFirst() //
+                .orElse(null);
+        Assert.assertNotNull(alertConfig);
+        String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
+        Assert.assertEquals(rendered,
+                "You have <span class=\"item-insights-bold\">5 active contacts</span> at this company. Their titles are <span class=\"item-insights-bold\">IT Director,Marketing Ops Manager,IT Admin</span>.");
+
+        data.put(COL_ACTIVE_CONTACTS, 1);
+        data.put(COL_TITLE_CNT, 0);
+        input.put(COL_ALERT_DATA, data);
+        rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
+        Assert.assertEquals(rendered,
+                "You have <span class=\"item-insights-bold\">1 active contact</span> at this company.");
+
+        data.put(COL_ACTIVE_CONTACTS, 2);
+        data.put(COL_TITLE_CNT, 1);
+        data.put(COL_TITLES, "Engineer");
+        input.put(COL_ALERT_DATA, data);
+        rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
+        Assert.assertEquals(rendered,
+                "You have <span class=\"item-insights-bold\">2 active contacts</span> at this company. The contacts title is <span class=\"item-insights-bold\">Engineer</span>.");
+    }
+
+    private void verifyIntentAroundProductPages(List<ActivityAlertsConfig> configs) {
+        Map<String, Object> input = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
+        data.put(COL_PAGE_NAME, "Database Product");
+        input.put(COL_ALERT_DATA, data);
+
+        ActivityAlertsConfig alertConfig = configs.stream() //
+                .filter(a -> a.getName().equals(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES)) //
+                .findFirst() //
+                .orElse(null);
+        Assert.assertNotNull(alertConfig);
+        String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
+        Assert.assertEquals(rendered,
+                "This company is doing web searches around your <span class=\"item-insights-bold\">Database Product</span>. It looks like they are in a <span class=\"item-insights-bold\">Buying Stage</span>.");
+
+        alertConfig = configs.stream() //
+                .filter(a -> a.getName().equals(ActivityStoreConstants.Alert.RESEARCHING_INTENT_AROUND_PRODUCT_PAGES)) //
+                .findFirst() //
+                .orElse(null);
+        Assert.assertNotNull(alertConfig);
+        rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
+        Assert.assertEquals(rendered,
+                "This company is doing web searches around your <span class=\"item-insights-bold\">Database Product</span>. It looks like they are in a <span class=\"item-insights-bold\">Researching Stage</span>.");
     }
 
     private void verifyReEngagedAlertConfig(List<ActivityAlertsConfig> configs) {
@@ -91,12 +160,12 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
         data.put(COL_RE_ENGAGED_CONTACTS, 1L);
         String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
-                "Someone has re-engaged with your product after not returning for more than 30 days.");
+                "<span class=\"item-insights-bold\">Someone</span> has re-engaged with your product after not returning for more than 30 days.");
 
         data.put(COL_RE_ENGAGED_CONTACTS, 2L);
         rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
-                "Multiple contacts have re-engaged with your product after not returning for more than 30 days.");
+                "<span class=\"item-insights-bold\">Multiple contacts</span> have re-engaged with your product after not returning for more than 30 days.");
     }
 
     private void verifyHasShownIntentAlertConfig(List<ActivityAlertsConfig> defaults) {
@@ -114,21 +183,24 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
         data.put(COL_NUM_BUY_INTENTS, 10L);
         data.put(COL_NUM_RESEARCH_INTENTS, 5L);
         String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
-        Assert.assertEquals(rendered, "We saw research intent on 5 products and buy intent "
-                + "on 10 products within the last 10 days. Check out which models in the Recent Activity section.");
+        Assert.assertEquals(rendered,
+                "We saw <span class=\"item-insights-bold\">research intent on 5 products</span> and <span class=\"item-insights-bold\">buy intent "
+                        + "on 10 products</span> within the last 10 days. Check out which models in the Recent Activity section.");
 
         // no research intent
         data.put(COL_NUM_BUY_INTENTS, 10L);
         data.put(COL_NUM_RESEARCH_INTENTS, 0L);
         rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
-        Assert.assertEquals(rendered, "We saw buy intent on 10 products within the last 10 days."
-                + " Check out which models in the Recent Activity section.");
+        Assert.assertEquals(rendered,
+                "We saw <span class=\"item-insights-bold\">buy intent on 10 products</span> within the last 10 days."
+                        + " Check out which models in the Recent Activity section.");
 
         // no buy intent
         data.put(COL_NUM_BUY_INTENTS, 0L);
         data.put(COL_NUM_RESEARCH_INTENTS, 5L);
         rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
-        Assert.assertEquals(rendered, "We saw research intent on 5 products within the last 10 days."
-                + " Check out which models in the Recent Activity section.");
+        Assert.assertEquals(rendered,
+                "We saw <span class=\"item-insights-bold\">research intent on 5 products</span> within the last 10 days."
+                        + " Check out which models in the Recent Activity section.");
     }
 }

@@ -46,6 +46,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
   private val buyingStage = "Buying Stage"
   private val researchingStage = "Researching Stage"
   private val titles = Alert.COL_TITLES
+  private val titleCnt = Alert.COL_TITLE_CNT
   private val buyingStageThreshold = ActivityStoreConstants.DnbIntent.BUYING_STAGE_THRESHOLD
   private val anonymousId = DataCloudConstants.ENTITY_ANONYMOUS_ID
 
@@ -249,7 +250,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
     // b) Show the titles of those known contacts
     addTimeRange(contactCntTitleDf
       .filter(col(activeContacts).geq(2)).join(maCntDf.filter(col(maCounts).gt(0)), Seq(accountId), "leftanti"), startTime, endTime)
-      .select(col(accountId), col(CreationTimestamp.name), packAlertData(activeContacts, titles))
+      .select(col(accountId), col(CreationTimestamp.name), packAlertData(activeContacts, titles, titleCnt))
   }
 
   def generateIntentAroundProductAlerts(timelineDf: DataFrame, stage: String, startTime: Long, endTime: Long): DataFrame = {
@@ -320,7 +321,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
       .filter(col(accountId).isNotNull.and(col(accountId).notEqual(anonymousId)))
       .filter(col(contactId).isNotNull.and(col(contactId).notEqual(anonymousId)))
       .groupBy(accountId)
-      .agg(countDistinct(contactId).as(activeContacts), concatTitles(col(title)).as(titles))
+      .agg(countDistinct(contactId).as(activeContacts), concatTitles(col(title)).as(titles), count(col(title)).as(titleCnt))
   }
 
   def filterByTimeRange(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
