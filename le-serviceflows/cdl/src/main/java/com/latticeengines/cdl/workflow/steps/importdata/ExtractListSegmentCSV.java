@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.importdata;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,9 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
+import com.latticeengines.domain.exposed.metadata.ColumnField;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MasterSchema;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -57,16 +60,19 @@ public class ExtractListSegmentCSV
     protected String podId;
 
     private final List<String> accountAttributes = Lists.newArrayList(InterfaceName.CompanyName.name(),
-            InterfaceName.Address_Street_1.name(), InterfaceName.City.name(), InterfaceName.State.name(),
-            InterfaceName.Country.name(), "LDC_City", "LDC_Country", "LDC_Domain", "LDC_Industry",
-            InterfaceName.LDC_Name.name(), "LDC_PostalCode", "LDC_State", "SDR_Email", "SFDC_ACCOUNT_ID",
-            InterfaceName.Website.name(), InterfaceName.Industry.name());
+            InterfaceName.Address_Street_1.name(), InterfaceName.Address_Street_2.name(), InterfaceName.City.name(),
+            InterfaceName.State.name(), InterfaceName.Country.name(), InterfaceName.PostalCode.name(),
+            InterfaceName.DUNS.name(), InterfaceName.PhoneNumber.name(), "LDC_City", "LDC_Country", "LDC_Domain",
+            "LDC_Industry", InterfaceName.LDC_Name.name(), "LDC_PostalCode", "LDC_State", "SDR_Email", "SFDC_ACCOUNT_ID",
+            InterfaceName.Website.name(), InterfaceName.Industry.name(), "user_us_8_digit_sic_code",
+            InterfaceName.AccountId.name(), "user_employees", "user_direct_marketing_status");
 
     private final List<String> contactAttributes = Lists.newArrayList("SFDC_CONTACT_ID", InterfaceName.ContactName.name(),
             InterfaceName.Contact_Address_Street_1.name(), InterfaceName.Contact_Address_Street_2.name(),
             InterfaceName.ContactCity.name(), InterfaceName.ContactState.name(), InterfaceName.ContactCountry.name(),
             InterfaceName.Email.name(), InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
-            InterfaceName.PhoneNumber.name(), InterfaceName.ContactPostalCode.name(), InterfaceName.Title.name());
+            InterfaceName.PhoneNumber.name(), InterfaceName.ContactPostalCode.name(), InterfaceName.Title.name(),
+            InterfaceName.ContactId.name(), "user_level_name", "user_job_function", InterfaceName.GCA_ID.name());
 
     @Override
     protected CustomerSpace parseCustomerSpace(ExtractListSegmentCSVConfiguration stepConfiguration) {
@@ -100,6 +106,10 @@ public class ExtractListSegmentCSV
                 processImportResult(BusinessEntity.Account, accountDataUnit, ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME);
                 HdfsDataUnit contactUnit = result.getTargets().get(1);
                 processImportResult(BusinessEntity.Contact, contactUnit, ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME);
+                metadataSegment.setAccounts(accountDataUnit.getCount());
+                metadataSegment.setContacts(contactUnit.getCount());
+                metadataSegment.setCountsOutdated(false);
+                segmentProxy.createOrUpdateSegment(tenantId, metadataSegment);
             } else {
                 throw new RuntimeException(String.format("Can't find segment by name {}.", segmentName));
             }
@@ -120,7 +130,7 @@ public class ExtractListSegmentCSV
         return unit;
     }
 
-    private Schema getSchema(HdfsDataUnit hdfsDataUnit) {
+    private MasterSchema getSchema(HdfsDataUnit hdfsDataUnit, BusinessEntity entity) {
         HdfsUtils.HdfsFilenameFilter fileFilter = filePath -> {
             if (filePath == null) {
                 return false;
@@ -128,23 +138,39 @@ public class ExtractListSegmentCSV
             return FilenameUtils.getName(filePath).endsWith(".csv");
         };
         String path = hdfsDataUnit.getPath();
+        MasterSchema masterSchema = new MasterSchema();
+        List<ColumnField> attributes = new ArrayList<>();
         try {
             List<String> matchedFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDataUnit.getPath(), fileFilter);
             if (CollectionUtils.isNotEmpty(matchedFiles)) {
-                return AvroUtils.getSchema(yarnConfiguration, new Path(path));
+                Schema avroSchema = AvroUtils.getSchema(yarnConfiguration, new Path(path));
+                for (Schema.Field field : avroSchema.getFields()) {
+                    ColumnField attribute = new ColumnField();
+                    attribute.setAttrName(field.name());
+                    attribute.setDisplayName(field.name());
+                    attributes.add(attribute);
+                }
             } else {
                 throw new RuntimeException("Did not find any Avro files under folder " + path + ".");
             }
         } catch (Exception ex) {
             throw new RuntimeException("Did not find any Avro files under folder " + path + ".");
         }
+        List<String> primaryKey = new ArrayList<>();
+        if (entity != null && entity == BusinessEntity.Account) {
+            primaryKey.add(InterfaceName.AccountId.name());
+        } else if (entity != null && entity == BusinessEntity.Contact) {
+            primaryKey.add(InterfaceName.ContactId.name());
+        }
+        masterSchema.setPrimaryKey(primaryKey);
+        return masterSchema;
     }
 
     private void processImportResult(BusinessEntity entity, HdfsDataUnit hdfsDataUnit, String contextKey) {
         String tenantId = customerSpace.getTenantId();
         CreateDataTemplateRequest request = new CreateDataTemplateRequest();
         request.setTemplateKey(entity.name());
-        request.setSchema(getSchema(hdfsDataUnit));
+        request.setSchema(getSchema(hdfsDataUnit, entity));
         String templateId = segmentProxy.createOrUpdateDataTemplate(tenantId, configuration.getSegmentName(), request);
         S3DataUnit s3DataUnit = toS3DataUnit(hdfsDataUnit, entity, templateId,
                 Lists.newArrayList(DataUnit.Role.Master, DataUnit.Role.Snapshot));

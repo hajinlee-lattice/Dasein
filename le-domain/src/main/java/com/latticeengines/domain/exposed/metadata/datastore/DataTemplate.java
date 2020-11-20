@@ -1,18 +1,17 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
-import org.apache.avro.Schema;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.MasterSchema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DataTemplate {
     @JsonProperty("MasterSchema")
-    private Schema masterSchema;
+    private MasterSchema masterSchema;
 
     @JsonProperty("Tenant")
     private String tenant;
@@ -20,11 +19,11 @@ public class DataTemplate {
     @JsonProperty("Name")
     private String name;
 
-    public Schema getMasterSchema() {
+    public MasterSchema getMasterSchema() {
         return masterSchema;
     }
 
-    public void setMasterSchema(Schema masterSchema) {
+    public void setMasterSchema(MasterSchema masterSchema) {
         this.masterSchema = masterSchema;
     }
 

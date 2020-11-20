@@ -7,18 +7,42 @@
     },
     {
       "fieldName": "Address_Street_1",
+      "userFieldName": "Address Line 1",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "Address_Street_2",
+      "userFieldName": "Address Line 2",
       "fieldType": "TEXT"
     },
     {
       "fieldName": "City",
+      "userFieldName": "City",
       "fieldType": "TEXT"
     },
     {
       "fieldName": "State",
+      "userFieldName": "State or Province Name",
       "fieldType": "TEXT"
     },
     {
       "fieldName": "Country",
+      "userFieldName": "Country/Region Name",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "PostalCode",
+      "userFieldName": "Postal Code",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "DUNS",
+      "userFieldName": "D-U-N-S¬Æ Number",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "PhoneNumber",
+      "userFieldName": "Phone",
       "fieldType": "TEXT"
     },
     {
@@ -55,11 +79,7 @@
     },
     {
       "fieldName": "SFDC_ACCOUNT_ID",
-      "userFieldName": "Company External ID",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "ContactName",
+      "userFieldName": "External ID",
       "fieldType": "TEXT"
     },
     {
@@ -69,7 +89,27 @@
     },
     {
       "fieldName": "Industry",
-      "userFieldName": "US SIC 8 digit Description",
+      "userFieldName": "US 8-Digit SIC Description",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "user_us_8_digit_sic_code",
+      "userFieldName": "US 8-Digit SIC Code",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "AccountId",
+      "userFieldName": "Company UUID",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "user_employees",
+      "userFieldName": "Employees",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "user_direct_marketing_status",
+      "userFieldName": "Direct Marketing Status",
       "fieldType": "TEXT"
     },
     {
@@ -78,28 +118,27 @@
       "fieldType": "TEXT"
     },
     {
+      "fieldName": "ContactName",
+      "fieldType": "TEXT"
+    },
+    {
       "fieldName": "Contact_Address_Street_1",
-      "userFieldName": "Address Line 1",
       "fieldType": "TEXT"
     },
     {
       "fieldName": "Contact_Address_Street_2",
-      "userFieldName": "Address Line 2",
       "fieldType": "TEXT"
     },
     {
       "fieldName": "ContactCity",
-      "userFieldName": "City",
       "fieldType": "TEXT"
     },
     {
       "fieldName": "ContactState",
-      "userFieldName": "State or Province Name",
       "fieldType": "TEXT"
     },
     {
       "fieldName": "ContactCountry",
-      "userFieldName": "Country/Region Name",
       "fieldType": "TEXT"
     },
     {
@@ -130,6 +169,26 @@
     {
       "fieldName": "Title",
       "userFieldName": "Title",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "ContactId",
+      "userFieldName": "Contact UUID",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "user_level_name",
+      "userFieldName": "Level Name",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "user_job_function",
+      "userFieldName": "Job Function",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "GCA_ID",
+      "userFieldName": "D&B Contact ID",
       "fieldType": "TEXT"
     }
   ]

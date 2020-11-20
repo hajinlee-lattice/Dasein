@@ -1,11 +1,10 @@
 package com.latticeengines.domain.exposed.cdl;
 
-import org.apache.avro.Schema;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.MasterSchema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -13,16 +12,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CreateDataTemplateRequest {
 
     @JsonProperty("schema")
-    private Schema schema;
+    private MasterSchema schema;
 
     @JsonProperty("templateKey")
     private String templateKey;
 
-    public Schema getSchema() {
+    public MasterSchema getSchema() {
         return schema;
     }
 
-    public void setSchema(Schema schema) {
+    public void setSchema(MasterSchema schema) {
         this.schema = schema;
     }
 
