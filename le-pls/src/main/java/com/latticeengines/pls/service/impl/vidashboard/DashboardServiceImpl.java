@@ -25,6 +25,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
 import com.latticeengines.pls.util.ElasticSearchUtil;
 
+import groovy.util.MapEntry;
+
 @Component("dashboardService")
 public class DashboardServiceImpl implements DashboardService {
 
@@ -126,6 +128,9 @@ public class DashboardServiceImpl implements DashboardService {
         Date date = new Date(System.currentTimeMillis());
         json = json.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER,
                 formatter.format(date)).replace(DASHBOARD_NAME_PLACEHOLDER, "joyTest_Employee");
+        for (Map.Entry<String, String> entry : visualizationMap.entrySet()) {
+            json = json.replace(entry.getKey(), entry.getValue());
+        }
         ElasticSearchUtil.createDocument(client, kibanaIndex, indexPatternId, json);
     }
 
