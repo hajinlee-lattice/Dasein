@@ -21,8 +21,6 @@ public interface ExportFieldMetadataDefaultsService {
     List<ExportFieldMetadataDefaults> getExportEnabledAttributesForAudienceType(CDLExternalSystemName systemName,
             AudienceType audienceType);
 
-    List<ExportFieldMetadataDefaults> getHistoryEnabledAttributes(CDLExternalSystemName systemName);
-
     List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
             List<ExportFieldMetadataDefaults> defaultExportFields);
 

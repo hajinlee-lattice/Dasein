@@ -25,11 +25,6 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
     }
 
     @Override
-    public List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFields(CDLExternalSystemName systemName) {
-        return this.findAllByFields("externalSystemName", systemName, "historyEnabled", true);
-    }
-
-    @Override
     public List<ExportFieldMetadataDefaults> getExportEnabledDefaultFields(CDLExternalSystemName systemName) {
         return this.findAllByFields("externalSystemName", systemName, "exportEnabled", true);
     }

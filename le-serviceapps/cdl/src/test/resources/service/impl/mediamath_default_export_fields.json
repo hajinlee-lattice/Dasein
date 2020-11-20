@@ -7,7 +7,6 @@
       "externalSystemName":"MediaMath",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["ACCOUNTS"]
    }
 ]

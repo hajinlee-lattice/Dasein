@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(ExportFieldMetadataDefaultEntityMgrImplTestNG.class);
 
     @Inject
     private ExportFieldMetadataDefaultsEntityMgr defaultExportFieldMetadataEntityMgr;
@@ -41,7 +44,9 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
             CDLExternalSystemName.Google_Display_N_Video_360,
             CDLExternalSystemName.MediaMath, 
             CDLExternalSystemName.TradeDesk, 
-            CDLExternalSystemName.Verizon_Media);
+            CDLExternalSystemName.Verizon_Media,
+            CDLExternalSystemName.Salesforce,
+            CDLExternalSystemName.Eloqua);
 
     private Map<CDLExternalSystemName, List<ExportFieldMetadataDefaults>> defaultExportFieldsFromJsonMap;
 
@@ -161,35 +166,15 @@ public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctional
         }
     }
 
-    @Test(groups = "functional")
-    public void testGetHistoryEnabledDefaultFieldMetadata() {
-        for (CDLExternalSystemName systemName : systemsToTest) {
-            List<ExportFieldMetadataDefaults> defaultExportFieldsFromJson = defaultExportFieldsFromJsonMap
-                    .get(systemName);
-
-            List<ExportFieldMetadataDefaults> historyEnabledDefaultFields = defaultExportFieldMetadataEntityMgr
-                    .getHistoryEnabledDefaultFieldMetadata(systemName);
-
-            List<ExportFieldMetadataDefaults> historyEnabledDefaultFieldsFromJson = defaultExportFieldsFromJson.stream()
-                    .filter(field -> field.getExternalSystemName().equals(systemName)
-                            && field.getHistoryEnabled() == true)
-                    .collect(Collectors.toList());
-
-            if (!defaultExportFieldListsEqual(historyEnabledDefaultFields, historyEnabledDefaultFieldsFromJson)) {
-                String failMsg = String.format(
-                        "%s: Database does not match JSON for history enabled. Database length: %d JSON length: %d",
-                        systemName.toString(), historyEnabledDefaultFields.size(),
-                        historyEnabledDefaultFieldsFromJson.size());
-                fail(failMsg);
-            }
-        }
-    }
-
     private void loadDefaultExportFieldsIfMissing(CDLExternalSystemName systemName) {
         List<ExportFieldMetadataDefaults> defaultExportFields = defaultExportFieldMetadataEntityMgr
                 .getAllDefaultExportFieldMetadata(systemName);
+        log.info(String.format("Retrieved %d ExportFieldMetadataDefaults from entity %s", defaultExportFields.size(),
+                systemName));
         
         if (defaultExportFields.size() == 0) {
+            log.info(String.format("ExportFieldMetadataDefaults for entity %s is empty, exporting from JSON",
+                    systemName));
             createDefaultExportFields(systemName);
         }
     }

@@ -55,12 +55,6 @@ public class ExportFieldMetadataDefaultsEntityMgrImpl implements ExportFieldMeta
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-    public List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFieldMetadata(CDLExternalSystemName systemName) {
-        return exportFieldMetadataDefaultsDao.getHistoryEnabledDefaultFields(systemName);
-    }
-
-    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
             List<ExportFieldMetadataDefaults> defaultFields) {

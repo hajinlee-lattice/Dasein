@@ -60,6 +60,9 @@ CREATE PROCEDURE `UpdateSchema`()
 	  ALTER TABLE `PLS_MultiTenant`.`ATLAS_S3_IMPORT_MESSAGE`
             CHANGE COLUMN `FK_DROP_BOX` `FK_DROP_BOX` BIGINT(20) NULL;
 
+	  ALTER TABLE `PLS_MultiTenant`.`EXPORT_FIELD_METADATA_DEFAULTS`
+	           DROP `HISTORY_ENABLED`;
+
   END //
 -- ##############################################################
 
