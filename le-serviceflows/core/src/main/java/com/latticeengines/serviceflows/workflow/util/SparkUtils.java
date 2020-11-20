@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.util;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -14,6 +15,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ParquetUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -21,11 +23,14 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.serviceflows.workflow.dataflow.LivySessionManager;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
@@ -67,6 +72,33 @@ public final class SparkUtils {
         }
 
         return table;
+    }
+
+    public static S3DataUnit hdfsUnitToS3DataUnit(HdfsDataUnit hdfsDataUnit, Configuration yarnConfiguration, BusinessEntity entity,
+                                                  String podId, CustomerSpace customerSpace, String bucket, String templateId, List<DataUnit.Role> roles) {
+        String tenantId = customerSpace.getTenantId();
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        S3DataUnit s3DataUnit = new S3DataUnit();
+        String dataUnitName = NamingUtils.uuid(entity.name());
+        String srcPath = hdfsDataUnit.getPath();
+        String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(templateId).append("/").append(dataUnitName).toString();
+        try {
+            log.info("Moving file from {} to {}", srcPath, tgtPath);
+            HdfsUtils.moveFile(yarnConfiguration, srcPath, tgtPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to move data from " + srcPath + " to " + tgtPath);
+        }
+        s3DataUnit.setTenant(tenantId);
+        s3DataUnit.setName(dataUnitName);
+        s3DataUnit.setCount(hdfsDataUnit.getCount());
+        s3DataUnit.setLinkedHdfsPath(tgtPath);
+        s3DataUnit.setRoles(roles);
+        s3DataUnit.setBucket(bucket);
+        s3DataUnit.setDataFormat(hdfsDataUnit.getDataFormat());
+        String key = pathBuilder.getS3AtlasDataUnitPrefix(bucket, tenantId, templateId, dataUnitName);
+        key = key.substring(key.indexOf(bucket) + bucket.length() + 2);
+        s3DataUnit.setPrefix(key);
+        return s3DataUnit;
     }
 
     /*

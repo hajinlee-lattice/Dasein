@@ -181,7 +181,7 @@ public final class HdfsUtils {
             }
         }
     }
-
+    
     public static void uncompressGZFileWithinHDFS(Configuration configuration, String gzHdfsPath,
             String uncompressedFilePath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
@@ -194,8 +194,7 @@ public final class HdfsUtils {
         }
     }
 
-    public static void uncompressZipFileWithinHDFS(Configuration configuration, String compressedFile,
-            String uncompressedDir) throws IOException {
+    public static void uncompressZipFileWithinHDFS(Configuration configuration, String compressedFile, String uncompressedDir) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path inputFile = new Path(compressedFile);
             Path outputFolder = new Path(uncompressedDir);
@@ -240,7 +239,6 @@ public final class HdfsUtils {
 
     public static List<String> getFilesForDir(Configuration configuration, String hdfsDir, final String regex)
             throws IOException {
-
         return getFilesForDir(configuration, hdfsDir, (HdfsFilenameFilter) filename -> {
             Pattern p = Pattern.compile(regex);
             Matcher matcher = p.matcher(filename);

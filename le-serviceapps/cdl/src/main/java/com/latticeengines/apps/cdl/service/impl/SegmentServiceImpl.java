@@ -38,6 +38,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
+import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
 import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -104,7 +105,7 @@ public class SegmentServiceImpl implements SegmentService {
                 persistedSegment = segmentEntityMgr.createSegment(segment);
             }
         } else {
-            segment.setName(NamingUtils.timestamp("Segment"));
+            segment.setName(NamingUtils.timestampWithRandom("Segment"));
             persistedSegment = segmentEntityMgr.createSegment(segment);
         }
         if (persistedSegment != null) {
@@ -512,5 +513,10 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
         return segmentEntityMgr.findByExternalInfo(externalSystem, externalSegmentId);
+    }
+
+    @Override
+    public String createOrUpdateDataTemplate(String segmentName, CreateDataTemplateRequest request) {
+        return segmentEntityMgr.createOrUpdateDataTemplate(segmentName, request);
     }
 }

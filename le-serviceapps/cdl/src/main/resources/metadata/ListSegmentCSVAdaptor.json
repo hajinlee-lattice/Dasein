@@ -1,84 +1,136 @@
 {
-  "importFieldMappings":[
+  "importFieldMappings": [
     {
-      "fieldName":"CompanyName",
-      "userFieldName":"Company Name",
-      "fieldType":"TEXT"
+      "fieldName": "CompanyName",
+      "userFieldName": "Company Name",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"SFDC_ACCOUNT_ID",
-      "userFieldName":"Company External ID",
-      "fieldType":"TEXT"
+      "fieldName": "Address_Street_1",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"Website",
-      "userFieldName":"URL",
-      "fieldType":"TEXT"
+      "fieldName": "City",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"Industry",
-      "userFieldName":"US SIC 1987 Description",
-      "fieldType":"TEXT"
+      "fieldName": "State",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"SFDC_CONTACT_ID",
-      "userFieldName":"Contact External ID",
-      "fieldType":"TEXT"
+      "fieldName": "Country",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"Contact_Address_Street_1",
-      "userFieldName":"Address Line 1",
-      "fieldType":"TEXT"
+      "fieldName": "LDC_City",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"Contact_Address_Street_2",
-      "userFieldName":"Address Line 2",
-      "fieldType":"TEXT"
+      "fieldName": "LDC_Country",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"ContactCity",
-      "userFieldName":"City",
-      "fieldType":"TEXT"
+      "fieldName": "LDC_Domain",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"ContactState",
-      "userFieldName":"State or Province Name",
-      "fieldType":"TEXT"
+      "fieldName": "LDC_Industry",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"ContactCountry",
-      "userFieldName":"Country/Region Name",
-      "fieldType":"TEXT"
+      "fieldName": "LDC_Name",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"Email",
-      "userFieldName":"Email",
-      "fieldType":"TEXT"
+      "fieldName": "LDC_PostalCode",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"FirstName",
-      "userFieldName":"First Name",
-      "fieldType":"TEXT"
+      "fieldName": "LDC_State",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"LastName",
-      "userFieldName":"Last Name",
-      "fieldType":"TEXT"
+      "fieldName": "SDR_Email",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"PhoneNumber",
-      "userFieldName":"Direct Phone",
-      "fieldType":"TEXT"
+      "fieldName": "SFDC_ACCOUNT_ID",
+      "userFieldName": "Company External ID",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"ContactPostalCode",
-      "userFieldName":"Postal Code",
-      "fieldType":"TEXT"
+      "fieldName": "ContactName",
+      "fieldType": "TEXT"
     },
     {
-      "fieldName":"Title",
-      "userFieldName":"Title",
-      "fieldType":"TEXT"
+      "fieldName": "Website",
+      "userFieldName": "URL",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "Industry",
+      "userFieldName": "US SIC 8 digit Description",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "SFDC_CONTACT_ID",
+      "userFieldName": "Contact External ID",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "Contact_Address_Street_1",
+      "userFieldName": "Address Line 1",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "Contact_Address_Street_2",
+      "userFieldName": "Address Line 2",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "ContactCity",
+      "userFieldName": "City",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "ContactState",
+      "userFieldName": "State or Province Name",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "ContactCountry",
+      "userFieldName": "Country/Region Name",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "Email",
+      "userFieldName": "Email",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "FirstName",
+      "userFieldName": "First Name",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "LastName",
+      "userFieldName": "Last Name",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "PhoneNumber",
+      "userFieldName": "Direct Phone",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "ContactPostalCode",
+      "userFieldName": "Postal Code",
+      "fieldType": "TEXT"
+    },
+    {
+      "fieldName": "Title",
+      "userFieldName": "Title",
+      "fieldType": "TEXT"
     }
   ]
 }

@@ -16,6 +16,9 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateTimeline
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MockActivityStoreConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SendIntentAlertEmailStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.CopyListSegmentCSVConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ExportListSegmentCSVToS3Configuration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ExtractListSegmentCSVConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
@@ -52,8 +55,11 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = PublishEntityMatchStagingConfiguration.class, name = "PublishEntityMatchStagingConfiguration"), //
         @Type(value = LegacyDeleteByDateRangeActionConfiguration.class, name = "LegacyDeleteByDateRangeActionConfiguration"), //
         @Type(value = GenerateTimelineExportUniverseStepConfiguration.class, name = "GenerateTimelineUniverseStepConfiguration"), //
-        @Type(value = GenerateIntentAlertArtifactsStepConfiguration.class, name = "GenerateIntentAlertArtifactsStepConfiguration"),
-        @Type(value = SendIntentAlertEmailStepConfiguration.class, name = "SendIntentAlertEmailStepConfiguration") })
+        @Type(value = GenerateIntentAlertArtifactsStepConfiguration.class, name = "GenerateIntentAlertArtifactsStepConfiguration"), //
+        @Type(value = SendIntentAlertEmailStepConfiguration.class, name = "SendIntentAlertEmailStepConfiguration"), //
+        @Type(value = ExtractListSegmentCSVConfiguration.class, name = "ExtractListSegmentCSVConfiguration"), //
+        @Type(value = CopyListSegmentCSVConfiguration.class, name = "CopyListSegmentCSVConfiguration"), //
+        @Type(value = ExportListSegmentCSVToS3Configuration.class, name = "ExportListSegmentCSVToS3Configuration")})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseStepConfiguration {
 

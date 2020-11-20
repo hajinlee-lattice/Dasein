@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -41,6 +42,12 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
     public MetadataSegment createOrUpdateListSegment(String customerSpace, MetadataSegment metadataSegment) {
         String url = constructUrl("/{customerSpace}/segments/list", shortenCustomerSpace(customerSpace));
         return post("createOrUpdateListSegment", url, metadataSegment, MetadataSegment.class);
+    }
+
+    public String createOrUpdateDataTemplate(String customerSpace, String segmentName, CreateDataTemplateRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/segments/list/{segmentName}/datatemplate",
+                customerSpace, segmentName);
+        return post("createOrUpdateDataUnit", url, request, String.class);
     }
 
     public ListSegment updateListSegment(String customerSpace, ListSegment listSegment) {

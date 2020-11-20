@@ -4,7 +4,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -24,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 import com.latticeengines.domain.exposed.metadata.template.ImportFieldMapping;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -65,9 +69,11 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         listSegment = listSegmentEntityMgr.findByExternalInfo(listSegment.getExternalSystem(), listSegment.getExternalSegmentId());
         assertNotNull(listSegment);
         listSegment.setCsvAdaptor(generateCSVAdaptor());
+        listSegment.setDataTemplates(getDataTemplates());
         listSegmentEntityMgr.updateListSegment(listSegment);
         listSegment = listSegmentEntityMgr.findByExternalInfo(listSegment.getExternalSystem(), listSegment.getExternalSegmentId());
         verifyListSegment(listSegment);
+        assertEquals(listSegment.getDataTemplates().size(), 2);
     }
 
     private void verifyListSegment(ListSegment listSegment) {
@@ -80,6 +86,13 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(importFieldMapping.getFieldName(), InterfaceName.CompanyName.name());
         assertEquals(importFieldMapping.getFieldType(), UserDefinedType.TEXT);
         assertEquals(importFieldMapping.getUserFieldName(), "Company Name");
+    }
+
+    private Map<String, String> getDataTemplates() {
+        Map<String, String> dataTemplates = new HashMap<>();
+        dataTemplates.put(BusinessEntity.Account.name(), UUID.randomUUID().toString());
+        dataTemplates.put(BusinessEntity.Contact.name(), UUID.randomUUID().toString());
+        return dataTemplates;
     }
 
     private CSVAdaptor generateCSVAdaptor() {
