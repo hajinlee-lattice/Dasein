@@ -201,7 +201,7 @@ public class DeltaCampaignLaunchInitStep
             displayNameMap.entrySet().stream().forEach(entry ->
             {
                 if (entry.getKey().startsWith(ExportUtils.CONTACT_ATTR_PREFIX)) {
-                    contactDisplayNames.put(entry.getKey().substring(prefixLength + 1), entry.getValue());
+                    contactDisplayNames.put(entry.getKey().substring(prefixLength), entry.getValue());
                 } else {
                     accountDisplayNames.put(entry.getKey(), entry.getValue());
                 }
