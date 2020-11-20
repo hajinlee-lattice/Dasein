@@ -167,7 +167,8 @@ public class SplitSystemBatchStore
             tableTemplateMap.put(tableName, tmpl);
 
             // make sure table has the same metadata as corresponding template
-            if (SystemBatchTemplateName.Other.name().equals(tmpl)) {
+            if (SystemBatchTemplateName.Other.name().equals(tmpl)
+                    || SystemBatchTemplateName.Embedded.name().equals(tmpl)) {
                 copyAttrs(splitTable, batchStoreTable);
             } else {
                 enrichTable(splitTable, tmpl, taskMap.get(tmpl));
@@ -203,7 +204,7 @@ public class SplitSystemBatchStore
 
     private void copyAttrs(@NotNull Table target, @NotNull Table source) {
         log.info("Copying {} attribute metadata from table {} to table {} ({} attributes)",
-                target.getAttributes().size(), target.getName(), source.getAttributes().size(), source.getName());
+                source.getAttributes().size(), source.getName(), target.getName(), target.getAttributes().size());
         Map<String, Attribute> attrs = source.getAttributes().stream()
                 .collect(Collectors.toMap(Attribute::getName, Functions.identity()));
         // use metadata from import template first
