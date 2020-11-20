@@ -1,5 +1,9 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.BUYING_STAGE_THRESHOLD;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.STAGE_BUYING;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.DnbIntent.STAGE_RESEARCHING;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
@@ -188,12 +192,11 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         data = filterStreamData(data, new HashSet<>(Arrays.asList(AtlasStream.StreamType.DnbIntentData)));
         for (Map<String, Object> map : data.getData()) {
             String detail2 = (String) map.get(InterfaceName.Detail2.name());
-            if (detail2 == null) {
+            try {
+                message = Double.valueOf(detail2) >= BUYING_STAGE_THRESHOLD ? STAGE_BUYING : STAGE_RESEARCHING;
+            } catch (Exception e) {
+                log.warn("Fail getting Detail2 from DnbIntentData", e);
                 break;
-            } else if (Float.valueOf(detail2) >= 0.5) {
-                message = BUYING;
-            } else {
-                message = message == BUYING ? BUYING : RESEARCHING;
             }
         }
         return message;

@@ -93,7 +93,7 @@ public class ActivityTimelineMetrics implements Serializable {
         AccountIntent("Account Intent") {
             @Override
             public String getContext(Integer days) {
-                return "Acount-level Intent";
+                return String.format("Acount level Intent in the last %d days", days);
             }
         };
 
