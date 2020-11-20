@@ -58,7 +58,8 @@ public class ActivityStoreUtilsUnitTestNG {
                 {TimeFilter.within(1, PeriodStrategy.Template.Week.name()), "Last 1 Weeks"},
                 {TimeFilter.within(2, PeriodStrategy.Template.Week.name()), "Last 2 Weeks"},
                 {TimeFilter.withinInclude(0, PeriodStrategy.Template.Week.name()), "Current week till today"},
-                {TimeFilter.withinInclude(2, PeriodStrategy.Template.Week.name()), "2 weeks till today"}
+                {TimeFilter.withinInclude(1, PeriodStrategy.Template.Week.name()), "1 week till today"},
+                {TimeFilter.withinInclude(2, PeriodStrategy.Template.Week.name()), "2 weeks till today"},
         };
     }
 }
