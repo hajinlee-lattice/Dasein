@@ -563,6 +563,19 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         System.out.println(headers);
         Assert.assertTrue(headers.contains("Company Name")); // in spec
         Assert.assertTrue(headers.contains("Country")); // in spec
+
+        Assert.assertTrue(headers.contains("City")); // in spec
+
+        System.out.println("**************** NEW TEST VERIFY HEADERS ***********************");
+        headers.stream().forEach(x -> System.out.println("HEADER = " + x));
+
+        Assert.assertTrue(headers.contains("Postal Code")); // in spec
+
+        int postalCodeIndex = headers.indexOf("Postal Code");
+        int countryIndex = headers.indexOf("Country");
+
+        Assert.assertTrue(countryIndex < postalCodeIndex);
+
         Assert.assertFalse(headers.contains("Test Date 2")); // not in spec
         Assert.assertFalse(headers.contains("__Matched_DUNS__")); // debug column
         Assert.assertFalse(headers.contains("__Matched_Name__")); // debug column
