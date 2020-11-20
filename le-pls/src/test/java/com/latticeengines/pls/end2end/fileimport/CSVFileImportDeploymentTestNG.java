@@ -420,6 +420,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, firstFile.getName(),
                 firstFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
 
+        log.info("applicationId: {}", applicationId.toString());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
 
