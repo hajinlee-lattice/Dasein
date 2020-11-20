@@ -57,6 +57,8 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -347,10 +349,14 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectRequest.setProjectType(Project.ProjectType.Type1);
         projectRequest.setPurposeOfUse(getPurposeOfUse());
         projectDetails = projectProxy.createDCPProject(mainCustomerSpace, projectRequest, "dcp_deployment@dnb.com");
-        // Create Source
+        // Add customer fields to base spec
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
                 TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
+        String[] fieldNames = {"user_Total_Employees", "user_MarketoAccountID", "user_Sales_in__B"};
+        String[] columnNames = {"Total Employees", "MarketoAccountID", "Sales in $B"};
+        addCustomerFields(fieldNames, columnNames, fieldDefinitionsRecord);
+        // Create Source
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setDisplayName("ImportEnd2EndSource");
         sourceRequest.setProjectId(projectDetails.getProjectId());
@@ -366,6 +372,20 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         s3FileKey = dropPath + TEST_ACCOUNT_DATA_FILE;
         testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE, s3Bucket,
                 s3FileKey);
+    }
+
+    private void addCustomerFields(String[] fields, String[] columns, FieldDefinitionsRecord record) {
+        for (int i = 0; i < fields.length; i++) {
+            FieldDefinition fd = new FieldDefinition();
+            fd.setFieldName(fields[i]);
+            fd.setFieldType(UserDefinedType.TEXT);
+            fd.setColumnName(columns[i]);
+            fd.setInCurrentImport(false);
+            fd.setRequired(false);
+            fd.setNullable(true);
+            fd.setMappedToLatticeId(false);
+            record.addFieldDefinition("Custom Fields", fd, false);
+        }
     }
 
     private void verifyUploadStats(UploadDetails upload) {
@@ -487,13 +507,22 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(headers.contains("Company Name")); // in spec
         Assert.assertTrue(headers.contains("Country")); // in spec
         Assert.assertTrue(headers.contains("City")); // in spec
+        Assert.assertTrue(headers.contains("Sales in $B")); // customer attribute
+        Assert.assertTrue(headers.contains("Total Employees")); // customer attribute
+        Assert.assertTrue(headers.contains("MarketoAccountID")); // customer attribute
 
         int companyNameIndex = headers.indexOf("Company Name");
         int cityIndex = headers.indexOf("City");
         int countryIndex = headers.indexOf("Country");
+        int salesIndex = headers.indexOf("Sales in $B");
+        int employeesIndex = headers.indexOf("Total Employees");
+        int marketoIndex = headers.indexOf("MarketoAccountID");
 
         Assert.assertTrue(companyNameIndex < cityIndex);
         Assert.assertTrue(cityIndex < countryIndex);
+        Assert.assertTrue(countryIndex < salesIndex);
+        Assert.assertTrue(salesIndex < employeesIndex);
+        Assert.assertTrue(employeesIndex < marketoIndex);
 
         Assert.assertFalse(headers.contains("Test Date 2")); // not in spec
         Assert.assertFalse(headers.contains("__Matched_DUNS__")); // debug column
