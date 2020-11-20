@@ -404,7 +404,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         String systemName = EntityTypeUtils.getSystemName(feedType);
         EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
         FieldMapping.IdType idType = getIdTypeFromEntityType(entityType);
-        checkColumnMapping(fieldMappings, standardAttrNames, groupedValidations, validations, systemName, idType, enableEntityMatch);
+        checkColumnMapping(fieldMappings, standardAttrNames, groupedValidations, validations, systemName, idType);
 
         compareStandardFields(templateTable, fieldMappingDocument, standardTable, validations, groupedValidations,
                 customerSpace,
@@ -526,8 +526,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private void checkColumnMapping(List<FieldMapping> fieldMappings, Set<String> standardAttrNames,
                                     Map<ValidationCategory, List<FieldValidation>> groupedValidations,
                                     List<FieldValidation> validations, String systemName,
-                                    FieldMapping.IdType idType,
-                                    boolean enableEntityMatch) {
+                                    FieldMapping.IdType idType) {
         Set<String> mappedStandardFields = new HashSet<>();
         Set<String> mappingKeys = new HashSet<>();
         for (FieldMapping fieldMapping : fieldMappings) {
@@ -565,7 +564,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
             }
         }
-        if (enableEntityMatch && idType != null && StringUtils.isNotBlank(systemName)) {
+        if (idType != null) {
             String uniqueKey = idType + "|" + systemName;
             if (!mappingKeys.contains(uniqueKey)) {
                 String message = "Unique id is not set";
