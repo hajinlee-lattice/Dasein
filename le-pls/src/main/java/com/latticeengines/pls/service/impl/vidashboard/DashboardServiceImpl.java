@@ -105,6 +105,7 @@ public class DashboardServiceImpl implements DashboardService {
             json = json.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).
                     replace(INDEX_PATTERN_ID_PLACEHOLDER, indexPatternId)
                     .replace(CREATE_TIME_PLACEHOLDER, formatter.format(date)).replace(NAME_PLACEHOLDER, "joyTest");
+            log.info("visualization name is {}, details is {}", String.format(PANEL_ID_PLACEHOLDER, i), json);
             ElasticSearchUtil.createDocument(client, kibanaIndex, visualizationId, json);
             visualizationMap.put(String.format(PANEL_ID_PLACEHOLDER, i), visualizationId);
         }
@@ -131,6 +132,7 @@ public class DashboardServiceImpl implements DashboardService {
         for (Map.Entry<String, String> entry : visualizationMap.entrySet()) {
             json = json.replace(entry.getKey(), entry.getValue());
         }
+        log.info("Dashboard is {}", json);
         ElasticSearchUtil.createDocument(client, kibanaIndex, indexPatternId, json);
     }
 
