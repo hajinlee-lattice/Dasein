@@ -17,6 +17,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -64,6 +65,9 @@ public class PivotScoreAndEventDataFlow
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+
+    @Value("${cdl.spark.driver.maxResultSize:4g}")
+    private String sparkMaxResultSize;
 
     private boolean multiModel = false;
     private Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap;
@@ -119,6 +123,8 @@ public class PivotScoreAndEventDataFlow
         hdfsDataUnit.setCoalesce(true);
         inputUnits.add(hdfsDataUnit);
         jobConfig.setInput(inputUnits);
+
+        setSparkMaxResultSize(sparkMaxResultSize);
 
         return jobConfig;
     }
@@ -404,8 +410,7 @@ public class PivotScoreAndEventDataFlow
     @SuppressWarnings("unchecked")
     private Map<String, Map<String, Double>> getOriginalLifts() {
         Map<String, Map<String, Double>> liftMap = new HashMap<>();
-        Map<String, List<BucketMetadata>> bmMap = (Map<String, List<BucketMetadata>>) //
-                WorkflowStaticContext.getObject(ORIGINAL_BUCKET_METADATA, Map.class);
+        Map<String, List<BucketMetadata>> bmMap = WorkflowStaticContext.getObject(ORIGINAL_BUCKET_METADATA, Map.class);
         if (MapUtils.isNotEmpty(bmMap)) {
             bmMap.forEach((guid, bmList) -> {
                 Map<String, Double> lifts = new HashMap<>();
