@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.workflow.listener.LEJobListener;
 
-@Component("dataFeedTaskImportListener")
+@Component("importListSegmentListener")
 public class ImportListSegmentListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(ImportListSegmentListener.class);
