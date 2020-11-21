@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,9 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        log.info("Calling OutreachExportFieldMetadataService for channle " + channel.getId());
+        log.info("Calling OutreachExportFieldMetadataService for channel " + channel.getId());
+
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = new HashMap<>();
 
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
                 channel.getLookupIdMap().getTenant().getPid());
@@ -48,7 +51,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
                     accountAttributesMap, contactAttributesMap);
         } else {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Outreach, accountAttributesMap,
-                    contactAttributesMap);
+                    contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
         }
 
         // Retrieves enriched fields for prospect owner and account Id and

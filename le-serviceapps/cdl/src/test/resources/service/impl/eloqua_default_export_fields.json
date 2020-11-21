@@ -257,7 +257,7 @@
       "externalSystemName":"Eloqua",
       "standardField":false,
       "exportEnabled":false,
-      "audienceType": ["CONTACTS"]
+      "audienceType": []
    },
    {
       "attrName":"PLAY_NAME",

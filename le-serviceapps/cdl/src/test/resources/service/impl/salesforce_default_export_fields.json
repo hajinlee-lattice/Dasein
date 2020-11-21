@@ -257,7 +257,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":false,
-      "audienceType": ["ACCOUNTS"]
+      "audienceType": []
    },
    {
       "attrName":"PLAY_NAME",

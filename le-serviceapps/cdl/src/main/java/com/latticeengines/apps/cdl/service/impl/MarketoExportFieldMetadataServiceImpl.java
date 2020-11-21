@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,9 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        log.info("Calling MarketoExportFieldMetadataService for channle " + channel.getId());
+        log.info("Calling MarketoExportFieldMetadataService for channel " + channel.getId());
+
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = new HashMap<>();
 
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
                 Collections.singletonList(BusinessEntity.Account));
@@ -46,7 +49,7 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
                     accountAttributesMap, contactAttributesMap);
         } else {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Marketo, accountAttributesMap,
-                    contactAttributesMap);
+                    contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
         }
 
         String accountId = channel.getLookupIdMap().getAccountId();
