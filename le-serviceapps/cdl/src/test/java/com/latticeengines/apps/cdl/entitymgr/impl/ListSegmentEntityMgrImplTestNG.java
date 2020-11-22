@@ -3,9 +3,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -14,7 +12,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StreamUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -119,12 +116,11 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         return listSegment;
     }
 
-    private String getStaticDocument(String documentPath) {
+    private InputStream getStaticDocument(String documentPath) {
         try {
             ClassLoader classLoader = getClass().getClassLoader();
-            InputStream tableRegistryStream = classLoader.getResourceAsStream(documentPath);
-            return StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
-        } catch (IOException e) {
+            return classLoader.getResourceAsStream(documentPath);
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_10011, e,
                     new String[] { documentPath.replace(commonResourcePath, "") });
         }

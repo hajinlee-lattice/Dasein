@@ -10,7 +10,6 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{Buffer, ListBuffer}
-import scala.util.control.Breaks.{break, breakable}
 
 class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVConfig] {
 
@@ -57,14 +56,12 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     }
     val contactNameUdf = udf(contactNameFunc)
     if (!columns.contains(InterfaceName.PhoneNumber.name())) {
-      breakable {
-        for (field <- columns) {
-          if (field.equalsIgnoreCase("Direct_Phone")) {
-            result = result.withColumnRenamed(field, InterfaceName.PhoneNumber.name)
-          } else if (field.equalsIgnoreCase("ContactName")) {
-            result = result.withColumn(field, when(col("FirstName").isNotNull,
-              contactNameUdf(col("FirstName"), col("LastName"))).otherwise(lit(null).cast(StringType)))
-          }
+      for (field <- columns) {
+        if (field.equalsIgnoreCase("Direct_Phone")) {
+          result = result.withColumnRenamed(field, InterfaceName.PhoneNumber.name)
+        } else if (field.equalsIgnoreCase("ContactName")) {
+          result = result.withColumn(field, when(col("FirstName").isNotNull,
+            contactNameUdf(col("FirstName"), col("LastName"))).otherwise(lit(null).cast(StringType)))
         }
       }
     }
