@@ -31,12 +31,10 @@ public class ImportListSegmentWorkflowSubmitter extends WorkflowSubmitter {
 
     @WithWorkflowJobPid
     public ApplicationId submit(@NotNull String customerSpace, @NotNull ListSegmentImportRequest request, @NotNull WorkflowPidWrapper pidWrapper) {
-        String s3FileKey = request.getS3FileKey();
-        String sourceKey = s3FileKey.substring(s3FileKey.indexOf(dateStageBucket) + dateStageBucket.length() + 2);
         ImportListSegmentWorkflowConfiguration configuration = new ImportListSegmentWorkflowConfiguration.Builder()
                 .customer(CustomerSpace.parse(customerSpace))
                 .sourceBucket(dateStageBucket)
-                .sourceKey(sourceKey)
+                .sourceKey(request.getS3FileKey())
                 .destBucket(customerBucket)
                 .segmentName(request.getSegmentName())
                 .build();

@@ -83,8 +83,18 @@ public final class SparkUtils {
         String srcPath = hdfsDataUnit.getPath();
         String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(templateId).append("/").append(dataUnitName).toString();
         try {
-            log.info("Moving file from {} to {}", srcPath, tgtPath);
-            HdfsUtils.moveFile(yarnConfiguration, srcPath, tgtPath);
+            for (String avroParquetPath : AvroParquetUtils.listAvroParquetFiles(yarnConfiguration, srcPath, false)) {
+                if (!HdfsUtils.isDirectory(yarnConfiguration, tgtPath)) {
+                    HdfsUtils.mkdir(yarnConfiguration, tgtPath);
+                }
+                Path dstPath = new Path(avroParquetPath.replace(srcPath, tgtPath));
+                Path parent = dstPath.getParent();
+                if (parent != null && !HdfsUtils.fileExists(yarnConfiguration, parent.toString())) {
+                    HdfsUtils.mkdir(yarnConfiguration, parent.toString());
+                }
+                log.info("Moving file from {} to {}", avroParquetPath, dstPath.toString());
+                HdfsUtils.moveFile(yarnConfiguration, avroParquetPath, dstPath.toString());
+            }
         } catch (IOException e) {
             throw new RuntimeException("Failed to move data from " + srcPath + " to " + tgtPath);
         }
@@ -95,8 +105,9 @@ public final class SparkUtils {
         s3DataUnit.setRoles(roles);
         s3DataUnit.setBucket(bucket);
         s3DataUnit.setDataFormat(hdfsDataUnit.getDataFormat());
+        s3DataUnit.setDataTemplateId(templateId);
         String key = pathBuilder.getS3AtlasDataUnitPrefix(bucket, tenantId, templateId, dataUnitName);
-        key = key.substring(key.indexOf(bucket) + bucket.length() + 2);
+        key = key.substring(key.indexOf(bucket) + bucket.length() + 1);
         s3DataUnit.setPrefix(key);
         return s3DataUnit;
     }

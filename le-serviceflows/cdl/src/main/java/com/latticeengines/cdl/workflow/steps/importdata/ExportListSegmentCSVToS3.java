@@ -25,8 +25,8 @@ public class ExportListSegmentCSVToS3
 
     @Override
     public void buildRequests(List<ImportExportRequest> requests) {
-        uploadS3DataUnits(getObjectFromContext(ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME, String.class), requests);
-        uploadS3DataUnits(getObjectFromContext(ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME, String.class), requests);
+        uploadS3DataUnits(getStringValueFromContext(ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME), requests);
+        uploadS3DataUnits(getStringValueFromContext(ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME), requests);
     }
 
     private void uploadS3DataUnits(String dataUnitName, List<ImportExportRequest> requests) {

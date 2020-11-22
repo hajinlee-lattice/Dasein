@@ -52,6 +52,7 @@ public class ImportListSegmentWorkflowConfiguration extends BaseCDLWorkflowConfi
         public ImportListSegmentWorkflowConfiguration build() {
             configuration.add(copyListSegmentCSVConfiguration);
             configuration.add(extractListSegmentCSVConfiguration);
+            configuration.add(exportListSegmentCSVToS3Configuration);
             return configuration;
         }
     }

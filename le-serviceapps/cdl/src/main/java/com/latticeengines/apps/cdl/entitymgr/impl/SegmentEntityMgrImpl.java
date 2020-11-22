@@ -2,8 +2,10 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import static com.latticeengines.domain.exposed.metadata.MetadataSegment.SegmentType;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -228,7 +231,16 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
                 dataTemplate.setMasterSchema(request.getSchema());
                 dataTemplate.setName(request.getTemplateKey());
                 dataTemplate.setTenant(tenantId);
-                return dataTemplateEntityMgr.create(tenantId, dataTemplate);
+                templateId = dataTemplateEntityMgr.create(tenantId, dataTemplate);
+
+                Map<String, String> dataTemplates = listSegment.getDataTemplates();
+                if (MapUtils.isEmpty(dataTemplates)) {
+                    dataTemplates = new HashMap<>();
+                }
+                dataTemplates.put(request.getTemplateKey(), templateId);
+                listSegment.setDataTemplates(dataTemplates);
+                segmentDao.update(segment);
+                return templateId;
             } else {
                 if (request.getSchema() != null) {
                     dataTemplate.setMasterSchema(request.getSchema());

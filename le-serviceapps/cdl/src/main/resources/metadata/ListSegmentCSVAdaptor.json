@@ -157,7 +157,7 @@
       "fieldType": "TEXT"
     },
     {
-      "fieldName": "PhoneNumber",
+      "fieldName": "Direct_Phone",
       "userFieldName": "Direct Phone",
       "fieldType": "TEXT"
     },

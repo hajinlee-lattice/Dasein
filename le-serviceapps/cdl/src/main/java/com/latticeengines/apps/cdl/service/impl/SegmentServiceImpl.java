@@ -108,7 +108,7 @@ public class SegmentServiceImpl implements SegmentService {
             segment.setName(NamingUtils.timestampWithRandom("Segment"));
             persistedSegment = segmentEntityMgr.createSegment(segment);
         }
-        if (persistedSegment != null) {
+        if (persistedSegment != null && !persistedSegment.getType().equals(MetadataSegment.SegmentType.List)) {
             try {
                 Map<BusinessEntity, Long> counts = updateSegmentCounts(persistedSegment);
                 persistedSegment.setAccounts(counts.getOrDefault(BusinessEntity.Account, 0L));

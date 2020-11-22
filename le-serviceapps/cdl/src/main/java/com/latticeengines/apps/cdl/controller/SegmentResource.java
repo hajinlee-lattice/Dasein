@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,9 +24,10 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.cdl.workflow.ImportListSegmentWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
-import com.latticeengines.domain.exposed.cdl.SegmentImportRequest;
+import com.latticeengines.domain.exposed.cdl.ListSegmentImportRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -144,7 +146,7 @@ public class SegmentResource {
         return segmentService.deleteSegmentByExternalInfo(externalSystem, externalSegmentId, hardDelete);
     }
 
-    @PostMapping("/list/{segmentName}/datetemplate")
+    @PostMapping("/list/{segmentName}/datatemplate")
     @ResponseBody
     @ApiOperation(value = "Create or update a date template for list segment")
     public String createOrUpdateDataUnit(@PathVariable String customerSpace,
@@ -249,7 +251,9 @@ public class SegmentResource {
     @PostMapping("/importListSegment")
     @ResponseBody
     @ApiOperation(value = "start segment import")
-    public String importListSegmentCSV(@PathVariable String customerSpace, @RequestBody SegmentImportRequest segmentImportRequest) {
-        return "";
+    public String importListSegmentCSV(@PathVariable String customerSpace, @RequestBody ListSegmentImportRequest listSegmentImportRequest) {
+        ApplicationId appId = listSegmentWorkflowSubmitter.submit(customerSpace, listSegmentImportRequest,
+                new WorkflowPidWrapper(-1L));
+        return appId.toString();
     }
 }

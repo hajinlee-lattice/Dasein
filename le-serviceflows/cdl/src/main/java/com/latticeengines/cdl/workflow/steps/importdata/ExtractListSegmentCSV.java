@@ -10,8 +10,6 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,8 +18,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.ParquetUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
@@ -71,7 +69,7 @@ public class ExtractListSegmentCSV
             InterfaceName.Contact_Address_Street_1.name(), InterfaceName.Contact_Address_Street_2.name(),
             InterfaceName.ContactCity.name(), InterfaceName.ContactState.name(), InterfaceName.ContactCountry.name(),
             InterfaceName.Email.name(), InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
-            InterfaceName.PhoneNumber.name(), InterfaceName.ContactPostalCode.name(), InterfaceName.Title.name(),
+            "Direct_Phone", InterfaceName.ContactPostalCode.name(), InterfaceName.Title.name(),
             InterfaceName.ContactId.name(), "user_level_name", "user_job_function", InterfaceName.GCA_ID.name());
 
     @Override
@@ -94,7 +92,6 @@ public class ExtractListSegmentCSV
             if (SegmentUtils.hasListSegment(metadataSegment)) {
                 extractListSegmentCSVConfig.setCsvAdaptor(metadataSegment.getListSegment().getCsvAdaptor());
                 String hdfsPath = s3DataUnit.getLinkedHdfsPath();
-                hdfsPath = FilenameUtils.getFullPathNoEndSeparator(hdfsPath);
                 extractListSegmentCSVConfig.setInput(Collections.singletonList(getInputCSVDataUnit(hdfsPath, dataUnitName)));
                 extractListSegmentCSVConfig.setTargetNums(2);
                 Map<Integer, DataUnit.DataFormat> specialTargets = new HashMap<>();
@@ -106,10 +103,13 @@ public class ExtractListSegmentCSV
                 processImportResult(BusinessEntity.Account, accountDataUnit, ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME);
                 HdfsDataUnit contactUnit = result.getTargets().get(1);
                 processImportResult(BusinessEntity.Contact, contactUnit, ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME);
+
+                //update segment count
+                metadataSegment = segmentProxy.getListSegmentByName(tenantId, segmentName);
                 metadataSegment.setAccounts(accountDataUnit.getCount());
                 metadataSegment.setContacts(contactUnit.getCount());
                 metadataSegment.setCountsOutdated(false);
-                segmentProxy.createOrUpdateSegment(tenantId, metadataSegment);
+                segmentProxy.createOrUpdateListSegment(tenantId, metadataSegment);
             } else {
                 throw new RuntimeException(String.format("Can't find segment by name {}.", segmentName));
             }
@@ -131,31 +131,30 @@ public class ExtractListSegmentCSV
     }
 
     private MasterSchema getSchema(HdfsDataUnit hdfsDataUnit, BusinessEntity entity) {
-        HdfsUtils.HdfsFilenameFilter fileFilter = filePath -> {
-            if (filePath == null) {
-                return false;
-            }
-            return FilenameUtils.getName(filePath).endsWith(".csv");
-        };
         String path = hdfsDataUnit.getPath();
         MasterSchema masterSchema = new MasterSchema();
         List<ColumnField> attributes = new ArrayList<>();
         try {
-            List<String> matchedFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDataUnit.getPath(), fileFilter);
+            List<String> matchedFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDataUnit.getPath(),
+                    (HdfsUtils.HdfsFilenameFilter) filename -> filename.endsWith(".parquet"));
             if (CollectionUtils.isNotEmpty(matchedFiles)) {
-                Schema avroSchema = AvroUtils.getSchema(yarnConfiguration, new Path(path));
-                for (Schema.Field field : avroSchema.getFields()) {
+                Schema parquetSchema = ParquetUtils.getAvroSchema(yarnConfiguration, matchedFiles.get(0));
+                for (Schema.Field field : parquetSchema.getFields()) {
                     ColumnField attribute = new ColumnField();
                     attribute.setAttrName(field.name());
                     attribute.setDisplayName(field.name());
                     attributes.add(attribute);
                 }
             } else {
-                throw new RuntimeException("Did not find any Avro files under folder " + path + ".");
+                log.info("Did not find any parquet files under folder " + path + ".");
+                throw new RuntimeException("Did not find any parquet files under folder " + path + ".");
             }
         } catch (Exception ex) {
-            throw new RuntimeException("Did not find any Avro files under folder " + path + ".");
+            ex.printStackTrace();
+            log.info(ex.getMessage());
+            throw new RuntimeException("Did not find any parquet files under folder " + path + ".");
         }
+        masterSchema.setAttributes(attributes);
         List<String> primaryKey = new ArrayList<>();
         if (entity != null && entity == BusinessEntity.Account) {
             primaryKey.add(InterfaceName.AccountId.name());

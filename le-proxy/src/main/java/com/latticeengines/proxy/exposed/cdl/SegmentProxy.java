@@ -45,7 +45,7 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
     }
 
     public String createOrUpdateDataTemplate(String customerSpace, String segmentName, CreateDataTemplateRequest request) {
-        String url = constructUrl("/customerspaces/{customerSpace}/segments/list/{segmentName}/datatemplate",
+        String url = constructUrl("/{customerSpace}/segments/list/{segmentName}/datatemplate",
                 customerSpace, segmentName);
         return post("createOrUpdateDataUnit", url, request, String.class);
     }

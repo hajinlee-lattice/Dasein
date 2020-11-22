@@ -3,9 +3,10 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,14 +14,18 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StreamUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.ListSegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -32,6 +37,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ListSegmentEntityMgrImplTestNG.class);
+
+    private static final String commonResourcePath = "metadata/";
+    private final String listSegmentCSVAdaptorPath = "ListSegmentCSVAdaptor.json";
 
     private String listSegmentName;
 
@@ -74,6 +82,8 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         listSegment = listSegmentEntityMgr.findByExternalInfo(listSegment.getExternalSystem(), listSegment.getExternalSegmentId());
         verifyListSegment(listSegment);
         assertEquals(listSegment.getDataTemplates().size(), 2);
+
+        throw new RuntimeException();
     }
 
     private void verifyListSegment(ListSegment listSegment) {
@@ -81,7 +91,7 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         CSVAdaptor csvAdaptor = listSegment.getCsvAdaptor();
         assertNotNull(csvAdaptor);
         assertNotNull(csvAdaptor.getImportFieldMappings());
-        assertEquals(csvAdaptor.getImportFieldMappings().size(), 1);
+        assertEquals(csvAdaptor.getImportFieldMappings().size(), 41);
         ImportFieldMapping importFieldMapping = csvAdaptor.getImportFieldMappings().get(0);
         assertEquals(importFieldMapping.getFieldName(), InterfaceName.CompanyName.name());
         assertEquals(importFieldMapping.getFieldType(), UserDefinedType.TEXT);
@@ -96,14 +106,8 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private CSVAdaptor generateCSVAdaptor() {
-        CSVAdaptor csvAdaptor = new CSVAdaptor();
-        List<ImportFieldMapping> importFieldMappings = new ArrayList<>();
-        ImportFieldMapping importFieldMapping = new ImportFieldMapping();
-        importFieldMapping.setFieldName(InterfaceName.CompanyName.name());
-        importFieldMapping.setFieldType(UserDefinedType.TEXT);
-        importFieldMapping.setUserFieldName("Company Name");
-        importFieldMappings.add(importFieldMapping);
-        csvAdaptor.setImportFieldMappings(importFieldMappings);
+        CSVAdaptor csvAdaptor = JsonUtils.deserialize(
+                getStaticDocument(commonResourcePath + listSegmentCSVAdaptorPath), CSVAdaptor.class);
         return csvAdaptor;
     }
 
@@ -113,5 +117,16 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         listSegment.setExternalSegmentId(externalSegmentId);
         listSegment.setS3DropFolder(s3DropFolder);
         return listSegment;
+    }
+
+    private String getStaticDocument(String documentPath) {
+        try {
+            ClassLoader classLoader = getClass().getClassLoader();
+            InputStream tableRegistryStream = classLoader.getResourceAsStream(documentPath);
+            return StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_10011, e,
+                    new String[] { documentPath.replace(commonResourcePath, "") });
+        }
     }
 }

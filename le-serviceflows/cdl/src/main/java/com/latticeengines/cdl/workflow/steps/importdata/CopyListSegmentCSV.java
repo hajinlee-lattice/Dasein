@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.importdata;
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -77,10 +78,10 @@ public class CopyListSegmentCSV extends BaseWorkflowStep<CopyListSegmentCSVConfi
         request.setTemplateKey(ListSegment.RAW_IMPORT);
         String templateId = segmentProxy.createOrUpdateDataTemplate(tenantId, segmentName, request);
         String templateDir = pathBuilder.getS3AtlasDataTemplatePrefix(destBucket, tenantId, templateId);
-        templateDir = templateDir.substring(templateDir.indexOf(destBucket) + destBucket.length() + 2);
+        templateDir = templateDir.substring(templateDir.indexOf(destBucket) + destBucket.length() + 1);
         String fileName = FilenameUtils.getName(sourceKey);
         log.info("templateDir is {}, fileName is {}.", templateDir, fileName);
-        S3DataUnit dataUnit = createImportUnit(tenantId, templateId, destBucket, templateDir, fileName);
+        S3DataUnit dataUnit = createImportUnit(destBucket, tenantId, templateId, templateDir, fileName);
         dataUnit = (S3DataUnit) dataUnitProxy.create(tenantId, dataUnit);
         putStringValueInContext(ImportListSegmentWorkflowConfiguration.IMPORT_DATA_UNIT_NAME, dataUnit.getName());
         copyToDataTemplateFolder(sourceBucket, sourceKey, destBucket, dataUnit.getPrefix());
@@ -89,7 +90,12 @@ public class CopyListSegmentCSV extends BaseWorkflowStep<CopyListSegmentCSVConfi
 
     private void uncompressZipCSV(S3DataUnit s3DataUnit) {
         try {
-            HdfsUtils.uncompressZipFileWithinHDFS(yarnConfiguration, s3DataUnit.getFullPath(pathBuilder.getProtocol()), s3DataUnit.getLinkedHdfsPath());
+            InputStream in = s3Service.readObjectAsStream(s3DataUnit.getBucket(), s3DataUnit.getPrefix());
+            String zipTempPath = s3DataUnit.getLinkedHdfsPath() + "/temp.zip";
+            log.info("zipTempPath is " + zipTempPath);
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, in, zipTempPath);
+            log.info("zipTempPath is " + zipTempPath + " transfer done");
+            HdfsUtils.uncompressZipFileWithinHDFS(yarnConfiguration, zipTempPath, s3DataUnit.getLinkedHdfsPath());
         } catch (IOException exception) {
             log.error("uncompress zip file failed with data unit {}.", s3DataUnit.getName());
         }
