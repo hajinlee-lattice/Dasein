@@ -48,6 +48,9 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskConfig;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.AttributeLengthValidator;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.TemplateValidator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
@@ -56,6 +59,7 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourcefileConfig;
 import com.latticeengines.domain.exposed.pls.frontend.ExtraFieldMappingInfo;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -207,9 +211,43 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo,
                     templateTable, table, systemIdSet);
         }
+        resultDocument.setSourcefileConfig(getSourcefileConfig(dataFeedTask, entity));
         EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument,
                 s3ImportSystem);
         return resultDocument;
+    }
+
+    private SourcefileConfig getSourcefileConfig(DataFeedTask dataFeedTask, String entity) {
+        BusinessEntity businessEntity = BusinessEntity.getByName(entity);
+        if(!BusinessEntity.Account.equals(businessEntity) && !BusinessEntity.Contact.equals(businessEntity))
+            return null;
+        SourcefileConfig config = new SourcefileConfig();
+        if (dataFeedTask!=null) {
+            DataFeedTaskConfig dataFeedTaskConfig = dataFeedTask.getDataFeedTaskConfig();
+            if (dataFeedTaskConfig != null) {
+                for (TemplateValidator validator : dataFeedTaskConfig.getTemplateValidators()) {
+                    if (validator instanceof AttributeLengthValidator) {
+                        AttributeLengthValidator lengthValidator = (AttributeLengthValidator) validator;
+                        if (checkAttributeName(lengthValidator.getAttributeName(), businessEntity)) {
+                            config.setUniqueIdentifierLength(lengthValidator.getLength());
+                            config.setUniqueIdentifierRequired(!lengthValidator.getNullable());
+                            config.setUniqueIdentifierName(lengthValidator.getAttributeName());
+                            return config;
+                        }
+                    }
+                }
+            }
+        }
+        return config;
+    }
+
+    private boolean checkAttributeName(String name, BusinessEntity entity) {
+        if (BusinessEntity.Account.equals(entity)) {
+            return name.contains("AccountId");
+        } else if (BusinessEntity.Contact.equals(entity)) {
+            return name.contains("ContactId");
+        }
+        return false;
     }
 
     private void setSystemMapping(String customerSpace,
@@ -491,6 +529,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         }
                     }
                 }
+            }
+        }
+
+        //check if source file config is valid
+        if (fieldMappingDocument.getSourcefileConfig() != null) {
+            SourcefileConfig config = fieldMappingDocument.getSourcefileConfig();
+            if (config.getUniqueIdentifierLength() < 0) {
+                String message = String.format("The length of unique ID is invalid %d",
+                        config.getUniqueIdentifierLength());
+                FieldValidation validation = createValidation(null, null, ValidationStatus.WARNING, message);
+                validations.add(validation);
+                groupedValidations.get(ValidationCategory.Others).add(validation);
             }
         }
         // generate template in memory
@@ -1301,10 +1351,33 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         newTable.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
         metadataProxy.createTable(customerSpace, newTable.getName(), newTable);
         sourceFile.setTableName(newTable.getName());
+        boolean isAccountOrContact = BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity);
+        SourcefileConfig config = fieldMappingDocument.getSourcefileConfig();
+        if (isAccountOrContact && config!=null) {
+            S3ImportSystem importSystem = cdlService.getDefaultImportSystem(customerSpace);
+            if (importSystem != null) {
+                config.setUniqueIdentifierName(getImportSystemId(importSystem, entity));
+                if(config.isUniqueIdentifierChanged() && StringUtils.isNotEmpty(config.getUniqueIdentifierName())) {
+                    sourceFile.setSourcefileConfig(config);
+                }
+            }
+        }
         sourceFileService.update(sourceFile);
         // Set external system column name
-        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+        if (isAccountOrContact) {
             CDLExternalSystemUtils.setCDLExternalSystem(resolver.getExternalSystem(), entity, cdlExternalSystemProxy);
+        }
+    }
+
+    private String getImportSystemId(S3ImportSystem importSystem, BusinessEntity entity) {
+        if (BusinessEntity.Account.equals(entity)) {
+            return importSystem.getAccountSystemId();
+        }
+        else if (BusinessEntity.Contact.equals(entity)) {
+            return importSystem.getContactSystemId();
+        }
+        else {
+            return null;
         }
     }
 

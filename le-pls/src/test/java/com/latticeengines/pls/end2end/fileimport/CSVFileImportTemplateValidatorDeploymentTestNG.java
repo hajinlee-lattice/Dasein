@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.validator.SimpleValueFilter;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourcefileConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -57,26 +58,30 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
                 fieldMapping.setSystemName(DEFAULT_SYSTEM);
                 fieldMapping.setMapToLatticeId(true);
             }
-            //remove id field.
+            // remove id field.
             if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
                 fieldMapping.setMappedField(null);
             }
         }
+        SourcefileConfig sourceFileConfig = new SourcefileConfig();
+        sourceFileConfig.setUniqueIdentifierRequired(true);
+        sourceFileConfig.setUniqueIdentifierLength(10);
+        fieldMappingDocument.setSourcefileConfig(sourceFileConfig);
         modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
                 feedType);
         sourceFile = sourceFileService.findByName(sourceFile.getName());
 
-        String dataFeedTaskId = cdlService.createS3Template(customerSpace, sourceFile.getName(),
-                SOURCE, ENTITY_ACCOUNT, feedType, null, ENTITY_ACCOUNT + "Data");
-        Assert.assertNotNull(sourceFile);
-        Assert.assertNotNull(dataFeedTaskId);
-
         S3ImportSystem importSystem = cdlProxy.getS3ImportSystem(customerSpace, DEFAULT_SYSTEM);
         Assert.assertNotNull(importSystem);
         Assert.assertTrue(StringUtils.isNotBlank(importSystem.getAccountSystemId()));
+        Assert.assertNotNull(sourceFile.getSourcefileConfig());
+        Assert.assertEquals(sourceFile.getSourcefileConfig().getUniqueIdentifierName(),
+                importSystem.getAccountSystemId());
 
-        cdlProxy.addAttributeLengthValidator(customerSpace, dataFeedTaskId, importSystem.getAccountSystemId(), 18,
-                false);
+        String dataFeedTaskId = cdlService.createS3Template(customerSpace, sourceFile.getName(), SOURCE, ENTITY_ACCOUNT,
+                feedType, null, ENTITY_ACCOUNT + "Data");
+        Assert.assertNotNull(sourceFile);
+        Assert.assertNotNull(dataFeedTaskId);
 
         startCDLImport(sourceFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
 
@@ -100,7 +105,7 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         simpleValueFilter.setRestrictions(Arrays.asList(r1, r2));
         cdlProxy.addSimpleValueFilter(customerSpace, dataFeedTaskId, simpleValueFilter);
 
-        startCDLImport(sourceFile, ENTITY_ACCOUNT,DEFAULT_SYSTEM);
+        startCDLImport(sourceFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
 
         list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         reports = JsonUtils.convertList(list, Report.class);

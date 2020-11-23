@@ -77,6 +77,7 @@ import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourcefileConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -223,8 +224,18 @@ public class CDLServiceImpl implements CDLService {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the s3 file upload initiator is %s", email));
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, templateFileName, email);
-        return cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, true, email,
-                metaData);
+        String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, true,
+                email, metaData);
+
+        SourceFile sourceFile = sourceFileService.findByName(templateFileName);
+        if (sourceFile != null) {
+            SourcefileConfig config = sourceFile.getSourcefileConfig();
+            if (config != null) {
+                cdlProxy.addAttributeLengthValidator(customerSpace, taskId, config.getUniqueIdentifierName(),
+                        config.getUniqueIdentifierLength(), !config.isUniqueIdentifierRequired());
+            }
+        }
+        return taskId;
     }
 
     @Override
