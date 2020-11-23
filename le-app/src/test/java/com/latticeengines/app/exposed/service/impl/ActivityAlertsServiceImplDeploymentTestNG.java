@@ -221,7 +221,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
 
         // record 2
         record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT);
+        record.setAlertName(ActivityStoreConstants.Alert.ANONYMOUS_WEB_VISITS);
         record.setEntityId(TEST_ACCOUNT_ID);
         record.setEntityType(BusinessEntity.Account);
         record.setTenantId(t.getPid());

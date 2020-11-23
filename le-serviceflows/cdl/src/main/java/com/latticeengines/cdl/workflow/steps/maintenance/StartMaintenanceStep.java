@@ -43,7 +43,7 @@ public class StartMaintenanceStep extends BaseWorkflowStep<StartMaintenanceConfi
         } else {
             dataFeedProxy.updateDataFeedMaintenanceMode(customerSpace.toString(), true);
         }
-        dataFeedProxy.startExecution(customerSpace.toString(), DataFeedExecutionJobType.CDLOperation, jobId);
+        dataFeedProxy.startExecution(customerSpace.toString(), DataFeedExecutionJobType.CDLOperation, jobId, null);
         setStepContext();
         saveOutputValue(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES,
                 JsonUtils.serialize(configuration.getEntityList()));

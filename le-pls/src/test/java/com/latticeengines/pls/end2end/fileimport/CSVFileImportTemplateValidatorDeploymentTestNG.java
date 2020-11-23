@@ -78,7 +78,7 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         cdlProxy.addAttributeLengthValidator(customerSpace, dataFeedTaskId, importSystem.getAccountSystemId(), 18,
                 false);
 
-        startCDLImport(sourceFile, ENTITY_ACCOUNT);
+        startCDLImport(sourceFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
 
         List<?> list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         List<Report> reports = JsonUtils.convertList(list, Report.class);
@@ -100,7 +100,7 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         simpleValueFilter.setRestrictions(Arrays.asList(r1, r2));
         cdlProxy.addSimpleValueFilter(customerSpace, dataFeedTaskId, simpleValueFilter);
 
-        startCDLImport(sourceFile, ENTITY_ACCOUNT);
+        startCDLImport(sourceFile, ENTITY_ACCOUNT,DEFAULT_SYSTEM);
 
         list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         reports = JsonUtils.convertList(list, Report.class);

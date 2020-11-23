@@ -148,19 +148,23 @@ public final class TimeLineStoreUtils {
     }
 
     public enum TimelineStandardColumn {
-        RecordId(InterfaceName.Id.name(), "String"), EventDate(InterfaceName.EventTimestamp.name(), "Long"), AccountId(
-                InterfaceName.AccountId.name(), "String"), ContactId(InterfaceName.ContactId.name(),
-                        "String"), EventType(InterfaceName.EventType.name(), "String"), StreamType(
-                                InterfaceName.StreamType.name(), "String"), Detail1(InterfaceName.Detail1.name(),
-                                        "String"), Detail2(InterfaceName.Detail2.name(), "String"), TrackedBySystem(
-                                                InterfaceName.Source.name(),
-                                                "String"), ContactName(InterfaceName.ContactName.name(), "String");
+        RecordId(InterfaceName.Id.name(), "String"), //
+        EventDate(InterfaceName.EventTimestamp.name(), "Long"), //
+        AccountId(InterfaceName.AccountId.name(), "String"), //
+        ContactId(InterfaceName.ContactId.name(), "String"), //
+        EventType(InterfaceName.EventType.name(), "String"), //
+        StreamType(InterfaceName.StreamType.name(), "String"), //
+        Detail1(InterfaceName.Detail1.name(), "String"), //
+        Detail2(InterfaceName.Detail2.name(), "String"), //
+        TrackedBySystem(InterfaceName.Source.name(), "String"), //
+        ContactName(InterfaceName.ContactName.name(), "String"), //
+        ContactTitle(InterfaceName.Title.name(), "String");
 
         private String columnName;
         private String dataType;
 
         private static List<String> columnNames;
-        private static List<String> requiredColumnNames;//will failed timelinejob, if the table haven't contains.
+        private static List<String> requiredColumnNames;// will failed timelinejob, if the table haven't contains.
         static {
             columnNames = new ArrayList<>();
             for (TimelineStandardColumn entry : values()) {
@@ -228,7 +232,7 @@ public final class TimeLineStoreUtils {
         private String dataType;
 
         private static List<String> columnNames;
-        private static List<String> requiredColumnNames;//will failed timelineExportJob, if the table haven't contains.
+        private static List<String> requiredColumnNames;// will failed timelineExportJob, if the table haven't contains.
         static {
             columnNames = new ArrayList<>();
             for (TimelineExportColumn entry : values()) {

@@ -117,22 +117,30 @@ public class S3ImportJmsConsumer {
                 } catch (UnsupportedEncodingException e) {
                     log.error("Cannot decode object key " + key);
                 }
+                String tenantId;
                 S3ImportMessageType messageType = S3ImportMessageUtils.getMessageTypeFromKey(key);
                 if (S3ImportMessageType.UNDEFINED.equals(messageType)) {
                     log.warn("S3 import path is not correct: " + key);
                     return;
-                }
-                String dropBoxPrefix = S3ImportMessageUtils.getDropBoxPrefix(key);
-                Tenant tenant = dropBoxService.getDropBoxOwner(dropBoxPrefix);
-                if (tenant == null) {
-                    log.error("Cannot find DropBox Owner: " + dropBoxPrefix);
-                    return;
+                } else if (S3ImportMessageType.LISTSEGMENT.equals(messageType)) {
+                    //set listsegment status to Pending
+                    tenantId = S3ImportMessageUtils.getKeyPart(key, S3ImportMessageType.LISTSEGMENT,
+                            S3ImportMessageUtils.KeyPart.TENANT_ID);
+                    String segmentName = S3ImportMessageUtils.getKeyPart(key, S3ImportMessageType.LISTSEGMENT,
+                            S3ImportMessageUtils.KeyPart.SEGMENT_NAME);
+                } else {
+                    String dropBoxPrefix = S3ImportMessageUtils.getDropBoxPrefix(key);
+                    Tenant tenant = dropBoxService.getDropBoxOwner(dropBoxPrefix);
+                    if (tenant == null) {
+                        log.error("Cannot find DropBox Owner: " + dropBoxPrefix);
+                        return;
+                    }
+                    tenantId = tenant.getId();
+                    tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
                 }
                 if (S3ImportMessageUtils.shouldSkipMessage(key, messageType)) {
                     return;
                 }
-                String tenantId = tenant.getId();
-                tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
                 synchronized (this) {
                     if (redisTemplate.opsForValue().get(REDIS_PREFIX + key) != null) {
                         log.warn(String.format("Already processed file %s in less then %d seconds, skip import!",

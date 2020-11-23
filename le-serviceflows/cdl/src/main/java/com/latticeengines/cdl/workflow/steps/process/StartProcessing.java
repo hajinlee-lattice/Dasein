@@ -222,8 +222,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void updateDataFeed() {
+        List<Long> actionIds = getImportActions().stream().map(Action::getPid).collect(Collectors.toList());
         DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace.toString(),
-                DataFeedExecutionJobType.PA, jobId);
+                DataFeedExecutionJobType.PA, jobId, actionIds);
         log.info(String.format("current running execution %s", execution));
 
         DataFeed datafeed = dataFeedProxy.getDataFeed(configuration.getCustomerSpace().toString());
@@ -771,7 +772,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     log.warn(String.format("Action %d doesn't have table to be registered.", action.getPid()));
                     continue;
                 }
-                dataFeedProxy.addTablesToQueue(customerSpace.toString(), taskId, tables);
 
                 if (configuration.isEntityMatchEnabled()) {
                     DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),

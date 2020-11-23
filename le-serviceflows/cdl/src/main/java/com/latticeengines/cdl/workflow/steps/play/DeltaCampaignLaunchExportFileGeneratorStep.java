@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaun
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
+import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.GenerateRecommendationCSVJob;
 
@@ -109,7 +110,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
             fields = new ArrayList<>(displayNames.keySet());
             Collections.sort(fields);
             Map<String, String> changedContactDisplayNames = MapUtils.isNotEmpty(contactDisplayNames) ? contactDisplayNames : new HashMap<>();
-            changedContactDisplayNames = changedContactDisplayNames.entrySet().stream().collect(Collectors.toMap(entry -> DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + entry.getKey(),
+            changedContactDisplayNames = changedContactDisplayNames.entrySet().stream().collect(Collectors.toMap(entry -> ExportUtils.CONTACT_ATTR_PREFIX + entry.getKey(),
                     entry -> entry.getValue()));
             List<String> contactFields = new ArrayList<>(changedContactDisplayNames.keySet());
             Collections.sort(contactFields);

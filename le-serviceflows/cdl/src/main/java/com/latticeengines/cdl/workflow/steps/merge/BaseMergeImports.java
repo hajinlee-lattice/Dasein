@@ -103,6 +103,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected String diffReportTablePrefix;
     protected String batchStorePrimaryKey;
     protected List<Table> inputTables = new ArrayList<>();
+    protected List<String> rematchInputTableNames = new ArrayList<>();
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
     protected Map<String, String> tableTemplateMap;
@@ -641,10 +642,15 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     protected void mergeInputSchema(String resultTableName) {
         Table resultTable = metadataProxy.getTable(customerSpace.toString(), resultTableName);
-        if (resultTable != null && CollectionUtils.isNotEmpty(inputTableNames)) {
-            log.info("Update the schema of " + resultTableName + " using input tables' schema.");
+        if (resultTable != null && (CollectionUtils.isNotEmpty(inputTableNames)
+                || CollectionUtils.isNotEmpty(rematchInputTableNames))) {
+            log.info("Update the schema of {} using input tables' ({}) and rematch input tables' ({}) schema.",
+                    resultTableName, inputTableNames, rematchInputTableNames);
             Map<String, Attribute> inputAttrs = new HashMap<>();
             inputTableNames.forEach(tblName -> addAttrsToMap(inputAttrs, tblName));
+            if (rematchInputTableNames != null) {
+                rematchInputTableNames.forEach(tblName -> addAttrsToMap(inputAttrs, tblName));
+            }
             updateAttrs(resultTable, inputAttrs);
             metadataProxy.updateTable(customerSpace.toString(), resultTableName, resultTable);
         }

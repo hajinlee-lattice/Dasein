@@ -8,6 +8,16 @@
     <description>Lattice Engines Modeling Service REST API</description>
 
     <filter>
+        <filter-name>xssSanitizeFilter</filter-name>
+        <filter-class>com.latticeengines.common.exposed.filter.XSSFilter</filter-class>
+        <async-supported>true</async-supported>
+    </filter>
+    <filter-mapping>
+        <filter-name>xssSanitizeFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
         <async-supported>true</async-supported>

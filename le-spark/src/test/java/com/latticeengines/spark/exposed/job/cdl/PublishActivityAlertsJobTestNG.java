@@ -85,7 +85,7 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
         config.setTenantId(-1L);
         Map<String, String> map = new HashMap<>();
         map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, AlertCategory.PRODUCTS.name());
-        map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT, AlertCategory.PRODUCTS.name());
+        map.put(ActivityStoreConstants.Alert.ANONYMOUS_WEB_VISITS, AlertCategory.PRODUCTS.name());
         map.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, AlertCategory.PRODUCTS.name());
         map.put(ActivityStoreConstants.Alert.SHOWN_INTENT, AlertCategory.PEOPLE.name());
         config.setAlertNameToAlertCategory(map);
@@ -120,8 +120,7 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
 
             Assert.assertEquals(size, 10);
             Assert.assertEquals(alertTypeCounts.get(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY).intValue(), 5);
-            Assert.assertEquals(
-                    alertTypeCounts.get(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT).intValue(), 4);
+            Assert.assertEquals(alertTypeCounts.get(ActivityStoreConstants.Alert.ANONYMOUS_WEB_VISITS).intValue(), 4);
             Assert.assertEquals(alertTypeCounts.get(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY).intValue(), 1);
         } catch (Exception e) {
             Assert.fail("Failed to verify\n" + e.getMessage());

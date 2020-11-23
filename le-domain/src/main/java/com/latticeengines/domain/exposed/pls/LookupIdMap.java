@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -28,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -36,6 +39,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.LookupIdMapConfigValuesLookup;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -94,6 +98,11 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     @JsonProperty("description")
     @Column(name = "DESCRIPTION")
     private String description;
+
+    @Type(type = "json")
+    @JsonProperty("configValues")
+    @Column(name = "CONFIG_VALUES", columnDefinition = "'JSON'")
+    private Map<String, String> configValues;
 
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
@@ -234,6 +243,18 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
         this.description = description;
     }
 
+    public Map<String, String> getConfigValues() {
+        if (configValues == null) {
+            return new HashMap<String, String>();
+        }
+
+        return configValues;
+    }
+
+    public void setConfigValues(Map<String, String> configValues) {
+        this.configValues = configValues;
+    }
+
     public Boolean getIsRegistered() {
         return isRegistered;
     }
@@ -280,6 +301,16 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
         }
         return externalAuthentication != null && !StringUtils.isBlank(externalAuthentication.getTrayAuthenticationId())
                 && externalAuthentication.getTrayWorkflowEnabled();
+    }
+
+    public String getEndDestinationId() {
+        if (LookupIdMapConfigValuesLookup.containsEndDestinationIdKey(externalSystemName)) {
+            String configValueKey = LookupIdMapConfigValuesLookup.getEndDestinationIdKey(externalSystemName);
+
+            return getConfigValues().get(configValueKey);
+        }
+
+        return orgId;
     }
 
     public boolean isFileSystem() {

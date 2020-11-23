@@ -77,8 +77,6 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         defaultMarketoExportFields = exportService.getAllAttributes(CDLExternalSystemName.Marketo);
 
         assertEquals(defaultMarketoExportFields.size(), 41);
-        assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 23);
 
@@ -118,7 +116,6 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         defaultS3ExportFields = exportService.getAllAttributes(CDLExternalSystemName.AWS_S3);
 
         assertEquals(defaultS3ExportFields.size(), 45);
-        assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(), 35);
         assertEquals(defaultS3ExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(), 37);
 
         List<ExportFieldMetadataDefaults> enabledS3ExportFields = exportService
@@ -137,9 +134,6 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         defaultLinkedInExportFields = exportService.getAllAttributes(CDLExternalSystemName.LinkedIn);
 
         assertEquals(defaultLinkedInExportFields.size(), 55);
-        assertEquals(
-                defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                44);
         List<ExportFieldMetadataDefaults> exportEnabledFields = defaultLinkedInExportFields.stream()
                 .filter(ExportFieldMetadataDefaults::getExportEnabled).collect((Collectors.toList()));
         assertEquals(exportEnabledFields.size(), 25);
@@ -156,9 +150,6 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         defaultFacebookExportFields = exportService.getAllAttributes(CDLExternalSystemName.Facebook);
 
         assertEquals(defaultFacebookExportFields.size(), 47);
-        assertEquals(
-                defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                40);
         assertEquals(defaultFacebookExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 11);
 
@@ -169,9 +160,6 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         defaultGoogleAdsExportFields = exportService.getAllAttributes(CDLExternalSystemName.GoogleAds);
 
         assertEquals(defaultGoogleAdsExportFields.size(), 43);
-        assertEquals(
-                defaultGoogleAdsExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                36);
         assertEquals(defaultGoogleAdsExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 10);
 
@@ -182,9 +170,6 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         defaultOutreachExportFields = exportService.getAllAttributes(CDLExternalSystemName.Outreach);
 
         assertEquals(defaultOutreachExportFields.size(), 37);
-        assertEquals(
-                defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                27);
         assertEquals(defaultOutreachExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
                 27);
 

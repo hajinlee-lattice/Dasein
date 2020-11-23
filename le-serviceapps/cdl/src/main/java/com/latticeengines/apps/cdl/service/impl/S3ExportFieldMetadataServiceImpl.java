@@ -130,13 +130,12 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
             List<ColumnMetadata> exportColumnMetadataList, AudienceType channelAudienceType) {
         if (channelAudienceType == AudienceType.CONTACTS) {
             exportColumnMetadataList.addAll(contactAttributesMap.values());
+            List<BusinessEntity> contactEntities = BusinessEntity.EXPORT_CONTACT_ENTITIES.stream().filter(entity -> !BusinessEntity.Contact.equals(entity)).collect(Collectors.toList());
+            exportColumnMetadataList.addAll(getServingMetadata(customerSpace, contactEntities, channelConfig.getAttributeSetName()).collect(Collectors.toList()).block());
         }
         exportColumnMetadataList.addAll(accountAttributesMap.values());
-        List<BusinessEntity> accountEntities =
-                BusinessEntity.EXPORT_ACCOUNT_ENTITIES.stream().filter(entity -> !BusinessEntity.Account.equals(entity)).collect(Collectors.toList());
-        List<BusinessEntity> contactEntities =
-                BusinessEntity.EXPORT_CONTACT_ENTITIES.stream().filter(entity -> !BusinessEntity.Contact.equals(entity)).collect(Collectors.toList());
+        List<BusinessEntity> accountEntities = BusinessEntity.EXPORT_ACCOUNT_ENTITIES.stream().filter(entity -> !BusinessEntity.Account.equals(entity)).collect(Collectors.toList());
         exportColumnMetadataList.addAll(getServingMetadata(customerSpace, accountEntities, channelConfig.getAttributeSetName()).collect(Collectors.toList()).block());
-        exportColumnMetadataList.addAll(getServingMetadata(customerSpace, contactEntities, channelConfig.getAttributeSetName()).collect(Collectors.toList()).block());
+
     }
 }

@@ -7,7 +7,6 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true,
       "audienceType": []
    },
    {
@@ -17,9 +16,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"AccountId",
@@ -29,7 +27,6 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -39,9 +36,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"PLAY_ID",
@@ -51,7 +47,6 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -61,9 +56,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"DESCRIPTION",
@@ -72,9 +66,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"LAUNCH_DATE",
@@ -83,9 +76,8 @@
       "javaClass":"Long",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"LAST_UPDATED_TIMESTAMP",
@@ -94,9 +86,8 @@
       "javaClass":"Long",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"MONETARY_VALUE",
@@ -106,7 +97,6 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -117,7 +107,26 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
+   },
+   {
+      "attrName":"SFDC_ACCOUNT_ID",
+      "displayName":"SFDC Account ID",
+      "entity":"Account",
+      "javaClass":"String",
+      "externalSystemName":"Salesforce",
+      "standardField":true,
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
+   },
+   {
+      "attrName":"PRIORITY_ID",
+      "displayName":"Lattice Identifier",
+      "entity":"Account",
+      "javaClass":"String",
+      "externalSystemName":"Salesforce",
+      "standardField":false,
+      "exportEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -128,30 +137,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
-   },
-   {
-      "attrName":"SFDC_ACCOUNT_ID",
-      "displayName":"SFDC Account ID",
-      "entity":"Account",
-      "javaClass":"String",
-      "externalSystemName":"Salesforce",
-      "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
-   },
-   {
-      "attrName":"PRIORITY_ID",
-      "displayName":"Lattice Identifier",
-      "entity":"Account",
-      "javaClass":"String",
-      "externalSystemName":"Salesforce",
-      "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
    },
    {
       "attrName":"PRIORITY_DISPLAY_NAME",
@@ -161,7 +147,6 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -171,9 +156,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"LIFT",
@@ -183,7 +167,6 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -194,30 +177,27 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"MODEL_SUMMARY_ID",
-      "displayName":"MODEL_SUMMARY_ID",
+      "displayName":"Model Summary Id",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"SYNC_DESTINATION",
-      "displayName":"SYNC_DESTINATION",
+      "displayName":"Sync Destination",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"DESTINATION_ORG_ID",
@@ -226,9 +206,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"DESTINATION_SYS_TYPE",
@@ -237,20 +216,18 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"TENANT_ID",
-      "displayName":"TENANT_ID",
+      "displayName":"Tenant ID",
       "entity":"Account",
       "javaClass":"Long",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"DELETED",
@@ -260,7 +237,6 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":false,
-      "historyEnabled":true,
       "audienceType": []
    },
    {
@@ -270,9 +246,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":true,
-      "exportEnabled":true,
-      "historyEnabled":false,
-      "audienceType": ["CONTACTS"]
+      "exportEnabled":false,
+      "audienceType": []
    },
    {
       "attrName":"DESTINATION_SYS_NAME",
@@ -281,8 +256,7 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":true,
-      "historyEnabled":false,
+      "exportEnabled":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -292,9 +266,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":true,
-      "historyEnabled":false,
-      "audienceType": ["CONTACTS"]
+      "exportEnabled":false,
+      "audienceType": []
    },
    {
       "attrName":"RATING_MODEL_NAME",
@@ -303,9 +276,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":true,
-      "historyEnabled":false,
-      "audienceType": ["CONTACTS"]
+      "exportEnabled":false,
+      "audienceType": []
    },
    {
       "attrName":"SEGMENT_NAME",
@@ -314,9 +286,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":false,
-      "exportEnabled":true,
-      "historyEnabled":false,
-      "audienceType": ["CONTACTS"]
+      "exportEnabled":false,
+      "audienceType": []
    },
    {
       "attrName":"Email",
@@ -326,18 +297,26 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"Address_Street_1",
-      "displayName":"Contact Address",
+      "displayName":"Contact Address Street 1",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
+   },
+   {
+      "attrName":"Address_Street_2",
+      "displayName":"Contact Address Street 2",
+      "entity":"Contact",
+      "javaClass":"String",
+      "externalSystemName":"Salesforce",
+      "standardField":true,
+      "exportEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -348,7 +327,6 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -359,7 +337,6 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -370,7 +347,26 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
+   },
+   {
+      "attrName": "DoNotCall",
+      "displayName": "Do Not Call",
+      "entity": "Contact",
+      "javaClass": "String",
+      "externalSystemName": "Salesforce",
+      "standardField": true,
+      "exportEnabled": true,
+      "audienceType": ["CONTACTS"]
+   },
+   {
+      "attrName": "DoNotMail",
+      "displayName": "Do Not Mail",
+      "entity": "Contact",
+      "javaClass": "String",
+      "externalSystemName": "Salesforce",
+      "standardField": true,
+      "exportEnabled": true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -381,7 +377,36 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
+      "audienceType": ["CONTACTS"]
+   },
+   {
+      "attrName":"CreatedDate",
+      "displayName":"Contact Created Date",
+      "entity":"Contact",
+      "javaClass":"String",
+      "externalSystemName":"Salesforce",
+      "standardField":true,
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
+   },
+   {
+      "attrName":"LastModifiedDate",
+      "displayName":"Contact Last Modified Date",
+      "entity":"Contact",
+      "javaClass":"String",
+      "externalSystemName":"Salesforce",
+      "standardField":true,
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
+   },
+   {
+      "attrName": "Title",
+      "displayName": "Contact Title",
+      "entity": "Contact",
+      "javaClass": "String",
+      "externalSystemName": "Salesforce",
+      "standardField": true,
+      "exportEnabled": true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -390,10 +415,9 @@
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Salesforce",
-      "standardField":false,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "standardField":true,
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"City",
@@ -403,7 +427,6 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -413,9 +436,8 @@
       "javaClass":"String",
       "externalSystemName":"Salesforce",
       "standardField":true,
-      "exportEnabled":false,
-      "historyEnabled":true,
-      "audienceType": []
+      "exportEnabled":true,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"ContactName",
@@ -425,7 +447,6 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -436,7 +457,6 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -447,7 +467,6 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":false,
       "audienceType": ["CONTACTS"]
    }
 ]

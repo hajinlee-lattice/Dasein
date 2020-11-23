@@ -7,7 +7,6 @@
       "externalSystemName":"TradeDesk",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["ACCOUNTS"]
    }
 ]

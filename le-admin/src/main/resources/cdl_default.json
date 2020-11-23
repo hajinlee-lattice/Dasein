@@ -78,6 +78,13 @@
     {
       "Node": "IntentEmailDeliveryCronExpression",
       "Data": ""
+    },
+    {
+      "Node": "ContactsPerAccountSort",
+      "Children": [
+        {"Node": "Attribute", "Data": "CDLUpdatedTime"},
+        {"Node": "Direction", "Data": "DESC"}
+      ]
     }
   ]
 }

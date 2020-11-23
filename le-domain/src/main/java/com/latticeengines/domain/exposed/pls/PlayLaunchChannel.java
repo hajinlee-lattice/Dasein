@@ -117,9 +117,13 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Enumerated(EnumType.STRING)
     private LaunchType launchType;
 
-    @JsonProperty("maxAccountsToLaunch")
-    @Column(name = "MAX_ACCOUNTS_TO_LAUNCH")
-    private Long maxAccountsToLaunch;
+    @JsonProperty("maxEntitiesToLaunch")
+    @Column(name = "MAX_ENTITIES_TO_LAUNCH")
+    private Long maxEntitiesToLaunch;
+
+    @JsonProperty("maxContactsPerAccount")
+    @Column(name = "MAX_CONTACTS_PER_ACCOUNT")
+    private Long maxContactsPerAccount;
 
     @JsonProperty("cronScheduleExpression")
     @Column(name = "CRON_SCHEDULE_EXPRESSION")
@@ -312,12 +316,20 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
         this.isAlwaysOn = isAlwaysOn;
     }
 
-    public Long getMaxAccountsToLaunch() {
-        return maxAccountsToLaunch;
+    public Long getMaxEntitiesToLaunch() {
+        return maxEntitiesToLaunch;
     }
 
-    public void setMaxAccountsToLaunch(Long maxAccountsToLaunch) {
-        this.maxAccountsToLaunch = maxAccountsToLaunch;
+    public void setMaxEntitiesToLaunch(Long maxEntitiesToLaunch) {
+        this.maxEntitiesToLaunch = maxEntitiesToLaunch;
+    }
+
+    public Long getMaxContactsPerAccount() {
+        return maxContactsPerAccount;
+    }
+
+    public void setMaxContactsPerAccount(Long maxContactsPerAccount) {
+        this.maxContactsPerAccount = maxContactsPerAccount;
     }
 
     public Set<RatingBucketName> getBucketsToLaunch() {

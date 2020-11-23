@@ -107,17 +107,17 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
             case ENTITY_ACCOUNT:
                 baseAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
                 Assert.assertNotNull(baseAccountFile);
-                startCDLImport(baseAccountFile, ENTITY_ACCOUNT);
+                startCDLImport(baseAccountFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
                 break;
             case ENTITY_CONTACT:
                 baseContactFile = uploadSourceFile(CONTACT_SOURCE_FILE, ENTITY_CONTACT);
                 Assert.assertNotNull(baseContactFile);
-                startCDLImport(baseContactFile, ENTITY_CONTACT);
+                startCDLImport(baseContactFile, ENTITY_CONTACT, DEFAULT_SYSTEM);
                 break;
             case ENTITY_TRANSACTION:
                 baseTransactionFile = uploadSourceFile(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION);
                 Assert.assertNotNull(baseTransactionFile);
-                startCDLImport(baseTransactionFile, ENTITY_TRANSACTION);
+                startCDLImport(baseTransactionFile, ENTITY_TRANSACTION, DEFAULT_SYSTEM);
                 break;
             default:
         }
@@ -170,9 +170,9 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
         return sourceFile;
     }
 
-    protected void startCDLImport(SourceFile sourceFile, String entity) {
+    protected void startCDLImport(SourceFile sourceFile, String entity, String system) {
         ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),
-                sourceFile.getName(), SOURCE, entity, getFeedTypeByEntity(DEFAULT_SYSTEM, entity));
+                sourceFile.getName(), SOURCE, entity, getFeedTypeByEntity(system, entity));
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);

@@ -50,11 +50,6 @@ public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetada
     }
 
     @Override
-    public List<ExportFieldMetadataDefaults> getHistoryEnabledAttributes(CDLExternalSystemName systemName) {
-        return exportFieldMetadataDefaultsEntityMgr.getHistoryEnabledDefaultFieldMetadata(systemName);
-    }
-
-    @Override
     public List<ExportFieldMetadataDefaults> updateDefaultFields(CDLExternalSystemName systemName,
             List<ExportFieldMetadataDefaults> defaultExportFields) {
         return this.updateFieldMetadataDefault(systemName, defaultExportFields, getAllAttributes(systemName));

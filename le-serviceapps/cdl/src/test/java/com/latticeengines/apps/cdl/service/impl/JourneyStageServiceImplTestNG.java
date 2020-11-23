@@ -122,6 +122,27 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "testUpdate")
+    public void testDelete() {
+        AtomicReference<JourneyStage> createdAtom = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom.set(journeyStageService.findByPid(mainCustomerSpace, pid));
+            Assert.assertNotNull(createdAtom.get());
+            return true;
+        });
+        JourneyStage stage = createdAtom.get();
+        Assert.assertNotNull(stage);
+        Assert.assertEquals(stage.getStageName(), updateStageName);
+        journeyStageService.delete(mainCustomerSpace, stage);
+        retry.execute(context -> {
+            createdAtom.set(journeyStageService.findByStageName(mainCustomerSpace, updateStageName));
+            Assert.assertNull(createdAtom.get());
+            return true;
+        });
+        stage = createdAtom.get();
+        Assert.assertNull(stage);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testDelete")
     public void testDefault() {
         journeyStageService.createDefaultJourneyStages(mainCustomerSpace);
         AtomicReference<List<JourneyStage>> createdAtom = new AtomicReference<>();

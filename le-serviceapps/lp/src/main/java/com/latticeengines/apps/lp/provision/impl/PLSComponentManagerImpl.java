@@ -554,7 +554,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             String email = user.getEmailAddress();
 
             User createUserData = new User();
-            createUserData.setEmail(user.getEmailAddress());
+            createUserData.setEmail(user.getEmailAddress().toLowerCase());
             createUserData.setFirstName(user.getFirstName());
             createUserData.setLastName(user.getLastName());
             createUserData.setUsername(user.getUserName());
@@ -579,6 +579,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
                 createdUsers.add(createdUser);
             } else {
+                user.setEmailAddress(email.toLowerCase());
                 createdUsers.add(user);
             }
         }

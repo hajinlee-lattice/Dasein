@@ -103,7 +103,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             "consolidateandpublishworkflow", //
             "profileandpublishworkflow", //
             "timelineexportworkflow", //
-            "generateintentemailalertworkflow" };
+            "generateintentemailalertworkflow", //
+            "campaigndeltacalculationworkflow", //
+            "deltacampaignlaunchworkflow" };
     private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
             Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
@@ -332,9 +334,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                         // make it as if old job is still running
                         job.setJobStatus(JobStatus.RUNNING);
                     }
-                    // when job failed and no further retry will be performed, not set the flag
+                    // when job is running, set the flag
                     // since UI will display a different tooltip
-                    if (job.getJobStatus() != JobStatus.FAILED) {
+                    if (job.isRunning()) {
                         job.setJobRetried(true);
                     }
 

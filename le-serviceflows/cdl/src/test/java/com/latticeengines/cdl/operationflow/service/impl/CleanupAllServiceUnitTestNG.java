@@ -47,8 +47,6 @@ public class CleanupAllServiceUnitTestNG {
 
         Mockito.doNothing().when(dataCollectionProxy).resetTable(anyString(), any(TableRoleInCollection.class));
 
-        Mockito.doNothing().when(dataFeedProxy).resetImport(anyString());
-        Mockito.doNothing().when(dataFeedProxy).resetImportByEntity(anyString(), anyString());
 
         Mockito.doNothing().when(metadataProxy).deleteImportTable(anyString(), anyString());
         Mockito.doNothing().when(metadataProxy).deleteTable(anyString(), anyString());

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,7 @@ public class JourneyStageServiceImpl implements JourneyStageService {
     @Override
     public JourneyStage createOrUpdate(String customerSpace, JourneyStage journeyStage) {
         JourneyStage newJourneyStage = null;
+        Boolean create = false;
         if (journeyStage.getPid() != null) {
             newJourneyStage = journeyStageEntityMgr.findByPid(journeyStage.getPid());
         }
@@ -50,6 +52,7 @@ public class JourneyStageServiceImpl implements JourneyStageService {
 
         if (newJourneyStage == null) {
             newJourneyStage = new JourneyStage();
+            create = true;
         }
         newJourneyStage.setTenant(MultiTenantContext.getTenant());
         newJourneyStage.setPriority(journeyStage.getPriority());
@@ -59,6 +62,18 @@ public class JourneyStageServiceImpl implements JourneyStageService {
         newJourneyStage.setDescription(journeyStage.getDescription());
         newJourneyStage.setDisplayColorCode(journeyStage.getDisplayColorCode());
         journeyStageEntityMgr.createOrUpdate(newJourneyStage);
+        // If creating new stage, need to shift the priorities for existing stages for
+        // current tenant
+        if (create) {
+            List<JourneyStage> stages = findByTenant(customerSpace);
+            for (JourneyStage stage : stages) {
+                if (stage.getPriority() >= newJourneyStage.getPriority()
+                        && !StringUtils.equals(stage.getStageName(), newJourneyStage.getStageName())) {
+                    stage.setPriority(stage.getPriority() + 1);
+                    journeyStageEntityMgr.update(stage);
+                }
+            }
+        }
         return newJourneyStage;
     }
 
@@ -75,6 +90,7 @@ public class JourneyStageServiceImpl implements JourneyStageService {
                     journeyStage.getStageName(), journeyStage.getPid());
             return;
         }
+        oldJourneyStage.setTenant(null);
         journeyStageEntityMgr.delete(oldJourneyStage);
     }
 

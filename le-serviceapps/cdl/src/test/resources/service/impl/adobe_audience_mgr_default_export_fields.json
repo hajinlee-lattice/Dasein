@@ -7,7 +7,6 @@
       "externalSystemName":"Adobe_Audience_Mgr",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["ACCOUNTS"]
    }
 ]

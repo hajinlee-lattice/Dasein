@@ -463,7 +463,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public Collection<TenantDocument> getTenantsInCache(String contractId) {
-        PerformanceTimer timer = new PerformanceTimer("geting tenants in backend", log);
+        PerformanceTimer timer = new PerformanceTimer("getting tenants in backend", log);
         Collection<TenantDocument> tenants = tenantEntityMgr.getTenantsInCache(contractId);
         if (tenants != null) {
             for (TenantDocument doc : tenants) {

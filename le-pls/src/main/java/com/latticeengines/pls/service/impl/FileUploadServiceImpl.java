@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
@@ -31,8 +33,10 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -288,7 +292,16 @@ public class FileUploadServiceImpl implements FileUploadService {
         sourceFile = getSourceFilewithRetry(sourceFile.getName(), true);
         Table template = getMetadata(sourceFile.getName());
         if (template == null) {
-            throw new RuntimeException("Cannot resolve metadata from uploaded file!");
+            Table standard = SchemaRepository.instance().getSchema(schemaInterpretation, false, enableEntityMatch,
+                    onlyGA);
+            Preconditions.checkNotNull(standard, "standard table should not be null");
+            Set<String> requiredColumns =
+                    standard.getAttributes().stream()
+                            .filter(Attribute::getRequired)
+                            .map(Attribute::getName)
+                            .collect(Collectors.toSet());
+            throw new RuntimeException(String.format("Cannot resolve metadata from uploaded file, please provide " +
+                    "required columns %s!", requiredColumns));
         }
         InterfaceName accountInterface = enableEntityMatch ? InterfaceName.CustomerAccountId : InterfaceName.AccountId;
         InterfaceName contactInterface = enableEntityMatch ? InterfaceName.CustomerContactId : InterfaceName.ContactId;

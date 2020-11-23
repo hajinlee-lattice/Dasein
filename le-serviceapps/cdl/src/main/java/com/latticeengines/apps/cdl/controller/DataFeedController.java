@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.AtlasExportService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
-import com.latticeengines.apps.cdl.util.EntityExportUtils;
 import com.latticeengines.apps.cdl.util.PAValidationUtils;
 import com.latticeengines.apps.cdl.workflow.AtlasProfileReportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.CDLEntityMatchMigrationWorkflowSubmitter;
@@ -243,21 +242,12 @@ public class DataFeedController {
                 request.setSaveToDropfolder(true);
                 AtlasExportType exportType = request.getExportType();
                 if (exportType != null) {
-                    EntityExportUtils.checkExportAttribute(exportType, customerSpace,
-                            request.getDataCollectionVersion(), servingStoreService);
                     appId = submitWorkflow(customerSpace, request, exportType);
                     return ResponseDocument.successResponse(appId.toString());
                 } else {
                     // empty export type means export both account and contact
                     List<String> responseMessages = new ArrayList();
                     for (AtlasExportType atlasExportType : AtlasExportType.UI_EXPORT_TYPES) {
-                        try {
-                            EntityExportUtils.checkExportAttribute(atlasExportType, customerSpace,
-                                    request.getDataCollectionVersion(), servingStoreService);
-                        } catch (RuntimeException e) {
-                            responseMessages.add(e.getMessage());
-                            continue;
-                        }
                         appId = submitWorkflow(customerSpace, request, atlasExportType);
                         responseMessages.add(appId.toString());
                     }

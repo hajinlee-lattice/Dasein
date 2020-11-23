@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -38,12 +40,12 @@ import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
+import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.CreateDeltaRecommendationsJob;
@@ -192,15 +194,20 @@ public class DeltaCampaignLaunchInitStep
     private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
         List<ColumnMetadata> columnMetadata = playLaunchContext.getFieldMappingMetadata();
         if (CollectionUtils.isNotEmpty(columnMetadata)) {
-            Map<String, String> contactDisplayNames = columnMetadata.stream()
-                    .filter(col -> BusinessEntity.Contact.equals(col.getEntity()))
-                    .collect(Collectors.toMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName));
-            Map<String, String> accountDisplayNames = columnMetadata.stream()
-                    .filter(col -> !BusinessEntity.Contact.equals(col.getEntity()))
-                    .collect(Collectors.toMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName));
+            Map<String, String> accountDisplayNames = new HashMap<>();
+            Map<String, String> contactDisplayNames = new HashMap<>();
+            Map<String, String> displayNameMap = ExportUtils.getDisplayNameMap(ExportEntity.AccountContact, columnMetadata);
+            int prefixLength = ExportUtils.CONTACT_ATTR_PREFIX.length();
+            displayNameMap.entrySet().stream().forEach(entry ->
+            {
+                if (entry.getKey().startsWith(ExportUtils.CONTACT_ATTR_PREFIX)) {
+                    contactDisplayNames.put(entry.getKey().substring(prefixLength), entry.getValue());
+                } else {
+                    accountDisplayNames.put(entry.getKey(), entry.getValue());
+                }
+            });
             log.info("accountDisplayNames map: " + accountDisplayNames);
             log.info("contactDisplayNames map: " + contactDisplayNames);
-
             putObjectInContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES, accountDisplayNames);
             putObjectInContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES, contactDisplayNames);
         }
@@ -277,7 +284,7 @@ public class DeltaCampaignLaunchInitStep
         if (audienceType.equals(AudienceType.ACCOUNTS)) {
             return InterfaceName.AccountId.name();
         } else {
-            return DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name();
+            return ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name();
         }
     }
 

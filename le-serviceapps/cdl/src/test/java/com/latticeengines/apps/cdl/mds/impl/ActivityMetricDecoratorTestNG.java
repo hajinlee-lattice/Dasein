@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputat
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 
 import reactor.core.publisher.Flux;
 
@@ -68,8 +69,10 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
     private static final String PATTERN = "*dnb.com/*";
     private static final String PERIOD = PeriodStrategy.Template.Week.name();
     private static final String GROUPNAME_TOTAL_VISIT = "Total Web Visits";
+    private static final String GROUPNAME_TOTAL_VISIT_CW = "Total Web Visits Current Week";
     private static final String DISPLAY_NAME_TMPL = StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME;
     private static final String DESCRIPTION_TMPL = StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION;
+    private static final String DESCRIPTION_TMPL_CW = StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION_CW;
     private static final String SUBCATEGORY_TMPL = StringTemplateConstants.ACTIVITY_METRICS_GROUP_SUBCATEGORY;
     private static final String JAVA_CLASS_LONG = Long.class.getSimpleName();
     private static final NullMetricsImputation NULL_IMPUTATION = NullMetricsImputation.ZERO;
@@ -89,6 +92,7 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
     private StringTemplateReaderRepository stringTemplateReaderRepository;
 
     private String groupId;
+    private String currentWeekGroupId;
 
     @Override
     protected List<String> getCatalogNames() {
@@ -127,7 +131,7 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         ColumnMetadata cm1 = rendered.get(0);
         Assert.assertEquals(cm1.getCategory(), Category.WEB_VISIT_PROFILE);
         Assert.assertEquals(cm1.getDisplayName(), "Last 2 weeks");
-        Assert.assertNull(cm1.getDescription());
+        Assert.assertEquals(cm1.getDescription(), "This attribute shows companies with the unique Website Visits counts (organic + lead) within the previous 2 weeks plus this week till today, based on real-time web traffic records. The previous 2 weeks is the 3 weeks period beginning 2 weeks ago as of the last data refresh.");
         Assert.assertEquals(cm1.getSubcategory(), "Page 123");
         Assert.assertEquals(cm1.getSecondarySubCategoryDisplayName(), PATTERN);
         Assert.assertEquals(cm1.getFilterTags(), Arrays.asList("w_2_w", FilterOptions.Option.ANY_VALUE));
@@ -136,13 +140,23 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
 
         ColumnMetadata cm2 = rendered.get(1);
         Assert.assertEquals(cm2.getCategory(), Category.WEB_VISIT_PROFILE);
-        Assert.assertEquals(cm2.getDisplayName(), "Between 2 and 4 weeks");
-        Assert.assertNull(cm2.getDescription());
+        Assert.assertEquals(cm2.getDisplayName(), "1 week till today");
+        Assert.assertEquals(cm2.getDescription(), "This attribute shows companies with the unique Website Visits counts (organic + lead) within the previous 1 week plus this week till today, based on real-time web traffic records. The previous 1 week is the 2 weeks period beginning 1 week ago as of the last data refresh.");
         Assert.assertEquals(cm2.getSubcategory(), "Page 123");
         Assert.assertEquals(cm2.getSecondarySubCategoryDisplayName(), PATTERN);
-        Assert.assertEquals(cm2.getFilterTags(), Arrays.asList("b_2_4_w", FilterOptions.Option.ANY_VALUE));
+        Assert.assertEquals(cm2.getFilterTags(), Arrays.asList("wi_1_w", FilterOptions.Option.ANY_VALUE));
         Assert.assertTrue(cm2.isHiddenInCategoryTile());
         Assert.assertEquals(cm2.getFundamentalType(), FundamentalType.NUMERIC);
+
+        ColumnMetadata cm3 = rendered.get(2);
+        Assert.assertEquals(cm3.getCategory(), Category.WEB_VISIT_PROFILE);
+        Assert.assertEquals(cm3.getDisplayName(), "Current week till today");
+        Assert.assertEquals(cm3.getDescription(), "This attribute shows companies with the unique Website Visits counts between the beginning of this week till today, based on real-time web traffic records.");
+        Assert.assertEquals(cm3.getSubcategory(), "Page 123");
+        Assert.assertEquals(cm3.getSecondarySubCategoryDisplayName(), PATTERN);
+        Assert.assertEquals(cm3.getFilterTags(), Arrays.asList("wi_0_w", FilterOptions.Option.ANY_VALUE));
+        Assert.assertTrue(cm3.isHiddenInCategoryTile());
+        Assert.assertEquals(cm3.getFundamentalType(), FundamentalType.NUMERIC);
     }
 
     private void mockBatonService() {
@@ -181,22 +195,31 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
     }
 
     private List<ColumnMetadata> constructColumns() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("GroupId", groupId);
-        map.put("RollupDimIds", Collections.singletonList(PATTERN_ID));
+        Map<String, Object> multiWeeksGroupAttrs = new HashMap<>();
+        multiWeeksGroupAttrs.put("GroupId", groupId);
+        multiWeeksGroupAttrs.put("RollupDimIds", Collections.singletonList(PATTERN_ID));
 
         TimeFilter timeFilter = TimeFilter.within(2, PERIOD);
-        map.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
-        String attr1 = TemplateUtils.renderByMap(ACTIVITY_METRICS_GROUP_ATTRNAME, map).toLowerCase();
+        multiWeeksGroupAttrs.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
+        String attr1 = TemplateUtils.renderByMap(ACTIVITY_METRICS_GROUP_ATTRNAME, multiWeeksGroupAttrs).toLowerCase();
         ColumnMetadata cm1 = new ColumnMetadata(attr1, "String");
         cm1.setEntity(BusinessEntity.WebVisitProfile);
 
-        timeFilter = TimeFilter.between(2, 4, PERIOD);
-        map.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
-        String attr2 = TemplateUtils.renderByMap(ACTIVITY_METRICS_GROUP_ATTRNAME, map).toLowerCase();
+        timeFilter = TimeFilter.withinInclude(1, PERIOD);
+        multiWeeksGroupAttrs.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
+        String attr2 = TemplateUtils.renderByMap(ACTIVITY_METRICS_GROUP_ATTRNAME, multiWeeksGroupAttrs).toLowerCase();
         ColumnMetadata cm2 = new ColumnMetadata(attr2, "String");
         cm2.setEntity(BusinessEntity.WebVisitProfile);
-        return Arrays.asList(cm1, cm2);
+
+        Map<String, Object> currentWeekGroupAttr = new HashMap<>();
+        currentWeekGroupAttr.put("GroupId", currentWeekGroupId);
+        currentWeekGroupAttr.put("RollupDimIds", Collections.singletonList(PATTERN_ID));
+        timeFilter = TimeFilter.withinInclude(0, PERIOD);
+        currentWeekGroupAttr.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
+        String attr3 = TemplateUtils.renderByMap(ACTIVITY_METRICS_GROUP_ATTRNAME, currentWeekGroupAttr).toLowerCase();
+        ColumnMetadata cm3 = new ColumnMetadata(attr3, "String");
+        cm3.setEntity(BusinessEntity.WebVisitProfile);
+        return Arrays.asList(cm1, cm2, cm3);
     }
 
     private void prepareDimension() {
@@ -216,6 +239,8 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
     private void prepareMetricGroup() {
         ActivityMetricsGroup group = prepareMetricsGroup();
         activityMetricsGroupEntityMgr.createOrUpdate(group);
+        ActivityMetricsGroup currentWeekGroup = prepareCurrentWeekMetricsGroup();
+        activityMetricsGroupEntityMgr.createOrUpdate(currentWeekGroup);
     }
 
     private StreamDimension getWebVisitDimension() {
@@ -257,6 +282,28 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         group.setActivityTimeRange(activityTimeRange);
         group.setDisplayNameTmpl(getTemplate(DISPLAY_NAME_TMPL));
         group.setDescriptionTmpl(getTemplate(DESCRIPTION_TMPL));
+        group.setCategory(Category.WEBSITE_PROFILE);
+        group.setSubCategoryTmpl(getTemplate(SUBCATEGORY_TMPL));
+        group.setJavaClass(JAVA_CLASS_LONG);
+        group.setNullImputation(NULL_IMPUTATION);
+
+        return group;
+    }
+
+    private ActivityMetricsGroup prepareCurrentWeekMetricsGroup() {
+        AtlasStream stream = streams.get(STREAM_WEBVISIT);
+        ActivityMetricsGroup group = new ActivityMetricsGroup();
+        group.setGroupName(GROUPNAME_TOTAL_VISIT);
+        currentWeekGroupId = ActivityMetricsGroupUtils.fromGroupNameToGroupIdBase(GROUPNAME_TOTAL_VISIT_CW);
+        group.setGroupId(currentWeekGroupId);
+        group.setTenant(mainTestTenant);
+        group.setStream(stream);
+        group.setEntity(BusinessEntity.Account);
+        group.setRollupDimensions(DIM_PATH_PATTERN_ID);
+        group.setAggregation(stream.getAttributeDerivers().get(0));
+        group.setActivityTimeRange(ActivityStoreUtils.currentWeekTimeRange());
+        group.setDisplayNameTmpl(getTemplate(DISPLAY_NAME_TMPL));
+        group.setDescriptionTmpl(getTemplate(DESCRIPTION_TMPL_CW));
         group.setCategory(Category.WEBSITE_PROFILE);
         group.setSubCategoryTmpl(getTemplate(SUBCATEGORY_TMPL));
         group.setJavaClass(JAVA_CLASS_LONG);

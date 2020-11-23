@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rematch;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +21,24 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Functions;
+import com.latticeengines.cdl.workflow.steps.merge.SystemBatchTemplateName;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ConvertBatchStoreStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.SplitSystemBatchStoreConfig;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.SplitSystemBatchStoreJob;
@@ -43,6 +52,9 @@ public class SplitSystemBatchStore
     static final String BEAN_NAME = "splitSystemBatchStore";
 
     public static final String LATTICE_ACCOUNT_ID = InterfaceName.LatticeAccountId.name();
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -132,26 +144,40 @@ public class SplitSystemBatchStore
                 ? TableRoleInCollection.SystemAccount
                 : TableRoleInCollection.SystemContact;
 
+        DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        Table batchStoreTable = dataCollectionProxy.getTable(customerSpace.toString(),
+                configuration.getEntity().getBatchStore(), active);
+        Map<String, DataFeedTask> taskMap = MapUtils
+                .emptyIfNull(dataFeedProxy.getTemplateToDataFeedTaskMap(customerSpace.toString()));
         int cnt = 1;
         Map<String, String> tableTemplateMap = getMapObjectFromContext(CONSOLIDATE_INPUT_TEMPLATES, String.class,
                 String.class);
         if (tableTemplateMap == null) {
             tableTemplateMap = new HashMap<>();
         }
-        List<String> tempList = templates.stream().collect(Collectors.toList());
+        List<String> tempList = new ArrayList<>(templates);
         log.info("tableTemplateMap size " + tableTemplateMap.size() + ", tempList size " + tempList.size());
         for (HdfsDataUnit target : targets) {
             String tableName = NamingUtils.timestamp(role.toString() + "_split" + cnt);
             log.info("Generated table name is " + tableName);
             Table splitTable = toTable(tableName, target);
 
+            String tmpl = tempList.get(cnt - 1);
             // Update the table template map
-            tableTemplateMap.put(tableName, tempList.get(cnt - 1));
+            tableTemplateMap.put(tableName, tmpl);
+
+            // make sure table has the same metadata as corresponding template
+            if (SystemBatchTemplateName.Other.name().equals(tmpl)
+                    || SystemBatchTemplateName.Embedded.name().equals(tmpl)) {
+                copyAttrs(splitTable, batchStoreTable);
+            } else {
+                enrichTable(splitTable, tmpl, taskMap.get(tmpl));
+            }
 
             // Register into metadata table
             metadataProxy.createTable(customerSpace.getTenantId(), tableName, splitTable);
 
-            rematchTables.putIfAbsent(configuration.getEntity().name(), new LinkedList<String>());
+            rematchTables.putIfAbsent(configuration.getEntity().name(), new LinkedList<>());
             rematchTables.get(configuration.getEntity().name()).add(tableName);
 
             exportToS3(splitTable);
@@ -163,5 +189,27 @@ public class SplitSystemBatchStore
         putObjectInContext(REMATCH_TABLE_NAMES, rematchTables);
         // Put the table template map back into context
         putObjectInContext(CONSOLIDATE_INPUT_TEMPLATES, tableTemplateMap);
+    }
+
+    private void enrichTable(@NotNull Table table, @NotNull String templateName, DataFeedTask task) {
+        if (task == null || task.getImportTemplate() == null) {
+            log.warn("Cannot find import template table for {}", templateName);
+            return;
+        }
+
+        log.info("Enriching split table {} with import template {}, table {}", table.getName(), templateName,
+                task.getImportTemplate().getName());
+        copyAttrs(table, task.getImportTemplate());
+    }
+
+    private void copyAttrs(@NotNull Table target, @NotNull Table source) {
+        log.info("Copying {} attribute metadata from table {} to table {} ({} attributes)",
+                source.getAttributes().size(), source.getName(), target.getName(), target.getAttributes().size());
+        Map<String, Attribute> attrs = source.getAttributes().stream()
+                .collect(Collectors.toMap(Attribute::getName, Functions.identity()));
+        // use metadata from import template first
+        List<Attribute> mergedAttrs = target.getAttributes().stream()
+                .map(attr -> attrs.getOrDefault(attr.getName(), attr)).collect(Collectors.toList());
+        target.setAttributes(mergedAttrs);
     }
 }

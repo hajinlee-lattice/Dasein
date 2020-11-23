@@ -79,7 +79,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     protected GlobalAuthDeploymentTestBed testBed;
 
     @Inject
-    private WorkflowProxy workflowProxy;
+    protected WorkflowProxy workflowProxy;
 
     @Inject
     private ModelProxy modelProxy;
