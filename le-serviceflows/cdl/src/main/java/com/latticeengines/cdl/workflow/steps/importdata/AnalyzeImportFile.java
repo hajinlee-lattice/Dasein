@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -57,7 +58,13 @@ public class AnalyzeImportFile extends RunSparkJob<ImportDataFeedTaskConfigurati
             log.error("EAI import job {} not exists, or cannot find import data.", applicationId);
             return null;
         }
-        List<DataUnit> dataUnits = importJobDetail.getPathDetail().stream()
+        List<String> inputPathList = importJobDetail.getPathDetail().stream()
+                .filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(inputPathList)) {
+            log.error("EAI import job {} does not contain any import data.", applicationId);
+            return null;
+        }
+        List<DataUnit> dataUnits = inputPathList.stream()
                 .map(inputPath -> HdfsDataUnit.fromPath(PathUtils.stripoutProtocol(inputPath))).collect(Collectors.toList());
         InputPresenceConfig config = new InputPresenceConfig();
         config.setInput(dataUnits);
