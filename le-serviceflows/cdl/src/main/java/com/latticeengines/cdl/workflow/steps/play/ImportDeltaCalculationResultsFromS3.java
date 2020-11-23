@@ -55,6 +55,7 @@ public class ImportDeltaCalculationResultsFromS3
         boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(play.getTapType());
         if (CollectionUtils.isNotEmpty(tables)) {
             if (baseOnOtherTapType) {
+                log.info("Play {} is based on list segment.", play.getName());
                 tables.forEach(dataUnitName -> {
                     S3DataUnit dataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), dataUnitName,
                             DataUnit.StorageType.S3);

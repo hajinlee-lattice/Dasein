@@ -128,6 +128,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     }
 
     private void putContextKey(Play play, PlayLaunchChannel channel) {
+        log.info("Play {} is based on list segment.", play.getName());
         String tenantId = configuration.getCustomerSpace().getTenantId();
         AudienceType audienceType = channel.getChannelConfig().getAudienceType();
         String contextKey = getFullUniverseContextKeyByAudienceType(audienceType);
