@@ -55,6 +55,15 @@ public class ImportDeltaCalculationResultsFromS3
         boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(play.getTapType());
         if (CollectionUtils.isNotEmpty(tables)) {
             if (baseOnOtherTapType) {
+                tables.forEach(dataUnitName -> {
+                    S3DataUnit dataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), dataUnitName,
+                            DataUnit.StorageType.S3);
+                    if (dataUnit == null) {
+                        throw new RuntimeException("Data Unit " + dataUnitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
+                    }
+                    addS3DataUnitToRequestForImport(dataUnit, requests);
+                });
+            } else {
                 tables.forEach(tblName -> {
                     Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
                     if (table == null) {
@@ -63,15 +72,6 @@ public class ImportDeltaCalculationResultsFromS3
                                 + " does not exists.");
                     }
                     addTableToRequestForImport(table, requests);
-                });
-            } else {
-                tables.forEach(dataUnitName -> {
-                    S3DataUnit dataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), dataUnitName,
-                            DataUnit.StorageType.S3);
-                    if (dataUnit == null) {
-                        throw new RuntimeException("Data Unit " + dataUnitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
-                    }
-                    addS3DataUnitToRequestForImport(dataUnit, requests);
                 });
             }
         } else {
