@@ -137,8 +137,8 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         }
         DataUnit accountDataUnit = dataUnitProxy.getByDataTemplateIdAndRole(tenantId, play.getAccountTemplateId(), DataUnit.Role.Master);
         DataUnit contactDataUnit = dataUnitProxy.getByDataTemplateIdAndRole(tenantId, play.getContactTemplateId(), DataUnit.Role.Master);
-        putStringValueInContext(ADDED_ACCOUNTS_DELTA_TABLE, accountDataUnit.getName());
-        putStringValueInContext(ADDED_CONTACTS_DELTA_TABLE, contactDataUnit.getName());
+        putObjectInContext(ADDED_ACCOUNTS_DELTA_TABLE, accountDataUnit.getName());
+        putObjectInContext(ADDED_CONTACTS_DELTA_TABLE, contactDataUnit.getName());
         if (AudienceType.ACCOUNTS.equals(audienceType)) {
             counts.put(contextKey, accountDataUnit.getCount());
         } else {
