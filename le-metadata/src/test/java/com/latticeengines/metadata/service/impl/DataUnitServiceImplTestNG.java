@@ -84,7 +84,7 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
                 Collections.singleton(AssertionError.class), null);
         retry.execute(context -> {
-            List<DataUnit> found = dataUnitService.findAllByDataTemplateIdAndRoleFromReader(DATATEMPLATE_ID, DataUnit.Role.Master);
+            List<DataUnit> found = dataUnitService.findAllByDataTemplateIdAndRole(DATATEMPLATE_ID, DataUnit.Role.Master);
             Assert.assertTrue(CollectionUtils.isNotEmpty(found));
             Assert.assertTrue(found.get(0) instanceof DynamoDataUnit);
             return true;

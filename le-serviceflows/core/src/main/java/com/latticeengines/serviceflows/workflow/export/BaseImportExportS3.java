@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -147,6 +148,21 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
                     }
                 }
             });
+        }
+    }
+
+    protected void addS3DataUnitToRequestForImport(S3DataUnit s3DataUnit, List<ImportExportRequest> requests) {
+        String hdfsPath = s3DataUnit.getLinkedHdfsPath();
+        try {
+            String dataUnitName = s3DataUnit.getName();
+            if (!HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
+                String s3Path = pathBuilder.getS3AtlasDataUnitPrefix(s3Bucket, tenantId, s3DataUnit.getDataTemplateId(), dataUnitName);
+                if (isDoImport(s3Path, hdfsPath)) {
+                    requests.add(new ImportExportRequest(s3Path, hdfsPath, dataUnitName, true, false, true));
+                }
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to check Hdfs file=" + hdfsPath, ex);
         }
     }
 

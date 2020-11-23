@@ -122,13 +122,13 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateListSegment(MetadataSegment segment) {
-        MetadataSegment persistedSegment;
+        MetadataSegment persistedSegment = null;
         if (segment.getListSegment() != null) {
             MetadataSegment existingSegment = segmentEntityMgr.findByExternalInfo(segment);
             if (existingSegment != null) {
                 persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
             } else {
-                segment.setName(NamingUtils.timestamp("Segment"));
+                segment.setName(NamingUtils.timestampWithRandom("Segment"));
                 persistedSegment = createListSegment(segment);
             }
         } else if (StringUtils.isNotEmpty(segment.getName())) {
@@ -139,8 +139,7 @@ public class SegmentServiceImpl implements SegmentService {
                 persistedSegment = createListSegment(segment);
             }
         } else {
-            segment.setName(NamingUtils.timestamp("Segment"));
-            persistedSegment = createListSegment(segment);
+            log.error("Can't create or update list segment with empty name or empty list segment object.");
         }
         return persistedSegment;
     }
@@ -152,11 +151,6 @@ public class SegmentServiceImpl implements SegmentService {
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read " + listSegmentCSVAdaptorPath, exception);
         }
-    }
-
-    public static void main(String[] args) {
-        SegmentServiceImpl segmentService = new SegmentServiceImpl();
-        segmentService.readCSVAdaptor();
     }
 
     private MetadataSegment createListSegment(MetadataSegment segment) {

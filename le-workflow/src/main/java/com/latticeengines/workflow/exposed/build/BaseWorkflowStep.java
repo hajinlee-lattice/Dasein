@@ -41,6 +41,8 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -56,6 +58,7 @@ import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -516,6 +519,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     @Inject
     protected MetadataProxy metadataProxy;
 
+    @Inject
+    protected DataUnitProxy dataUnitProxy;
+
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
             .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
@@ -573,6 +579,25 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
         workflowJob.setOutputContext(getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class));
         workflowJobEntityMgr.updateWorkflowJob(workflowJob);
+    }
+
+    protected DataUnit getDataUnit(boolean queryDataUnit, CustomerSpace customerSpace, String unitName) {
+        if (unitName == null) {
+            return null;
+        } else if (queryDataUnit) {
+            S3DataUnit s3DataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.getTenantId(), unitName, DataUnit.StorageType.S3);
+            if (s3DataUnit == null) {
+                throw new RuntimeException("S3 data unit " + unitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
+            }
+            return s3DataUnit.toHdfsDataUnit();
+        } else {
+            Table table = metadataProxy.getTable(customerSpace.toString(), unitName);
+            if (table == null) {
+                throw new RuntimeException("Table " + unitName + " for customer " + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
+                        + " does not exists.");
+            }
+            return table.toHdfsDataUnit(unitName);
+        }
     }
 
     protected void saveReport(Map<String, String> map) {

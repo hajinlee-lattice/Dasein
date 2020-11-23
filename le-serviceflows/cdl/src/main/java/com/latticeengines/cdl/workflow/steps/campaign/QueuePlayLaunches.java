@@ -33,6 +33,12 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
 
     @Override
     public void execute() {
+        String customerSpace = configuration.getCustomerSpace().getTenantId();
+        Play play = playProxy.getPlay(customerSpace, configuration.getPlayId(), false, false);
+        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace, configuration.getPlayId(),
+                configuration.getChannelId());
+        Play.TapType tapType = play.getTapType();
+        boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(tapType);
         long accountsAdded = getCount(getLongValueFromContext(ACCOUNTS_ADDED));
         long accountsDeleted = getCount(getLongValueFromContext(ACCOUNTS_DELETED));
         long contactsAdded = getCount(getLongValueFromContext(CONTACTS_ADDED));
@@ -44,20 +50,14 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                 "accountsAdded=%d, accountsDeleted=%d, accumulativeAccounts=%d, contactsAdded=%d, contactsDeleted=%d, fullContacts=%d, accumulativeContacts=%d",
                 accountsAdded, accountsDeleted, accumulativeAccounts, contactsAdded, contactsDeleted, fullContacts,
                 accumulativeContacts));
-
         // 4) Update current launch universe in the channel for the next delta
         // calculation
-        String customerSpace = configuration.getCustomerSpace().getTenantId();
-        Play play = playProxy.getPlay(customerSpace, configuration.getPlayId(), false, false);
-        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace, configuration.getPlayId(),
-                configuration.getChannelId());
         PlayLaunch launch = null;
         if (StringUtils.isNotBlank(configuration.getLaunchId())) {
             launch = playProxy.getPlayLaunch(customerSpace, configuration.getPlayId(), configuration.getLaunchId());
             channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace, configuration.getPlayId(),
                     configuration.getLaunchId());
         }
-
         channel.setCurrentLaunchedAccountUniverseTable(getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, String.class));
         channel.setCurrentLaunchedContactUniverseTable(getObjectFromContext(FULL_CONTACTS_UNIVERSE, String.class));
         log.info(String.format(
@@ -66,16 +66,13 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                 channel.getCurrentLaunchedContactUniverseTable()));
         playProxy.updatePlayLaunchChannel(customerSpace, configuration.getPlayId(), configuration.getChannelId(),
                 channel, false);
-
-        boolean deltaFound = wasDeltaDataFound(channel.getChannelConfig().getAudienceType(),
+        boolean deltaFound = baseOnOtherTapType || wasDeltaDataFound(channel.getChannelConfig().getAudienceType(),
                 channel.getLookupIdMap().getExternalSystemName());
-
         // For Eloqua, contactAdded should be fullContacts
         // Before migrating to Tray, Sureshot will do de-dup.
         if (CDLExternalSystemName.Eloqua.equals(channel.getLookupIdMap().getExternalSystemName())) {
             contactsAdded = fullContacts;
         }
-
         if (deltaFound) {
             if (launch != null && launch.getLaunchState() == LaunchState.PreProcessing) {
                 launch.setAddAccountsTable(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class));
@@ -104,7 +101,6 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                 launch = queueNewLaunch(play, accountsAdded, accountsDeleted, contactsAdded, contactsDeleted,
                         accumulativeAccounts, accumulativeContacts);
             }
-
             Long launchWorkflowPid = playProxy.kickoffWorkflowForLaunch(configuration.getCustomerSpace().toString(),
                     configuration.getPlayId(), launch.getLaunchId());
             log.info("Kicked off delta launch workflow for the new Launch: " + launch.getId() + " with workflow PID ="
@@ -135,11 +131,9 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
         long deltaPid = workflowJobEntityMgr.findByWorkflowId(jobId).getPid();
         launch.setParentDeltaWorkflowId(deltaPid);
         long accountsSuppressed = play.getTargetSegment().getAccounts() != null
-                ? play.getTargetSegment().getAccounts() - accumulativeAccounts
-                : 0L;
+                ? play.getTargetSegment().getAccounts() - accumulativeAccounts : 0L;
         long contactsSuppressed = play.getTargetSegment().getContacts() != null
-                ? play.getTargetSegment().getContacts() - accumulativeContacts
-                : 0L;
+                ? play.getTargetSegment().getContacts() - accumulativeContacts : 0L;
         log.info("totalAccounts=" + play.getTargetSegment().getAccounts());
         log.info("totalContacts=" + play.getTargetSegment().getContacts());
         log.info(String.format("accountsSuppressed=%d, contactsSuppressed=%d", accountsSuppressed, contactsSuppressed));
