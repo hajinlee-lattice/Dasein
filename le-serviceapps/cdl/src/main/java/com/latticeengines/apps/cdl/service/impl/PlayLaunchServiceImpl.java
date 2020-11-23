@@ -153,8 +153,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Override
     public PlayLaunch update(PlayLaunch playLaunch) {
-        Play play = playLaunch.getPlay();
-        if (play != null && Play.TapType.ListSegment.equals(play.getTapType())) {
+        if (Play.TapType.ListSegment.equals(playLaunch.getTapType())) {
             verifyDataUnitsInLaunch(playLaunch);
         } else {
             verifyTablesInLaunch(playLaunch);

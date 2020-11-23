@@ -468,6 +468,7 @@ public class PlayResource {
         playLaunch.setPlay(play);
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
+        playLaunch.setTapType(play.getTapType());
         return playLaunchService.update(playLaunch);
     }
 
