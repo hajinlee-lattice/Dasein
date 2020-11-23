@@ -210,11 +210,11 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     private String verifyDataUnitExists(String dataUnitName, String launchId, String tag) {
         List<DataUnit> dataUnits = dataUnitEntityMgr.findByNameFromReader(MultiTenantContext.getShortTenantId(), dataUnitName);
-        if (CollectionUtils.isEmpty(dataUnits)) {
+        if (CollectionUtils.isNotEmpty(dataUnits)) {
             return dataUnitName;
         } else {
             throw new LedpException(LedpCode.LEDP_32000, new String[]{
-                    "Failed to update Launch: " + launchId + " since no " + tag + " table found by Id: " + dataUnitName});
+                    "Failed to update Launch: " + launchId + " since no " + tag + " data unit found by Id: " + dataUnitName});
         }
     }
 
