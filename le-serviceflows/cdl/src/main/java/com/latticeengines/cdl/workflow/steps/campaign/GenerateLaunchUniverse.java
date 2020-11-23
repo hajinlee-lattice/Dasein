@@ -227,6 +227,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig( //
                         getRandomWorkspace(), maxContactsPerAccount, maxEntitiesToLaunch, sortAttr, sortDir);
 
+                config.setInput(inputUnits);
                 log.info("Executing GenerateLaunchUniverseJob with config: " + JsonUtils.serialize(config));
 
                 SparkJobResult result = executeSparkJob(GenerateLaunchUniverseJob.class, config);
