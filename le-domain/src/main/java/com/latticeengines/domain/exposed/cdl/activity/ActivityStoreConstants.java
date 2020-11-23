@@ -51,6 +51,7 @@ public final class ActivityStoreConstants {
         public static final String COL_RE_ENGAGED_CONTACTS = "ReEngagedContacts";
         public static final String COL_TOTAL_MA_COUNTS = "TotalMaCounts";
         public static final String COL_TITLES = "Titles";
+        public static final String COL_TITLE_CNT = "TitleCount";
         public static final String COL_STAGE = "IntentStage";
 
         public static final long RE_ENGAGED_QUIET_PERIOD_IN_DAYS = 30L;
