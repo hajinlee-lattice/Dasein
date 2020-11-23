@@ -148,6 +148,7 @@ public enum InterfaceName {
 
     // WebVisit
     WebVisitPageUrl, UserId, WebVisitDate, SourceMedium, SourceMediumId, WebVisitProfile, //
+    UtmSource, UtmMedium, UtmCampaign, UtmTerm, UtmContent, //
 
     // WebVisitPathPattern
     PathPatternName, PathPattern, PathPatternId,

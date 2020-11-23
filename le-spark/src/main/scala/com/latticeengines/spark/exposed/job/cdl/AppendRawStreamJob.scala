@@ -1,11 +1,14 @@
 package com.latticeengines.spark.exposed.job.cdl
 
+import java.net.URLDecoder
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+import com.google.common.base.CaseFormat
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
-import com.latticeengines.domain.exposed.cdl.activity.EmptyStreamException
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, StreamDateId, __StreamDate}
+import com.latticeengines.domain.exposed.cdl.activity.{ActivityStoreConstants, EmptyStreamException}
+import com.latticeengines.domain.exposed.metadata.InterfaceName
+import com.latticeengines.domain.exposed.metadata.InterfaceName._
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
@@ -41,9 +44,10 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
 
       // add date & dateId
       var mdf: DataFrame = lattice.input(config.matchedRawStreamInputIdx)
-      mdf = mdf.withColumn(__StreamDate.name, getDate(mdf.col(config.dateAttr)))
+      mdf = parseUtmCodes(mdf
+        .withColumn(__StreamDate.name, getDate(mdf.col(config.dateAttr)))
         .withColumn(StreamDateId.name, getDateId(mdf.col(config.dateAttr)))
-        .withColumn(LastActivityDate.name, mdf.col(config.dateAttr))
+        .withColumn(LastActivityDate.name, mdf.col(config.dateAttr)))
       if (hasMaster) {
         mdf = MergeUtils.concat2(mdf, lattice.input(config.masterInputIdx))
       }
@@ -78,6 +82,33 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
     }
 
     lattice.output = df :: Nil
+  }
+
+  // hard-code parsing utm code (from google analytics) on web visit url for now
+  // since we only have one url column and one vendor
+  private def parseUtmCodes(df: DataFrame): DataFrame = {
+    val urlCol = WebVisitPageUrl.name
+    if (!df.columns.contains(urlCol)) {
+      df
+    } else {
+      ActivityStoreConstants.WebVisit.UTM_COLUMNS
+        .foldLeft(df)((parsedDf, utmCol) => parseQueryParameter(parsedDf, utmCol, urlCol))
+    }
+  }
+
+  private def parseQueryParameter(df: DataFrame, col: InterfaceName, urlCol: String): DataFrame = {
+    val urlDecode = udf {
+      s: String =>
+        if (StringUtils.isNotBlank(s)) {
+          try {
+            Some(URLDecoder.decode(s, "UTF-8"))
+          } catch {
+            case _: Throwable => None
+          }
+        } else None
+    }
+    val queryParam = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, col.name)
+    df.withColumn(col.name, urlDecode(callUDF("parse_url", df.col(urlCol), lit("QUERY"), lit(queryParam))))
   }
 
   private def getStartDateId(retentionDays: Int, epochMilli: Long): Int = {

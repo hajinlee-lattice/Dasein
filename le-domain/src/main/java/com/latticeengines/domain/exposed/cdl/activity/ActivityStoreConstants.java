@@ -1,5 +1,16 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.UtmCampaign;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.UtmContent;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.UtmMedium;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.UtmSource;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.UtmTerm;
+
+import java.util.Arrays;
+import java.util.List;
+
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+
 /**
  * class to hold constants for all features built on top of this time series
  * processing framework (activity store)
@@ -7,6 +18,12 @@ package com.latticeengines.domain.exposed.cdl.activity;
 public final class ActivityStoreConstants {
 
     private ActivityStoreConstants() {
+    }
+
+    public static class WebVisit {
+        public static final List<InterfaceName> UTM_COLUMNS = Arrays.asList( //
+                UtmSource, UtmMedium, UtmCampaign, UtmContent, UtmTerm //
+        );
     }
 
     public static class DnbIntent {
