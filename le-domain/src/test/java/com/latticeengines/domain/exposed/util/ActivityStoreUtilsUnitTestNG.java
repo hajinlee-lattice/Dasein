@@ -1,12 +1,16 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.metadata.FilterOptions;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
 public class ActivityStoreUtilsUnitTestNG {
@@ -35,6 +39,27 @@ public class ActivityStoreUtilsUnitTestNG {
         }
     }
 
+    @Test(groups = "unit")
+    private void testGenericFilters() {
+        List<String> expected = Arrays.asList( //
+                "wi_0_w", //
+                "1 week", //
+                "2 weeks", //
+                "4 weeks", //
+                "8 weeks", //
+                "12 weeks" //
+        );
+        FilterOptions options = ActivityStoreUtils.genericFilterOptions();
+        Assert.assertEquals(options.getLabel(), "Timeframe");
+        Assert.assertEquals(options.getOptions().stream().map(FilterOptions.Option::getValue).collect(Collectors.toList()), expected);
+    }
+
+    @Test(groups = "unit", dataProvider = "filterTagsProvider")
+    private void testGetFilterTagsFromTimeRange(String timeRange, List<String> expected) {
+        List<String> actual = ActivityStoreUtils.getFilterTagsFromTimeRange(timeRange);
+        Assert.assertEquals(actual, expected);
+    }
+
     @DataProvider(name = "modifyPatternTestData")
     private Object[][] modifyPatternTestData() {
         return new Object[][] { //
@@ -60,6 +85,16 @@ public class ActivityStoreUtilsUnitTestNG {
                 {TimeFilter.withinInclude(0, PeriodStrategy.Template.Week.name()), "Current week till today"},
                 {TimeFilter.withinInclude(1, PeriodStrategy.Template.Week.name()), "1 week till today"},
                 {TimeFilter.withinInclude(2, PeriodStrategy.Template.Week.name()), "2 weeks till today"},
+        };
+    }
+
+    @DataProvider(name = "filterTagsProvider")
+    public static Object[][] filterTagsProvider() {
+        return new Object[][] { //
+                {"wi_0_w", Arrays.asList("wi_0_w", "any")}, //
+                {"wi_1_w", Arrays.asList("wi_1_w", "any", "1 week")}, //
+                {"wi_8_w", Arrays.asList("wi_8_w", "any", "8 weeks")}, //
+                {"w_8_w", Arrays.asList("w_8_w", "any", "8 weeks")} //
         };
     }
 }
