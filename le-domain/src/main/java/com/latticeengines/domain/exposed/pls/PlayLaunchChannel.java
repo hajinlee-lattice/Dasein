@@ -117,6 +117,11 @@ public class PlayLaunchChannel implements HasPid, HasId<String>, HasTenantId, Ha
     @Enumerated(EnumType.STRING)
     private LaunchType launchType;
 
+    @JsonProperty("maxAccountsToLaunch")
+    @Transient
+    @Column(name = "MAX_ACCOUNTS_TO_LAUNCH")
+    private Long maxAccountsToLaunch;
+
     @JsonProperty("maxEntitiesToLaunch")
     @Column(name = "MAX_ENTITIES_TO_LAUNCH")
     private Long maxEntitiesToLaunch;
