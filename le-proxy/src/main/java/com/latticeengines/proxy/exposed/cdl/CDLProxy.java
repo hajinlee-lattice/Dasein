@@ -790,12 +790,19 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     public void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, Integer length,
             boolean nullable) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks"
-                + "/appendLengthValidator/{uniqueTaskId}?attrName={attrName}&nullable={nullable}",
-                shortenCustomerSpace(customerSpace), uniqueTaskId, attrName, nullable);
+        String baseUrl = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks"
+                + "/appendLengthValidator/{uniqueTaskId}?attrName={attrName}&nullable={nullable}";
+        List<String> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(uniqueTaskId);
+        args.add(attrName);
+        args.add(String.valueOf(nullable));
         if (length != null) {
-            url = constructUrl(url + "&length={length}", length);
+            baseUrl = baseUrl + "&length={length}";
+            args.add(String.valueOf(length));
         }
+        String url = constructUrl(baseUrl, args);
+
         put("Add attribute length validator", url);
     }
 
