@@ -10,14 +10,14 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class SegmentImportRequest {
+public class ListSegmentImportRequest {
 
-    @JsonProperty("segment_name")
+    @JsonProperty("segmentName")
     @ApiModelProperty(required = true, value = "segmentName")
     private String segmentName;
 
-    @JsonProperty("s3_file_key")
-    @ApiModelProperty(required = false, value = "s3FileKey")
+    @JsonProperty("s3FileKey")
+    @ApiModelProperty(value = "s3FileKey")
     private String s3FileKey;
 
     public String getSegmentName() {

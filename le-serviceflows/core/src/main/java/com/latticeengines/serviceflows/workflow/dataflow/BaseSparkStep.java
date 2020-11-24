@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
@@ -266,6 +267,10 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     protected Table toTable(String tableName, String primaryKey, HdfsDataUnit jobTarget) {
         return SparkUtils.hdfsUnitToTable(tableName, primaryKey, jobTarget, yarnConfiguration, podId, customerSpace);
+    }
+
+    protected S3DataUnit toS3DataUnit(HdfsDataUnit jobTarget, BusinessEntity entity, String templateId, List<DataUnit.Role> roles) {
+        return SparkUtils.hdfsUnitToS3DataUnit(jobTarget, yarnConfiguration, entity, podId, customerSpace, s3Bucket, templateId, roles);
     }
 
     protected Table toTable(String tableName, HdfsDataUnit jobTarget) {

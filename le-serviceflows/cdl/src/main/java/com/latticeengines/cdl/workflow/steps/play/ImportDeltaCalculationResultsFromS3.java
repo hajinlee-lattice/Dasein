@@ -58,7 +58,7 @@ public class ImportDeltaCalculationResultsFromS3
             });
         } else {
             log.error(
-                    String.format("There is no metadat tables associated with tenant %s", customerSpace.getTenantId()));
+                    String.format("There is no metadata tables associated with tenant %s", customerSpace.getTenantId()));
         }
 
     }

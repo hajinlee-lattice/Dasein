@@ -53,6 +53,22 @@ public final class PathUtils {
         }
     }
 
+    public static String toCSVGlob(String path) {
+        if (path.endsWith(".csv")) {
+            return path;
+        } else {
+            return toCSVDir(path) + "/*.csv";
+        }
+    }
+
+    public static String toCSVDir(String path) {
+        if (path.endsWith(".csv") || path.endsWith("/")) {
+            return path.substring(0, path.lastIndexOf("/"));
+        } else {
+            return path;
+        }
+    }
+
     public static String toParquetGlob(String path) {
         if (path.endsWith(".parquet")) {
             return path;

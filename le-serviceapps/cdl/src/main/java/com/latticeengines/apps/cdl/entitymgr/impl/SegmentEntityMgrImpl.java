@@ -2,8 +2,10 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import static com.latticeengines.domain.exposed.metadata.MetadataSegment.SegmentType;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -36,12 +39,14 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
 import com.latticeengines.domain.exposed.graph.EdgeType;
 import com.latticeengines.domain.exposed.graph.ParsedDependencies;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
@@ -49,6 +54,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.domain.exposed.util.SegmentUtils;
+import com.latticeengines.metadata.entitymgr.DataTemplateEntityMgr;
 
 @Component("segmentEntityMgr")
 public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
@@ -69,6 +75,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
     @Inject
     private ListSegmentEntityMgr listSegmentEntityMgr;
+
+    @Inject
+    private DataTemplateEntityMgr dataTemplateEntityMgr;
 
     @Inject
     private SegmentEntityMgr _self;
@@ -199,12 +208,48 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         return metadataSegment;
     }
 
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findByExternalInfo(MetadataSegment segment) {
         if (segment.getListSegment() != null) {
             return segmentDao.findByExternalInfo(segment.getListSegment().getExternalSystem(), segment.getListSegment().getExternalSegmentId());
         } else {
             return null;
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public String createOrUpdateDataTemplate(String name, CreateDataTemplateRequest request) {
+        MetadataSegment segment = findByName(name, true);
+        if (SegmentUtils.hasListSegment(segment)) {
+            String tenantId = MultiTenantContext.getShortTenantId();
+            ListSegment listSegment = segment.getListSegment();
+            String templateId = listSegment.getTemplateId(request.getTemplateKey());
+            DataTemplate dataTemplate = new DataTemplate();
+            if (StringUtils.isEmpty(templateId)) {
+                dataTemplate.setMasterSchema(request.getSchema());
+                dataTemplate.setName(request.getTemplateKey());
+                dataTemplate.setTenant(tenantId);
+                templateId = dataTemplateEntityMgr.create(tenantId, dataTemplate);
+
+                Map<String, String> dataTemplates = listSegment.getDataTemplates();
+                if (MapUtils.isEmpty(dataTemplates)) {
+                    dataTemplates = new HashMap<>();
+                }
+                dataTemplates.put(request.getTemplateKey(), templateId);
+                listSegment.setDataTemplates(dataTemplates);
+                segmentDao.update(segment);
+                return templateId;
+            } else {
+                if (request.getSchema() != null) {
+                    dataTemplate.setMasterSchema(request.getSchema());
+                }
+                dataTemplateEntityMgr.updateByUuid(tenantId, templateId, dataTemplate);
+                return templateId;
+            }
+        } else {
+            throw new RuntimeException("List segment does not exists");
         }
     }
 

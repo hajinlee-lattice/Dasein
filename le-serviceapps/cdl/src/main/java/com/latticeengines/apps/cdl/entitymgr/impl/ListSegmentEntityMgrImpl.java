@@ -1,7 +1,11 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -59,6 +63,16 @@ public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Lis
     private void cloneListSegmentForUpdate(ListSegment existingListSegment, ListSegment incomingListSegment) {
         if (incomingListSegment.getCsvAdaptor() != null) {
             existingListSegment.setCsvAdaptor(incomingListSegment.getCsvAdaptor());
+        }
+        if (MapUtils.isNotEmpty(incomingListSegment.getDataTemplates())) {
+            Map<String, String> existingDataTemplates = existingListSegment.getDataTemplates();
+            if (MapUtils.isEmpty(existingDataTemplates)) {
+                existingDataTemplates = new HashMap<>();
+                existingListSegment.setDataTemplates(existingDataTemplates);
+            }
+            for (Map.Entry<String, String> entry : incomingListSegment.getDataTemplates().entrySet()) {
+                existingDataTemplates.put(entry.getKey(), entry.getValue());
+            }
         }
     }
 

@@ -19,6 +19,9 @@ public class S3DataUnit extends DataUnit {
     @JsonProperty("Prefix")
     private String prefix;
 
+    @JsonProperty("linkedHdfsPath")
+    private String linkedHdfsPath;
+
     @Override
     @JsonProperty("StorageType")
     public StorageType getStorageType() {
@@ -76,5 +79,13 @@ public class S3DataUnit extends DataUnit {
                 this.prefix = prefix;
             }
         }
+    }
+
+    public String getLinkedHdfsPath() {
+        return linkedHdfsPath;
+    }
+
+    public void setLinkedHdfsPath(String linkedHdfsPath) {
+        this.linkedHdfsPath = linkedHdfsPath;
     }
 }
