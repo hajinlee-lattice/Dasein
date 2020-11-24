@@ -1,5 +1,7 @@
 package com.latticeengines.objectapi.controller;
 
+import static com.latticeengines.query.factory.RedshiftQueryProvider.USER_BATCH;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,62 +36,75 @@ public class EventResource {
     @PostMapping("/count/scoring")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    @InvocationMeter(name ="scoring", measurment = "objectapi")
-    public Long getScoringCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
-            @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getScoringCount(frontEndQuery, version);
+    @InvocationMeter(name = "scoring", measurment = "objectapi")
+    public Long getScoringCount(@PathVariable String customerSpace, //
+                                @RequestParam(value = "sqlUser", required = false, defaultValue = USER_BATCH) String sqlUser, //
+                                @RequestBody EventFrontEndQuery frontEndQuery, //
+                                @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        return eventQueryService.getScoringCount(frontEndQuery, sqlUser, version);
     }
 
     @PostMapping("/count/training")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    @InvocationMeter(name ="training", measurment = "objectapi")
-    public Long getTrainingCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
-            @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getTrainingCount(frontEndQuery, version);
+    @InvocationMeter(name = "training", measurment = "objectapi")
+    public Long getTrainingCount(@PathVariable String customerSpace, //
+                                 @RequestParam(value = "sqlUser", required = false, defaultValue = USER_BATCH) String sqlUser, //
+                                 @RequestBody EventFrontEndQuery frontEndQuery,
+                                 @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        return eventQueryService.getTrainingCount(frontEndQuery, sqlUser, version);
     }
 
     @PostMapping("/count/event")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    @InvocationMeter(name ="event", measurment = "objectapi")
-    public Long getEventCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+    @InvocationMeter(name = "event", measurment = "objectapi")
+    public Long getEventCount(@PathVariable String customerSpace, //
+            @RequestParam(value = "sqlUser", required = false, defaultValue = USER_BATCH) String sqlUser, //
+            @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getEventCount(frontEndQuery, version);
+        return eventQueryService.getEventCount(frontEndQuery, sqlUser, version);
     }
 
     @PostMapping("/data/scoring")
     @ResponseBody
     @ApiOperation(value = "Retrieve the scoring tuples for the specified query")
-    public DataPage getScoringTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+    public DataPage getScoringTuples(@PathVariable String customerSpace, //
+            @RequestParam(value = "sqlUser", required = false, defaultValue = USER_BATCH) String sqlUser, //
+            @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getScoringTuples(frontEndQuery, version);
+        return eventQueryService.getScoringTuples(frontEndQuery, sqlUser, version);
     }
 
     @PostMapping("/data/training")
     @ResponseBody
     @ApiOperation(value = "Retrieve the training tuples for the specified query")
-    public DataPage getTrainingTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+    public DataPage getTrainingTuples(@PathVariable String customerSpace, //
+            @RequestParam(value = "sqlUser", required = false, defaultValue = USER_BATCH) String sqlUser, //
+            @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getTrainingTuples(frontEndQuery, version);
+        return eventQueryService.getTrainingTuples(frontEndQuery, sqlUser, version);
     }
 
     @PostMapping("/data/event")
     @ResponseBody
     @ApiOperation(value = "Retrieve the event tuples for the specified query")
-    public DataPage getEventTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+    public DataPage getEventTuples(@PathVariable String customerSpace, //
+            @RequestParam(value = "sqlUser", required = false, defaultValue = USER_BATCH) String sqlUser, //
+            @RequestBody EventFrontEndQuery frontEndQuery, //
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getEventTuples(frontEndQuery, version);
+        return eventQueryService.getEventTuples(frontEndQuery, sqlUser, version);
     }
 
     @PostMapping("/query")
     @ResponseBody
     @ApiOperation(value = "Retrieve the SQL for the specified query")
     public String getQuery(@PathVariable String customerSpace, //
+            @RequestParam(value = "sqlUser", required = false, defaultValue = USER_BATCH) String sqlUser, //
             @RequestBody EventFrontEndQuery frontEndQuery, //
             @RequestParam(value = "eventType", required = true) EventType eventType, //
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getQueryStr(frontEndQuery, eventType, version);
+        return eventQueryService.getQueryStr(frontEndQuery, eventType, sqlUser, version);
     }
 
 }

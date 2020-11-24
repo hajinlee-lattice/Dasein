@@ -436,10 +436,11 @@ public class EventQueryTranslator extends TranslatorCommon {
 
         int expectedResult = (returnPositive) ? 1 : 0;
 
-        BooleanExpression resultFilter = amountAggr.eq(String.valueOf(expectedResult)).and(periodIdPredicate);
+        NumberPath<BigDecimal> numberPath = Expressions.numberPath(BigDecimal.class, amountAggr.getMetadata());
+        BooleanExpression resultFilter = numberPath.eq(BigDecimal.valueOf(expectedResult)).and(periodIdPredicate);
 
         if (txRestriction.isSkipOffset()) {
-            int offset = Integer.valueOf(timeFilter.getValues().get(0).toString());
+            int offset = Integer.parseInt(timeFilter.getValues().get(0).toString());
 
             resultFilter = resultFilter
                     .and(periodId.gt(translateMinPeriodId(queryFactory, repository, offset, sqlUser)));

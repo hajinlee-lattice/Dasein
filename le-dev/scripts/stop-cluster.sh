@@ -14,3 +14,16 @@ printf "%s\n" "${LIVY_HOME:?You must set LIVY_HOME}"
 
 "${SPARK_HOME}/sbin/stop-history-server.sh"
 "${LIVY_HOME}/bin/livy-server" stop
+
+if [[ -n "${HIVE_HOME}" ]]; then
+  ps -ef | grep HiveMetaStore > hive_process
+  pid=$(cat hive_process | grep org.apache.hadoop.hive.metastore.HiveMetaStore | cut -d ' ' -f 2)
+  if [[ -n ${pid} ]]; then
+    echo "Found hive metastore pid ${pid}, going to kill it"
+    kill -9 ${pid}
+  fi
+fi
+
+if [[ -n "${PRESTO_HOME}" ]]; then
+  ${PRESTO_HOME}/bin/launcher stop
+fi

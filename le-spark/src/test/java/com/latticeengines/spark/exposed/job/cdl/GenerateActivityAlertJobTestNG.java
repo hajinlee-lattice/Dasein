@@ -1,8 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT;
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY;
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.SHOWN_INTENT;
+import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert;
 import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.DnbIntentData;
 import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.MarketingActivity;
 import static com.latticeengines.domain.exposed.cdl.activity.AtlasStream.StreamType.WebVisit;
@@ -13,6 +11,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CreationTimestamp;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PartitionKey;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SortKey;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Title;
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.Detail1;
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.Detail2;
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.EventDate;
@@ -38,7 +37,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -56,6 +54,7 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
             Pair.of(EventDate.getColumnName(), Long.class), //
             Pair.of(AccountId.name(), String.class), //
             Pair.of(ContactId.name(), String.class), //
+            Pair.of(Title.name(), String.class), //
             Pair.of(EventType.getColumnName(), String.class), //
             Pair.of(StreamType.getColumnName(), String.class), //
             Pair.of(TrackedBySystem.getColumnName(), String.class), //
@@ -75,10 +74,15 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         prepareData();
 
         ActivityAlertJobConfig config = new ActivityAlertJobConfig();
-        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, 10L);
-        config.alertNameToQualificationPeriodDays.put(INC_WEB_ACTIVITY_ON_PRODUCT, 10L);
-        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, 10L);
-        config.alertNameToQualificationPeriodDays.put(ActivityStoreConstants.Alert.SHOWN_INTENT, 10L);
+        config.alertNameToQualificationPeriodDays.put(Alert.INC_WEB_ACTIVITY, 10L);
+        config.alertNameToQualificationPeriodDays.put(Alert.ANONYMOUS_WEB_VISITS, 10L);
+        config.alertNameToQualificationPeriodDays.put(Alert.RE_ENGAGED_ACTIVITY, 10L);
+        config.alertNameToQualificationPeriodDays.put(Alert.SHOWN_INTENT, 10L);
+        config.alertNameToQualificationPeriodDays.put(Alert.HIGH_ENGAGEMENT_IN_ACCOUNT, 10L);
+        config.alertNameToQualificationPeriodDays.put(Alert.KNOWN_WEB_VISITS, 10L);
+        config.alertNameToQualificationPeriodDays.put(Alert.ACTIVE_CONTACT_WEB_VISITS, 10L);
+        config.alertNameToQualificationPeriodDays.put(Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES, 10L);
+        config.alertNameToQualificationPeriodDays.put(Alert.RESEARCHING_INTENT_AROUND_PRODUCT_PAGES, 10L);
         config.currentEpochMilli = 10L;
         config.masterAccountTimeLineIdx = 0;
 
@@ -179,6 +183,22 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
                  */
                 newIntentRecord("a8", 2L, "m1", "0.45"), //
                 newIntentRecord("a8", 3L, "m4", "0.46"), //
+
+                // no. of marketing activity > 5 => High Engagement In Account
+                newMARecord("a11", "c1", 2L), //
+                newMARecord("a11", "c2", 3L), //
+                newMARecord("a11", "c3", 4L), //
+                newMARecord("a11", "c4", 1L), //
+                newMARecord("a11", "c5", 0L), //
+                newMARecord("a11", "c6", 6L), //
+
+                // Known contacts with titles and no MA => Active Contacts and Web Visits, show
+                // titles as well
+                newTimelineContactRecord("a12", "c1", "Manager", WebVisit, "Page group 1",
+                        "Data Management product, Business Intelligence"), //
+                newTimelineContactRecord("a12", "c2", "Software Engineer", WebVisit, "Page group 2", "AI products"), //
+                newTimelineContactRecord("a13", "c1", "QA", WebVisit, "Page group 2", "AI products"), //
+                newMARecord("a13", "c3", 2L), // => this should go to KNOWN_WEB_VISITS since there is MA
         };
         uploadHdfsDataUnit(masterData, TIMELINE_FIELDS);
     }
@@ -187,44 +207,70 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
     private Map<Pair<String, String>, Integer> getExpectedAlertCount() {
         Map<Pair<String, String>, Integer> counts = new HashMap<>();
 
-        counts.put(Pair.of("a1", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
-        counts.put(Pair.of("a2", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
-        counts.put(Pair.of("a3", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
-        counts.put(Pair.of("a4", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
-        counts.put(Pair.of("a5", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
-        counts.put(Pair.of("a6", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
-        counts.put(Pair.of("a7", INC_WEB_ACTIVITY_ON_PRODUCT), 1);
+        counts.put(Pair.of("a12", Alert.INC_WEB_ACTIVITY), 1);
+        counts.put(Pair.of("a13", Alert.INC_WEB_ACTIVITY), 1);
 
-        counts.put(Pair.of("a8", RE_ENGAGED_ACTIVITY), 1);
-        counts.put(Pair.of("a9", RE_ENGAGED_ACTIVITY), 1);
+        counts.put(Pair.of("a1", Alert.ANONYMOUS_WEB_VISITS), 1);
+        counts.put(Pair.of("a2", Alert.ANONYMOUS_WEB_VISITS), 1);
+        counts.put(Pair.of("a3", Alert.ANONYMOUS_WEB_VISITS), 1);
+        counts.put(Pair.of("a4", Alert.ANONYMOUS_WEB_VISITS), 1);
+        counts.put(Pair.of("a5", Alert.ANONYMOUS_WEB_VISITS), 1);
+        counts.put(Pair.of("a6", Alert.ANONYMOUS_WEB_VISITS), 1);
+        counts.put(Pair.of("a7", Alert.ANONYMOUS_WEB_VISITS), 1);
 
-        counts.put(Pair.of("a3", SHOWN_INTENT), 1);
-        counts.put(Pair.of("a4", SHOWN_INTENT), 1);
-        counts.put(Pair.of("a5", SHOWN_INTENT), 1);
-        counts.put(Pair.of("a6", SHOWN_INTENT), 1);
-        counts.put(Pair.of("a8", SHOWN_INTENT), 1);
+        counts.put(Pair.of("a8", Alert.RE_ENGAGED_ACTIVITY), 1);
+        counts.put(Pair.of("a9", Alert.RE_ENGAGED_ACTIVITY), 1);
 
+        counts.put(Pair.of("a3", Alert.SHOWN_INTENT), 1);
+        counts.put(Pair.of("a4", Alert.SHOWN_INTENT), 1);
+        counts.put(Pair.of("a5", Alert.SHOWN_INTENT), 1);
+        counts.put(Pair.of("a6", Alert.SHOWN_INTENT), 1);
+        counts.put(Pair.of("a8", Alert.SHOWN_INTENT), 1);
+
+        counts.put(Pair.of("a11", Alert.HIGH_ENGAGEMENT_IN_ACCOUNT), 6);
+
+        counts.put(Pair.of("a8", Alert.KNOWN_WEB_VISITS), 1);
+        counts.put(Pair.of("a9", Alert.KNOWN_WEB_VISITS), 1);
+        counts.put(Pair.of("a10", Alert.KNOWN_WEB_VISITS), 1);
+        counts.put(Pair.of("a11", Alert.KNOWN_WEB_VISITS), 1);
+        counts.put(Pair.of("a13", Alert.KNOWN_WEB_VISITS), 1);
+
+        counts.put(Pair.of("a12", Alert.ACTIVE_CONTACT_WEB_VISITS), 1);
+
+        counts.put(Pair.of("a3", Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES), 1);
+        counts.put(Pair.of("a5", Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES), 1);
+        counts.put(Pair.of("a6", Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES), 1);
+
+        counts.put(Pair.of("a4", Alert.RESEARCHING_INTENT_AROUND_PRODUCT_PAGES), 1);
         return counts;
     }
 
     private Object[] newMARecord(String accountId, String contactId, long timestamp) {
         return new Object[] { //
                 "p", "s", "r", timestamp, // not testing pk, sk, uuid and timestamp for now
-                accountId, contactId, "fake event", MarketingActivity.name(), null, null, null, //
+                accountId, contactId, null, "fake event", MarketingActivity.name(), null, null, null, //
         };
     }
 
     private Object[] newIntentRecord(String accountId, long timestamp, String detail1, String detail2) {
         return new Object[] { //
                 "p", "s", "r", timestamp, // not testing pk, sk, uuid and timestamp for now
-                accountId, null, "fake event", DnbIntentData.name(), null, detail1, detail2, //
+                accountId, null, null, "fake event", DnbIntentData.name(), null, detail1, detail2, //
         };
     }
 
     private Object[] newTimelineRecord(String accountId, AtlasStream.StreamType type, String detail1, String detail2) {
         return new Object[] { //
                 "p", "s", "r", 0L, // not testing pk, sk, uuid and timestamp for now
-                accountId, null, "fake event", type == null ? null : type.name(), null, detail1, detail2, //
+                accountId, null, null, "fake event", type == null ? null : type.name(), null, detail1, detail2, //
         };
+    }
+
+    private Object[] newTimelineContactRecord(String accountId, String contactId, String title,
+            AtlasStream.StreamType type, String detail1, String detail2) {
+        Object[] row = newTimelineRecord(accountId, type, detail1, detail2);
+        row[5] = contactId;
+        row[6] = title;
+        return row;
     }
 }

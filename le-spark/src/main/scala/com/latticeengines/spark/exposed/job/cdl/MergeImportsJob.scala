@@ -20,12 +20,14 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     val joinKey = config.getJoinKey
     val srcId = config.getSrcId
     val templates: List[String] = if (config.getTemplates == null) List() else  config.getTemplates.asScala.toList
+    val discardAttrs: List[String] = if (config.getExcludeAttrs == null) List() else config.getExcludeAttrs.asScala.toList
     hasSystem = config.isHasSystem
     val sortedInputs: Seq[DataFrame] = inputDfs.zip(lattice.inputCnts).sortBy(_._2).map(_._1)
     var processedInputs = sortedInputs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
         config.getRenameSrcFields, config.getCloneSrcFields, hasSystem) }
     println("----- BEGIN SCRIPT OUTPUT -----")
     println(s"templates is: $templates")
+    println(s"Discard attributes are: $discardAttrs")
     println("----- END SCRIPT OUTPUT -----")
 
     if (templates.nonEmpty) {
@@ -66,12 +68,16 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
         requiredCols.toList.foldLeft(merged)((df, p) => addAllNullsIfMissing(df, p._1, p._2))
       }
 
-    val result =
+    var result =
       if (config.isAddTimestamps) {
         CopyUtils.fillTimestamps(withRequiredCols)
       } else {
         withRequiredCols
       }
+
+    if (discardAttrs.nonEmpty) {
+      result = result.drop(discardAttrs: _*)
+    }
 
     // finish
     lattice.output = result :: Nil

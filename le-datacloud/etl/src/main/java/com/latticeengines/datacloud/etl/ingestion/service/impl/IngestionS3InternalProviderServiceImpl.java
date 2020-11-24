@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -72,6 +74,8 @@ public class IngestionS3InternalProviderServiceImpl extends IngestionProviderSer
     private static final String FILES = "files";
     private static final String FILE_NAME = "name";
 
+    private static final String FILEPATH_DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
+
     @Override
     public void ingest(IngestionProgress progress) {
         Ingestion ingestion = progress.getIngestion();
@@ -81,16 +85,11 @@ public class IngestionS3InternalProviderServiceImpl extends IngestionProviderSer
         // exists. If not present, files are not ready for ingestion
         String sourceBucket = config.getSourceBucket();
         String parentDir = config.getParentDir();
+        String prefix = parentDir + "/" + latestVersion;
         // When force the check against control file
         if (config.getCheckControlFile()) {
-            String contolObj = String.format("%s/%s/%s", parentDir, latestVersion, CONTROL_FILE_NAME);
-            // When control file doesn't exist, stop the process as data is fully ready
-            if (!s3Service.objectExist(sourceBucket, contolObj)) {
-                log.error("Control file doesn't exist, abort ingestion process");
-                ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
-                return;
-            }
-            // Read control.json and check against it to see if data is ready
+            String contolObj = String.format("%s/%s", prefix, CONTROL_FILE_NAME);
+            // Read control.json and check against it to see if data is fully ready
             String control = null;
             try {
                 control = IOUtils.toString(s3Service.readObjectAsStream(sourceBucket, contolObj),
@@ -100,7 +99,7 @@ public class IngestionS3InternalProviderServiceImpl extends IngestionProviderSer
                 ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
                 throw new RuntimeException(String.format("Fail to read control file under %s", contolObj), e);
             }
-            if (!checkAgainstControlFile(sourceBucket, parentDir, latestVersion, control)) {
+            if (!checkAgainstControlFile(sourceBucket, prefix, control)) {
                 log.error("Content in the source folder doesn't match with control file, abort ingestion process");
                 ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
                 return;
@@ -108,13 +107,34 @@ public class IngestionS3InternalProviderServiceImpl extends IngestionProviderSer
         }
 
         // Copy raw data into destination on hdfs
-        String destPath = progress.getDestination();
+        String destFolder = progress.getDestination();
+        String dateFormat = config.getSubfolderDateFormat();
+        // If date format is not standard, update destFolder with standard date string
+        if (!FILEPATH_DATE_FORMAT_STRING.equalsIgnoreCase(dateFormat)) {
+            SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+            SimpleDateFormat standardFormatter = new SimpleDateFormat(FILEPATH_DATE_FORMAT_STRING);
+            standardFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+            try {
+                Date date = formatter.parse(latestVersion);
+                latestVersion = standardFormatter.format(date);
+                destFolder = destFolder.substring(0, destFolder.lastIndexOf("/") + 1) + latestVersion;
+                log.info("Destination folder {}", destFolder);
+            } catch (ParseException e) {
+                throw new RuntimeException(String.format("Failed to parse date string %s", latestVersion), e);
+            }
+        }
         String fileExtension = config.getFileExtension();
-        String s3Uri = "s3a://" + sourceBucket + "/" + parentDir + "/" + latestVersion + "/*" + fileExtension;
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         queue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
+        List<String> fileList = getTargetFileListFromS3(sourceBucket, prefix, fileExtension);
+        String s3Uri = null;
+        String destPath = null;
         try {
-            HdfsUtils.distcp(yarnConfiguration, s3Uri, destPath, queue);
+            for (String file : fileList) {
+                s3Uri = String.format("s3a://%s/%s/%s", sourceBucket, prefix, file);
+                destPath = String.format("%s/%s", destFolder, file);
+                HdfsUtils.distcp(yarnConfiguration, s3Uri, destPath, queue);
+            }
         } catch (Exception e) {
             ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
             throw new RuntimeException(String.format("Fail to copy from s3 path %s to hdfs %s", s3Uri, destPath), e);
@@ -134,6 +154,14 @@ public class IngestionS3InternalProviderServiceImpl extends IngestionProviderSer
         String sourceBucket = config.getSourceBucket();
         String parentDir = config.getParentDir();
         String latestVersion = getLatestVersionFromS3Folder(config);
+        // If check for control file is enabled, make sure it's present;
+        // Otherwise, ignore it until control file is present
+        if (config.getCheckControlFile()) {
+            if (!isControlFilePresent(sourceBucket, parentDir, latestVersion)) {
+                log.info("No control file present, ignore it for now.");
+                return Collections.emptyList();
+            }
+        }
         // Check if ingestion for this version is done. If so, return empty list to
         // avoid duplication since this api will be called by quartz job periodically
         String destination = hdfsPathBuilder.constructIngestionDir(ingestion.getIngestionName()).append(latestVersion)
@@ -176,8 +204,7 @@ public class IngestionS3InternalProviderServiceImpl extends IngestionProviderSer
         return latestVersion;
     }
 
-    private Boolean checkAgainstControlFile(String sourceBucket, String parentDir, String latestVersion,
-            String control) {
+    private Boolean checkAgainstControlFile(String sourceBucket, String prefix, String control) {
         if (control == null) {
             return false;
         }
@@ -192,8 +219,8 @@ public class IngestionS3InternalProviderServiceImpl extends IngestionProviderSer
         JsonNode content = jsonNode.get(CONTROL_HEADER);
         int totalFileCount = content.get(TOTAL_FILE_COUNT).asInt();
         log.info(String.format("totalFileCount is %d", totalFileCount));
-        String prefix = parentDir + "/" + latestVersion;
-        content.get(FILES).elements().forEachRemaining(e -> fileSet.add(String.format("%s/%s", prefix, e.get(FILE_NAME).asText())));
+        content.get(FILES).elements()
+                .forEachRemaining(e -> fileSet.add(String.format("%s/%s", prefix, e.get(FILE_NAME).asText())));
         log.info("fileSet {}", fileSet);
         List<S3ObjectSummary> objects = s3Service.listObjects(sourceBucket, prefix);
         if (objects.size() - 1 != fileSet.size() || totalFileCount != objects.size() - 1) {
@@ -208,5 +235,18 @@ public class IngestionS3InternalProviderServiceImpl extends IngestionProviderSer
             }
         }
         return true;
+    }
+
+    private List<String> getTargetFileListFromS3(String sourceBucket, String prefix, String fileExtension) {
+        List<S3ObjectSummary> objects = s3Service.listObjects(sourceBucket, prefix);
+        return objects.stream().filter(summary -> summary.getKey().endsWith(fileExtension)).map(summary -> {
+            String key = summary.getKey();
+            return key.substring(key.lastIndexOf("/") + 1);
+        }).collect(Collectors.toList());
+    }
+
+    private Boolean isControlFilePresent(String sourceBucket, String parentDir, String latestVersion) {
+        String contolObj = String.format("%s/%s/%s", parentDir, latestVersion, CONTROL_FILE_NAME);
+        return s3Service.objectExist(sourceBucket, contolObj);
     }
 }

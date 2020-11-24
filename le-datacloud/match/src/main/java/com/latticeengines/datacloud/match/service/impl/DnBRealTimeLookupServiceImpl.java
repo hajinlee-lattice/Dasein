@@ -128,7 +128,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                 context.setMatchInsight(topCandidate.getMatchInsight());
                 context.setMatchGrade(topCandidate.getMatchInsight().getMatchGrade());
                 context.setMatchedNameLocation(topCandidate.getNameLocation());
-                context.setOutOfBusiness(outOfBusinessValue.equals(topCandidate.getOperatingStatus()));
+                context.setOutOfBusiness(outOfBusinessValue.equalsIgnoreCase(topCandidate.getOperatingStatus()));
             }
             break;
         case REALTIME_EMAIL:

@@ -1,9 +1,5 @@
 package com.latticeengines.app.exposed.controller;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -12,10 +8,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -202,20 +195,21 @@ public class LatticeInsightsResource {
 
     private static final String SEGMENT_CONTACTS_FILE_LOCAL_PATH = "com/latticeengines/pls/controller/internal/export-state-%s.csv";
 
-    @GetMapping(SEGMENTS_PATH + "/downloadcsv")
-    @ResponseBody
-    @ApiOperation(value = "Download lead enrichment attributes")
-    public void downloadSegmentCSV(HttpServletRequest request, HttpServletResponse response,
-            @RequestParam(value = "state", required = true) String state) throws FileNotFoundException, IOException {
-        InputStream stream = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(String.format(SEGMENT_CONTACTS_FILE_LOCAL_PATH, state));
-        String inputStream = IOUtils.toString(new InputStreamReader(stream));
-        DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
-        builder.setMimeType("application/csv").setFileName("segments-contacts.csv").setFileContent(inputStream)
-                .setBatonService(batonService);
-        DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
-        downloader.downloadFile(request, response);
-    }
+//    // PLS-15998: remove this end point
+//    @GetMapping(SEGMENTS_PATH + "/downloadcsv")
+//    @ResponseBody
+//    @ApiOperation(value = "Download lead enrichment attributes")
+//    public void downloadSegmentCSV(HttpServletRequest request, HttpServletResponse response,
+//            @RequestParam(value = "state", required = true) String state) throws FileNotFoundException, IOException {
+//        InputStream stream = Thread.currentThread().getContextClassLoader()
+//                .getResourceAsStream(String.format(SEGMENT_CONTACTS_FILE_LOCAL_PATH, state));
+//        String inputStream = IOUtils.toString(new InputStreamReader(stream));
+//        DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
+//        builder.setMimeType("application/csv").setFileName("segments-contacts.csv").setFileContent(inputStream)
+//                .setBatonService(batonService);
+//        DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
+//        downloader.downloadFile(request, response);
+//    }
 
     @GetMapping(INSIGHTS_PATH + "/premiumattributeslimitation")
     @ResponseBody

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -45,6 +46,9 @@ public class NameLocation implements Fact, Serializable {
 
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
+
+    @JsonIgnore
+    private Boolean isUnreachable;
 
     @JsonProperty("RegistrationNumber")
     private String registrationNumber;
@@ -152,6 +156,14 @@ public class NameLocation implements Fact, Serializable {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public Boolean getUnreachable() {
+        return isUnreachable;
+    }
+
+    public void setUnreachable(Boolean unreachable) {
+        isUnreachable = unreachable;
     }
 
     @MetricField(name = "RegistrationNumber")

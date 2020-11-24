@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.cdl.MigrateDynamoRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.SegmentImportRequest;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
@@ -813,5 +814,12 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         } else {
             throw new RuntimeException(StringUtils.join(responseDoc.getErrors(), ","));
         }
+    }
+
+    public ApplicationId importListSegment(String customerSpace, SegmentImportRequest request) {
+        String baseUrl = "/customerspaces/{customerSpace}/segments/importListSegment";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
+        String appIdStr = post("Start import listsegment", url, request, String.class);
+        return ApplicationIdUtils.toApplicationIdObj(appIdStr);
     }
 }

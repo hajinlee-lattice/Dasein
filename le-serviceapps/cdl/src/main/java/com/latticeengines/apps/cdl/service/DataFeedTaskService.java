@@ -42,13 +42,7 @@ public interface DataFeedTaskService {
 
     List<String> registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts);
 
-    void addTableToQueue(String customerSpace, String taskUniqueId, String tableName);
-
-    void addTablesToQueue(String customerSpace, String taskUniqueId, List<String> tableNames);
-
-    List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType, String entity);
-
-    void resetImport(String customerSpace, DataFeedTask datafeedTask);
+    List<String> registerImportData(String customerSpace, String taskUniqueId, String dataTable);
 
     List<Table> getTemplateTables(String customerSpace, String entity);
 

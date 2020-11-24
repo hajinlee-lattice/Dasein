@@ -169,8 +169,8 @@ public class PlayLaunchChannelEntityMgrImpl
             playLaunchChannel.setExpirationDate(
                     PlayLaunchChannel.getExpirationDateFromExpirationPeriodString(playLaunchChannel));
         }
-        if (playLaunchChannel.getMaxAccountsToLaunch() == null || playLaunchChannel.getMaxAccountsToLaunch() < 0) {
-            playLaunchChannel.setMaxAccountsToLaunch(null);
+        if (playLaunchChannel.getMaxEntitiesToLaunch() == null || playLaunchChannel.getMaxEntitiesToLaunch() < 0) {
+            playLaunchChannel.setMaxEntitiesToLaunch(null);
         }
         playLaunchChannel.setLookupIdMap(lookupIdMap);
         playLaunchChannel.setId(playLaunchChannel.generateChannelId());
@@ -185,11 +185,11 @@ public class PlayLaunchChannelEntityMgrImpl
         if (updatedChannel.getBucketsToLaunch() != null) {
             existingPlayLaunchChannel.setBucketsToLaunch(updatedChannel.getBucketsToLaunch());
         }
-        if (updatedChannel.getMaxAccountsToLaunch() != null) {
-            if (updatedChannel.getMaxAccountsToLaunch() < 0) {
-                existingPlayLaunchChannel.setMaxAccountsToLaunch(null);
+        if (updatedChannel.getMaxEntitiesToLaunch() != null) {
+            if (updatedChannel.getMaxEntitiesToLaunch() < 0) {
+                existingPlayLaunchChannel.setMaxEntitiesToLaunch(null);
             } else {
-                existingPlayLaunchChannel.setMaxAccountsToLaunch(updatedChannel.getMaxAccountsToLaunch());
+                existingPlayLaunchChannel.setMaxEntitiesToLaunch(updatedChannel.getMaxEntitiesToLaunch());
             }
         }
         if (updatedChannel.getLaunchType() != null) {

@@ -7,7 +7,6 @@
       "externalSystemName":"AppNexus",
       "standardField":true,
       "exportEnabled":true,
-      "historyEnabled":true,
       "audienceType": ["ACCOUNTS"]
    }
 ]

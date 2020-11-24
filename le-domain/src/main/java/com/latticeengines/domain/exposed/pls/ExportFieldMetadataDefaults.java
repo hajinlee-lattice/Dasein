@@ -67,10 +67,6 @@ public class ExportFieldMetadataDefaults implements HasPid {
     @Column(name = "EXPORT_ENABLED", nullable = false)
     private Boolean exportEnabled;
 
-    @JsonProperty("historyEnabled")
-    @Column(name = "HISTORY_ENABLED", nullable = false)
-    private Boolean historyEnabled;
-
     @JsonProperty("audienceType")
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "EXPORT_FIELD_METADATA_DEFAULTS_AUDIENCE_TYPE", joinColumns = @JoinColumn(name = "EXPORT_FIELD_METADATA_DEFAULTS_PID"))
@@ -85,7 +81,7 @@ public class ExportFieldMetadataDefaults implements HasPid {
     public ExportFieldMetadataDefaults(String attrName, String displayName, String javaClass, BusinessEntity entity,
             CDLExternalSystemName systemName,
             Boolean isStandardField,
-            Boolean isExportEnabled, Boolean isHistoryEnabled) {
+            Boolean isExportEnabled) {
         this.attrName = attrName;
         this.entity = entity;
         this.displayName = displayName;
@@ -93,7 +89,6 @@ public class ExportFieldMetadataDefaults implements HasPid {
         this.externalSystemName = systemName;
         this.standardField = isStandardField;
         this.exportEnabled = isExportEnabled;
-        this.historyEnabled = isHistoryEnabled;
     }
 
     @Override
@@ -160,14 +155,6 @@ public class ExportFieldMetadataDefaults implements HasPid {
 
     public void setExportEnabled(Boolean exportEnabled) {
         this.exportEnabled = exportEnabled;
-    }
-
-    public Boolean getHistoryEnabled() {
-        return historyEnabled;
-    }
-
-    public void setHistoryEnabled(Boolean historyEnabled) {
-        this.historyEnabled = historyEnabled;
     }
 
     public List<AudienceType> getAudienceTypes() {

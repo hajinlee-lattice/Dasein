@@ -4,9 +4,13 @@ import static com.latticeengines.domain.exposed.pls.ActionType.HARD_DELETE;
 import static com.latticeengines.domain.exposed.pls.ActionType.SOFT_DELETE;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +49,10 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulerConstants;
+import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.FirstActionTimePending;
+import com.latticeengines.domain.exposed.cdl.scheduling.constraint.LastActionTimePending;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -96,7 +103,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             "consolidateandpublishworkflow", //
             "profileandpublishworkflow", //
             "timelineexportworkflow", //
-            "generateintentemailalertworkflow" };
+            "generateintentemailalertworkflow", //
+            "campaigndeltacalculationworkflow", //
+            "deltacampaignlaunchworkflow" };
     private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
             Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
@@ -325,9 +334,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                         // make it as if old job is still running
                         job.setJobStatus(JobStatus.RUNNING);
                     }
-                    // when job failed and no further retry will be performed, not set the flag
+                    // when job is running, set the flag
                     // since UI will display a different tooltip
-                    if (job.getJobStatus() != JobStatus.FAILED) {
+                    if (job.isRunning()) {
                         job.setJobRetried(true);
                     }
 
@@ -610,6 +619,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             if (expandChildrenJobs) {
                 job.setSubJobs(updateJobsWithActionId(expandActions(actions, null), null));
             }
+            updateEstimateScheduleTime(job, schedulingStatus, actions);
         }
         return job;
     }
@@ -693,6 +703,76 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
         }
         job.setStartTimestamp(nextInvokeDate);
+    }
+
+    /*
+     * Update estimate invoke time for autoscheduling 1) 2 hours after last import
+     * job 2) check if in peace period 3)start at next day if no auto schedule quota
+     */
+    private void updateEstimateScheduleTime(Job job, SchedulingStatus schedulingStatus, List<Action> actions) {
+        boolean allowAutoSchedule = false;
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        try {
+            allowAutoSchedule = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+        } catch (Exception e) {
+            log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
+        }
+        if (allowAutoSchedule) {
+            try {
+                Set<Long> runningJobSet = job.getSubJobs().stream().filter(subJob -> subJob.isRunning())
+                        .map(Job::getPid).collect(Collectors.toSet());
+                actions = actions.stream().filter(action -> !runningJobSet.contains(action.getTrackingPid()))
+                        .collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(actions)) {
+                    ZoneId timezone = batonService.getTenantTimezone(customerSpace);
+                    long autoScheduleQuota = MapUtils.emptyIfNull(schedulingStatus.getRemainingPaQuota())
+                            .getOrDefault(SchedulerConstants.QUOTA_AUTO_SCHEDULE, 0L);
+                    Instant now = Instant.now();
+                    Instant estimateStartTime = now;
+
+                    Action firstImportAction = Collections.min(actions, Comparator.comparing(Action::getCreated));
+                    if (firstImportAction != null && firstImportAction.getCreated() != null) {
+                        Instant importTime = firstImportAction.getCreated().toInstant()
+                                .plus(FirstActionTimePending.FIRSTACTION_PENDING_HOUR, ChronoUnit.HOURS);
+                        estimateStartTime = getLatestInstant(estimateStartTime, importTime);
+                    }
+                    Action lastImportAction = Collections.max(actions, Comparator.comparing(Action::getCreated));
+                    if (lastImportAction != null && lastImportAction.getCreated() != null) {
+                        Instant importTime = lastImportAction.getCreated().toInstant()
+                                .plus(LastActionTimePending.LASTACTION_PENDING_MINITE, ChronoUnit.MINUTES);
+                        estimateStartTime = getLatestInstant(estimateStartTime, importTime);
+                    }
+
+                    if (SchedulingPAUtils.isInPeacePeriod(estimateStartTime, timezone, autoScheduleQuota)) {
+                        Pair<Instant, Instant> period = SchedulingPAUtils.calculatePeacePeriod(estimateStartTime,
+                                timezone, autoScheduleQuota);
+                        if (period != null) {
+                            estimateStartTime = period.getRight();
+                        }
+                    }
+
+                    if (autoScheduleQuota <= 0) {
+                        Instant quotaTime = now.atZone(timezone).plus(1L, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS)
+                                .toInstant();
+                        estimateStartTime = getLatestInstant(quotaTime, estimateStartTime);
+                    }
+
+                    // update only when schedule time is not now
+                    if (job.getSchedulingInfo() != null && estimateStartTime.isAfter(now)) {
+                        job.getSchedulingInfo().setEstimateTimestamp(Date.from(estimateStartTime));
+                    }
+                    log.info("estimate auto schedule time for for tenant {} is {} ",
+                            MultiTenantContext.getShortTenantId(), estimateStartTime.toString());
+                }
+            } catch (Exception e) {
+                log.warn(String.format("Getting estimate schedule time for tenant %s has error",
+                        MultiTenantContext.getShortTenantId()), e);
+            }
+        }
+    }
+
+    private Instant getLatestInstant(Instant instant1, Instant instant2) {
+        return instant1.isAfter(instant2) ? instant1 : instant2;
     }
 
     @VisibleForTesting

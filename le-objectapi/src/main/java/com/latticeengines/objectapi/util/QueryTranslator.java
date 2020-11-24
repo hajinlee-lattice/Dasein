@@ -368,7 +368,7 @@ abstract class QueryTranslator {
                 String tenantId = repository.getCustomerSpace().getTenantId();
                 String tempTableName;
                 try (PerformanceTimer timer = new PerformanceTimer()) {
-                    tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz,
+                    tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz, sqlUser,
                             repository.getRedshiftPartition());
                     timer.setThreshold(10000L);
                     timer.setTimerMessage("Created a templist named " + tempTableName + " for tenant " + tenantId);

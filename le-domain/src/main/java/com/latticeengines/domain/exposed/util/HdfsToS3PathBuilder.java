@@ -55,7 +55,6 @@ public class HdfsToS3PathBuilder {
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
     private String s3ExportDir = s3BucketDir + "/dropfolder/%s/export";
     private String s3AtlasTableBackupPrefix = s3AtlasTablePrefix + "/Backup";
-    private String s3DataVisionSegmentDir = s3BucketDir + "/datavision_segment";
 
     public HdfsToS3PathBuilder() {
     }
@@ -157,10 +156,6 @@ public class HdfsToS3PathBuilder {
 
     public String getS3ExportDir(String s3Bucket, String dropboxName) {
         return String.format(protocol + s3ExportDir, s3Bucket, dropboxName);
-    }
-
-    public String getS3ListSegmentDir(String s3Bucket, String tenantId, String segmentName) {
-        return String.format(protocol + s3DataVisionSegmentDir, s3Bucket) + PATH_SEPARATOR + tenantId + PATH_SEPARATOR + segmentName;
     }
 
     public String getS3CampaignExportDir(String s3Bucket, String dropboxName) {

@@ -35,7 +35,7 @@ public class SparkSQLQuery<T> extends BaseSQLQuery<T> {
         super(connProvider, configuration);
     }
 
-    /** 
+    /**
      * SparkSQL does not support columns in With Clause.
      * So, ignoring columns projection and just keeping the alias
      */
@@ -60,7 +60,7 @@ public class SparkSQLQuery<T> extends BaseSQLQuery<T> {
         return new SparkDateTimeExpressionTemplate();
     }
 
-    private class SparkDateTimeExpressionTemplate implements DateTimeExpressionTemplate {
+    private static class SparkDateTimeExpressionTemplate implements DateTimeExpressionTemplate {
 
         private static final String ADD_DAYS_FN = "DATE_ADD";
         private static final String ADD_MONTHS_FN = "ADD_MONTHS";

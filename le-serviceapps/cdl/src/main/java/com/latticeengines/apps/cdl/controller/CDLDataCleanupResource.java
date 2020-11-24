@@ -57,11 +57,10 @@ public class CDLDataCleanupResource {
     @ResponseBody
     @ApiOperation(value = "Register delete data table")
     public ResponseDocument<String> registerDeleteData(@PathVariable String customerSpace,
-                                                       @RequestParam(value = "user", required = false) String user,
-                                                       @RequestParam(value = "filename", required = false) String filename,
-                                                       @RequestParam(value = "hardDelete", required = false,
-                                                               defaultValue = "false") boolean hardDelete,
-                                                       @RequestBody DeleteRequest request) {
+            @RequestParam(value = "user", required = false) String user,
+            @RequestParam(value = "filename", required = false) String filename,
+            @RequestParam(value = "hardDelete", required = false) Boolean hardDelete,
+            @RequestBody DeleteRequest request) {
         try {
             if (request == null) {
                 request = new DeleteRequest();
@@ -72,7 +71,9 @@ public class CDLDataCleanupResource {
             if (StringUtils.isNotBlank(filename)) {
                 request.setFilename(filename);
             }
-            request.setHardDelete(hardDelete);
+            if (hardDelete != null) {
+                request.setHardDelete(hardDelete);
+            }
             customerSpace = CustomerSpace.parse(customerSpace).toString();
             ApplicationId applicationId = cdlDataCleanupService.registerDeleteData(customerSpace, request);
             return ResponseDocument.successResponse(applicationId.toString());

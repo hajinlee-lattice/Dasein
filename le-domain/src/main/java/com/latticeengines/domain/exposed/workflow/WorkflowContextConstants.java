@@ -25,6 +25,7 @@ public final class WorkflowContextConstants {
         public static final String DATAFEEDTASK_REGISTERED_TABLES = "DATAFEEDTASK_REGISTERED_TABLES";
         public static final String DATAFEEDTASK_IMPORT_ERROR_FILES = "DATAFEEDTASK_IMPORT_ERROR_FILES";
         public static final String IMPORT_MIGRATE_TRACKING_ID = "IMPORT_MIGRATE_TRACKING_ID";
+        public static final String MATCH_RESULT_TABLE_NAME = "MATCH_RESULT_TABLE_NAME";
         public static final String IMPORT_WARNING = "IMPORT_WARNING";
         public static final String RENAME_AND_MATCH_TABLE = "RENAME_AND_MATCH_TABLE";
     }

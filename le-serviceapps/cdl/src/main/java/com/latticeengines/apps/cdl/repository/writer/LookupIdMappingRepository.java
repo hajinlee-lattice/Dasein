@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
@@ -16,4 +17,6 @@ public interface LookupIdMappingRepository
     LookupIdMap findByOrgIdAndExternalSystemType(String orgId, CDLExternalSystemType externalSystemType);
     
     List<LookupIdMap> findAllByOrgName(String orgName);
+
+    List<LookupIdMap> findAllByExternalSystemName(CDLExternalSystemName externalSystemName);
 }

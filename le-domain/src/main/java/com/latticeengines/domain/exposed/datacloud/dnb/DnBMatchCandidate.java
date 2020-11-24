@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.datacloud.dnb;
 
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -48,6 +50,18 @@ public class DnBMatchCandidate {
 
     @JsonProperty("Classification")
     private Classification classification;
+
+    @JsonProperty("IsMarketable")
+    private Boolean isMarketable;
+
+    @JsonProperty("IsMailUndeliverable")
+    private Boolean isMailUndeliverable;
+
+    @JsonProperty("IsUnreachable")
+    private Boolean isUnreachable;
+
+    @JsonProperty("FamilyTreeRoles")
+    private List<String> familyTreeRoles;
 
     @JsonIgnore
     private Long matchDuration;
@@ -106,6 +120,38 @@ public class DnBMatchCandidate {
 
     public void setMatchDuration(Long matchDuration) {
         this.matchDuration = matchDuration;
+    }
+
+    public Boolean getMarketable() {
+        return isMarketable;
+    }
+
+    public void setMarketable(Boolean marketable) {
+        isMarketable = marketable;
+    }
+
+    public Boolean getMailUndeliverable() {
+        return isMailUndeliverable;
+    }
+
+    public void setMailUndeliverable(Boolean mailUndeliverable) {
+        isMailUndeliverable = mailUndeliverable;
+    }
+
+    public Boolean getUnreachable() {
+        return isUnreachable;
+    }
+
+    public void setUnreachable(Boolean unreachable) {
+        isUnreachable = unreachable;
+    }
+
+    public List<String> getFamilyTreeRoles() {
+        return familyTreeRoles;
+    }
+
+    public void setFamilyTreeRoles(List<String> familyTreeRoles) {
+        this.familyTreeRoles = familyTreeRoles;
     }
 
     public enum Classification {

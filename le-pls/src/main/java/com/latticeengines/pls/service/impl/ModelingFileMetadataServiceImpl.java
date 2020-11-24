@@ -398,25 +398,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> standardAttrNames =
                 standardTable.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
 
-        Set<String> mappedStandardFields = new HashSet<>();
-        // check if there's multiple mapping to standard field
-        for (FieldMapping fieldMapping : fieldMappings) {
-            if (fieldMapping.getMappedField() != null) {
-                if (standardAttrNames.contains(fieldMapping.getMappedField())) {
-                    if (mappedStandardFields.contains(fieldMapping.getMappedField())) {
-                        String message =
-                                "Multiple user fields are mapped to standard field " + fieldMapping.getMappedField();
-                        FieldValidation validation = createValidation(fieldMapping.getUserField(),
-                                fieldMapping.getMappedField(),
-                                ValidationStatus.ERROR, message);
-                        validations.add(validation);
-                        groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
-                    } else {
-                        mappedStandardFields.add(fieldMapping.getMappedField());
-                    }
-                }
-            }
-        }
+        // 1. check user field to standard field 2. check user field to matched system
+        checkMultipleUserFieldsMappedToLatticeField(fieldMappings, standardAttrNames, groupedValidations, validations);
 
         compareStandardFields(templateTable, fieldMappingDocument, standardTable, validations, groupedValidations,
                 customerSpace,
@@ -500,7 +483,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                                 latticeAttr.getSourceAttrName())
                                 || resolver.isUserFieldMatchWithAttribute(userField, latticeAttr)) {
                             String message = String.format("%s is currently unmapped and can be mapped to Standard " +
-                                            " Field %s.", userField, attrName);
+                                    " Field %s.", userField, attrName);
                             FieldValidation validation = createValidation(null, attrName, ValidationStatus.WARNING,
                                     message);
                             validations.add(validation);
@@ -535,6 +518,49 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return fieldValidationResult;
     }
 
+    private void checkMultipleUserFieldsMappedToLatticeField(List<FieldMapping> fieldMappings,
+                                                              Set<String> standardAttrNames,
+                                                              Map<ValidationCategory, List<FieldValidation>> groupedValidations,
+                                                              List<FieldValidation> validations) {
+        Set<String> mappedStandardFields = new HashSet<>();
+        Set<String> mappingKeys = new HashSet<>();
+        for (FieldMapping fieldMapping : fieldMappings) {
+            // check if there's multiple mapping to standard field
+            if (fieldMapping.getMappedField() != null) {
+                if (standardAttrNames.contains(fieldMapping.getMappedField())) {
+                    if (mappedStandardFields.contains(fieldMapping.getMappedField())) {
+                        String message =
+                                "Multiple user fields are mapped to standard field " + fieldMapping.getMappedField();
+                        FieldValidation validation = createValidation(fieldMapping.getUserField(),
+                                fieldMapping.getMappedField(),
+                                ValidationStatus.ERROR, message);
+                        validations.add(validation);
+                        groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
+                    } else {
+                        mappedStandardFields.add(fieldMapping.getMappedField());
+                    }
+                }
+            }
+            // check if multiple user fields mapped to system
+            if (fieldMapping.getIdType() != null && StringUtils.isNotBlank(fieldMapping.getSystemName())) {
+                String key = fieldMapping.getIdType() + "|" + fieldMapping.getSystemName();
+                if (mappingKeys.contains(key)) {
+                    String message = String.format(
+                            "Multiple user fields are mapped to %s with the same type %s",
+                            fieldMapping.getSystemName(), fieldMapping.getIdType());
+                    FieldValidation validation = createValidation(fieldMapping.getUserField(),
+                            fieldMapping.getMappedField(),
+                            ValidationStatus.ERROR, message);
+                    validations.add(validation);
+                    groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
+                } else {
+                    mappingKeys.add(key);
+                }
+
+            }
+        }
+    }
+
     private void compareStandardFields(Table templateTable,
                                        FieldMappingDocument fieldMappingDocument,
                                        Table standardTable,
@@ -562,8 +588,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 templateTable.getAttributes()
                         .stream()
                         .filter(attr -> standardAttrNames.contains(attr.getName()))
-                        .collect(Collectors.toMap(Attribute::getName, attr -> StringUtils.isNotBlank(attr.getSourceAttrName()) ? attr.getSourceAttrName() :
-                        attr.getDisplayName()));
+                        .collect(Collectors.toMap(Attribute::getName,
+                                attr -> StringUtils.isNotBlank(attr.getSourceAttrName()) ? attr.getSourceAttrName() : attr.getDisplayName()));
         for (FieldMapping mapping : fieldMappingDocument.getFieldMappings()) {
             if (standardAttrNames.contains(mapping.getMappedField())) {
                 String preUserField = previousStandardFieldMapping.get(mapping.getMappedField());

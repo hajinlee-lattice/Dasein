@@ -39,7 +39,7 @@ public interface CDLService {
 
     void importFileToS3(String customerSpace, String templateFileName, String s3Path);
 
-    UIAction softDelete(DeleteRequest deleteRequest);
+    UIAction delete(DeleteRequest deleteRequest);
 
     UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
                      CleanupOperationType cleanupOperationType);
@@ -76,7 +76,8 @@ public interface CDLService {
     List<S3ImportSystem> getS3ImportSystemWithFilter(String customerSpace, boolean filterAccount,
                                                      boolean filterContact, S3ImportTemplateDisplay templateDisplay);
 
-    List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable);
+    List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable, Table standardTable,
+                                                  Set<String> matchingFieldNames);
 
     boolean autoImport(String templateFileName);
 

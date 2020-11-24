@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,7 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
+import com.latticeengines.domain.exposed.cdl.SegmentImportRequest;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
@@ -126,7 +128,10 @@ public class S3ImportServiceImpl implements S3ImportService {
             }
         } else if (S3ImportMessageType.DCP.equals(messageType)) {
             return parts[parts.length - 1].toLowerCase().endsWith(".csv");
-        } else {
+        } else if (S3ImportMessageType.LISTSEGMENT.equals(messageType)) {
+            return parts[parts.length - 1].toLowerCase().endsWith(".zip");
+        }
+        else {
             return false;
         }
     }
@@ -142,7 +147,14 @@ public class S3ImportServiceImpl implements S3ImportService {
         for (S3ImportMessage message : messageList) {
             try {
                 log.info("Start processing : " + message.getKey());
-                if (dropBoxSet.contains(message.getDropBox().getDropBox())) {
+                if (S3ImportMessageType.LISTSEGMENT.equals(message.getMessageType())){
+                    String segmentIndex = S3ImportMessageUtils.getSegmentIndex(message);
+                    if (dropBoxSet.contains(segmentIndex)) {
+                        log.info(String.format("Already submitted one import for segment: %s",
+                                segmentIndex));
+                        continue;
+                    }
+                } else if (dropBoxSet.contains(message.getDropBox().getDropBox())) {
                     log.info(String.format("Already submitted one import for dropBox: %s",
                             message.getDropBox().getDropBox()));
                     continue;
@@ -151,6 +163,8 @@ public class S3ImportServiceImpl implements S3ImportService {
                     submitAtlasImport(dropBoxSet, message);
                 } else if (S3ImportMessageType.DCP.equals(message.getMessageType())) {
                     submitDCPImport(dropBoxSet, message);
+                } else if (S3ImportMessageType.LISTSEGMENT.equals(message.getMessageType())) {
+                    submitListSegmentImport(dropBoxSet, message);
                 }
             } catch (RuntimeException e) {
                 // Only log message instead of stack trace to reduce log.
@@ -167,19 +181,33 @@ public class S3ImportServiceImpl implements S3ImportService {
 
     @Override
     public void updateMessageUrl() {
-        S3ImportMessageType messageType = isDCPStack ? S3ImportMessageType.DCP : S3ImportMessageType.Atlas;
-        List<S3ImportMessage> messageList = s3ImportMessageService.getMessageWithoutHostUrlByType(messageType);
+        List<S3ImportMessage> messageList = new ArrayList<>();
+        if (isDCPStack) {
+            messageList = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.DCP);
+        } else {
+            messageList = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.Atlas);
+            List<S3ImportMessage> messageListSegment = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.LISTSEGMENT);
+            messageList.addAll(messageListSegment);
+        }
+
         if (CollectionUtils.isNotEmpty(messageList)) {
             log.info("Current stack: " + currentStack + " hostUrl: " + hostUrl + " isDCPStack: " + isDCPStack);
             for (S3ImportMessage message : messageList) {
-                Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
-                if (tenant == null) {
-                    log.error("Cannot find DropBox Owner: " + message.getDropBox().getDropBox());
-                } else {
-                    if (shouldSet(CustomerSpace.shortenCustomerSpace(tenant.getId()), messageType)) {
-                        log.info("Set message " + message.getKey() + " with hostUrl: " + hostUrl);
-                        s3ImportMessageService.updateHostUrl(message.getKey(), hostUrl);
+                String tenantId;
+                if (!S3ImportMessageType.LISTSEGMENT.equals(message.getMessageType())) {
+                    Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
+                    if (tenant == null) {
+                        log.error("Cannot find DropBox Owner: " + message.getDropBox().getDropBox());
+                        continue;
                     }
+                    tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
+                } else {
+                    tenantId = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
+                            S3ImportMessageUtils.KeyPart.TENANT_ID);
+                }
+                if (shouldSet(tenantId, message.getMessageType())) {
+                    log.info("Set message " + message.getKey() + " with hostUrl: " + hostUrl);
+                    s3ImportMessageService.updateHostUrl(message.getKey(), hostUrl);
                 }
             }
         }
@@ -187,7 +215,8 @@ public class S3ImportServiceImpl implements S3ImportService {
 
     @SuppressWarnings("unchecked")
     private boolean shouldSet(String tenantId, S3ImportMessageType messageType) {
-        String url = S3ImportMessageType.Atlas.equals(messageType) ? appPublicUrl + STACK_INFO_URL : dcpPublicUrl + STACK_INFO_URL;
+        String url = (S3ImportMessageType.Atlas.equals(messageType) || S3ImportMessageType.LISTSEGMENT.equals(messageType)) ?
+                appPublicUrl + STACK_INFO_URL : dcpPublicUrl + STACK_INFO_URL;
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
         boolean currentActive = true;
         boolean inactiveImport = false;
@@ -305,4 +334,36 @@ public class S3ImportServiceImpl implements S3ImportService {
 
     }
 
+    private void submitListSegmentImport(Set<String> dropBoxSet, S3ImportMessage message) {
+        log.info(String.format("ListSegment import for %s / %s", message.getBucket(), message.getKey()));
+        String tenantId = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
+                S3ImportMessageUtils.KeyPart.TENANT_ID);
+        String segmentName = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
+                S3ImportMessageUtils.KeyPart.SEGMENT_NAME);
+        String fileName = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
+                S3ImportMessageUtils.KeyPart.FILE_NAME);
+
+        log.info(String.format("Process ListSegment import with Tenant %s, segment %s, File %s", tenantId, segmentName,
+                fileName));
+        if (submitListSegmentImport(tenantId, segmentName, message.getKey(), message.getHostUrl())) {
+            dropBoxSet.add(S3ImportMessageUtils.getSegmentIndex(message));
+            s3ImportMessageService.deleteMessage(message);
+        }
+    }
+
+    private boolean submitListSegmentImport(String tenantId, String segmentName, String key, String hostUrl) {
+        SegmentImportRequest request = new SegmentImportRequest();
+        request.setSegmentName(segmentName);
+        request.setS3FileKey(key);
+        try {
+            CDLProxy cdlProxy = new CDLProxy(hostUrl);
+            ApplicationId applicationId = cdlProxy.importListSegment(tenantId, request);
+            log.info("Start segment import by applicationId : " + applicationId.toString());
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to submit segment import job.", e);
+            return false;
+        }
+
+    }
 }

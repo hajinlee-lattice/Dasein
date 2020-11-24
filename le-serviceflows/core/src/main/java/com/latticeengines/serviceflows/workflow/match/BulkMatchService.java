@@ -3,6 +3,8 @@ package com.latticeengines.serviceflows.workflow.match;
 import static com.latticeengines.domain.exposed.metadata.datastore.DataUnit.DataFormat.AVRO;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.inject.Inject;
@@ -12,6 +14,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.apache.parquet.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -116,6 +119,39 @@ public class BulkMatchService {
                 cnt++;
             }
             log.info(String.format("Moved %d files from %s to %s", cnt, avroGlobs, tgtPath));
+            Table table = MetadataConverter.getTable(yarnConfiguration, tgtPath, //
+                    null, null, false);
+            table.setName(targetTableName);
+            metadataProxy.createTable(customer, targetTableName, table);
+        } catch (Exception e) {
+            log.error("Failed to save match result", e);
+        }
+    }
+
+    public void registerResultTable(String customer, List<MatchCommand> matchCommandList, String targetTableName) {
+
+        try {
+            String tgtPath = PathBuilder.buildDataTablePath(podId, CustomerSpace.parse(customer))
+                    .append(targetTableName).toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, tgtPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, tgtPath);
+            }
+            HdfsUtils.mkdir(yarnConfiguration, tgtPath);
+            int cnt = 0;
+            List<String> avroGlobPathList = new ArrayList<>();
+            for (MatchCommand command : matchCommandList) {
+                String outputDir = PathUtils.toParquetOrAvroDir(command.getResultLocation());
+                String avroGlobs = PathUtils.toAvroGlob(outputDir);
+                for (String avroFilePath : HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlobs)) {
+                    String avroFileName = new Path(avroFilePath).getName();
+                    String tgtFilePath = tgtPath + "/" + avroFileName;
+                    HdfsUtils.moveFile(yarnConfiguration, avroFilePath, tgtFilePath);
+                    log.info("Moved {} to {}", avroFilePath, tgtFilePath);
+                    avroGlobPathList.add(avroGlobs);
+                    cnt++;
+                }
+            }
+            log.info(String.format("Moved %d files from %s to %s", cnt, Strings.join(avroGlobPathList, ","), tgtPath));
             Table table = MetadataConverter.getTable(yarnConfiguration, tgtPath, //
                     null, null, false);
             table.setName(targetTableName);

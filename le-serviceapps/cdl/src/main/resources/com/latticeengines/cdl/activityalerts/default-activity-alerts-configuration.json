@@ -8,11 +8,11 @@
     "is_active": true
   },
   {
-    "name": "IncActivityOnProduct",
-    "alert_header": "Increased Activity on Product Pages",
+    "name": "AnonymousWebVisits",
+    "alert_header": "Anonymous Web Visits",
     "alert_category": "PEOPLE",
     "qualification_period_days": 10,
-    "alert_message_template": "${Data.PageVisits} <#if (Data.PageVisits > 1)>visits<#else>visit</#if> to your ${Data.PageName} page suggests you'll need to prospect into those personas.",
+    "alert_message_template": "Your web pages had ${Data.PageVisits} <#if (Data.PageVisits > 1)>visits<#else>visit</#if> anonymous visits from this company in the last 10 days.",
     "is_active": true
   },
   {
@@ -29,6 +29,46 @@
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
     "alert_message_template": "We saw <#if (Data.NumResearchIntents > 0)>research intent on ${Data.NumResearchIntents} products </#if><#if (Data.NumBuyIntents > 0) && (Data.NumResearchIntents > 0)>and </#if><#if (Data.NumBuyIntents > 0)>buy intent on ${Data.NumBuyIntents} products </#if>within the last 10 days. Check out which models in the Recent Activity section.",
+    "is_active": true
+  },
+  {
+    "name": "HighEngagementInAccount",
+    "alert_header": "High Engagement in Account",
+    "alert_category": "PEOPLE",
+    "qualification_period_days": 10,
+    "alert_message_template": "Overall, there is a high level of engagement from this company.",
+    "is_active": true
+  },
+  {
+    "name": "KnownWebVisits",
+    "alert_header": "Known Web Visits",
+    "alert_category": "PEOPLE",
+    "qualification_period_days": 10,
+    "alert_message_template": "You have ${Data.ActiveContacts} known <#if (Data.ActiveContacts > 1)>contacts<#else>contact</#if> among the visitors that are engaging with you",
+    "is_active": true
+  },
+  {
+    "name": "AcitiveContactsAndWebVisits",
+    "alert_header": "Active Contacts and Web Visits",
+    "alert_category": "PEOPLE",
+    "qualification_period_days": 10,
+    "alert_message_template": "You have ${Data.ActiveContacts} active contacts at this company. Their titles are ${Data.Titles}",
+    "is_active": true
+  },
+  {
+    "name": "BuyingIntentAroundProductPages",
+    "alert_header": "Buying Intent around Product Pages",
+    "alert_category": "PRODUCTS",
+    "qualification_period_days": 10,
+    "alert_message_template": "This company is doing web searches around your ${Data.PageName}. It looks like they are in a Buying Stage.",
+    "is_active": true
+  },
+  {
+    "name": "ResearchingIntentAroundProductPages",
+    "alert_header": "Researching Intent around Product Pages",
+    "alert_category": "PRODUCTS",
+    "qualification_period_days": 10,
+    "alert_message_template": "This company is doing web searches around your ${Data.PageName}. It looks like they are in a Researching Stage.",
     "is_active": true
   }
 ]

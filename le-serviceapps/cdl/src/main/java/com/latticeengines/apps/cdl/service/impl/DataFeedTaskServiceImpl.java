@@ -236,28 +236,16 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
-    public void addTableToQueue(String customerSpace, String taskUniqueId, String tableName) {
-        dataFeedTaskEntityMgr.addTableToQueue(taskUniqueId, tableName);
+    public List<String> registerImportData(String customerSpace, String taskUniqueId, String dataTable) {
+        DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
+        DataFeed dataFeed = dataFeedTask.getDataFeed();
+        if (dataFeed.getStatus() == DataFeed.Status.Initing) {
+            // log.info("Skip registering extract for feed in initing state");
+            return Collections.emptyList();
+        }
+        return dataFeedTaskEntityMgr.registerImportData(dataFeedTask, dataTable);
     }
-
-    @Override
-    public void addTablesToQueue(String customerSpace, String taskUniqueId, List<String> tableNames) {
-        dataFeedTaskEntityMgr.addTablesToQueue(taskUniqueId, tableNames);
-    }
-
-    @Override
-    public List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType,
-            String entity) {
-        DataFeedTask datafeedTask = getDataFeedTask(customerSpace, source, dataFeedType, entity);
-        return dataFeedTaskEntityMgr.getExtractsPendingInQueue(datafeedTask);
-    }
-
-    @Override
-    public void resetImport(String customerSpaceStr, DataFeedTask datafeedTask) {
-        dataFeedTaskEntityMgr.clearTableQueuePerTask(datafeedTask);
-    }
-
-    @Override
+    
     public List<Table> getTemplateTables(String customerSpace, String entity) {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         List<DataFeedTask> datafeedTasks = dataFeedTaskEntityMgr.getDataFeedTaskWithSameEntity(entity, dataFeed);

@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -462,7 +463,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public Collection<TenantDocument> getTenantsInCache(String contractId) {
-        PerformanceTimer timer = new PerformanceTimer("geting tenants in backend", log);
+        PerformanceTimer timer = new PerformanceTimer("getting tenants in backend", log);
         Collection<TenantDocument> tenants = tenantEntityMgr.getTenantsInCache(contractId);
         if (tenants != null) {
             for (TenantDocument doc : tenants) {
@@ -529,7 +530,7 @@ public class TenantServiceImpl implements TenantService {
         if (doc == null) {
             return null;
         }
-        doc.setFeatureFlags(overlayDefaultValues(doc.getFeatureFlags()));
+        doc.setFeatureFlags(overlayDefaultValues(doc.getFeatureFlags(), doc.getSpaceConfig().getProducts()));
         doc.setBootstrapState(getTenantOverallState(contractId, tenantId, doc));
         return doc;
     }
@@ -873,10 +874,6 @@ public class TenantServiceImpl implements TenantService {
         }
     }
 
-    private void saveVboRequestLog(String traceId, String tenantName, VboRequest vboRequest, VboResponse vboResponse) {
-
-    }
-
     private Scope startAdminSpan(String tenantName, long startTimeStamp) {
         Tracer tracer = GlobalTracer.get();
         Span span = tracer.buildSpan("Bootstrap Tenant - " + tenantName)
@@ -994,12 +991,15 @@ public class TenantServiceImpl implements TenantService {
         return !productsBelongTo.isEmpty();
     }
 
-    private FeatureFlagValueMap overlayDefaultValues(FeatureFlagValueMap flagValueMap) {
+    private FeatureFlagValueMap overlayDefaultValues(FeatureFlagValueMap flagValueMap, List<LatticeProduct> products) {
         FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
         FeatureFlagValueMap newValueMap = new FeatureFlagValueMap();
         definitionMap.forEach((flagId, flagDef) -> {
-            boolean defaultVal = flagDef.getDefaultValue();
-            newValueMap.put(flagId, defaultVal);
+            if (CollectionUtils.isNotEmpty(products) && CollectionUtils.isNotEmpty(flagDef.getAvailableProducts())
+                    && !Collections.disjoint(products, flagDef.getAvailableProducts())) {
+                boolean defaultVal = flagDef.getDefaultValue();
+                newValueMap.put(flagId, defaultVal);
+            }
         });
         if (flagValueMap != null) {
             newValueMap.putAll(flagValueMap);

@@ -389,6 +389,7 @@ public class Job implements HasId<Long>, HasName {
         private boolean scheduled;
         private boolean hasScheduleNowQuota;
         private String message;
+        private Date estimateTimestamp;
 
         public SchedulingInfo() {
         }
@@ -429,6 +430,14 @@ public class Job implements HasId<Long>, HasName {
 
         public void setMessage(String message) {
             this.message = message;
+        }
+
+        public Date getEstimateTimestamp() {
+            return estimateTimestamp;
+        }
+
+        public void setEstimateTimestamp(Date estimateTimestamp) {
+            this.estimateTimestamp = estimateTimestamp;
         }
     }
 }

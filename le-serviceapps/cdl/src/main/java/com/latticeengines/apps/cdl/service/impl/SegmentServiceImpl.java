@@ -55,8 +55,8 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
@@ -88,9 +88,6 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Value("${aws.s3.data.stage.bucket}")
     private String dateStageBucket;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
 
     private final String listSegmentCSVAdaptorPath = "metadata/ListSegmentCSVAdaptor.json";
 
@@ -125,15 +122,16 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public MetadataSegment createOrUpdateListSegment(MetadataSegment segment) {
         MetadataSegment persistedSegment;
-        if (StringUtils.isNotEmpty(segment.getName())) {
-            MetadataSegment existingSegment = segmentEntityMgr.findByName(segment.getName());
+        if (segment.getListSegment() != null) {
+            MetadataSegment existingSegment = segmentEntityMgr.findByExternalInfo(segment);
             if (existingSegment != null) {
                 persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
             } else {
+                segment.setName(NamingUtils.timestamp("Segment"));
                 persistedSegment = createListSegment(segment);
             }
-        } else if (segment.getListSegment() != null) {
-            MetadataSegment existingSegment = segmentEntityMgr.findByExternalInfo(segment);
+        } else if (StringUtils.isNotEmpty(segment.getName())) {
+            MetadataSegment existingSegment = segmentEntityMgr.findByName(segment.getName());
             if (existingSegment != null) {
                 persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
             } else {
@@ -163,8 +161,10 @@ public class SegmentServiceImpl implements SegmentService {
     private MetadataSegment createListSegment(MetadataSegment segment) {
         if (segment.getListSegment() != null) {
             ListSegment listSegment = segment.getListSegment();
-            HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-            listSegment.setS3DropFolder(pathBuilder.getS3ListSegmentDir(dateStageBucket, MultiTenantContext.getShortTenantId(), segment.getName()));
+            String s3Path = S3PathBuilder.getS3ListSegmentDir(dateStageBucket, MultiTenantContext.getShortTenantId(), segment.getName());
+            s3Path = s3Path //
+                    .replaceFirst("s3a:", "s3:").replaceFirst("s3n:", "s3:");
+            listSegment.setS3DropFolder(s3Path);
             listSegment.setCsvAdaptor(readCSVAdaptor());
         }
         return segmentEntityMgr.createListSegment(segment);

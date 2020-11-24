@@ -62,21 +62,26 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     @Inject
     private EventQueryService eventQueryService;
 
+    private String sqlUser;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestData(3);
+        sqlUser = SEGMENT_USER;
     }
 
     @DataProvider(name = "userContexts", parallel = false)
-    private Object[][] provideSqlUserContexts() {
-        return new Object[][] { { SEGMENT_USER, "Redshift" } };
+    protected Object[][] provideSqlUserContexts() {
+        return new Object[][]{ //
+                {SEGMENT_USER, "Redshift"}
+        };
     }
 
     private EntityQueryService getEntityQueryService(String sqlUser) {
         return entityQueryService;
     }
 
-    private Object[][] getTimeFilterDataProvider() {
+    protected Object[][] getTimeFilterDataProvider(String sqlUser) {
         TimeFilter currentMonth = new TimeFilter( //
                 ComparisonType.IN_CURRENT_PERIOD, //
                 PeriodStrategy.Template.Month.name(), //
@@ -90,10 +95,10 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 PeriodStrategy.Template.Date.name(), //
                 Arrays.asList("2017-07-15", "2017-08-15"));
         return new Object[][] { //
-                { SEGMENT_USER, TimeFilter.ever(), 24636L }, //
-                { SEGMENT_USER, currentMonth, 1983L }, //
-                { SEGMENT_USER, lastMonth, 2056L }, //
-                { SEGMENT_USER, betweendates, 2185L }, //
+                { sqlUser, TimeFilter.ever(), 24636L }, //
+                { sqlUser, currentMonth, 1983L }, //
+                { sqlUser, lastMonth, 2056L }, //
+                { sqlUser, betweendates, 2185L }, //
         };
     }
 
@@ -107,7 +112,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setTargetProductIds(Collections.singletonList("o13brsbfF10fllM6VUZRxMO7wfo5I7Ks"));
-        return eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+        return eventQueryService.getScoringCount(frontEndQuery, sqlUser, DataCollection.Version.Blue);
     }
 
     private Restriction getTxnRestriction(Bucket.Transaction txn) {
@@ -179,8 +184,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         testAndAssertCount(sqlUser, count, 132658);
     }
 
-    @Test(groups = "functional")
-    public void testConvertNumericalBucket() {
+    @Test(groups = "functional", dataProvider = "userContexts")
+    public void testConvertNumericalBucket(String sqlUser, String queryContext) {
         AttributeLookup intAttr = new AttributeLookup(BusinessEntity.Account, AccountAttr.NumFamilyMembers);
         ColumnMetadata cm = attrRepo.getColumnMetadata(intAttr);
         Assert.assertEquals(cm.getJavaClass(), Integer.class.getSimpleName());
@@ -194,8 +199,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        String sql = getEntityQueryService(SEGMENT_USER) //
-                .getQueryStr(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER, true);
+        String sql = getEntityQueryService(sqlUser) //
+                .getQueryStr(frontEndQuery, DataCollection.Version.Blue, sqlUser, true);
         Assert.assertFalse(sql.contains("lower(Account.NUMBER_OF_FAMILY_MEMBERS)"), sql);
         Assert.assertTrue(sql.contains("(1.5, 2)"), sql);
     }
@@ -272,8 +277,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     }
 
     @DataProvider(name = "timefilterProvider")
-    private Object[][] timefilterProvider() {
-        return getTimeFilterDataProvider();
+    protected Object[][] timefilterProvider() {
+        return getTimeFilterDataProvider(sqlUser);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")

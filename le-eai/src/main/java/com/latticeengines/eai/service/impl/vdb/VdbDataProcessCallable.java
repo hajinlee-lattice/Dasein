@@ -263,6 +263,11 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
         Map<String, String> recordForValidation = new HashMap<>();
         for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
             if (attributeMap.containsKey(column.getColumnName())) {
+                if (taskConfig != null && taskConfig.getSanitizers() != null) {
+                    // Regulate the value before validate.
+                    column.getValues().set(index, taskConfig.getSanitizers().sanitize(column.getValues().get(index),
+                            attributeMap.get(column.getColumnName())));
+                }
                 recordForValidation.put(attributeMap.get(column.getColumnName()).getName(), column.getValues().get(index));
                 if (!attributeMap.get(column.getColumnName()).isNullable()) {
                     if (StringUtils.isEmpty(column.getValues().get(index))) { //check null value column

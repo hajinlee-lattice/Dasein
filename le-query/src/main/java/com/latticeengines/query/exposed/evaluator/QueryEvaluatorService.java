@@ -22,6 +22,9 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.latticeengines.query.exposed.service.AthenaQueryService;
+import com.latticeengines.query.factory.AthenaQueryProvider;
+import com.latticeengines.query.factory.PrestoQueryProvider;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.querydsl.sql.SQLQuery;
 
@@ -42,6 +45,9 @@ public class QueryEvaluatorService {
     @Inject
     private QueryFactory queryFactory;
 
+    @Inject
+    private AthenaQueryService athenaQueryService;
+
     public AttributeRepository getAttributeRepository(String customerSpace, DataCollection.Version version) {
         return dataCollectionProxy.getAttrRepo(customerSpace, version);
     }
@@ -59,9 +65,14 @@ public class QueryEvaluatorService {
             return 0L;
         } else {
             SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
-            try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
-                timer.setThreshold(0L);
-                return sqlQuery.fetchCount();
+            if (AthenaQueryProvider.ATHENA_USER.equals(sqlUser)) {
+                return athenaQueryService.getCount(sqlQuery);
+            } else {
+                try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
+                    timer.setThreshold(0L);
+                    sqlQuery.setUseLiterals(PrestoQueryProvider.PRESTO_USER.equals(sqlUser));
+                    return sqlQuery.fetchCount();
+                }
             }
         }
     }
@@ -109,10 +120,11 @@ public class QueryEvaluatorService {
         SQLQuery<?> sqlQuery = constructSqlQuery(attrRepo, query, sqlUser);
         AtomicLong startTime = new AtomicLong();
         AtomicLong counter = new AtomicLong(0);
-        Flux<Map<String, Object>> flux = queryEvaluator.pipe(sqlQuery, query) //
+        Flux<Map<String, Object>> flux = queryEvaluator.pipe(sqlQuery, query, sqlUser) //
                 .doOnSubscribe(s -> startTime.set(System.currentTimeMillis())) //
                 .doOnNext(m -> counter.getAndIncrement()) //
                 .doOnComplete(() -> {
+                    sqlQuery.setUseLiterals(false);
                     String msg = String.format(
                             "[Metric] Finished fetching %d records. tenantId=%s SQLQuery=%s Bindings=%s ElapsedTime=%d ms",
                             counter.get(), attrRepo.getCustomerSpace().getTenantId(),

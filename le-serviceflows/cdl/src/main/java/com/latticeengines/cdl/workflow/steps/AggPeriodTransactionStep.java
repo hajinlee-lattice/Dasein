@@ -49,7 +49,7 @@ public class AggPeriodTransactionStep extends BaseProcessAnalyzeSparkStep<Proces
 
     private static final Logger log = LoggerFactory.getLogger(AggPeriodTransactionStep.class);
 
-    private static final String PERIOD_TXN_PREFIX_FMT = "PERIOD_TXN_%s_%s"; // type, period
+    public static final String PERIOD_TXN_PREFIX_FMT = "PERIOD_TXN_%s_%s"; // type, period
 
     @Inject
     private PeriodProxy periodProxy;
@@ -137,20 +137,6 @@ public class AggPeriodTransactionStep extends BaseProcessAnalyzeSparkStep<Proces
         config.inputMetadata = metadataWrapper;
         config.repartition = true;
         return config;
-    }
-
-    private ActivityStoreSparkIOMetadata constructInputMetadata(List<String> retainTypes) {
-        ActivityStoreSparkIOMetadata metadataWrapper = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> inputMetadata = new HashMap<>();
-        for (int i = 0; i < retainTypes.size(); i++) {
-            String type = retainTypes.get(i);
-            ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
-            details.setStartIdx(i);
-            details.setLabels(periodStrategies);
-            inputMetadata.put(type, details);
-        }
-        metadataWrapper.setMetadata(inputMetadata);
-        return metadataWrapper;
     }
 
     private List<AtlasStream> constructTransactionStreams(List<String> retainTypes) {

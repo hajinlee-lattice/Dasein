@@ -80,6 +80,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
         String applicationId = job.getOutputContextValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID);
         String importJobIdentifier = job
                 .getInputContextValue(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER);
+        String matchDataTable = job.getOutputContextValue(WorkflowContextConstants.Outputs.MATCH_RESULT_TABLE_NAME);
         Boolean sendS3ImportEmail = Boolean.valueOf(
                 job.getInputContextValue(WorkflowContextConstants.Inputs.S3_IMPORT_EMAIL_FLAG));
         String customerSpace = job.getTenant().getId();
@@ -156,15 +157,25 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     if (extracts.size() == 1) {
                         log.info(String.format("Register single extract: %s", extracts.get(0).getName()));
                         totalRecords = extracts.get(0).getProcessedRecords();
-                        registeredTables = dataFeedProxy.registerExtract(customerSpace, importJobIdentifier,
-                                templateName, extracts.get(0));
+                        if (StringUtils.isNotEmpty(matchDataTable)) {
+                            registeredTables = dataFeedProxy.registerImportData(customerSpace, importJobIdentifier,
+                                    matchDataTable);
+                        } else {
+                            registeredTables = dataFeedProxy.registerExtract(customerSpace, importJobIdentifier,
+                                    templateName, extracts.get(0));
+                        }
                     } else {
                         log.info(String.format("Register %d extracts.", extracts.size()));
                         for (Extract extract : extracts) {
                             totalRecords += extract.getProcessedRecords();
                         }
-                        registeredTables = dataFeedProxy.registerExtracts(customerSpace, importJobIdentifier,
-                                templateName, extracts);
+                        if (StringUtils.isNotEmpty(matchDataTable)) {
+                            registeredTables = dataFeedProxy.registerImportData(customerSpace, importJobIdentifier,
+                                    matchDataTable);
+                        } else {
+                            registeredTables = dataFeedProxy.registerExtracts(customerSpace, importJobIdentifier,
+                                    templateName, extracts);
+                        }
                     }
                     importActionConfiguration.setImportCount(totalRecords);
                     importActionConfiguration.setRegisteredTables(registeredTables);

@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActivityTimelineMetrics implements Serializable {
 
-    @JsonProperty("count")
-    private Integer count;
+    @JsonProperty("message")
+    private String message;
 
     @JsonProperty("label")
     private String label;
@@ -24,16 +24,16 @@ public class ActivityTimelineMetrics implements Serializable {
 
     }
 
-    public ActivityTimelineMetrics(Integer count, String lable, String description, String context) {
+    public ActivityTimelineMetrics(String message, String lable, String description, String context) {
 
-        this.count = count;
+        this.message = message;
         this.label = lable;
         this.description = description;
         this.context = context;
     }
 
-    public Integer getCount() {
-        return count;
+    public String getMessage() {
+        return message;
     }
 
     public String getLabel() {
@@ -48,8 +48,8 @@ public class ActivityTimelineMetrics implements Serializable {
         return context;
     }
 
-    public void setCount(Integer count) {
-        this.count = count;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public void setLabel(String label) {
@@ -66,28 +66,34 @@ public class ActivityTimelineMetrics implements Serializable {
 
     public enum MetricsType {
 
-        NewActivity("New Page Visits") {
+        NewActivities("New Activities") {
             @Override
-            public String getContext(Integer count) {
-                return String.format("Total number of web activity in the last %d days", count);
+            public String getContext(Integer days) {
+                return String.format("Total number of web activity in the last %d days", days);
             }
         },
-        NewIdentifiedContacts("Identified Contacts") {
+        NewContacts("New Contacts") {
             @Override
-            public String getContext(Integer count) {
-                return String.format("Total number of new identified contacts from Marketo in the last %d days", count);
+            public String getContext(Integer days) {
+                return String.format("Total number of new contacts in the last %d days", days);
             }
         },
         Newengagements("New Engagements") {
             @Override
-            public String getContext(Integer count) {
-                return String.format("Total number of engagements in the last in the last %d days", count);
+            public String getContext(Integer days) {
+                return String.format("Total number of engagements in the last in the last %d days", days);
             }
         },
         NewOpportunities("New Opportunities") {
             @Override
-            public String getContext(Integer count) {
-                return String.format("Number of present open opportunities in the last %d days", count);
+            public String getContext(Integer days) {
+                return String.format("Number of present open opportunities in the last %d days", days);
+            }
+        },
+        AccountIntent("Account Intent") {
+            @Override
+            public String getContext(Integer days) {
+                return String.format("Acount level Intent in the last %d days", days);
             }
         };
 
@@ -101,10 +107,13 @@ public class ActivityTimelineMetrics implements Serializable {
             return this.label;
         }
 
-        public static String getDescription(Integer count) {
-            return String.format("in last %d days", count);
+        public static String getDescription(Integer count, Integer days) {
+            if (count == null || count.equals(0)) {
+                return "";
+            }
+            return String.format(" in last %d days", days);
         }
 
-        public abstract String getContext(Integer count);
+        public abstract String getContext(Integer days);
     }
 }

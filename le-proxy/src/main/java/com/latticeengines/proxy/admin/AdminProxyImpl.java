@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.admin;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
@@ -18,5 +20,11 @@ public class AdminProxyImpl extends BaseRestApiProxy implements AdminProxy {
         String url = constructUrl(String.format("/internal/tenants/%s?contractId=%s", tenantId,
                 contractId));
         delete("delete tenant", url);
+    }
+
+    @Override
+    public List<String> getAllTenantIds() {
+        String url = constructUrl("/internal/tenants");
+        return getList("get tenant ids", url, String.class);
     }
 }

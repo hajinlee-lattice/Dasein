@@ -15,9 +15,11 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWor
 import com.latticeengines.scoring.workflow.steps.CalculateExpectedRevenuePercentileDataFlow;
 import com.latticeengines.scoring.workflow.steps.CalculateExpectedRevenuePercentileJobDataFlow;
 import com.latticeengines.scoring.workflow.steps.CalculatePredictedRevenuePercentileDataFlow;
+import com.latticeengines.scoring.workflow.steps.CalculatePredictedRevenuePercentileJobDataFlow;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculateExpectedRevenueDataFlow;
+import com.latticeengines.scoring.workflow.steps.RecalculateExpectedRevenueJobDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculatePercentileScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.RecalculatePercentileScoreJobDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
@@ -54,18 +56,25 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     @Inject
     private RecalculatePercentileScoreJobDataFlow recalculatePercentileScoreJob;
 
+    // TODO: pending migration
     @Inject
     private CalculatePredictedRevenuePercentileDataFlow calculatePredictedRevenuePercentileDataFlow;
 
     @Inject
+    private CalculatePredictedRevenuePercentileJobDataFlow calculatePredictedRevenuePercentileJob;
+
+    // TODO: pending migration
+    @Inject
     private RecalculateExpectedRevenueDataFlow recalculateExpectedRevenueDataFlow;
+    @Inject
+    private RecalculateExpectedRevenueJobDataFlow recalculateExpectedRevenueJob;
 
     // TODO: pending migration
     @Inject
     private CalculateExpectedRevenuePercentileDataFlow calculateExpectedRevenuePercentileDataFlow;
 
     @Inject
-    private CalculateExpectedRevenuePercentileJobDataFlow calculateExpectedRevenuePercentileJobDataFlow;
+    private CalculateExpectedRevenuePercentileJobDataFlow calculateExpectedRevenuePercentileJob;
 
     @Inject
     private ScoreAggregateFlow scoreAggregate;
@@ -91,9 +100,9 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
         if (!isLPI) {
             builder //
                     .next(recalculatePercentileScoreJob) //
-                    .next(calculatePredictedRevenuePercentileDataFlow) //
-                    .next(recalculateExpectedRevenueDataFlow) //
-                    .next(calculateExpectedRevenuePercentileJobDataFlow) //
+                    .next(calculatePredictedRevenuePercentileJob) //
+                    .next(recalculateExpectedRevenueJob) //
+                    .next(calculateExpectedRevenuePercentileJob) //
                     .next(scoreAggregate); //
         }
         return builder //

@@ -11,6 +11,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +105,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
     private List<TransformationStepConfig> entityMatchSteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
-        List<String> convertedRematchTableNames = getConvertedRematchTableNames();
+        rematchInputTableNames = ListUtils.emptyIfNull(getConvertedRematchTableNames());
         Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
 
         if (CollectionUtils.isNotEmpty(inputTableNames)) {
@@ -113,15 +114,15 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
             steps.add(mergeImport);
             TransformationStepConfig concatenateImportContactName = concatenateContactName(steps.size() - 1, null);
             steps.add(concatenateImportContactName);
-            if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
+            if (CollectionUtils.isNotEmpty(rematchInputTableNames)) {
                 TransformationStepConfig entityMatchImport = matchContact(steps.size() - 1, null, null);
                 steps.add(entityMatchImport);
             }
         }
-        if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
+        if (CollectionUtils.isNotEmpty(rematchInputTableNames)) {
             // when there is no input table, steps.size() - 1 will be -1
             TransformationStepConfig mergeBatchStore = concatImports(null, preProcessFlds.getLeft(),
-                    preProcessFlds.getRight(), convertedRematchTableNames, steps.size() - 1);
+                    preProcessFlds.getRight(), rematchInputTableNames, steps.size() - 1);
             steps.add(mergeBatchStore);
             TransformationStepConfig concatenateBatchStoreContactName = concatenateContactName(steps.size() - 1, null);
             steps.add(concatenateBatchStoreContactName);
@@ -130,7 +131,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
             steps.add(filterImports);
         }
         TransformationStepConfig entityMatch = matchContact(steps.size() - 1, matchTargetTablePrefix,
-                convertedRematchTableNames);
+                rematchInputTableNames);
         steps.add(entityMatch);
         log.info("steps are {}.", steps);
         return steps;

@@ -29,6 +29,9 @@ public class UpsertConfig extends SparkJobConfig {
     @JsonProperty("BatchTemplateName")
     private String batchTemplateName;
 
+    @JsonProperty("ExcludeAttrs")
+    private List<String> excludeAttrs;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -89,4 +92,11 @@ public class UpsertConfig extends SparkJobConfig {
         this.batchTemplateName = batchTemplateName;
     }
 
+    public List<String> getExcludeAttrs() {
+        return excludeAttrs;
+    }
+
+    public void setExcludeAttrs(List<String> excludeAttrs) {
+        this.excludeAttrs = excludeAttrs;
+    }
 }

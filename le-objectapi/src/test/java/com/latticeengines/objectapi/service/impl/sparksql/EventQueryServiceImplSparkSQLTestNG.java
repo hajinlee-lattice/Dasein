@@ -120,11 +120,11 @@ public class EventQueryServiceImplSparkSQLTestNG extends EventQueryServiceImplTe
         EventFrontEndQuery frontEndQuery = loadEventFrontEndQueryFromResource("prior.json");
         frontEndQuery.getSegmentQuery().setEvaluationDateStr(maxTransactionDate);
         String sql = eventQueryServiceSparkSql.getQueryStr(frontEndQuery, EventType.Scoring, //
-                DataCollection.Version.Blue);
+                SPARK_BATCH_USER, DataCollection.Version.Blue);
         System.out.println(sql);
-        long count = eventQueryServiceSparkSql.getScoringCount(frontEndQuery,DataCollection.Version.Blue);
+        long count = eventQueryServiceSparkSql.getScoringCount(frontEndQuery, SPARK_BATCH_USER, DataCollection.Version.Blue);
         Assert.assertEquals(count, 5692L);
-        long count2 = eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+        long count2 = eventQueryService.getScoringCount(frontEndQuery, SEGMENT_USER, DataCollection.Version.Blue);
         Assert.assertEquals(count2, count);
     }
 
@@ -165,11 +165,11 @@ public class EventQueryServiceImplSparkSQLTestNG extends EventQueryServiceImplTe
         frontEndQuery.setEvaluationPeriodId(211);
 
         String sql = eventQueryServiceSparkSql.getQueryStr(frontEndQuery, EventType.Scoring, //
-                DataCollection.Version.Blue);
+                SPARK_BATCH_USER, DataCollection.Version.Blue);
         System.out.println(sql);
-        long count = eventQueryServiceSparkSql.getScoringCount(frontEndQuery,DataCollection.Version.Blue);
+        long count = eventQueryServiceSparkSql.getScoringCount(frontEndQuery, SPARK_BATCH_USER, DataCollection.Version.Blue);
         Assert.assertEquals(count, 27327L);
-        long count2 = eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+        long count2 = eventQueryService.getScoringCount(frontEndQuery, SEGMENT_USER, DataCollection.Version.Blue);
         Assert.assertEquals(count2, count);
     }
 }

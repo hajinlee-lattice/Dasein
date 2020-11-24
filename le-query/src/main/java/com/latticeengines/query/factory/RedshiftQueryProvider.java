@@ -55,4 +55,9 @@ public class RedshiftQueryProvider extends QueryProvider {
         }
     }
 
+    protected String getCacheKey(AttributeRepository repository, String sqlUser) {
+        String partition = repository.getRedshiftPartition();
+        return partition + "-" + sqlUser;
+    }
+
 }

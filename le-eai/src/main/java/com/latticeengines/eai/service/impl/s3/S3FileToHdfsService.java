@@ -190,9 +190,14 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             log.info(String.format("Modeling metadata for template: %s",
                     JsonUtils.serialize(template.getModelingMetadata())));
             context.setProperty(ImportProperty.METADATA, JsonUtils.serialize(template.getModelingMetadata()));
-            if (dataFeedTask.getDataFeedTaskConfig() != null
-                    && CollectionUtils.isNotEmpty(dataFeedTask.getDataFeedTaskConfig().getTemplateValidators())) {
-                context.setProperty(ImportProperty.IMPORT_VALIDATORS, JsonUtils.serialize(dataFeedTask.getDataFeedTaskConfig().getTemplateValidators()));
+            if (dataFeedTask.getDataFeedTaskConfig() != null) {
+                if (CollectionUtils.isNotEmpty(dataFeedTask.getDataFeedTaskConfig().getTemplateValidators())) {
+                    context.setProperty(ImportProperty.IMPORT_VALIDATORS, JsonUtils.serialize(dataFeedTask.getDataFeedTaskConfig().getTemplateValidators()));
+                }
+                if (dataFeedTask.getDataFeedTaskConfig().getSanitizers() != null) {
+                    context.setProperty(ImportProperty.IMPORT_SANITIZERS,
+                            JsonUtils.serialize(dataFeedTask.getDataFeedTaskConfig().getSanitizers()));
+                }
             }
             String targetPath = createTargetPath(config.getCustomerSpace(), config.getBusinessEntity(), SourceType.FILE);
             List<Table> tableMetadata = new ArrayList<>();
