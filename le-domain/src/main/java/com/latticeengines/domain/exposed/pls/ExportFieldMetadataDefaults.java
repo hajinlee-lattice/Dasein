@@ -15,6 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -66,6 +67,11 @@ public class ExportFieldMetadataDefaults implements HasPid {
     @JsonProperty("exportEnabled")
     @Column(name = "EXPORT_ENABLED", nullable = false)
     private Boolean exportEnabled;
+
+    @JsonProperty("historyEnabled")
+    @Column(name = "HISTORY_ENABLED", nullable = false)
+    @Transient
+    private Boolean historyEnabled;
 
     @JsonProperty("audienceType")
     @Enumerated(EnumType.STRING)
