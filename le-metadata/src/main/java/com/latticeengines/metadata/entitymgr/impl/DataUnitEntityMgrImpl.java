@@ -214,6 +214,9 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     private List<DataUnitEntity> findDataUnitEntitiesNeedToPurge(DataUnit dataUnit, DataUnit.Role role) {
+        if (StringUtils.isEmpty(dataUnit.getDataTemplateId())) {
+            return new ArrayList<>();
+        }
         List<DataUnitEntity> entities = readerRepository.
                 findByTenantIdAndDataTemplateIdOrderByCreatedDate(dataUnit.getTenant(), dataUnit.getDataTemplateId());
         return entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role) &&
