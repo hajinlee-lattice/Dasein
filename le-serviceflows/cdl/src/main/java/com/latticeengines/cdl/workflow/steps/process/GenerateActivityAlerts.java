@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,6 +67,7 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
 
     private DataCollection.Version inactive;
     private DataCollection.Version active;
+    private Long currentTimestamp;
 
     @Override
     protected ActivityAlertJobConfig configureJob(TimeLineSparkStepConfiguration stepConfiguration) {
@@ -83,14 +85,21 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
         Table timeLineMasterTable = getAccount360TimeLineMasterTable();
         Table activityAlertMasterTable = getActivityAlertMasterTable();
         String activityAlertVersion = getOrCreateActivityAlertVersion();
+        Long lastEvaluationTime = getLastAlertEvaluationTime();
+        currentTimestamp = getCurrentTimestamp();
+        boolean dedupAlert = lastEvaluationTime == null || currentTimestamp.equals(lastEvaluationTime);
         Preconditions.checkNotNull(timeLineMasterTable, "should have account timeline master table");
+
+        log.info("Last evaluation time = {}, current time = {}, shouldDedupAlert = {}", lastEvaluationTime,
+                currentTimestamp, dedupAlert);
 
         List<DataUnit> inputs = new ArrayList<>();
         inputs.add(timeLineMasterTable.toHdfsDataUnit("AccountTimeLine"));
 
         ActivityAlertJobConfig config = new ActivityAlertJobConfig();
-        config.currentEpochMilli = getCurrentTimestamp();
+        config.currentEpochMilli = currentTimestamp;
         config.masterAccountTimeLineIdx = 0;
+        config.dedupAlert = dedupAlert;
         config.alertNameToQualificationPeriodDays.putAll(alertConfigs.stream() //
                 .filter(Objects::nonNull) //
                 .filter(ActivityAlertsConfig::isActive) //
@@ -135,6 +144,8 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
             String alertDiffTableName = customerSpace.getTenantId() + "_"
                     + NamingUtils.timestamp(ActivityAlert.name() + "Diff");
             createTableAndPersist(outputs.get(1), alertDiffTableName, ACTIVITY_ALERT_DIFF_TABLE_NAME);
+
+            setLastAlertEvaluationTime();
         }
     }
 
@@ -241,8 +252,6 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
     private String getOrCreateActivityAlertVersion() {
         DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         String version = dcStatus.getActivityAlertVersion();
-        // TODO make sure UUID is acceptable as version (i.e., - is an valid character
-        // in serving store of alerts)
         if (StringUtils.isBlank(version)) {
             version = UUID.randomUUID().toString();
             log.info("No existing activity alert version, creating a new one {}", version);
@@ -253,6 +262,21 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
         dcStatus.setActivityAlertVersion(version);
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
         return version;
+    }
+
+    private Long getLastAlertEvaluationTime() {
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        return MapUtils.emptyIfNull(dcStatus.getEvaluationDateMap()).get(ActivityAlert.name());
+    }
+
+    private void setLastAlertEvaluationTime() {
+        Preconditions.checkNotNull(currentTimestamp, "Current time should be set already");
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus.getEvaluationDateMap() == null) {
+            dcStatus.setEvaluationDateMap(new HashMap<>());
+        }
+        log.info("Set evaluation date for {} to {}", ActivityAlert.name(), currentTimestamp);
+        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
     }
 
     private boolean isShortCutMode() {

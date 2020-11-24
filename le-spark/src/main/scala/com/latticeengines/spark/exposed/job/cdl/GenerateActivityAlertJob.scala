@@ -34,8 +34,6 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
   private val detail2 = TimelineStandardColumn.Detail2.getColumnName
   private val pageVisit = Alert.COL_PAGE_VISITS
   private val pageName = Alert.COL_PAGE_NAME
-  private val pageVisitTime = Alert.COL_PAGE_VISIT_TIME
-  private val prevPageVisitTime = Alert.COL_PREV_PAGE_VISIT_TIME
   private val activeContacts = Alert.COL_ACTIVE_CONTACTS
   private val maCounts = Alert.COL_TOTAL_MA_COUNTS
   private val accountStage = Alert.COL_STAGE
@@ -103,12 +101,25 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
         .map(mergedAlertDf.unionByName)
         .getOrElse(mergedAlertDf)
     }
+    val dedupedAlertDf = if (!config.dedupAlert) {
+      alertDf
+    } else {
+      filterDuplicateAlerts(alertDf, alertIdx.map(lattice.input(_)))
+    }
 
-    val mergedAlertDf = alertIdx.map(idx => lattice.input(idx).unionByName(alertDf)).getOrElse(alertDf)
-    lattice.output = mergedAlertDf :: alertDf :: Nil
+    val mergedAlertDf = alertIdx.map(idx => lattice.input(idx).unionByName(dedupedAlertDf)).getOrElse(dedupedAlertDf)
+    lattice.output = mergedAlertDf :: dedupedAlertDf :: Nil
     // count and output whether there are new alert or not
     // TODO change to json object if needed
-    lattice.outputStr = alertDf.count.toString
+    lattice.outputStr = dedupedAlertDf.count.toString
+  }
+
+  def filterDuplicateAlerts(newAlertDf: DataFrame, existingAlertDf: Option[DataFrame]): DataFrame = {
+    val joinCols = Seq(accountId, CreationTimestamp.name, AlertName.name)
+    existingAlertDf
+      .map(_.select(joinCols.map(col): _*))
+      .map(df => newAlertDf.join(df, joinCols, "leftanti"))
+      .getOrElse(newAlertDf)
   }
 
   def generateIncreasedWebActivityAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
