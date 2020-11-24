@@ -330,7 +330,7 @@ public final class AvroUtils {
             tp.shutdown();
         }
 
-        log.info(String.format("Totally %d records in %s", count, StringUtils.join(globs, ",")));
+        log.info(String.format("Total of %d records in %s", count, StringUtils.join(globs, ",")));
         return count;
     }
 

@@ -12,6 +12,7 @@ import com.latticeengines.common.exposed.util.KryoUtils;
 public class PrimeAccount {
 
     public static final String DunsNumber = "duns_number";
+    public static final String ENRICH_ERROR_CODE = "enrich_error_code";
 
     private String id;
     private Map<String, Object> result;

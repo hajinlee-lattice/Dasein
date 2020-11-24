@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 
 import javax.inject.Inject;
 
@@ -29,6 +30,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.dcp.DownloadFileType;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -114,6 +116,7 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
 
         uploadDetails.getUploadConfig().setUploadRawFilePath(UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
                 uploadRaw, csvFileName));
+        uploadDetails.getUploadConfig().setDownloadableFiles(EnumSet.of(DownloadFileType.RAW));
 
         // Copy file from drop folder to raw input folder.
         copyFromDropfolder(uploadDetails, dropBoxSummary);

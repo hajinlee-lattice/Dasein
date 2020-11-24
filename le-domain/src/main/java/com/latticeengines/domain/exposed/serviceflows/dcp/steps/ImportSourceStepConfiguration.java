@@ -32,6 +32,9 @@ public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration
     @JsonProperty("append_purpose")
     private PurposeOfUse appendPurpose;
 
+    @JsonProperty("suppress_known_errors")
+    private Boolean suppressErrors;
+
     public String getProjectId() {
         return projectId;
     }
@@ -94,5 +97,13 @@ public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration
 
     public void setAppendPurpose(PurposeOfUse appendPurpose) {
         this.appendPurpose = appendPurpose;
+    }
+
+    public Boolean getSuppressErrors() {
+        return suppressErrors;
+    }
+
+    public void setSuppressErrors(Boolean suppressErrors) {
+        this.suppressErrors = suppressErrors;
     }
 }

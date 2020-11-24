@@ -1,6 +1,8 @@
 package com.latticeengines.matchapi.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -21,6 +24,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -39,6 +43,7 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -461,6 +466,34 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         BulkMatchWorkflowConfiguration bulkConf = matchProxy.getBulkConfig(input, podId);
         Assert.assertNotNull(bulkConf);
         Assert.assertTrue(bulkConf.getSwpkgNames().contains("datacloud"));
+    }
+
+    // Match service returns 10002 due to the postal code being too long
+    @Test(groups = "deployment")
+    public void testMatchErrorCode() throws IOException{
+        InputStream is = new ClassPathResource("matchinput/BadMatchInput.json").getInputStream();
+        String errorInputStr = IOUtils.toString(is, Charset.defaultCharset());
+        MatchOutput result = matchProxy.matchRealTime(JsonUtils.deserialize(errorInputStr, MatchInput.class));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getResult().size(), 1);
+        Assert.assertFalse(result.getResult().get(0).isMatched());
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().containsKey(MatchCoreErrorConstants.ErrorType.MATCH_ERROR));
+        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(MatchCoreErrorConstants.ErrorType.MATCH_ERROR).size(),1);
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().get(MatchCoreErrorConstants.ErrorType.MATCH_ERROR).get(0).startsWith("10002:"));
+    }
+
+    // Enrichment service returns 40001, as info for input DUNS under review as of 2020-11-24
+    @Test(groups = "deployment")
+    public void testAppendErrorCode() throws IOException{
+        InputStream is = new ClassPathResource("matchinput/DunsUnderReview.json").getInputStream();
+        String errorInputStr = IOUtils.toString(is, Charset.defaultCharset());
+        MatchOutput result = matchProxy.matchRealTime(JsonUtils.deserialize(errorInputStr, MatchInput.class));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getResult().size(), 1);
+        Assert.assertFalse(result.getResult().get(0).isMatched());
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().containsKey(MatchCoreErrorConstants.ErrorType.APPEND_ERROR));
+        Assert.assertEquals(result.getResult().get(0).getErrorCodes().get(MatchCoreErrorConstants.ErrorType.APPEND_ERROR).size(),1);
+        Assert.assertTrue(result.getResult().get(0).getErrorCodes().get(MatchCoreErrorConstants.ErrorType.APPEND_ERROR).get(0).startsWith("40001:"));
     }
 
     @DataProvider(name = "recentApprovedVersions", parallel = true)

@@ -10,10 +10,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -33,10 +36,12 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.DownloadFileType;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
@@ -125,6 +130,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
         jobConfig.setConfidenceCodeAttr(ConfidenceCode);
 
+        jobConfig.setErrorIndicatorAttr(MatchConstants.MATCH_ERROR_TYPE);
+        jobConfig.setErrorCodeAttr(MatchConstants.MATCH_ERROR_CODE);
+        jobConfig.setIgnoreErrors(stepConfiguration.getSuppressErrors() ? MatchCoreErrorConstants.IGNORE_ERRORS : Collections.emptyMap());
+
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         dataBlockDispNames = dataBlockFieldDisplayNames();
         log.info("InputSchema=" + JsonUtils.serialize(cms));
@@ -145,7 +154,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setAcceptedAttrs(acceptedAttrs);
         jobConfig.setDisplayNameMap(displayNameMap);
 
-        log.info("JobConfig=" + JsonUtils.serialize(jobConfig));
+        log.info("JobConfig=" + JsonUtils.pprint(jobConfig));
         return jobConfig;
     }
 
@@ -172,30 +181,45 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         }
 
         // Copy files from spark workspace to upload result location.
-        String acceptedCsvFilePath = getCsvFilePath(result.getTargets().get(0));
-        String acceptedS3Path = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
-                upload.getUploadConfig().getUploadMatchResultAccepted());
-        try {
-            if (StringUtils.isNotEmpty(acceptedCsvFilePath)) {
-                copyToS3(acceptedCsvFilePath, acceptedS3Path);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        // Order must match the output order from Scala (matched -> unmatched -> processing errors -> DUNS count)
+        Iterator<HdfsDataUnit> targetIt = result.getTargets().iterator();
+        Set<DownloadFileType> generatedFiles = EnumSet.noneOf(DownloadFileType.class);
+        if (copySparkCsvToS3(targetIt.next(), dropFolder, upload.getUploadConfig().getUploadMatchResultAccepted())) {
+            generatedFiles.add(DownloadFileType.MATCHED);
         }
-        String rejectedCsvFilePath = getCsvFilePath(result.getTargets().get(1));
-        String rejectedS3Path = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
-                upload.getUploadConfig().getUploadMatchResultRejected());
-        try {
-            if (StringUtils.isNotEmpty(rejectedCsvFilePath)) {
-                copyToS3(rejectedCsvFilePath, rejectedS3Path);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (copySparkCsvToS3(targetIt.next(), dropFolder, upload.getUploadConfig().getUploadMatchResultRejected())) {
+            generatedFiles.add(DownloadFileType.UNMATCHED);
         }
+        if (copySparkCsvToS3(targetIt.next(), dropFolder, upload.getUploadConfig().getUploadMatchResultErrored())) {
+            generatedFiles.add(DownloadFileType.PROCESS_ERRORS);
+        }
+        updateDunsCount(targetIt.next(), uploadId);
 
-        updateDunsCount(result.getTargets().get(2), uploadId);
+        upload.getUploadConfig().getDownloadableFiles().addAll(generatedFiles);
+        uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, upload.getUploadConfig());
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED, null);
         updateUploadStatistics(result);
+    }
+
+    /*
+     * Copies CSV from HDFS Data Unit (output from Spark job) to a location in S3
+     *
+     * Returns true if file exists (and was moved), otherwise false
+     */
+    private boolean copySparkCsvToS3(HdfsDataUnit sparkOutput, String dropFolder, String outputS3Path) {
+        String sparkOutputFilePath = getCsvFilePath(sparkOutput);
+        String targetPathForCopy = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder, outputS3Path);
+        boolean fileExists = StringUtils.isNotEmpty(sparkOutputFilePath);
+
+        if (fileExists) {
+            try {
+                copyToS3(sparkOutputFilePath, targetPathForCopy);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return fileExists;
     }
 
     private void updateDunsCount(HdfsDataUnit unit, String uploadId) {
@@ -273,6 +297,10 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         return attrNames;
     }
 
+    /*
+     * Input: list of metadata to convert
+     * Output: Map: metadata attrName -> CSV header
+     */
     private Map<String, String> convertToDispMap(Collection<ColumnMetadata> cms) {
         Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
         Map<String, String> dispNames = new LinkedHashMap<>();
@@ -280,6 +308,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         List<ColumnMetadata> customerAttrs = new ArrayList<>();
         List<ColumnMetadata> dataBlockAttrs = new ArrayList<>();
         List<ColumnMetadata> candidateAttrs = new ArrayList<>();
+        List<ColumnMetadata> errorAttrs = new ArrayList<>();
         List<ColumnMetadata> otherAttrs = new ArrayList<>();
         // MatchedDuns belongs to candidate attribute
         ColumnMetadata duns = null;
@@ -290,6 +319,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                 dataBlockAttrs.add(cm);
             } else if (candidateFieldDispNames.containsKey(cm.getAttrName())) {
                 candidateAttrs.add(cm);
+            } else if (MatchCoreErrorConstants.CSV_HEADER_MAP.containsKey(cm.getAttrName())) {
+                errorAttrs.add(cm);
             } else if ((cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL)){
                 customerAttrs.add(cm);
             } else {
@@ -302,6 +333,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         }
         candidateAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), candidateFieldDispNames.get(cm.getAttrName())));
         dataBlockAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), dataBlockDispNames.get(cm.getAttrName())));
+        errorAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), MatchCoreErrorConstants.CSV_HEADER_MAP.get(cm.getAttrName())));
         otherAttrs.forEach(cm -> dispNames.put(cm.getAttrName(), cm.getDisplayName()));
         log.info("the generated map are " + JsonUtils.serialize(dispNames));
 

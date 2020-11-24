@@ -40,6 +40,7 @@ import org.xerial.snappy.Snappy;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
+import com.jayway.jsonpath.JsonPath;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -84,6 +85,12 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
 
     @Value("${datacloud.dnb.direct.plus.enrich.cache.ttl.max.days}")
     private int cacheTtlMaxDays;
+
+    @Value("${datacloud.dnb.direct.plus.errorcode.jsonpath}")
+    private String errorCodeXpath;
+
+    @Value("${datacloud.dnb.direct.plus.errormsg.jsonpath}")
+    private String errorMsgXpath;
 
     @Inject
     private DynamoItemService dynamoItemService;
@@ -143,7 +150,7 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
     private Map<String, Object> fetch(DirectPlusEnrichRequest request) {
         String duns = request.getDunsNumber();
         Map<String, List<PrimeColumn>> reqColumnsByBlock = new HashMap<>();
-        // avoid alternating original List
+        // avoid altering original List
         request.getReqColumnsByBlockId().forEach((k, v) -> reqColumnsByBlock.put(k, new ArrayList<>(v)));
         Map<String, Object> result = new HashMap<>();
 
@@ -174,19 +181,26 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
                 resp = sendRequest(url);
                 cacheDplusResponse(resp, request.getDunsNumber(), blockIds);
             } catch (LedpException e) {
-                boolean toRethrow = true;
-                if (e.getCause() instanceof HttpClientErrorException) {
+                boolean isError = true;
+                boolean httpCause = e.getCause() instanceof HttpClientErrorException;
+                if (httpCause) {
                     HttpClientErrorException httpException = (HttpClientErrorException) e.getCause();
                     if (NOT_FOUND.equals(httpException.getStatusCode())) {
                         // not found can be cached
                         resp = httpException.getResponseBodyAsString();
                         cacheDplusResponse(resp, request.getDunsNumber(), blockIds);
-                        toRethrow = false;
+                        isError = false;
                     }
                 }
-                if (toRethrow) {
-                    throw e;
+                if (isError) {
+                    if (httpCause) {
+                        return generateErrorMap((HttpClientErrorException) e.getCause());
+                    } else {
+                        throw e;
+                    }
                 }
+            } catch (HttpClientErrorException e) {
+                return generateErrorMap(e);
             }
             List<PrimeColumn> reqColumns = new ArrayList<>();
             reqColumnsByBlock.values().forEach(reqColumns::addAll);
@@ -195,6 +209,12 @@ public class DirectPlusEnrichServiceImpl implements DirectPlusEnrichService {
         }
 
         return result;
+    }
+
+    private Map<String, Object> generateErrorMap(HttpClientErrorException e) {
+        String errorCode = JsonPath.parse(e.getResponseBodyAsString()).read(errorCodeXpath)
+                + ":" + JsonPath.parse(e.getResponseBodyAsString()).read(errorMsgXpath);
+        return Collections.singletonMap(PrimeAccount.ENRICH_ERROR_CODE, errorCode);
     }
 
     private Set<String> consolidateFetchBlocks(Collection<String> blockIds) {

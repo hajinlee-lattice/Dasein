@@ -55,7 +55,7 @@ final class DnBResultProcessor {
         traveler.debug(logMessage);
         traveler.setDunsOriginMapIfAbsent(new HashMap<>());
         traveler.getDunsOriginMap().put(actorClz.getName(), res.getDuns());
-        traveler.getDnBMatchContexts().add(res);
+        traveler.appendDnBMatchContext(res);
         traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
                 Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
                         Collections.singletonList(res.getDuns()))));
