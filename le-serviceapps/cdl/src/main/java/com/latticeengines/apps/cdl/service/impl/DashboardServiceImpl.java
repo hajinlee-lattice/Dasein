@@ -1,9 +1,11 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,17 @@ public class DashboardServiceImpl implements DashboardService {
         dashboardEntityMgr.createOrUpdate(dashboard1);
         return dashboard1;
 
+    }
+
+    @Override
+    public void createOrUpdateAll(String customerSpace, List<Dashboard> dashboards) {
+        if (CollectionUtils.isEmpty(dashboards)) {
+            return;
+        }
+        List<Dashboard> needCreated = new ArrayList<>();
+        for (Dashboard dashboard : dashboards) {
+            createOrUpdate(customerSpace, dashboard);
+        }
     }
 
     @Override

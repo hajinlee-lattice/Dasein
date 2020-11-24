@@ -652,9 +652,11 @@
     </security:http>
     <security:http use-expressions="true"
                    pattern="/pls/vidashboards/**"
+                   authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
         <security:csrf disabled="true"/>
+        <security:intercept-url pattern="/pls/datamapping/**" access="hasRole('View_PLS_Data')"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 

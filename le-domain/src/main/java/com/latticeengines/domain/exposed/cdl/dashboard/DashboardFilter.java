@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.dashboard;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -16,6 +17,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -49,9 +51,10 @@ public class DashboardFilter implements HasPid, HasTenant, Serializable {
     @JsonProperty("name")
     private String name;
 
-    @Column(name = "FILTER_VALUE", nullable = false)
+    @Column(name = "FILTER_VALUE", nullable = false, columnDefinition = "'JSON'")
     @JsonProperty("filter_value")
-    private String filterValue;
+    @Type(type = "json")
+    private List<DashboardFilterValue> filterValue;
 
     @Override
     public Long getPid() {
@@ -81,11 +84,11 @@ public class DashboardFilter implements HasPid, HasTenant, Serializable {
         this.name = name;
     }
 
-    public String getFilterValue() {
+    public List<DashboardFilterValue> getFilterValue() {
         return filterValue;
     }
 
-    public void setFilterValue(String filterValue) {
+    public void setFilterValue(List<DashboardFilterValue> filterValue) {
         this.filterValue = filterValue;
     }
 }

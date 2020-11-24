@@ -39,6 +39,7 @@ public class DashboardFilterEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Das
     }
 
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<DashboardFilter> findAllByTenant() {
         Tenant tenant = MultiTenantContext.getTenant();
         return readerRepository.findAllByTenant(tenant);

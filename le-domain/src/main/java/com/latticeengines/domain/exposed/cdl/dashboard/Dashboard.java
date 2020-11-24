@@ -16,6 +16,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -44,8 +45,9 @@ public class Dashboard implements HasPid, HasTenant, Serializable {
     @JsonProperty("name")
     private String name;
 
-    @Column(name = "DASHBOARD_URL", nullable = false)
+    @Column(name = "DASHBOARD_URL", nullable = false, columnDefinition = "'JSON'")
     @JsonProperty("dashboard_url")
+    @Type(type = "json")
     private String dashboardUrl;
 
     @ManyToOne(cascade = CascadeType.REMOVE)

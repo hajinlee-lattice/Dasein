@@ -9,16 +9,18 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilterValue;
+import com.latticeengines.domain.exposed.cdl.dashboard.DashboardResponse;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
 
 import io.swagger.annotations.Api;
@@ -27,6 +29,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "VI dashboard resource", description = "REST resource for action")
 @RestController
 @RequestMapping("/vidashboards")
+@PreAuthorize("hasRole('View_PLS_Data')")
 public class VIDashboardResource {
 
     private static final Logger log = LoggerFactory.getLogger(VIDashboardResource.class);
@@ -45,39 +48,12 @@ public class VIDashboardResource {
         return res;
     }
 
-    @GetMapping("/createDashboard")
+    @PostMapping("/createDashboard")
     @ResponseBody
     @ApiOperation("create dashboards")
-    public void createDashboard() {
-        dashboardService.create();
-    }
-
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private class DashboardResponse {
-
-        @JsonProperty("dashboard_urls")
-        private Map<String, String> dashboardUrls;
-
-        @JsonProperty("filters")
-        private Map<String, List<DashboardFilterValue>> filters;
-
-        public Map<String, String> getDashboardUrls() {
-            return dashboardUrls;
-        }
-
-        public void setDashboardUrls(Map<String, String> dashboardUrls) {
-            this.dashboardUrls = dashboardUrls;
-        }
-
-        public Map<String, List<DashboardFilterValue>> getFilters() {
-            return filters;
-        }
-
-        public void setFilters(Map<String, List<DashboardFilterValue>> filters) {
-            this.filters = filters;
-        }
+    public void createDashboard(@RequestParam("esIndexName") String esIndexName) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        dashboardService.create(customerSpace.toString(), esIndexName);
     }
 
     private Map<String, List<DashboardFilterValue>> getMockFilterValue() {

@@ -64,6 +64,6 @@ public class DashboardFilterServiceImpl implements DashboardFilterService {
 
     @Override
     public List<DashboardFilter> findAllByTenant(String customerSpace) {
-        return dashboardFilterEntityMgr.findAll();
+        return dashboardFilterEntityMgr.findAllByTenant();
     }
 }

@@ -53,6 +53,15 @@ public class DashboardResource {
         return dashboardService.createOrUpdate(customerSpace, dashboard);
     }
 
+    @PostMapping("/createList")
+    @ResponseBody
+    @ApiOperation("Create or update a Dashboard list under current tenant")
+    public void createDashboard( //
+                                      @PathVariable(value = "customerSpace") String customerSpace, //
+                                      @RequestBody List<Dashboard> dashboards) {
+        dashboardService.createOrUpdateAll(customerSpace, dashboards);
+    }
+
     @PostMapping("/createFilter")
     @ResponseBody
     @ApiOperation("Create or update a DashboardFilter under current tenant")

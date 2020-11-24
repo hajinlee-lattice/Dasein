@@ -8,6 +8,8 @@ public interface DashboardService {
 
     Dashboard createOrUpdate(String customerSpace, Dashboard dashboard);
 
+    void createOrUpdateAll(String customerSpace, List<Dashboard> dashboards);
+
     boolean delete(String customerSpace, Dashboard dashboard);
 
     Dashboard findByPid(String customerSpce, Long pid);
