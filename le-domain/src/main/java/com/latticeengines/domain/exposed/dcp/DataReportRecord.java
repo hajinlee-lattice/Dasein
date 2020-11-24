@@ -248,6 +248,14 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
         this.readyForRollup = readyForRollup;
     }
 
+    public RollupStatus getRollupStatus() {
+        return rollupStatus;
+    }
+
+    public void setRollupStatus(RollupStatus rollupStatus) {
+        this.rollupStatus = rollupStatus;
+    }
+
     public enum Level {
         Tenant,
         Project {
