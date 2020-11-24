@@ -91,6 +91,7 @@ public class S3DataUnit extends DataUnit {
 
     public HdfsDataUnit toHdfsDataUnit(){
         HdfsDataUnit hdfsDataUnit = new HdfsDataUnit();
+        hdfsDataUnit.setDataFormat(getDataFormat());
         hdfsDataUnit.setName(getName());
         hdfsDataUnit.setPath(getLinkedHdfsPath());
         hdfsDataUnit.setCount(getCount());

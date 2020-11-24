@@ -529,6 +529,7 @@ public class PlayResource {
         playLaunch.setContactsSuppressed(
                 playLaunch.getContactsSuppressed() != null ? playLaunch.getContactsSuppressed() : 0L);
         playLaunch.setContactsErrored(playLaunch.getContactsErrored() != null ? playLaunch.getContactsErrored() : 0L);
+        playLaunch.setTapType(play.getTapType());
         playLaunchService.update(playLaunch);
         return workflowPid;
     }
