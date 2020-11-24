@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StreamUtils;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.ListSegmentEntityMgr;
@@ -146,8 +144,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     private CSVAdaptor readCSVAdaptor() {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(listSegmentCSVAdaptorPath)) {
-            String csvAdaptor = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-            return JsonUtils.deserialize(csvAdaptor, CSVAdaptor.class);
+            return JsonUtils.deserialize(inputStream, CSVAdaptor.class);
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read " + listSegmentCSVAdaptorPath, exception);
         }

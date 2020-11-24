@@ -65,7 +65,7 @@ public class ExtractListSegmentCSV
             InterfaceName.Website.name(), InterfaceName.Industry.name(), "user_us_8_digit_sic_code",
             InterfaceName.AccountId.name(), "user_employees", "user_direct_marketing_status");
 
-    private final List<String> contactAttributes = Lists.newArrayList("SFDC_CONTACT_ID", InterfaceName.ContactName.name(),
+    private final List<String> contactAttributes = Lists.newArrayList(InterfaceName.AccountId.name(), "SFDC_CONTACT_ID", InterfaceName.ContactName.name(),
             InterfaceName.Contact_Address_Street_1.name(), InterfaceName.Contact_Address_Street_2.name(),
             InterfaceName.ContactCity.name(), InterfaceName.ContactState.name(), InterfaceName.ContactCountry.name(),
             InterfaceName.Email.name(), InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
@@ -103,7 +103,6 @@ public class ExtractListSegmentCSV
                 processImportResult(BusinessEntity.Account, accountDataUnit, ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME);
                 HdfsDataUnit contactUnit = result.getTargets().get(1);
                 processImportResult(BusinessEntity.Contact, contactUnit, ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME);
-
                 //update segment count
                 metadataSegment = segmentProxy.getListSegmentByName(tenantId, segmentName);
                 metadataSegment.setAccounts(accountDataUnit.getCount());

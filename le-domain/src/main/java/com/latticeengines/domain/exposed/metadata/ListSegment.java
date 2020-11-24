@@ -69,10 +69,6 @@ public class ListSegment implements HasPid {
     @Type(type = "json")
     private Map<String, String> dataTemplates;
 
-    @JsonProperty("csvAdaptor")
-    @Transient
-    private CSVAdaptor csvAdaptor;
-
     @JsonProperty("csvAdaptorStr")
     @Column(name = "CSV_ADAPTOR")
     @Type(type = "text")
@@ -128,17 +124,14 @@ public class ListSegment implements HasPid {
     }
 
     @Transient
+    @JsonProperty("csvAdaptor")
     public CSVAdaptor getCsvAdaptor() {
-        if (this.csvAdaptor != null){
-            return this.csvAdaptor;
-        }
-        return StringUtils.isNotEmpty(this.csvAdaptorStr)
-                ? JsonUtils.deserialize(this.csvAdaptorStr, CSVAdaptor.class)
-                : this.csvAdaptor;
+        return StringUtils.isNotEmpty(this.csvAdaptorStr) ? JsonUtils.deserialize(this.csvAdaptorStr, CSVAdaptor.class) : null;
     }
 
+    @Transient
+    @JsonProperty("csvAdaptor")
     public void setCsvAdaptor(CSVAdaptor csvAdaptor) {
-        this.csvAdaptor = csvAdaptor;
         this.csvAdaptorStr = JsonUtils.serialize(csvAdaptor);
     }
 
