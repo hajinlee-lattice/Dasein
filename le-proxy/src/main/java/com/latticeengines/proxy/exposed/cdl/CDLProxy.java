@@ -801,7 +801,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             baseUrl = baseUrl + "&length={length}";
             args.add(String.valueOf(length));
         }
-        String url = constructUrl(baseUrl, args);
+        String url = constructUrl(baseUrl, args.toArray());
 
         put("Add attribute length validator", url);
     }
