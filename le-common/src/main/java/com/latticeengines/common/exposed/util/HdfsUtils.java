@@ -215,6 +215,26 @@ public final class HdfsUtils {
         }
     }
 
+    public static void uncompressZipFileFromInputStream(Configuration configuration, InputStream inputStream, String uncompressedDir) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            Path outputFolder = new Path(uncompressedDir);
+            try (ZipInputStream is = new ZipInputStream(inputStream)) {
+                ZipEntry entry = is.getNextEntry();
+                while (entry != null) {
+                    if (entry.isDirectory()) {
+                        entry = is.getNextEntry();
+                        continue;
+                    }
+                    Path outputFile = new Path(outputFolder, entry.getName());
+                    OutputStream os = fs.create(outputFile, true);
+                    org.apache.hadoop.io.IOUtils.copyBytes(is, os, configuration, false);
+                    os.close();
+                    entry = is.getNextEntry();
+                }
+            }
+        }
+    }
+
     public static void compressGZFileWithinHDFS(Configuration configuration, String gzHdfsPath,
             String uncompressedFilePath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {

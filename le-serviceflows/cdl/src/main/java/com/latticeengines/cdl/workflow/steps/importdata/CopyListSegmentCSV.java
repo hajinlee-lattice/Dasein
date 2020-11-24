@@ -91,11 +91,7 @@ public class CopyListSegmentCSV extends BaseWorkflowStep<CopyListSegmentCSVConfi
     private void uncompressZipCSV(S3DataUnit s3DataUnit) {
         try {
             InputStream in = s3Service.readObjectAsStream(s3DataUnit.getBucket(), s3DataUnit.getPrefix());
-            String zipTempPath = s3DataUnit.getLinkedHdfsPath() + "/temp.zip";
-            log.info("zipTempPath is " + zipTempPath);
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, in, zipTempPath);
-            log.info("zipTempPath is " + zipTempPath + " transfer done");
-            HdfsUtils.uncompressZipFileWithinHDFS(yarnConfiguration, zipTempPath, s3DataUnit.getLinkedHdfsPath());
+            HdfsUtils.uncompressZipFileFromInputStream(yarnConfiguration, in, s3DataUnit.getLinkedHdfsPath());
         } catch (IOException exception) {
             log.error("uncompress zip file failed with data unit {}.", s3DataUnit.getName());
         }

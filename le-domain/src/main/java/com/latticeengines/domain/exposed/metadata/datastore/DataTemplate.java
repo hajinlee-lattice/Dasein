@@ -10,13 +10,13 @@ import com.latticeengines.domain.exposed.metadata.MasterSchema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DataTemplate {
-    @JsonProperty("MasterSchema")
+    @JsonProperty("masterSchema")
     private MasterSchema masterSchema;
 
-    @JsonProperty("Tenant")
+    @JsonProperty("tenant")
     private String tenant;
 
-    @JsonProperty("Name")
+    @JsonProperty("name")
     private String name;
 
     public MasterSchema getMasterSchema() {

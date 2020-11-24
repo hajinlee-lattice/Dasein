@@ -9,12 +9,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ColumnField {
-    @JsonProperty("AttrName")
+    @JsonProperty("attrName")
     private String attrName;
-    @JsonProperty("Description")
-    private String description;
-    @JsonProperty("DisplayName")
-    private String displayName;
 
     public String getAttrName() {
         return attrName;
@@ -22,21 +18,5 @@ public class ColumnField {
 
     public void setAttrName(String attrName) {
         this.attrName = attrName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 }

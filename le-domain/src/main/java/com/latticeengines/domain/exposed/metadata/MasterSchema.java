@@ -11,10 +11,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class MasterSchema {
-    @JsonProperty("Attributes")
+    @JsonProperty("attributes")
     private List<ColumnField> attributes;
 
-    @JsonProperty("PrimaryKey")
+    @JsonProperty("primaryKey")
     private List<String> primaryKey;
 
     public List<ColumnField> getAttributes() {

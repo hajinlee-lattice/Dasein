@@ -79,8 +79,6 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         listSegment = listSegmentEntityMgr.findByExternalInfo(listSegment.getExternalSystem(), listSegment.getExternalSegmentId());
         verifyListSegment(listSegment);
         assertEquals(listSegment.getDataTemplates().size(), 2);
-
-        throw new RuntimeException();
     }
 
     private void verifyListSegment(ListSegment listSegment) {

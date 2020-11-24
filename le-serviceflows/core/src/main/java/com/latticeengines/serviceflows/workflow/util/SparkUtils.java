@@ -81,7 +81,7 @@ public final class SparkUtils {
         S3DataUnit s3DataUnit = new S3DataUnit();
         String dataUnitName = NamingUtils.uuid(entity.name());
         String srcPath = hdfsDataUnit.getPath();
-        String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(templateId).append("/").append(dataUnitName).toString();
+        String tgtPath = pathBuilder.getHdfsAtlasDataUnitPrefix(podId, tenantId, templateId, dataUnitName);
         try {
             for (String avroParquetPath : AvroParquetUtils.listAvroParquetFiles(yarnConfiguration, srcPath, false)) {
                 if (!HdfsUtils.isDirectory(yarnConfiguration, tgtPath)) {

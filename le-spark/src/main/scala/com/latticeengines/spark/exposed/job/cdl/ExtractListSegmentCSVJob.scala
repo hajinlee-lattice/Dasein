@@ -24,6 +24,11 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     val importCSVColumns: Array[String] = importCSVDf.columns
     val columnsExist: ListBuffer[String] = ListBuffer()
     val structFields: ListBuffer[StructField] = ListBuffer()
+    logSpark("importCSVColumns :")
+    importCSVColumns.foreach { c =>
+      logSpark("column :" + c)
+    }
+    println(fieldMappings)
     fieldMappings.foreach { fieldMapping =>
       if (importCSVColumns.contains(fieldMapping.getUserFieldName)) {
         columnsExist += fieldMapping.getUserFieldName

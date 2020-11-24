@@ -142,7 +142,6 @@ public class ExtractListSegmentCSV
                 for (Schema.Field field : parquetSchema.getFields()) {
                     ColumnField attribute = new ColumnField();
                     attribute.setAttrName(field.name());
-                    attribute.setDisplayName(field.name());
                     attributes.add(attribute);
                 }
             } else {

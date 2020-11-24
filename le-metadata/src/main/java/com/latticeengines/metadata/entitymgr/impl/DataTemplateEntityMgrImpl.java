@@ -57,7 +57,6 @@ public class DataTemplateEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataTem
         DataTemplateEntity existing = repository.findByTenantIdAndUuid(tenantId, uuid);
         if (existing != null) {
             cloneDataTemplate(existing.getDocument(), dataTemplate);
-            existing.setDocument(dataTemplate);
             repository.save(existing);
         }
     }

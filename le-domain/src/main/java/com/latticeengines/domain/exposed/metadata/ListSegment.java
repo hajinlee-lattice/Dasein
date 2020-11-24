@@ -12,8 +12,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -68,9 +70,13 @@ public class ListSegment implements HasPid {
     private Map<String, String> dataTemplates;
 
     @JsonProperty("csvAdaptor")
-    @Column(name = "CSV_ADAPTOR", columnDefinition = "'JSON'")
-    @Type(type = "json")
+    @Transient
     private CSVAdaptor csvAdaptor;
+
+    @JsonProperty("csvAdaptorStr")
+    @Column(name = "CSV_ADAPTOR")
+    @Type(type = "text")
+    private String csvAdaptorStr;
 
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
@@ -121,12 +127,19 @@ public class ListSegment implements HasPid {
         this.s3DropFolder = s3DropFolder;
     }
 
+    @Transient
     public CSVAdaptor getCsvAdaptor() {
-        return csvAdaptor;
+        if (this.csvAdaptor != null){
+            return this.csvAdaptor;
+        }
+        return StringUtils.isNotEmpty(this.csvAdaptorStr)
+                ? JsonUtils.deserialize(this.csvAdaptorStr, CSVAdaptor.class)
+                : this.csvAdaptor;
     }
 
     public void setCsvAdaptor(CSVAdaptor csvAdaptor) {
         this.csvAdaptor = csvAdaptor;
+        this.csvAdaptorStr = JsonUtils.serialize(csvAdaptor);
     }
 
     public Map<String, String> getDataTemplates() {
@@ -153,6 +166,14 @@ public class ListSegment implements HasPid {
         this.tenantId = tenantId;
     }
 
+    public String getCsvAdaptorStr() {
+        return csvAdaptorStr;
+    }
+
+    public void setCsvAdaptorStr(String csvAdaptorStr) {
+        this.csvAdaptorStr = csvAdaptorStr;
+    }
+
     public String getTemplateId(String templateKey) {
         if (MapUtils.isNotEmpty(dataTemplates)) {
             return dataTemplates.get(templateKey);
@@ -160,4 +181,5 @@ public class ListSegment implements HasPid {
             return null;
         }
     }
+
 }
