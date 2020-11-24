@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "<NAME>_page_by_page",
+    "title": "<DASHBOARD_NAME>",
     "hits": 0,
     "description": "",
     "panelsJSON": "[{\"embeddableConfig\":{\"title\":\"Companies Visited\"},\"gridData\":{\"h\":23,\"i\":\"c919947a-3fbd-440f-b0bc-3b236e713905\",\"w\":32,\"x\":0,\"y\":0},\"panelIndex\":\"c919947a-3fbd-440f-b0bc-3b236e713905\",\"title\":\"Companies Visited\",\"version\":\"7.8.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"title\":\"\"},\"gridData\":{\"h\":6,\"i\":\"4ea09b08-c49a-4ff6-9a6c-24fedd5cf6d0\",\"w\":16,\"x\":32,\"y\":0},\"panelIndex\":\"4ea09b08-c49a-4ff6-9a6c-24fedd5cf6d0\",\"version\":\"7.8.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"table\":null,\"title\":\"Companies Visited\",\"vis\":{\"colors\":{\"Views\":\"#65C5DB\"},\"legendOpen\":false}},\"gridData\":{\"h\":17,\"i\":\"8472d9fb-6978-487f-a87c-7879e0b7eff4\",\"w\":16,\"x\":32,\"y\":6},\"panelIndex\":\"8472d9fb-6978-487f-a87c-7879e0b7eff4\",\"title\":\"Companies Visited\",\"version\":\"7.8.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"title\":\"\"},\"gridData\":{\"h\":18,\"i\":\"acf49354-d43b-4ebd-b063-7662698bab0f\",\"w\":48,\"x\":0,\"y\":26},\"panelIndex\":\"acf49354-d43b-4ebd-b063-7662698bab0f\",\"version\":\"7.8.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"title\":\"\"},\"gridData\":{\"h\":3,\"i\":\"516067fd-6464-4db4-8438-02c1d8165185\",\"w\":6,\"x\":0,\"y\":23},\"panelIndex\":\"516067fd-6464-4db4-8438-02c1d8165185\",\"version\":\"7.8.0\",\"panelRefName\":\"panel_4\"}]",

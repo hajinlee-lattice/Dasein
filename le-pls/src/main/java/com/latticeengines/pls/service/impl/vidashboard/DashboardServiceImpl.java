@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.util.UuidUtil;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -63,6 +64,7 @@ public class DashboardServiceImpl implements DashboardService {
     private static final String DASHBOARD_URL_TIME_FILTER_PLACEHOLDER = "<TIME_FILTER>";
     private static final String DASHBOARD_URL_OTHER_FILTER_PLACEHOLDER = "<OTHER_FILTER>";
     private static final String DASHBOARD_URL_ID_PLACEHOLDER = "<DASHBOARD_ID>";
+    private static final String DASHBOARD_NAME_PLACEHOLDER = "<DASHBOARD_NAME>";
 
     private static final String PATH_PREFIX = "com/latticeengines/pls/kibanaitems/%s";
 
@@ -75,17 +77,19 @@ public class DashboardServiceImpl implements DashboardService {
     @Value("${cdl.elasticsearch.kibana.url}")
     private String kibanaUrl;
     //indexPatternName need using esIndexName or esIndexNamePrefix(Regular expression)
-    private String indexPatternName = "";
-    private String indexPatternId = "";
+    private String indexPatternName;
+    private String indexPatternId;
 
     private List<String> dashboardNameList = Arrays.asList("employee", "industry", "location", "overview", "page",
             "page_group", "revenue");
     //placeholder-> visualizationId : COMPANY_TABLE_PLACEHOLDER && COMPANY_LABEL_PLACEHOLDER
-    private Map<String, String> companyVisualizationMap = new HashMap<>();
+    private Map<String, String> companyVisualizationMap;
     //dashboardName-><placeholder, visualizationId>
-    private Map<String, Map<String, String>> dashboardVisualizationMap = new HashMap<>();
+    private Map<String, Map<String, String>> dashboardVisualizationMap;
     //dashboardName->dashboardId
-    private Map<String, String> dashboardIdMap = new HashMap<>();
+    private Map<String, String> dashboardIdMap;
+    //dashboard List Name -> dashboard Real Name
+    private Map<String, String> dashboardRealNameMap;
 
     @Override
     public void create(String customerSpace, String esIndexName) {
@@ -157,6 +161,8 @@ public class DashboardServiceImpl implements DashboardService {
 
 
     private void createVisualization(String namePrefix) {
+        companyVisualizationMap = new HashMap<>();
+        dashboardVisualizationMap = new HashMap<>();
         String companyLabelFilePath = String.format(PATH_PREFIX, "panel_company_label.json");
         companyVisualizationMap.put(COMPANY_LABEL_PLACEHOLDER, createVisualization(namePrefix,
                 companyLabelFilePath));
@@ -188,6 +194,8 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private void createDashboard(String namePrefix) {
+        dashboardIdMap = new HashMap<>();
+        dashboardRealNameMap = new HashMap<>();
         for (String dashboardName : dashboardNameList) {
             dashboardIdMap.put(dashboardName, createDashboard(namePrefix, dashboardName));
         }
@@ -228,10 +236,11 @@ public class DashboardServiceImpl implements DashboardService {
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read dashboard", exception);
         }
+        String dashboardRealName = String.format("%s_%s", namePrefix, dashboardName);
         String dashboardId = UuidUtil.getTimeBasedUuid().toString();
         log.info("dashboardId is {}.", dashboardId);
         json = json.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER,
-                getDate()).replace(NAME_PLACEHOLDER, namePrefix)
+                getDate()).replace(DASHBOARD_NAME_PLACEHOLDER, dashboardRealName)
                 .replace(COMPANY_LABEL_PLACEHOLDER, companyVisualizationMap.get(COMPANY_LABEL_PLACEHOLDER))
                 .replace(COMPANY_TABLE_PLACEHOLDER, companyVisualizationMap.get(COMPANY_TABLE_PLACEHOLDER))
                 .replace(PAGE_GROUP_PLACEHOLDER, companyVisualizationMap.get(PAGE_GROUP_PLACEHOLDER));
@@ -240,6 +249,7 @@ public class DashboardServiceImpl implements DashboardService {
         }
         log.info("Dashboard is {}", json);
         ElasticSearchUtil.createDocument(client, kibanaIndex, String.format("%s%s", DASHBOARD_PREFIX, dashboardId), json);
+        dashboardRealNameMap.put(dashboardName, dashboardRealName);
         return dashboardId;
     }
 
@@ -274,7 +284,7 @@ public class DashboardServiceImpl implements DashboardService {
                                 .replace(INDEX_PATTERN_ID_PLACEHOLDER, indexPatternId);
             }
             Dashboard dashboard = new Dashboard();
-            dashboard.setName(dashboardName);
+            dashboard.setName(dashboardRealNameMap.get(dashboardName));
             dashboard.setDashboardUrl(dashboardUrl);
             dashboards.add(dashboard);
         }
@@ -302,7 +312,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private String generateNameprefix(String customerSpace) {
-        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        String uuid = RandomStringUtils.randomAlphabetic(6);
         return String.format("%s_%s", customerSpace, uuid);
     }
 
