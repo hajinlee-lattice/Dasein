@@ -468,6 +468,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(bulkConf.getSwpkgNames().contains("datacloud"));
     }
 
+    // Match service returns 10002 due to the postal code being too long
     @Test(groups = "deployment")
     public void testMatchErrorCode() throws IOException{
         InputStream is = new ClassPathResource("matchinput/BadMatchInput.json").getInputStream();
@@ -481,6 +482,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(result.getResult().get(0).getErrorCodes().get(MatchCoreErrorConstants.ErrorType.MATCH_ERROR).get(0).startsWith("10002:"));
     }
 
+    // Enrichment service returns 40001, as info for input DUNS under review as of 2020-11-24
     @Test(groups = "deployment")
     public void testAppendErrorCode() throws IOException{
         InputStream is = new ClassPathResource("matchinput/DunsUnderReview.json").getInputStream();
