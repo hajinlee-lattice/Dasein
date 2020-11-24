@@ -1,6 +1,7 @@
 package com.latticeengines.auth.service.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,6 +9,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -17,6 +19,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthSubscriptionEntit
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.auth.exposed.service.GlobalAuthSubscriptionService;
 import com.latticeengines.auth.testframework.AuthFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
@@ -63,6 +66,7 @@ public class GlobalAuthSubscriptionServiceImplTestNG extends AuthFunctionalTestN
 
     @Test(groups = "functional")
     public void testCRUD() {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, Collections.singleton(AssertionError.class), null);
         List<String> tenantIds = globalAuthSubscriptionService.getAllTenantId();
         Assert.assertTrue(!tenantIds.contains(tenant.getId()));
         List<String> emailList = globalAuthSubscriptionService.getEmailsByTenantId(tenant.getId());
@@ -72,16 +76,21 @@ public class GlobalAuthSubscriptionServiceImplTestNG extends AuthFunctionalTestN
         Set<String> emailSet = new HashSet<>(Arrays.asList(email));
         emailList = globalAuthSubscriptionService.createByEmailsAndTenantId(emailSet, tenant.getId());
         Assert.assertTrue(emailsEqual(emailSet, emailList));
-        Assert.assertTrue(emailsEqual(emailSet, globalAuthSubscriptionService.getEmailsByTenantId(tenant.getId())));
-        tenantIds = globalAuthSubscriptionService.getAllTenantId();
-        Assert.assertTrue(tenantIds.contains(tenant.getId()));
-        Assert.assertNotNull(globalAuthSubscriptionEntityMgr.findByUserTenantRight(tenantRight));
-
+        retry.execute(ctx -> {
+            Assert.assertTrue(emailsEqual(emailSet, globalAuthSubscriptionService.getEmailsByTenantId(tenant.getId())));
+            List<String> savedTenantIds = globalAuthSubscriptionService.getAllTenantId();
+            Assert.assertTrue(savedTenantIds.contains(tenant.getId()));
+            Assert.assertNotNull(globalAuthSubscriptionEntityMgr.findByUserTenantRight(tenantRight));
+            return true;
+        });
         globalAuthSubscriptionService.deleteByEmailAndTenantId(email, tenant.getId());
-        emailList = globalAuthSubscriptionService.getEmailsByTenantId(tenant.getId());
-        Assert.assertTrue(CollectionUtils.isEmpty(emailList));
-        tenantIds = globalAuthSubscriptionService.getAllTenantId();
-        Assert.assertTrue(!tenantIds.contains(tenant.getId()));
+        retry.execute(ctx -> {
+            List<String> saveEmailList = globalAuthSubscriptionService.getEmailsByTenantId(tenant.getId());
+            Assert.assertTrue(CollectionUtils.isEmpty(saveEmailList));
+            List<String> savedTenantIds = globalAuthSubscriptionService.getAllTenantId();
+            Assert.assertTrue(!savedTenantIds.contains(tenant.getId()));
+            return true;
+        });
     }
 
     private boolean emailsEqual(Set<String> emailSet, List<String> emailList) {
