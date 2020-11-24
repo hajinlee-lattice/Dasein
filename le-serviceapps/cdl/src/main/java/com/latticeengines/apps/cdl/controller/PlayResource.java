@@ -631,11 +631,16 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
             @PathVariable("action") LaunchState action) {
-        getPlayId(playName);
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            log.error("Invalid playName: " + playName);
+            throw new LedpException(LedpCode.LEDP_18151, new String[]{playName});
+        }
         PlayLaunch existingPlayLaunch = playLaunchService.findByLaunchId(launchId, false);
         if (existingPlayLaunch != null) {
             if (LaunchState.canTransit(existingPlayLaunch.getLaunchState(), action)) {
                 existingPlayLaunch.setLaunchState(action);
+                existingPlayLaunch.setTapType(play.getTapType());
                 return playLaunchService.update(existingPlayLaunch);
             } else {
                 log.error(String.format("Cannot change state for Launch:%s from %s to %s", launchId,
