@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -249,11 +248,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         String uploadId = configuration.getUploadId();
         UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
-        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
-        String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
-        String s3Path = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
-            upload.getUploadConfig().getUploadMatchResultAccepted());
-        return s3Path;
+        return upload.getUploadConfig().getUploadRawFilePath();
     }
 
     private List<String> getCustomerFileHeaders() {
@@ -277,9 +272,18 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     }
 
     private List<ColumnMetadata> sortCustomerAttrs(List<ColumnMetadata> attrs) {
-        List<ColumnMetadata> sortedCustomerAttrs = new ArrayList<>(attrs.size());
-
         List<String> customerHeaders = getCustomerFileHeaders();
+
+        int sortedAttrsSize = attrs.size();
+        if (customerHeaders.size() > sortedAttrsSize) {
+            sortedAttrsSize = customerHeaders.size();
+        }
+
+        List<ColumnMetadata> sortedCustomerAttrs = new ArrayList<>(sortedAttrsSize);
+        for(int index = 0; index < sortedAttrsSize; index++) {
+            sortedCustomerAttrs.add(index, null);
+        }
+
         List<ColumnMetadata> otherAttrs = new ArrayList<>();
 
         attrs.stream().forEach(columnMetadata -> {
@@ -287,7 +291,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             if (index == -1) {
                 otherAttrs.add(columnMetadata);
             } else {
-                sortedCustomerAttrs.add(index, columnMetadata);
+                sortedCustomerAttrs.set(index, columnMetadata);
             }
         });
 

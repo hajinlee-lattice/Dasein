@@ -469,12 +469,10 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(headers.contains("Country")); // in spec
         Assert.assertTrue(headers.contains("City")); // in spec
 
-        int companyNameIndex = headers.indexOf("Company Name");
-        int cityIndex = headers.indexOf("City");
+        int postalCodeIndex = headers.indexOf("Postal Code");
         int countryIndex = headers.indexOf("Country");
 
-        Assert.assertTrue(companyNameIndex < cityIndex);
-        Assert.assertTrue(cityIndex < countryIndex);
+        Assert.assertTrue(countryIndex < postalCodeIndex);
 
         Assert.assertFalse(headers.contains("Test Date 2")); // not in spec
         Assert.assertFalse(headers.contains("__Matched_DUNS__")); // debug column
