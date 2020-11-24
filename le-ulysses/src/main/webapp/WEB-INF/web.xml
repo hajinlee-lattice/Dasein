@@ -48,6 +48,17 @@
         </param-value>
     </context-param>
 
+    <filter>
+        <filter-name>tracingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>tracingFilter</filter-name>
+        <servlet-name>ulysses</servlet-name>
+    </filter-mapping>
+
     <servlet>
         <servlet-name>ulysses</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
