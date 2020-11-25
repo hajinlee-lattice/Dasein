@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="SparkFunctionalTestGroup2">
+<suite name="SparkFunctionalTestGroup1">
     <groups>
         <run>
             <include name="functional"/>
@@ -8,12 +8,62 @@
     </groups>
     <test name="FunctionalTestGroup2">
         <packages>
-            <package name="com.latticeengines.spark.*">
-                <exclude name="com.latticeengines.spark.exposed.job.cdl"/>
-                <exclude name="com.latticeengines.spark.exposed.job.cm"/>
-                <exclude name="com.latticeengines.spark.exposed.job.common"/>
-                <exclude name="com.latticeengines.spark.exposed.job.dcp"/>
-            </package>
+            <package name="com.latticeengines.spark.exposed.job.cdl"/>
+            <package name="com.latticeengines.spark.exposed.job.cm"/>
+            <package name="com.latticeengines.spark.exposed.job.common"/>
+            <package name="com.latticeengines.spark.exposed.job.dcp"/>
         </packages>
+        <classes>
+            <class name="com.latticeengines.spark.exposed.job.cdl.PeriodStoresGeneratorTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+            <class name="com.latticeengines.spark.exposed.job.cdl.TestRecommendationGenTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+            <class name="com.latticeengines.spark.exposed.job.cdl.GenerateLaunchArtifactsJobTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+            <class name="com.latticeengines.spark.exposed.job.cdl.AggDailyActivityJobTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+            <class name="com.latticeengines.spark.exposed.job.cdl.CalculateDeltaJobTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+            <class name="com.latticeengines.spark.exposed.job.cdl.TransformTxnStreamJobTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+            <class name="com.latticeengines.spark.exposed.job.cdl.PublishActivityAlertsJobTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+            <class name="com.latticeengines.spark.exposed.job.cdl.DeltaCampaignLaunchTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+            <class name="com.latticeengines.spark.exposed.job.cdl.MetricsGroupGeneratorTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+            <class name="com.latticeengines.spark.exposed.job.cdl.ValidateProductTestNG">
+                <methods>
+                    <exclude name=".*"/>
+                </methods>
+            </class>
+        </classes>
     </test>
 </suite>
