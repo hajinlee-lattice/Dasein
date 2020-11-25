@@ -127,6 +127,7 @@ public class JourneyStageServiceImplTestNG extends CDLFunctionalTestNGBase {
         retry.execute(context -> {
             createdAtom.set(journeyStageService.findByPid(mainCustomerSpace, pid));
             Assert.assertNotNull(createdAtom.get());
+            Assert.assertEquals(createdAtom.get().getStageName(), updateStageName);
             return true;
         });
         JourneyStage stage = createdAtom.get();
