@@ -504,28 +504,14 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private void verifyOutputHeaders(List<String> headers) {
         System.out.println(headers);
 
-        Assert.assertTrue(headers.contains("Company Name")); // in spec
-        Assert.assertTrue(headers.contains("Country")); // in spec
-        Assert.assertTrue(headers.contains("City")); // in spec
-        Assert.assertTrue(headers.contains("Sales in $B")); // customer attribute
-        Assert.assertTrue(headers.contains("Total Employees")); // customer attribute
-        Assert.assertTrue(headers.contains("MarketoAccountID")); // customer attribute
+        String[] expectedHeaders = {
+                "Customer ID", "Website", "Company Name", "City", "State",
+                "Country", "Postal Code", "Registration Number", "Sales in $B", "Total Employees", "MarketoAccountID",
+                "Street Address Line 1", "Street Address Line 2", "Phone Number", "DUNS Number"
+        };
 
-        int companyNameIndex = headers.indexOf("Company Name");
-        int cityIndex = headers.indexOf("City");
-        int countryIndex = headers.indexOf("Country");
-        int salesIndex = headers.indexOf("Sales in $B");
-        int employeesIndex = headers.indexOf("Total Employees");
-        int marketoIndex = headers.indexOf("MarketoAccountID");
-        int postalCodeIndex = headers.indexOf("Postal Code");
-
-        Assert.assertTrue(companyNameIndex < cityIndex);
-        Assert.assertTrue(cityIndex < countryIndex);
-        Assert.assertTrue(countryIndex < salesIndex);
-        Assert.assertTrue(salesIndex < employeesIndex);
-        Assert.assertTrue(employeesIndex < marketoIndex);
-        Assert.assertTrue(countryIndex < postalCodeIndex);
-
+        for (int i = 0; i < expectedHeaders.length; i++)
+            Assert.assertEquals(headers.indexOf(expectedHeaders[i]), i);
 
         Assert.assertFalse(headers.contains("Test Date 2")); // not in spec
         Assert.assertFalse(headers.contains("__Matched_DUNS__")); // debug column
@@ -538,10 +524,12 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
             // verify match/candidate column order
             int start = headers.indexOf("Matched D-U-N-S Number");
+            Assert.assertEquals(start, 15);
             Assert.assertEquals(headers.subList(start, start + MATCH_COLUMNS.size()), MATCH_COLUMNS);
 
             // verify base info column order
             start = headers.indexOf("D-U-N-S Number");
+            Assert.assertEquals(start, 24);
             Assert.assertEquals(headers.subList(start, start + BASE_COLUMNS.size()), BASE_COLUMNS);
         }
     }
