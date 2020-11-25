@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.entitymgr;
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
-import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 
@@ -41,5 +40,4 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
 
     MetadataSegment findByExternalInfo(MetadataSegment segment);
 
-    String createOrUpdateDataTemplate(String name, CreateDataTemplateRequest request);
 }

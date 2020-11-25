@@ -13,6 +13,4 @@ public interface DataTemplateService {
 
     void deleteByUuid(String uuid);
 
-    DataUnit createDataTemplate(DataTemplate dataTemplate, DataUnit dataUnit);
-
 }

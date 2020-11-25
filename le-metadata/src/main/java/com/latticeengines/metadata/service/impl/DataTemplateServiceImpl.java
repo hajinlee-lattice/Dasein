@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.entitymgr.DataTemplateEntityMgr;
 import com.latticeengines.metadata.service.DataTemplateService;
 
@@ -19,11 +18,6 @@ public class DataTemplateServiceImpl implements DataTemplateService {
 
     @Inject
     private DataTemplateEntityMgr entityMgr;
-
-    @Override
-    public DataUnit createDataTemplate(DataTemplate dataTemplate, DataUnit dataUnit) {
-        return null;
-    }
 
     @Override
     public String create(DataTemplate dataTemplate) {
