@@ -27,8 +27,6 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
     private static final String TRAY_PROSPECT_OWNER_COLUMN_NAME = "SDR Email";
     private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC Account ID";
-    private static final String COMPANY_NAME = "CompanyName";
-    private static final String ACCOUNT_NAME = "Account Name";
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
