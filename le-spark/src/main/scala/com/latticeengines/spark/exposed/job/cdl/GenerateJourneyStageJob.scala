@@ -26,6 +26,7 @@ class GenerateJourneyStageJob extends AbstractSparkJob[JourneyStageJobConfig] {
   private val JOURNEY_STAGE_SOURCE = "Atlas"
   private val JOURNEY_STAGE_RECORD_ID = "js_change"
   private val CHANGE_DETECTION_LOOKBACK_DAYS = 90
+  private val MAX_STEPS_PER_DAG = 2
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[JourneyStageJobConfig]): Unit = {
     val config = lattice.config
@@ -34,6 +35,7 @@ class GenerateJourneyStageJob extends AbstractSparkJob[JourneyStageJobConfig] {
     val priorityStageMap = stages.map(stage => (stage.getPriority, stage.getStageName)).toMap
 
     val timelineMaster = lattice.input(config.masterAccountTimeLineIdx)
+    val accountsInTimeline = timelineMaster.select(AccountId.name).distinct
     val timelineDiff = lattice.input(config.diffAccountTimeLineIdx)
 
     val eventTimeCol = EventDate.getColumnName
@@ -65,8 +67,9 @@ class GenerateJourneyStageJob extends AbstractSparkJob[JourneyStageJobConfig] {
         }).reduce(_ unionByName _)
           .groupBy(AccountId.name)
           .agg(max(INTERNAL_PRIORITY_KEY).as(INTERNAL_PRIORITY_KEY))
+
         val newMergedStageDf = mergedPriorityDf
-          .join(timelineMaster.select(AccountId.name).distinct, Seq(AccountId.name), "right")
+          .join(accountsInTimeline, Seq(AccountId.name), "right")
           .withColumn(eventTimeCol, lit(currTime.toEpochMilli))
           .withColumn(StageName.name, coalesce(
             priorityToStage(mergedPriorityDf.col(INTERNAL_PRIORITY_KEY)),
@@ -91,8 +94,14 @@ class GenerateJourneyStageJob extends AbstractSparkJob[JourneyStageJobConfig] {
           .withColumnRenamed(INTERNAL_STAGENAME_KEY, StageName.name)
           .withColumnRenamed(INTERNAL_TIME_KEY, eventTimeCol)
 
+        val idx = (timestamp - startTime) / step
         val newAccStageDf = MergeUtils.merge2(mergedStage, newChangeDf, Seq(AccountId.name), Set(), overwriteByNull = false)
-        (newAccStageDf, newChangeDf.unionByName(changeDf))
+        val accumulatedChangeDf = newChangeDf.unionByName(changeDf)
+        if ((idx + 1) % MAX_STEPS_PER_DAG == 0) {
+          (newAccStageDf.checkpoint, accumulatedChangeDf.checkpoint)
+        } else {
+          (newAccStageDf, accumulatedChangeDf)
+        }
       })
 
     // merge changed stage

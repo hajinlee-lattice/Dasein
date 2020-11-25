@@ -19,6 +19,7 @@ import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.Timeline
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,14 +98,15 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
     @Override
     protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
         return Arrays.asList( //
-                verifyTimeLineFn("master", 25, 10), //
-                verifyTimeLineFn("diff", 11, 10), //
+                verifyTimeLineFn("master", 26, 11, true), //
+                verifyTimeLineFn("diff", 12, 11, false), //
                 verifyJourneyStageFn(getExpectedStageNames()));
     }
 
     private Function<HdfsDataUnit, Boolean> verifyTimeLineFn(String name, int expectedNumRecords,
-            int expectedNumJourneyStageRecords) {
+            int expectedNumJourneyStageRecords, boolean verifyStageProgression) {
         return (tgt) -> {
+            Map<String, List<Pair<String, Long>>> stageChangeEvents = new HashMap<>();
             AtomicInteger counter = new AtomicInteger(0);
             AtomicInteger journeyStageCounter = new AtomicInteger(0);
             List<GenericRecord> records = new ArrayList<>();
@@ -114,7 +116,13 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
                 String eventType = TypeConversionUtil.toString(record.get(EventType.getColumnName()));
                 if (JOURNEY_STAGE_EVENT_TYPE.equals(eventType)) {
                     journeyStageCounter.incrementAndGet();
+                    String accountId = TypeConversionUtil.toString(record.get(AccountId.name()));
+                    String stageName = TypeConversionUtil.toString(record.get(Detail1.getColumnName()));
                     String streamType = TypeConversionUtil.toString(record.get(StreamType.getColumnName()));
+                    Long timestamp = (Long) record.get(EventDate.getColumnName());
+                    stageChangeEvents.putIfAbsent(accountId, new ArrayList<>());
+                    stageChangeEvents.get(accountId).add(Pair.of(stageName, timestamp));
+
                     Assert.assertEquals(streamType, AtlasStream.StreamType.JourneyStage.name());
                     Assert.assertNotNull(record.get(Detail1.getColumnName()));
                 }
@@ -124,6 +132,17 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
             log.info("TimeLine Output:");
             List<String> cols = TIMELINE_FIELDS.stream().map(Pair::getKey).collect(Collectors.toList());
             records.forEach(record -> log.info(name + ": " + debugStr(record, cols)));
+
+            if (verifyStageProgression) {
+                stageChangeEvents.forEach((accountId, stageEvents) -> stageEvents
+                        .sort((p1, p2) -> Long.compare(p1.getValue(), p2.getValue())));
+
+                Map<String, List<String>> stageJourney = stageChangeEvents.entrySet().stream() //
+                        .collect(Collectors.toMap(Map.Entry::getKey, //
+                                entry -> entry.getValue().stream().map(Pair::getKey).collect(Collectors.toList())));
+                log.info("Stage changes events = {}", stageChangeEvents);
+                Assert.assertEquals(stageJourney, getExpectedStageJourney());
+            }
 
             Assert.assertEquals(counter.get(), expectedNumRecords);
             Assert.assertEquals(journeyStageCounter.get(), expectedNumJourneyStageRecords);
@@ -193,7 +212,7 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
                 newTimelineRecord("a1", Opportunity, "Closed"), //
         };
         Object[][] journeyStageData = new Object[][] { //
-                { "a2", "Engaged", 0L }, //
+                { "a2", "Aware", 0L }, //
                 { "a3", "Closed", 0L }, //
                 { "a5", "Closed", 0L }, //
                 { "a6", "Known Engaged", 0L }, //
@@ -208,17 +227,33 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
         uploadHdfsDataUnit(journeyStageData, JOURNEY_STAGE_FIELDS);
     }
 
+    // account id -> list of journey stages (ordered by time)
+    private Map<String, List<String>> getExpectedStageJourney() {
+        Map<String, List<String>> stageChanges = new HashMap<>();
+        stageChanges.put("a1", Collections.singletonList("Closed-Won"));
+        stageChanges.put("a2", Arrays.asList("Engaged", "Dark")); // change from Engaged to dark
+        stageChanges.put("a3", Collections.singletonList("Opportunity"));
+        stageChanges.put("a4", Arrays.asList("Engaged", "Aware")); // change from Opportunity to Aware
+        // no a5 because stage is not changed (from Closed)
+        stageChanges.put("a6", Collections.singletonList("Closed-Won"));
+        stageChanges.put("a7", Collections.singletonList("Dark"));
+        stageChanges.put("a8", Collections.singletonList("Dark"));
+        stageChanges.put("a9", Collections.singletonList("Contact Inquiry"));
+        stageChanges.put("a10", Collections.singletonList("Contact Inquiry"));
+        return stageChanges;
+    }
+
     private Map<String, String> getExpectedStageNames() {
         Map<String, String> stageNames = new HashMap<>();
         stageNames.put("a1", "Closed-Won");
-        stageNames.put("a2", "Dark"); // change from Engaged to dark
+        stageNames.put("a2", "Dark");
         stageNames.put("a3", "Opportunity");
-        stageNames.put("a4", "Aware"); // change from Opportunity to Aware
+        stageNames.put("a4", "Aware");
         stageNames.put("a5", "Closed");
         stageNames.put("a6", "Closed-Won");
         stageNames.put("a7", "Dark");
         stageNames.put("a8", "Dark");
-        stageNames.put("a9", "Contact Inquiry"); // change from Contact Inquiry to Dark
+        stageNames.put("a9", "Contact Inquiry");
         stageNames.put("a10", "Contact Inquiry");
         return stageNames;
     }
