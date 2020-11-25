@@ -616,7 +616,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
-    public void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, int length,
+    public void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, Integer length,
                                             boolean nullable) {
         DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, uniqueTaskId);
         if (dataFeedTask == null) {
@@ -660,7 +660,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, true);
     }
 
-    private AttributeLengthValidator getAttributeLengthValidator(String attrName, int length, boolean nullable) {
+    private AttributeLengthValidator getAttributeLengthValidator(String attrName, Integer length, boolean nullable) {
         AttributeLengthValidator lengthValidator = new AttributeLengthValidator();
         lengthValidator.setAttributeName(attrName);
         lengthValidator.setLength(length);

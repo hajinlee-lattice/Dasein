@@ -465,7 +465,7 @@ public class DataFeedTaskController {
     public void addAttributeLengthValidator(@PathVariable String customerSpace,
                                             @PathVariable String uniqueTaskId,
                                             @RequestParam String attrName,
-                                            @RequestParam int length,
+                                            @RequestParam(required = false) Integer length,
                                             @RequestParam(required = false, defaultValue = "false") boolean nullable) {
         dataFeedTaskTemplateService.addAttributeLengthValidator(customerSpace, uniqueTaskId, attrName, length, nullable);
     }

@@ -151,7 +151,7 @@ public interface DataFeedTaskTemplateService {
      */
     List<String> getPAConsumedTemplates(String customerSpace);
 
-    void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, int length,
+    void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, Integer length,
                                      boolean nullable);
 
     void addSimpleValueFilter(String customerSpace, String uniqueTaskId, SimpleValueFilter simpleValueFilter);
