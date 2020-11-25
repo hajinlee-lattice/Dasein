@@ -78,6 +78,9 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
         config.currentEpochMilli = FAKE_CURRENT_TIME;
 
         List<JourneyStage> stages = JourneyStageUtils.atlasJourneyStages(null);
+        for (JourneyStage stage : stages) {
+            log.info("stage: " + stage.getStageName());
+        }
         config.journeyStages = new ArrayList<>(stages.subList(0, stages.size() - 1));
         config.defaultStage = stages.get(stages.size() - 1);
         config.accountTimeLineVersion = "v1";
@@ -90,7 +93,7 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
 
     @Override
     protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
-        return Arrays.asList(verifyTimeLineFn("master", 20, 7), verifyTimeLineFn("diff", 8, 7),
+        return Arrays.asList(verifyTimeLineFn("master", 23, 8), verifyTimeLineFn("diff", 9, 8),
                 verifyJourneyStageFn(getExpectedStageNames()));
     }
 
@@ -176,7 +179,9 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
                  * accounts with no current records (qualify for default stage): a8
                  */
 
-                newTimelineRecordWithEventType("a9", "Form Filled", MarketingActivity, null)
+                newTimelineRecordWithEventType("a9", "Fill Out Form", MarketingActivity, null), //
+                newTimelineRecordWithEventType("a10", "Fill Out Form", MarketingActivity, null), //
+                newTimelineRecordWithEventType("a10", "FormSubmit", MarketingActivity, null)
         };
 
         Object[][] diffData = new Object[][] { //
@@ -209,6 +214,7 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
         stageNames.put("a7", "Dark");
         stageNames.put("a8", "Dark");
         stageNames.put("a9", "Contact Inquiry");
+        stageNames.put("a10", "Contact Inquiry");
         return stageNames;
     }
 
