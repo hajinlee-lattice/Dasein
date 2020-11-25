@@ -63,6 +63,9 @@ public class DataTemplateEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataTem
 
     private void cloneDataTemplate(DataTemplate existing, DataTemplate incoming) {
         if (existing != null) {
+            if (StringUtils.isNotEmpty(incoming.getName())) {
+                existing.setName(incoming.getName());
+            }
             if (StringUtils.isNotEmpty(incoming.getTenant())) {
                 existing.setTenant(incoming.getTenant());
             }
