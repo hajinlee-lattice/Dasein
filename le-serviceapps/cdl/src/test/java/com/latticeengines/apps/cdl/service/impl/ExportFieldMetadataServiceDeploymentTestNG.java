@@ -399,11 +399,13 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testMarketoLaunch")
-    public void testOutreachLaunch() {
+    public void testOutreachContactsLaunch() {
+
         CDLExternalSystemName externalSystemName = CDLExternalSystemName.Outreach;
         AudienceType audienceType = AudienceType.CONTACTS;
 
         OutreachChannelConfig outreachChannel = new OutreachChannelConfig();
+        outreachChannel.setAudienceType(audienceType);
         createPlayLaunchChannel(outreachChannel, registerOutreachLookupIdMap());
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
@@ -423,7 +425,29 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         compareEntityInMetadata(columnMetadata, exportFieldMetadataList);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testOutreachLaunch")
+    @Test(groups = "deployment-app", dependsOnMethods = "testMarketoLaunch")
+    public void testOutreachAccountsLaunch() {
+
+        CDLExternalSystemName externalSystemName = CDLExternalSystemName.Outreach;
+        AudienceType audienceType = AudienceType.ACCOUNTS;
+        OutreachChannelConfig outreachChannel = new OutreachChannelConfig();
+        outreachChannel.setAudienceType(audienceType);
+        createPlayLaunchChannel(outreachChannel, registerOutreachLookupIdMap());
+        ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
+                .getExportFieldMetadataService(externalSystemName);
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        log.info(JsonUtils.serialize(columnMetadata));
+
+        // ProspectOwner + AccountID + AccountName
+        assertEquals(columnMetadata.size(), 3);
+
+        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+
+        long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
+        assertEquals(nonStandardFields, 0);
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = "testOutreachContactsLaunch")
     public void testFacebookLaunch() {
         CDLExternalSystemName externalSystemName = CDLExternalSystemName.Facebook;
         AudienceType audienceType = AudienceType.CONTACTS;

@@ -107,7 +107,7 @@
       "externalSystemName": "Outreach",
       "standardField": true,
       "exportEnabled": true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    },
    {
       "attrName": "PRIORITY_DISPLAY_NAME",
@@ -237,7 +237,7 @@
       "externalSystemName": "Outreach",
       "standardField": true,
       "exportEnabled": true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    },
    {
       "attrName": "Email",
@@ -367,6 +367,6 @@
       "externalSystemName": "Outreach",
       "standardField": false,
       "exportEnabled": true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    }
 ]

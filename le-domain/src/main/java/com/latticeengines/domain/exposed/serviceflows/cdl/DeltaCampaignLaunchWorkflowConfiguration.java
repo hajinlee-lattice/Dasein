@@ -24,6 +24,7 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
 
     public static final String ADD = "add";
     public static final String DELETE = "delete";
+    public static final String TASK_DESCRIPTION = "taskDescription";
 
     // avro file path in hdfs
     public static final String RECOMMENDATION_AVRO_HDFS_FILEPATH = "RECOMMENDATION_AVRO_HDFS_FILEPATH";
@@ -39,6 +40,8 @@ public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowCon
     public static final String CREATE_RECOMMENDATION_DATA_FRAME = "CREATE_RECOMMENDATION_DATA_FRAME";
     public static final String CREATE_ADD_CSV_DATA_FRAME = "CREATE_ADD_CSV_DATA_FRAME";
     public static final String CREATE_DELETE_CSV_DATA_FRAME = "CREATE_DELETE_CSV_DATA_FRAME";
+    public static final String CREATE_TASK_DESCRIPTION_FILE = "CREATE_TASK_DESCRIPTION_FILE";
+    public static final String TASK_DESCRIPTION_FILE = "TASK_DESCRIPTION_FILE";
 
     public static final String ADD_EXPORT_TIMESTAMP = "ADD_EXPORT_TIMESTAMP";
 

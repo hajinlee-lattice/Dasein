@@ -27,10 +27,12 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
     private static final String TRAY_PROSPECT_OWNER_COLUMN_NAME = "SDR Email";
     private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC Account ID";
+    private static final String COMPANY_NAME = "CompanyName";
+    private static final String ACCOUNT_NAME = "Account Name";
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        log.info("Calling OutreachExportFieldMetadataService for channle " + channel.getId());
+        log.info("Calling OutreachExportFieldMetadataService for channel " + channel.getId());
 
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
                 channel.getLookupIdMap().getTenant().getPid());
@@ -51,9 +53,15 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
                     contactAttributesMap);
         }
 
-        // Retrieves enriched fields for prospect owner and account Id and
-        // update
-        // displayName
+        exportColumnMetadataList = addOwnerAndLookupId(channel, exportColumnMetadataList, accountAttributesMap);
+
+        return exportColumnMetadataList;
+    }
+
+    private List<ColumnMetadata> addOwnerAndLookupId(PlayLaunchChannel channel, List<ColumnMetadata> exportColumnMetadataList,
+            Map<String, ColumnMetadata> accountAttributesMap) {
+
+        // Add enriched fields for prospectOwner and accountId and update displayName
         String prospectOwner = channel.getLookupIdMap().getProspectOwner();
         log.info("Outreach account owner " + prospectOwner);
         if (StringUtils.isNotBlank(prospectOwner) && accountAttributesMap.containsKey(prospectOwner)) {
