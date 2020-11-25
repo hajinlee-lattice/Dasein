@@ -621,8 +621,8 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         fieldMapping_3.setDestinationField("phone");
         fieldMapping_3.setOverwriteValue(false);
 
-        lookupIdMap.setProspectOwner(InterfaceName.Website.name());
-        lookupIdMap.setAccountId(InterfaceName.AccountId.name());
+        lookupIdMap.setProspectOwner("SDR_Email");
+        lookupIdMap.setAccountId("SFDC_ACCOUNT_ID");
         lookupIdMap.setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2, fieldMapping_3));
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
 
