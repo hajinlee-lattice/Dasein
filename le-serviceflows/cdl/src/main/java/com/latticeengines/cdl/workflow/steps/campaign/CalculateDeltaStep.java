@@ -142,12 +142,13 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         putObjectInContext(ADDED_CONTACTS_DELTA_TABLE, contactDataUnit.getName());
         if (AudienceType.ACCOUNTS.equals(audienceType)) {
             counts.put(contextKey, accountDataUnit.getCount());
+            putLongValueInContext(ACCOUNTS_ADDED, accountDataUnit.getCount());
         } else {
             counts.put(contextKey, contactDataUnit.getCount());
+            putLongValueInContext(ACCOUNTS_ADDED, accountDataUnit.getCount());
+            putLongValueInContext(CONTACTS_ADDED, contactDataUnit.getCount());
         }
         putObjectInContext(DELTA_TABLE_COUNTS, counts);
-        putLongValueInContext(ACCOUNTS_ADDED, accountDataUnit.getCount());
-        putLongValueInContext(CONTACTS_ADDED, contactDataUnit.getCount());
     }
 
     private SparkJobResult executeSparkJob(HdfsDataUnit currentLaunchUniverse, HdfsDataUnit previousLaunchUniverse,
