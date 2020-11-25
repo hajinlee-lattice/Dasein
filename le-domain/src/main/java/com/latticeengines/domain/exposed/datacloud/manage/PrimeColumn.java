@@ -74,7 +74,7 @@ public class PrimeColumn implements MetadataColumn {
     private String javaClass;
 
     @JsonProperty("example")
-    @Column(name = "example", nullable = true, length = 4000)
+    @Column(name = "Example", nullable = true, length = 4000)
     private String example;
 
     @JsonIgnore
