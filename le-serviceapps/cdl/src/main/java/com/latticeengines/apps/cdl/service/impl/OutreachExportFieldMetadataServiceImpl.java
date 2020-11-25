@@ -14,6 +14,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("outreachExportFieldMetadataService")
@@ -32,6 +34,9 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling OutreachExportFieldMetadataService for channel " + channel.getId());
 
+        OutreachChannelConfig channelConfig = (OutreachChannelConfig) channel.getChannelConfig();
+        AudienceType audienceType = channelConfig.getAudienceType();
+
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
                 channel.getLookupIdMap().getTenant().getPid());
 
@@ -43,7 +48,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
         List<ColumnMetadata> exportColumnMetadataList;
 
-        if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
+        if (mappedFieldNames != null && mappedFieldNames.size() != 0 && audienceType != AudienceType.ACCOUNTS) {
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Outreach, mappedFieldNames,
                     accountAttributesMap, contactAttributesMap);
         } else {
