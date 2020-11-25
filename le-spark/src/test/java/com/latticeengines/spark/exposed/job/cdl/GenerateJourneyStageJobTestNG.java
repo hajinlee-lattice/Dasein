@@ -16,6 +16,7 @@ import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.Timeline
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.StreamType;
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.TrackedBySystem;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -75,7 +76,9 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
         config.masterAccountTimeLineIdx = 0;
         config.diffAccountTimeLineIdx = 1;
         config.masterJourneyStageIdx = 2;
-        config.currentEpochMilli = FAKE_CURRENT_TIME;
+        config.earliestBackfillEpochMilli = FAKE_CURRENT_TIME;
+        config.currentEpochMilli = FAKE_CURRENT_TIME + Duration.ofDays(14L).toMillis();
+        config.backfillStepInDays = 7L;
 
         List<JourneyStage> stages = JourneyStageUtils.atlasJourneyStages(null);
         for (JourneyStage stage : stages) {
@@ -93,7 +96,9 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
 
     @Override
     protected List<Function<HdfsDataUnit, Boolean>> getTargetVerifiers() {
-        return Arrays.asList(verifyTimeLineFn("master", 23, 8), verifyTimeLineFn("diff", 9, 8),
+        return Arrays.asList( //
+                verifyTimeLineFn("master", 25, 10), //
+                verifyTimeLineFn("diff", 11, 10), //
                 verifyJourneyStageFn(getExpectedStageNames()));
     }
 
@@ -206,14 +211,14 @@ public class GenerateJourneyStageJobTestNG extends SparkJobFunctionalTestNGBase 
     private Map<String, String> getExpectedStageNames() {
         Map<String, String> stageNames = new HashMap<>();
         stageNames.put("a1", "Closed-Won");
-        stageNames.put("a2", "Engaged");
+        stageNames.put("a2", "Dark"); // change from Engaged to dark
         stageNames.put("a3", "Opportunity");
-        stageNames.put("a4", "Engaged");
+        stageNames.put("a4", "Aware"); // change from Opportunity to Aware
         stageNames.put("a5", "Closed");
         stageNames.put("a6", "Closed-Won");
         stageNames.put("a7", "Dark");
         stageNames.put("a8", "Dark");
-        stageNames.put("a9", "Contact Inquiry");
+        stageNames.put("a9", "Contact Inquiry"); // change from Contact Inquiry to Dark
         stageNames.put("a10", "Contact Inquiry");
         return stageNames;
     }

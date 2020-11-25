@@ -1,5 +1,8 @@
 package com.latticeengines.workflow.exposed.build;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +34,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -43,6 +48,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -922,5 +928,42 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
         log.info("{} templates = {}", entity.name(), templateNames);
         return templateNames;
+    }
+
+    protected long getCurrentTimestamp() {
+        String evaluationDateStr = getStringValueFromContext(CDL_EVALUATION_DATE);
+        if (StringUtils.isNotBlank(evaluationDateStr)) {
+            long currTime = LocalDate
+                    .parse(evaluationDateStr, DateTimeFormatter.ofPattern(DateTimeUtils.DATE_ONLY_FORMAT_STRING)) //
+                    .atStartOfDay(ZoneId.of("UTC")) // start of date in UTC
+                    .toInstant() //
+                    .toEpochMilli();
+            log.info("Found evaluation date {}, use end of date as current time. Timestamp = {}", evaluationDateStr,
+                    currTime);
+            return currTime;
+        } else {
+            Long paTime = getLongValueFromContext(PA_TIMESTAMP);
+            Preconditions.checkNotNull(paTime, "pa timestamp should be set in context");
+            log.info("No evaluation date str found in context, use pa timestamp = {}", paTime);
+            return paTime;
+        }
+    }
+
+    protected Long getLastEvaluationTime(@NotNull TableRoleInCollection role) {
+        Preconditions.checkNotNull(role, "Table role should not be null");
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        return MapUtils.emptyIfNull(dcStatus.getEvaluationDateMap()).get(role.name());
+    }
+
+    protected void setLastEvaluationTime(@NotNull Long currentTimestamp, @NotNull TableRoleInCollection role) {
+        Preconditions.checkNotNull(currentTimestamp, "Current time should be set already");
+        Preconditions.checkNotNull(role, "Table role should not be null");
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus.getEvaluationDateMap() == null) {
+            dcStatus.setEvaluationDateMap(new HashMap<>());
+        }
+        dcStatus.getEvaluationDateMap().put(role.name(), currentTimestamp);
+        log.info("Set evaluation date for {} to {}", role.name(), currentTimestamp);
+        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
     }
 }

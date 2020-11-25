@@ -4,9 +4,7 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.A
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -28,10 +26,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -70,6 +68,7 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
     private DataCollection.Version inactive;
     private DataCollection.Version active;
     private String accountBatchStoreTableName;
+    private Long currentTimestamp;
 
     @Override
     protected JourneyStageJobConfig configureJob(TimeLineSparkStepConfiguration stepConfiguration) {
@@ -86,6 +85,8 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
         String accountJourneyStageTableName = getAccountJourneyStageTableName();
         acc360Timeline = getAccount360TimeLine();
         journeyStages = activityStoreProxy.getJourneyStages(customerSpace.toString());
+        currentTimestamp = getCurrentTimestamp();
+        Long lastEvaluationTime = configuration.isShouldRebuild() ? null : getLastEvaluationTime(AccountJourneyStage);
 
         if (!shouldExecute()) {
             return null;
@@ -102,17 +103,18 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
         }
         log.info(
                 "Generating journey stages for accounts. account time line object = {}, master table name = {},"
-                        + " diff table name = {}, hasAccountTimeLineChange = {}, rebuild = {}",
+                        + " diff table name = {}, hasAccountTimeLineChange = {}, rebuild = {}, currTime = {}, lastEvalTime = {}",
                 JsonUtils.serialize(acc360Timeline), masterTable.getName(), diffTable.getName(),
-                hasAccountTimeLineChange(), configuration.isShouldRebuild());
+                hasAccountTimeLineChange(), configuration.isShouldRebuild(), currentTimestamp, lastEvaluationTime);
 
         List<DataUnit> inputs = new ArrayList<>();
         inputs.add(masterTable.toHdfsDataUnit("AccTimeLineMaster"));
         inputs.add(diffTable.toHdfsDataUnit("AccTimeLineDiff"));
         JourneyStageJobConfig config = new JourneyStageJobConfig();
-        config.currentEpochMilli = getCurrentTimestamp();
+        config.currentEpochMilli = currentTimestamp;
         config.masterAccountTimeLineIdx = 0;
         config.diffAccountTimeLineIdx = 1;
+        configureBackfillTime(config, lastEvaluationTime);
         Pair<List<JourneyStage>, JourneyStage> processedStages = processJourneyStages(journeyStages);
         config.journeyStages = processedStages.getLeft();
         config.defaultStage = processedStages.getRight();
@@ -149,6 +151,24 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
 
         // link all tables to inactive version
         linkTimelineMasterTablesToInactive();
+
+        setLastEvaluationTime(currentTimestamp, AccountJourneyStage);
+    }
+
+    private void configureBackfillTime(@NotNull JourneyStageJobConfig config, Long lastEvalTime) {
+        Preconditions.checkNotNull(currentTimestamp, "current timestamp should be set here");
+
+        config.backfillStepInDays = ActivityStoreConstants.JourneyStage.BACKFILL_STEP_IN_DAYS;
+
+        long step = Duration.ofDays(ActivityStoreConstants.JourneyStage.BACKFILL_STEP_IN_DAYS).toMillis();
+        config.earliestBackfillEpochMilli = currentTimestamp
+                - step * ActivityStoreConstants.JourneyStage.MAX_BACKFILL_STEPS;
+        while (lastEvalTime != null && config.earliestBackfillEpochMilli < lastEvalTime) {
+            config.earliestBackfillEpochMilli += step;
+        }
+
+        log.info("Step = {}, earliestBackfillTime = {}, currTime = {}, lastEvalTime = {}", step,
+                config.earliestBackfillEpochMilli, currentTimestamp, lastEvalTime);
     }
 
     // return [ list of non default stages, default journey stage ]
@@ -174,25 +194,6 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
         String version = MapUtils.emptyIfNull(versionMap).get(timelineId);
         log.info("Timeline version map = {}, timeline id = {}, version = {}", versionMap, timelineId, version);
         return version;
-    }
-
-    private long getCurrentTimestamp() {
-        String evaluationDateStr = getStringValueFromContext(CDL_EVALUATION_DATE);
-        if (StringUtils.isNotBlank(evaluationDateStr)) {
-            long currTime = LocalDate
-                    .parse(evaluationDateStr, DateTimeFormatter.ofPattern(DateTimeUtils.DATE_ONLY_FORMAT_STRING)) //
-                    .atStartOfDay(ZoneId.of("UTC")) // start of date in UTC
-                    .toInstant() //
-                    .toEpochMilli();
-            log.info("Found evaluation date {}, use end of date as current time. Timestamp = {}", evaluationDateStr,
-                    currTime);
-            return currTime;
-        } else {
-            Long paTime = getLongValueFromContext(PA_TIMESTAMP);
-            Preconditions.checkNotNull(paTime, "pa timestamp should be set in context");
-            log.info("No evaluation date str found in context, use pa timestamp = {}", paTime);
-            return paTime;
-        }
     }
 
     private boolean shouldExecute() {

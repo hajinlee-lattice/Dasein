@@ -2,11 +2,7 @@ package com.latticeengines.cdl.workflow.steps.process;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ActivityAlert;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,7 +25,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
-import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -85,7 +80,7 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
         Table timeLineMasterTable = getAccount360TimeLineMasterTable();
         Table activityAlertMasterTable = getActivityAlertMasterTable();
         String activityAlertVersion = getOrCreateActivityAlertVersion();
-        Long lastEvaluationTime = getLastAlertEvaluationTime();
+        Long lastEvaluationTime = getLastEvaluationTime(ActivityAlert);
         currentTimestamp = getCurrentTimestamp();
         boolean dedupAlert = lastEvaluationTime == null || currentTimestamp.equals(lastEvaluationTime);
         Preconditions.checkNotNull(timeLineMasterTable, "should have account timeline master table");
@@ -145,7 +140,7 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
                     + NamingUtils.timestamp(ActivityAlert.name() + "Diff");
             createTableAndPersist(outputs.get(1), alertDiffTableName, ACTIVITY_ALERT_DIFF_TABLE_NAME);
 
-            setLastAlertEvaluationTime();
+            setLastEvaluationTime(currentTimestamp, ActivityAlert);
         }
     }
 
@@ -181,25 +176,6 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
     }
 
     // TODO move timeline helpers to a shared base step
-
-    private long getCurrentTimestamp() {
-        String evaluationDateStr = getStringValueFromContext(CDL_EVALUATION_DATE);
-        if (StringUtils.isNotBlank(evaluationDateStr)) {
-            long currTime = LocalDate
-                    .parse(evaluationDateStr, DateTimeFormatter.ofPattern(DateTimeUtils.DATE_ONLY_FORMAT_STRING)) //
-                    .atStartOfDay(ZoneId.of("UTC")) // start of date in UTC
-                    .toInstant() //
-                    .toEpochMilli();
-            log.info("Found evaluation date {}, use end of date as current time. Timestamp = {}", evaluationDateStr,
-                    currTime);
-            return currTime;
-        } else {
-            Long paTime = getLongValueFromContext(PA_TIMESTAMP);
-            Preconditions.checkNotNull(paTime, "pa timestamp should be set in context");
-            log.info("No evaluation date str found in context, use pa timestamp = {}", paTime);
-            return paTime;
-        }
-    }
 
     private Table getAccount360TimeLineMasterTable() {
         Map<String, String> tableNames = getMapObjectFromContext(TIMELINE_MASTER_TABLE_NAME, String.class,
@@ -262,21 +238,6 @@ public class GenerateActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigu
         dcStatus.setActivityAlertVersion(version);
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
         return version;
-    }
-
-    private Long getLastAlertEvaluationTime() {
-        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        return MapUtils.emptyIfNull(dcStatus.getEvaluationDateMap()).get(ActivityAlert.name());
-    }
-
-    private void setLastAlertEvaluationTime() {
-        Preconditions.checkNotNull(currentTimestamp, "Current time should be set already");
-        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        if (dcStatus.getEvaluationDateMap() == null) {
-            dcStatus.setEvaluationDateMap(new HashMap<>());
-        }
-        log.info("Set evaluation date for {} to {}", ActivityAlert.name(), currentTimestamp);
-        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
     }
 
     private boolean isShortCutMode() {
