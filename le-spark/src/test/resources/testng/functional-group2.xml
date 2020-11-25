@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="SparkFunctionalTestGroup1">
+<suite name="SparkFunctionalTestGroup2">
     <groups>
         <run>
             <include name="functional"/>
