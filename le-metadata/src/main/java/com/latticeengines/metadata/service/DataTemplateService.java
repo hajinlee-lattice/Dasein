@@ -1,7 +1,6 @@
 package com.latticeengines.metadata.service;
 
 import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 
 public interface DataTemplateService {
 
