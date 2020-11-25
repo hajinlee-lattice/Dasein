@@ -42,6 +42,7 @@ public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkfl
             importDeltaArtifactsFromS3Configuration.setVersion(version);
             generateLaunchUniverseStepConfiguration.setVersion(version);
             generateLaunchArtifactsStepConfiguration.setVersion(version);
+            generateLiveRampLaunchArtifactsStepConfiguration.setVersion(version);
             calculateDeltaStepConfiguration.setVersion(version);
             exportDeltaArtifactsToS3StepConfiguration.setVersion(version);
             return this;
