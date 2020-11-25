@@ -518,7 +518,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         int employeesIndex = headers.indexOf("Total Employees");
         int marketoIndex = headers.indexOf("MarketoAccountID");
         int postalCodeIndex = headers.indexOf("Postal Code");
-        int countryIndex = headers.indexOf("Country");
 
         Assert.assertTrue(companyNameIndex < cityIndex);
         Assert.assertTrue(cityIndex < countryIndex);
