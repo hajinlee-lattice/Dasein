@@ -409,7 +409,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         createPlayLaunchChannel(outreachChannel, registerOutreachLookupIdMap());
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(externalSystemName);
-        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, outreachChannel);
         log.info(JsonUtils.serialize(columnMetadata));
 
         // ProspectOwner + AccountID + 3 mapped fields
@@ -435,7 +435,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         createPlayLaunchChannel(outreachChannel, registerOutreachLookupIdMap());
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(externalSystemName);
-        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, outreachChannel);
         log.info(JsonUtils.serialize(columnMetadata));
 
         // ProspectOwner + AccountID + AccountName
@@ -621,8 +621,8 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         fieldMapping_3.setDestinationField("phone");
         fieldMapping_3.setOverwriteValue(false);
 
-        lookupIdMap.setProspectOwner("SDR_Email");
-        lookupIdMap.setAccountId("SFDC_ACCOUNT_ID");
+        lookupIdMap.setProspectOwner(InterfaceName.Website.name());
+        lookupIdMap.setAccountId(InterfaceName.AccountId.name());
         lookupIdMap.setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2, fieldMapping_3));
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
 

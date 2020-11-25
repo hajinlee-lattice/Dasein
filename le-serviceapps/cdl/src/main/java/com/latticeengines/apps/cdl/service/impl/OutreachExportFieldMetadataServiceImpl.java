@@ -66,7 +66,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
         // Add enriched fields for prospectOwner and accountId and update displayName
         String prospectOwner = channel.getLookupIdMap().getProspectOwner();
-        log.info("Outreach account owner " + prospectOwner);
+        log.info("Outreach account owner: " + prospectOwner);
         if (StringUtils.isNotBlank(prospectOwner) && accountAttributesMap.containsKey(prospectOwner)) {
             ColumnMetadata prospectOwnerColumnMetadata = accountAttributesMap.get(prospectOwner);
             prospectOwnerColumnMetadata.setDisplayName(TRAY_PROSPECT_OWNER_COLUMN_NAME);
@@ -77,7 +77,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
         }
 
         String lookupId = channel.getLookupIdMap().getAccountId();
-        log.info("Outreach account owner " + lookupId);
+        log.info("Outreach account ID: " + lookupId);
         if (StringUtils.isNotBlank(lookupId) && accountAttributesMap.containsKey(lookupId)) {
             ColumnMetadata lookupIdColumnMetadata = accountAttributesMap.get(lookupId);
             lookupIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
