@@ -408,7 +408,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         outreachChannel.setAudienceType(audienceType);
         createPlayLaunchChannel(outreachChannel, registerOutreachLookupIdMap());
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
-                .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
+                .getExportFieldMetadataService(externalSystemName);
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
