@@ -131,7 +131,7 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
 
     protected void postMatchProcessing(List<MatchCommand> commandList) {
         String customer = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
-        String finalResultTable = NamingUtils.timestamp("DataFeedImportMatchResult");
+        String finalResultTable = NamingUtils.timestampWithRandom("DataFeedImportMatchResult");
 
         bulkMatchService.registerResultTable(customer, commandList, finalResultTable);
         saveOutputValue(WorkflowContextConstants.Outputs.MATCH_RESULT_TABLE_NAME, finalResultTable);
