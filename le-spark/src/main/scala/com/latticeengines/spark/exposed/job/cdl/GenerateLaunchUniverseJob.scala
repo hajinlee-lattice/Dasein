@@ -27,7 +27,7 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     var trimmedData = input
 
     if (maxContactsPerAccount != null) {
-      trimmedData = limitContactsPerAccount(trimmedData, accountId, sortAttr, sortDir, maxContactsPerAccount)
+      trimmedData = limitContactsPerAccount(trimmedData, accountId, contactId, sortAttr, sortDir, maxContactsPerAccount)
     }
 
     if (maxEntitiesToLaunch != null) {
@@ -37,7 +37,9 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     lattice.output = List(trimmedData)
   }
 
-  def limitContactsPerAccount(trimmedData: DataFrame, accountId: String, sortAttr: String, sortDir: String, maxContactsPerAccount: Long): DataFrame = {
+  def limitContactsPerAccount(trimmedData: DataFrame, accountId: String, contactId: String,
+        sortAttr: String, sortDir: String, maxContactsPerAccount: Long): DataFrame = {
+
     val rowNumber = "rowNumber"
     var w = Window.partitionBy(accountId)
 

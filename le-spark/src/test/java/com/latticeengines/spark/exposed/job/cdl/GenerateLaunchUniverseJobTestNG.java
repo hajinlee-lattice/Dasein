@@ -78,6 +78,23 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
         log.info("TestGenerateLaunchUniverseJobBothLimits Results: " + JsonUtils.serialize(result));
 
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 13);
+    }
+
+    @Test(groups = "functional")
+    public void testGenerateLaunchUniverseJobColumnNotFound() throws Exception {
+        // When sort column is not found, use ContactId to sort
+        GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig();
+        config.setWorkspace("testGenerateLaunchUniverseJobBothLimits");
+
+        config.setMaxContactsPerAccount(2L);
+        config.setContactsPerAccountSortAttribute("Unknown Column");
+        config.setContactsPerAccountSortDirection(DESC);
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateLaunchUniverseJob.class, config);
+        log.info("TestGenerateLaunchUniverseJobColumnNotFound Results: " + JsonUtils.serialize(result));
+
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 16);
 
     }
 
