@@ -81,7 +81,7 @@ public class ActivityTimelineMetrics implements Serializable {
         Newengagements("New Engagements") {
             @Override
             public String getContext(Integer days) {
-                return String.format("Total number of engagements in the last in the last %d days", days);
+                return String.format("Total number of engagements in the last %d days", days);
             }
         },
         NewOpportunities("New Opportunities") {
@@ -93,7 +93,7 @@ public class ActivityTimelineMetrics implements Serializable {
         AccountIntent("Account Intent") {
             @Override
             public String getContext(Integer days) {
-                return String.format("Acount level Intent in the last %d days", days);
+                return "Acount-level Intent - {X}";
             }
         };
 
