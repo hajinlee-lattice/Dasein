@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -24,12 +23,12 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.dashboard.Dashboard;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilterValue;
@@ -37,7 +36,7 @@ import com.latticeengines.domain.exposed.cdl.dashboard.DashboardResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
-import com.latticeengines.pls.util.ElasticSearchUtil;
+import com.latticeengines.pls.util.ElasticSearchUtils;
 import com.latticeengines.proxy.exposed.cdl.DashboardProxy;
 
 @Component("dashboardService")
@@ -61,12 +60,13 @@ public class DashboardServiceImpl implements DashboardService {
     private static final String COMPANY_LABEL_PLACEHOLDER = "<PANEL_COMPANY_LABEL_ID>";
     private static final String PAGE_GROUP_PLACEHOLDER = "<PANEL_PAGE_GROUP_ID>";
     private static final String KIBANA_URL_PLACEHOLDER = "<KIBANA_URL>";
-    private static final String DASHBOARD_URL_TIME_FILTER_PLACEHOLDER = "<TIME_FILTER>";
     private static final String DASHBOARD_URL_OTHER_FILTER_PLACEHOLDER = "<OTHER_FILTER>";
     private static final String DASHBOARD_URL_ID_PLACEHOLDER = "<DASHBOARD_ID>";
     private static final String DASHBOARD_NAME_PLACEHOLDER = "<DASHBOARD_NAME>";
 
     private static final String PATH_PREFIX = "com/latticeengines/pls/kibanaitems/%s";
+
+    private static final int MAX_RETRY = 3;
 
     @Inject
     private RestHighLevelClient client;
@@ -79,6 +79,7 @@ public class DashboardServiceImpl implements DashboardService {
     //indexPatternName need using esIndexName or esIndexNamePrefix(Regular expression)
     private String indexPatternName;
     private String indexPatternId;
+    private String jsonFile;
 
     private List<String> dashboardNameList = Arrays.asList("employee", "industry", "location", "overview", "page",
             "page_group", "revenue");
@@ -139,23 +140,32 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private void createIndexPattern(String esIndexName) {
-        String json = "";
+        jsonFile = "";
         try (InputStream inputStream =
                      getClass().getClassLoader().getResourceAsStream(String.format(PATH_PREFIX, "data_index_pattern" +
                              ".json"))) {
-            json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-            log.info("json is {}", json);
+            jsonFile = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read data_index_pattern", exception);
         }
-        log.info("file is {}", json);
+        log.info("indexPatternJson is {}, indexName is {}.", jsonFile, esIndexName);
         indexPatternName = esIndexName;
         indexPatternId = UuidUtil.getTimeBasedUuid().toString();
-        log.info("indexPatternId is {}.", indexPatternId);
+        log.info("indexPatternId is {}, indexName is {}.", indexPatternId, esIndexName);
 
-        json = json.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER, getDate());
-        log.info("replaced json is {}.", json);
-        ElasticSearchUtil.createDocument(client, kibanaIndex, String.format("%s%s", INDEX_PATTERN_PREFIX, indexPatternId), json);
+        jsonFile = jsonFile.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER,
+                getDate());
+        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
+        try {retry.execute(context -> {
+
+                ElasticSearchUtils.createDocument(client, kibanaIndex, String.format("%s%s", INDEX_PATTERN_PREFIX,
+                        indexPatternId), jsonFile);
+                return 0;
+            });
+        } catch (IOException e) {
+            log.error(String.format("Failed to create index-pattern %s", String.format("%s%s", INDEX_PATTERN_PREFIX,
+                    indexPatternId)), e);
+        }
     }
 
 
@@ -163,13 +173,16 @@ public class DashboardServiceImpl implements DashboardService {
     private void createVisualization(String namePrefix) {
         companyVisualizationMap = new HashMap<>();
         dashboardVisualizationMap = new HashMap<>();
+        //visualization doc id->JsonString
+        Map<String, String> visualizationJsonFileMap = new HashMap<>();
         String companyLabelFilePath = String.format(PATH_PREFIX, "panel_company_label.json");
         companyVisualizationMap.put(COMPANY_LABEL_PLACEHOLDER, createVisualization(namePrefix,
-                companyLabelFilePath));
+                companyLabelFilePath, visualizationJsonFileMap));
         String companyTableFilePath = String.format(PATH_PREFIX, "panel_company_table.json");
-        companyVisualizationMap.put(COMPANY_TABLE_PLACEHOLDER, createVisualization(namePrefix, companyTableFilePath));
+        companyVisualizationMap.put(COMPANY_TABLE_PLACEHOLDER, createVisualization(namePrefix, companyTableFilePath,
+                visualizationJsonFileMap));
         String pageGroupFilePath = String.format(PATH_PREFIX, "panel_page_group.json");
-        companyVisualizationMap.put(PAGE_GROUP_PLACEHOLDER, createVisualization(namePrefix, pageGroupFilePath));
+        companyVisualizationMap.put(PAGE_GROUP_PLACEHOLDER, createVisualization(namePrefix, pageGroupFilePath, visualizationJsonFileMap));
         for (String dashboardName : dashboardNameList) {
             Map<String, String> visualizationMap = new HashMap<>();
             String panelPath = String.format(PATH_PREFIX, String.format(PANEL_DIR_PATH, dashboardName));
@@ -177,78 +190,99 @@ public class DashboardServiceImpl implements DashboardService {
             String fileJson;
             try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(panelPath)) {
                 fileJson = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-                log.info("fileJson is {}", fileJson);
+                log.info("panel List is {}", fileJson);
                 String[] files = fileJson.split("\n");
                 for (String file : files) {
                     String filePath = String.format("%s%s", panelPath, file);
                     String number = Pattern.compile("[^0-9]").matcher(file).replaceAll("");
                     log.info("panel id is {}", number);
                     visualizationMap.put(String.format(PANEL_ID_PLACEHOLDER, number), createVisualization(namePrefix,
-                            filePath));
+                            filePath, visualizationJsonFileMap));
                 }
                 dashboardVisualizationMap.put(dashboardName, visualizationMap);
             } catch (IOException exception) {
                 throw new LedpException(LedpCode.LEDP_00002, "Can't read visualization", exception);
             }
         }
+        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
+        try {retry.execute(context -> {
+            ElasticSearchUtils.createDocuments(client, kibanaIndex, visualizationJsonFileMap);
+            return 0;
+        });
+        } catch (IOException e) {
+            log.error(String.format("Failed to create visualization documents, namePrefix is %s.", namePrefix), e);
+            throw new IllegalStateException(String.format("Failed to create visualization documents, namePrefix is %s.", namePrefix));
+        }
     }
 
     private void createDashboard(String namePrefix) {
         dashboardIdMap = new HashMap<>();
         dashboardRealNameMap = new HashMap<>();
+        //dashboard doc id -> dashboard json file.
+        Map<String, String> dashboardFileMap = new HashMap<>();
         for (String dashboardName : dashboardNameList) {
-            dashboardIdMap.put(dashboardName, createDashboard(namePrefix, dashboardName));
+            dashboardIdMap.put(dashboardName, createDashboard(namePrefix, dashboardName, dashboardFileMap));
+        }
+        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
+        try {retry.execute(context -> {
+            ElasticSearchUtils.createDocuments(client, kibanaIndex, dashboardFileMap);
+            return 0;
+        });
+        } catch (IOException e) {
+            log.error(String.format("Failed to create dashboards, namePrefix is %s.", namePrefix), e);
+            throw new IllegalStateException(String.format("Failed to create dashboards, namePrefix is %s.",
+                    namePrefix));
         }
     }
 
-    private String createVisualization(String namePrefix, String filePath) {
+    private String createVisualization(String namePrefix, String filePath, Map<String, String> visualizationFiles) {
         if (StringUtils.isEmpty(indexPatternName) || StringUtils.isEmpty(filePath)) {
             return "";
         }
-        log.info("json file path is {}.", filePath);
-        String json = "";
+        log.info("visualization file path is {}.", filePath);
+        jsonFile = "";
         try (InputStream inputStream =
                      getClass().getClassLoader().getResourceAsStream(filePath)) {
-            json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
+            jsonFile = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read panel file", exception);
         }
         String visualizationId = UuidUtil.getTimeBasedUuid().toString();
         log.info("visualizationId is {}.", visualizationId);
-        json = json.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).
+        jsonFile = jsonFile.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).
                 replace(INDEX_PATTERN_ID_PLACEHOLDER, indexPatternId)
                 .replace(CREATE_TIME_PLACEHOLDER, getDate()).replace(NAME_PLACEHOLDER, namePrefix);
-        log.info("visualization details is {}", json);
-        ElasticSearchUtil.createDocument(client, kibanaIndex, String.format("%s%s", VISUALIZATION_PREFIX, visualizationId), json);
+        log.info("visualization details is {}", jsonFile);
+        visualizationFiles.put(String.format("%s%s", VISUALIZATION_PREFIX, visualizationId), jsonFile);
         return visualizationId;
     }
 
-    private String createDashboard(String namePrefix, String dashboardName) {
+    private String createDashboard(String namePrefix, String dashboardName, Map<String, String> dashboardFileMap) {
         String dashboardFilePath = String.format(PATH_PREFIX, String.format(DASHBOARD_JSONFILE_SUFFIX, dashboardName));
         Map<String, String> dashboardRelatedVisualizationMap = dashboardVisualizationMap.get(dashboardName);
         if (MapUtils.isEmpty(dashboardRelatedVisualizationMap)) {
             return "";
         }
-        String json = "";
+        jsonFile = "";
         try (InputStream inputStream =
                      getClass().getClassLoader().getResourceAsStream(dashboardFilePath)) {
-            json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
+            jsonFile = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read dashboard", exception);
         }
         String dashboardRealName = String.format("%s_%s", namePrefix, dashboardName);
         String dashboardId = UuidUtil.getTimeBasedUuid().toString();
         log.info("dashboardId is {}.", dashboardId);
-        json = json.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER,
+        jsonFile = jsonFile.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER,
                 getDate()).replace(DASHBOARD_NAME_PLACEHOLDER, dashboardRealName)
                 .replace(COMPANY_LABEL_PLACEHOLDER, companyVisualizationMap.get(COMPANY_LABEL_PLACEHOLDER))
                 .replace(COMPANY_TABLE_PLACEHOLDER, companyVisualizationMap.get(COMPANY_TABLE_PLACEHOLDER))
                 .replace(PAGE_GROUP_PLACEHOLDER, companyVisualizationMap.get(PAGE_GROUP_PLACEHOLDER));
         for (Map.Entry<String, String> entry : dashboardRelatedVisualizationMap.entrySet()) {
-            json = json.replace(entry.getKey(), entry.getValue());
+            jsonFile = jsonFile.replace(entry.getKey(), entry.getValue());
         }
-        log.info("Dashboard is {}", json);
-        ElasticSearchUtil.createDocument(client, kibanaIndex, String.format("%s%s", DASHBOARD_PREFIX, dashboardId), json);
+        log.info("Dashboard is {}", jsonFile);
+        dashboardFileMap.put(String.format("%s%s", DASHBOARD_PREFIX, dashboardId), jsonFile);
         dashboardRealNameMap.put(dashboardName, dashboardRealName);
         return dashboardId;
     }
