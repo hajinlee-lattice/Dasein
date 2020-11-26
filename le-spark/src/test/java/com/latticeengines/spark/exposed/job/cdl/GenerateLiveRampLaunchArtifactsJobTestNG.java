@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLiveRampLaunchArtifactsJobConfig;
-import com.latticeengines.spark.exposed.job.cdl.GenerateLiveRampLaunchArtifactsJob;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class GenerateLiveRampLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBase {
@@ -50,6 +49,7 @@ public class GenerateLiveRampLaunchArtifactsJobTestNG extends SparkJobFunctional
     private static Long ONE_DUPLICATE_EXPECTED = 499L;
     private static Long MANY_DUPLICATE_EXPECTED = 464L;
     private static Long MANY_DIFF_DUPLICATE_EXPECTED = 50L;
+    private static Long ZERO_EXPECTED = 0L;
 
     @Override
     @BeforeClass(groups = "functional")
@@ -208,7 +208,7 @@ public class GenerateLiveRampLaunchArtifactsJobTestNG extends SparkJobFunctional
 
         Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount(), expectedAddContacts);
-        Assert.assertEquals(result.getTargets().get(1).getCount(), new Long(0L));
+        Assert.assertEquals(result.getTargets().get(1).getCount(), ZERO_EXPECTED);
     }
 
     @Test(groups = "functional")
@@ -224,7 +224,7 @@ public class GenerateLiveRampLaunchArtifactsJobTestNG extends SparkJobFunctional
         log.info("Results: " + JsonUtils.serialize(result));
 
         Assert.assertEquals(result.getTargets().size(), 2);
-        Assert.assertEquals(result.getTargets().get(0).getCount(), new Long(0L));
+        Assert.assertEquals(result.getTargets().get(0).getCount(), ZERO_EXPECTED);
         Assert.assertEquals(result.getTargets().get(1).getCount(), expectedRemoveContacts);
     }
 
@@ -239,8 +239,8 @@ public class GenerateLiveRampLaunchArtifactsJobTestNG extends SparkJobFunctional
         log.info("Results: " + JsonUtils.serialize(result));
 
         Assert.assertEquals(result.getTargets().size(), 2);
-        Assert.assertEquals(result.getTargets().get(0).getCount(), new Long(0L));
-        Assert.assertEquals(result.getTargets().get(1).getCount(), new Long(0L));
+        Assert.assertEquals(result.getTargets().get(0).getCount(), ZERO_EXPECTED);
+        Assert.assertEquals(result.getTargets().get(1).getCount(), ZERO_EXPECTED);
     }
 
     interface AvroExportable {
