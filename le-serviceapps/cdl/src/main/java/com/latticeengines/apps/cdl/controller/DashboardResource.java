@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "dashboard", description = "REST resource for dashboard management")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/vireports/dashboard")
+@RequestMapping("/customerspaces/{customerSpace}/vireports/dashboards")
 public class DashboardResource {
 
     @Inject

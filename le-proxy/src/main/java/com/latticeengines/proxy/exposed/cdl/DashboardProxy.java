@@ -24,24 +24,28 @@ public class DashboardProxy extends MicroserviceRestApiProxy implements ProxyInt
     }
 
     public Dashboard createDashboard(String customerSpace, Dashboard dashboard) {
-        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboard", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboards",
+                shortenCustomerSpace(customerSpace));
         return post("create dashboard", url, dashboard, Dashboard.class);
     }
 
     public void createDashboardList(String customerSpace, List<Dashboard> dashboardList) {
-        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboard/createList", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboards/createList",
+                shortenCustomerSpace(customerSpace));
         post("create dashboard list", url, dashboardList);
     }
 
     public List<Dashboard> getDashboards(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboard", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboards",
+                shortenCustomerSpace(customerSpace));
         List<?> dashboardList = get("get all dashboard", url, List.class);
         return JsonUtils.convertList(dashboardList, Dashboard.class);
     }
 
     public List<DashboardFilter> getDashboardFilters(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboard/filters", shortenCustomerSpace(customerSpace));
-        List<?> dashboardFilterList = get("get all dashboardfilter", url, List.class);
+        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboards/filters",
+                shortenCustomerSpace(customerSpace));
+        List<?> dashboardFilterList = get("get all dashboard filter", url, List.class);
         return JsonUtils.convertList(dashboardFilterList, DashboardFilter.class);
     }
 }
