@@ -237,7 +237,7 @@
       "externalSystemName": "Outreach",
       "standardField": true,
       "exportEnabled": true,
-      "audienceType": ["ACCOUNTS", "CONTACTS"]
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName": "Email",
@@ -367,6 +367,6 @@
       "externalSystemName": "Outreach",
       "standardField": false,
       "exportEnabled": true,
-      "audienceType": ["ACCOUNTS", "CONTACTS"]
+      "audienceType": ["CONTACTS"]
    }
 ]

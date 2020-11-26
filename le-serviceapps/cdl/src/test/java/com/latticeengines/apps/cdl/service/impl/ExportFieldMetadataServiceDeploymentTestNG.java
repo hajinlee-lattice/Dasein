@@ -432,14 +432,14 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         AudienceType audienceType = AudienceType.ACCOUNTS;
         OutreachChannelConfig outreachChannel = new OutreachChannelConfig();
         outreachChannel.setAudienceType(audienceType);
-        createPlayLaunchChannel(outreachChannel, registerOutreachLookupIdMap());
+        createPlayLaunchChannel(outreachChannel, registerOutreachAccountLookupIdMap());
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(externalSystemName);
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        // ProspectOwner + AccountID + AccountName
-        assertEquals(columnMetadata.size(), 3);
+        // Account Name
+        assertEquals(columnMetadata.size(), 1);
 
         List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
 
@@ -624,6 +624,18 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         lookupIdMap.setProspectOwner(InterfaceName.Website.name());
         lookupIdMap.setAccountId(InterfaceName.AccountId.name());
         lookupIdMap.setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2, fieldMapping_3));
+        lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
+
+        return lookupIdMap;
+    }
+
+    private LookupIdMap registerOutreachAccountLookupIdMap() {
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setTenant(mainTestTenant);
+        lookupIdMap.setExternalSystemType(CDLExternalSystemType.MAP);
+        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Outreach);
+        lookupIdMap.setOrgId(org2 + "outreach");
+        lookupIdMap.setOrgName("org2nameOutreach");
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
 
         return lookupIdMap;
