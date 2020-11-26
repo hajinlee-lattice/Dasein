@@ -112,7 +112,6 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         }
 
         updateLaunchUniverse(playLaunch.getLaunchState(), launchId);
-        playLaunch.setTapType(playLaunch.getPlay().getTapType());
         playLaunchService.update(playLaunch);
     }
 

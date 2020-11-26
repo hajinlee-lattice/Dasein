@@ -468,7 +468,6 @@ public class PlayResource {
         playLaunch.setPlay(play);
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setTenantId(MultiTenantContext.getTenant().getPid());
-        playLaunch.setTapType(play.getTapType());
         return playLaunchService.update(playLaunch);
     }
 
@@ -529,7 +528,6 @@ public class PlayResource {
         playLaunch.setContactsSuppressed(
                 playLaunch.getContactsSuppressed() != null ? playLaunch.getContactsSuppressed() : 0L);
         playLaunch.setContactsErrored(playLaunch.getContactsErrored() != null ? playLaunch.getContactsErrored() : 0L);
-        playLaunch.setTapType(play.getTapType());
         playLaunchService.update(playLaunch);
         return workflowPid;
     }
@@ -631,16 +629,11 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
             @PathVariable("action") LaunchState action) {
-        Play play = playService.getPlayByName(playName, false);
-        if (play == null) {
-            log.error("Invalid playName: " + playName);
-            throw new LedpException(LedpCode.LEDP_18151, new String[]{playName});
-        }
+        getPlayId(playName);
         PlayLaunch existingPlayLaunch = playLaunchService.findByLaunchId(launchId, false);
         if (existingPlayLaunch != null) {
             if (LaunchState.canTransit(existingPlayLaunch.getLaunchState(), action)) {
                 existingPlayLaunch.setLaunchState(action);
-                existingPlayLaunch.setTapType(play.getTapType());
                 return playLaunchService.update(existingPlayLaunch);
             } else {
                 log.error(String.format("Cannot change state for Launch:%s from %s to %s", launchId,

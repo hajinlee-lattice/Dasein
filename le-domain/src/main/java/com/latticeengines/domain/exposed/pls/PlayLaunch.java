@@ -338,10 +338,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "DELETE_RECOMMENDATIONS_TABLE_NAME")
     private String deleteRecommendationsTable;
 
-    @Transient
     @JsonProperty("tapType")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TAP_TYPE")
     private Play.TapType tapType;
-
     public PlayLaunch() {
     }
 
@@ -995,6 +995,9 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
         if (StringUtils.isNotBlank(playLaunch.getUpdatedBy())) {
             this.setUpdatedBy(playLaunch.getUpdatedBy());
+        }
+        if (playLaunch.getTapType() != null) {
+            this.setTapType(playLaunch.getTapType());
         }
     }
 
