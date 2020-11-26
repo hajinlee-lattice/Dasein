@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "dashboard", description = "REST resource for dashboard management")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/dashboard")
+@RequestMapping("/customerspaces/{customerSpace}/vireports/dashboard")
 public class DashboardResource {
 
     @Inject
@@ -37,7 +37,7 @@ public class DashboardResource {
         return dashboardService.findAllByTenant(customerSpace);
     }
 
-    @GetMapping("/getFilter")
+    @GetMapping("/filters")
     @ResponseBody
     @ApiOperation("Get all DashboardFilter under current tenant")
     public List<DashboardFilter> getDashboardFilters(@PathVariable(value = "customerSpace") String customerSpace) {
