@@ -416,6 +416,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         assertEquals(columnMetadata.size(), 5);
 
         List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        log.info(JsonUtils.serialize(attrNames));
 
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFields, 0);
@@ -430,9 +431,11 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
         CDLExternalSystemName externalSystemName = CDLExternalSystemName.Outreach;
         AudienceType audienceType = AudienceType.ACCOUNTS;
+        registerLookupIdMap(CDLExternalSystemType.MAP, externalSystemName, "Outreach");
+
         OutreachChannelConfig outreachChannel = new OutreachChannelConfig();
         outreachChannel.setAudienceType(audienceType);
-        createPlayLaunchChannel(outreachChannel, registerOutreachAccountLookupIdMap());
+        createPlayLaunchChannel(outreachChannel, lookupIdMap);
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(externalSystemName);
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
@@ -442,6 +445,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         assertEquals(columnMetadata.size(), 1);
 
         List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
+        log.info(JsonUtils.serialize(attrNames));
 
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFields, 0);
@@ -624,18 +628,6 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         lookupIdMap.setProspectOwner(InterfaceName.Website.name());
         lookupIdMap.setAccountId(InterfaceName.AccountId.name());
         lookupIdMap.setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2, fieldMapping_3));
-        lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
-
-        return lookupIdMap;
-    }
-
-    private LookupIdMap registerOutreachAccountLookupIdMap() {
-        LookupIdMap lookupIdMap = new LookupIdMap();
-        lookupIdMap.setTenant(mainTestTenant);
-        lookupIdMap.setExternalSystemType(CDLExternalSystemType.MAP);
-        lookupIdMap.setExternalSystemName(CDLExternalSystemName.Outreach);
-        lookupIdMap.setOrgId(org2 + "outreach");
-        lookupIdMap.setOrgName("org2nameOutreach");
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
 
         return lookupIdMap;

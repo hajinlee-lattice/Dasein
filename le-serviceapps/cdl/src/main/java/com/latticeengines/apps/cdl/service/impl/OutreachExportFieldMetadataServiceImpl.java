@@ -56,15 +56,9 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
                     contactAttributesMap);
         }
 
-        exportColumnMetadataList = addOwnerAndLookupId(channel, exportColumnMetadataList, accountAttributesMap);
-
-        return exportColumnMetadataList;
-    }
-
-    private List<ColumnMetadata> addOwnerAndLookupId(PlayLaunchChannel channel, List<ColumnMetadata> exportColumnMetadataList,
-            Map<String, ColumnMetadata> accountAttributesMap) {
-
-        // Add enriched fields for prospectOwner and accountId and update displayName
+        // Retrieves enriched fields for prospect owner and account Id and	        exportColumnMetadataList = addOwnerAndLookupId(channel, exportColumnMetadataList, accountAttributesMap);
+        // update	
+        // displayName
         String prospectOwner = channel.getLookupIdMap().getProspectOwner();
         log.info("Outreach account owner: " + prospectOwner);
         if (StringUtils.isNotBlank(prospectOwner) && accountAttributesMap.containsKey(prospectOwner)) {
