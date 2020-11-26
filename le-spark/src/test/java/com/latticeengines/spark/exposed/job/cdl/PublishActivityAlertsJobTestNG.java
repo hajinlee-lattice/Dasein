@@ -119,7 +119,6 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
             Assert.assertEquals(alertTypeCounts.get(ActivityStoreConstants.Alert.ANONYMOUS_WEB_VISITS).intValue(), 4);
             Assert.assertEquals(alertTypeCounts.get(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY).intValue(), 1);
         } catch (Exception e) {
-            e.printStackTrace();
             Assert.fail("Failed to verify\n" + e.getMessage());
         }
     }
