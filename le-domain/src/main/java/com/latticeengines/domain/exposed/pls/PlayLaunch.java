@@ -418,13 +418,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     }
 
     public void setLaunchState(LaunchState launchState) {
-        if (LaunchState.Synced.equals(launchState)) {
-            try {
-                throw new RuntimeException();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
         this.launchState = launchState;
     }
 
