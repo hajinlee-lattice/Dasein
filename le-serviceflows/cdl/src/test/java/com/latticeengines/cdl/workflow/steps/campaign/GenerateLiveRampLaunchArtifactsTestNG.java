@@ -89,6 +89,7 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
     private static final Integer MATCHED_ADD_ACCOUNTS_ROWS = 123;
     private static final Integer MATCHED_REMOVED_ACCOUNTS_ROWS = 321;
     private static final String FAKE_EXECUTION_ID = "1234321";
+    private static Long ZERO_EXPECTED = 0L;
 
     @BeforeClass(groups = "functional")
     public void setupTest() throws Exception {
@@ -215,7 +216,7 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE),
                 Long.valueOf(MATCHED_ADD_ACCOUNTS_ROWS));
         Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE),
-                new Long(0L));
+                ZERO_EXPECTED);
     }
 
     private void setupMockitoForOnlyAdd() {
@@ -263,7 +264,7 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
 
         log.info(counts.toString());
         Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE),
-                new Long(0L));
+                ZERO_EXPECTED);
         Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE),
                 Long.valueOf(MATCHED_REMOVED_ACCOUNTS_ROWS));
     }
@@ -306,9 +307,9 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         log.info(String.format("Table %s was not created", removedContactsDeltaTable));
 
         log.info(counts.toString());
-        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE), new Long(0L));
+        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE), ZERO_EXPECTED);
         Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE),
-                new Long(0L));
+                ZERO_EXPECTED);
     }
 
     @AfterClass(groups = "functional")
