@@ -31,7 +31,7 @@ public class ExportStartedWorkflowStatusHandler implements WorkflowStatusHandler
 
         checkStatusMonitorExists(statusMonitor, status);
 
-        updateMonitoringStatus(statusMoniteor, DataIntegrationEventType.ExportStart.toString());
+        updateMonitoringStatus(statusMonitor, DataIntegrationEventType.ExportStart.toString());
 
         if (statusMonitor.getStatus().equals(DataIntegrationEventType.ExportStart.toString())) {
 
