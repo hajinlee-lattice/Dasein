@@ -342,6 +342,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Enumerated(EnumType.STRING)
     @Column(name = "TAP_TYPE")
     private Play.TapType tapType;
+    
     public PlayLaunch() {
     }
 
