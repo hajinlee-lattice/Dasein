@@ -86,7 +86,7 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         Assert.assertNotNull(dataFeedTaskId);
 
         // check if length attribute is stored in datafeedtask
-        Assert.assertTrue(assertAttributeInDataFeedTask(dataFeedTaskId, importSystem.getAccountSystemId(), 18, true));
+        Assert.assertTrue(assertAttributeInDataFeedTask(dataFeedTaskId, importSystem.getAccountSystemId(), 18, false));
 
         startCDLImport(sourceFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
 
