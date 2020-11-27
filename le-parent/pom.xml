@@ -197,6 +197,11 @@
         <commons.lang.version>2.6</commons.lang.version>
         <commons.logging.version>1.2</commons.logging.version>
 
+        <!-- elasticsearch -->
+        <elasticsearch.hadoop.version>7.9.1</elasticsearch.hadoop.version>
+        <elasticsearch.netty.version>7.9.1</elasticsearch.netty.version>
+        <elasticsearch.client.version>7.9.1</elasticsearch.client.version>
+
         <!-- parameters: can be overwritten in child projects -->
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
         <deployment.classes.include>**/*DeploymentTestNG.java</deployment.classes.include>

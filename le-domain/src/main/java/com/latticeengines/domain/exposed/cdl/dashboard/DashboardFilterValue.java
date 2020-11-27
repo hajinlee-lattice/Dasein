@@ -1,8 +1,18 @@
 package com.latticeengines.domain.exposed.cdl.dashboard;
 
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DashboardFilterValue {
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class DashboardFilterValue implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     @JsonProperty("display_name")
     private String displayName;
