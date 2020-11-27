@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 
 public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -90,6 +91,17 @@ public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkfl
         public CampaignDeltaCalculationWorkflowConfiguration.Builder inputProperties(
                 Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
+            return this;
+        }
+
+        public CampaignDeltaCalculationWorkflowConfiguration.Builder tapType(Play.TapType tapType) {
+            if (Play.TapType.ListSegment.equals(tapType)) {
+                importDeltaArtifactsFromS3Configuration.setSkipStep(true);
+                generateLaunchUniverseStepConfiguration.setSkipStep(true);
+                generateLaunchArtifactsStepConfiguration.setSkipStep(true);
+                generateLiveRampLaunchArtifactsStepConfiguration.setSkipStep(true);
+                exportDeltaArtifactsToS3StepConfiguration.setSkipStep(true);
+            }
             return this;
         }
 

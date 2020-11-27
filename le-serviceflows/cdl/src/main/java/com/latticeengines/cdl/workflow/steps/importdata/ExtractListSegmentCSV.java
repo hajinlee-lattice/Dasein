@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnField;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MasterSchema;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
@@ -65,7 +66,7 @@ public class ExtractListSegmentCSV
             InterfaceName.Website.name(), InterfaceName.Industry.name(), "user_us_8_digit_sic_code",
             InterfaceName.AccountId.name(), "user_employees", "user_direct_marketing_status");
 
-    private final List<String> contactAttributes = Lists.newArrayList("SFDC_CONTACT_ID", InterfaceName.ContactName.name(),
+    private final List<String> contactAttributes = Lists.newArrayList(InterfaceName.AccountId.name(), "SFDC_CONTACT_ID", InterfaceName.ContactName.name(),
             InterfaceName.Contact_Address_Street_1.name(), InterfaceName.Contact_Address_Street_2.name(),
             InterfaceName.ContactCity.name(), InterfaceName.ContactState.name(), InterfaceName.ContactCountry.name(),
             InterfaceName.Email.name(), InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
@@ -103,7 +104,6 @@ public class ExtractListSegmentCSV
                 processImportResult(BusinessEntity.Account, accountDataUnit, ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME);
                 HdfsDataUnit contactUnit = result.getTargets().get(1);
                 processImportResult(BusinessEntity.Contact, contactUnit, ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME);
-
                 //update segment count
                 metadataSegment = segmentProxy.getListSegmentByName(tenantId, segmentName);
                 metadataSegment.setAccounts(accountDataUnit.getCount());
@@ -153,7 +153,7 @@ public class ExtractListSegmentCSV
             log.info(ex.getMessage());
             throw new RuntimeException("Did not find any parquet files under folder " + path + ".");
         }
-        masterSchema.setAttributes(attributes);
+        masterSchema.setFields(attributes);
         List<String> primaryKey = new ArrayList<>();
         if (entity != null && entity == BusinessEntity.Account) {
             primaryKey.add(InterfaceName.AccountId.name());
@@ -164,11 +164,19 @@ public class ExtractListSegmentCSV
         return masterSchema;
     }
 
+    private CreateDataTemplateRequest createRequest(String templateKey, MasterSchema schema) {
+        CreateDataTemplateRequest request = new CreateDataTemplateRequest();
+        request.setTemplateKey(templateKey);
+        DataTemplate dataTemplate = new DataTemplate();
+        dataTemplate.setName(request.getTemplateKey());
+        dataTemplate.setMasterSchema(schema);
+        request.setDataTemplate(dataTemplate);
+        return request;
+    }
+
     private void processImportResult(BusinessEntity entity, HdfsDataUnit hdfsDataUnit, String contextKey) {
         String tenantId = customerSpace.getTenantId();
-        CreateDataTemplateRequest request = new CreateDataTemplateRequest();
-        request.setTemplateKey(entity.name());
-        request.setSchema(getSchema(hdfsDataUnit, entity));
+        CreateDataTemplateRequest request = createRequest(entity.name(), getSchema(hdfsDataUnit, entity));
         String templateId = segmentProxy.createOrUpdateDataTemplate(tenantId, configuration.getSegmentName(), request);
         S3DataUnit s3DataUnit = toS3DataUnit(hdfsDataUnit, entity, templateId,
                 Lists.newArrayList(DataUnit.Role.Master, DataUnit.Role.Snapshot));

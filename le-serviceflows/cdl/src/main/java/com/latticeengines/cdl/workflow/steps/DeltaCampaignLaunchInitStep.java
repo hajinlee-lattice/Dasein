@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
@@ -119,7 +120,7 @@ public class DeltaCampaignLaunchInitStep
         ProcessedFieldMappingMetadata processedFieldMappingMetadata = new ProcessedFieldMappingMetadata();
         frontEndQueryCreator.processFieldMappingMetadataWithExistingRecommendationColumns(
                 playLaunchContext.getFieldMappingMetadata(), processedFieldMappingMetadata);
-
+        Play play = playLaunchContext.getPlay();
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
         log.info("PlayLaunch=" + JsonUtils.serialize(playLaunch));
         String addAccounts = playLaunch.getAddAccountsTable();
@@ -128,7 +129,8 @@ public class DeltaCampaignLaunchInitStep
         String delContacts = playLaunch.getRemoveContactsTable();
         String completeContacts = playLaunch.getCompleteContactsTable();
         List<String> tableNames = Arrays.asList(addAccounts, addContacts, delAccounts, delContacts, completeContacts);
-        List<DataUnit> input = processTableNames(tableNames);
+        boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(play.getTapType());
+        List<DataUnit> input = processTableNames(tableNames, baseOnOtherTapType);
         sparkConfig.setInput(input);
 
         String totalDfs = getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.DATA_FRAME_NUM);
@@ -175,20 +177,8 @@ public class DeltaCampaignLaunchInitStep
     }
 
     @VisibleForTesting
-    List<DataUnit> processTableNames(List<String> tableNames) {
-        return tableNames.stream().map(tableName -> {
-            if (tableName == null) {
-                return null;
-            } else {
-                Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
-                if (table == null) {
-                    throw new RuntimeException("Table " + tableName + " for customer " //
-                            + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
-                            + " does not exists.");
-                }
-                return table.toHdfsDataUnit(tableName);
-            }
-        }).collect(Collectors.toList());
+    List<DataUnit> processTableNames(List<String> tableNames, boolean baseOnOtherTapType) {
+        return tableNames.stream().map(tableName -> getDataUnit(baseOnOtherTapType, customerSpace, tableName)).collect(Collectors.toList());
     }
 
     private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
