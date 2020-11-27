@@ -226,16 +226,20 @@ public class CDLServiceImpl implements CDLService {
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, templateFileName, email);
         String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, true,
                 email, metaData);
+        addAttributeLengthValidatorToTask(customerSpace, templateFileName, taskId);
+        return taskId;
+    }
 
+    private void addAttributeLengthValidatorToTask(String customerSpace, String templateFileName, String taskId) {
         SourceFile sourceFile = sourceFileService.findByName(templateFileName);
         if (sourceFile != null) {
             SourcefileConfig config = sourceFile.getSourcefileConfig();
-            if (config != null) {
-                cdlProxy.addAttributeLengthValidator(customerSpace, taskId, config.getUniqueIdentifierName(),
-                        config.getUniqueIdentifierLength(), !config.isUniqueIdentifierRequired());
+            if (config != null && config.getUniqueIdentifierConfig() != null) {
+                cdlProxy.updateAttributeLengthValidator(customerSpace, taskId,
+                        config.getUniqueIdentifierConfig().getName(), config.getUniqueIdentifierConfig().getLength(),
+                        !config.getUniqueIdentifierConfig().isRequired());
             }
         }
-        return taskId;
     }
 
     @Override

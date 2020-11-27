@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskConfig;
 import com.latticeengines.domain.exposed.metadata.datafeed.validator.AttributeLengthValidator;
 import com.latticeengines.domain.exposed.metadata.datafeed.validator.TemplateValidator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -60,6 +59,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretationFunctionalInterface;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourcefileConfig;
+import com.latticeengines.domain.exposed.pls.UniqueIdentifierConfig;
 import com.latticeengines.domain.exposed.pls.frontend.ExtraFieldMappingInfo;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -208,41 +208,45 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 }
                 setSystemMapping(customerSpace.toString(), systemName, fieldMappingFromTemplate);
             }
+            updateDocumentForDataFeedConfig(dataFeedTask, entity, fieldMappingFromTemplate);
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo,
                     templateTable, table, systemIdSet);
         }
-        resultDocument.setSourcefileConfig(getSourcefileConfig(dataFeedTask, entity));
         EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument,
                 s3ImportSystem);
         return resultDocument;
     }
 
-    private SourcefileConfig getSourcefileConfig(DataFeedTask dataFeedTask, String entity) {
+    private void updateDocumentForDataFeedConfig(DataFeedTask dataFeedTask, String entity,
+                                                 FieldMappingDocument document) {
+        if (StringUtils.isEmpty(entity)) {
+            return;
+        }
         BusinessEntity businessEntity = BusinessEntity.getByName(entity);
-        if(!BusinessEntity.Account.equals(businessEntity) && !BusinessEntity.Contact.equals(businessEntity))
-            return null;
-        SourcefileConfig config = new SourcefileConfig();
-        if (dataFeedTask!=null) {
-            DataFeedTaskConfig dataFeedTaskConfig = dataFeedTask.getDataFeedTaskConfig();
-            if (dataFeedTaskConfig != null) {
-                for (TemplateValidator validator : dataFeedTaskConfig.getTemplateValidators()) {
-                    if (validator instanceof AttributeLengthValidator) {
-                        AttributeLengthValidator lengthValidator = (AttributeLengthValidator) validator;
-                        if (checkAttributeName(lengthValidator.getAttributeName(), businessEntity)) {
-                            config.setUniqueIdentifierLength(lengthValidator.getLength());
-                            config.setUniqueIdentifierRequired(!lengthValidator.getNullable());
-                            config.setUniqueIdentifierName(lengthValidator.getAttributeName());
-                            return config;
+        if ((BusinessEntity.Account.equals(businessEntity) || BusinessEntity.Contact.equals(businessEntity))
+                && dataFeedTask != null && dataFeedTask.getDataFeedTaskConfig() != null) {
+            for (TemplateValidator validator : dataFeedTask.getDataFeedTaskConfig().getTemplateValidators()) {
+                if (validator instanceof AttributeLengthValidator) {
+                    AttributeLengthValidator lengthValidator = (AttributeLengthValidator) validator;
+                    if (checkAttributeName(lengthValidator.getAttributeName(), businessEntity)) {
+                        for (FieldMapping fieldMapping : document.getFieldMappings()) {
+                            if (lengthValidator.getAttributeName().equals(fieldMapping.getMappedField())) {
+                                fieldMapping.setLength(lengthValidator.getLength());
+                                fieldMapping.setRequired(!lengthValidator.getNullable());
+                                return;
+                            }
                         }
+                        return;
                     }
                 }
             }
         }
-        return config;
     }
 
     private boolean checkAttributeName(String name, BusinessEntity entity) {
-        if (BusinessEntity.Account.equals(entity)) {
+        if (StringUtils.isEmpty(name)) {
+            return false;
+        } else if (BusinessEntity.Account.equals(entity)) {
             return name.contains("AccountId");
         } else if (BusinessEntity.Contact.equals(entity)) {
             return name.contains("ContactId");
@@ -531,18 +535,6 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 }
             }
         }
-
-        //check if source file config is valid
-        if (fieldMappingDocument.getSourcefileConfig() != null) {
-            SourcefileConfig config = fieldMappingDocument.getSourcefileConfig();
-            if (config.getUniqueIdentifierLength() < 0) {
-                String message = String.format("The length of unique ID is invalid %d",
-                        config.getUniqueIdentifierLength());
-                FieldValidation validation = createValidation(null, null, ValidationStatus.WARNING, message);
-                validations.add(validation);
-                groupedValidations.get(ValidationCategory.Others).add(validation);
-            }
-        }
         // generate template in memory
         Table generatedTemplate = generateTemplate(sourceFileName, fieldMappingDocument, entity, source, feedType);
         FieldValidationResult fieldValidationResult = new FieldValidationResult();
@@ -607,6 +599,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     mappingKeys.add(key);
                 }
 
+            }
+            // check if length is valid
+            if (!fieldMapping.checkLengthValid()) {
+                String message = String.format("The length of unique ID %d is invalid", fieldMapping.getLength());
+                FieldValidation validation = createValidation(null, null, ValidationStatus.ERROR, message);
+                validations.add(validation);
+                groupedValidations.get(ValidationCategory.Others).add(validation);
             }
         }
     }
@@ -951,6 +950,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         BusinessEntity businessEntity = BusinessEntity.getByName(entity);
         schemaTable = getSchemaTable(customerSpace, businessEntity, feedType, withoutId);
         S3ImportSystem defaultSystem = cdlService.getDefaultImportSystem(customerSpace.toString());
+        /*
+         * store fieldmappings with idtype matched. Regulatefiledmapping function may
+         * delete idtype with length and required info returned by UI
+         */
+        List<FieldMapping> fieldMappingsWithIdtype = fieldMappingDocument.getFieldMappings().stream()
+                .filter(f -> idTypeMatchEntity(f, businessEntity)).collect(Collectors.toList());
         if (dataFeedTask == null) {
             table = TableUtils.clone(schemaTable, schemaTable.getName());
             EntityMatchGAConverterUtils.setSystemIdForGATenant(enableEntityMatch, enableEntityMatchGA,
@@ -969,6 +974,75 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
         resolveMetadata(sourceFile, fieldMappingDocument, table, true, schemaTable, BusinessEntity.getByName(entity));
+        if (BusinessEntity.Account.equals(businessEntity) || BusinessEntity.Contact.equals(businessEntity)) {
+            updateSourceFileConfig(customerSpace, sourceFile, fieldMappingsWithIdtype, businessEntity, feedType);
+        }
+    }
+
+    /*
+     * update length validator : UI might return duplicate idtypes, if there's more
+     * than 1 with different fieldname,use isMappedToLatticeSystem to filter the old
+     * idtype
+     */
+    private void updateSourceFileConfig(CustomerSpace customerSpace, SourceFile sourceFile,
+                                        List<FieldMapping> fieldMappingsWithIdtype, BusinessEntity entity, String feedType) {
+        String systemName = cdlService.getSystemNameFromFeedType(feedType);
+        if (StringUtils.isBlank(systemName))
+            return;
+        S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+        String systemId;
+        if (s3ImportSystem == null || (systemId = getSystemId(s3ImportSystem, entity)) == null) {
+            return;
+        }
+        fieldMappingsWithIdtype = fieldMappingsWithIdtype.stream()
+                .filter(f -> (systemName.equals(f.getSystemName()) && systemId.equals(f.getMappedField())))
+                .collect(Collectors.toList());
+        //if multiple user field mapped to systemId, use the new one(not mappedtolatticesystem)
+        //if same user field mapped to systemId, iterate to find config
+        boolean mappedCondition = fieldMappingsWithIdtype.stream().map(FieldMapping::getUserField)
+                .collect(Collectors.toSet()).size() > 1 ? true : false;
+        for (FieldMapping fieldMapping : fieldMappingsWithIdtype) {
+            if (mappedCondition && fieldMapping.isMappedToLatticeSystem()) {
+                continue;
+            }
+            if (fieldMapping.lengthAndRequiredChanged() && fieldMapping.checkLengthValid()) {
+                UniqueIdentifierConfig uniqueConfig = new UniqueIdentifierConfig();
+                uniqueConfig.setName(fieldMapping.getMappedField());
+                uniqueConfig.setLength(fieldMapping.getLength());
+                uniqueConfig.setRequired(fieldMapping.isRequired());
+                SourcefileConfig sourceConfig = sourceFile.getSourcefileConfig();
+                if (sourceConfig == null) {
+                    sourceConfig = new SourcefileConfig();
+                }
+                sourceConfig.setUniqueIdentifierConfig(uniqueConfig);
+                sourceFile.setSourcefileConfig(sourceConfig);
+                sourceFileService.update(sourceFile);
+                return;
+            }
+        }
+    }
+
+    private boolean idTypeMatchEntity(FieldMapping fieldMapping, BusinessEntity entity) {
+        if (fieldMapping == null || fieldMapping.getIdType() == null)
+            return false;
+        switch (fieldMapping.getIdType()) {
+            case Account:
+                return BusinessEntity.Account.equals(entity);
+            case Contact:
+                return BusinessEntity.Contact.equals(entity);
+            default:
+                return false;
+        }
+    }
+
+    private String getSystemId(S3ImportSystem s3ImportSystem, BusinessEntity entity) {
+        if (BusinessEntity.Account.equals(entity)) {
+            return s3ImportSystem.getAccountSystemId();
+        } else if (BusinessEntity.Contact.equals(entity)) {
+            return s3ImportSystem.getContactSystemId();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -1351,33 +1425,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         newTable.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
         metadataProxy.createTable(customerSpace, newTable.getName(), newTable);
         sourceFile.setTableName(newTable.getName());
-        boolean isAccountOrContact = BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity);
-        SourcefileConfig config = fieldMappingDocument.getSourcefileConfig();
-        if (isAccountOrContact && config!=null) {
-            S3ImportSystem importSystem = cdlService.getDefaultImportSystem(customerSpace);
-            if (importSystem != null) {
-                config.setUniqueIdentifierName(getImportSystemId(importSystem, entity));
-                if(config.isUniqueIdentifierChanged() && StringUtils.isNotEmpty(config.getUniqueIdentifierName())) {
-                    sourceFile.setSourcefileConfig(config);
-                }
-            }
-        }
         sourceFileService.update(sourceFile);
         // Set external system column name
-        if (isAccountOrContact) {
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
             CDLExternalSystemUtils.setCDLExternalSystem(resolver.getExternalSystem(), entity, cdlExternalSystemProxy);
-        }
-    }
-
-    private String getImportSystemId(S3ImportSystem importSystem, BusinessEntity entity) {
-        if (BusinessEntity.Account.equals(entity)) {
-            return importSystem.getAccountSystemId();
-        }
-        else if (BusinessEntity.Contact.equals(entity)) {
-            return importSystem.getContactSystemId();
-        }
-        else {
-            return null;
         }
     }
 

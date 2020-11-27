@@ -129,7 +129,7 @@ public class SourceFile
     @Column(name = "WORKFLOW_PID")
     private Long workflowPid;
 
-    @Column(name = "SOURCEFILE_CONFIG", columnDefinition = "'JSON'", length = 6000)
+    @Column(name = "SOURCEFILE_CONFIG", columnDefinition = "'JSON'")
     @Type(type = "json")
     @JsonProperty("sourcefile_config")
     private SourcefileConfig sourcefileConfig;
