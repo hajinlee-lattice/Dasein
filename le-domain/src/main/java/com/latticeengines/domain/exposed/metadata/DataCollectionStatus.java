@@ -372,6 +372,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         return this.detail.isTimelineRebuildFlag();
     }
 
+    @JsonProperty("entityWithESVersionMap")
+    public void setEntityWithESVersionMap(Map<String, String> entityWithESVersionMap) {
+        this.detail.setEntityWithESVersionMap(entityWithESVersionMap);
+    }
+
+    @JsonProperty("entityWithESVersionMap")
+    public Map<String, String> getEntityWithESVersionMap() {
+        return this.detail.getEntityWithESVersionMap();
+    }
+
     @JsonProperty("TransactionRebuilt")
     public Boolean getTransactionRebuilt() {
         return this.detail.getTransactionRebuilt();

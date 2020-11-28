@@ -19,24 +19,21 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.util.UuidUtil;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.dashboard.Dashboard;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilterValue;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.elasticsearch.Service.ElasticSearchService;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
-import com.latticeengines.pls.util.ElasticSearchUtils;
 import com.latticeengines.proxy.exposed.cdl.DashboardProxy;
 
 @Component("dashboardService")
@@ -66,10 +63,8 @@ public class DashboardServiceImpl implements DashboardService {
 
     private static final String PATH_PREFIX = "com/latticeengines/pls/kibanaitems/%s";
 
-    private static final int MAX_RETRY = 3;
-
     @Inject
-    private RestHighLevelClient client;
+    private ElasticSearchService elasticSearchService;
     @Inject
     private DashboardProxy dashboardProxy;
     @Value("${cdl.elasticsearch.kibana.index}")
@@ -155,17 +150,8 @@ public class DashboardServiceImpl implements DashboardService {
 
         jsonFile = jsonFile.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER,
                 getDate());
-        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
-        try {retry.execute(context -> {
-
-                ElasticSearchUtils.createDocument(client, kibanaIndex, String.format("%s%s", INDEX_PATTERN_PREFIX,
-                        indexPatternId), jsonFile);
-                return 0;
-            });
-        } catch (IOException e) {
-            log.error(String.format("Failed to create index-pattern %s", String.format("%s%s", INDEX_PATTERN_PREFIX,
-                    indexPatternId)), e);
-        }
+        elasticSearchService.createDocument(kibanaIndex, String.format("%s%s", INDEX_PATTERN_PREFIX,
+                indexPatternId), jsonFile);
     }
 
 
@@ -204,13 +190,10 @@ public class DashboardServiceImpl implements DashboardService {
                 throw new LedpException(LedpCode.LEDP_00002, "Can't read visualization", exception);
             }
         }
-        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
-        try {retry.execute(context -> {
-            ElasticSearchUtils.createDocuments(client, kibanaIndex, visualizationJsonFileMap);
-            return 0;
-        });
-        } catch (IOException e) {
-            log.error(String.format("Failed to create visualization documents, namePrefix is %s.", namePrefix), e);
+        boolean isSuccess = elasticSearchService.createDocuments(kibanaIndex, visualizationJsonFileMap);
+
+        if (!isSuccess) {
+            log.error("Failed to create visualization documents, namePrefix is {}.", namePrefix);
             throw new IllegalStateException(String.format("Failed to create visualization documents, namePrefix is %s.", namePrefix));
         }
     }
@@ -223,13 +206,10 @@ public class DashboardServiceImpl implements DashboardService {
         for (String dashboardName : dashboardNameList) {
             dashboardIdMap.put(dashboardName, createDashboard(namePrefix, dashboardName, dashboardFileMap));
         }
-        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
-        try {retry.execute(context -> {
-            ElasticSearchUtils.createDocuments(client, kibanaIndex, dashboardFileMap);
-            return 0;
-        });
-        } catch (IOException e) {
-            log.error(String.format("Failed to create dashboards, namePrefix is %s.", namePrefix), e);
+        boolean isSuccess = elasticSearchService.createDocuments(kibanaIndex, dashboardFileMap);
+
+        if (!isSuccess) {
+            log.error("Failed to create dashboards, namePrefix is {}.", namePrefix);
             throw new IllegalStateException(String.format("Failed to create dashboards, namePrefix is %s.",
                     namePrefix));
         }

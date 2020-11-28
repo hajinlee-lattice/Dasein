@@ -1,4 +1,4 @@
-package com.latticeengines.pls.util;
+package com.latticeengines.elasticsearch.config;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -13,17 +13,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ElasticSearchConfig {
-
-    @Value("${cdl.elasticsearch.http.scheme}")
+public class ElasticSearchClientConfig {
+    @Value("${elasticsearch.http.scheme}")
     private String esScheme;
-    @Value("${cdl.elasticsearch.host}")
+    @Value("${elasticsearch.host}")
     private String esHost;
-    @Value("${cdl.elasticsearch.ports}")
+    @Value("${elasticsearch.ports}")
     private String esPorts;
-    @Value("${cdl.elasticsearch.user}")
+    @Value("${elasticsearch.user}")
     private String user;
-    @Value("${cdl.elasticsearch.pwd.encrypted}")
+    @Value("${elasticsearch.pwd.encrypted}")
     private String password;
 
 

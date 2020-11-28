@@ -76,5 +76,6 @@
         <module>le-component</module>
         <module>le-spark</module>
         <module>le-telepath</module>
+        <module>le-elasticsearch</module>
     </modules>
 </project>

@@ -237,14 +237,9 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-            <version>${elasticsearch.client.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>${elasticsearch.client.version}</version>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-elasticsearch</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
