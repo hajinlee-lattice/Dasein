@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.CipherUtils;
-
 @Component
 public class ElasticSearchConfig {
 
@@ -39,9 +37,8 @@ public class ElasticSearchConfig {
     public RestHighLevelClient restClient() {
         RestClientBuilder clientBuilder = RestClient.builder(new HttpHost(esHost, Integer.parseInt(esPorts), esScheme));
         //basic authentication mechanism
-        String pwd = CipherUtils.decrypt(password);
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, pwd));
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
 
         // Asynchronous httpclient connection number configuration and password configuration
         clientBuilder.setHttpClientConfigCallback(httpClientBuilder -> {
