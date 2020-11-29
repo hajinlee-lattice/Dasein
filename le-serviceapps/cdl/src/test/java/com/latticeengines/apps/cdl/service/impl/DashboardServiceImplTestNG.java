@@ -49,11 +49,16 @@ public class DashboardServiceImplTestNG extends CDLFunctionalTestNGBase {
         log.info("Dashboard is {}.", JsonUtils.serialize(created));
         log.info("pid is {}", created.getPid());
         Assert.assertNotNull(created.getPid());
-        List<Dashboard> dashboardList = dashboardService.findAllByTenant(mainCustomerSpace);
-        Assert.assertEquals(dashboardList.size(), 1);
-        Assert.assertEquals(dashboardList.get(0).getName(), name);
-        Assert.assertEquals(dashboardList.get(0).getDashboardUrl(), url);
-        pid = dashboardList.get(0).getPid();
+        AtomicReference<List<Dashboard>> createdAtom = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom.set(dashboardService.findAllByTenant(mainCustomerSpace));
+            List<Dashboard> dashboardList = createdAtom.get();
+            Assert.assertEquals(dashboardList.size(), 1);
+            Assert.assertEquals(dashboardList.get(0).getName(), name);
+            Assert.assertEquals(dashboardList.get(0).getDashboardUrl(), url);
+            pid = dashboardList.get(0).getPid();
+            return true;
+        });
     }
 
     @Test(groups = "functional")
@@ -61,12 +66,12 @@ public class DashboardServiceImplTestNG extends CDLFunctionalTestNGBase {
         AtomicReference<Dashboard> createdAtom = new AtomicReference<>();
         retry.execute(context -> {
             createdAtom.set(dashboardService.findByPid(mainCustomerSpace, pid));
-            Assert.assertNotNull(createdAtom.get());
+            Dashboard dashboard = createdAtom.get();
+            Assert.assertNotNull(dashboard);
+            Assert.assertEquals(dashboard.getName(), name);
             return true;
         });
         Dashboard dashboard = createdAtom.get();
-        Assert.assertNotNull(dashboard);
-        Assert.assertEquals(dashboard.getName(), name);
         dashboard.setName(updateName);
         dashboardService.createOrUpdate(mainCustomerSpace, dashboard);
         retry.execute(context -> {

@@ -66,12 +66,12 @@ public class DashboardFilterServiceImplTestNG extends CDLFunctionalTestNGBase {
         AtomicReference<DashboardFilter> createdAtom = new AtomicReference<>();
         retry.execute(context -> {
             createdAtom.set(dashboardFilterService.findByPid(mainCustomerSpace, filterPid));
-            Assert.assertNotNull(createdAtom.get());
+            DashboardFilter filter = createdAtom.get();
+            Assert.assertNotNull(filter);
+            Assert.assertEquals(filter.getName(), filterName);
             return true;
         });
         DashboardFilter filter = createdAtom.get();
-        Assert.assertNotNull(filter);
-        Assert.assertEquals(filter.getName(), filterName);
         filter.setName(updateFilterName);
         dashboardFilterService.createOrUpdate(mainCustomerSpace, filter);
         retry.execute(context -> {
@@ -85,11 +85,10 @@ public class DashboardFilterServiceImplTestNG extends CDLFunctionalTestNGBase {
         retry.execute(context -> {
             createdAtom1.set(dashboardFilterService.findAllByTenant(mainCustomerSpace));
             Assert.assertEquals(createdAtom1.get().size(), 1);
+            List<DashboardFilter> dashboardFilterList = createdAtom1.get();
+            Assert.assertEquals(dashboardFilterList.get(0).getName(), updateFilterName);
             return true;
         });
-        Assert.assertEquals(createdAtom1.get().size(), 1);
-        List<DashboardFilter> dashboardFilterList = createdAtom1.get();
-        Assert.assertEquals(dashboardFilterList.get(0).getName(), updateFilterName);
         dashboardFilterService.delete(mainCustomerSpace, updateFilter);
         retry.execute(context -> {
             createdAtom1.set(dashboardFilterService.findAllByTenant(mainCustomerSpace));
