@@ -52,13 +52,16 @@ public class DashboardFilterServiceImplTestNG extends CDLFunctionalTestNGBase {
         log.info("DashboardFilter is {}.", JsonUtils.serialize(createdFilter));
         log.info("DashboardFilter pid is {}", createdFilter.getPid());
         Assert.assertNotNull(createdFilter.getPid());
-        List<DashboardFilter> dashboardFilterList = dashboardFilterService.findAllByTenant(mainCustomerSpace);
-        log.info("dashboard list is {}.", JsonUtils.serialize(dashboardFilterList));
-        Assert.assertEquals(dashboardFilterList.size(), 1);
-        Assert.assertEquals(dashboardFilterList.get(0).getName(), filterName);
-        Assert.assertEquals(dashboardFilterList.get(0).getFilterValue().get(0).getDisplayName(),
-                filterValue.get(0).getDisplayName());
-        filterPid = dashboardFilterList.get(0).getPid();
+        AtomicReference<List<DashboardFilter>> createdAtom = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom.set(dashboardFilterService.findAllByTenant(mainCustomerSpace));
+            List<DashboardFilter> dashboardFilterList = createdAtom.get();
+            Assert.assertEquals(dashboardFilterList.size(), 1);
+            Assert.assertEquals(dashboardFilterList.get(0).getName(), filterName);
+            Assert.assertEquals(dashboardFilterList.get(0).getFilterValue().get(0).getDisplayName(), filterValue.get(0).getDisplayName());
+            return true;
+        });
+        filterPid = createdAtom.get().get(0).getPid();
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")
@@ -105,6 +108,7 @@ public class DashboardFilterServiceImplTestNG extends CDLFunctionalTestNGBase {
         values.add(createValue("last two week", "2w"));
         return values;
     }
+
     private DashboardFilterValue createValue(String displayName, String value) {
         DashboardFilterValue filterValue = new DashboardFilterValue();
         filterValue.setDisplayName(displayName);
