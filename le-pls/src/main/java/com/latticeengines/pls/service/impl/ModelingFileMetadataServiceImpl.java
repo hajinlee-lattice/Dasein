@@ -987,8 +987,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     private void updateSourceFileConfig(CustomerSpace customerSpace, SourceFile sourceFile,
                                         List<FieldMapping> fieldMappingsWithIdtype, BusinessEntity entity, String feedType) {
         String systemName = cdlService.getSystemNameFromFeedType(feedType);
-        if (StringUtils.isBlank(systemName))
+        if (StringUtils.isBlank(systemName)) {
             return;
+        }
         S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
         String systemId;
         if (s3ImportSystem == null || (systemId = getSystemId(s3ImportSystem, entity)) == null) {
