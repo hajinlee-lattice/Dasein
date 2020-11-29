@@ -154,5 +154,8 @@ public interface DataFeedTaskTemplateService {
     void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, Integer length,
                                      boolean nullable);
 
+    void updateAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, Integer length,
+                                     boolean nullable);
+
     void addSimpleValueFilter(String customerSpace, String uniqueTaskId, SimpleValueFilter simpleValueFilter);
 }

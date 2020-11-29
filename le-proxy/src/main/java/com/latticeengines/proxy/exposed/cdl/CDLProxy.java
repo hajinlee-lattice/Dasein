@@ -806,6 +806,24 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         put("Add attribute length validator", url);
     }
 
+    public void updateAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName,
+            Integer length, boolean nullable) {
+        String baseUrl = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks"
+                + "/updateLengthValidator/{uniqueTaskId}?attrName={attrName}&nullable={nullable}";
+        List<String> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(uniqueTaskId);
+        args.add(attrName);
+        args.add(String.valueOf(nullable));
+        if (length != null) {
+            baseUrl = baseUrl + "&length={length}";
+            args.add(String.valueOf(length));
+        }
+        String url = constructUrl(baseUrl, args.toArray());
+
+        put("Update attribute length validator", url);
+    }
+
     public void addSimpleValueFilter(String customerSpace, String uniqueTaskId, SimpleValueFilter simpleValueFilter) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks"
                 + "/appendSimpleValueFilter/{uniqueTaskId}", shortenCustomerSpace(customerSpace), uniqueTaskId);
