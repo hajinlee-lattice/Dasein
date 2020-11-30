@@ -36,6 +36,7 @@ public class ActivityStoreUtils {
             PeriodStrategy.Template.Week.name(), Collections.singletonList(8));
     public static final String DEFAULT_TIME_RANGE = ActivityMetricsGroupUtils
             .timeFilterToTimeRangeTmpl(UI_DEFAULT_TIME_FILTER);
+    private static final String CURRENT_WEEK_TIME_RANGE = "wi_0_w";
 
     private ActivityStoreUtils() {
     }
@@ -115,6 +116,32 @@ public class ActivityStoreUtils {
         return filterOptions;
     }
 
+    // FIXME - Temporary solution. Should use attrFilterOptions after all tenants migrated to new groups
+    public static FilterOptions genericFilterOptions() {
+        FilterOptions filterOptions = new FilterOptions();
+        filterOptions.setLabel("Timeframe");
+        List<FilterOptions.Option> options = new ArrayList<>();
+        options.add(FilterOptions.Option.anyAttrOption());
+        options.addAll(ActivityMetricsGroupUtils.toTimeFilters(currentWeekTimeRange())
+                .stream() //
+                .map(ActivityStoreUtils::timeFilterToFilterOption) //
+                .collect(Collectors.toList()));
+        options.addAll(genericTimeFilters());
+        filterOptions.setOptions(options);
+        return filterOptions;
+    }
+
+    private static List<FilterOptions.Option> genericTimeFilters() {
+        return ActivityMetricsGroupUtils.toTimeFilters(defaultTimeRange()).stream().map(filter -> {
+            FilterOptions.Option option = new FilterOptions.Option();
+            String timeRange = ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(filter);
+            String filterName = ActivityMetricsGroupUtils.timeRangeTmplToPeriodOnly(timeRange, 0);
+            option.setValue(filterName);
+            option.setDisplayName(filterName);
+            return option;
+        }).collect(Collectors.toList());
+    }
+
     private static FilterOptions.Option timeFilterToFilterOption(TimeFilter timeFilter) {
         FilterOptions.Option option = new FilterOptions.Option();
         option.setValue(ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
@@ -144,7 +171,7 @@ public class ActivityStoreUtils {
     public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull String timeRange,
             String secondaryDisplayName) {
         // any tag for filtering all attrs
-        cm.setFilterTags(Arrays.asList(timeRange, FilterOptions.Option.ANY_VALUE));
+        cm.setFilterTags(getFilterTagsFromTimeRange(timeRange));
         if (!DEFAULT_TIME_RANGE.equals(timeRange)) {
             // leave null for not hidden attrs to save some space
             cm.setIsHiddenInCategoryTile(true);
@@ -173,5 +200,14 @@ public class ActivityStoreUtils {
                     tenantId), e);
             return null;
         }
+    }
+
+    // FIXME - remove this after all tenants migrated to new groups
+    public static List<String> getFilterTagsFromTimeRange(String timeRange) {
+        List<String> tags = new ArrayList<>(Arrays.asList(timeRange, FilterOptions.Option.ANY_VALUE));
+        if (!CURRENT_WEEK_TIME_RANGE.equals(timeRange)) {
+            tags.add(ActivityMetricsGroupUtils.timeRangeTmplToPeriodOnly(timeRange, 0));
+        }
+        return tags;
     }
 }
