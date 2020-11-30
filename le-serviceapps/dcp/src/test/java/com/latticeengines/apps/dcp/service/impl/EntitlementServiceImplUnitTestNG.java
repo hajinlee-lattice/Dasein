@@ -16,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
@@ -39,7 +40,7 @@ public class EntitlementServiceImplUnitTestNG {
         String idaasStr = IOUtils.toString(is, Charset.defaultCharset());
         DataBlockEntitlementContainer container = EntitlementServiceImpl.parseIDaaSEntitlement(idaasStr);
         Assert.assertNotNull(container);
-        Assert.assertEquals(container.getDomains().size(), 2);
+        Assert.assertEquals(container.getDomains().size(), 3);
         for (DataBlockEntitlementContainer.Domain domain : container.getDomains()) {
             switch (domain.getDomain()) {
             case SalesMarketing:
@@ -50,13 +51,16 @@ public class EntitlementServiceImplUnitTestNG {
                 Assert.assertEquals(domain.getRecordTypes().get(MasterData).size(), 5);
                 break;
             case Finance:
-                Assert.fail("Should not see Finance domain with only Analytical Use entitlement");
+                Assert.assertEquals(domain.getRecordTypes().size(), 1);
+                Assert.assertTrue(domain.getRecordTypes().containsKey(Analytical));
+                Assert.assertEquals(domain.getRecordTypes().get(Analytical).size(),11);
                 break;
             case Supply:
-                Assert.assertEquals(domain.getRecordTypes().size(), 1);
+                Assert.assertEquals(domain.getRecordTypes().size(), 2);
                 Assert.assertTrue(domain.getRecordTypes().containsKey(MasterData));
+                Assert.assertTrue(domain.getRecordTypes().containsKey(Analytical));
                 Assert.assertEquals(domain.getRecordTypes().get(MasterData).size(), 5);
-                Assert.assertFalse(domain.getRecordTypes().containsKey(Analytical));
+                Assert.assertEquals(domain.getRecordTypes().get(Analytical).size(),11);
                 break;
             default:
                 Assert.fail("Should not see domain " + domain.getDomain());
@@ -71,7 +75,8 @@ public class EntitlementServiceImplUnitTestNG {
         String idaasStr = IOUtils.toString(is, Charset.defaultCharset());
         DataBlockEntitlementContainer container = EntitlementServiceImpl.parseIDaaSEntitlement(idaasStr);
         Assert.assertNotNull(container);
-        Assert.assertTrue(container.getDomains().isEmpty());
+        Assert.assertEquals(container.getDomains().size(), 1);
+        Assert.assertEquals("D&B for Sales & Marketing", container.getDomains().get(0).getDomain().getDisplayName());
     }
 
     @Test(groups = "unit")

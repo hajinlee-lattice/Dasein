@@ -264,7 +264,6 @@ public class EntitlementServiceImpl implements EntitlementService {
         if (types.isEmpty()) {
             return null;
         } else {
-            types.remove(DataRecordType.Analytical);
             return new DataBlockEntitlementContainer.Domain(domain, types);
         }
     }
