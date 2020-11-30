@@ -60,6 +60,8 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
@@ -87,6 +89,24 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     protected static final String TEST_TEMPLATE_VERSION = "4";
 
     private static final String USER = "test@dnb.com";
+
+    public static final List<String> MATCH_COLUMNS = Arrays.asList(
+            "Matched D-U-N-S Number",
+            "Match Type",
+            "Match Confidence Code",
+            "Match Grade",
+            "Match Data Profile",
+            "Name Match Score",
+            "Match Candidate Operating Status",
+            "Match Primary Business Name",
+            "Match ISO Alpha 2 Char Country Code"
+    );
+
+    public static final List<String> BASE_COLUMNS = Arrays.asList(
+            "D-U-N-S Number", //
+            "Primary Business Name", //
+            "ISO Alpha 2 Char Country Code" //
+    );
 
     @Inject
     private DropBoxProxy dropBoxProxy;
@@ -267,9 +287,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         enrichmentLayout.setDomain(DataDomain.SalesMarketing);
         enrichmentLayout.setRecordType(DataRecordType.Domain);
         enrichmentLayout.setElements(Arrays.asList( //
-                "duns_number", //
-                "primaryname", //
-                "countryisoalpha2code", //
                 "primaryaddr_country_isoalpha2code", //
                 "primaryaddr_country_name", //
                 "primaryaddr_county_name", //
@@ -295,7 +312,10 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "primaryaddr_latitude", //
                 "primaryaddr_longitude", //
                 "numberofemployees_employeefiguresdate", //
-                "registeredname" //
+                "registeredname", //
+                "primaryname", //
+                "duns_number", //
+                "countryisoalpha2code" //
         ));
         ResponseDocument<String> response =  enrichmentLayoutService.create(mainCustomerSpace, enrichmentLayout);
         Assert.assertNotNull(response);
@@ -368,10 +388,14 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectRequest.setProjectType(Project.ProjectType.Type1);
         projectRequest.setPurposeOfUse(getPurposeOfUse());
         projectDetails = projectProxy.createDCPProject(mainCustomerSpace, projectRequest, "dcp_deployment@dnb.com");
-        // Create Source
+        // Add customer fields to base spec
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
                 TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
+        String[] fieldNames = {"user_Total_Employees", "user_MarketoAccountID", "user_Sales_in__B"};
+        String[] columnNames = {"Total Employees", "MarketoAccountID", "Sales in $B"};
+        addCustomerFields(fieldNames, columnNames, fieldDefinitionsRecord);
+        // Create Source
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setDisplayName("ImportEnd2EndSource");
         sourceRequest.setProjectId(projectDetails.getProjectId());
@@ -387,6 +411,20 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         s3FileKey = dropPath + TEST_ACCOUNT_DATA_FILE;
         testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE, s3Bucket,
                 s3FileKey);
+    }
+
+    private void addCustomerFields(String[] fields, String[] columns, FieldDefinitionsRecord record) {
+        for (int i = 0; i < fields.length; i++) {
+            FieldDefinition fd = new FieldDefinition();
+            fd.setFieldName(fields[i]);
+            fd.setFieldType(UserDefinedType.TEXT);
+            fd.setColumnName(columns[i]);
+            fd.setInCurrentImport(false);
+            fd.setRequired(false);
+            fd.setNullable(true);
+            fd.setMappedToLatticeId(false);
+            record.addFieldDefinition("Custom Fields", fd, false);
+        }
     }
 
     private void verifyUploadStats(UploadDetails upload) {
@@ -561,8 +599,16 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private void verifyOutputHeaders(List<String> headers) {
         System.out.println(headers);
-        Assert.assertTrue(headers.contains("Company Name")); // in spec
-        Assert.assertTrue(headers.contains("Country")); // in spec
+
+        String[] expectedHeaders = {
+                "Customer ID", "Website", "Company Name", "City", "State",
+                "Country", "Postal Code", "Registration Number", "Sales in $B", "Total Employees", "MarketoAccountID",
+                "Street Address Line 1", "Street Address Line 2", "Phone Number", "DUNS Number"
+        };
+
+        for (int i = 0; i < expectedHeaders.length; i++)
+            Assert.assertEquals(headers.indexOf(expectedHeaders[i]), i);
+
         Assert.assertFalse(headers.contains("Test Date 2")); // not in spec
         Assert.assertFalse(headers.contains("__Matched_DUNS__")); // debug column
         Assert.assertFalse(headers.contains("__Matched_Name__")); // debug column
@@ -570,6 +616,17 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             Assert.assertTrue(headers.contains("Registered Name")); // in enrichment layout
             Assert.assertTrue(headers.contains("Primary Address Region Abreviated Name")); // in enrichment layout
             Assert.assertFalse(headers.contains("Primary Address Region Name")); // not in enrichment layout
+            Assert.assertTrue(headers.contains("Matched D-U-N-S Number"));
+
+            // verify match/candidate column order
+            int start = headers.indexOf("Matched D-U-N-S Number");
+            Assert.assertEquals(start, 15);
+            Assert.assertEquals(headers.subList(start, start + MATCH_COLUMNS.size()), MATCH_COLUMNS);
+
+            // verify base info column order
+            start = headers.indexOf("D-U-N-S Number");
+            Assert.assertEquals(start, 24);
+            Assert.assertEquals(headers.subList(start, start + BASE_COLUMNS.size()), BASE_COLUMNS);
         }
 
         MatchCoreErrorConstants.CSV_HEADER_MAP.values().forEach(errorHeader -> Assert.assertTrue(headers.contains(errorHeader)));
