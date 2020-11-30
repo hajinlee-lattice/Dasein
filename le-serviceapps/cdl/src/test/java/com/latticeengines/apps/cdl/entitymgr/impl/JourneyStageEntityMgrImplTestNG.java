@@ -123,11 +123,11 @@ public class JourneyStageEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         retry.execute(context -> {
             createdAtom.set(journeyStageEntityMgr.findByPid(pid));
             Assert.assertNotNull(createdAtom.get());
+            Assert.assertEquals(createdAtom.get().getStageName(), updateStageName);
             return true;
         });
         JourneyStage stage = createdAtom.get();
         Assert.assertNotNull(stage);
-        Assert.assertEquals(stage.getStageName(), updateStageName);
         stage.setTenant(null);
         journeyStageEntityMgr.delete(stage);
         retry.execute(context -> {

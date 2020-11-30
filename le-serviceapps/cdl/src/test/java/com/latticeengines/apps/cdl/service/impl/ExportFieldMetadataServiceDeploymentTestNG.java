@@ -5,13 +5,10 @@ import static org.testng.Assert.assertNotEquals;
 
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -21,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataService;
@@ -56,6 +52,7 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MediaMathChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.TradeDeskChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.VerizonMediaChannelConfig;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -97,28 +94,23 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     private ExportFieldMetadataDefaultsService exportFieldMetadataDefaultsService;
 
     @Inject
-    private ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;
-
-    @Inject
     private SegmentService segmentService;
-
-    private Set<String> defaultMarketoFields = new HashSet<>(Arrays.asList(InterfaceName.CompanyName.name(),
-            InterfaceName.Email.name(), InterfaceName.PhoneNumber.name()));
-
-    private Set<String> defaultS3Fields = new HashSet<>(Collections.singletonList("PLAY_ID"));
-
-    private List<ExportFieldMetadataDefaults> defaultMarketoExportFields;
-    private List<ExportFieldMetadataDefaults> defaultS3ExportFields;
-    private List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
-    private List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
-    private List<ExportFieldMetadataDefaults> defaultOutreachExportFields;
-    private List<ExportFieldMetadataDefaults> defaultGoogleExportFields;
-    private List<ExportFieldMetadataDefaults> defaultAdobeAudienceManagerExportFields;
-    private List<ExportFieldMetadataDefaults> defaultAppNexusExportFields;
-    private List<ExportFieldMetadataDefaults> defaultGoogleDNV360ExportFields;
-    private List<ExportFieldMetadataDefaults> defaultMediaMathExportFields;
-    private List<ExportFieldMetadataDefaults> defaultTradeDeskExportFields;
-    private List<ExportFieldMetadataDefaults> defaultVerizonMediaExportFields;
+    
+    private List<CDLExternalSystemName> systemsToCheck = Arrays.asList(
+            CDLExternalSystemName.Marketo, //
+            CDLExternalSystemName.AWS_S3, //
+            CDLExternalSystemName.LinkedIn, //
+            CDLExternalSystemName.Facebook, //
+            CDLExternalSystemName.Outreach, //
+            CDLExternalSystemName.GoogleAds, //
+            CDLExternalSystemName.Adobe_Audience_Mgr, //
+            CDLExternalSystemName.AppNexus, //
+            CDLExternalSystemName.Google_Display_N_Video_360, //
+            CDLExternalSystemName.MediaMath, //
+            CDLExternalSystemName.TradeDesk, //
+            CDLExternalSystemName.Verizon_Media, //
+            CDLExternalSystemName.Salesforce, //
+            CDLExternalSystemName.Eloqua);
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
@@ -139,106 +131,29 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         play.setTargetSegment(segment);
         play.setPlayType(playTypeService.getAllPlayTypes(mainCustomerSpace).get(0));
 
+        log.info(JsonUtils.serialize(play));
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
 
-        defaultMarketoExportFields = exportFieldMetadataDefaultsService.getAllAttributes(CDLExternalSystemName.Marketo);
+        Map<CDLExternalSystemName, List<ExportFieldMetadataDefaults>> defaultExportFields = new HashMap<>();
+        
+        for (CDLExternalSystemName system : systemsToCheck) {
+            log.info("Checking default fields for system: {}", system);
+            List<ExportFieldMetadataDefaults> currentDefaultField = exportFieldMetadataDefaultsService
+                    .getAllAttributes(system);
 
-        if (defaultMarketoExportFields.size() == 0) {
-            defaultMarketoExportFields = createDefaultExportFields(CDLExternalSystemName.Marketo);
+            if (currentDefaultField.size() == 0) {
+                currentDefaultField = createDefaultExportFields(system);
+                log.info("Successfully inserted {} fields for system {}", currentDefaultField.size(), system);
+            }
+            
+            defaultExportFields.put(system, currentDefaultField);
         }
 
-        defaultS3ExportFields = exportFieldMetadataDefaultsService.getAllAttributes(CDLExternalSystemName.AWS_S3);
-
-        if (defaultS3ExportFields.size() == 0) {
-            defaultS3ExportFields = createDefaultExportFields(CDLExternalSystemName.AWS_S3);
+        for (CDLExternalSystemName system : defaultExportFields.keySet()) {
+            assertNotEquals(defaultExportFields.get(system).size(), 0,
+                    String.format("Expected size > 0 for system %s", system));
         }
-
-        defaultLinkedInExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.LinkedIn);
-
-        if (defaultLinkedInExportFields.size() == 0) {
-            defaultLinkedInExportFields = createDefaultExportFields(CDLExternalSystemName.LinkedIn);
-        }
-
-        defaultFacebookExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.Facebook);
-
-        if (defaultFacebookExportFields.size() == 0) {
-            defaultFacebookExportFields = createDefaultExportFields(CDLExternalSystemName.Facebook);
-        }
-
-        defaultOutreachExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.Outreach);
-
-        if (defaultOutreachExportFields.size() == 0) {
-            defaultOutreachExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
-        }
-
-        defaultGoogleExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.GoogleAds);
-
-        if (defaultGoogleExportFields.size() == 0) {
-            defaultGoogleExportFields = createDefaultExportFields(CDLExternalSystemName.GoogleAds);
-        }
-
-        defaultAdobeAudienceManagerExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.Adobe_Audience_Mgr);
-
-        if (defaultAdobeAudienceManagerExportFields.size() == 0) {
-            defaultAdobeAudienceManagerExportFields = createDefaultExportFields(
-                    CDLExternalSystemName.Adobe_Audience_Mgr);
-        }
-
-        defaultAppNexusExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.AppNexus);
-
-        if (defaultAppNexusExportFields.size() == 0) {
-            defaultAppNexusExportFields = createDefaultExportFields(CDLExternalSystemName.AppNexus);
-        }
-
-        defaultGoogleDNV360ExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.Google_Display_N_Video_360);
-
-        if (defaultGoogleDNV360ExportFields.size() == 0) {
-            defaultGoogleDNV360ExportFields = createDefaultExportFields(
-                    CDLExternalSystemName.Google_Display_N_Video_360);
-        }
-
-        defaultMediaMathExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.MediaMath);
-
-        if (defaultMediaMathExportFields.size() == 0) {
-            defaultMediaMathExportFields = createDefaultExportFields(CDLExternalSystemName.MediaMath);
-        }
-
-        defaultTradeDeskExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.TradeDesk);
-
-        if (defaultTradeDeskExportFields.size() == 0) {
-            defaultTradeDeskExportFields = createDefaultExportFields(CDLExternalSystemName.TradeDesk);
-        }
-
-        defaultVerizonMediaExportFields = exportFieldMetadataDefaultsService
-                .getAllAttributes(CDLExternalSystemName.Verizon_Media);
-
-        if (defaultVerizonMediaExportFields.size() == 0) {
-            defaultVerizonMediaExportFields = createDefaultExportFields(CDLExternalSystemName.Verizon_Media);
-        }
-
-        assertNotEquals(defaultMarketoExportFields.size(), 0);
-        assertNotEquals(defaultS3ExportFields.size(), 0);
-        assertNotEquals(defaultLinkedInExportFields.size(), 0);
-        assertNotEquals(defaultFacebookExportFields.size(), 0);
-        assertNotEquals(defaultOutreachExportFields.size(), 0);
-        assertNotEquals(defaultGoogleExportFields.size(), 0);
-        assertNotEquals(defaultAdobeAudienceManagerExportFields.size(), 0);
-        assertNotEquals(defaultAppNexusExportFields.size(), 0);
-        assertNotEquals(defaultGoogleDNV360ExportFields.size(), 0);
-        assertNotEquals(defaultMediaMathExportFields.size(), 0);
-        assertNotEquals(defaultTradeDeskExportFields.size(), 0);
-        assertNotEquals(defaultVerizonMediaExportFields.size(), 0);
-
     }
 
     @Test(groups = "deployment-app")
@@ -493,7 +408,12 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 0);
+        assertEquals(columnMetadata.size(), 40);
+
+        List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
+                .collect(Collectors.toList());
+        log.info(JsonUtils.serialize(nonStandardFields));
+        assertEquals(nonStandardFields.size(), 34);
 
         List<ExportFieldMetadataDefaults> exportFieldMetadataList = exportFieldMetadataDefaultsService
                 .getExportEnabledAttributesForAudienceType(externalSystemName, audienceType);
@@ -501,6 +421,34 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testEloquaLaunch")
+    public void testSalesforceLaunch() {
+        CDLExternalSystemName externalSystemName = CDLExternalSystemName.Salesforce;
+        AudienceType audienceType = AudienceType.ACCOUNTS;
+
+        registerLookupIdMap(CDLExternalSystemType.MAP, externalSystemName, "Salesforce", null,
+                null,
+                InterfaceName.ContactId.name());
+
+        createPlayLaunchChannel(new SalesforceChannelConfig(), lookupIdMap);
+
+        ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
+                .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
+        List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
+        log.info(JsonUtils.serialize(columnMetadata));
+
+        assertEquals(columnMetadata.size(), 40);
+
+        List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
+                .collect(Collectors.toList());
+        log.info(JsonUtils.serialize(nonStandardFields));
+        assertEquals(nonStandardFields.size(), 34);
+
+        List<ExportFieldMetadataDefaults> exportFieldMetadataList = exportFieldMetadataDefaultsService
+                .getExportEnabledAttributesForAudienceType(externalSystemName, audienceType);
+        compareEntityInMetadata(columnMetadata, exportFieldMetadataList);
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = "testSalesforceLaunch")
     public void testGoogleLaunch() {
         CDLExternalSystemName externalSystemName = CDLExternalSystemName.GoogleAds;
         AudienceType audienceType = AudienceType.CONTACTS;

@@ -15,6 +15,7 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     val config: GenerateLaunchUniverseJobConfig = lattice.config
     val input : DataFrame = lattice.input.head
     val accountId = InterfaceName.AccountId.name()
+    val contactId = InterfaceName.ContactId.name()
     val maxContactsPerAccount = config.getMaxContactsPerAccount
     val maxEntitiesToLaunch = config.getMaxEntitiesToLaunch
     val sortAttr = config.getContactsPerAccountSortAttribute
@@ -26,7 +27,7 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     var trimmedData = input
 
     if (maxContactsPerAccount != null) {
-      trimmedData = limitContactsPerAccount(trimmedData, accountId, sortAttr, sortDir, maxContactsPerAccount)
+      trimmedData = limitContactsPerAccount(trimmedData, accountId, contactId, sortAttr, sortDir, maxContactsPerAccount)
     }
 
     if (maxEntitiesToLaunch != null) {
@@ -36,7 +37,9 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     lattice.output = List(trimmedData)
   }
 
-  def limitContactsPerAccount(trimmedData: DataFrame, accountId: String, sortAttr: String, sortDir: String, maxContactsPerAccount: Long): DataFrame = {
+  def limitContactsPerAccount(trimmedData: DataFrame, accountId: String, contactId: String,
+        sortAttr: String, sortDir: String, maxContactsPerAccount: Long): DataFrame = {
+
     val rowNumber = "rowNumber"
     var w = Window.partitionBy(accountId)
 
@@ -46,6 +49,8 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
       } else {
         w = w.orderBy(col(sortAttr))
       }
+    } else {
+      w = w.orderBy(col(contactId))
     }
 
     trimmedData

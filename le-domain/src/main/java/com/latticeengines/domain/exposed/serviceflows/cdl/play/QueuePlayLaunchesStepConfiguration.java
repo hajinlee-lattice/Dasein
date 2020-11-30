@@ -29,4 +29,5 @@ public class QueuePlayLaunchesStepConfiguration extends BaseStepConfiguration {
     public String getExecutionId() { return executionId; }
 
     public void setExecutionId(String executionId) { this.executionId = executionId; }
+
 }

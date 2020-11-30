@@ -7,11 +7,17 @@
         </run>
     </groups>
     <test name="FunctionalTestGroup1">
-        <packages>
-            <package name="com.latticeengines.spark.exposed.job.cdl"/>
-            <package name="com.latticeengines.spark.exposed.job.cm"/>
-            <package name="com.latticeengines.spark.exposed.job.common"/>
-            <package name="com.latticeengines.spark.exposed.job.dcp"/>
-        </packages>
+        <classes>
+            <class name="com.latticeengines.spark.exposed.job.cdl.PeriodStoresGeneratorTestNG"/>
+            <class name="com.latticeengines.spark.exposed.job.cdl.TestRecommendationGenTestNG"/>
+            <class name="com.latticeengines.spark.exposed.job.cdl.GenerateLaunchArtifactsJobTestNG"/>
+            <class name="com.latticeengines.spark.exposed.job.cdl.AggDailyActivityJobTestNG"/>
+            <class name="com.latticeengines.spark.exposed.job.cdl.CalculateDeltaJobTestNG"/>
+            <class name="com.latticeengines.spark.exposed.job.cdl.TransformTxnStreamJobTestNG"/>
+            <class name="com.latticeengines.spark.exposed.job.cdl.PublishActivityAlertsJobTestNG"/>
+            <class name="com.latticeengines.spark.exposed.job.cdl.DeltaCampaignLaunchTestNG"/>
+            <class name="com.latticeengines.spark.exposed.job.cdl.MetricsGroupGeneratorTestNG"/>
+            <class name="com.latticeengines.spark.exposed.job.cdl.ValidateProductTestNG"/>
+        </classes>
     </test>
 </suite>

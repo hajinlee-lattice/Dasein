@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.play;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class GenerateLiveRampLaunchArtifactStepConfiguration extends BaseStepConfiguration {
@@ -8,6 +9,7 @@ public class GenerateLiveRampLaunchArtifactStepConfiguration extends BaseStepCon
     private String playId;
     private String channelId;
     private String executionId;
+    private DataCollection.Version version;
 
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
@@ -39,5 +41,13 @@ public class GenerateLiveRampLaunchArtifactStepConfiguration extends BaseStepCon
 
     public void setExecutionId(String executionId) {
         this.executionId = executionId;
+    }
+
+    public DataCollection.Version getVersion() {
+        return version;
+    }
+
+    public void setVersion(DataCollection.Version version) {
+        this.version = version;
     }
 }

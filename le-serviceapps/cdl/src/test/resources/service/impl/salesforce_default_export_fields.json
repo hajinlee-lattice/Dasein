@@ -17,7 +17,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"AccountId",
@@ -27,7 +27,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"LE_ACCOUNT_EXTERNAL_ID",
@@ -37,7 +37,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"PLAY_ID",
@@ -47,7 +47,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"LAUNCH_ID",
@@ -57,7 +57,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"DESCRIPTION",
@@ -67,7 +67,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"LAUNCH_DATE",
@@ -77,7 +77,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"LAST_UPDATED_TIMESTAMP",
@@ -87,7 +87,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"MONETARY_VALUE",
@@ -97,7 +97,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"LIKELIHOOD",
@@ -107,7 +107,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"SFDC_ACCOUNT_ID",
@@ -117,7 +117,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"PRIORITY_ID",
@@ -127,7 +127,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"CompanyName",
@@ -137,7 +137,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"PRIORITY_DISPLAY_NAME",
@@ -147,7 +147,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"MONETARY_VALUE_ISO4217_ID",
@@ -157,7 +157,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"LIFT",
@@ -167,7 +167,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"RATING_MODEL_ID",
@@ -177,7 +177,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"MODEL_SUMMARY_ID",
@@ -187,7 +187,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"SYNC_DESTINATION",
@@ -197,7 +197,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"DESTINATION_ORG_ID",
@@ -207,7 +207,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"DESTINATION_SYS_TYPE",
@@ -217,7 +217,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"TENANT_ID",
@@ -227,7 +227,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"DELETED",
@@ -257,7 +257,7 @@
       "externalSystemName":"Salesforce",
       "standardField":false,
       "exportEnabled":false,
-      "audienceType": ["CONTACTS"]
+      "audienceType": []
    },
    {
       "attrName":"PLAY_NAME",
@@ -297,7 +297,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"Address_Street_1",
@@ -307,7 +307,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"Address_Street_2",
@@ -317,7 +317,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"PhoneNumber",
@@ -327,7 +327,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"State",
@@ -337,7 +337,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"PostalCode",
@@ -347,7 +347,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName": "DoNotCall",
@@ -357,7 +357,7 @@
       "externalSystemName": "Salesforce",
       "standardField": true,
       "exportEnabled": true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName": "DoNotMail",
@@ -367,7 +367,7 @@
       "externalSystemName": "Salesforce",
       "standardField": true,
       "exportEnabled": true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"Country",
@@ -377,7 +377,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"CreatedDate",
@@ -387,7 +387,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"LastModifiedDate",
@@ -397,7 +397,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName": "Title",
@@ -407,7 +407,7 @@
       "externalSystemName": "Salesforce",
       "standardField": true,
       "exportEnabled": true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"SFDC_CONTACT_ID",
@@ -417,7 +417,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"City",
@@ -427,7 +427,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"ContactId",
@@ -437,7 +437,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"ContactName",
@@ -447,7 +447,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"FirstName",
@@ -457,7 +457,7 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    },
    {
       "attrName":"LastName",
@@ -467,6 +467,6 @@
       "externalSystemName":"Salesforce",
       "standardField":true,
       "exportEnabled":true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS"]
    }
 ]

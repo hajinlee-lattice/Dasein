@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.dcp.DataReportMode;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
@@ -42,6 +44,12 @@ public class ImportDataReportFromS3  extends BaseImportExportS3<DCPReportImportC
         List<Table> tables = getImportTables(rootId, level, mode);
         // super class will judge import or not
         tables.forEach(table -> addTableToRequestForImport(table, requests));
+    }
+
+    @Override
+    protected ExecutorService getExporterPool(List<ImportExportRequest> requests) {
+        int threadPoolSize = Math.min(16, requests.size());
+        return ThreadPoolUtils.getFixedSizeThreadPool("s3-import-export", threadPoolSize);
     }
 
     /**

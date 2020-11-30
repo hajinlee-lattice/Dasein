@@ -52,6 +52,7 @@
                                 <argument>com.latticeengines.domain.exposed.cdl.tray</argument>
                                 <argument>com.latticeengines.domain.exposed.cdl.activity</argument>
                                 <argument>com.latticeengines.domain.exposed.cdl.sla</argument>
+                                <argument>com.latticeengines.domain.exposed.cdl.dashboard</argument>
                                 <argument>com.latticeengines.domain.exposed.dcp</argument>
                                 <argument>com.latticeengines.domain.exposed.dcp.match</argument>
                                 <argument>com.latticeengines.domain.exposed.ulysses</argument>

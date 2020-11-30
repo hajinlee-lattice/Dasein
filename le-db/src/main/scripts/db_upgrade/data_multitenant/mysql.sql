@@ -13,7 +13,7 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
-      
+      ALTER TABLE SOURCE_FILE ADD COLUMN `SOURCEFILE_CONFIG` JSON;
   END //
 -- ##############################################################
 

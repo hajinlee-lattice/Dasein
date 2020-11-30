@@ -19,7 +19,6 @@ public class DataTemplateServiceImpl implements DataTemplateService {
     @Inject
     private DataTemplateEntityMgr entityMgr;
 
-
     @Override
     public String create(DataTemplate dataTemplate) {
         String tenantId = MultiTenantContext.getShortTenantId();

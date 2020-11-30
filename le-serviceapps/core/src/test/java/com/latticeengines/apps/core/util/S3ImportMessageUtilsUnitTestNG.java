@@ -18,6 +18,7 @@ public class S3ImportMessageUtilsUnitTestNG {
         String atlasKey5 = "dropfolder/08vdzz2k/Templates/DefaultSystem_AccountData/Account part1.CSV.zip";
         String invalidKey1 = "dropfolder/08vdzz2k/Projects/Project_xc51mzph/Source/Source_5aggfg55/Uploads/Account.csv";
         String invalidKey2 = "dropfolder/08vdzz2k/Projects/Project_xc51mzph/Source/Source_5aggfg55/drop/";
+        String listsegmentKsy = "datavision_segment/Lin_PA_Test/Segment_2020_11_23_06_37_39_UTC/Segment.zip";
         Assert.assertEquals(S3ImportMessageUtils.getMessageTypeFromKey(dcpKey), S3ImportMessageType.DCP);
         Assert.assertEquals(S3ImportMessageUtils.getMessageTypeFromKey(dcpKey2), S3ImportMessageType.DCP);
         Assert.assertEquals(S3ImportMessageUtils.getMessageTypeFromKey(atlasKey), S3ImportMessageType.Atlas);
@@ -27,6 +28,7 @@ public class S3ImportMessageUtilsUnitTestNG {
         Assert.assertEquals(S3ImportMessageUtils.getMessageTypeFromKey(atlasKey5), S3ImportMessageType.Atlas);
         Assert.assertEquals(S3ImportMessageUtils.getMessageTypeFromKey(invalidKey1), S3ImportMessageType.UNDEFINED);
         Assert.assertEquals(S3ImportMessageUtils.getMessageTypeFromKey(invalidKey2), S3ImportMessageType.UNDEFINED);
+        Assert.assertEquals(S3ImportMessageUtils.getMessageTypeFromKey(listsegmentKsy), S3ImportMessageType.LISTSEGMENT);
 
         Assert.assertEquals(S3ImportMessageUtils.getKeyPart(dcpKey, S3ImportMessageType.DCP,
                 S3ImportMessageUtils.KeyPart.PROJECT_ID), "Project_xc51mzph");

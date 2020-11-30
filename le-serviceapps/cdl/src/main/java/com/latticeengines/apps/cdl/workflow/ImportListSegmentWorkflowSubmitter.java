@@ -31,15 +31,16 @@ public class ImportListSegmentWorkflowSubmitter extends WorkflowSubmitter {
 
     @WithWorkflowJobPid
     public ApplicationId submit(@NotNull String customerSpace, @NotNull ListSegmentImportRequest request, @NotNull WorkflowPidWrapper pidWrapper) {
+        Map<String, String> inputProperties = new HashMap<>();
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importListSegmentWorkflow");
         ImportListSegmentWorkflowConfiguration configuration = new ImportListSegmentWorkflowConfiguration.Builder()
                 .customer(CustomerSpace.parse(customerSpace))
                 .sourceBucket(dateStageBucket)
                 .sourceKey(request.getS3FileKey())
                 .destBucket(customerBucket)
                 .segmentName(request.getSegmentName())
+                .inputProperties(inputProperties)
                 .build();
-        Map<String, String> inputProperties = new HashMap<>();
-        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importListSegmentWorkflow");
         ApplicationId applicationId = workflowJobService.submit(configuration, pidWrapper.getPid());
         return applicationId;
     }

@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ImportListSegmentWorkflowConfiguration;
@@ -74,8 +75,7 @@ public class CopyListSegmentCSV extends BaseWorkflowStep<CopyListSegmentCSVConfi
         String sourceKey = configuration.getSourceKey();
         checkFileSize(sourceBucket, sourceKey);
         String destBucket = configuration.getDestBucket();
-        CreateDataTemplateRequest request = new CreateDataTemplateRequest();
-        request.setTemplateKey(ListSegment.RAW_IMPORT);
+        CreateDataTemplateRequest request = createRequest();
         String templateId = segmentProxy.createOrUpdateDataTemplate(tenantId, segmentName, request);
         String templateDir = pathBuilder.getS3AtlasDataTemplatePrefix(destBucket, tenantId, templateId);
         templateDir = templateDir.substring(templateDir.indexOf(destBucket) + destBucket.length() + 1);
@@ -88,9 +88,17 @@ public class CopyListSegmentCSV extends BaseWorkflowStep<CopyListSegmentCSVConfi
         uncompressZipCSV(dataUnit);
     }
 
+    private CreateDataTemplateRequest createRequest() {
+        CreateDataTemplateRequest request = new CreateDataTemplateRequest();
+        request.setTemplateKey(ListSegment.RAW_IMPORT);
+        DataTemplate dataTemplate = new DataTemplate();
+        dataTemplate.setName(request.getTemplateKey());
+        request.setDataTemplate(dataTemplate);
+        return request;
+    }
+
     private void uncompressZipCSV(S3DataUnit s3DataUnit) {
-        try {
-            InputStream in = s3Service.readObjectAsStream(s3DataUnit.getBucket(), s3DataUnit.getPrefix());
+        try (InputStream in = s3Service.readObjectAsStream(s3DataUnit.getBucket(), s3DataUnit.getPrefix())) {
             HdfsUtils.uncompressZipFileFromInputStream(yarnConfiguration, in, s3DataUnit.getLinkedHdfsPath());
         } catch (IOException exception) {
             log.error("uncompress zip file failed with data unit {}.", s3DataUnit.getName());
@@ -101,7 +109,7 @@ public class CopyListSegmentCSV extends BaseWorkflowStep<CopyListSegmentCSVConfi
         S3DataUnit dataUnit = new S3DataUnit();
         dataUnit.setTenant(tenantId);
         dataUnit.setDataTemplateId(templateId);
-        String dataUnitName = NamingUtils.uuid(ListSegment.RAW_IMPORT);
+        String dataUnitName = NamingUtils.timestampWithRandom(ListSegment.RAW_IMPORT);
         dataUnit.setName(dataUnitName);
         dataUnit.setBucket(bucket);
         dataUnit.setPrefix(prefix + "/" + dataUnit.getName() + "/" + fileName);

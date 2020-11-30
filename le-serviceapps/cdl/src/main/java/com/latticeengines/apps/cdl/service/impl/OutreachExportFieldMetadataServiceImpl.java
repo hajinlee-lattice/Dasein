@@ -37,6 +37,9 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
         OutreachChannelConfig channelConfig = (OutreachChannelConfig) channel.getChannelConfig();
         AudienceType audienceType = channelConfig.getAudienceType();
 
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+                channel);
+
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
                 channel.getLookupIdMap().getTenant().getPid());
 
@@ -56,7 +59,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
                     accountAttributesMap, contactAttributesMap);
         } else {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Outreach, accountAttributesMap,
-                    contactAttributesMap);
+                    contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
         }
 
         // Retrieves enriched fields for prospect owner and account Id and
