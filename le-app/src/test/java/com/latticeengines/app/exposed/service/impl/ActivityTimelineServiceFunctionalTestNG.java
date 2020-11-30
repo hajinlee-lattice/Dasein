@@ -113,7 +113,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
         Assert.assertEquals(metrics.get(4).getLabel(), "Account Intent");
         Assert.assertEquals(String.valueOf(metrics.get(4).getMessage()), "Buying");
         Assert.assertEquals(metrics.get(4).getDescription(), "");
-        Assert.assertEquals(metrics.get(4).getContext(), "Acount-level Intent - {X}");
+        Assert.assertEquals(metrics.get(4).getContext(), "Acount-level intent in the last 10 days");
 
     }
 
