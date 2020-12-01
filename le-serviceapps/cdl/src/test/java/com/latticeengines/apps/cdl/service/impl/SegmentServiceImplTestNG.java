@@ -13,10 +13,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.log4testng.Logger;
 
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
@@ -37,7 +38,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 
 public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
 
-    private static final Logger log = Logger.getLogger(SegmentServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(SegmentServiceImplTestNG.class);
 
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
