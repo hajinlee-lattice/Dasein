@@ -224,7 +224,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         BusinessEntity businessEntity = BusinessEntity.getByName(entity);
         if ((BusinessEntity.Account.equals(businessEntity) || BusinessEntity.Contact.equals(businessEntity))
-                && dataFeedTask != null && dataFeedTask.getDataFeedTaskConfig() != null) {
+                && dataFeedTask != null && dataFeedTask.getDataFeedTaskConfig() != null && dataFeedTask.getDataFeedTaskConfig().getTemplateValidators() != null) {
             for (TemplateValidator validator : dataFeedTask.getDataFeedTaskConfig().getTemplateValidators()) {
                 if (validator instanceof AttributeLengthValidator) {
                     AttributeLengthValidator lengthValidator = (AttributeLengthValidator) validator;
