@@ -12,11 +12,14 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -40,9 +43,11 @@ import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
@@ -50,6 +55,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
@@ -58,6 +64,10 @@ import com.latticeengines.proxy.exposed.matchapi.MatchInternalProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
+/**
+ * Bulk match workflow step
+ * Splits match requests into blocks which are sent in parallel to Yarn containers
+ */
 @Component("parallelBlockExecution")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecutionConfiguration> {
@@ -88,11 +98,13 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private List<ApplicationId> applicationIds = new ArrayList<>();
     // Match Block ApplicationId -> Match Block UUID
     private Map<String, String> blockUuidMap = new HashMap<>();
+    // Match Block UUID -> Job Configuration
+    private Map<String, DataCloudJobConfiguration> configMap = new HashMap<>();
+
     private int numErrors = 0;
     private float progress;
     private Long progressUpdated;
     private MatchOutput matchOutput;
-    private Random random = new Random(System.currentTimeMillis());
     private List<DataCloudJobConfiguration> jobConfigurations;
     private List<DataCloudJobConfiguration> remainingJobs;
     private int totalRetries = 0;
@@ -103,12 +115,21 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private String matchUsageDir;
     private Map<String, Long> newEntityCountsFromFailedBlocks = new HashMap<>();
 
+    private Random random = new Random(System.currentTimeMillis());
+
+    // Continuously AND blocks: start with true in both
+    private boolean allSuccess = true;
+    private boolean allFailures = true;
+
+    private List<String> failedApps = new ArrayList<>();
+
     @Override
     public void execute() {
         try {
             log.info("Inside ParallelBlockExecution execute()");
             initializeYarnClient();
 
+            // Generate jobConfigurations
             Map<String, String> tracingContext = getTracingContext();
             jobConfigurations = new ArrayList<>();
             Object listObj = executionContext.get(BulkMatchContextKey.YARN_JOB_CONFIGS);
@@ -122,16 +143,21 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                             config.setTracingContext(tracingContext);
                         }
                         jobConfigurations.add(config);
+                        configMap.put(config.getBlockOperationUid(), config);
                     }
                 }
             }
 
             HdfsPodContext.changeHdfsPodId(getConfiguration().getPodId());
             rootOperationUid = getStringValueFromContext(BulkMatchContextKey.ROOT_OPERATION_UID);
+
+            // Output directories
             matchErrorDir = hdfsPathBuilder.constructMatchErrorDir(rootOperationUid).toString();
             matchNewEntityDir = hdfsPathBuilder.constructMatchNewEntityDir(rootOperationUid).toString();
             matchCandidateDir = hdfsPathBuilder.constructMatchCandidateDir(rootOperationUid).toString();
             matchUsageDir = hdfsPathBuilder.constructMatchUsageDir(rootOperationUid).toString();
+
+            // Setup complete
             remainingJobs = new ArrayList<>(jobConfigurations);
             // TODO trace block submission
             while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
@@ -139,6 +165,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 waitForMatchBlocks();
                 SleepUtils.sleep(10000L);
             }
+
             finalizeMatch();
         } catch (Exception e) {
             failTheWorkflowWithErrorMessage(e.getMessage(), e);
@@ -172,6 +199,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 log.info("Match block {} is not ready for processing.", jobConfiguration.getBlockOperationUid());
                 SleepUtils.sleep(60000);
             }
+
             ApplicationId appId = ApplicationIdUtils //
                     .toApplicationIdObj(matchInternalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
             blockUuidMap.put(appId.toString(), jobConfiguration.getBlockOperationUid());
@@ -181,6 +209,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             matchCommandService.startBlock(matchCommand, appId, jobConfiguration.getBlockOperationUid(),
                     jobConfiguration.getBlockSize());
             log.info("Submit a match block to application id " + appId);
+
             try {
                 log.info("Sleep for " + blockRampingRate + " seconds before submitting next block.");
                 Thread.sleep(blockRampingRate * 1000);
@@ -207,8 +236,15 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void finalizeMatch() {
+        if (!allSuccess && allFailures) {
+            throw new LedpException(LedpCode.LEDP_00008, new String[] { failedApps.toString() });
+        }
+
         try {
-            matchCommandService.update(rootOperationUid).status(MatchStatus.FINISHING).progress(0.98f).commit();
+            matchCommandService.update(rootOperationUid)
+                    .status(MatchStatus.FINISHING)
+                    .progress(0.98f)
+                    .commit();
 
             long startTime = matchOutput.getReceivedAt().getTime();
             matchOutput.getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
@@ -247,6 +283,52 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                                 map.getOrDefault(EntityMatchResult.MATCHED_BY_MATCHKEY, 0L);
                         matchedByAccountIdCount += //
                                 map.getOrDefault(EntityMatchResult.MATCHED_BY_ACCOUNTID, 0L);
+                    }
+                }
+            }
+
+            // For D&B Connect, mark failed as batch errors
+            if (!allSuccess) {
+                String schemaFile = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPathBuilder.constructMatchSchemaFile(rootOperationUid).toString());
+                Schema outputSchema = new Schema.Parser().parse(schemaFile);
+
+                String outputDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
+
+                if (!outputDir.endsWith("/")) {
+                    outputDir += '/';
+                }
+
+                for (String appId : failedApps) {
+                    String blockOperationUid = blockUuidMap.get(appId);
+                    DataCloudJobConfiguration config = configMap.get(blockOperationUid);
+
+                    if (config.getMatchInput().getTargetEntity().equals(BusinessEntity.PrimeAccount.toString())) {
+                        try {
+                            String blockErrorFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid)
+                                    .toString();
+                            String blockError = HdfsUtils.getHdfsFileContents(yarnConfiguration, blockErrorFile);
+
+                            List<GenericRecord> failedInputRecords = AvroUtils.getData(yarnConfiguration, new Path(config.getAvroPath()));
+                            List<GenericRecord> outputRecords = new ArrayList<>();
+
+                            for (GenericRecord record : failedInputRecords) {
+                                GenericRecordBuilder errorBuilder = new GenericRecordBuilder(outputSchema);
+
+                                for (Schema.Field inputField : outputSchema.getFields()) {
+                                    errorBuilder.set(inputField, record.get(inputField.name()));
+                                }
+                                errorBuilder.set(MatchConstants.MATCH_ERROR_TYPE, MatchCoreErrorConstants.ErrorType.BATCH_FAILURE.name());
+                                int endOfFirstLine = blockError.indexOf('\n');
+                                errorBuilder.set(MatchConstants.MATCH_ERROR_INFO, endOfFirstLine == -1 ? blockError : blockError.substring(0, endOfFirstLine));
+                                outputRecords.add(errorBuilder.build());
+                            }
+                            String outputFile = hdfsPathBuilder.constructMatchBlockSplitAvro(rootOperationUid, blockOperationUid, 0).toString();
+                            outputFile = outputDir + outputFile.substring(outputFile.lastIndexOf('/') + 1);
+                            AvroUtils.writeToHdfsFile(yarnConfiguration, outputSchema, outputFile, outputRecords);
+                        } catch (Exception e) {
+                            log.error("Failed to save errors for matcher " + blockOperationUid + " in application " + appId
+                                    + " : ", e);
+                        }
                     }
                 }
             }
@@ -407,10 +489,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     mergeBlockCandidateResult(appId);
                     mergeBlockUsageResult(appId);
                     matchCommandService.updateBlock(blockUid).status(state).progress(1f).commit();
+                    allFailures = false;
                 } else {
-                    log.error("Unknown teminal status " + status + " for Application [" + appId
+                    log.error("Unknown terminal status " + status + " for Application [" + appId
                             + "]. Treat it as FAILED.");
-                    failTheWorkflowByFailedBlock(MatchStatus.FAILED, report);
+                    logFailedBlock(MatchStatus.FAILED, report);
                 }
 
             }
@@ -443,10 +526,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 }
             }
         } else {
-            log.warn(errorMsg + ". Killing the whole match");
+            log.warn(errorMsg + ". Failing the block");
             MatchStatus terminalStatus = FinalApplicationStatus.FAILED.equals(status) ? MatchStatus.FAILED
                     : MatchStatus.ABORTED;
-            failTheWorkflowByFailedBlock(terminalStatus, report);
+            logFailedBlock(terminalStatus, report);
+            allSuccess = false;
         }
     }
 
@@ -470,31 +554,45 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         return matchCommandService.blockIsRetriable(blockUid);
     }
 
-    private void failTheWorkflowByFailedBlock(MatchStatus terminalStatus, ApplicationReport failedReport) {
+    private void logFailedBlock(MatchStatus terminalStatus, ApplicationReport failedReport) {
         ApplicationId failedAppId = failedReport.getApplicationId();
         String blockOperationUid = blockUuidMap.get(failedAppId.toString());
         String blockErrorFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid)
                 .toString();
         String errorMsg = "Match container [" + failedAppId + "] failed.";
+
+        String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
         try {
             String blockError = HdfsUtils.getHdfsFileContents(yarnConfiguration, blockErrorFile);
             String matchErrorFile = hdfsPathBuilder.constructMatchErrorFile(rootOperationUid).toString();
             HdfsUtils.writeToFile(yarnConfiguration, matchErrorFile, errorMsg + "\n" + blockError);
+
             errorMsg += blockError.split("\n")[0];
         } catch (Exception e) {
             log.error("Failed to read the error for matcher " + blockOperationUid + " in application " + failedAppId
                     + " : " + e.getMessage());
         }
-        matchCommandService.update(rootOperationUid) //
-                .status(terminalStatus) //
-                .errorMessage(errorMsg) //
-                .commit();
-        throw new LedpException(LedpCode.LEDP_00008, new String[] { errorMsg });
+
+        DataCloudJobConfiguration jobConfig = configMap.get(blockOperationUid);
+
+        if (terminalStatus == MatchStatus.ABORTED
+                || !BusinessEntity.PrimeAccount.toString().equals(jobConfig.getMatchInput().getTargetEntity())) {
+            matchCommandService.update(rootOperationUid) //
+                    .resultLocation(avroDir)
+                    .status(terminalStatus) //
+                    .errorMessage(errorMsg) //
+                    .commit();
+
+            throw new LedpException(LedpCode.LEDP_00008, new String[] { errorMsg });
+        }
+
+        failedApps.add(failedAppId.toString());
     }
 
     private void failTheWorkflowWithErrorMessage(String errorMsg, Exception ex) {
         try {
             String matchErrorFile = hdfsPathBuilder.constructMatchErrorFile(rootOperationUid).toString();
+            log.info("Match Error File: " + matchErrorFile);
             HdfsUtils.writeToFile(yarnConfiguration, matchErrorFile, errorMsg);
         } catch (Exception e) {
             log.error("Failed to write the error file: " + e.getMessage(), e);

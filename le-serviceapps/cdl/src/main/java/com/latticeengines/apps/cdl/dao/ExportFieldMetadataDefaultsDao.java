@@ -12,8 +12,6 @@ public interface ExportFieldMetadataDefaultsDao extends BaseDao<ExportFieldMetad
 
     List<ExportFieldMetadataDefaults> getAllDefaultExportFields(CDLExternalSystemName systemName);
 
-    List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFields(CDLExternalSystemName systemName);
-
     List<ExportFieldMetadataDefaults> getExportEnabledDefaultFields(CDLExternalSystemName systemName);
 
     List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldsForEntity(CDLExternalSystemName systemName,

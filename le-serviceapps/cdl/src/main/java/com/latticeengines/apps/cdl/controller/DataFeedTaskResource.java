@@ -197,31 +197,13 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.registerExtracts(customerSpace, taskId, tableName, extracts);
     }
 
-    @PutMapping("/{taskId}/addtabletoqueue/{tableName}")
+    @PostMapping("/{taskId}/registerimportdata/{dataTableName}")
     @ResponseBody
-    @ApiOperation(value = "Add table to data feed task table queue")
-    public void addTableToQueue(@PathVariable String customerSpace, @PathVariable String taskId,
-                                @PathVariable String tableName) {
+    @ApiOperation(value = "Update data feed task")
+    public List<String> registerImportData(@PathVariable String customerSpace, @PathVariable String taskId,
+                                         @PathVariable String dataTableName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataFeedTaskService.addTableToQueue(customerSpace, taskId, tableName);
-    }
-
-    @PutMapping("/{taskId}/addtablestoqueue")
-    @ResponseBody
-    @ApiOperation(value = "Add tables to data feed task table queue")
-    public void addTablesToQueue(@PathVariable String customerSpace, @PathVariable String taskId,
-                                 @RequestBody List<String> tables) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataFeedTaskService.addTablesToQueue(customerSpace, taskId, tables);
-    }
-
-    @GetMapping("/{source}/{dataFeedType}/{entity}/unconsolidatedextracts")
-    @ResponseBody
-    @ApiOperation(value = "Get unconsolidated extracts in queue")
-    public List<Extract> getExtractsPendingInQueue(@PathVariable String customerSpace, @PathVariable String source,
-            @PathVariable String dataFeedType, @PathVariable String entity) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataFeedTaskService.getExtractsPendingInQueue(customerSpace, source, dataFeedType, entity);
+        return dataFeedTaskService.registerImportData(customerSpace, taskId, dataTableName);
     }
 
     @GetMapping("/{entity}/getTables")

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -23,16 +24,22 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
+import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.prestodb.exposed.service.AthenaService;
+import com.latticeengines.prestodb.exposed.service.PrestoConnectionService;
+import com.latticeengines.prestodb.exposed.service.PrestoDbService;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.functionalframework.QueryTestUtils;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
@@ -59,6 +66,18 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
 
+    @Inject
+    private AthenaService athenaService;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Inject
+    private PrestoConnectionService prestoConnectionService;
+
+    @Inject
+    private PrestoDbService prestoDbService;
+
     @Value("${camille.zk.pod.id}")
     private String podId;
 
@@ -66,23 +85,54 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
     protected CustomerSpace customerSpace;
     protected Map<String, String> tblPathMap;
 
-    protected void initializeAttributeRepo(int version, boolean uploadHdfs) {
+    protected void initializeAttributeRepo(int version, boolean uploadHdfs, boolean setupAthena) {
         InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
                 String.valueOf(version), ATTR_REPO_S3_FILENAME);
         attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
         attrRepo.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
         if (version >= 3) {
-            if (uploadHdfs) {
-                tblPathMap = new HashMap<>();
-                Map<TableRoleInCollection, String> pathMap = readTablePaths(version);
-                for (TableRoleInCollection role : QueryTestUtils.getRolesInAttrRepo()) {
-                    if (pathMap.containsKey(role)) {
-                        String tblName = QueryTestUtils.getServingStoreName(role, version);
-                        String path = pathMap.get(role);
-                        tblPathMap.put(tblName, path);
+            tblPathMap = new HashMap<>();
+            Map<TableRoleInCollection, String> pathMap = readTablePaths(version);
+            for (TableRoleInCollection role : QueryTestUtils.getRolesInAttrRepo()) {
+                if (pathMap.containsKey(role)) {
+                    String tblName = QueryTestUtils.getServingStoreName(role, version);
+                    String path = pathMap.get(role);
+                    tblPathMap.put(tblName, path);
+                    if (uploadHdfs && prestoConnectionService.isPrestoDbAvailable() && !prestoDbService.tableExists(tblName)) {
+                        // if you want to force re-register presto table, remove "!prestoDbService.tableExists(tblName)"
+                        String lockName = "QueryTest_PrestoDB_" + tblName;
+                        try {
+                            LockManager.registerCrossDivisionLock(lockName);
+                            LockManager.acquireWriteLock(lockName, 10, TimeUnit.MINUTES);
+                            log.info("Won the distributed lock {}", lockName);
+                        } catch (Exception e) {
+                            log.warn("Error while acquiring zk lock {}", lockName, e);
+                        }
+                        try {
+                            prestoDbService.deleteTableIfExists(tblName);
+                            if (path.endsWith(".parquet")) {
+                                prestoDbService.createTableIfNotExists(tblName, path, DataUnit.DataFormat.PARQUET, null);
+                            } else {
+                                prestoDbService.createTableIfNotExists(tblName, path, DataUnit.DataFormat.AVRO);
+                            }
+                        } finally {
+                            LockManager.releaseWriteLock(lockName);
+                        }
+                    }
+                    if (setupAthena && !athenaService.tableExists(tblName)) {
+                        String s3Folder = path.substring( //
+                                path.indexOf("/Tables/") + "/Tables/".length(), path.lastIndexOf("/"));
+                        s3Folder = "le-query/attrrepo/" + version + "/ParquetTables/" + s3Folder;
+                        String bucket = "latticeengines-test-artifacts";
+                        if (s3Service.isNonEmptyDirectory(bucket, s3Folder)) {
+                            athenaService.createTableIfNotExists( //
+                                    tblName, bucket, s3Folder, DataUnit.DataFormat.PARQUET);
+                        }
                     }
                 }
-                insertPurchaseHistory(attrRepo, version);
+            }
+            insertPurchaseHistory(attrRepo, version);
+            if (uploadHdfs) {
                 uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);
             }
 
@@ -181,7 +231,6 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
         } catch (Exception e) {
             throw new RuntimeException("Failed to load json resource" + resourceName, e);
         }
-
     }
 
 }

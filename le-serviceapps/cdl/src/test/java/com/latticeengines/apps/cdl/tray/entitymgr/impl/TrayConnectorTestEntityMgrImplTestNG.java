@@ -96,15 +96,18 @@ public class TrayConnectorTestEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         test2.setTestResult(TrayConnectorTestResultType.Succeeded);
         trayConnectorTestEntityMgr.create(test2);
 
-        List<TrayConnectorTest> unfinishedTests = trayConnectorTestEntityMgr.findUnfinishedTests();
-        Assert.assertEquals(unfinishedTests.size(), 1);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
+                Collections.singleton(AssertionError.class), null);
+
+        retry.execute(context -> {
+            List<TrayConnectorTest> unfinishedTests = trayConnectorTestEntityMgr.findUnfinishedTests();
+            Assert.assertEquals(unfinishedTests.size(), 1);
+            return true;
+        });
 
         // Clean up from here
         trayConnectorTestEntityMgr.deleteByWorkflowRequestId(workflowRequestId1);
         trayConnectorTestEntityMgr.deleteByWorkflowRequestId(workflowRequestId2);
-
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
-                Collections.singleton(AssertionError.class), null);
 
         retry.execute(context -> {
             TrayConnectorTest deletedTest1 = trayConnectorTestEntityMgr.findByWorkflowRequestId(workflowRequestId1);

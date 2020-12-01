@@ -2,11 +2,14 @@ package com.latticeengines.datacloud.yarn.runtime;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.CREATED_TEMPLATE_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.MATCH_ERROR_CODE;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_MATCH_ERROR_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_REMOVED;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.MATCH_ERROR_INFO;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.MATCH_ERROR_TYPE;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -525,6 +528,9 @@ public class ProcessorContext {
         }
         if (BusinessEntity.PrimeAccount.name().equals(originalInput.getTargetEntity())) {
             outputSchema = appendCandidateSchema(outputSchema);
+
+            // Need to pipe D+ error codes out of core; should be removed from most CSV files at the end
+            outputSchema = appendDcpErrorSchema(outputSchema);
         }
 
         disableDunsValidation = originalInput.isDisableDunsValidation();
@@ -569,6 +575,16 @@ public class ProcessorContext {
     Schema appendErrorSchema(Schema schema) {
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
         fieldMap.put(ENTITY_MATCH_ERROR_FIELD, String.class);
+        Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
+        Schema errorSchema = AvroUtils.constructSchemaWithProperties(schema.getName(), fieldMap, propertiesMap);
+        return (Schema) AvroUtils.combineSchemas(schema, errorSchema)[0];
+    }
+
+    Schema appendDcpErrorSchema(Schema schema) {
+        Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
+        fieldMap.put(MATCH_ERROR_TYPE, String.class);
+        fieldMap.put(MATCH_ERROR_CODE, String.class);
+        fieldMap.put(MATCH_ERROR_INFO, String.class);
         Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
         Schema errorSchema = AvroUtils.constructSchemaWithProperties(schema.getName(), fieldMap, propertiesMap);
         return (Schema) AvroUtils.combineSchemas(schema, errorSchema)[0];

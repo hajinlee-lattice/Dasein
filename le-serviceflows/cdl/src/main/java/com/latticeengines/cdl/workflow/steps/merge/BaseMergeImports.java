@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATTR_LDC_DUNS;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
@@ -102,6 +103,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected String diffReportTablePrefix;
     protected String batchStorePrimaryKey;
     protected List<Table> inputTables = new ArrayList<>();
+    protected List<String> rematchInputTableNames = new ArrayList<>();
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
     protected Map<String, String> tableTemplateMap;
@@ -355,6 +357,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setDedupSrc(true);
         config.setJoinKey(joinKey);
         config.setAddTimestamps(true);
+        config.setExcludeAttrs(Collections.singletonList(ATTR_LDC_DUNS));
         if (hasSystemBatch) {
             config.setHasSystem(true);
         }
@@ -639,10 +642,15 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     protected void mergeInputSchema(String resultTableName) {
         Table resultTable = metadataProxy.getTable(customerSpace.toString(), resultTableName);
-        if (resultTable != null && CollectionUtils.isNotEmpty(inputTableNames)) {
-            log.info("Update the schema of " + resultTableName + " using input tables' schema.");
+        if (resultTable != null && (CollectionUtils.isNotEmpty(inputTableNames)
+                || CollectionUtils.isNotEmpty(rematchInputTableNames))) {
+            log.info("Update the schema of {} using input tables' ({}) and rematch input tables' ({}) schema.",
+                    resultTableName, inputTableNames, rematchInputTableNames);
             Map<String, Attribute> inputAttrs = new HashMap<>();
             inputTableNames.forEach(tblName -> addAttrsToMap(inputAttrs, tblName));
+            if (rematchInputTableNames != null) {
+                rematchInputTableNames.forEach(tblName -> addAttrsToMap(inputAttrs, tblName));
+            }
             updateAttrs(resultTable, inputAttrs);
             metadataProxy.updateTable(customerSpace.toString(), resultTableName, resultTable);
         }

@@ -11,7 +11,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,7 @@ import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
-    private static final Logger LOG = Logger.getLogger(ScoreExternalResourceDeploymentTestNG.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ScoreExternalResourceDeploymentTestNG.class);
 
     private static final String MARKETO_CRED_NAME = "TestProfileFromScoringAPI";
 

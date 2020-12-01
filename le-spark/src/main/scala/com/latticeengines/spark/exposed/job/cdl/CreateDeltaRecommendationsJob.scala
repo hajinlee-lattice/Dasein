@@ -7,12 +7,12 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.playmakercore.{NonStandardRecColumnName, RecommendationColumnName}
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext
-import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig
+import com.latticeengines.domain.exposed.util.ExportUtils
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeltaCampaignLaunchUtils
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{col, count, from_unixtime, lit, rank, sum, to_timestamp, when}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
@@ -92,12 +92,12 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       val columnsExistInContactCols: Seq[String] = contactCols.filter(name => contactTable.columns.contains(name))
       val joinKeyCol: Option[String] = Some(joinKey)
       val contactTableToJoin: DataFrame = contactTable.select((columnsExistInContactCols ++ joinKeyCol).map(name => col(name)): _*)
-      val newAttrs = contactTableToJoin.columns.map(c => DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + c)
+      val newAttrs = contactTableToJoin.columns.map(c => ExportUtils.CONTACT_ATTR_PREFIX + c)
       val contactTableRenamed: DataFrame = contactTableToJoin.toDF(newAttrs: _*)
       result = result.drop("PID")
       result = result.drop("DELETED")
-      result = result.join(contactTableRenamed, result(joinKey) === contactTableRenamed(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + joinKey), "left")
-      result = result.drop(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + joinKey)
+      result = result.join(contactTableRenamed, result(joinKey) === contactTableRenamed(ExportUtils.CONTACT_ATTR_PREFIX + joinKey), "left")
+      result = result.drop(ExportUtils.CONTACT_ATTR_PREFIX + joinKey)
     }
     result
   }
@@ -107,9 +107,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     var result: DataFrame = generateUserConfiguredDataFrame(recDf, accountTable, deltaCampaignLaunchSparkContext, joinKey)
     if (!contactTable.rdd.isEmpty && !contactCols.isEmpty) {
       result = joinContacts(result, contactTable, contactCols, joinKey)
-      contactNums += result.filter(col(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name()).isNotNull).count()
+      contactNums += result.filter(col(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name()).isNotNull).count()
     } else {
-      result = result.withColumn(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name(), lit(null).cast(StringType))
+      result = result.withColumn(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name(), lit(null).cast(StringType))
       contactNums += 0L
     }
     dropJoinKeyIfNeeded(deltaCampaignLaunchSparkContext, joinKey, result)
@@ -313,9 +313,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     val joinKeyCol: Option[String] = if (!containsJoinKey) Some(joinKey) else None
     val columnsExistInContactCols: Seq[String] = contactColsToUse.filter(name => contactTable.columns.contains(name))
     val contactTableToJoin: DataFrame = contactTable.select((columnsExistInContactCols ++ joinKeyCol).map(name => col(name)): _*)
-    val newAttrs = contactTableToJoin.columns.map(c => DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + c)
+    val newAttrs = contactTableToJoin.columns.map(c => ExportUtils.CONTACT_ATTR_PREFIX + c)
     val contactTableRenamed: DataFrame = contactTableToJoin.toDF(newAttrs: _*)
-    joinResult = joinResult.join(contactTableRenamed, joinResult(joinKey) === contactTableRenamed(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + joinKey), "left")
+    joinResult = joinResult.join(contactTableRenamed, joinResult(joinKey) === contactTableRenamed(ExportUtils.CONTACT_ATTR_PREFIX + joinKey), "left")
     logSpark("----- BEGIN SCRIPT OUTPUT ACCOUNT JOIN CONTACT -----")
     joinResult.printSchema
     logSpark("----- END SCRIPT OUTPUT ACCOUNT JOIN CONTACT -----")

@@ -132,6 +132,9 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("CreateDeleteCsvDataFrame")
     private boolean createDeleteCsvDataFrame;
 
+    @JsonProperty("createTaskDescriptionFile")
+    private boolean createTaskDescriptionFile;
+
     @JsonProperty("publishRecommendationsToDB")
     private boolean publishRecommendationsToDB;
 
@@ -409,6 +412,14 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
 
     public void setCreateDeleteCsvDataFrame(boolean createDeleteCsvDataFrame) {
         this.createDeleteCsvDataFrame = createDeleteCsvDataFrame;
+    }
+
+    public boolean getCreateTaskDescriptionFile() {
+        return this.createTaskDescriptionFile;
+    }
+
+    public void setCreateTaskDescriptionFile(boolean createTaskDescriptionFile) {
+        this.createTaskDescriptionFile = createTaskDescriptionFile;
     }
 
     public boolean getPublishRecommendationsToDB() {

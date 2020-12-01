@@ -21,7 +21,7 @@ public class AttributeLengthValidator extends TemplateValidator {
     private Boolean nullable;
 
     @JsonProperty("length")
-    private int length;
+    private Integer length;
 
     public String getAttributeName() {
         return attributeName;
@@ -39,11 +39,11 @@ public class AttributeLengthValidator extends TemplateValidator {
         this.nullable = nullable;
     }
 
-    public int getLength() {
+    public Integer getLength() {
         return length;
     }
 
-    public void setLength(int length) {
+    public void setLength(Integer length) {
         this.length = length;
     }
 
@@ -57,6 +57,9 @@ public class AttributeLengthValidator extends TemplateValidator {
                 }
                 return Boolean.TRUE.equals(nullable);
             } else {
+                if (length == null) {
+                    return true;
+                }
                 if (StringUtils.length(value) == length) {
                     return true;
                 } else {

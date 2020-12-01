@@ -1,9 +1,12 @@
 package com.latticeengines.ulysses.controller;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,19 +31,26 @@ public class DataVisionSegmentResource {
     private SegmentProxy segmentProxy;
 
     @GetMapping("")
-    public List<MetadataSegment> getSegments(@PathVariable String customerSpace) {
-        return segmentProxy.getLiSegments(customerSpace);
+    public List<ListSegmentSummary> getSegments(@PathVariable String customerSpace) {
+        List<MetadataSegment> segmentList = segmentProxy.getLiSegments(customerSpace);
+        if (CollectionUtils.isNotEmpty(segmentList)) {
+            return segmentList.stream().map(ListSegmentSummary::fromMetadataSegment).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @GetMapping("/{externalSystem}/{externalSegmentId}")
-    public MetadataSegment getSegmentByExternalInfo(@PathVariable String customerSpace, @PathVariable String externalSystem,
+    public ListSegmentSummary getSegmentByExternalInfo(@PathVariable String customerSpace, @PathVariable String externalSystem,
                                                     @PathVariable String externalSegmentId) {
-        return segmentProxy.getListSegmentByExternalInfo(customerSpace, externalSystem, externalSegmentId);
+        MetadataSegment segment = segmentProxy.getListSegmentByExternalInfo(customerSpace, externalSystem, externalSegmentId);
+        return ListSegmentSummary.fromMetadataSegment(segment);
     }
 
     @PostMapping("")
-    public MetadataSegment createOrUpdateSegment(@PathVariable String customerSpace, @RequestBody ListSegmentRequest request) {
-        return segmentProxy.createOrUpdateListSegment(customerSpace, convertFromRequest(request));
+    public ListSegmentSummary createOrUpdateSegment(@PathVariable String customerSpace, @RequestBody ListSegmentRequest request) {
+        MetadataSegment segment =  segmentProxy.createOrUpdateListSegment(customerSpace, convertFromRequest(request));
+        return ListSegmentSummary.fromMetadataSegment(segment);
     }
 
     private MetadataSegment convertFromRequest(ListSegmentRequest request) {
@@ -58,4 +68,5 @@ public class DataVisionSegmentResource {
         segmentProxy.deleteSegmentByExternalInfo(customerSpace, externalSystem, externalSegmentId, false);
         return true;
     }
+
 }

@@ -83,9 +83,6 @@ public class RecommendationCleanupServiceImplDeploymentTestNG extends AbstractTe
         List<Recommendation> recommendations = recommendationEntityMgr.findAll();
         Assert.assertTrue(CollectionUtils.isEmpty(recommendations));
 
-        List<Long> tenantIds = recommendationEntityMgr.getAllTenantIds();
-        Assert.assertTrue(CollectionUtils.isNotEmpty(tenantIds));
-
         orgInfo = new HashMap<>();
         orgInfo.put(CDLConstants.ORG_ID, "DOID");
         orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, "CRM");

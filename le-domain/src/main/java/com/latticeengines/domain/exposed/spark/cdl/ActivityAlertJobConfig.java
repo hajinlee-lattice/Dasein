@@ -22,6 +22,9 @@ public class ActivityAlertJobConfig extends SparkJobConfig {
     public Map<String, Long> alertNameToQualificationPeriodDays = new HashMap<>();
 
     @JsonProperty
+    public boolean dedupAlert;
+
+    @JsonProperty
     public Long currentEpochMilli;
 
     @Override

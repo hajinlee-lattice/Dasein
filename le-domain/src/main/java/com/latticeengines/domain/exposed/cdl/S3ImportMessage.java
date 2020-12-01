@@ -45,7 +45,7 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
      */
     @JsonProperty("dropbox")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_DROP_BOX", nullable = false)
+    @JoinColumn(name = "FK_DROP_BOX")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private DropBox dropBox;
 
@@ -111,7 +111,7 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     }
 
     public void setKey(String key) {
-        if (StringUtils.isEmpty(key) || key.split("/").length < 5) {
+        if (StringUtils.isEmpty(key) || key.split("/").length < 4) {
             throw new IllegalArgumentException("Do not support s3 message key: " + key);
         }
         this.key = key;

@@ -16,11 +16,16 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.LaunchBaseType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LiveRampChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalculationResultsFromS3StepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -44,21 +49,37 @@ public class ImportDeltaCalculationResultsFromS3
         String launchId = configuration.getLaunchId();
         log.info(String.format("Building requests for tenant=%s, playId=%s launchId=%s", customerSpace.getTenantId(),
                 playId, launchId));
-
         List<String> tables = getMetadataTableNames(customerSpace, playId, launchId);
+        Play play = playProxy.getPlay(customerSpace.getTenantId(), playId);
+        if (play == null) {
+            throw new RuntimeException("Can't find play by name " + playId + ".");
+        }
+        boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(play.getTapType());
         if (CollectionUtils.isNotEmpty(tables)) {
-            tables.forEach(tblName -> {
-                Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
-                if (table == null) {
-                    throw new RuntimeException("Table " + tblName + " for customer " //
-                            + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
-                            + " does not exists.");
-                }
-                addTableToRequestForImport(table, requests);
-            });
+            if (baseOnOtherTapType) {
+                log.info("Play {} is based on list segment.", play.getName());
+                tables.forEach(dataUnitName -> {
+                    S3DataUnit dataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), dataUnitName,
+                            DataUnit.StorageType.S3);
+                    if (dataUnit == null) {
+                        throw new RuntimeException("Data Unit " + dataUnitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
+                    }
+                    addS3DataUnitToRequestForImport(dataUnit, requests);
+                });
+            } else {
+                tables.forEach(tblName -> {
+                    Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
+                    if (table == null) {
+                        throw new RuntimeException("Table " + tblName + " for customer " //
+                                + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
+                                + " does not exists.");
+                    }
+                    addTableToRequestForImport(table, requests);
+                });
+            }
         } else {
             log.error(
-                    String.format("There is no metadat tables associated with tenant %s", customerSpace.getTenantId()));
+                    String.format("There is no metadata tables associated with tenant %s", customerSpace.getTenantId()));
         }
 
     }
@@ -84,6 +105,7 @@ public class ImportDeltaCalculationResultsFromS3
         CDLExternalSystemName systemName = playLaunch.getDestinationSysName();
         boolean launchToDb = CDLExternalSystemName.Salesforce.equals(systemName) || CDLExternalSystemName.Eloqua.equals(systemName);
         boolean isLiveRampLaunch = channelConfig instanceof LiveRampChannelConfig;
+        boolean isOutreachTaskLaunch = isOutreachTaskLaunch(channelConfig);
 
         if (isLiveRampLaunch) {
             if (StringUtils.isNotEmpty(addContacts)) {
@@ -152,6 +174,11 @@ public class ImportDeltaCalculationResultsFromS3
             throw new RuntimeException(audienceType + " not supported.");
         }
 
+        if (isOutreachTaskLaunch) {
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE,
+                Boolean.toString(true));
+        }
+
         log.info(String.format("totalDfs=%d, tableNames=%s", totalDfs, Arrays.toString(tableNames.toArray())));
         putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DATA_FRAME_NUM, String.valueOf(totalDfs));
         if (totalDfs == 0) {
@@ -161,4 +188,12 @@ public class ImportDeltaCalculationResultsFromS3
         return tableNames;
     }
 
+    private boolean isOutreachTaskLaunch(ChannelConfig channelConfig) {
+        if (channelConfig instanceof OutreachChannelConfig) {
+            OutreachChannelConfig outreachConfig = (OutreachChannelConfig) channelConfig;
+            return outreachConfig.getLaunchBaseType() == LaunchBaseType.TASK;
+        } else {
+            return false;
+        }
+    }
 }

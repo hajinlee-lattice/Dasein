@@ -22,6 +22,7 @@ import com.latticeengines.datacloud.etl.utils.SftpUtils;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.ingestion.PatchBookConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.S3Configuration;
+import com.latticeengines.domain.exposed.datacloud.ingestion.S3InternalConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
@@ -110,6 +111,17 @@ public class IngestionValidatorImpl implements IngestionValidator {
             }
             // PatchBook validation takes place inside ingestion workflow due to
             // pagination is required and validation could take long time
+            return;
+        case S3_INTERNAL:
+            if (StringUtils.isBlank(request.getFileName())) {
+                throw new RuntimeException("Please provide file name");
+            }
+            S3InternalConfiguration config = (S3InternalConfiguration) ingestion.getProviderConfiguration();
+            if (config.getSourceBucket() == null || config.getParentDir() == null
+                    || config.getSubfolderDateFormat() == null) {
+                throw new IllegalArgumentException(
+                        "SourceBucket, ParentDir or SubfolderDateFormat is missing in S3InternalConfiguration. Please check Ingestion table in db");
+            }
             return;
         default:
             throw new RuntimeException(

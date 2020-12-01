@@ -32,6 +32,9 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.prestodb.exposed.service.AthenaService;
+import com.latticeengines.prestodb.exposed.service.PrestoConnectionService;
+import com.latticeengines.prestodb.exposed.service.PrestoDbService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -67,6 +70,15 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
+
+    @Inject
+    private PrestoConnectionService prestoConnectionService;
+
+    @Inject
+    private PrestoDbService prestoDbService;
+
+    @Inject
+    private AthenaService athenaService;
 
     @Inject
     private S3Service s3Service;
@@ -253,20 +265,72 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     @Override
+    public void cleanupPrestoDb() {
+        if (prestoConnectionService.isPrestoDbAvailable()) {
+            for (Tenant tenant : testTenants) {
+                if (excludedCleanupTenantIds.contains(tenant.getId())) {
+                    log.info("Skip cleaning up redshift for" + tenant.getId());
+                } else {
+                    log.info("Clean up prestodb for test tenant " + tenant.getId());
+                    String tenantId = CustomerSpace.parse(tenant.getId()).getTenantId();
+                    List<String> tables = prestoDbService.getTablesStartsWith(tenantId + "_");
+                    RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+                    tables.forEach(t -> {
+                        try {
+                            retry.execute(ctx -> {
+                                prestoDbService.deleteTableIfExists(t);
+                                return true;
+                            });
+                        } catch (Exception e) {
+                            log.warn("Failed to drop testing table {}", t, e);
+                        }
+                    });
+                }
+            }
+        } else {
+            log.warn("PrestoDB is not available in current environment.");
+        }
+    }
+
+    @Override
     public void cleanupRedshift() {
         for (Tenant tenant : testTenants) {
             if (excludedCleanupTenantIds.contains(tenant.getId())) {
                 log.info("Skip cleaning up redshift for" + tenant.getId());
             } else {
-                log.info("Clean up redshift test tenant " + tenant.getId());
+                log.info("Clean up redshift for test tenant " + tenant.getId());
                 // FIXME: some test tenant may not be on the default partition
                 RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
-                List<String> tables = redshiftService.getTables(CustomerSpace.parse(tenant.getId()).getTenantId());
-                RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(5, 2000, 2, null);
+                List<String> tables = redshiftService.getTables(CustomerSpace.parse(tenant.getId()).getTenantId() + "_");
+                RetryTemplate retry = RetryUtils.getRetryTemplate(5);
                 tables.forEach(t -> {
                     try {
                         retry.execute(ctx -> {
                             redshiftService.dropTable(t);
+                            return true;
+                        });
+                    } catch (Exception e) {
+                        log.warn("Failed to drop testing table {}", t, e);
+                    }
+                });
+            }
+        }
+    }
+
+    @Override
+    public void cleanupAthena() {
+        for (Tenant tenant : testTenants) {
+            if (excludedCleanupTenantIds.contains(tenant.getId())) {
+                log.info("Skip cleaning up redshift for" + tenant.getId());
+            } else {
+                log.info("Clean up athena for test tenant " + tenant.getId());
+                String tenantId = CustomerSpace.parse(tenant.getId()).getTenantId();
+                List<String> tables = athenaService.getTablesStartsWith(tenantId + "_");
+                RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+                tables.forEach(t -> {
+                    try {
+                        retry.execute(ctx -> {
+                            athenaService.deleteTableIfExists(t);
                             return true;
                         });
                     } catch (Exception e) {

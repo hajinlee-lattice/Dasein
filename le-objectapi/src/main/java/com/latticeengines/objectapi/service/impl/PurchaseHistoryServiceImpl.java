@@ -1,5 +1,8 @@
 package com.latticeengines.objectapi.service.impl;
 
+import static com.latticeengines.query.factory.AthenaQueryProvider.ATHENA_USER;
+import static com.latticeengines.query.factory.PrestoQueryProvider.PRESTO_USER;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -34,6 +38,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.ulysses.PeriodTransaction;
 import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
 import com.latticeengines.objectapi.service.PurchaseHistoryService;
+import com.latticeengines.prestodb.exposed.service.AthenaService;
+import com.latticeengines.prestodb.exposed.service.PrestoConnectionService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
@@ -52,10 +58,16 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
 
+    @Inject
+    private PrestoConnectionService prestoConnectionService;
+
+    @Inject
+    private AthenaService athenaService;
+
     @SuppressWarnings("rawtypes")
     @Override
     public List<PeriodTransaction> getPeriodTransactionsByAccountId(String accountId, String periodName,
-            ProductType productType) {
+            ProductType productType, String sqlUser) {
         List<PeriodTransaction> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
         String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
@@ -67,7 +79,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         }
         // For BIS use case, the product type is ProductType.Spending
         String baseQuery = "SELECT t.{0}, t.{1}, t.{2}, t.{3}, t.{4} FROM {5} t "
-                + "where t.{6} = ? and t.{7} = ? and t.{8} = ''{9}''";
+                + "where t.{6} = ? and t.{7} = ''{10}'' and t.{8} = ''{9}''";
         String query = MessageFormat.format(baseQuery, //
                 InterfaceName.PeriodId, // 0
                 InterfaceName.ProductId, // 1
@@ -78,12 +90,20 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 InterfaceName.AccountId, // 6
                 InterfaceName.PeriodName, // 7
                 InterfaceName.ProductType, // 8
-                productType.toString()); // 9
+                productType.toString(), // 9
+                periodName // 10
+        );
         if (log.isDebugEnabled()) {
             log.debug("Query for getPeriodTransactionsByAccountId " + query);
         }
-        List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), null) //
-                .queryForList(query, accountId, periodName);
+        List<Map<String, Object>> retList;
+        if (ATHENA_USER.equalsIgnoreCase(sqlUser)) {
+            // athena only support plain query
+            query = query.replace("?", String.format("'%s'", accountId));
+            retList = query(query, sqlUser);
+        } else {
+            retList = query(query, sqlUser, accountId);
+        }
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
             periodTransaction.setTotalAmount((double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
@@ -100,7 +120,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     @SuppressWarnings("rawtypes")
     @Override
     public List<PeriodTransaction> getPeriodTransactionsForSegmentAccounts(String segment, String periodName,
-            ProductType productType) {
+            ProductType productType, String sqlUser) {
         List<PeriodTransaction> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
         String periodTransactionTableName = getAndValidateServingStoreTableName(tenant.getId(),
@@ -112,12 +132,18 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                     periodTransactionTableName, accountTableName, tenant.getId(), segment, periodName, productType));
         }
 
-        String baseQuery = "SELECT count(pt.{0}), pt.{1}, pt.{2}, sum(pt.{3}) as {11}, sum(pt.{4}) as {12}, sum(pt.{5}) as {13} FROM {6} as pt "
+        String baseQuery = "SELECT " //
+                + "count(pt.{0}), " //
+                + "pt.{1}, " //
+                + "pt.{2}, " //
+                + "sum(pt.{3}) as {11}, " //
+                + "sum(pt.{4}) as {12}, " //
+                + "sum(pt.{5}) as {13} " //
+                + "FROM {6} as pt " //
                 + "inner join {7} as ac on  pt.{0} = ac.{0} " //
-                + "where pt.{8} = ? and ac.{9} = ? and pt.{10} = ? " //
+                + "where pt.{8} = ''{14}'' and ac.{9} = ''{15}'' and pt.{10} = ''{16}'' " //
                 + "group by pt.{1}, pt.{2} " //
                 + "order by pt.{1}, pt.{2}";
-
         String query = MessageFormat.format(baseQuery, //
                 InterfaceName.AccountId, // 0
                 InterfaceName.PeriodId, // 1
@@ -132,12 +158,15 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 InterfaceName.ProductType, // 10
                 InterfaceName.TotalAmount, // 11
                 InterfaceName.TotalQuantity, // 12
-                InterfaceName.TransactionCount); // 13
+                InterfaceName.TransactionCount, // 13
+                periodName, // 14
+                segment, // 15
+                productType.name() // 16
+        );
         if (log.isDebugEnabled()) {
             log.debug("Query for getPeriodTransactionForSegmentAccount " + query);
         }
-        List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), null) //
-                .queryForList(query, periodName, segment, productType.toString());
+        List<Map<String, Object>> retList = query(query, sqlUser);
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
             periodTransaction.setTotalAmount((double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
@@ -158,7 +187,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public List<ProductHierarchy> getProductHierarchy(DataCollection.Version version) {
+    public List<ProductHierarchy> getProductHierarchy(DataCollection.Version version, String sqlUser) {
         List<ProductHierarchy> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
         String tableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.ProductHierarchy);
@@ -172,8 +201,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         if (log.isDebugEnabled()) {
             log.debug("query for getProductHierarchy " + query);
         }
-        List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), version)
-                .queryForList(query);
+        List<Map<String, Object>> retList = query(query, sqlUser);
         for (Map row : retList) {
             ProductHierarchy productHierarchy = new ProductHierarchy();
             productHierarchy
@@ -187,7 +215,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     }
 
     @Override
-    public DataPage getAllSpendAnalyticsSegments() {
+    public DataPage getAllSpendAnalyticsSegments(String sqlUser) {
         Tenant tenant = MultiTenantContext.getTenant();
         // SpendAnalyticsSegment is optional in Account data. Check to see if
         // this column exists. If not, return empty result
@@ -208,7 +236,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                         "SELECT distinct ac.{0}, count(ac.{1}) as {2}, True as IsSegment, ac.{0} as AccountId " //
                                 + "FROM {3} as ac " //
                                 + "WHERE ac.{0} IS NOT NULL and ac.{1} in " //
-                                + "(select distinct pt.{1} from {4} as pt where pt.{5} = ?) " //
+                                + "(select distinct pt.{1} from {4} as pt where pt.{5} = ''{6}'') " //
                                 + "GROUP BY ac.{0} " //
                                 + "ORDER BY ac.{0}", //
                         InterfaceName.SpendAnalyticsSegment, // 0
@@ -216,12 +244,13 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                         InterfaceName.RepresentativeAccounts, // 2
                         accountTableName, // 3
                         periodTransactionTableName, // 4
-                        InterfaceName.ProductType); // 5
+                        InterfaceName.ProductType, // 5
+                        ProductType.Spending.name() // 6
+                );
                 if (log.isDebugEnabled()) {
                     log.debug("query for getAllSpendAnalyticsSegments " + query);
                 }
-                List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), null)
-                        .queryForList(query, ProductType.Spending.name());
+                List<Map<String, Object>> retList = query(query, sqlUser);
                 return new DataPage(retList);
             } catch (Exception e) {
                 if (ExceptionUtils.getStackTrace(e).contains("spendanalyticssegment does not exist")) {
@@ -250,7 +279,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     }
 
     @Override
-    public List<String> getFinalAndFirstTransactionDate() {
+    public List<String> getFinalAndFirstTransactionDate(String sqlUser) {
         Tenant tenant = MultiTenantContext.getTenant();
         String transactionTableName = getAndValidateServingStoreTableName(tenant.getId(), BusinessEntity.Transaction);
         if (log.isDebugEnabled()) {
@@ -261,9 +290,27 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         if (log.isDebugEnabled()) {
             log.debug("query for getFinalTransactionDate " + query);
         }
-        List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), null)
-                .queryForList(query);
+        List<Map<String, Object>> retList = query(query, sqlUser);
         return Arrays.asList((String) retList.get(0).get("max"), (String) retList.get(0).get("min"));
+    }
+
+    private List<Map<String, Object>> query(String sql, String sqlUser, Object... params) {
+        List<Map<String, Object>> retList;
+        switch (sqlUser) {
+            case ATHENA_USER:
+                retList = athenaService.query(sql);
+                break;
+            case PRESTO_USER:
+                DataSource dataSource = prestoConnectionService.getPrestoDataSource();
+                JdbcTemplate jdbcTemplate1 = new JdbcTemplate(dataSource);
+                retList = jdbcTemplate1.queryForList(sql, params);
+                break;
+            default:
+                CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+                JdbcTemplate jdbcTemplate2 = getRedshiftJdbcTemplate(customerSpace, null);
+                retList = jdbcTemplate2.queryForList(sql, params);
+        }
+        return retList;
     }
 
     /*-

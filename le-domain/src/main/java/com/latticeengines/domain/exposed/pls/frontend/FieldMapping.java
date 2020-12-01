@@ -56,6 +56,12 @@ public class FieldMapping {
     @JsonProperty
     private String timezone;
 
+    @JsonProperty
+    private Integer length;
+
+    @JsonProperty
+    private boolean required;
+
     public String getUserField() {
         return this.userField;
     }
@@ -154,5 +160,29 @@ public class FieldMapping {
 
     public void setMapToLatticeId(boolean mapToLatticeId) {
         this.mapToLatticeId = mapToLatticeId;
+    }
+
+    public Integer getLength() {
+        return length;
+    }
+
+    public void setLength(Integer length) {
+        this.length = length;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    public boolean checkLengthValid() {
+        return length == null || length > 0;
+    }
+
+    public boolean lengthAndRequiredChanged(){
+        return length!=null || required;
     }
 }

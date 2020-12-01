@@ -43,15 +43,19 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
     protected String maxTransactionDate;
 
     protected void setupTestData(int dataVersion) {
-        setupTestData(dataVersion, false);
+        setupTestData(dataVersion, false, false);
+    }
+
+    protected void setupTestDataWithAthena(int dataVersion) {
+        setupTestData(dataVersion, false, true);
     }
 
     protected void setupTestDataWithSpark(int dataVersion) {
-        setupTestData(dataVersion, true);
+        setupTestData(dataVersion, true, false);
     }
 
-    private void setupTestData(int dataVersion, boolean setupSpark) {
-        initializeAttributeRepo(dataVersion, setupSpark);
+    private void setupTestData(int dataVersion, boolean setupSpark, boolean setupAthena) {
+        initializeAttributeRepo(dataVersion, setupSpark, setupAthena);
         mockDataCollectionProxy(queryEvaluatorService);
         mockPeriodProxy();
         tenant = new Tenant();

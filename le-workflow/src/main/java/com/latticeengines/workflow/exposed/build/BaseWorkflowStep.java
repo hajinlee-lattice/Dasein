@@ -1,5 +1,8 @@
 package com.latticeengines.workflow.exposed.build;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +34,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -41,6 +46,9 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -56,6 +64,7 @@ import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -135,6 +144,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String TRANSFORM_PIPELINE_VERSION = "TRANSFORM_PIPELINE_VERSION";
     protected static final String EVENT_COUNTER_MAP = "EVENT_COUNTER_MAP";
     protected static final String ENTITY_VALIDATION_SUMMARY = "ENTITY_VALIDATION_SUMMARY";
+    protected static final String IMPORT_FILE_SIGNATURE = "IMPORT_FILE_SIGNATURE";
 
     // DCP
     protected static final String UPLOAD_STATS = "UPLOAD_STATS";
@@ -515,6 +525,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     @Inject
     protected MetadataProxy metadataProxy;
 
+    @Inject
+    protected DataUnitProxy dataUnitProxy;
+
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
             .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
@@ -572,6 +585,25 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
         workflowJob.setOutputContext(getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class));
         workflowJobEntityMgr.updateWorkflowJob(workflowJob);
+    }
+
+    protected DataUnit getDataUnit(boolean queryDataUnit, CustomerSpace customerSpace, String unitName) {
+        if (unitName == null) {
+            return null;
+        } else if (queryDataUnit) {
+            S3DataUnit s3DataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.getTenantId(), unitName, DataUnit.StorageType.S3);
+            if (s3DataUnit == null) {
+                throw new RuntimeException("S3 data unit " + unitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
+            }
+            return s3DataUnit.toHdfsDataUnit();
+        } else {
+            Table table = metadataProxy.getTable(customerSpace.toString(), unitName);
+            if (table == null) {
+                throw new RuntimeException("Table " + unitName + " for customer " + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
+                        + " does not exists.");
+            }
+            return table.toHdfsDataUnit(unitName);
+        }
     }
 
     protected void saveReport(Map<String, String> map) {
@@ -896,5 +928,42 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
         log.info("{} templates = {}", entity.name(), templateNames);
         return templateNames;
+    }
+
+    protected long getCurrentTimestamp() {
+        String evaluationDateStr = getStringValueFromContext(CDL_EVALUATION_DATE);
+        if (StringUtils.isNotBlank(evaluationDateStr)) {
+            long currTime = LocalDate
+                    .parse(evaluationDateStr, DateTimeFormatter.ofPattern(DateTimeUtils.DATE_ONLY_FORMAT_STRING)) //
+                    .atStartOfDay(ZoneId.of("UTC")) // start of date in UTC
+                    .toInstant() //
+                    .toEpochMilli();
+            log.info("Found evaluation date {}, use end of date as current time. Timestamp = {}", evaluationDateStr,
+                    currTime);
+            return currTime;
+        } else {
+            Long paTime = getLongValueFromContext(PA_TIMESTAMP);
+            Preconditions.checkNotNull(paTime, "pa timestamp should be set in context");
+            log.info("No evaluation date str found in context, use pa timestamp = {}", paTime);
+            return paTime;
+        }
+    }
+
+    protected Long getLastEvaluationTime(@NotNull TableRoleInCollection role) {
+        Preconditions.checkNotNull(role, "Table role should not be null");
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        return MapUtils.emptyIfNull(dcStatus.getEvaluationDateMap()).get(role.name());
+    }
+
+    protected void setLastEvaluationTime(@NotNull Long currentTimestamp, @NotNull TableRoleInCollection role) {
+        Preconditions.checkNotNull(currentTimestamp, "Current time should be set already");
+        Preconditions.checkNotNull(role, "Table role should not be null");
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus.getEvaluationDateMap() == null) {
+            dcStatus.setEvaluationDateMap(new HashMap<>());
+        }
+        dcStatus.getEvaluationDateMap().put(role.name(), currentTimestamp);
+        log.info("Set evaluation date for {} to {}", role.name(), currentTimestamp);
+        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
     }
 }

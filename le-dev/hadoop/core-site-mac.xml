@@ -17,16 +17,16 @@
 <!-- Put site-specific property overrides in this file. -->
 
 <configuration>
-<property>
-   <name>fs.default.name</name>
-   <value>hdfs://localhost:9000</value>
-</property>
- <property>
-   <name>fs.defaultFS</name>
-   <value>hdfs://localhost:9000</value>
- </property>
-<property>
-    <name>io.compression.codec.bzip2.library</name>
-    <value>libbz2.dylib</value>
-</property>
+    <property>
+       <name>fs.default.name</name>
+       <value>hdfs://localhost:9000</value>
+    </property>
+     <property>
+       <name>fs.defaultFS</name>
+       <value>hdfs://localhost:9000</value>
+     </property>
+    <property>
+        <name>io.compression.codec.bzip2.library</name>
+        <value>libbz2.dylib</value>
+    </property>
 </configuration>

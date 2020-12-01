@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 public interface DataFeedService {
 
     DataFeedExecution startExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobTyp,
-                                     long jobId);
+                                     long jobId, List<Long> actionIds);
 
     DataFeed findDataFeedByName(String customerSpace, String datafeedName);
 
@@ -47,10 +47,6 @@ public interface DataFeedService {
                                     Long executionId);
 
     DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
-
-    void resetImport(String customerSpace, String datafeedName);
-
-    void resetImportByEntity(String customerSpace, String datafeedName, String entity);
 
     DataFeed updateEarliestLatestTransaction(String customerSpace, String datafeedName, Integer earliestDayPeriod,
             Integer latestDayPeriod);

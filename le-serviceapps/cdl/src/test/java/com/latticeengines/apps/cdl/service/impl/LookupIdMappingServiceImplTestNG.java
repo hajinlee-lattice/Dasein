@@ -3,8 +3,10 @@ package com.latticeengines.apps.cdl.service.impl;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -24,6 +26,7 @@ import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.LookupIdMapConfigValuesLookup;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
@@ -137,6 +140,125 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         lookupIdMappingLaunchService.deleteLookupIdMap(configId);
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap(configId));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testBasicOperations")
+    public void testRegisterLookupIdMapValidation() {
+        LookupIdMap lookupIdMap = createLookupIdMap(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                CDLExternalSystemType.DSP, CDLExternalSystemName.Adobe_Audience_Mgr);
+
+        try {
+            lookupIdMappingLaunchService.registerExternalSystem(lookupIdMap);
+            Assert.fail("Registering new lookupIdMap should have failed.");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_32000);
+        }
+
+        lookupIdMap = createLookupIdMap(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
+                CDLExternalSystemType.ADS, null);
+
+        try {
+            lookupIdMappingLaunchService.registerExternalSystem(lookupIdMap);
+            Assert.fail("Registering new lookupIdMap should have failed.");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_32000);
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testBasicOperations")
+    public void testRegisterDuplicateLookupIdMaps() {
+        String endDestId = "end_dest_id_123";
+
+        Map<String, String> configValues = new HashMap<String, String>();
+        String endDestKey = LookupIdMapConfigValuesLookup
+                .getEndDestinationIdKey(CDLExternalSystemName.Adobe_Audience_Mgr);
+        configValues.put(endDestKey, endDestId);
+
+        testCreateDuplicateLookupIdMapForDSP(
+                CDLExternalSystemType.DSP,
+                CDLExternalSystemName.Adobe_Audience_Mgr,
+                configValues);
+
+        configValues.clear();
+        endDestKey = LookupIdMapConfigValuesLookup
+                .getEndDestinationIdKey(CDLExternalSystemName.Google_Display_N_Video_360);
+        configValues.put(endDestKey, endDestId);
+
+        testCreateDuplicateLookupIdMapForDSP(
+                CDLExternalSystemType.DSP,
+                CDLExternalSystemName.Google_Display_N_Video_360,
+                configValues);
+
+        configValues.clear();
+        endDestKey = LookupIdMapConfigValuesLookup
+                .getEndDestinationIdKey(CDLExternalSystemName.TradeDesk);
+        configValues.put(endDestKey, endDestId);
+
+        testCreateDuplicateLookupIdMapForDSP(
+                CDLExternalSystemType.DSP,
+                CDLExternalSystemName.TradeDesk,
+                configValues);
+
+        configValues.clear();
+        endDestKey = LookupIdMapConfigValuesLookup
+                .getEndDestinationIdKey(CDLExternalSystemName.Verizon_Media);
+        configValues.put(endDestKey, endDestId);
+
+        testCreateDuplicateLookupIdMapForDSP(
+                CDLExternalSystemType.DSP,
+                CDLExternalSystemName.Verizon_Media,
+                configValues);
+
+        configValues.clear();
+        endDestKey = LookupIdMapConfigValuesLookup
+                .getEndDestinationIdKey(CDLExternalSystemName.AppNexus);
+        configValues.put(endDestKey, endDestId);
+
+        testCreateDuplicateLookupIdMapForDSP(
+                CDLExternalSystemType.DSP,
+                CDLExternalSystemName.AppNexus,
+                configValues);
+
+        testCreateDuplicateLookupIdMapForDSP(CDLExternalSystemType.DSP,
+                CDLExternalSystemName.MediaMath,
+                configValues);
+    }
+
+    private void testCreateDuplicateLookupIdMapForDSP(
+            CDLExternalSystemType externalSystemType,
+            CDLExternalSystemName externalSystemName, Map<String, String> configValues) {
+        LookupIdMap lookupIdMap = createLookupIdMap(
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
+                externalSystemType, externalSystemName);
+        lookupIdMap.setConfigValues(configValues);
+
+        lookupIdMappingLaunchService.registerExternalSystem(lookupIdMap);
+
+        LookupIdMap duplicateLookupIdMap = createLookupIdMap(
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
+                externalSystemType, externalSystemName);
+        duplicateLookupIdMap.setConfigValues(configValues);
+
+        try {
+            lookupIdMappingLaunchService.registerExternalSystem(duplicateLookupIdMap);
+            Assert.fail("Registering new lookupIdMap should have failed.");
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_40071);
+        }
+    }
+
+    private LookupIdMap createLookupIdMap(String orgId, String orgName,
+            CDLExternalSystemType externalSystemType,
+            CDLExternalSystemName externalSystemName) {
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setOrgId(orgId);
+        lookupIdMap.setOrgName(orgName);
+        lookupIdMap.setExternalSystemType(externalSystemType);
+        lookupIdMap.setExternalSystemName(externalSystemName);
+        return lookupIdMap;
     }
 
     private LookupIdMap testRegisterDeregister(String orgId, String orgName, boolean doRegister, String configId) {

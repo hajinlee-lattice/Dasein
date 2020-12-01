@@ -16,7 +16,10 @@ import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.prestodb.exposed.service.AthenaService;
 import com.latticeengines.query.evaluator.QueryProcessor;
+import com.latticeengines.query.factory.AthenaQueryProvider;
+import com.latticeengines.query.factory.PrestoQueryProvider;
 import com.querydsl.sql.SQLQuery;
 
 import reactor.core.publisher.Flux;
@@ -34,6 +37,9 @@ public class QueryEvaluator {
     @Inject
     private QueryProcessor processor;
 
+    @Inject
+    private AthenaService athenaService;
+
     public SQLQuery<?> evaluate(AttributeRepository repository, Query query, String sqlUser) {
         if (processor == null) {
             throw new RuntimeException("processor is null.");
@@ -41,7 +47,7 @@ public class QueryEvaluator {
         return processor.process(repository, query, sqlUser);
     }
 
-    Flux<Map<String, Object>> pipe(SQLQuery<?> sqlquery, Query query) {
+    Flux<Map<String, Object>> pipe(SQLQuery<?> sqlquery, Query query, String sqlUser) {
         final Map<String, String> attrNames = new HashMap<>();
         query.getLookups().forEach(l -> {
             if (l instanceof AttributeLookup) {
@@ -67,22 +73,33 @@ public class QueryEvaluator {
             limit = query.getPageFilter().getNumRows();
         }
 
-        final long finalOffset = offset;
-        final long finalLimit = limit;
+        Flux<Map<String, Object>> flux;
+        if (AthenaQueryProvider.ATHENA_USER.equals(sqlUser)) {
+            flux = getAthenaFlux(sqlquery, attrNames, offset, limit);
+        } else {
+            sqlquery.setUseLiterals(PrestoQueryProvider.PRESTO_USER.equals(sqlUser));
+            flux = getSQLFlux(sqlquery, attrNames, offset, limit);
+        }
+        return flux.subscribeOn(getScheduler());
+    }
+
+    private Flux<Map<String, Object>> getSQLFlux(SQLQuery<?> sqlquery, Map<String, String> attrNames, //
+                                                 final long offset, final long limit) {
         AtomicLong iter = new AtomicLong(0);
-        Flux<Map<String, Object>> flux = Flux.generate(() -> {
-            ResultSet results = sqlquery.getResults();
+        return Flux.generate(() -> {
+            ResultSet results;
+            results = sqlquery.getResults();
             ResultSetMetaData metadata = results.getMetaData();
             int fetchSize = getFetchSize(metadata.getColumnCount());
             results.setFetchSize(fetchSize);
             return results;
         }, (results, sink) -> {
             try {
-                if (finalLimit > 0 && iter.get() >= finalOffset + finalLimit) {
+                if (limit > 0 && iter.get() >= offset + limit) {
                     results.close();
                     sink.complete();
                 } else {
-                    while (iter.get() < finalOffset) {
+                    while (iter.get() < offset) {
                         if (!results.next()) {
                             results.close();
                             sink.complete();
@@ -103,7 +120,27 @@ public class QueryEvaluator {
             }
             return results;
         });
-        return flux.subscribeOn(getScheduler());
+    }
+
+    private Flux<Map<String, Object>> getAthenaFlux(SQLQuery<?> sqlquery, Map<String, String> attrNames, //
+                                                 final long offset, final long limit) {
+        sqlquery.setUseLiterals(true);
+        String sql = sqlquery.getSQL().getSQL();
+        Flux<Map<String, Object>> flux = athenaService.queryFlux(sql);
+        if (offset > 0) {
+            flux = flux.skip(offset);
+        }
+        if (limit > 0) {
+            flux = flux.take(limit);
+        }
+        return flux.map(row -> {
+            Map<String, Object> row2 = new HashMap<>();
+            row.forEach((k, v) -> {
+                String attr = attrNames.getOrDefault(k, k);
+                row2.put(attr, v);
+            });
+            return row2;
+        });
     }
 
     private static Map<String, Object> readRow(Map<String, String> attrNames, ResultSet results) throws SQLException {

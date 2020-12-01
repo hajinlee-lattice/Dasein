@@ -100,6 +100,7 @@ import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskConfig;
 import com.latticeengines.domain.exposed.metadata.datafeed.validator.TemplateValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 
@@ -171,6 +172,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private List<TemplateValidator> validatorList = null;
 
+    private DataFeedTaskConfig.SanitizerList sanitizerList = null;
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         LogManager.getLogger(CSVImportMapper.class).setLevel(Level.INFO);
@@ -206,6 +209,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     TemplateValidator.class);
         } else {
             validatorList = new ArrayList<>();
+        }
+        String serializedSanitizer = conf.get("eai.import.sanitizers", "");
+        if (StringUtils.isNotBlank(serializedSanitizer)) {
+            sanitizerList = JsonUtils.deserialize(serializedSanitizer, DataFeedTaskConfig.SanitizerList.class);
         }
     }
 
@@ -714,6 +721,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         LOG.warn(e.getMessage());
                     }
                     try {
+                        if (sanitizerList != null) {
+                            csvFieldValue = sanitizerList.sanitize(csvFieldValue, attr);
+                        }
                         if (StringUtils.length(csvFieldValue) > MAX_STRING_LENGTH) {
                             throw new RuntimeException(String.format("%s exceeds %s chars", csvFieldValue, MAX_STRING_LENGTH));
                         }

@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>4.33.0-SNAPSHOT</version>
+        <version>4.35.0-SNAPSHOT</version>
         <relativePath>../le-microservice</relativePath>
     </parent>
 
@@ -72,6 +72,19 @@
             <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-prestodb</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-prestodb</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-yarn</artifactId>

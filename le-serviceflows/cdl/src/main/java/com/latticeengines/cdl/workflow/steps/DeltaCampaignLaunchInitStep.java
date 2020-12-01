@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -35,14 +37,16 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.DeltaCampaignLaunchSparkContext;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
+import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.CreateDeltaRecommendationsJob;
@@ -116,7 +120,7 @@ public class DeltaCampaignLaunchInitStep
         ProcessedFieldMappingMetadata processedFieldMappingMetadata = new ProcessedFieldMappingMetadata();
         frontEndQueryCreator.processFieldMappingMetadataWithExistingRecommendationColumns(
                 playLaunchContext.getFieldMappingMetadata(), processedFieldMappingMetadata);
-
+        Play play = playLaunchContext.getPlay();
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
         log.info("PlayLaunch=" + JsonUtils.serialize(playLaunch));
         String addAccounts = playLaunch.getAddAccountsTable();
@@ -125,7 +129,8 @@ public class DeltaCampaignLaunchInitStep
         String delContacts = playLaunch.getRemoveContactsTable();
         String completeContacts = playLaunch.getCompleteContactsTable();
         List<String> tableNames = Arrays.asList(addAccounts, addContacts, delAccounts, delContacts, completeContacts);
-        List<DataUnit> input = processTableNames(tableNames);
+        boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(play.getTapType());
+        List<DataUnit> input = processTableNames(tableNames, baseOnOtherTapType);
         sparkConfig.setInput(input);
 
         String totalDfs = getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.DATA_FRAME_NUM);
@@ -172,34 +177,27 @@ public class DeltaCampaignLaunchInitStep
     }
 
     @VisibleForTesting
-    List<DataUnit> processTableNames(List<String> tableNames) {
-        return tableNames.stream().map(tableName -> {
-            if (tableName == null) {
-                return null;
-            } else {
-                Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
-                if (table == null) {
-                    throw new RuntimeException("Table " + tableName + " for customer " //
-                            + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
-                            + " does not exists.");
-                }
-                return table.toHdfsDataUnit(tableName);
-            }
-        }).collect(Collectors.toList());
+    List<DataUnit> processTableNames(List<String> tableNames, boolean baseOnOtherTapType) {
+        return tableNames.stream().map(tableName -> getDataUnit(baseOnOtherTapType, customerSpace, tableName)).collect(Collectors.toList());
     }
 
     private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
         List<ColumnMetadata> columnMetadata = playLaunchContext.getFieldMappingMetadata();
         if (CollectionUtils.isNotEmpty(columnMetadata)) {
-            Map<String, String> contactDisplayNames = columnMetadata.stream()
-                    .filter(col -> BusinessEntity.Contact.equals(col.getEntity()))
-                    .collect(Collectors.toMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName));
-            Map<String, String> accountDisplayNames = columnMetadata.stream()
-                    .filter(col -> !BusinessEntity.Contact.equals(col.getEntity()))
-                    .collect(Collectors.toMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName));
+            Map<String, String> accountDisplayNames = new HashMap<>();
+            Map<String, String> contactDisplayNames = new HashMap<>();
+            Map<String, String> displayNameMap = ExportUtils.getDisplayNameMap(ExportEntity.AccountContact, columnMetadata);
+            int prefixLength = ExportUtils.CONTACT_ATTR_PREFIX.length();
+            displayNameMap.entrySet().stream().forEach(entry ->
+            {
+                if (entry.getKey().startsWith(ExportUtils.CONTACT_ATTR_PREFIX)) {
+                    contactDisplayNames.put(entry.getKey().substring(prefixLength), entry.getValue());
+                } else {
+                    accountDisplayNames.put(entry.getKey(), entry.getValue());
+                }
+            });
             log.info("accountDisplayNames map: " + accountDisplayNames);
             log.info("contactDisplayNames map: " + contactDisplayNames);
-
             putObjectInContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES, accountDisplayNames);
             putObjectInContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES, contactDisplayNames);
         }
@@ -259,6 +257,10 @@ public class DeltaCampaignLaunchInitStep
         } else {
             throw new LedpException(LedpCode.LEDP_70000);
         }
+        if (CDLExternalSystemName.AWS_S3.equals(playLaunchContext.getPlayLaunch().getDestinationSysName())) {
+            S3ChannelConfig s3ChannelConfig = (S3ChannelConfig) playLaunchContext.getChannel().getChannelConfig();
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_EXPORT_TIMESTAMP, String.valueOf(s3ChannelConfig.getAddExportTimestamp()));
+        }
         playProxy.updatePlayLaunch(customerSpace.getTenantId(), playLaunchContext.getPlayName(),
                 playLaunchContext.getPlayLaunchId(), playLaunchContext.getPlayLaunch());
         long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
@@ -272,7 +274,7 @@ public class DeltaCampaignLaunchInitStep
         if (audienceType.equals(AudienceType.ACCOUNTS)) {
             return InterfaceName.AccountId.name();
         } else {
-            return DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name();
+            return ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name();
         }
     }
 

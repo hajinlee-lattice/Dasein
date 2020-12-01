@@ -59,7 +59,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 
@@ -811,16 +810,13 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         return res;
     }
 
-    private boolean isMultiCandidates(DataSourceLookupRequest request) {
-        return OperationalMode.MULTI_CANDIDATES.equals(request.getMatchTravelerContext().getOperationalMode());
-    }
-
     private void setMatchRule(DnBMatchContext context, DplusMatchConfig config) {
         if (config != null) {
             NameLocation nl = context.getInputNameLocation();
+            DplusMatchRule matchRule = config.getBaseRule();
             if (nl != null && CollectionUtils.isNotEmpty(config.getSpecialRules())) {
                 String inputCode = nl.getCountryCode();
-                DplusMatchRule matchRule = config.getSpecialRules().stream().filter(sr -> {
+                matchRule = config.getSpecialRules().stream().filter(sr -> {
                     if (MatchKey.Country.equals(sr.getMatchKey())) {
                         return sr.getAllowedValues().stream().anyMatch(v -> {
                             String filterCode = countryCodeService.getCountryCode(v);
@@ -831,10 +827,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     }
                     return false;
                 }).map(DplusMatchConfig.SpeicalRule::getSpecialRule).findFirst().orElse(config.getBaseRule());
-                context.setMatchRule(matchRule);
-            } else {
-                context.setMatchRule(config.getBaseRule());
             }
+            context.setMatchRule(matchRule);
         }
     }
 

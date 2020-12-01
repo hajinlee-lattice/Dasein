@@ -4,15 +4,15 @@
     "alert_header": "Increased Web Activity",
     "alert_category": "PEOPLE",
     "qualification_period_days": 10,
-    "alert_message_template": "${Data.PageVisits} <#if (Data.PageVisits > 1)>visits<#else>visit</#if> to the ${Data.PageName} page <#if (Data.PageVisits > 1)>have<#else>has</#if> occurred meaning they are looking to buy, check your ${Data.ActiveContacts} active <#if (Data.ActiveContacts > 1)>contacts<#else>contact</#if>.",
+    "alert_message_template": "<span class=\"item-insights-bold\">${Data.PageVisits} <#if (Data.PageVisits > 1)>visits<#else>visit</#if></span> to the <span class=\"item-insights-bold\">${Data.PageName}</span> page <#if (Data.PageVisits > 1)>have<#else>has</#if> occurred meaning they are looking to buy, check your <span class=\"item-insights-bold\">${Data.ActiveContacts} active</span> <#if (Data.ActiveContacts > 1)>contacts<#else>contact</#if>.",
     "is_active": true
   },
   {
-    "name": "IncActivityOnProduct",
-    "alert_header": "Increased Activity on Product Pages",
+    "name": "AnonymousWebVisits",
+    "alert_header": "Anonymous Web Visits",
     "alert_category": "PEOPLE",
     "qualification_period_days": 10,
-    "alert_message_template": "${Data.PageVisits} <#if (Data.PageVisits > 1)>visits<#else>visit</#if> to your ${Data.PageName} page suggests you'll need to prospect into those personas.",
+    "alert_message_template": "Your web pages had <span class=\"item-insights-bold\">${Data.PageVisits} anonymous <#if (Data.PageVisits > 1)>visits<#else>visit</#if></span> from this company in the last 10 days.",
     "is_active": true
   },
   {
@@ -20,7 +20,7 @@
     "alert_header": "Re-engaged Activity",
     "alert_category": "PEOPLE",
     "qualification_period_days": 10,
-    "alert_message_template": "<#if (Data.ReEngagedContacts > 1)>Multiple contacts have<#else>Someone has</#if> re-engaged with your product after not returning for more than 30 days.",
+    "alert_message_template": "<#if (Data.ReEngagedContacts > 1)><span class=\"item-insights-bold\">Multiple contacts</span> have<#else><span class=\"item-insights-bold\">Someone</span> has</#if> re-engaged with your product after not returning for more than 30 days.",
     "is_active": true
   },
   {
@@ -28,7 +28,47 @@
     "alert_header": "Has Shown Intent",
     "alert_category": "PRODUCTS",
     "qualification_period_days": 10,
-    "alert_message_template": "We saw <#if (Data.NumResearchIntents > 0)>research intent on ${Data.NumResearchIntents} products </#if><#if (Data.NumBuyIntents > 0) && (Data.NumResearchIntents > 0)>and </#if><#if (Data.NumBuyIntents > 0)>buy intent on ${Data.NumBuyIntents} products </#if>within the last 10 days. Check out which models in the Recent Activity section.",
+    "alert_message_template": "We saw <#if (Data.NumResearchIntents > 0)><span class=\"item-insights-bold\">research intent on ${Data.NumResearchIntents} products</span></#if><#if (Data.NumBuyIntents > 0) && (Data.NumResearchIntents > 0)> and </#if><#if (Data.NumBuyIntents > 0)><span class=\"item-insights-bold\">buy intent on ${Data.NumBuyIntents} products</span></#if> within the last 10 days. Check out which models in the Recent Activity section.",
+    "is_active": true
+  },
+  {
+    "name": "HighEngagementInAccount",
+    "alert_header": "High Engagement in Account",
+    "alert_category": "PEOPLE",
+    "qualification_period_days": 10,
+    "alert_message_template": "Overall, there is a high level of engagement from this company.",
+    "is_active": true
+  },
+  {
+    "name": "KnownWebVisits",
+    "alert_header": "Known Web Visits",
+    "alert_category": "PEOPLE",
+    "qualification_period_days": 10,
+    "alert_message_template": "You have <span class=\"item-insights-bold\">${Data.ActiveContacts} known <#if (Data.ActiveContacts > 1)>contacts<#else>contact</#if></span> among the visitors that are engaging with you.",
+    "is_active": true
+  },
+  {
+    "name": "AcitiveContactsAndWebVisits",
+    "alert_header": "Active Contacts and Web Visits",
+    "alert_category": "PEOPLE",
+    "qualification_period_days": 10,
+    "alert_message_template": "You have <span class=\"item-insights-bold\">${Data.ActiveContacts} active <#if (Data.ActiveContacts> 1)>contacts<#else>contact</#if></span> at this company.<#if (Data.TitleCount > 0)><#if (Data.TitleCount==1)> The contacts title is <#else> Their titles are </#if><span class=\"item-insights-bold\">${Data.Titles}</span>.</#if>",
+    "is_active": true
+  },
+  {
+    "name": "BuyingIntentAroundProductPages",
+    "alert_header": "Buying Intent around Product Pages",
+    "alert_category": "PRODUCTS",
+    "qualification_period_days": 10,
+    "alert_message_template": "This company is doing web searches around your <span class=\"item-insights-bold\">${Data.PageName}</span>. It looks like they are in a <span class=\"item-insights-bold\">Buying Stage</span>.",
+    "is_active": true
+  },
+  {
+    "name": "ResearchingIntentAroundProductPages",
+    "alert_header": "Researching Intent around Product Pages",
+    "alert_category": "PRODUCTS",
+    "qualification_period_days": 10,
+    "alert_message_template": "This company is doing web searches around your <span class=\"item-insights-bold\">${Data.PageName}</span>. It looks like they are in a <span class=\"item-insights-bold\">Researching Stage</span>.",
     "is_active": true
   }
 ]

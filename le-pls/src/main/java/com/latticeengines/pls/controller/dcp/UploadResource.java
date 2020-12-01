@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.DownloadFileType;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
-import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadJobDetails;
 import com.latticeengines.domain.exposed.exception.UIActionUtils;
 import com.latticeengines.pls.service.dcp.UploadService;
@@ -60,7 +60,7 @@ public class UploadResource {
     @GetMapping("/uploadId/{uploadId}/token")
     @ResponseBody
     @ApiOperation("Generate a token for downloading zip file of the upload results")
-    public String getToken(@PathVariable String uploadId, @RequestParam(required = false) List<UploadFileDownloadConfig.FileType> files) {
+    public String getToken(@PathVariable String uploadId, @RequestParam(required = false) List<DownloadFileType> files) {
         return uploadService.generateToken(uploadId, files);
     }
 

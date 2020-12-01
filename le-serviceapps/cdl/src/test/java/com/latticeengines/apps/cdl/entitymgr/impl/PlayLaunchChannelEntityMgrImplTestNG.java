@@ -145,6 +145,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         S3ChannelConfig s3ChannelConfig = new S3ChannelConfig();
         s3ChannelConfig.setAudienceName("something");
         s3ChannelConfig.setAttributeSetName("attribute_set_name_s3");
+        s3ChannelConfig.setAddExportTimestamp(true);
         channel4.setIsAlwaysOn(true);
         channel4.setCronScheduleExpression("0 0 12 ? * WED *");
         channel4.setExpirationPeriodString("P3M");
@@ -290,6 +291,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
             Assert.assertNotNull(updatedChannel.get());
             log.info("Channel4 id is {}.", channel4.getId());
             Assert.assertEquals(((S3ChannelConfig) updatedChannel.get().getChannelConfig()).getAttributeSetName(), AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
+            Assert.assertEquals(((S3ChannelConfig) updatedChannel.get().getChannelConfig()).getAddExportTimestamp(), true);
             return true;
         });
     }
@@ -343,7 +345,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(retrieved.getId(), channel1.getId());
         Assert.assertEquals(retrieved.getExpirationPeriodString(), channel1.getExpirationPeriodString());
 
-        channel1.setMaxAccountsToLaunch(NULL_MAX_ACCOUNTS_TO_LAUNCH);
+        channel1.setMaxEntitiesToLaunch(NULL_MAX_ACCOUNTS_TO_LAUNCH);
         Assert.assertNotNull(channel1);
 
         channel1.setIsAlwaysOn(false);
@@ -354,7 +356,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(retrieved.getId(), channel1.getId());
         Assert.assertFalse(retrieved.getIsAlwaysOn());
         Assert.assertNull(retrieved.getExpirationDate());
-        Assert.assertNull(retrieved.getMaxAccountsToLaunch());
+        Assert.assertNull(retrieved.getMaxEntitiesToLaunch());
 
         channel1.setLaunchUnscored(false);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
@@ -416,7 +418,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         channel.setUpdatedBy(CREATED_BY);
         channel.setLaunchType(LaunchType.FULL);
         channel.setId(NamingUtils.randomSuffix("pl", 16));
-        channel.setMaxAccountsToLaunch(MAX_ACCOUNTS_TO_LAUNCH);
+        channel.setMaxEntitiesToLaunch(MAX_ACCOUNTS_TO_LAUNCH);
         channel.setLaunchUnscored(false);
         channel.setExpirationDate(Date.from(new Date().toInstant().plus(Duration.ofHours(2))));
         return channel;

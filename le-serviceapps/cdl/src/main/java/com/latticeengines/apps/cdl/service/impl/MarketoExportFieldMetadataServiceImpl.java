@@ -28,7 +28,10 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        log.info("Calling MarketoExportFieldMetadataService for channle " + channel.getId());
+        log.info("Calling MarketoExportFieldMetadataService for channel " + channel.getId());
+
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+                channel);
 
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
                 Collections.singletonList(BusinessEntity.Account));
@@ -46,7 +49,7 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
                     accountAttributesMap, contactAttributesMap);
         } else {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Marketo, accountAttributesMap,
-                    contactAttributesMap);
+                    contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
         }
 
         String accountId = channel.getLookupIdMap().getAccountId();
@@ -66,7 +69,6 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
         }
 
         return exportColumnMetadataList;
-
     }
 
 }

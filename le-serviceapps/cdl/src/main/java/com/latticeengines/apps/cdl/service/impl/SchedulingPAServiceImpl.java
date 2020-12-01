@@ -461,7 +461,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
         boolean isHandHoldPATenant = isHandHoldPATenant(customerSpace);
         SchedulingStatus status = new SchedulingStatus(customerSpace, schedulerEnabled, feed, execution,
-                !isHandHoldPATenant && retryValidation(execution, customerSpace));
+                !isHandHoldPATenant && retryValidation(execution, customerSpace, true));
         status.setHandHoldPATenant(isHandHoldPATenant);
         return status;
     }
@@ -615,6 +615,10 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
      * will update retryCount in table DataFeedExecution
      */
     private boolean retryValidation(DataFeedExecution execution, String tenantId) {
+        return retryValidation(execution, tenantId, false);
+    }
+
+    private boolean retryValidation(DataFeedExecution execution, String tenantId, boolean readOnly) {
         try {
             if (execution == null || !DataFeedExecution.Status.Failed.equals(execution.getStatus())
                     || execution.getUpdated() == null || !checkRetryPendingTime(execution.getUpdated().getTime())) {
@@ -634,13 +638,17 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             }
             Job job = getFailedPAJob(execution, tenantId);
             if (USER_ERROR_CATEGORY.equalsIgnoreCase(job.getErrorCategory())) {
-                updateRetryCount(execution);
+                if (!readOnly) {
+                    updateRetryCount(execution);
+                }
                 log.debug("due to user error, tenant {} cannot be retry.", tenantId);
                 return false;
             }
             return true;
         } catch (IllegalArgumentException e) {
-            updateRetryCount(execution);
+            if (!readOnly) {
+                updateRetryCount(execution);
+            }
             log.error("cannot retry this tenant {}", tenantId, e);
             return false;
         } catch (Exception e) {

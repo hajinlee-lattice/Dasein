@@ -14,7 +14,7 @@ public interface LookupIdMappingService {
     Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
             boolean descending);
 
-    LookupIdMap registerExternalSystem(LookupIdMap lookupIdsMap);
+    LookupIdMap registerExternalSystem(LookupIdMap lookupIdMap);
 
     void deregisterExternalSystem(LookupIdMap lookupIdMap);
 

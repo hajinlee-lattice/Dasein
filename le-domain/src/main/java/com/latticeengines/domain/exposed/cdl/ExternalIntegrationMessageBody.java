@@ -12,6 +12,8 @@ public class ExternalIntegrationMessageBody {
 
     private Map<String, List<ExportFileConfig>> deleteFiles;
 
+    private Map<String, List<ExportFileConfig>> taskDescription;
+
     private String externalAudienceId;
 
     private String externalAudienceName;
@@ -31,6 +33,10 @@ public class ExternalIntegrationMessageBody {
     private String stack;
 
     private Boolean enableAcxiom;
+
+    private String taskPriority;
+
+    private String taskType;
 
     public String getTrayTenantId() {
         return trayTenantId;
@@ -54,6 +60,14 @@ public class ExternalIntegrationMessageBody {
 
     public void setDeleteFiles(Map<String, List<ExportFileConfig>> deleteFiles) {
         this.deleteFiles = deleteFiles;
+    }
+
+    public Map<String, List<ExportFileConfig>> getTaskDescription() {
+        return taskDescription;
+    }
+
+    public void setTaskDescription(Map<String, List<ExportFileConfig>> taskDescription) {
+        this.taskDescription = taskDescription;
     }
 
     public String getExternalAudienceId() {
@@ -127,4 +141,20 @@ public class ExternalIntegrationMessageBody {
     public boolean getEnableAcxiom() { return enableAcxiom; }
 
     public void setEnableAcxiom(boolean enableAcxiom) { this.enableAcxiom = enableAcxiom; }
+
+    public void setTaskPriority(String taskPriority) {
+        this.taskPriority = taskPriority;
+    }
+
+    public String getTaskPriority() {
+        return taskPriority;
+    }
+
+    public void setTaskType(String taskType) {
+        this.taskType = taskType;
+    }
+
+    public String getTaskType() {
+        return taskType;
+    }
 }

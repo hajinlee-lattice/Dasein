@@ -73,10 +73,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(list, SimpleDataFeed.class);
     }
 
-    public DataFeedExecution startExecution(String customerSpace, DataFeedExecutionJobType jobType, long jobId) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/startexecution",
-                shortenCustomerSpace(customerSpace), jobType);
-        return post("startExecution", url, jobId, DataFeedExecution.class);
+    public DataFeedExecution startExecution(String customerSpace, DataFeedExecutionJobType jobType, long jobId,
+                                            List<Long> actionIds) {
+        String url =
+                constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/jobId/{jobId}/startexecution",
+                shortenCustomerSpace(customerSpace), jobType, jobId);
+        return post("startExecution", url, actionIds, DataFeedExecution.class);
     }
 
     public DataFeedExecution finishExecution(String customerSpace, String initialDataFeedStatus) {
@@ -302,37 +304,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(res, String.class);
     }
 
-    public void addTableToQueue(String customerSpace, String taskId, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue/{tableName}",
-                shortenCustomerSpace(customerSpace), taskId, tableName);
-        put("addTableToQueue", url);
-    }
-
-    public void addTablesToQueue(String customerSpace, String taskId, List<String> tables) {
-        String baseUrl = "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtablestoqueue";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), taskId);
-        put("addTablesToQueue", url, tables);
-    }
-
-    public List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType,
-            String entity) {
+    public List<String> registerImportData(String customerSpace, String taskId, String dataTableName) {
         String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}/unconsolidatedextracts",
-                shortenCustomerSpace(customerSpace), source, dataFeedType, entity);
-        List<?> res = get("getExtractPendingInQueue", url, List.class);
-        return JsonUtils.convertList(res, Extract.class);
-    }
-
-    public void resetImport(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/resetimport",
-                shortenCustomerSpace(customerSpace));
-        post("resetImport", url, null, Void.class);
-    }
-
-    public void resetImportByEntity(String customerSpace, String entity) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/resetimport/{entity}",
-                shortenCustomerSpace(customerSpace), entity);
-        post("resetImportByEntity", url, null, Void.class);
+                "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerimportdata/{dataTableName}",
+                shortenCustomerSpace(customerSpace), taskId, dataTableName);
+        List<?> res = post("registerImportData", url, null, List.class);
+        return JsonUtils.convertList(res, String.class);
     }
 
     public DataFeed updateEarliestLatestTransaction(String customerSpace, Integer earliestDayPeriod,

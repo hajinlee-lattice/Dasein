@@ -1,0 +1,51 @@
+{
+  "Tenant": {
+    "Identifier": "bleh"
+  },
+  "UseDirectPlus": true,
+  "RegNumberType": "2541",
+  "TargetEntity": "PrimeAccount",
+  "DataCloudVersion": "2.0.25",
+  "LogLevel": "INFO",
+  "Fields": [
+    "ID", "CompanyName", "City", "State", "Code", "Country", "Web"
+  ],
+  "Data": [
+    [ null, "000\"", "Khalil Eraiqat", "Chief Executive Officer", "0b82b153-5637-47c0-b176-d0df1d47366e", "11", "001-10"]
+  ],
+  "KeyMap": {
+    "Name": [
+      "CompanyName"
+    ],
+    "City": [
+      "City"
+    ],
+    "State": [
+      "State"
+    ],
+    "Zipcode": [
+      "Code"
+    ],
+    "Country": [
+      "Country"
+    ],
+    "Domain": [
+      "Web"
+    ]
+  },
+  "CustomSelection": {"Columns": [
+    {"ExternalColumnID": "duns_number", "ColumnName": "duns_number"},
+    {"ExternalColumnID": "primaryname", "ColumnName": "primaryname"},
+    {"ExternalColumnID": "tradestylenames_name", "ColumnName": "tradestylenames_name"},
+    {"ExternalColumnID": "telephone_telephonenumber", "ColumnName": "telephone_telephonenumber"},
+    {"ExternalColumnID": "primaryindcode_ussicv4", "ColumnName": "primaryindcode_ussicv4"}
+  ]},
+  "DPlusMatchConfig": {
+    "BaseRule": {
+      "AcceptCriterion": {
+        "LowestConfidenceCode": 5,
+        "HighestConfidenceCode": 10
+      }
+    }
+  }
+}

@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.spark.dcp;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
@@ -31,6 +32,15 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("ConfidenceCodeAttr")
     private String confidenceCodeAttr;
 
+    @JsonProperty("ErrorIndicatorAttr")
+    private String errorIndicatorAttr;
+
+    @JsonProperty("ErrorCodeAttr")
+    private String errorCodeAttr;
+
+    @JsonProperty("IgnoreErrors")
+    private Map<String, Set<String>> ignoreErrors;
+
     @JsonProperty("TotalCount")
     private long totalCount;
 
@@ -57,7 +67,7 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     @Override
     public int getNumTargets() {
-        return 3;
+        return 4; // Accepted, Rejected, Match Core Errors, DUNS Count
     }
 
     public List<String> getAcceptedAttrs() {
@@ -106,6 +116,30 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     public void setCountryAttr(String countryAttr) {
         this.countryAttr = countryAttr;
+    }
+
+    public String getErrorIndicatorAttr() {
+        return errorIndicatorAttr;
+    }
+
+    public void setErrorIndicatorAttr(String errorIndicatorAttr) {
+        this.errorIndicatorAttr = errorIndicatorAttr;
+    }
+
+    public String getErrorCodeAttr() {
+        return errorCodeAttr;
+    }
+
+    public void setErrorCodeAttr(String errorCodeAttr) {
+        this.errorCodeAttr = errorCodeAttr;
+    }
+
+    public Map<String, Set<String>> getIgnoreErrors() {
+        return ignoreErrors;
+    }
+
+    public void setIgnoreErrors(Map<String, Set<String>> ignoreErrors) {
+        this.ignoreErrors = ignoreErrors;
     }
 
     public String getManageDbUrl() {

@@ -55,7 +55,6 @@ public class HdfsToS3PathBuilder {
     private String s3AtlasMetadataDir = s3AtlasDir + "/Metadata";
     private String s3ExportDir = s3BucketDir + "/dropfolder/%s/export";
     private String s3AtlasTableBackupPrefix = s3AtlasTablePrefix + "/Backup";
-    private String s3DataVisionSegmentDir = s3BucketDir + "/datavision_segment";
 
     public HdfsToS3PathBuilder() {
     }
@@ -159,10 +158,6 @@ public class HdfsToS3PathBuilder {
         return String.format(protocol + s3ExportDir, s3Bucket, dropboxName);
     }
 
-    public String getS3ListSegmentDir(String s3Bucket, String tenantId, String segmentName) {
-        return String.format(protocol + s3DataVisionSegmentDir, s3Bucket) + PATH_SEPARATOR + tenantId + PATH_SEPARATOR + segmentName;
-    }
-
     public String getS3CampaignExportDir(String s3Bucket, String dropboxName) {
         return getS3ExportDir(s3Bucket, dropboxName) + PATH_SEPARATOR + "campaigns";
     }
@@ -182,6 +177,30 @@ public class HdfsToS3PathBuilder {
 
     public String getS3AtlasTableSchemasDir(String s3Bucket, String tenantId) {
         return getS3AtlasDataDir(s3Bucket, tenantId) + PATH_SEPARATOR + "TableSchemas";
+    }
+
+    public String getS3AtlasDataTemplatesDir(String s3Bucket, String tenantId) {
+        return getS3AtlasDataDir(s3Bucket, tenantId) + PATH_SEPARATOR + "DataTemplates";
+    }
+
+    public String getS3AtlasDataTemplatePrefix(String s3Bucket, String tenantId, String templateId) {
+        return getS3AtlasDataTemplatesDir(s3Bucket, tenantId) + PATH_SEPARATOR + templateId;
+    }
+
+    public String getS3AtlasDataUnitPrefix(String s3Bucket, String tenantId, String templateId, String unitName) {
+        return getS3AtlasDataTemplatePrefix(s3Bucket, tenantId, templateId) + PATH_SEPARATOR + unitName;
+    }
+
+    public String getHdfsAtlasDataTemplatesDir(String pod, String tenantId) {
+        return getHdfsAtlasDataDir(pod, tenantId) + PATH_SEPARATOR + "DataTemplates";
+    }
+
+    public String getHdfsAtlasDataTemplatePrefix(String pod, String tenantId, String templateId) {
+        return getHdfsAtlasDataTemplatesDir(pod, tenantId) + PATH_SEPARATOR + templateId;
+    }
+
+    public String getHdfsAtlasDataUnitPrefix(String pod, String tenantId, String templateId, String unitName) {
+        return getHdfsAtlasDataTemplatePrefix(pod, tenantId, templateId) + PATH_SEPARATOR + unitName;
     }
 
     public String getS3AtlasFilesDir(String s3Bucket, String tenantId) {

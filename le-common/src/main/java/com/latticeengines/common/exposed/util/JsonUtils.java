@@ -329,6 +329,10 @@ public final class JsonUtils {
         return parseValueAtPath(root, String.class, paths);
     }
 
+    public static Boolean parseBooleanValueAtPath(JsonNode root, String... paths) {
+        return parseValueAtPath(root, Boolean.class, paths);
+    }
+
     private static <T> T parseValueAtPath(JsonNode root, Class<T> clz, String... paths) {
         JsonNode node = tryGetJsonNode(root, paths);
         if (node == null || node instanceof NullNode) {
@@ -344,6 +348,9 @@ public final class JsonUtils {
                 case "Double":
                     //noinspection unchecked
                     return (T) Double.valueOf(node.asDouble());
+                case "Boolean":
+                    //noinspection unchecked
+                    return (T) Boolean.valueOf(node.asBoolean());
                 default:
                     throw new UnsupportedOperationException("Unknown json type " + clz);
             }

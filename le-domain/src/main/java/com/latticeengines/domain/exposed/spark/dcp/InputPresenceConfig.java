@@ -13,6 +13,9 @@ public class InputPresenceConfig extends SparkJobConfig {
     @JsonProperty("InputNames")
     private Set<String> inputNames;
 
+    @JsonProperty("ExcludeEmpty")
+    private Boolean excludeEmpty;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -30,5 +33,13 @@ public class InputPresenceConfig extends SparkJobConfig {
 
     public void setInputNames(Set<String> inputNames) {
         this.inputNames = inputNames;
+    }
+
+    public Boolean getExcludeEmpty() {
+        return excludeEmpty;
+    }
+
+    public void setExcludeEmpty(Boolean excludeEmpty) {
+        this.excludeEmpty = excludeEmpty;
     }
 }

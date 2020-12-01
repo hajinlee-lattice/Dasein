@@ -5,11 +5,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
@@ -27,6 +29,7 @@ import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -36,22 +39,25 @@ import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DataLicense;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("datafeedService")
@@ -95,6 +101,12 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Inject
     private WorkflowProxy workflowProxy;
 
+    @Inject
+    private ActionService actionService;
+
+    @Inject
+    private MetadataService metadataService;
+
     private static final String LockType = "DataFeedExecutionLock";
 
     public DataFeedServiceImpl() {
@@ -103,13 +115,16 @@ public class DataFeedServiceImpl implements DataFeedService {
     @VisibleForTesting
     DataFeedServiceImpl(DataFeedEntityMgr datafeedEntityMgr, DataFeedExecutionEntityMgr datafeedExecutionEntityMgr,
             DataFeedTaskEntityMgr datafeedTaskEntityMgr, DataCollectionService dataCollectionService,
-            DataFeedTaskService datafeedTaskService, WorkflowProxy workflowProxy) {
+            DataFeedTaskService datafeedTaskService, WorkflowProxy workflowProxy,
+                        ActionService actionService, MetadataService metadataService) {
         this.datafeedEntityMgr = datafeedEntityMgr;
         this.datafeedExecutionEntityMgr = datafeedExecutionEntityMgr;
         this.datafeedTaskEntityMgr = datafeedTaskEntityMgr;
         this.dataCollectionService = dataCollectionService;
         this.datafeedTaskService = datafeedTaskService;
         this.workflowProxy = workflowProxy;
+        this.actionService = actionService;
+        this.metadataService = metadataService;
     }
 
     @Override
@@ -170,12 +185,21 @@ public class DataFeedServiceImpl implements DataFeedService {
         return execution;
     }
 
+    /**
+     *
+     * @param customerSpace
+     * @param datafeedName
+     * @param jobType
+     * @param jobId
+     * @param actionIds action ids are used to start PA execution
+     * @return
+     */
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public DataFeedExecution startExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType,
-            long jobId) {
+            long jobId, List<Long> actionIds) {
         if (DataFeedExecutionJobType.PA == jobType) {
-            return startPnAExecution(customerSpace, datafeedName, jobId);
+            return startPnAExecution(customerSpace, datafeedName, jobId, actionIds);
         } else if (DataFeedExecutionJobType.CDLOperation == jobType) {
             Job job = workflowProxy.getWorkflowExecution(String.valueOf(jobId), customerSpace);
             Map<String, String> inputs = job.getInputs();
@@ -188,7 +212,8 @@ public class DataFeedServiceImpl implements DataFeedService {
         return datafeedEntityMgr.findByName(datafeedName).getActiveExecution();
     }
 
-    private DataFeedExecution startPnAExecution(String customerSpace, String datafeedName, long jobId) {
+    private DataFeedExecution startPnAExecution(String customerSpace, String datafeedName, long jobId,
+                                                List<Long> actionIds) {
         DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
         if (datafeed == null) {
             log.info("Can't find data feed");
@@ -197,10 +222,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
         List<DataFeedImport> imports = new ArrayList<>();
         List<DataFeedTask> tasks = datafeed.getTasks();
-        tasks.forEach(task -> {
-            imports.addAll(createImports(task));
-            datafeedTaskEntityMgr.clearTableQueuePerTask(task);
-        });
+        imports.addAll(createImports(tasks, actionIds, customerSpace));
         log.info("imports for processanalyze are: " + imports);
 
         imports.sort(Comparator.comparingLong(dataFeedImport -> dataFeedImport.getDataTable().getPid()));
@@ -220,16 +242,46 @@ public class DataFeedServiceImpl implements DataFeedService {
         return execution;
     }
 
-    private List<DataFeedImport> createImports(DataFeedTask task) {
+    private List<DataFeedImport> createImports(List<DataFeedTask> tasks, List<Long> actionIds, String customerSpace) {
         List<DataFeedImport> imports = new ArrayList<>();
 
-        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskEntityMgr.getInflatedDataFeedTaskTables(task);
-        datafeedTaskTables.stream().map(DataFeedTaskTable::getTable)//
-                .filter(Objects::nonNull)//
-                .forEach(dataTable -> {
-                    task.setImportData(dataTable);
-                    imports.add(DataFeedImportUtils.createImportFromTask(task));
-                });
+        if (CollectionUtils.isEmpty(actionIds)) {
+            log.info("action Ids are empty from PA");
+            return imports;
+        }
+
+        if (CollectionUtils.isEmpty(tasks)) {
+            log.info("tasks are empty.");
+            return imports;
+        }
+
+        List<Action> actions = actionService.findByPidIn(actionIds);
+        if (CollectionUtils.isNotEmpty(actions)) {
+            Map<String, DataFeedTask> IdToTask = tasks.stream().collect(Collectors.toMap(DataFeedTask::getUniqueId,
+                    e -> e));
+            for (Action action : actions) {
+                ImportActionConfiguration config = (ImportActionConfiguration) action.getActionConfiguration();
+                if (config.getImportCount() == 0) {
+                    log.info("action {} doesn't have import rows", action.getPid());
+                    continue;
+                }
+                String uniqueId = config.getDataFeedTaskId();
+                DataFeedTask task = IdToTask.get(uniqueId);
+                Preconditions.checkNotNull(task, String.format("task should not be empty %s", uniqueId));
+                List<String> tableNames = config.getRegisteredTables();
+                if (CollectionUtils.isNotEmpty(tableNames)) {
+                    tableNames.forEach(tableName -> {
+                        Table dataTable = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
+                        if (dataTable != null) {
+                            task.setImportData(dataTable);
+                            imports.add(DataFeedImportUtils.createImportFromTask(task));
+                        }
+                    });
+                } else {
+                    log.info("action {} doesn't have table to be registered", action.getPid());
+                }
+            }
+        }
         return imports;
 
     }
@@ -390,19 +442,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         datafeedExecutionEntityMgr.update(execution);
         return execution;
     }
-
-    @Override
-    public void resetImport(String customerSpace, String datafeedName) {
-        DataFeed dataFeed = datafeedEntityMgr.findByNameInflated(datafeedName);
-        if (dataFeed == null) {
-            return;
-        }
-
-        for (DataFeedTask task : dataFeed.getTasks()) {
-            datafeedTaskService.resetImport(customerSpace, task);
-        }
-    }
-
+    
     public Status getSuccessfulDataFeedStatus(String initialDataFeedStatus) {
         Status datafeedStatus = Status.fromName(initialDataFeedStatus);
         switch (datafeedStatus) {
@@ -481,20 +521,6 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public List<DataFeed> getDataFeedsBySchedulingGroup(TenantStatus status, String version, String schedulingGroup) {
         return datafeedEntityMgr.getDataFeedsBySchedulingGroup(status, version, schedulingGroup);
-    }
-
-    @Override
-    public void resetImportByEntity(String customerSpace, String datafeedName, String entity) {
-        DataFeed dataFeed = datafeedEntityMgr.findByNameInflated(datafeedName);
-        if (dataFeed == null) {
-            return;
-        }
-
-        for (DataFeedTask task : dataFeed.getTasks()) {
-            if (task.getEntity().equals(entity)) {
-                datafeedTaskService.resetImport(customerSpace, task);
-            }
-        }
     }
 
     @Override

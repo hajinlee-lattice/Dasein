@@ -251,7 +251,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         try {
             Set<BusinessEntity> needDeletedEntity = new HashSet<>();
             List<Action> actions = actionService.findByOwnerId(null);
-            validateHardDelete(actions, request.getFullRematch());
+            if (hasHardDelete(actions) && !Boolean.TRUE.equals(request.getFullRematch())) {
+                request.setFullRematch(Boolean.TRUE);
+            }
             List<Action> completedActions = getCompletedActions(customerSpace, actions, needDeletedEntity);
             request.getRebuildEntities().addAll(getLegacyDeleteEntity(completedActions));
             List<Long> actionIds = completedActions.stream().map(Action::getPid).collect(Collectors.toList());

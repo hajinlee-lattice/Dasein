@@ -15,10 +15,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,8 +39,8 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
+import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
 import com.latticeengines.spark.exposed.job.common.ConvertToCSVJob;
@@ -80,32 +78,40 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
         return stepConfiguration.getCustomerSpace();
     }
 
+    private boolean getAddExportTimestamp(AtlasExport exportRecord) {
+        if (exportRecord.getExportConfig() != null) {
+            return exportRecord.getExportConfig().getAddExportTimestamp();
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public void execute() {
-        customerSpace = parseCustomerSpace(configuration);
-        inputUnits = getMapObjectFromContext(ATLAS_EXPORT_DATA_UNIT, ExportEntity.class, HdfsDataUnit.class);
-        inputUnits.forEach((exportEntity, hdfsDataUnit) -> {
-            ConvertToCSVConfig config = new ConvertToCSVConfig();
-            config.setInput(Collections.singletonList(hdfsDataUnit));
-            config.setDateAttrsFmt(getDateAttrFmtMap(exportEntity));
-            config.setDisplayNames(getDisplayNameMap(exportEntity));
-            config.setTimeZone("UTC");
-            config.setWorkspace(getRandomWorkspace());
-            config.setCompress(configuration.isCompressResult());
-            if (configuration.isAddExportTimestamp()) {
-                config.setExportTimeAttr(InterfaceName.LatticeExportTime.name());
-            }
-            log.info("Submit spark job to convert " + exportEntity + " csv.");
-            SparkJobResult result = runSparkJob(ConvertToCSVJob.class, config);
-            outputUnits.put(exportEntity, result.getTargets().get(0));
-        });
-
         AtlasExport exportRecord = WorkflowStaticContext.getObject(ATLAS_EXPORT, AtlasExport.class);
         if (exportRecord == null) {
             log.error(String.format("Cannot find atlas export record for id: %s, skip save data",
                     configuration.getAtlasExportId()));
             return;
         }
+        boolean addExportTimestamp = getAddExportTimestamp(exportRecord);
+        customerSpace = parseCustomerSpace(configuration);
+        inputUnits = getMapObjectFromContext(ATLAS_EXPORT_DATA_UNIT, ExportEntity.class, HdfsDataUnit.class);
+        inputUnits.forEach((exportEntity, hdfsDataUnit) -> {
+            ConvertToCSVConfig config = new ConvertToCSVConfig();
+            config.setInput(Collections.singletonList(hdfsDataUnit));
+            config.setDateAttrsFmt(getDateAttrFmtMap(exportEntity, addExportTimestamp));
+            config.setDisplayNames(getDisplayNameMap(exportEntity));
+            config.setTimeZone("UTC");
+            config.setWorkspace(getRandomWorkspace());
+            config.setCompress(configuration.isCompressResult());
+            if (addExportTimestamp) {
+                config.setExportTimeAttr(InterfaceName.LatticeExportTime.name());
+            }
+            log.info("Submit spark job to convert " + exportEntity + " csv.");
+            SparkJobResult result = runSparkJob(ConvertToCSVJob.class, config);
+            outputUnits.put(exportEntity, result.getTargets().get(0));
+        });
         outputUnits.forEach(((exportEntity, hdfsDataUnit) -> {
             String outputDir = hdfsDataUnit.getPath();
             String csvGzPath;
@@ -121,97 +127,12 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
         }));
     }
 
-    private void renameDisplayNameMap(ExportEntity exportEntity, ColumnMetadata cm, String displayName, Map<String, String> displayNameMap) {
-        // need to rename contact column name
-        if (ExportEntity.AccountContact.equals(exportEntity) && //
-                BusinessEntity.Contact.equals(BusinessEntity.getCentralEntity(cm.getEntity()))) {
-            displayNameMap.put(AccountContactExportConfig.CONTACT_ATTR_PREFIX + cm.getAttrName(), displayName);
-        } else {
-            displayNameMap.put(cm.getAttrName(), displayName);
-        }
-    }
-
-    private static class DisplayData {
-
-        private ColumnMetadata columnMetadata;
-
-        private boolean displayNameUpdated;
-
-        private DisplayData(ColumnMetadata columnMetadata, boolean displayNameUpdated) {
-            this.columnMetadata = columnMetadata;
-            this.displayNameUpdated = displayNameUpdated;
-        }
-
-        public boolean isDisplayNameUpdated() {
-            return displayNameUpdated;
-        }
-
-        public void setDisplayNameUpdated(boolean displayNameUpdated) {
-            this.displayNameUpdated = displayNameUpdated;
-        }
-
-        public ColumnMetadata getColumnMetadata() {
-            return columnMetadata;
-        }
-    }
-
-    private void insertDataIntoDisplayNameMap(ColumnMetadata cm, ExportEntity exportEntity, Map<String, DisplayData> outputCols,
-                                              Map<String, String> displayNameMap, String originalDisplayName, int indexToAppend) {
-        boolean putDisplayName = true;
-        String displayName = originalDisplayName;
-        DisplayData displayData = outputCols.get(originalDisplayName.toLowerCase());
-        if (displayData != null) {
-            putDisplayName = false;
-            if (indexToAppend > 1) {
-                // display name may duplicated in same category, if so append index to display name
-                displayName = cm.getCategory().getName() + "_" + originalDisplayName + "(" + indexToAppend + ")";
-            } else {
-                displayName = cm.getCategory().getName() + "_" + originalDisplayName;
-            }
-            log.warn(String.format("Display name [%s] has already been assigned to another attr, cannot be " +
-                    "assigned to [%s]. Display name changed to [%s].", originalDisplayName, cm.getAttrName(), displayName));
-            if (!displayData.isDisplayNameUpdated()) {
-                displayData.setDisplayNameUpdated(true);
-                ColumnMetadata columnMetadata = displayData.getColumnMetadata();
-                renameDisplayNameMap(exportEntity, columnMetadata,
-                        columnMetadata.getCategory().getName() + "_" + columnMetadata.getDisplayName(), displayNameMap);
-            }
-        }
-        renameDisplayNameMap(exportEntity, cm, displayName, displayNameMap);
-        if (putDisplayName) {
-            outputCols.put(displayName.toLowerCase(), new DisplayData(cm, false));
-        }
-    }
-
     private Map<String, String> getDisplayNameMap(ExportEntity exportEntity) {
         List<ColumnMetadata> schema = getExportSchema(exportEntity);
-        Map<String, String> displayNameMap = new HashMap<>();
-        Map<String, DisplayData> outputCols = new HashMap<>();
-        Map<Category, Map<String, MutableInt>> displayNameIndexMap = new HashMap<>();
-        schema.forEach(cm -> {
-            String originalDisplayName = cm.getDisplayName();
-            String originalDisplayNameLowerCase = originalDisplayName.toLowerCase();
-            Map<String, MutableInt> indexMap = displayNameIndexMap.get(cm.getCategory());
-            int indexToAppend = 1;
-            if (MapUtils.isNotEmpty(indexMap)) {
-                MutableInt index = indexMap.get(originalDisplayNameLowerCase);
-                if (index != null) {
-                    index.increment();
-                    indexToAppend = index.getValue();
-                } else {
-                    indexMap.put(originalDisplayNameLowerCase, new MutableInt(indexToAppend));
-                }
-            } else {
-                indexMap = new HashMap<>();
-                indexMap.put(originalDisplayNameLowerCase, new MutableInt(indexToAppend));
-                displayNameIndexMap.put(cm.getCategory(), indexMap);
-            }
-            insertDataIntoDisplayNameMap(cm, exportEntity, outputCols, displayNameMap, originalDisplayName, indexToAppend);
-        });
-        return displayNameMap;
+        return ExportUtils.getDisplayNameMap(exportEntity, schema);
     }
 
-    private Map<String, String> getDateAttrFmtMap(ExportEntity exportEntity) {
+    private Map<String, String> getDateAttrFmtMap(ExportEntity exportEntity, boolean addExportTimestamp) {
         List<ColumnMetadata> schema = getExportSchema(exportEntity);
         Map<String, String> dateFmtMap = new HashMap<>();
         schema.forEach(cm -> {
@@ -220,14 +141,14 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
                 if (ExportEntity.AccountContact.equals(exportEntity) && //
                         BusinessEntity.Contact.equals(BusinessEntity.getCentralEntity(cm.getEntity()))) {
                     // for now, use default format for all date attrs
-                    dateFmtMap.put(AccountContactExportConfig.CONTACT_ATTR_PREFIX + cm.getAttrName(), ISO_8601);
+                    dateFmtMap.put(ExportUtils.CONTACT_ATTR_PREFIX + cm.getAttrName(), ISO_8601);
                 } else {
                     // for now, use default format for all date attrs
                     dateFmtMap.put(cm.getAttrName(), ISO_8601);
                 }
             }
         });
-        if (configuration.isAddExportTimestamp()) {
+        if (addExportTimestamp) {
             dateFmtMap.put(InterfaceName.LatticeExportTime.name(), ISO_8601);
         }
         return dateFmtMap;

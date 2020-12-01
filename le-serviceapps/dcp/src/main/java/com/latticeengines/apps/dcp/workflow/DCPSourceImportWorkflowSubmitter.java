@@ -80,6 +80,10 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         String sourceId = importRequest.getSourceId();
         String customerSpaceStr = customerSpace.toString();
 
+        if (importRequest.getSuppressKnownMatchErrors() == null) {
+            importRequest.setSuppressKnownMatchErrors(Boolean.TRUE);
+        }
+
         UploadConfig uploadConfig = generateUploadConfig(customerSpace, importRequest);
         UploadDetails upload = uploadService.createUpload(customerSpaceStr, sourceId,
                 uploadConfig, importRequest.getUserId());
@@ -99,7 +103,7 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         }
 
         DCPSourceImportWorkflowConfiguration configuration = //
-                generateConfiguration(customerSpace, projectId, sourceId, upload.getUploadId(), container.getPid());
+                generateConfiguration(customerSpace, projectId, sourceId, upload, container.getPid());
         ApplicationId applicationId = workflowJobService.submit(configuration, pidWrapper.getPid());
         Job job = workflowJobService.findByApplicationId(applicationId.toString());
         uploadService.updateStatsWorkflowPid(upload.getUploadId(), container.getPid(), job.getPid());
@@ -134,14 +138,17 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         } else {
             uploadConfig.setDropFilePath(importRequest.getS3FileKey());
         }
+
+        uploadConfig.setSuppressKnownMatchErrors(importRequest.getSuppressKnownMatchErrors());
         return uploadConfig;
     }
 
     private DCPSourceImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace, String projectId,
-                                                                       String sourceId, String uploadId, long statsId) {
+                                                                       String sourceId, UploadDetails uploadDetails, long statsId) {
         Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
 
+        String uploadId = uploadDetails.getUploadId();
         DplusMatchConfig matchConfig = getMatchConfig(customerSpace.toString(), sourceId);
         PurposeOfUse matchPurpose = getMatchPurpose(customerSpace.toString(), sourceId);
         EnrichmentLayout enrichmentLayout = getEnrichmentLayout(customerSpace.toString(), sourceId);
@@ -163,7 +170,7 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(DCPSourceImportWorkflowConfiguration.SOURCE_ID, sourceId) //
                         .put(DCPSourceImportWorkflowConfiguration.PROJECT_ID, projectId)
                         .build()) //
-                .matchConfig(matchConfig, matchPurpose) //
+                .matchConfig(matchConfig, matchPurpose, uploadDetails.getUploadConfig().getSuppressKnownMatchErrors()) //
                 .appendConfig(appendConfig, appendPurpose) //
                 .build();
     }

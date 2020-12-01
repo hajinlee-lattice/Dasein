@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.testng.ITestResult;
@@ -64,8 +65,8 @@ public interface RedshiftAndSparkQueryTester {
 
     @BeforeMethod(groups = "functional")
     default void beforeMethod(Method method, Object[] params) {
-        System.out.println(String.format("\n*********** Running Test Method (Redshift-SparkSQL): %s, Params: %s **********",
-                method.getName(), Arrays.deepToString(params)));
+        System.out.printf("\n*********** Running Test Method (Redshift-SparkSQL): %s, Params: %s **********\n",
+                method.getName(), Arrays.deepToString(params));
     }
 
     @AfterMethod(groups = "functional")
@@ -79,25 +80,28 @@ public interface RedshiftAndSparkQueryTester {
             case USER_SEGMENT:
                 getLogger().info("Redshift Query Count Collection: {}", redshiftQueryCountResults);
                 getLogger().info("Redshift Query Data Collection Size: {}",
-                        redshiftQueryDataResults.stream().map(lst -> lst.size()).collect(Collectors.toList()));
+                        redshiftQueryDataResults.stream().map(List::size).collect(Collectors.toList()));
                 break;
             case SPARK_BATCH_USER:
                 getLogger().info("SparkSQL Query Count Collection: {}", sparkQueryCountResults);
                 getLogger().info("Spark Query Data Collection Size: {}",
-                        sparkQueryDataResults.stream().map(lst -> lst.size()).collect(Collectors.toList()));
+                        sparkQueryDataResults.stream().map(List::size).collect(Collectors.toList()));
                 assertEquals(redshiftQueryCountResults, sparkQueryCountResults,
                         String.format("Counts doesn't match for %s : %s", testResult.getMethod().getMethodName(),
                                 Arrays.deepToString(params)));
-                assertEquals(redshiftQueryDataResults, sparkQueryDataResults,
-                        String.format("Data doesn't match for %s : %s", testResult.getMethod().getMethodName(),
-                                Arrays.deepToString(params)));
+                assertEquals(CollectionUtils.size(sparkQueryDataResults), CollectionUtils.size(redshiftQueryDataResults));
+                for (int i = 0; i < CollectionUtils.size(sparkQueryDataResults); i++) {
+                    assertEquals(sparkQueryDataResults.get(i), redshiftQueryDataResults.get(i),
+                            String.format("Counts doesn't match for %s : %s", testResult.getMethod().getMethodName(),
+                                    Arrays.deepToString(params)));
+                }
                 break;
             default:
             }
         } finally {
-            System.out.println(String.format(
-                    "---------- Completed Test Method (Redshift-SparkSQL): %s, Params: %s, Time: %d ms ----------\n",
-                    testResult.getMethod().getMethodName(), Arrays.deepToString(params), timeTaken));
+            System.out.printf(
+                    "---------- Completed Test Method (Redshift-SparkSQL): %s, Params: %s, Time: %d ms ----------\n\n",
+                    testResult.getMethod().getMethodName(), Arrays.deepToString(params), timeTaken);
             if (SPARK_BATCH_USER.equalsIgnoreCase(currUserContext) || StringUtils.isBlank(currUserContext)) {
                 // We Need to reset these counts only when SparkSQLTest is run. Because
                 // @AfterMethod gets triggered for each user context

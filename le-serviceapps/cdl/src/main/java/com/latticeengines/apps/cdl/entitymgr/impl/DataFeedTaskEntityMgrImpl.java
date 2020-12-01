@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.DataFeedTaskDao;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskTableEntityMgr;
 import com.latticeengines.apps.cdl.repository.writer.DataFeedTaskRepository;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -36,7 +35,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskSummary;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.LastModifiedKeyDao;
@@ -55,9 +53,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Inject
     private DataFeedTaskDao datafeedTaskDao;
-
-    @Inject
-    private DataFeedTaskTableEntityMgr datafeedTaskTableEntityMgr;
 
     @Inject
     private TableEntityMgr tableEntityMgr;
@@ -102,60 +97,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         datafeedTaskDao.create(datafeedTask);
     }
 
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void addTableToQueue(DataFeedTask datafeedTask, Table table) {
-        if (table.getPid() == null) {
-            table.setTableType(TableType.DATATABLE);
-            tableEntityMgr.create(table);
-        }
-        if (!TableType.DATATABLE.equals(table.getTableType())) {
-            throw new IllegalArgumentException(
-                    "Can only put data table in the queue. But " + table.getName() + " is a " + table.getTableType());
-        }
-        DataFeedTaskTable datafeedTaskTable = new DataFeedTaskTable();
-        datafeedTaskTable.setFeedTask(datafeedTask);
-        datafeedTaskTable.setTable(table);
-        datafeedTaskTableEntityMgr.create(datafeedTaskTable);
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void addTableToQueue(String dataFeedTaskUniqueId, String tableName) {
-        if (StringUtils.isEmpty(dataFeedTaskUniqueId) || StringUtils.isEmpty(tableName)) {
-            throw new IllegalArgumentException("DataFeedTask Unique Id & table name cannot be null");
-        }
-        DataFeedTask dataFeedTask = getDataFeedTask(dataFeedTaskUniqueId);
-        if (dataFeedTask == null) {
-            throw new RuntimeException("Cannot find data feed task with unique id: " + dataFeedTaskUniqueId);
-        }
-        Table table = tableEntityMgr.findByName(tableName);
-        if (table == null) {
-            throw new RuntimeException("Cannot find table with name: " + tableName);
-        }
-        addTableToQueue(dataFeedTask, table);
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void addTablesToQueue(String dataFeedTaskUniqueId, List<String> tableNames) {
-        if (StringUtils.isEmpty(dataFeedTaskUniqueId) || tableNames == null || tableNames.size() == 0) {
-            throw new IllegalArgumentException("DataFeedTask Unique Id & table name cannot be null");
-        }
-        DataFeedTask dataFeedTask = getDataFeedTask(dataFeedTaskUniqueId);
-        if (dataFeedTask == null) {
-            throw new RuntimeException("Cannot find data feed task with unique id: " + dataFeedTaskUniqueId);
-        }
-        for (String tableName : tableNames) {
-            Table table = tableEntityMgr.findByName(tableName);
-            if (table == null) {
-                log.error("Cannot find table with name: " + tableName);
-                continue;
-            }
-            addTableToQueue(dataFeedTask, table);
-        }
-    }
-
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     private void createDataTable(Table table) {
         if (table.getPid() == null) {
@@ -170,21 +111,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void clearTableQueue() {
-        datafeedTaskTableEntityMgr.deleteAll();
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void clearTableQueuePerTask(DataFeedTask dataFeedTask) {
-        datafeedTaskTableEntityMgr.deleteDataFeedTaskTables(dataFeedTask);
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public List<String> registerExtract(DataFeedTask datafeedTask, String tableName, Extract extract) {
         Table templateTable = getTemplate(tableName);
-        String registeredTableName = registerExtractTable(templateTable, extract, datafeedTask);
+        String registeredTableName = registerExtractTable(templateTable, extract);
         updateDataFeedTaskAfterRegister(datafeedTask);
         return Collections.singletonList(registeredTableName);
     }
@@ -194,11 +123,24 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     public List<String> registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts) {
         Table templateTable = getTemplate(tableName);
         List<String> registeredTables = new ArrayList<>();
-        for (int i = 0; i < extracts.size(); i++) {
-            Extract extract = extracts.get(i);
-            registeredTables.add(registerExtractTable(templateTable, extract, datafeedTask));
+        for (Extract extract : extracts) {
+            registeredTables.add(registerExtractTable(templateTable, extract));
         }
         updateDataFeedTaskAfterRegister(datafeedTask);
+        return registeredTables;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public List<String> registerImportData(DataFeedTask dataFeedTask, String dataTableName) {
+        Table dataTable = tableEntityMgr.findByName(dataTableName);
+        List<String> registeredTables = new ArrayList<>();
+        if (dataTable != null && CollectionUtils.isNotEmpty(dataTable.getExtracts())) {
+            for (Extract extract : dataTable.getExtracts()) {
+                registeredTables.add(registerExtractTable(dataTable, extract));
+            }
+            updateDataFeedTaskAfterRegister(dataFeedTask);
+        }
         return registeredTables;
     }
 
@@ -210,8 +152,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         return templateTable;
     }
 
-    private String registerExtractTable(Table template, Extract extract, DataFeedTask datafeedTask) {
-        Table cloneTable = TableUtils.clone(template, NamingUtils.uuid("DataTable"));
+    private String registerExtractTable(Table template, Extract extract) {
+        Table cloneTable = TableUtils.clone(template, NamingUtils.uuid("DataTable"), true);
+        cloneTable.setExtracts(new ArrayList<>());
         cloneTable.setTenant(MultiTenantContext.getTenant());
         cloneTable.addExtract(extract);
         log.info(String.format("Adding extract to new data table %s", template.getName()));
@@ -461,35 +404,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void update(DataFeedTask datafeedTask, Status status, Date lastImported) {
         datafeedTaskDao.update(datafeedTask, status, lastImported);
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
-    public List<Extract> getExtractsPendingInQueue(DataFeedTask task) {
-        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskTableEntityMgr.getInflatedDataFeedTaskTables(task);
-        List<Extract> extracts = new ArrayList<>();
-        datafeedTaskTables.stream().map(DataFeedTaskTable::getTable).forEach(t -> {
-            extracts.addAll(t.getExtracts());
-        });
-        return extracts;
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
-    public List<DataFeedTaskTable> getInflatedDataFeedTaskTables(DataFeedTask task) {
-        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskTableEntityMgr.getInflatedDataFeedTaskTables(task);
-        List<DataFeedTaskTable> inflatedDatafeedTaskTables = new ArrayList<>();
-        datafeedTaskTables.stream().forEach(datafeedtaskTable -> {
-            Table dataTable = datafeedtaskTable.getTable();
-            if (dataTable != null) {
-                if (!dataTable.getExtracts().isEmpty()) {
-                    inflatedDatafeedTaskTables.add(datafeedtaskTable);
-                } else {
-                    log.info(String.format("skip table: %s as this table extract is empty", dataTable.getName()));
-                }
-            }
-        });
-        return inflatedDatafeedTaskTables;
     }
 
     @Override

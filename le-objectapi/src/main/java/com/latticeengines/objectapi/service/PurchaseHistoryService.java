@@ -11,15 +11,15 @@ import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
 public interface PurchaseHistoryService {
 
     List<PeriodTransaction> getPeriodTransactionsByAccountId(String accountId, String periodName,
-            ProductType productType);
+            ProductType productType, String sqlUser);
 
     List<PeriodTransaction> getPeriodTransactionsForSegmentAccounts(String spendAnalyticsSegment, String periodName,
-            ProductType productType);
+            ProductType productType, String sqlUser);
 
-    List<ProductHierarchy> getProductHierarchy(DataCollection.Version version);
+    List<ProductHierarchy> getProductHierarchy(DataCollection.Version version, String sqlUser);
 
-    DataPage getAllSpendAnalyticsSegments();
+    DataPage getAllSpendAnalyticsSegments(String sqlUser);
 
-    List<String> getFinalAndFirstTransactionDate();
+    List<String> getFinalAndFirstTransactionDate(String sqlUser);
 
 }

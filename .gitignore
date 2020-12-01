@@ -12,6 +12,7 @@
 # Mac
 .DS_Store
 
+hive_process
 /spark-warehouse
 
 # Maven

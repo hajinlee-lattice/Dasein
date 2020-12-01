@@ -40,9 +40,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
+import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.spark.testframework.TestJoinTestNGBase;
 
 public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
@@ -207,7 +207,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 verifyContactColumns(schema);
             } else {
                 for (String contactColumn : contactColumns) {
-                    Schema.Field field = schema.getField(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn);
+                    Schema.Field field = schema.getField(ExportUtils.CONTACT_ATTR_PREFIX + contactColumn);
                     if (InterfaceName.ContactId.name().equals(contactColumn)) {
                         Assert.assertNotNull(field);
                     } else {
@@ -220,12 +220,12 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
 
     private void verifyContactColumns(Schema schema) {
         List<String> contactColumns = CampaignLaunchUtils.generateContactColsForS3();
-        Set<String> excludeFields = Sets.newHashSet(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Address_Street_1.name(),
-                DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.SalesforceContactID.name(),
-                DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + InterfaceName.Name.name());
+        Set<String> excludeFields = Sets.newHashSet(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Address_Street_1.name(),
+                ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.SalesforceContactID.name(),
+                ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Name.name());
         for (String contactColumn : contactColumns) {
-            Schema.Field field = schema.getField(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn);
-            if (excludeFields.contains(DeltaCampaignLaunchWorkflowConfiguration.CONTACT_ATTR_PREFIX + contactColumn)) {
+            Schema.Field field = schema.getField(ExportUtils.CONTACT_ATTR_PREFIX + contactColumn);
+            if (excludeFields.contains(ExportUtils.CONTACT_ATTR_PREFIX + contactColumn)) {
                 Assert.assertNull(field);
             } else {
                 Assert.assertNotNull(field);

@@ -595,7 +595,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 115);
+        testGetCountAndAssert(sqlUser, query, 115, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -606,7 +606,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1216);
+        testGetCountAndAssert(sqlUser, query, 1216, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -617,7 +617,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1857);
+        testGetCountAndAssert(sqlUser, query, 1857, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -632,7 +632,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 .from(BusinessEntity.Transaction).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 115);
+        testGetCountAndAssert(sqlUser, query, 115, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -645,7 +645,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 52);
+        testGetCountAndAssert(sqlUser, query, 52, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -658,7 +658,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 318);
+        testGetCountAndAssert(sqlUser, query, 318, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -698,7 +698,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 50);
+        testGetCountAndAssert(sqlUser, query, 50, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -709,7 +709,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 18);
+        testGetCountAndAssert(sqlUser, query, 18, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -720,7 +720,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1265);
+        testGetCountAndAssert(sqlUser, query, 1265, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -731,7 +731,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 0);
+        testGetCountAndAssert(sqlUser, query, 0, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -742,7 +742,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 0);
+        testGetCountAndAssert(sqlUser, query, 0, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -755,7 +755,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 9);
+        testGetCountAndAssert(sqlUser, query, 9, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -773,7 +773,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1);
+        testGetCountAndAssert(sqlUser, query, 1, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -784,7 +784,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1331);
+        testGetCountAndAssert(sqlUser, query, 1331, false);
 
     }
 
@@ -796,7 +796,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 115);
+        testGetCountAndAssert(sqlUser, query, 115, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -807,7 +807,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 42);
+        testGetCountAndAssert(sqlUser, query, 42, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -840,7 +840,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 7);
+        testGetCountAndAssert(sqlUser, query, 7, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -852,7 +852,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 0);
+        testGetCountAndAssert(sqlUser, query, 0, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -864,7 +864,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 2);
+        testGetCountAndAssert(sqlUser, query, 2, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -876,7 +876,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 16);
+        testGetCountAndAssert(sqlUser, query, 16, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -888,7 +888,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 15);
+        testGetCountAndAssert(sqlUser, query, 15, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -900,7 +900,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 21);
+        testGetCountAndAssert(sqlUser, query, 21, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -914,7 +914,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 0);
+        testGetCountAndAssert(sqlUser, query, 0, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -926,7 +926,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1);
+        testGetCountAndAssert(sqlUser, query, 1, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -938,7 +938,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 0);
+        testGetCountAndAssert(sqlUser, query, 0, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -952,7 +952,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1277);
+        testGetCountAndAssert(sqlUser, query, 1277, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -964,7 +964,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1180);
+        testGetCountAndAssert(sqlUser, query, 1180, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -976,7 +976,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 5);
+        testGetCountAndAssert(sqlUser, query, 5, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -988,7 +988,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1326);
+        testGetCountAndAssert(sqlUser, query, 1326, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -1000,7 +1000,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1290);
+        testGetCountAndAssert(sqlUser, query, 1290, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -1012,7 +1012,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1);
+        testGetCountAndAssert(sqlUser, query, 1, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -1024,7 +1024,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 0);
+        testGetCountAndAssert(sqlUser, query, 0, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -1036,7 +1036,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 2);
+        testGetCountAndAssert(sqlUser, query, 2, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -1048,7 +1048,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1219);
+        testGetCountAndAssert(sqlUser, query, 1219, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -1060,7 +1060,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getEventFrontEndQueryWithLimitedPeriodCount(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 11216);
+        testGetCountAndAssert(sqlUser, query, 11216, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -1072,7 +1072,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 42);
+        testGetCountAndAssert(sqlUser, query, 42, false);
     }
 
     @Test(groups = "functional", dataProvider = "userContexts")
@@ -1085,7 +1085,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1289);
+        testGetCountAndAssert(sqlUser, query, 1289, false);
 
         TransactionRestriction hasNotEngaged = getHasNotEngagedProd2();
         TransactionRestriction within = getEngagedWithinSeven();
@@ -1094,7 +1094,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery1 = queryEvaluator.evaluate(attrRepo, query1, sqlUser);
         logQuery(sqlUser, sqlQuery1);
-        testGetCountAndAssert(sqlUser, query1, 1289);
+        testGetCountAndAssert(sqlUser, query1, 1289, false);
 
     }
 
@@ -1110,7 +1110,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
                 getDefaultEventFrontEndQuery(), Query.builder(), sqlUser).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 50);
+        testGetCountAndAssert(sqlUser, query, 50, false);
 
     }
 
@@ -1124,7 +1124,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         // SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query,
         // sqlUser);
         // logQuery(sqlUser, sqlQuery);
-        testGetCountAndAssert(sqlUser, query, 1);
+        testGetCountAndAssert(sqlUser, query, 1, false);
 
     }
 
@@ -1139,7 +1139,7 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
          * SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query,
          * sqlUser); logQuery(sqlUser, sqlQuery);
          */
-        testGetCountAndAssert(sqlUser, query, 26);
+        testGetCountAndAssert(sqlUser, query, 26, false);
     }
 
     public static class EnhancedEventQueryTranslator extends EventQueryTranslator {

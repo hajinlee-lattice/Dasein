@@ -277,7 +277,7 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
             log.info("RenameAndMatchStep, accountSystemIds {}", accountSystemIds);
             MatchInput.EntityKeyMap accountKeyMap = new MatchInput.EntityKeyMap();
             matchInput.setTargetEntity(BusinessEntity.Account.name());
-            accountKeyMap.setKeyMap(MatchUtils.getAccountMatchKeysAccount(columnNames, accountSystemIds, false));
+            accountKeyMap.setKeyMap(MatchUtils.getAccountMatchKeysAccount(columnNames, accountSystemIds, false, null));
             entityKeyMaps.put(BusinessEntity.Account.name(), accountKeyMap);
             matchInput.setEntityKeyMaps(entityKeyMaps);
         } else {
@@ -289,9 +289,10 @@ public class RenameAndMatchStep extends BaseTransformWrapperStep<RenameAndMatchS
                     contactSystemIds);
             matchInput.setTargetEntity(BusinessEntity.Contact.name());
             MatchInput.EntityKeyMap accountKeyMap = MatchInput.EntityKeyMap
-                    .fromKeyMap(MatchUtils.getAccountMatchKeysForContact(columnNames, accountSystemIds, false, false));
+                    .fromKeyMap(MatchUtils.getAccountMatchKeysForContact(columnNames, accountSystemIds, false, false,
+                            null));
             MatchInput.EntityKeyMap contactKeyMap = MatchInput.EntityKeyMap
-                    .fromKeyMap(MatchUtils.getContactMatchKeys(columnNames, contactSystemIds, false));
+                    .fromKeyMap(MatchUtils.getContactMatchKeys(columnNames, contactSystemIds, false, null));
             matchInput.setEntityKeyMaps(new HashMap<>(ImmutableMap.of( //
                     BusinessEntity.Account.name(), accountKeyMap, //
                     BusinessEntity.Contact.name(), contactKeyMap)));

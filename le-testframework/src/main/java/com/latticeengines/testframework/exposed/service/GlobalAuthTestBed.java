@@ -88,7 +88,11 @@ public interface GlobalAuthTestBed {
 
     void cleanupPlsHdfs();
 
+    void cleanupPrestoDb();
+
     void cleanupRedshift();
+
+    void cleanupAthena();
 
     void overwriteFeatureFlag(Tenant tenant, String featureFlagName, boolean value);
 

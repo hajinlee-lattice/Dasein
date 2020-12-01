@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,14 +31,15 @@ public class DataFeedResource {
     @Inject
     private DataFeedService datafeedService;
 
-    @PostMapping("/{datafeedName}/jobtype/{jobType}startexecution")
+    @PostMapping("/{datafeedName}/jobtype/{jobType}/jobId/{jobId}/startexecution")
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
             @PathVariable String datafeedName, //
             @PathVariable DataFeedExecutionJobType jobType, //
-            @RequestBody long jobId) {
-        return datafeedService.startExecution(customerSpace, datafeedName, jobType, jobId);
+            @PathVariable long jobId, //
+            @RequestBody(required = false) List<Long> actionIds ) {
+        return datafeedService.startExecution(customerSpace, datafeedName, jobType, jobId, actionIds);
     }
 
     @PostMapping("/{datafeedName}/jobtype/{jobType}/restartexecution")

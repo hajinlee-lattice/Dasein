@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,12 +14,12 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StreamUtils;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.ListSegmentEntityMgr;
@@ -38,6 +37,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
+import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
 import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -55,9 +56,11 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
+import com.latticeengines.domain.exposed.util.SegmentUtils;
+import com.latticeengines.metadata.service.DataTemplateService;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("segmentService")
@@ -86,11 +89,11 @@ public class SegmentServiceImpl implements SegmentService {
     @Inject
     private MetadataSegmentExportEntityMgr metadataSegmentExportEntityMgr;
 
+    @Inject
+    private DataTemplateService dataTemplateService;
+
     @Value("${aws.s3.data.stage.bucket}")
     private String dateStageBucket;
-
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
 
     private final String listSegmentCSVAdaptorPath = "metadata/ListSegmentCSVAdaptor.json";
 
@@ -107,10 +110,10 @@ public class SegmentServiceImpl implements SegmentService {
                 persistedSegment = segmentEntityMgr.createSegment(segment);
             }
         } else {
-            segment.setName(NamingUtils.timestamp("Segment"));
+            segment.setName(NamingUtils.timestampWithRandom("Segment"));
             persistedSegment = segmentEntityMgr.createSegment(segment);
         }
-        if (persistedSegment != null) {
+        if (persistedSegment != null && !MetadataSegment.SegmentType.List.equals(persistedSegment.getType())) {
             try {
                 Map<BusinessEntity, Long> counts = updateSegmentCounts(persistedSegment);
                 persistedSegment.setAccounts(counts.getOrDefault(BusinessEntity.Account, 0L));
@@ -124,47 +127,43 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateListSegment(MetadataSegment segment) {
-        MetadataSegment persistedSegment;
-        if (StringUtils.isNotEmpty(segment.getName())) {
+        MetadataSegment persistedSegment = null;
+        if (segment.getListSegment() != null) {
+            MetadataSegment existingSegment = segmentEntityMgr.findByExternalInfo(segment);
+            if (existingSegment != null) {
+                persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
+            } else {
+                segment.setName(NamingUtils.timestampWithRandom("Segment"));
+                persistedSegment = createListSegment(segment);
+            }
+        } else if (StringUtils.isNotEmpty(segment.getName())) {
             MetadataSegment existingSegment = segmentEntityMgr.findByName(segment.getName());
             if (existingSegment != null) {
                 persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
             } else {
                 persistedSegment = createListSegment(segment);
             }
-        } else if (segment.getListSegment() != null) {
-            MetadataSegment existingSegment = segmentEntityMgr.findByExternalInfo(segment);
-            if (existingSegment != null) {
-                persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
-            } else {
-                persistedSegment = createListSegment(segment);
-            }
         } else {
-            segment.setName(NamingUtils.timestamp("Segment"));
-            persistedSegment = createListSegment(segment);
+            log.error("Can't create or update list segment with empty name or empty list segment object.");
         }
         return persistedSegment;
     }
 
     private CSVAdaptor readCSVAdaptor() {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(listSegmentCSVAdaptorPath)) {
-            String csvAdaptor = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-            return JsonUtils.deserialize(csvAdaptor, CSVAdaptor.class);
+            return JsonUtils.deserialize(inputStream, CSVAdaptor.class);
         } catch (IOException exception) {
             throw new LedpException(LedpCode.LEDP_00002, "Can't read " + listSegmentCSVAdaptorPath, exception);
         }
     }
 
-    public static void main(String[] args) {
-        SegmentServiceImpl segmentService = new SegmentServiceImpl();
-        segmentService.readCSVAdaptor();
-    }
-
     private MetadataSegment createListSegment(MetadataSegment segment) {
         if (segment.getListSegment() != null) {
             ListSegment listSegment = segment.getListSegment();
-            HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-            listSegment.setS3DropFolder(pathBuilder.getS3ListSegmentDir(dateStageBucket, MultiTenantContext.getShortTenantId(), segment.getName()));
+            String s3Path = S3PathBuilder.getS3ListSegmentDir(dateStageBucket, MultiTenantContext.getShortTenantId(), segment.getName());
+            s3Path = s3Path //
+                    .replaceFirst("s3a:", "s3:").replaceFirst("s3n:", "s3:");
+            listSegment.setS3DropFolder(s3Path);
             listSegment.setCsvAdaptor(readCSVAdaptor());
         }
         return segmentEntityMgr.createListSegment(segment);
@@ -325,7 +324,7 @@ public class SegmentServiceImpl implements SegmentService {
                         review.put(name, counts);
                     } catch (Exception e) {
                         log.warn("Failed to update counts for segment " + name + //
-                        " in tenant " + MultiTenantContext.getShortTenantId());
+                                " in tenant " + MultiTenantContext.getShortTenantId());
                         failedSegments.add(name);
                     }
                 });
@@ -374,7 +373,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     private Long getEntityCount(BusinessEntity entity, FrontEndRestriction accountRestriction,
-            FrontEndRestriction contactRestriction) {
+                                FrontEndRestriction contactRestriction) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         Restriction accountExists = Restriction.builder() //
@@ -471,14 +470,14 @@ public class SegmentServiceImpl implements SegmentService {
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(segment.getAccountRestriction()));
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(segment.getContactRestriction()));
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_40057, e, new String[] { e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_40057, e, new String[]{e.getMessage()});
         }
         if (CollectionUtils.isNotEmpty(invalidBkts)) {
             String message = invalidBkts.stream() //
                     .map(BucketRestriction::getAttr) //
                     .map(AttributeLookup::toString) //
                     .collect(Collectors.joining(","));
-            throw new LedpException(LedpCode.LEDP_40057, new String[] { message });
+            throw new LedpException(LedpCode.LEDP_40057, new String[]{message});
         }
     }
 
@@ -512,5 +511,32 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId) {
         return segmentEntityMgr.findByExternalInfo(externalSystem, externalSegmentId);
+    }
+
+    @Override
+    public String createOrUpdateDataTemplate(String segmentName, CreateDataTemplateRequest request) {
+        MetadataSegment segment = segmentEntityMgr.findByName(segmentName, true);
+        if (SegmentUtils.hasListSegment(segment)) {
+            String tenantId = MultiTenantContext.getShortTenantId();
+            ListSegment listSegment = segment.getListSegment();
+            String templateId = listSegment.getTemplateId(request.getTemplateKey());
+            DataTemplate dataTemplate = request.getDataTemplate();
+            if (StringUtils.isEmpty(templateId)) {
+                dataTemplate.setTenant(tenantId);
+                templateId = dataTemplateService.create(dataTemplate);
+                Map<String, String> dataTemplates = listSegment.getDataTemplates();
+                if (MapUtils.isEmpty(dataTemplates)) {
+                    dataTemplates = new HashMap<>();
+                }
+                dataTemplates.put(request.getTemplateKey(), templateId);
+                listSegment.setDataTemplates(dataTemplates);
+                segmentEntityMgr.update(segment);
+            } else {
+                dataTemplateService.updateByUuid(templateId, dataTemplate);
+            }
+            return templateId;
+        } else {
+            throw new RuntimeException("List segment does not exists");
+        }
     }
 }

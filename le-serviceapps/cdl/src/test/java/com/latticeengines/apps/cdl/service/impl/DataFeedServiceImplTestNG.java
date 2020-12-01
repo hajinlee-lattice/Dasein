@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -8,6 +9,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +21,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -31,8 +32,10 @@ import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -43,11 +46,15 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
@@ -74,9 +81,14 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
+    @Inject
+    private ActionService actionService;
+
     private String dataFeedName;
 
     private DataFeed datafeed = new DataFeed();
+
+    private Long actionId;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -86,19 +98,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         job.setJobStatus(JobStatus.FAILED);
         job.setInputs(new HashMap<>());
         job.getInputs().put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, Status.Active.getName());
-        WorkflowProxy workflowProxy = mock(WorkflowProxy.class);
-        when(workflowProxy.getWorkflowExecution(anyString(), anyString())).thenReturn(job);
-        datafeedService = new DataFeedServiceImpl(datafeedEntityMgr, datafeedExecutionEntityMgr, datafeedTaskEntityMgr,
-                dataCollectionService, datafeedTaskService, workflowProxy);
-    }
 
-    @AfterClass(groups = "functional")
-    public void cleanup() {
-        datafeedTaskEntityMgr.clearTableQueue();
-    }
-
-    @Test(groups = "functional")
-    public void create() {
         DataCollection dataCollection = new DataCollection();
         dataCollection.setName(NamingUtils.timestamp("DATA_COLLECTION_NAME"));
         dataCollection.setTenant(MultiTenantContext.getTenant());
@@ -139,10 +139,31 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         task.setStartTime(new Date());
         task.setLastImported(new Date());
         task.setLastUpdated(new Date());
-        task.setUniqueId(UUID.randomUUID().toString());
+        String uniqueId = UUID.randomUUID().toString();
+        task.setUniqueId(uniqueId);
         datafeed.addTask(task);
+
+        Action action = new Action();
+        action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+        ImportActionConfiguration config = new ImportActionConfiguration();
+        action.setActionConfiguration(config);
+        config.setImportCount(100L);
+        config.setRegisteredTables(Collections.singletonList("dataTable"));
+        config.setDataFeedTaskId(uniqueId);
+        actionService.create(action);
+        actionId = action.getPid();
+
+        WorkflowProxy workflowProxy = mock(WorkflowProxy.class);
+        when(workflowProxy.getWorkflowExecution(anyString(), anyString())).thenReturn(job);
+        MetadataService metadataService = mock(MetadataService.class);
+        when(metadataService.getTable(any(CustomerSpace.class), anyString())).thenReturn(dataTable);
+        datafeedService = new DataFeedServiceImpl(datafeedEntityMgr, datafeedExecutionEntityMgr, datafeedTaskEntityMgr,
+                dataCollectionService, datafeedTaskService, workflowProxy, actionService, metadataService);
         datafeedService.createDataFeed(MultiTenantContext.getTenant().getId(), dataCollection.getName(), datafeed);
-        datafeedTaskEntityMgr.addTableToQueue(task, dataTable);
+    }
+
+    @Test(groups = "functional")
+    public void create() {
 
         DataFeedExecution execution = new DataFeedExecution();
         execution.setDataFeed(datafeed);
@@ -174,7 +195,8 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         log.info("started locking execution");
         datafeedService.lockExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA);
         log.info("already locked execution");
-        assertNotNull(datafeedService.startExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA, 2L)
+        assertNotNull(datafeedService.startExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA, 2L,
+                Collections.singletonList(actionId))
                 .getImports());
         DataFeed df = datafeedService.findDataFeedByName(customerSpace, dataFeedName);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
@@ -228,7 +250,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(exec0.getStatus(), DataFeedExecution.Status.Failed);
 
         DataFeedExecution exec1 = datafeedService.startExecution(MultiTenantContext.getTenant().getId(), dataFeedName,
-                DataFeedExecutionJobType.PA, workflowId + 1L);
+                DataFeedExecutionJobType.PA, workflowId + 1L, Collections.singletonList(actionId));
         df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), dataFeedName);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 

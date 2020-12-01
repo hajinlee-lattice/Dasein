@@ -15,6 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -69,6 +70,7 @@ public class ExportFieldMetadataDefaults implements HasPid {
 
     @JsonProperty("historyEnabled")
     @Column(name = "HISTORY_ENABLED", nullable = false)
+    @Transient
     private Boolean historyEnabled;
 
     @JsonProperty("audienceType")
@@ -85,7 +87,7 @@ public class ExportFieldMetadataDefaults implements HasPid {
     public ExportFieldMetadataDefaults(String attrName, String displayName, String javaClass, BusinessEntity entity,
             CDLExternalSystemName systemName,
             Boolean isStandardField,
-            Boolean isExportEnabled, Boolean isHistoryEnabled) {
+            Boolean isExportEnabled) {
         this.attrName = attrName;
         this.entity = entity;
         this.displayName = displayName;
@@ -93,7 +95,6 @@ public class ExportFieldMetadataDefaults implements HasPid {
         this.externalSystemName = systemName;
         this.standardField = isStandardField;
         this.exportEnabled = isExportEnabled;
-        this.historyEnabled = isHistoryEnabled;
     }
 
     @Override
@@ -160,14 +161,6 @@ public class ExportFieldMetadataDefaults implements HasPid {
 
     public void setExportEnabled(Boolean exportEnabled) {
         this.exportEnabled = exportEnabled;
-    }
-
-    public Boolean getHistoryEnabled() {
-        return historyEnabled;
-    }
-
-    public void setHistoryEnabled(Boolean historyEnabled) {
-        this.historyEnabled = historyEnabled;
     }
 
     public List<AudienceType> getAudienceTypes() {

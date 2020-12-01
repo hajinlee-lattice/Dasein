@@ -38,6 +38,7 @@ import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.datacloud.match.PrimeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.VboUsageEvent;
 import com.latticeengines.domain.exposed.datacloud.match.config.DplusUsageReportConfig;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
@@ -164,7 +166,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 if (matchInput.getRequestSource() != null)
                     matchHistory.setRequestSource(matchInput.getRequestSource().toString());
                 if (matchInput.isFetchOnly() && //
-                        (record.getLatticeAccount() != null || record.getFetchResult() != null)) {
+                        (record.getLatticeAccount() != null || (record.getFetchResult() != null && !record.getFetchResult().getResult().containsKey(PrimeAccount.ENRICH_ERROR_CODE)))) {
                     matchHistory.setMatched(true);
                     matchHistory.setLdcMatched(true);
                 }
@@ -239,6 +241,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             matchContext.setNameLocations(new HashSet<>());
         }
 
+        // Convert InternalOutputRecords to OutputRecords
         for (InternalOutputRecord internalRecord : records) {
             if (internalRecord.isFailed()) {
                 OutputRecord outputRecord = new OutputRecord();
@@ -367,11 +370,20 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 }
             }
 
+            // don't copy errors if null or was successful on a later retry
+            if (CollectionUtils.isNotEmpty(internalRecord.getErrorMessages()) && internalRecord.getRawError() != null) {
+                outputRecord.addErrorCode(MatchCoreErrorConstants.ErrorType.MATCH_ERROR, internalRecord.getRawError());
+            }
+            if (internalRecord.getFetchResult() != null && internalRecord.getFetchResult().getResult().containsKey(PrimeAccount.ENRICH_ERROR_CODE)) {
+                outputRecord.addErrorCode(MatchCoreErrorConstants.ErrorType.APPEND_ERROR, (String) internalRecord.getFetchResult().getResult().get(PrimeAccount.ENRICH_ERROR_CODE));
+            }
+
             outputRecord.setRowNumber(internalRecord.getRowNumber());
             outputRecord.setErrorMessages(internalRecord.getErrorMessages());
             outputRecord.setMatchLogs(internalRecord.getMatchLogs());
             outputRecord.setDebugValues(internalRecord.getDebugValues());
             outputRecord.setNumFeatureValue(internalRecord.getNumFeatureValue());
+
             outputRecords.add(outputRecord);
         }
 

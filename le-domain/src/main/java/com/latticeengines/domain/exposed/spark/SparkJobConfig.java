@@ -20,8 +20,11 @@ import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResul
 import com.latticeengines.domain.exposed.serviceflows.core.spark.PrepareMatchDataJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ScoreAggregateJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CalculateExpectedRevenuePercentileJobConfig;
+import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CalculatePredictedRevenuePercentileJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CombineInputTableWithScoreJobConfig;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.PivotScoreAndEventJobConfig;
+import com.latticeengines.domain.exposed.serviceflows.scoring.spark.RecalculateExpectedRevenueJobConfig;
+import com.latticeengines.domain.exposed.serviceflows.scoring.spark.RecalculatePercentileScoreJobConfig;
 import com.latticeengines.domain.exposed.spark.am.MapAttributeTxfmrConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityAlertJobConfig;
@@ -37,10 +40,13 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateEventTableFilterJobConf
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.ExtractListSegmentCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateIntentAlertArtifactsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchUniverseJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateLiveRampLaunchArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
@@ -121,6 +127,9 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = ScoreAggregateJobConfig.class, name = ScoreAggregateJobConfig.NAME), //
         @JsonSubTypes.Type(value = CombineInputTableWithScoreJobConfig.class, name = CombineInputTableWithScoreJobConfig.NAME), //
         @JsonSubTypes.Type(value = CalculateExpectedRevenuePercentileJobConfig.class, name = CalculateExpectedRevenuePercentileJobConfig.NAME), //
+        @JsonSubTypes.Type(value = RecalculatePercentileScoreJobConfig.class, name = RecalculatePercentileScoreJobConfig.NAME), //
+        @JsonSubTypes.Type(value = CalculatePredictedRevenuePercentileJobConfig.class, name = CalculatePredictedRevenuePercentileJobConfig.NAME), //
+        @JsonSubTypes.Type(value = RecalculateExpectedRevenueJobConfig.class, name = RecalculateExpectedRevenueJobConfig.NAME), //
         @JsonSubTypes.Type(value = CreateCdlEventTableJobConfig.class, name = CreateCdlEventTableJobConfig.NAME), //
         @JsonSubTypes.Type(value = CreateEventTableFilterJobConfig.class, name = CreateEventTableFilterJobConfig.NAME), //
         @JsonSubTypes.Type(value = MergeSystemBatchConfig.class, name = MergeSystemBatchConfig.NAME), //
@@ -130,6 +139,7 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = CountAvroGlobsConfig.class, name = CountAvroGlobsConfig.NAME), //
         @JsonSubTypes.Type(value = CalculateDeltaJobConfig.class, name = CalculateDeltaJobConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateLaunchArtifactsJobConfig.class, name = GenerateLaunchArtifactsJobConfig.NAME), //
+        @JsonSubTypes.Type(value = GenerateLaunchUniverseJobConfig.class, name = GenerateLaunchUniverseJobConfig.NAME), //
         @JsonSubTypes.Type(value = TestPartitionJobConfig.class, name = TestPartitionJobConfig.NAME), //
         @JsonSubTypes.Type(value = AccountContactExportConfig.class, name = AccountContactExportConfig.NAME), //
         @JsonSubTypes.Type(value = AppendRawStreamConfig.class, name = AppendRawStreamConfig.NAME), //
@@ -184,7 +194,9 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME), //
         @JsonSubTypes.Type(value = PublishActivityAlertsJobConfig.class, name = PublishActivityAlertsJobConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateRecommendationCSVConfig.class, name = GenerateRecommendationCSVConfig.NAME), //
-        @JsonSubTypes.Type(value = GenerateIntentAlertArtifactsConfig.class, name = GenerateIntentAlertArtifactsConfig.NAME) //
+        @JsonSubTypes.Type(value = GenerateIntentAlertArtifactsConfig.class, name = GenerateIntentAlertArtifactsConfig.NAME), //
+        @JsonSubTypes.Type(value = ExtractListSegmentCSVConfig.class, name = ExtractListSegmentCSVConfig.NAME), //
+        @JsonSubTypes.Type(value = GenerateLiveRampLaunchArtifactsJobConfig.class, name = GenerateLiveRampLaunchArtifactsJobConfig.NAME) //
 })
 public abstract class SparkJobConfig implements Serializable {
 

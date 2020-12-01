@@ -226,6 +226,9 @@ public class FuzzyMatchHelper implements DbHelper {
         }
     }
 
+    /*
+     * Enrichment/Append step
+     */
     @MatchStep
     @Override
     public void fetchMatchResult(MatchContext context) {
@@ -425,14 +428,20 @@ public class FuzzyMatchHelper implements DbHelper {
                     fetchResult.setRecordId(copy.getId());
                     record.setFetchResult(fetchResult);
                     List<VboUsageEvent> usageEvents = parseEnrichEvents(primeAccount, trackingBlockIds);
-                    usageEvents.forEach(e -> e.setResponseTime(duration));
-                    record.addUsageEvents(usageEvents);
+                    if (usageEvents != null) {
+                        usageEvents.forEach(e -> e.setResponseTime(duration));
+                        record.addUsageEvents(usageEvents);
+                    }
                 }
             }
         }
     }
 
     private List<VboUsageEvent> parseEnrichEvents(PrimeAccount account, Collection<String> blockIds) {
+        if (account.getResult().containsKey(PrimeAccount.ENRICH_ERROR_CODE)) {
+            return null;
+        }
+
         Set<String> reportBlocks = new HashSet<>();
         reportBlocks.add("baseinfo_L1_v1");
         reportBlocks.addAll(blockIds);
@@ -580,7 +589,7 @@ public class FuzzyMatchHelper implements DbHelper {
         if (MapUtils.isNotEmpty(primeAccount)) {
             queryResult.putAll(primeAccount);
         }
-        if (record.isMatched() && record.getFetchResult() == null) {
+        if (record.isMatched() && (record.getFetchResult() == null || record.getFetchResult().getResult().containsKey(PrimeAccount.ENRICH_ERROR_CODE))) {
             record.setMatched(false);
         }
         record.setQueryResult(queryResult);
@@ -620,7 +629,7 @@ public class FuzzyMatchHelper implements DbHelper {
     }
 
     private Map<String, Object> parseFetchResult(GenericFetchResult fetchResult, ColumnSelection columnSelection) {
-        if (fetchResult == null) {
+        if (fetchResult == null || fetchResult.getResult().containsKey(PrimeAccount.ENRICH_ERROR_CODE)) {
             return Collections.emptyMap();
         } else {
             Map<String, Object> result = fetchResult.getResult();

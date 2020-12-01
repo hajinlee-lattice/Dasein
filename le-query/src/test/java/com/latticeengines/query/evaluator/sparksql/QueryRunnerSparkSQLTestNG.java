@@ -75,7 +75,8 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements Reds
             sparkUserTestCase[0] = SPARK_BATCH_USER;
             basicTestsWithMultipleUsers[(i*2)+1] = sparkUserTestCase;
         }
-        log.info("Test Data Counts from Base Class: {}, From Current Dataprovider: {}", basicTests.length,basicTestsWithMultipleUsers.length);
+        log.info("Test Data Counts from Base Class: {}, From Current Dataprovider: {}", //
+                basicTests.length, basicTestsWithMultipleUsers.length);
         return basicTestsWithMultipleUsers;
     }
 

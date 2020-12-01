@@ -100,7 +100,7 @@ public class DataFeedTaskController {
 
     @PostMapping("/import/{taskIdentifier}")
     @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
+    @ApiOperation(value = "Start Vdb import job")
     @NoCustomerSpace
     public ResponseDocument<String> startImportJobForVdb(@PathVariable String customerSpace,
             @PathVariable String taskIdentifier, @RequestBody VdbLoadTableConfig vdbLoadTableConfig) {
@@ -111,7 +111,7 @@ public class DataFeedTaskController {
 
     @PostMapping("/import/internal/{taskIdentifier}")
     @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
+    @ApiOperation(value = "Start import job")
     @NoCustomerSpace
     public ResponseDocument<String> startImportJob(@PathVariable String customerSpace,
             @PathVariable String taskIdentifier,
@@ -134,7 +134,7 @@ public class DataFeedTaskController {
 
     @PostMapping("/s3import")
     @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
+    @ApiOperation(value = "Start import job from S3")
     @NoCustomerSpace
     public ResponseDocument<String> startImportJobForS3(@PathVariable String customerSpace,
             @RequestBody S3FileToHdfsConfiguration s3FileToHdfsConfiguration) {
@@ -150,7 +150,7 @@ public class DataFeedTaskController {
 
     @PostMapping("/reset")
     @ResponseBody
-    @ApiOperation(value = "Create a data feed task")
+    @ApiOperation(value = "Reset Import")
     public ResponseDocument<Boolean> resetImport(@PathVariable String customerSpace,
             @RequestParam(value = "entity", required = false) BusinessEntity entity) {
         if (dataFeedTaskManagerService.resetImport(customerSpace, entity)) {
@@ -465,9 +465,20 @@ public class DataFeedTaskController {
     public void addAttributeLengthValidator(@PathVariable String customerSpace,
                                             @PathVariable String uniqueTaskId,
                                             @RequestParam String attrName,
-                                            @RequestParam int length,
+                                            @RequestParam(required = false) Integer length,
                                             @RequestParam(required = false, defaultValue = "false") boolean nullable) {
         dataFeedTaskTemplateService.addAttributeLengthValidator(customerSpace, uniqueTaskId, attrName, length, nullable);
+    }
+
+    @PutMapping("/updateLengthValidator/{uniqueTaskId}")
+    @ResponseBody
+    @ApiOperation(value = "Update attribute length validator")
+    public void updateAttributeLengthValidator(@PathVariable String customerSpace,
+                                            @PathVariable String uniqueTaskId,
+                                            @RequestParam String attrName,
+                                            @RequestParam(required = false) Integer length,
+                                            @RequestParam(required = false, defaultValue = "false") boolean nullable) {
+        dataFeedTaskTemplateService.updateAttributeLengthValidator(customerSpace, uniqueTaskId, attrName, length, nullable);
     }
 
     @PostMapping("/appendSimpleValueFilter/{uniqueTaskId}")

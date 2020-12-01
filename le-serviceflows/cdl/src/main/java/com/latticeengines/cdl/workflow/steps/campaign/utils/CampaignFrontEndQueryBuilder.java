@@ -122,8 +122,8 @@ public class CampaignFrontEndQueryBuilder {
             return this;
         }
 
-        public Builder limit(Long limit) {
-            if (limit != null) {
+        public Builder limit(Long limit, boolean useContactsPerAccountLimit) {
+            if (limit != null && !useContactsPerAccountLimit) {
                 queryBuilder.limit = limit;
             } else {
                 queryBuilder.limit = 0L;

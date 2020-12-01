@@ -154,7 +154,8 @@ public class AccountMatchCorrectnessDeploymentTestNG extends MatchapiDeploymentT
         input.setInputBuffer(prepareBulkData(inputFile));
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
-        input.setEntityMatchConfiguration(new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true));
+        input.setEntityMatchConfiguration(
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null));
         return input;
     }
 

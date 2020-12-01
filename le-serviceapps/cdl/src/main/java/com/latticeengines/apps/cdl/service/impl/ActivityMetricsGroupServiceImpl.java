@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
@@ -101,7 +100,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     public ActivityMetricsGroup setUpDefaultOpportunityGroup(String customerSpace, String streamName) {
         Tenant tenant = MultiTenantContext.getTenant();
         AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
-        return setupDefaultStageGroup(tenant, stream);
+        return setupDefaultOpportunityGroup(tenant, stream);
     }
 
     @Override
@@ -158,8 +157,9 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
             totalVisit.setSubCategoryTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SUBCATEGORY));
             totalVisit.setDisplayNameTmpl(
                     getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME));
-            totalVisit.setDescriptionTmpl(
-                    getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION));
+            totalVisit.setDescriptionTmpl(getTemplate(isCurrentWeekTimeRange(timeRange)
+                    ? StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION_CW
+                    : StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION));
             totalVisit.setNullImputation(NullMetricsImputation.ZERO);
             totalVisit.setSecondarySubCategoryTmpl(
                     getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SECONDARY_SUBCATEGORY));
@@ -189,8 +189,9 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
             sourceMedium.setSubCategoryTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SUBCATEGORY));
             sourceMedium.setDisplayNameTmpl(
                     getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUMNAME_DISPLAYNAME));
-            sourceMedium.setDescriptionTmpl(
-                    getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION));
+            sourceMedium.setDescriptionTmpl(getTemplate(isCurrentWeekTimeRange(timeRange)
+                    ? StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION_CW
+                    : StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION));
             sourceMedium.setNullImputation(NullMetricsImputation.ZERO);
             sourceMedium.setSecondarySubCategoryTmpl(
                     getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SECONDARY_SUBCATEGORY));
@@ -199,7 +200,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         });
     }
 
-    private ActivityMetricsGroup setupDefaultStageGroup(Tenant tenant, AtlasStream atlasStream) {
+    private ActivityMetricsGroup setupDefaultOpportunityGroup(Tenant tenant, AtlasStream atlasStream) {
         ActivityMetricsGroup stage = new ActivityMetricsGroup();
         stage.setTenant(tenant);
         stage.setStream(atlasStream);
@@ -242,8 +243,9 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
                     getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_SUBCATEGORY));
             marketingType.setDisplayNameTmpl(
                     getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_DISPLAYNAME));
-            marketingType.setDescriptionTmpl(
-                    getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_DESCRIPTION));
+            marketingType.setDescriptionTmpl(getTemplate(isCurrentWeekTimeRange(timeRange)
+                    ? StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_DESCRIPTION_CW
+                    : StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_DESCRIPTION));
             marketingType.setNullImputation(NullMetricsImputation.ZERO);
             marketingType.setSecondarySubCategoryTmpl(
                     getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_SECONDARY_SUBCATEGORY));
@@ -293,17 +295,13 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
             modelGroup.setAggregation(createAttributeDeriver(Collections.emptyList(), InterfaceName.HasIntent.name(),
                     StreamAttributeDeriver.Calculation.TRUE, FundamentalType.BOOLEAN));
             modelGroup.setCategory(Category.DNBINTENTDATA_PROFILE);
-            modelGroup
-                    .setDisplayNameTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DISPLAYNAME));
-            if (timeRange.getOperator().equals(ComparisonType.WITHIN_INCLUDE)) {
-                modelGroup.setDescriptionTmpl(
-                        getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_CURRENT_WEEK_DESCRIPTION));
-            } else {
-                modelGroup.setDescriptionTmpl(
-                        getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DESCRIPTION));
-            }
-            modelGroup
-                    .setSubCategoryTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_SUBCATEGORY));
+            modelGroup.setDisplayNameTmpl(
+                    getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DISPLAYNAME));
+            modelGroup.setDescriptionTmpl(getTemplate(isCurrentWeekTimeRange(timeRange)
+                    ? StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_CURRENT_WEEK_DESCRIPTION
+                    : StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DESCRIPTION));
+            modelGroup.setSubCategoryTmpl(
+                    getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_SUBCATEGORY));
             modelGroup.setNullImputation(NullMetricsImputation.FALSE);
             modelGroup.setUseLatestVersion(false);
             activityMetricsGroupEntityMgr.create(modelGroup);
@@ -378,6 +376,10 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         deriver.setCalculation(calculation);
         deriver.setTargetFundamentalType(type);
         return deriver;
+    }
+
+    private boolean isCurrentWeekTimeRange(ActivityTimeRange timeRange) {
+        return timeRange.getParamSet().iterator().next().get(0) == 0;
     }
 
     private StringTemplate getTemplate(String name) {
