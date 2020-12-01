@@ -53,7 +53,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
         if (audienceType == AudienceType.ACCOUNTS) {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Outreach, accountAttributesMap,
-                    contactAttributesMap, audienceType);
+                    contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap, audienceType);
         } else if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Outreach, mappedFieldNames,
                     accountAttributesMap, contactAttributesMap);
