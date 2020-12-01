@@ -2,7 +2,8 @@ package com.latticeengines.apps.lp.entitymgr.impl;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.lp.entitymgr.ScoringRequestConfigEntityManager;
@@ -17,7 +18,7 @@ import com.latticeengines.domain.exposed.pls.ScoringRequestConfigContext;
 @Component("scoringRequestConfigEntityMgr")
 public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrRepositoryImpl<ScoringRequestConfig, Long>
         implements ScoringRequestConfigEntityManager {
-    private static final Logger LOG = Logger.getLogger(ScoringRequestConfigEntityManagerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ScoringRequestConfigEntityManagerImpl.class);
 
     @Inject
     private ScoringRequestConfigReaderRepository scoringRequestReadRepository;
