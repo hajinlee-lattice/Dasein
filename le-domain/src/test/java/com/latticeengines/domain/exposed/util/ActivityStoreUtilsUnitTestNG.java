@@ -42,6 +42,7 @@ public class ActivityStoreUtilsUnitTestNG {
     @Test(groups = "unit")
     private void testGenericFilters() {
         List<String> expected = Arrays.asList( //
+                "any", //
                 "wi_0_w", //
                 "1 week", //
                 "2 weeks", //
