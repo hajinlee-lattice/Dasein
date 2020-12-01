@@ -84,16 +84,20 @@ public class DeltaCampaignLaunchExportFilesToS3Step
 
     private boolean createDeleteCsvDataFrame;
 
+    private boolean createTaskDescriptionFile;
+
     private Map<String, List<String>> exportFiles = new HashMap<>();
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
         createAddCsvDataFrame = Boolean.toString(true)
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
-        createDeleteCsvDataFrame = Boolean.toString(true).equals(
-                getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
+        createDeleteCsvDataFrame = Boolean.toString(true)
+                .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
+        createTaskDescriptionFile = Boolean.toString(true)
+                .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE));
         log.info("createAddCsvDataFrame=" + createAddCsvDataFrame + ", createDeleteCsvDataFrame="
-                + createDeleteCsvDataFrame);
+                + createDeleteCsvDataFrame + ", createTaskDescriptionFile=" + createTaskDescriptionFile);
 
         if (!createAddCsvDataFrame && !createDeleteCsvDataFrame) {
             return;
@@ -106,6 +110,10 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         if (createDeleteCsvDataFrame) {
             exportFiles.put(DeltaCampaignLaunchWorkflowConfiguration.DELETE, getListObjectFromContext(
                     DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, String.class));
+        }
+        if (createTaskDescriptionFile) {
+            exportFiles.put(DeltaCampaignLaunchWorkflowConfiguration.TASK_DESCRIPTION, getListObjectFromContext(
+                    DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE, String.class));
         }
         log.info("Before processing, Uploading all HDFS files to S3. {}", exportFiles);
         LookupIdMap lookupIdMap = getConfiguration().getLookupIdMap();

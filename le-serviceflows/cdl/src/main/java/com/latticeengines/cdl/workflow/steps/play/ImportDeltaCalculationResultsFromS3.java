@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.LaunchBaseType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LiveRampChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalculationResultsFromS3StepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -103,6 +105,7 @@ public class ImportDeltaCalculationResultsFromS3
         CDLExternalSystemName systemName = playLaunch.getDestinationSysName();
         boolean launchToDb = CDLExternalSystemName.Salesforce.equals(systemName) || CDLExternalSystemName.Eloqua.equals(systemName);
         boolean isLiveRampLaunch = channelConfig instanceof LiveRampChannelConfig;
+        boolean isOutreachTaskLaunch = isOutreachTaskLaunch(channelConfig);
 
         if (isLiveRampLaunch) {
             if (StringUtils.isNotEmpty(addContacts)) {
@@ -171,6 +174,11 @@ public class ImportDeltaCalculationResultsFromS3
             throw new RuntimeException(audienceType + " not supported.");
         }
 
+        if (isOutreachTaskLaunch) {
+            putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE,
+                Boolean.toString(true));
+        }
+
         log.info(String.format("totalDfs=%d, tableNames=%s", totalDfs, Arrays.toString(tableNames.toArray())));
         putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.DATA_FRAME_NUM, String.valueOf(totalDfs));
         if (totalDfs == 0) {
@@ -180,4 +188,12 @@ public class ImportDeltaCalculationResultsFromS3
         return tableNames;
     }
 
+    private boolean isOutreachTaskLaunch(ChannelConfig channelConfig) {
+        if (channelConfig instanceof OutreachChannelConfig) {
+            OutreachChannelConfig outreachConfig = (OutreachChannelConfig) channelConfig;
+            return outreachConfig.getLaunchBaseType() == LaunchBaseType.TASK;
+        } else {
+            return false;
+        }
+    }
 }

@@ -107,7 +107,7 @@
       "externalSystemName": "Outreach",
       "standardField": true,
       "exportEnabled": true,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    },
    {
       "attrName": "PRIORITY_DISPLAY_NAME",

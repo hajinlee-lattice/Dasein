@@ -44,9 +44,13 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
     private boolean createDeleteCsvDataFrame;
 
+    private boolean createTaskDescriptionFile;
+
     private static final String ADD_FILE_PREFIX = "add";
 
     private static final String DELETE_FILE_PREFIX = "delete";
+
+    private static final String TASK_DESCRIPTION = "task_description";
 
     @Override
     protected Class<GenerateRecommendationCSVJob> getJobClz() {
@@ -59,6 +63,8 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
         createDeleteCsvDataFrame = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
+        createTaskDescriptionFile = Boolean.toString(true)
+                .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE));
         boolean addExportTimeStamp = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_EXPORT_TIMESTAMP));
         log.info("createAddCsvDataFrame=" + createAddCsvDataFrame + ", createDeleteCsvDataFrame="
@@ -71,11 +77,11 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         List<DataUnit> inputs = new ArrayList<>();
         if (createAddCsvDataFrame) {
             target++;
-            createDateUnit(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH, inputs);
+            createDataUnit(DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH, inputs);
         }
         if (createDeleteCsvDataFrame) {
             target++;
-            createDateUnit(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH, inputs);
+            createDataUnit(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH, inputs);
         }
         generateRecommendationCSVConfig.setTargetNums(target);
         generateRecommendationCSVConfig.setInput(inputs);
@@ -121,7 +127,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         generateRecommendationCSVContext.setDisplayNames(displayNames);
     }
 
-    private void createDateUnit(String contextKey, List<DataUnit> inputs) {
+    private void createDataUnit(String contextKey, List<DataUnit> inputs) {
         String path = getStringValueFromContext(contextKey);
         DataUnit dataUnit = HdfsDataUnit.fromPath(path);
         inputs.add(dataUnit);
@@ -140,8 +146,15 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                 || ChannelConfigUtil.isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
     }
 
+    private String getTaskDescription(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
+        String taskDescription;
+        taskDescription = ChannelConfigUtil.getTaskDescription(config.getDestinationSysName(), config.getChannelConfig());
+        return taskDescription;
+    }
+
     @Override
     protected void postJobExecution(SparkJobResult result) {
+        DeltaCampaignLaunchExportFilesGeneratorConfiguration config = getConfiguration();
         String addRenameCSVPath;
         String deleteRenameCSVPath;
         Date fileExportTime = new Date();
@@ -158,6 +171,12 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
             deleteRenameCSVPath = renameDataUnit(result.getTargets().get(0), DELETE_FILE_PREFIX, fileExportTime);
             putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, Lists.newArrayList(deleteRenameCSVPath));
         }
+
+        if (createTaskDescriptionFile) {
+            String content = getTaskDescription(config);
+            String descriptionFilePath = createDescriptionFilePath(result.getTargets().get(0), fileExportTime, content);
+            putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.TASK_DESCRIPTION_FILE, Lists.newArrayList(descriptionFilePath));
+        }
     }
 
     private String renameDataUnit(HdfsDataUnit hdfsDataUnit, String filePrefix, Date fileExportTime) {
@@ -171,8 +190,21 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
             HdfsUtils.rename(yarnConfiguration, csvPath, renamePath);
             return renamePath;
         } catch (IOException e) {
-            log.info("Can't rename CSV file to {}.", fileName);
+            log.warn("Can't rename CSV file to {}.", fileName);
             throw new RuntimeException("Unable to rename csv file on HDFS!");
+        }
+    }
+
+    private String createDescriptionFilePath(HdfsDataUnit hdfsDataUnit, Date fileExportTime, String content) {
+        String fileName = String.format("%s_%s.txt", TASK_DESCRIPTION, DateTimeUtils.currentTimeAsString(fileExportTime));
+        try {
+            String outputDir = hdfsDataUnit.getPath();
+            String filePath = outputDir + "/" + fileName;
+            HdfsUtils.writeToFile(yarnConfiguration, filePath, content);
+            return filePath;
+        } catch (IOException e) {
+            log.warn("Failed to create path for {}", fileName);
+            return "";
         }
     }
 

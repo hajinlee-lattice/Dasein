@@ -64,6 +64,8 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
 
     private boolean createDeleteCsvDataFrame;
 
+    private boolean createTaskDescriptionFile;
+
     @Override
     public void execute() {
         DeltaCampaignLaunchExportPublishToSNSConfiguration config = getConfiguration();
@@ -79,8 +81,10 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
         createDeleteCsvDataFrame = Boolean.toString(true).equals(
                 getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
+        createTaskDescriptionFile = Boolean.toString(true)
+                .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE));
         log.info("createAddCsvDataFrame=" + createAddCsvDataFrame + ", createDeleteCsvDataFrame="
-                + createDeleteCsvDataFrame);
+                + createDeleteCsvDataFrame + ", createTaskDescriptionFile=" + createTaskDescriptionFile);
 
         DeltaCampaignLaunchExportPublishToSNSConfiguration config = getConfiguration();
         LookupIdMap lookupIdMap = config.getLookupIdMap();
@@ -94,6 +98,10 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         if (createDeleteCsvDataFrame) {
             Map<String, List<ExportFileConfig>> deleteFiles = getFiles(DeltaCampaignLaunchWorkflowConfiguration.DELETE);
             messageBody.setDeleteFiles(deleteFiles);
+        }
+        if (createTaskDescriptionFile) {
+            Map<String, List<ExportFileConfig>> taskDescription = getFiles(DeltaCampaignLaunchWorkflowConfiguration.TASK_DESCRIPTION);
+            messageBody.setTaskDescription(taskDescription);
         }
 
         messageBody.setWorkflowRequestId(workflowRequestId);
