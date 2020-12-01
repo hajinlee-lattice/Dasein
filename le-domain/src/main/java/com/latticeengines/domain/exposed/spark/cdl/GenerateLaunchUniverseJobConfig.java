@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class GenerateLaunchUniverseJobConfig extends SparkJobConfig {
@@ -18,17 +19,22 @@ public class GenerateLaunchUniverseJobConfig extends SparkJobConfig {
     @JsonProperty("ContactsPerAccountSortDirection")
     private String contactsPerAccountSortDirection;
 
+    @JsonProperty("ContactsData")
+    private DataUnit contactsData;
+
     public GenerateLaunchUniverseJobConfig() {
     }
 
     public GenerateLaunchUniverseJobConfig(String workSpace,
             Long maxContactsPerAccount, Long maxEntitiesToLaunch,
-            String contactsPerAccountSortAttribute, String contactsPerAccountSortDirection) {
+            String contactsPerAccountSortAttribute, String contactsPerAccountSortDirection,
+            DataUnit contactsData) {
         this.setWorkspace(workSpace);
         this.maxContactsPerAccount = maxContactsPerAccount;
         this.maxEntitiesToLaunch = maxEntitiesToLaunch;
         this.contactsPerAccountSortAttribute = contactsPerAccountSortAttribute;
         this.contactsPerAccountSortDirection = contactsPerAccountSortDirection;
+        this.contactsData = contactsData;
     }
 
     @Override
@@ -67,6 +73,14 @@ public class GenerateLaunchUniverseJobConfig extends SparkJobConfig {
 
     public void setContactsPerAccountSortDirection(String contactsPerAccountSortDirection) {
         this.contactsPerAccountSortDirection = contactsPerAccountSortDirection;
+    }
+
+    public DataUnit getContactsData() {
+        return contactsData;
+    }
+
+    public void setContactsData(DataUnit contactsData) {
+        this.contactsData = contactsData;
     }
 
 }
