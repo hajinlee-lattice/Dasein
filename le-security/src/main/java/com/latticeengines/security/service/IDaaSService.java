@@ -1,5 +1,6 @@
 package com.latticeengines.security.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
@@ -31,4 +32,6 @@ public interface IDaaSService {
     boolean doesSubscriberNumberExist(VboRequest vboRequest);
 
     LoginDocument addSubscriberDetails(LoginDocument doc);
+
+    JsonNode getMeter(String subscriberNumber);
 }

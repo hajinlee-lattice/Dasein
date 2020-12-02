@@ -424,7 +424,7 @@ public class IDaaSServiceImpl extends AuthorizationServiceBase implements IDaaSS
     /**
      * Check if this subscriber_number is in IDaaS and returns subscriber_details
      * when requested.
-     * 
+     *
      * @param vboRequest
      * @return
      */
@@ -437,6 +437,39 @@ public class IDaaSServiceImpl extends AuthorizationServiceBase implements IDaaSS
         } else {
             return false; // no subscriber number in the VBO request.
         }
+    }
+
+    @Override
+    public JsonNode getMeter(String subscriberNumber) {
+        refreshToken();
+        String usageUrl = "https://usage-master-stg.vbo.dnb.net";
+        String urlPattern = "/event/meter/";
+        URI uri = URI.create(usageUrl + urlPattern + subscriberNumber);
+        try {
+            ResponseEntity<JsonNode> response = restTemplate.getForEntity(uri, JsonNode.class);
+            if (response.getStatusCodeValue() != 200) {
+                log.warn(String.format("Retrieved status code %s while trying to get meter for subscriber %s",
+                        response.getStatusCodeValue(), subscriberNumber));
+                return null;
+            }
+            // return "meter" node from "D&B Connect" node
+            JsonNode dnbConnect = getNodeFromList(response.getBody(),
+                    "products", "name", "D&B Connect");
+            return getNodeFromList(dnbConnect, "domain_add_ons", "canonical_name", "STCT");
+        } catch (Error e) {
+            log.warn("Failed to retrieve Meter: ", e);
+        }
+        return null;
+    }
+
+    private JsonNode getNodeFromList(JsonNode node, String listField, String key, String value) {
+        if (node == null) return null;
+        if (node.has(listField) && node.get(listField).size() > 0) {
+            for (JsonNode n : node.get(listField)) {
+                if (n.get(key).asText().equals(value)) return n;
+            }
+        }
+        return null;
     }
 
     private boolean hasAccessToApp(IDaaSUser user) {

@@ -107,6 +107,10 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
         assertNotNull(user);
     }
 
+    @Test(groups = "functional", dependsOnMethods = {"testFindUser"})
+    public void testExternalUserSeatLimit() {
+    }
+
     @Test(groups = "functional")
     public void testCreateSamlExternalUser() {
         assertTrue(userService.upsertSamlIntegrationUser(null, samlUser, tenant.getId()));
