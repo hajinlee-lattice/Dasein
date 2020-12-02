@@ -126,7 +126,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                     String tenantId = tenantRight.getGlobalAuthTenant().getId();
                     String userName = tenantRight.getGlobalAuthUser().getEmail();
                     log.info(String.format("Quartz job deleted %s from user %s", tenantId, userName));
-                    userService.deleteUser(tenantId, userName);
+                    userService.deleteUser(tenantId, userName, false);
                     sendEmail(tenantRight, 0);
                 }
             }

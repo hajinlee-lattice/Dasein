@@ -374,8 +374,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean deleteUser(String tenantId, String username) {
-        if (softDelete(tenantId, username) && globalUserManagementService.isRedundant(username)) {
+    public boolean deleteUser(String tenantId, String username, boolean clearSession) {
+        if (softDelete(tenantId, username, clearSession) && globalUserManagementService.isRedundant(username)) {
             return globalUserManagementService.deleteUser(username);
         }
         return false;
@@ -578,7 +578,7 @@ public class UserServiceImpl implements UserService {
         User oldUser = findByEmail(email);
         if (oldUser != null) {
             if (globalUserManagementService.userExpireInTenant(oldUser.getEmail(), tenantId)) {
-                deleteUser(tenantId, oldUser.getUsername());
+                deleteUser(tenantId, oldUser.getUsername(), true);
             }
         }
         RegistrationResult result = new RegistrationResult();
@@ -618,15 +618,17 @@ public class UserServiceImpl implements UserService {
         return result;
     }
 
-    private boolean softDelete(String tenantId, String username) {
+    private boolean softDelete(String tenantId, String username, boolean clearSession) {
         if (resignAccessLevel(tenantId, username)) {
             boolean success = true;
             String right = globalUserManagementService.getRight(username, tenantId);
             if (StringUtils.isNotEmpty(right)) {
                 success = globalUserManagementService.revokeRight(right, tenantId, username);
             }
-            Long userId = findIdByUsername(username);
-            clearSession(tenantId, Collections.singletonList(userId));
+            if (clearSession) {
+                Long userId = findIdByUsername(username);
+                clearSession(tenantId, Collections.singletonList(userId));
+            }
             return success;
         } else {
             return false;
