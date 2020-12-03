@@ -11,9 +11,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -38,8 +35,6 @@ import com.latticeengines.domain.exposed.ratings.coverage.UpdateRatingCoverageRe
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
-
-import io.swagger.annotations.ApiOperation;
 
 @Component("ratingEngineProxy")
 public class RatingEngineProxy extends MicroserviceRestApiProxy implements ProxyInterface {
@@ -221,7 +216,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
 
     @SuppressWarnings("rawtypes")
     public Map<String, Long> updateRatingEngineCounts(String customerSpace, String ratingEngineId, //
-                                                      UpdateRatingCoverageRequest request) {
+            UpdateRatingCoverageRequest request) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/counts", shortenCustomerSpace(customerSpace),
                 ratingEngineId);
         Map map = put("update rating engine counts", url, request, Map.class);
@@ -340,13 +335,8 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return post("validateForModeling", url, ratingEngine, Boolean.class);
     }
 
-    @PostMapping("/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus")
-    @ResponseBody
-    @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
-    public void updateModelingStatus(@PathVariable String customerSpace, //
-            @PathVariable String ratingEngineId, //
-            @PathVariable String ratingModelId, //
-            @RequestParam(value = "newStatus", required = true) JobStatus newStatus) {
+    public void updateModelingStatus(String customerSpace, String ratingEngineId, String ratingModelId,
+            JobStatus newStatus) {
         String url = constructUrl(
                 URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/setModelingStatus?newStatus={newStatus}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, newStatus);
