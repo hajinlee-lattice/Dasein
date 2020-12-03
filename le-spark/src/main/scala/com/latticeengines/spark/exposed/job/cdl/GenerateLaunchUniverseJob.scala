@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchUniverseJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.expressions.Window
@@ -21,10 +22,15 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     val sortAttr = config.getContactsPerAccountSortAttribute
     val sortDir = config.getContactsPerAccountSortDirection
 
-    logSpark("Input schema is as follows:")
-    input.printSchema
-
     var trimmedData = input
+
+    if (config.getContactsData != null) {
+      val contactsDf = loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit])
+      trimmedData = contactsDf.join(input, Seq(contactId), "inner")
+    }
+
+    logSpark("Input schema is as follows:")
+    trimmedData.printSchema
 
     if (maxContactsPerAccount != null) {
       trimmedData = limitContactsPerAccount(trimmedData, accountId, contactId, sortAttr, sortDir, maxContactsPerAccount)
@@ -56,6 +62,6 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     trimmedData
       .withColumn(rowNumber, row_number.over(w))
       .filter(col(rowNumber) <= maxContactsPerAccount.toInt)
-      .drop(rowNumber)
+      .drop(rowNumber, sortAttr)
   }
 }
