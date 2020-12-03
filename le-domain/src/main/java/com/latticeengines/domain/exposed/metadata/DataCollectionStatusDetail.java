@@ -111,10 +111,6 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("timeline_rebuild_flag")
     private Boolean timelineRebuildFlag;
 
-    //key: esEntityType -> value: elasticsearchVersion
-    @JsonProperty("entityWithESVersionMap")
-    private Map<String, String> entityWithESVersionMap;
-
     @JsonProperty("ActivityAlertVersion")
     private String activityAlertVersion;
 
@@ -367,13 +363,5 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setEvaluationDateMap(Map<String, Long> evaluationDateMap) {
         this.evaluationDateMap = evaluationDateMap;
-    }
-
-    public Map<String, String> getEntityWithESVersionMap() {
-        return entityWithESVersionMap;
-    }
-
-    public void setEntityWithESVersionMap(Map<String, String> entityWithESVersionMap) {
-        this.entityWithESVersionMap = entityWithESVersionMap;
     }
 }

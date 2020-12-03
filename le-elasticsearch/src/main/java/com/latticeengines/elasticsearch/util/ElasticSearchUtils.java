@@ -66,6 +66,7 @@ public final class ElasticSearchUtils {
 
     public static void createDocuments(RestHighLevelClient client, String indexName, Map<String, String> docs) throws IOException {
         if (!client.indices().exists(new GetIndexRequest(indexName), RequestOptions.DEFAULT) || MapUtils.isEmpty(docs)) {
+            log.error("index doesn't exists. or docs is empty. indexName is {}, docs: {}", indexName, docs);
             return;
         }
 

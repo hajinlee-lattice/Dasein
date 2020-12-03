@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilterValue;
 import com.latticeengines.domain.exposed.elasticsearch.EsEntityType;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -84,16 +83,7 @@ public class PublishVIDataStep extends RunSparkJob<PublishVIDataStepConfiguratio
             log.info("webVisitTableNameIsMaps is empty or latticeAccountTable is null, skip this step.");
             return null;
         }
-        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        if (dcStatus == null) {
-            dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
-                    configuration.getVersion());
-        }
-        Map<String, String> entityWithESVersionMap =
-                new HashMap<>(MapUtils.emptyIfNull(dcStatus.getEntityWithESVersionMap()));
-        String index = createIndex(configuration.getCustomer(), entityWithESVersionMap);
-        dcStatus.setEntityWithESVersionMap(entityWithESVersionMap);
-        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
+        String index = createIndex(configuration.getCustomer());
         List<DataUnit> inputs = new ArrayList<>();
         ElasticSearchConfig esConfig = elasticSearchService.getDefaultElasticSearchConfig();
         PublishVIDataJobConfiguration config = new PublishVIDataJobConfiguration();
@@ -124,10 +114,6 @@ public class PublishVIDataStep extends RunSparkJob<PublishVIDataStepConfiguratio
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        if (dcStatus != null) {
-            dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), dcStatus, configuration.getVersion());
-        }
         String outputStr = result.getOutput();
         Map<?, ?> rawMap = JsonUtils.deserialize(outputStr, Map.class);
         Map<String, List> filterParamMaps = JsonUtils.convertMap(rawMap, String.class, List.class);
@@ -180,13 +166,13 @@ public class PublishVIDataStep extends RunSparkJob<PublishVIDataStepConfiguratio
                 .collect(Collectors.toList());
     }
 
-    private String createIndex(String customerSpace, Map<String, String> entityWithESVersionMap) {
+    private String createIndex(String customerSpace) {
         String newVersion = generateNewVersion();
         String idxName = String
                 .format("%s_%s_%s", CustomerSpace.shortenCustomerSpace(customerSpace), EsEntityType.VIData, newVersion)
                 .toLowerCase();
-        entityWithESVersionMap.put(EsEntityType.VIData.name(), newVersion);
         elasticSearchService.createIndex(idxName, EsEntityType.VIData);
+        log.info("create Index is {}.", idxName);
         return idxName;
     }
 
