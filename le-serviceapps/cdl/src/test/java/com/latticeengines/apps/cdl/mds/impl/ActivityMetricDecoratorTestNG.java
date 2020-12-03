@@ -134,7 +134,7 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         Assert.assertEquals(cm1.getDescription(), "This attribute shows companies with the unique Website Visits counts (organic + lead) within the previous 2 weeks plus this week till today, based on real-time web traffic records. The previous 2 weeks is the 3 weeks period beginning 2 weeks ago as of the last data refresh.");
         Assert.assertEquals(cm1.getSubcategory(), "Page 123");
         Assert.assertEquals(cm1.getSecondarySubCategoryDisplayName(), PATTERN);
-        Assert.assertEquals(cm1.getFilterTags(), Arrays.asList("w_2_w", FilterOptions.Option.ANY_VALUE));
+        Assert.assertEquals(cm1.getFilterTags(), Arrays.asList("w_2_w", FilterOptions.Option.ANY_VALUE, "2 weeks"));
         Assert.assertTrue(cm1.isHiddenInCategoryTile());
         Assert.assertEquals(cm1.getFundamentalType(), FundamentalType.NUMERIC);
 
@@ -144,7 +144,7 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         Assert.assertEquals(cm2.getDescription(), "This attribute shows companies with the unique Website Visits counts (organic + lead) within the previous 1 week plus this week till today, based on real-time web traffic records. The previous 1 week is the 2 weeks period beginning 1 week ago as of the last data refresh.");
         Assert.assertEquals(cm2.getSubcategory(), "Page 123");
         Assert.assertEquals(cm2.getSecondarySubCategoryDisplayName(), PATTERN);
-        Assert.assertEquals(cm2.getFilterTags(), Arrays.asList("wi_1_w", FilterOptions.Option.ANY_VALUE));
+        Assert.assertEquals(cm2.getFilterTags(), Arrays.asList("wi_1_w", FilterOptions.Option.ANY_VALUE, "1 week"));
         Assert.assertTrue(cm2.isHiddenInCategoryTile());
         Assert.assertEquals(cm2.getFundamentalType(), FundamentalType.NUMERIC);
 
