@@ -172,13 +172,17 @@ public class ActivityStoreUtils {
             String secondaryDisplayName) {
         // any tag for filtering all attrs
         cm.setFilterTags(getFilterTagsFromTimeRange(timeRange));
-        if (!DEFAULT_TIME_RANGE.equals(timeRange)) {
+        if (!isDefaultPeriodRange(timeRange)) {
             // leave null for not hidden attrs to save some space
             cm.setIsHiddenInCategoryTile(true);
         }
         if (StringUtils.isNotBlank(secondaryDisplayName)) {
             cm.setSecondarySubCategoryDisplayName(secondaryDisplayName);
         }
+    }
+
+    public static boolean isDefaultPeriodRange(String timeRange) {
+        return timeRange.endsWith("8_w");
     }
 
     // params: dimensionId -> key -> dimensionValue
