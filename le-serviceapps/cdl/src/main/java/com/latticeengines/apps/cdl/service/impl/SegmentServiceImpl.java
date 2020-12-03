@@ -530,7 +530,7 @@ public class SegmentServiceImpl implements SegmentService {
                 }
                 dataTemplates.put(request.getTemplateKey(), templateId);
                 listSegment.setDataTemplates(dataTemplates);
-                segmentEntityMgr.update(segment);
+                listSegmentEntityMgr.updateListSegment(listSegment);
             } else {
                 dataTemplateService.updateByUuid(templateId, dataTemplate);
             }
