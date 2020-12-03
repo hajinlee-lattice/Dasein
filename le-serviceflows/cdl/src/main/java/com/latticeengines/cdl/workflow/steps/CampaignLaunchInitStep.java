@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
@@ -28,7 +27,6 @@ import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -186,65 +184,56 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
 
     private SparkJobResult executeSparkJob(PlayLaunchContext playLaunchContext,
             ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        return retry.execute(ctx -> {
-            if (ctx.getRetryCount() > 0) {
-                log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
-                log.warn("Previous failure:", ctx.getLastThrowable());
+        startSparkSQLSession(getHdfsPaths(attrRepo), false);
+        String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+        boolean contactsDataExists = StringUtils.isNotEmpty(contactTableName);
+        // check the account and account limit
+        Long accountLimitFromUI = playLaunchContext.getPlayLaunch().getTopNCount();
+        if (accountLimitFromUI != null && accountLimitFromUI > 0) {
+            campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountLimitFromUI);
+        } else {
+            long accountsCount = getEntityQueryCount(
+                    buildFrontEndQuery(playLaunchContext, BusinessEntity.Account));
+            campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountsCount);
+            if (contactsDataExists) {
+                long contactsCount = getEntityQueryCount(
+                        buildFrontEndQuery(playLaunchContext, BusinessEntity.Contact));
+                campaignLaunchUtils.checkCampaignLaunchContactLimitation(contactsCount);
             }
-            try {
-                startSparkSQLSession(getHdfsPaths(attrRepo), false);
-                String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
-                boolean contactsDataExists = StringUtils.isNotEmpty(contactTableName);
-                // check the account and account limit
-                Long accountLimitFromUI = playLaunchContext.getPlayLaunch().getTopNCount();
-                if (accountLimitFromUI != null && accountLimitFromUI > 0) {
-                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountLimitFromUI);
-                } else {
-                    long accountsCount = getEntityQueryCount(
-                            buildFrontEndQuery(playLaunchContext, BusinessEntity.Account));
-                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountsCount);
-                    if (contactsDataExists) {
-                        long contactsCount = getEntityQueryCount(
-                                buildFrontEndQuery(playLaunchContext, BusinessEntity.Contact));
-                        campaignLaunchUtils.checkCampaignLaunchContactLimitation(contactsCount);
-                    }
-                }
-                // 2. get DataFrame for Account and Contact
-                HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
-                log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
-                HdfsDataUnit contactDataUnit = null;
-                if (contactsDataExists) {
-                    contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
-                    log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
-                } else {
-                    log.info("No contact table available in Redshift.");
-                }
-                // 3. generate avro out of DataFrame with predefined format for
-                // Recommendations
-                PlayLaunchSparkContext playLaunchSparkContext = playLaunchContext.toPlayLaunchSparkContext();
-                playLaunchSparkContext
-                        .setAccountColsRecIncluded(processedFieldMappingMetadata.getAccountColsRecIncluded());
-                playLaunchSparkContext.setAccountColsRecNotIncludedStd(
-                        processedFieldMappingMetadata.getAccountColsRecNotIncludedStd());
-                playLaunchSparkContext.setAccountColsRecNotIncludedNonStd(
-                        processedFieldMappingMetadata.getAccountColsRecNotIncludedNonStd());
-                playLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
-                playLaunchSparkContext.setDataDbDriver(dataDbDriver);
-                playLaunchSparkContext.setDataDbUrl(dataDbUrl);
-                playLaunchSparkContext.setDataDbUser(dataDbUser);
-                String saltHint = CipherUtils.generateKey();
-                playLaunchSparkContext.setSaltHint(saltHint);
-                String encryptionKey = CipherUtils.generateKey();
-                playLaunchSparkContext.setEncryptionKey(encryptionKey);
-                playLaunchSparkContext.setDataDbPassword(CipherUtils.encrypt(dataDbPassword, encryptionKey, saltHint));
-                log.info("playLaunchSparkContext=" + JsonUtils.serialize(playLaunchSparkContext));
-                return executeSparkJob(CreateRecommendationsJob.class,
-                        generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchSparkContext));
-            } finally {
-                stopSparkSQLSession();
-            }
-        });
+        }
+        // 2. get DataFrame for Account and Contact
+        HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
+        log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
+        HdfsDataUnit contactDataUnit = null;
+        if (contactsDataExists) {
+            contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
+            log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
+        } else {
+            log.info("No contact table available in Redshift.");
+        }
+        // 3. generate avro out of DataFrame with predefined format for
+        // Recommendations
+        PlayLaunchSparkContext playLaunchSparkContext = playLaunchContext.toPlayLaunchSparkContext();
+        playLaunchSparkContext
+                .setAccountColsRecIncluded(processedFieldMappingMetadata.getAccountColsRecIncluded());
+        playLaunchSparkContext.setAccountColsRecNotIncludedStd(
+                processedFieldMappingMetadata.getAccountColsRecNotIncludedStd());
+        playLaunchSparkContext.setAccountColsRecNotIncludedNonStd(
+                processedFieldMappingMetadata.getAccountColsRecNotIncludedNonStd());
+        playLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
+        playLaunchSparkContext.setDataDbDriver(dataDbDriver);
+        playLaunchSparkContext.setDataDbUrl(dataDbUrl);
+        playLaunchSparkContext.setDataDbUser(dataDbUser);
+        String saltHint = CipherUtils.generateKey();
+        playLaunchSparkContext.setSaltHint(saltHint);
+        String encryptionKey = CipherUtils.generateKey();
+        playLaunchSparkContext.setEncryptionKey(encryptionKey);
+        playLaunchSparkContext.setDataDbPassword(CipherUtils.encrypt(dataDbPassword, encryptionKey, saltHint));
+        log.info("playLaunchSparkContext=" + JsonUtils.serialize(playLaunchSparkContext));
+        return executeSparkJob(CreateRecommendationsJob.class,
+                generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchSparkContext));
+
+
     }
 
     private CreateRecommendationConfig generateCreateRecommendationConfig(HdfsDataUnit accountDataUnit,
