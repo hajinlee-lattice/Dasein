@@ -84,10 +84,9 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
         config.setAlertVersion("version");
         config.setTenantId(-1L);
         Map<String, String> map = new HashMap<>();
-        map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, AlertCategory.PRODUCTS.name());
-        map.put(ActivityStoreConstants.Alert.ANONYMOUS_WEB_VISITS, AlertCategory.PRODUCTS.name());
-        map.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, AlertCategory.PRODUCTS.name());
-        map.put(ActivityStoreConstants.Alert.SHOWN_INTENT, AlertCategory.PEOPLE.name());
+        map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, AlertCategory.PEOPLE.name());
+        map.put(ActivityStoreConstants.Alert.ANONYMOUS_WEB_VISITS, AlertCategory.PEOPLE.name());
+        map.put(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY, AlertCategory.PEOPLE.name());
         config.setAlertNameToAlertCategory(map);
         inputProvider = config::getInput;
 

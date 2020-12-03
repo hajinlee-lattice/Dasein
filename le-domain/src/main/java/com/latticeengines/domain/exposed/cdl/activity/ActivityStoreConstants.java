@@ -50,7 +50,6 @@ public final class ActivityStoreConstants {
         public static final String INC_WEB_ACTIVITY = "IncWebActivity";
         public static final String ANONYMOUS_WEB_VISITS = "AnonymousWebVisits";
         public static final String RE_ENGAGED_ACTIVITY = "ReEngagedActivity";
-        public static final String SHOWN_INTENT = "HasShownIntent";
         public static final String HIGH_ENGAGEMENT_IN_ACCOUNT = "HighEngagementInAccount";
         public static final String KNOWN_WEB_VISITS = "KnownWebVisits";
         public static final String ACTIVE_CONTACT_WEB_VISITS = "AcitiveContactsAndWebVisits";

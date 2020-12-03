@@ -24,14 +24,6 @@
     "is_active": true
   },
   {
-    "name": "HasShownIntent",
-    "alert_header": "Has Shown Intent",
-    "alert_category": "PRODUCTS",
-    "qualification_period_days": 10,
-    "alert_message_template": "We saw <#if (Data.NumResearchIntents > 0)><span class=\"item-insights-bold\">research intent on ${Data.NumResearchIntents} products</span></#if><#if (Data.NumBuyIntents > 0) && (Data.NumResearchIntents > 0)> and </#if><#if (Data.NumBuyIntents > 0)><span class=\"item-insights-bold\">buy intent on ${Data.NumBuyIntents} products</span></#if> within the last 10 days. Check out which models in the Recent Activity section.",
-    "is_active": true
-  },
-  {
     "name": "HighEngagementInAccount",
     "alert_header": "High Engagement in Account",
     "alert_category": "PEOPLE",

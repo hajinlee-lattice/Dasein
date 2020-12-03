@@ -77,7 +77,7 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         ActivityAlertJobConfig config = new ActivityAlertJobConfig();
         Arrays.asList( //
                 Alert.INC_WEB_ACTIVITY, Alert.ANONYMOUS_WEB_VISITS, Alert.RE_ENGAGED_ACTIVITY, //
-                Alert.SHOWN_INTENT, Alert.HIGH_ENGAGEMENT_IN_ACCOUNT, Alert.KNOWN_WEB_VISITS, //
+                Alert.HIGH_ENGAGEMENT_IN_ACCOUNT, Alert.KNOWN_WEB_VISITS, //
                 Alert.ACTIVE_CONTACT_WEB_VISITS, Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES, //
                 Alert.RESEARCHING_INTENT_AROUND_PRODUCT_PAGES)
                 .forEach(alert -> config.alertNameToQualificationPeriodDays.put(alert, 10L));
@@ -237,12 +237,6 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
 
         counts.put(Pair.of("a8", Alert.RE_ENGAGED_ACTIVITY), 1);
         counts.put(Pair.of("a9", Alert.RE_ENGAGED_ACTIVITY), 1);
-
-        counts.put(Pair.of("a3", Alert.SHOWN_INTENT), 1);
-        counts.put(Pair.of("a4", Alert.SHOWN_INTENT), 1);
-        counts.put(Pair.of("a5", Alert.SHOWN_INTENT), 1);
-        counts.put(Pair.of("a6", Alert.SHOWN_INTENT), 1);
-        counts.put(Pair.of("a8", Alert.SHOWN_INTENT), 1);
 
         counts.put(Pair.of("a11", Alert.HIGH_ENGAGEMENT_IN_ACCOUNT), 6);
 

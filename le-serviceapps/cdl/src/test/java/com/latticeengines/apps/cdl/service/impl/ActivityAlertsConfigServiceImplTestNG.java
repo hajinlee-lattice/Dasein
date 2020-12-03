@@ -2,8 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_ACTIVE_CONTACTS;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_ALERT_DATA;
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_NUM_BUY_INTENTS;
-import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_NUM_RESEARCH_INTENTS;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_PAGE_NAME;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_PAGE_VISITS;
 import static com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants.Alert.COL_RE_ENGAGED_CONTACTS;
@@ -45,7 +43,7 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
 
         defaults = activityAlertsConfigService.createDefaultActivityAlertsConfigs(mainCustomerSpace);
         Assert.assertNotNull(defaults);
-        Assert.assertEquals(defaults.size(), 9);
+        Assert.assertEquals(defaults.size(), 8);
 
         verifyDefaultAlertConfig(defaults);
 
@@ -81,7 +79,6 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
                 "You have <span class=\"item-insights-bold\">2 known contacts</span> among the visitors that are engaging with you.");
 
         verifyReEngagedAlertConfig(defaults);
-        verifyHasShownIntentAlertConfig(defaults);
         verifyAcitiveContactsAndWebVisits(defaults);
         verifyIntentAroundProductPages(defaults);
     }
@@ -166,41 +163,5 @@ public class ActivityAlertsConfigServiceImplTestNG extends CDLFunctionalTestNGBa
         rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
         Assert.assertEquals(rendered,
                 "<span class=\"item-insights-bold\">Multiple contacts</span> have re-engaged with your product after not returning for more than 30 days.");
-    }
-
-    private void verifyHasShownIntentAlertConfig(List<ActivityAlertsConfig> defaults) {
-        ActivityAlertsConfig alertConfig = defaults.stream() //
-                .filter(a -> a.getName().equals(ActivityStoreConstants.Alert.SHOWN_INTENT)) //
-                .findFirst() //
-                .orElse(null);
-        Assert.assertNotNull(alertConfig);
-
-        Map<String, Object> input = new HashMap<>();
-        Map<String, Object> data = new HashMap<>();
-        input.put(COL_ALERT_DATA, data);
-
-        // have both
-        data.put(COL_NUM_BUY_INTENTS, 10L);
-        data.put(COL_NUM_RESEARCH_INTENTS, 5L);
-        String rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
-        Assert.assertEquals(rendered,
-                "We saw <span class=\"item-insights-bold\">research intent on 5 products</span> and <span class=\"item-insights-bold\">buy intent "
-                        + "on 10 products</span> within the last 10 days. Check out which models in the Recent Activity section.");
-
-        // no research intent
-        data.put(COL_NUM_BUY_INTENTS, 10L);
-        data.put(COL_NUM_RESEARCH_INTENTS, 0L);
-        rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
-        Assert.assertEquals(rendered,
-                "We saw <span class=\"item-insights-bold\">buy intent on 10 products</span> within the last 10 days."
-                        + " Check out which models in the Recent Activity section.");
-
-        // no buy intent
-        data.put(COL_NUM_BUY_INTENTS, 0L);
-        data.put(COL_NUM_RESEARCH_INTENTS, 5L);
-        rendered = TemplateUtils.renderByMap(alertConfig.getAlertMessageTemplate(), input);
-        Assert.assertEquals(rendered,
-                "We saw <span class=\"item-insights-bold\">research intent on 5 products</span> within the last 10 days."
-                        + " Check out which models in the Recent Activity section.");
     }
 }

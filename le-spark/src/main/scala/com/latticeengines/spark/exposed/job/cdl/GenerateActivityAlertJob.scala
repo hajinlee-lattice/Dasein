@@ -80,9 +80,6 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
           Some(generateAnonymousWebVisitsAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
         case Alert.RE_ENGAGED_ACTIVITY =>
           Some(generateReEngagedActivity(timelineDf, startTimestamp, endTimestamp))
-        // intent need data in all time range
-        case Alert.SHOWN_INTENT =>
-          Some(generateShownIntentAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
         case Alert.HIGH_ENGAGEMENT_IN_ACCOUNT =>
           Some(generateHighEngagementInAccountAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
         case Alert.KNOWN_WEB_VISITS =>
