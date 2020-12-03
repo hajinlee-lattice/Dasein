@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -52,7 +51,6 @@ public class DashboardServiceImpl implements DashboardService {
         if (CollectionUtils.isEmpty(dashboards)) {
             return;
         }
-        List<Dashboard> needCreated = new ArrayList<>();
         for (Dashboard dashboard : dashboards) {
             createOrUpdate(customerSpace, dashboard);
         }

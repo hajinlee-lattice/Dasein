@@ -8,6 +8,8 @@ public interface DashboardFilterService {
 
     DashboardFilter createOrUpdate(String customerSpace, DashboardFilter dashboardFilter);
 
+    void createOrUpdateAll(String customerSpace, List<DashboardFilter> dashboardFilters);
+
     void delete(String customerSpace, DashboardFilter dashboardFilter);
 
     DashboardFilter findByPid(String customerSpace, Long pid);

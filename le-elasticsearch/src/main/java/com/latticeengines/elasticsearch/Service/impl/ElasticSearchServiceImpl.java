@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.elasticsearch.EsEntityType;
@@ -21,7 +21,7 @@ import com.latticeengines.elasticsearch.util.ElasticSearchUtils;
 
 import parquet.Preconditions;
 
-@Component("elasticSearchService")
+@Service("elasticSearchService")
 public class ElasticSearchServiceImpl implements ElasticSearchService {
 
     private static Logger log = LoggerFactory.getLogger(ElasticSearchServiceImpl.class);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class PublishVIDataJobConfiguration extends SparkJobConfig implements Serializable {
@@ -20,11 +21,24 @@ public class PublishVIDataJobConfiguration extends SparkJobConfig implements Ser
     @JsonProperty
     public List<String> selectedAttributes;
     @JsonProperty
-    public List<String> webVisitAttributes;
-    @JsonProperty
-    public List<String> latticeAccountAttributes;
-    @JsonProperty
     public Map<String, String> esConfigs = new HashMap<>();
+    @JsonProperty
+    public Map<String, String> filterParams;
+    //streamId -> tableName
+    @JsonProperty
+    public Map<String, String> webVisitTableNameIsMaps;
+    // streamId -> dimensionName -> metadata
+    @JsonProperty
+    public Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap = new HashMap<>();
+    @JsonProperty
+    public int targetNum;
+    @JsonProperty
+    public boolean isTest;
+
+    @Override
+    public int getNumTargets() {
+        return targetNum;
+    }
 
     @Override
     public String getName() {

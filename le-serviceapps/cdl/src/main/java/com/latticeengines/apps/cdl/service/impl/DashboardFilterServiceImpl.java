@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,16 @@ public class DashboardFilterServiceImpl implements DashboardFilterService {
         dashboardFilter1.setTenant(MultiTenantContext.getTenant());
         dashboardFilterEntityMgr.createOrUpdate(dashboardFilter1);
         return dashboardFilter1;
+    }
+
+    @Override
+    public void createOrUpdateAll(String customerSpace, List<DashboardFilter> dashboardFilters) {
+        if (CollectionUtils.isEmpty(dashboardFilters)) {
+            return;
+        }
+        for (DashboardFilter filter : dashboardFilters) {
+            createOrUpdate(customerSpace, filter);
+        }
     }
 
     @Override
