@@ -62,7 +62,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Facebook, "d01b9af1-e773-42a9-b660-f42378cbc747");
         SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.GoogleAds, "e089a0e4-9b89-45ff-ac9d-d75e643ac212");
         SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.LinkedIn, "add0a7c7-4342-42cb-a726-63e488aa23a3");
-        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Outreach, "a16c9564-d640-4f38-9171-8d0eb03e0641");
+        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Outreach, "8a290053-5a9c-418f-a89e-24ebf82a4ff2");
         SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Marketo, "64497731-1be1-4b25-8830-56fcb1ffcf82");
     }
 
