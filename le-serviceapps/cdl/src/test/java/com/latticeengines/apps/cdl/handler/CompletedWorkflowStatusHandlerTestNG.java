@@ -140,6 +140,37 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
         teardown(launchId, channel.getId(), play.getName());
     }
 
+    @Test(groups = "functional")
+    public void testCompletedWorkflowStatusSyncedWithNoProcessed() {
+        createAll();
+        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
+
+        Long totalRecords = 0L;
+        Long processed = 0L;
+        Long failed = 0L;
+        Long duplicates = 0L;
+        createEventDetail(statusMessage, totalRecords, processed, failed, duplicates);
+
+        CompletedWorkflowStatusHandler handler = new CompletedWorkflowStatusHandler(playLaunchService,
+                playLaunchChannelService, dataIntegrationStatusMonitoringEntityMgr);
+        handler.handleWorkflowState(statusMonitor, statusMessage);
+
+        handler.handleWorkflowState(statusMonitor, statusMessage);
+
+        String launchId = playLaunch.getLaunchId();
+        playLaunch = playLaunchService.findByLaunchId(launchId, false);
+        channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
+
+        Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Completed.toString());
+        Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Synced);
+        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), CURRENT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
+        teardown(launchId, channel.getId(), play.getName());
+    }
+
     private void createAll() {
         cleanupPlayLaunches();
 
