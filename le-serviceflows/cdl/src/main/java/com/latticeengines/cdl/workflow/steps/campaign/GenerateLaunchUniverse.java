@@ -66,6 +66,8 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
     private static final String DIRECTION = "/Direction";
     private static final String CDL_UPDATED_TIME = "CDLUpdatedTime";
     private static final String DESC = "DESC";
+    private static final String CONTACT_ACCOUNT_RATIO_THRESHOLD = "/ContactAccountRatioThreshold";
+    private static final String CONTACT_ACCOUNT_RATIO_THRESHOLD_DEFAULT = "100000";
 
     @Inject
     private PeriodProxy periodProxy;
@@ -150,11 +152,9 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
 
         // 3) check for 'Contacts per Account' limit
-        if (useContactsPerAccountLimit) {
             Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
             launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
-                    maxContactsPerAccount, maxEntitiesToLaunch, customerSpace);
-        }
+                    maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, channelConfig.getSystemName());
 
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
     }
@@ -210,7 +210,8 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
     }
 
     private HdfsDataUnit executeSparkJobContactsPerAccount(HdfsDataUnit launchDataUniverseDataUnit, //
-            Long maxContactsPerAccount, Long maxEntitiesToLaunch, CustomerSpace customerSpace) {
+            Long maxContactsPerAccount, Long maxEntitiesToLaunch, CustomerSpace customerSpace,
+            CDLExternalSystemName systemName) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -243,8 +244,14 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 List<DataUnit> inputUnits = new ArrayList<>();
                 inputUnits.add(launchDataUniverseDataUnit);
 
-                GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig( //
-                        getRandomWorkspace(), maxContactsPerAccount, maxEntitiesToLaunch, sortAttr, sortDir, contactDataUnit);
+                Long contactAccountRatioThreshold = null;
+                if (CDLExternalSystemName.Eloqua.equals(systemName)) {
+                    contactAccountRatioThreshold = Long.valueOf(getContactAccountRatioThresholdFromZK(customerSpace));
+                }
+
+                GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig(
+                        getRandomWorkspace(), maxContactsPerAccount, maxEntitiesToLaunch, sortAttr, sortDir,
+                        contactDataUnit, contactAccountRatioThreshold);
 
                 config.setInput(inputUnits);
                 log.info("Executing GenerateLaunchUniverseJob with config: " + JsonUtils.serialize(config));
@@ -295,6 +302,27 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         sortConfig.add(sortAttr);
         sortConfig.add(sortDir);
         return sortConfig;
+    }
+
+    private String getContactAccountRatioThresholdFromZK(CustomerSpace customerSpace) {
+        String contactAccountRatioThreshold = CONTACT_ACCOUNT_RATIO_THRESHOLD;
+        Path contactAccountRatioThresholdPath = null;
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            contactAccountRatioThresholdPath = PathBuilder.buildCustomerSpaceServicePath(podId, customerSpace, CDL)
+                    .append(CONTACT_ACCOUNT_RATIO_THRESHOLD);
+            if (camille.exists(contactAccountRatioThresholdPath)) {
+                contactAccountRatioThreshold = camille.get(contactAccountRatioThresholdPath).getData();
+                log.info("Found tenant override contactAccountRatioThreshold: ", contactAccountRatioThreshold);
+            } else {
+                log.info("Tenant contactAccountRatioThreshold not found. Using default");
+            }
+        } catch (Exception e) {
+            log.warn("Tenant sort config found but unable to read: ", e);
+        }
+
+        return contactAccountRatioThreshold;
     }
 
     private long limitToCheck(long userConfiguredLimit, long queryCount) {

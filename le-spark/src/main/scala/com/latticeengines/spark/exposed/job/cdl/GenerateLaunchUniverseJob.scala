@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchUniverseJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions.{col, row_number}
+import org.apache.spark.sql.functions.{col, count, row_number}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 
@@ -21,6 +21,7 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     val maxEntitiesToLaunch = config.getMaxEntitiesToLaunch
     val sortAttr = config.getContactsPerAccountSortAttribute
     val sortDir = config.getContactsPerAccountSortDirection
+    val contactAccountRatioThreshold = config.getContactAccountRatioThreshold
 
     var trimmedData = input
 
@@ -31,6 +32,10 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
 
     logSpark("Input schema is as follows:")
     trimmedData.printSchema
+
+    if(contactAccountRatioThreshold != null) {
+      trimmedData = checkContactAccountRatio(trimmedData, accountId, contactAccountRatioThreshold)
+    }
 
     if (maxContactsPerAccount != null) {
       trimmedData = limitContactsPerAccount(trimmedData, accountId, contactId, sortAttr, sortDir, maxContactsPerAccount)
@@ -63,5 +68,19 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
       .withColumn(rowNumber, row_number.over(w))
       .filter(col(rowNumber) <= maxContactsPerAccount.toInt)
       .drop(rowNumber, sortAttr)
+  }
+
+  def checkContactAccountRatio(trimmedData: DataFrame, accountId: String, contactAccountRatioThreshold: Long): DataFrame = {
+
+    val accountDF = trimmedData.select(col(accountId))
+      .groupBy(col(accountId))
+      .agg(count("*").alias("cnt"))
+    accountDF.collect().foreach(row => {
+      val accId: String = row.getAs(accountId)
+      val count: Long = row.getAs("cnt")
+      if (count > contactAccountRatioThreshold)
+        throw new IllegalStateException(s"Contact/Account ratio exceed threshold for Account=$accId!")
+    })
+    trimmedData
   }
 }
