@@ -152,6 +152,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
 
         // 3) check for 'Contacts per Account' limit
+        if (useContactsPerAccountLimit || CDLExternalSystemName.Eloqua.equals(channelConfig.getSystemName())) {
             Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
             launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
                     maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, channelConfig.getSystemName());
