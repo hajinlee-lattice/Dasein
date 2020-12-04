@@ -38,6 +38,11 @@ public class DataBlock {
         public static final String principalscontacts = "principalscontacts";
         public static final String salesmarketinginsight = "salesmarketinginsight";
         public static final String thirdpartyriskinsight = "thirdpartyriskinsight";
+        public static final String businessactivityinsight = "businessactivityinsight";
+        public static final String derivedtradeinsight = "derivedtradeinsight";
+        public static final String externaldisruptioninsight = "externaldisruptioninsight";
+        public static final String inquiryinsight = "inquiryinsight";
+        public static final String spendinsight = "spendinsight";
     }
 
     public static final String BLOCK_BASE_INFO = "baseinfo";
@@ -58,6 +63,11 @@ public class DataBlock {
             .put(Id.principalscontacts, "Principal and Contacts") //
             .put(Id.salesmarketinginsight, "Sales and Marketing Insights") //
             .put(Id.thirdpartyriskinsight, "Third-Party Risk Insights") //
+            .put(Id.businessactivityinsight, "Business Activity Insights") //
+            .put(Id.derivedtradeinsight, "Derived Trade Insights") //
+            .put(Id.externaldisruptioninsight, "External Disruption Insights") //
+            .put(Id.inquiryinsight, "Inquiry Insights") //
+            .put(Id.spendinsight, "Spend Insights") //
             .build();
 
     @JsonProperty("blockId")
