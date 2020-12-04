@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -56,10 +57,14 @@ public class ExcludeLDCDeprecatedAttributes extends BaseWorkflowStep<ExcludeLDCD
         Set<String> attributesDeprecated = new HashSet<>();
 
         List<ColumnMetadata> metadata = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model);
-        for (ColumnMetadata column : metadata) {
-            if (column.getShouldDeprecate()) {
-                attributesDeprecated.add(column.getAttrName());
+        if (CollectionUtils.isNotEmpty(metadata)) {
+            for (ColumnMetadata column : metadata) {
+                if (column != null && Boolean.TRUE.equals(column.getShouldDeprecate())) {
+                    attributesDeprecated.add(column.getAttrName());
+                }
             }
+        } else {
+            log.warn("ExcludeLDCDeprecatedAttributes: ColumnMetadataProxy.columnSelection returned an empty column set.");
         }
 
         return attributesDeprecated;
