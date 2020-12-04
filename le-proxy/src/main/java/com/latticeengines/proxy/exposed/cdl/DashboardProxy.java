@@ -35,6 +35,18 @@ public class DashboardProxy extends MicroserviceRestApiProxy implements ProxyInt
         post("create dashboard list", url, dashboardList);
     }
 
+    public Dashboard createDashboardFilter(String customerSpace, DashboardFilter dashboardFilter) {
+        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboards/createFilter",
+                shortenCustomerSpace(customerSpace));
+        return post("create dashboardFilter", url, dashboardFilter, Dashboard.class);
+    }
+
+    public void createDashboardFilterList(String customerSpace, List<DashboardFilter> dashboardFilterList) {
+        String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboards/createFilterList",
+                shortenCustomerSpace(customerSpace));
+        post("create dashboardFilter list", url, dashboardFilterList);
+    }
+
     public List<Dashboard> getDashboards(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/vireports/dashboards",
                 shortenCustomerSpace(customerSpace));
