@@ -157,7 +157,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setRejectedAttrs(rejectedAttrs);
 
         List<ColumnMetadata> acceptedCms = cms.stream() //
-                .filter(cm -> !isAttrToExclude(cm)).collect(Collectors.toList());
+                .filter(cm -> !isAttrToExclude(cm) && !isProcessingErrorField(cm)).collect(Collectors.toList());
         Map<String, String> displayNameMap = convertToDispMap(cms);
         List<String> acceptedAttrs = sortOutputAttrs(acceptedCms);
         jobConfig.setAcceptedAttrs(acceptedAttrs);
@@ -444,6 +444,14 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
     private boolean isFromDataBlock(ColumnMetadata cm) {
         return dataBlockDispNames.containsKey(cm.getAttrName());
+    }
+
+    private boolean isProcessingErrorField(ColumnMetadata cm) {
+        return Arrays.asList(
+                MatchConstants.MATCH_ERROR_CODE,
+                MatchConstants.MATCH_ERROR_INFO,
+                MatchConstants.MATCH_ERROR_TYPE
+        ).contains(cm.getAttrName());
     }
 
     private Map<String, String> candidateFieldDisplayNames() {
