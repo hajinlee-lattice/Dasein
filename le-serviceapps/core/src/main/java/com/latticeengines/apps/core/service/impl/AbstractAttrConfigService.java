@@ -666,9 +666,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         List<AttrConfigEntity> allConfigEntities = attrConfigEntityMgr.findAllObjectsInEntitiesInReader(tenantId,
                 new ArrayList<>(attrConfigGrps.keySet()));
         allConfigEntities.forEach(entry -> {
-            BusinessEntity entity = entry.getDocument().getEntity();
-            entityMap.putIfAbsent(entity, new ArrayList());
-            entityMap.get(entity).add(entry);
+            if (entry.getDocument() != null) {
+                BusinessEntity entity = entry.getDocument().getEntity();
+                entityMap.putIfAbsent(entity, new ArrayList());
+                entityMap.get(entity).add(entry);
+            }
 
         });
         attrConfigGrps.forEach((entity, configList) -> {
