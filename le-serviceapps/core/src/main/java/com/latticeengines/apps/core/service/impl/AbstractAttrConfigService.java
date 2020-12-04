@@ -122,7 +122,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         final Tenant tenant = MultiTenantContext.getTenant();
         boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
 
-        List<AttrConfig> configs = new ArrayList<>();
+        List<AttrConfig> configs = Collections.synchronizedList(new ArrayList<>());
         List<Runnable> runnables = new ArrayList<>();
         categories.forEach(category -> {
             Runnable runnable = () -> {
