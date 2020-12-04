@@ -22,7 +22,7 @@ import com.latticeengines.query.exposed.translator.EventQueryTranslator;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.querydsl.sql.SQLQuery;
 
-public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGBase {
+public class EventQueryTranslatorMultiProductTestNG extends QueryFunctionalTestNGBase {
 
     private EventQueryTranslator getEventQueryTranslator() {
         return new EnhancedEventQueryTranslator();
