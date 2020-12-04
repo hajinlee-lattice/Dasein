@@ -192,6 +192,11 @@ public class PlayLaunchChannelEntityMgrImpl
                 existingPlayLaunchChannel.setMaxEntitiesToLaunch(updatedChannel.getMaxEntitiesToLaunch());
             }
         }
+
+        if (updatedChannel.getMaxContactsPerAccount() != null) {
+            existingPlayLaunchChannel.setMaxContactsPerAccount(updatedChannel.getMaxContactsPerAccount());
+        }
+
         if (updatedChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(updatedChannel.getLaunchType());
         }
