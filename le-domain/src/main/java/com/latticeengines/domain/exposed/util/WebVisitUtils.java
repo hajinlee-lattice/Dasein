@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.util;
 
-import static com.latticeengines.domain.exposed.util.ActivityStoreUtils.DEFAULT_TIME_RANGE;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -161,7 +160,7 @@ public final class WebVisitUtils {
      */
     public static boolean shouldHideInCategoryTile(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group,
             @NotNull String timeRange) {
-        return !TOTAL_VISIT_GROUPNAME.equals(group.getGroupName()) || !DEFAULT_TIME_RANGE.equals(timeRange);
+        return !TOTAL_VISIT_GROUPNAME.equals(group.getGroupName()) || !ActivityStoreUtils.isDefaultPeriodRange(timeRange);
     }
 
     public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group,
