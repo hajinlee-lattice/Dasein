@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilterValue;
-import com.latticeengines.domain.exposed.elasticsearch.EsEntityType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -169,9 +168,9 @@ public class PublishVIDataStep extends RunSparkJob<PublishVIDataStepConfiguratio
     private String createIndex(String customerSpace) {
         String newVersion = generateNewVersion();
         String idxName = String
-                .format("%s_%s_%s", CustomerSpace.shortenCustomerSpace(customerSpace), EsEntityType.VIData, newVersion)
+                .format("%s_%s", CustomerSpace.shortenCustomerSpace(customerSpace), newVersion)
                 .toLowerCase();
-        elasticSearchService.createIndex(idxName, EsEntityType.VIData);
+        elasticSearchService.createIndex(idxName);
         log.info("create Index is {}.", idxName);
         return idxName;
     }

@@ -1,7 +1,6 @@
 package com.latticeengines.elasticsearch.Service.impl;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -14,7 +13,6 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.RetryUtils;
-import com.latticeengines.domain.exposed.elasticsearch.EsEntityType;
 import com.latticeengines.elasticsearch.Service.ElasticSearchService;
 import com.latticeengines.elasticsearch.config.ElasticSearchConfig;
 import com.latticeengines.elasticsearch.util.ElasticSearchUtils;
@@ -48,18 +46,16 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
     private String password;
 
     @Override
-    public boolean createIndex(String indexName, EsEntityType esEntityType) {
+    public boolean createIndex(String indexName) {
 
 
-        return createIndexWithSettings(indexName, getDefaultElasticSearchConfig(), esEntityType);
+        return createIndexWithSettings(indexName, getDefaultElasticSearchConfig());
     }
 
     @Override
-    public boolean createIndexWithSettings(String indexName, ElasticSearchConfig esConfig,
-                                           EsEntityType esEntityType) {
+    public boolean createIndexWithSettings(String indexName, ElasticSearchConfig esConfig) {
         Preconditions.checkNotNull(indexName, "index Name can't be null.");
         Preconditions.checkNotNull(esConfig, "esConfig can't be null");
-        Preconditions.checkNotNull(esEntityType, "xContentBuilderType can't be null.");
         if (esConfig.getRefreshInterval() == null) {
             esConfig.setRefreshInterval(esRefreshInterval);
         }
@@ -75,44 +71,17 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
         try {retry.execute(context -> {
             ElasticSearchUtils.createIndexWithSettings(client, indexName, esConfig,
-                    ElasticSearchUtils.initIndexMapping(esEntityType, esConfig.getDynamic()));
+                    ElasticSearchUtils.initIndexMapping(esConfig.getDynamic()));
             return 0;
         });
         } catch (IOException e) {
-            log.error(String.format("Failed to create index %s, xContentBuilderType is %s", indexName, esEntityType), e);
+            log.error(String.format("Failed to create index %s", indexName), e);
             return false;
         }
         return false;
     }
 
-    public boolean createAccountIndexWithLookupIds(String indexName, ElasticSearchConfig esConfig,
-                                                   List<String> lookupIds) {
-        Preconditions.checkNotNull(indexName, "index Name can't be null.");
-        Preconditions.checkNotNull(esConfig, "esConfig can't be null");
-        if (esConfig.getRefreshInterval() == null) {
-            esConfig.setRefreshInterval(esRefreshInterval);
-        }
-        if (esConfig.getReplicas() == null) {
-            esConfig.setReplicas(esReplicas);
-        }
-        if (esConfig.getShards() == null) {
-            esConfig.setShards(esShards);
-        }
-        if (esConfig.getDynamic() == null) {
-            esConfig.setDynamic(esDynamic);
-        }
-        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
-        try {retry.execute(context -> {
-            ElasticSearchUtils.createIndexWithSettings(client, indexName, esConfig,
-                    ElasticSearchUtils.initAccountIndexMapping(esConfig.getDynamic(), lookupIds));
-            return 0;
-        });
-        } catch (IOException e) {
-            log.error(String.format("Failed to create account index %s", indexName), e);
-            return false;
-        }
-        return false;
-    }
+
 
     @Override
     public boolean createDocument(String indexName, String docId, String jsonString) {

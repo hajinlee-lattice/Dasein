@@ -1,13 +1,8 @@
 package com.latticeengines.elasticsearch.util;
 
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
-import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitDate;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
-import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.EventDate;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
@@ -30,7 +25,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.domain.exposed.elasticsearch.EsEntityType;
 import com.latticeengines.elasticsearch.config.ElasticSearchConfig;
 
 public final class ElasticSearchUtils {
@@ -108,47 +102,14 @@ public final class ElasticSearchUtils {
         }
     }
 
-    public static XContentBuilder initIndexMapping(EsEntityType type, boolean dynamic) throws IOException {
+    public static XContentBuilder initIndexMapping(boolean dynamic) throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder() //
                 .startObject() //
                 .field("dynamic", dynamic) //
                 .startObject("properties");
-        switch (type) {
-            case VIData: return builder
+        return builder
                     .startObject(WebVisitDate.name())
                     .field("type", "date")
                     .endObject().endObject().endObject();
-            case Contact: return builder.startObject(AccountId.name()) //
-                    .field("type", "keyword") //
-                    .endObject().endObject().endObject();
-            case TimelineProfile: return builder.startObject(AccountId.name()) //
-                    .field("type", "keyword") //
-                    .endObject() //
-                    .startObject(ContactId.name()) //
-                    .field("type", "keyword") //
-                    .endObject() //
-                    .startObject(EventDate.getColumnName()) //
-                    .field("type", "date") //
-                    .endObject().endObject().endObject();
-            default: return null;
-        }
-    }
-
-    public static XContentBuilder initAccountIndexMapping(boolean dynamic, List<String> lookupIds) throws IOException {
-        XContentBuilder accountBuilder = XContentFactory.jsonBuilder() //
-                .startObject() //
-                .field("dynamic", dynamic) //
-                .startObject("properties");
-
-        if (lookupIds != null) {
-            for (String lookupId : lookupIds) {
-                accountBuilder //
-                        .startObject(BucketedAccount.name() + ":" + lookupId) //
-                        .field("type", "keyword") //
-                        .endObject();
-            }
-        }
-        accountBuilder.endObject().endObject();
-        return accountBuilder;
     }
 }
