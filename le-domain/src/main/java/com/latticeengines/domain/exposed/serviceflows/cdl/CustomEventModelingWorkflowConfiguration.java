@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepC
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AttributeCategoryModifierConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ExcludeLDCDeprecatedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.MergeUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.UseConfiguredModelingAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelDataValidationWorkflowConfiguration;
@@ -74,6 +75,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         private MergeUserRefinedAttributesConfiguration mergeUserRefinedAttributes = new MergeUserRefinedAttributesConfiguration();
 
+        private ExcludeLDCDeprecatedAttributesConfiguration excludeLDCDeprecatedAttributes = new ExcludeLDCDeprecatedAttributesConfiguration();
+
         private UseConfiguredModelingAttributesConfiguration.Builder useConfiguredModelingAttributesBuilder = new UseConfiguredModelingAttributesConfiguration.Builder();
         private AttributeCategoryModifierConfiguration.Builder attributeCategoryModifierConfigurationBuilder = new AttributeCategoryModifierConfiguration.Builder();
 
@@ -95,6 +98,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             generateAIRating.customer(customerSpace);
             mergeUserRefinedAttributes.setCustomerSpace(customerSpace);
             modelImportExportS3.setCustomerSpace(customerSpace);
+            excludeLDCDeprecatedAttributes.setCustomerSpace(customerSpace);
             useConfiguredModelingAttributesBuilder.customerSpace(customerSpace);
             attributeCategoryModifierConfigurationBuilder.customerSpace(customerSpace);
             return this;
@@ -118,6 +122,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
             mergeUserRefinedAttributes.setMicroServiceHostPort(microServiceHostPort);
             modelImportExportS3.setMicroServiceHostPort(microServiceHostPort);
+
+            excludeLDCDeprecatedAttributes.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -165,6 +171,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             generateAIRating.internalResourceHostPort(internalResourceHostPort);
             mergeUserRefinedAttributes.setInternalResourceHostPort(internalResourceHostPort);
             modelImportExportS3.setInternalResourceHostPort(internalResourceHostPort);
+            excludeLDCDeprecatedAttributes.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -428,6 +435,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder skipExcludeLDCDeprecatedAttributes(CustomEventModelingType customEventModelingType) {
+            excludeLDCDeprecatedAttributes.setSkipStep(CustomEventModelingType.LPI != customEventModelingType);
+            return this;
+        }
+
         public Builder notesContent(String notesContent) {
             modelWorkflowBuilder.notesContent(notesContent);
             return this;
@@ -450,7 +462,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             customEventMatchWorkflowConfigurationBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
-        
+
         public Builder mapToLatticeAccount(boolean mapToLatticeAccount) {
             customEventMatchWorkflowConfigurationBuilder.mapToLatticeAccount(mapToLatticeAccount);
             return this;
@@ -518,6 +530,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(exportScoreTrainingFile);
             configuration.add(modelImportExportS3);
             configuration.add(mergeUserRefinedAttributes);
+            configuration.add(excludeLDCDeprecatedAttributes);
             configuration.add(useConfiguredModelingAttributesBuilder.build());
             configuration.add(attributeCategoryModifierConfigurationBuilder.build());
 

@@ -238,6 +238,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .targetTableName(trainingTableName + "_TargetTable") //
                 .skipLdcAttributesOnly(
                         !parameters.isExcludeCDLAttributes() || !parameters.isExcludeCustomFileAttributes()) //
+                .skipExcludeLDCDeprecatedAttributes(parameters.getCustomEventModelingType()) //
                 .aiModelId(parameters.getAiModelId()) //
                 .ratingEngineId(parameters.getRatingEngineId()) //
                 .setUseScorederivation(false) //
