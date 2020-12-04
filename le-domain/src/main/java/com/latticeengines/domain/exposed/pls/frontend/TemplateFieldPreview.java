@@ -33,6 +33,9 @@ public class TemplateFieldPreview {
     @JsonProperty("field_category")
     private FieldCategory fieldCategory;
 
+    @JsonProperty("lattice_field_category")
+    private LatticeFieldCategory latticeFieldCategory;
+
     @JsonProperty("unmapped")
     private boolean unmapped = false;
 
@@ -98,6 +101,14 @@ public class TemplateFieldPreview {
 
     public void setFieldCategory(FieldCategory fieldCategory) {
         this.fieldCategory = fieldCategory;
+    }
+
+    public LatticeFieldCategory getLatticeFieldCategory() {
+        return latticeFieldCategory;
+    }
+
+    public void setLatticeFieldCategory(LatticeFieldCategory latticeFieldCategory) {
+        this.latticeFieldCategory = latticeFieldCategory;
     }
 
     public boolean isUnmapped() {

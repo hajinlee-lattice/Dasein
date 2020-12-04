@@ -32,15 +32,25 @@ public class CalculateDeltaStepConfiguration extends BaseStepConfiguration {
         return channelId;
     }
 
-    public void setChannelId(String channelId) { this.channelId = channelId; }
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
+    }
 
-    public String getLaunchId() { return launchId; }
+    public String getLaunchId() {
+        return launchId;
+    }
 
-    public void setLaunchId(String launchId) { this.launchId = launchId; }
+    public void setLaunchId(String launchId) {
+        this.launchId = launchId;
+    }
 
-    public String getExecutionId() { return executionId; }
+    public String getExecutionId() {
+        return executionId;
+    }
 
-    public void setExecutionId(String executionId) { this.executionId = executionId; }
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
 
     public DataCollection.Version getVersion() {
         return version;
@@ -49,4 +59,5 @@ public class CalculateDeltaStepConfiguration extends BaseStepConfiguration {
     public void setVersion(DataCollection.Version version) {
         this.version = version;
     }
+
 }

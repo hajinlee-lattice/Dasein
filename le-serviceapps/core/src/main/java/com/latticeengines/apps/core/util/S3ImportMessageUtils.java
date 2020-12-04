@@ -8,6 +8,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Lists;
+import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 
 public final class S3ImportMessageUtils {
@@ -22,6 +23,7 @@ public final class S3ImportMessageUtils {
     private static final Pattern DCP_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Projects/([a-zA-Z0-9_]+)/Source[s]?/([a-zA-Z0-9_]+)/drop/(.*)");
     private static final Pattern ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Templates/(.*)");
     private static final Pattern LEGACY_ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/([a-zA-Z0-9_]+)/Templates/(.*)");
+    private static final Pattern LIST_SEGMENT_PATTERN = Pattern.compile("datavision_segment/([a-zA-Z0-9_]+)/([a-zA-Z0-9_]+)/(.*)");
 
     public static final List<String> validImportFileTypes = Lists.newArrayList(".csv", ".gzip", ".gz", ".tar", ".tar.gz", ".zip");
 
@@ -37,7 +39,10 @@ public final class S3ImportMessageUtils {
                 return S3ImportMessageType.DCP;
             } else if (ATLAS_PATTERN.matcher(key).find() || LEGACY_ATLAS_PATTERN.matcher(key).find()) {
                 return S3ImportMessageType.Atlas;
-            } else {
+            } else if (LIST_SEGMENT_PATTERN.matcher(key).find()) {
+                return S3ImportMessageType.LISTSEGMENT;
+            }
+            else {
                 return S3ImportMessageType.UNDEFINED;
             }
         }
@@ -51,6 +56,7 @@ public final class S3ImportMessageUtils {
                 skip = PS_SHARE.equals(feedType);
                 break;
             case DCP:
+            case LISTSEGMENT:
                 break;
             default:
                 skip = true;
@@ -82,7 +88,30 @@ public final class S3ImportMessageUtils {
             } else {
                 return StringUtils.EMPTY;
             }
-        } else {
+        } else if (S3ImportMessageType.LISTSEGMENT.equals(messageType)) {
+            Matcher matcher = LIST_SEGMENT_PATTERN.matcher(key);
+            if (matcher.find()) {
+                String result;
+                switch (keyPart) {
+                    case TENANT_ID:
+                        result = matcher.group(1);
+                        break;
+                    case SEGMENT_NAME:
+                        result = matcher.group(2);
+                        break;
+                    case FILE_NAME:
+                        result = matcher.group(3);
+                        break;
+                    default:
+                        result = StringUtils.EMPTY;
+                        break;
+                }
+                return result;
+            } else {
+                return StringUtils.EMPTY;
+            }
+        }
+        else {
             throw new NotImplementedException("Message type: " + messageType + " is not supported yet.");
         }
     }
@@ -121,7 +150,15 @@ public final class S3ImportMessageUtils {
         return folderName;
     }
 
+    public static String getSegmentIndex(S3ImportMessage message) {
+        String tenantId = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
+                S3ImportMessageUtils.KeyPart.TENANT_ID);
+        String segmentName = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
+                S3ImportMessageUtils.KeyPart.SEGMENT_NAME);
+        return tenantId + "_" + segmentName;
+    }
+
     public enum KeyPart {
-        PROJECT_ID, SOURCE_ID, FILE_NAME
+        PROJECT_ID, SOURCE_ID, FILE_NAME, TENANT_ID, SEGMENT_NAME
     }
 }

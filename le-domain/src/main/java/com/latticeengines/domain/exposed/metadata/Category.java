@@ -41,7 +41,8 @@ public enum Category {
     WEB_VISIT_PROFILE("My Website Visits", 17) {
         @Override
         public FilterOptions getFilterOptions() {
-            return ActivityStoreUtils.attrFilterOptions();
+//            return ActivityStoreUtils.attrFilterOptions();
+            return ActivityStoreUtils.genericFilterOptions();
         }
 
         @Override
@@ -58,7 +59,8 @@ public enum Category {
     ACCOUNT_MARKETING_ACTIVITY_PROFILE("My Account Marketing Activity", 19) {
         @Override
         public FilterOptions getFilterOptions() {
-            return ActivityStoreUtils.attrFilterOptions();
+//            return ActivityStoreUtils.attrFilterOptions();
+            return ActivityStoreUtils.genericFilterOptions();
         }
 
         @Override
@@ -74,7 +76,8 @@ public enum Category {
     CONTACT_MARKETING_ACTIVITY_PROFILE("My Contact Marketing Activity", 20) {
         @Override
         public FilterOptions getFilterOptions() {
-            return ActivityStoreUtils.attrFilterOptions();
+//            return ActivityStoreUtils.attrFilterOptions();
+            return ActivityStoreUtils.genericFilterOptions();
         }
 
         @Override

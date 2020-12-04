@@ -2,7 +2,9 @@ package com.latticeengines.pls.controller;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -30,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/jwt")
 public class JwtResource {
 
-    private static final Logger log = Logger.getLogger(JwtResource.class);
+    private static final Logger log = LoggerFactory.getLogger(JwtResource.class);
 
     @Inject
     private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
@@ -56,7 +58,7 @@ public class JwtResource {
             throw new LedpException(LedpCode.LEDP_10004, new String[] { "USER" });
         }
         JwtReplyParameters reply = jwtManager.handleJwtRequest(userData, reqParams);
-        log.info(reply);
+        log.info("reply is " + reply);
         return reply;
     }
 }

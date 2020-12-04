@@ -51,6 +51,13 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
     }
 
     @Override
+    public DataUnit getByDataTemplateIdAndRole(String customerSpace, String dataTemplateId, DataUnit.Role role) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit/template/{templateId}", shortenCustomerSpace(customerSpace), dataTemplateId);
+        url += "?role=" + role.name();
+        return get("get data unit by template id and role", url, DataUnit.class);
+    }
+
+    @Override
     public Boolean renameTableName(String customerSpace, DataUnit dataUnit, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/dataunit/renameTableName?tableName" +
                         "={tableName}",

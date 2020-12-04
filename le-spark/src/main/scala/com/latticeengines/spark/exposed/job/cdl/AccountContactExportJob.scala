@@ -2,6 +2,7 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.pls.AccountContactExportContext
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig
+import com.latticeengines.domain.exposed.util.ExportUtils
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -21,10 +22,10 @@ class AccountContactExportJob extends AbstractSparkJob[AccountContactExportConfi
 
     if (listSize == 2) {
       var contactTable: DataFrame = lattice.input(1)
-      val newAttrs = contactTable.columns.map(c => AccountContactExportConfig.CONTACT_ATTR_PREFIX + c)
+      val newAttrs = contactTable.columns.map(c => ExportUtils.CONTACT_ATTR_PREFIX + c)
       contactTable = contactTable.toDF(newAttrs: _*)
       // right join
-      val contactJoinKey = AccountContactExportConfig.CONTACT_ATTR_PREFIX + joinKey
+      val contactJoinKey = ExportUtils.CONTACT_ATTR_PREFIX + joinKey
       var joinResult: DataFrame = accountTable.join(contactTable, accountTable(joinKey) === contactTable(contactJoinKey), "right")
       // drop the join key
       joinResult = joinResult.drop(contactJoinKey)

@@ -69,15 +69,17 @@ public class S3ImportMessageEntityMgrImpl
             s3ImportMessageDao.update(message);
             return message;
         } else {
-            String dropBoxPrefix = S3ImportMessageUtils.getDropBoxPrefix(key);
-            DropBox dropBox = dropBoxEntityMgr.getDropBox(dropBoxPrefix);
             message = new S3ImportMessage();
             message.setBucket(bucket);
             message.setKey(key);
             if (S3ImportMessageType.Atlas.equals(messageType)) {
                 message.setFeedType(S3ImportMessageUtils.getFeedTypeFromKey(key));
             }
-            message.setDropBox(dropBox);
+            if( messageType != S3ImportMessageType.LISTSEGMENT) {
+                String dropBoxPrefix = S3ImportMessageUtils.getDropBoxPrefix(key);
+                DropBox dropBox = dropBoxEntityMgr.getDropBox(dropBoxPrefix);
+                message.setDropBox(dropBox);
+            }
             message.setMessageType(messageType);
             s3ImportMessageDao.create(message);
         }

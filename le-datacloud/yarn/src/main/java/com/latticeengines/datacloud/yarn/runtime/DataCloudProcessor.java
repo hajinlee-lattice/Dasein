@@ -62,6 +62,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Resource(name = "bulkMatchProcessorAsyncExecutor")
     private BulkMatchProcessorExecutor bulkMatchProcessorAsyncExecutor;
 
+    // Entry point for DataCloud job
     @Override
     public String process(DataCloudJobConfiguration jobConfiguration) throws Exception {
         Tracer tracer = GlobalTracer.get();

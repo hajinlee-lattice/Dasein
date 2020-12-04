@@ -420,6 +420,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, firstFile.getName(),
                 firstFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
 
+        log.info("applicationId: {}", applicationId.toString());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
 
@@ -490,7 +491,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertNotNull(missingColumn);
         Exception exp = null;
         try {
-            startCDLImport(missingColumn, ENTITY_TRANSACTION);
+            startCDLImport(missingColumn, ENTITY_TRANSACTION, DEFAULT_SYSTEM);
         } catch (RuntimeException e) {
             exp = e;
         }
@@ -550,7 +551,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     public void verifyColumnMissing() {
         SourceFile missingAccountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE_MISSING, ENTITY_ACCOUNT);
         Assert.assertNotNull(missingAccountFile);
-        startCDLImport(missingAccountFile, ENTITY_ACCOUNT);
+        startCDLImport(missingAccountFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
         accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
                 getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_ACCOUNT), ENTITY_ACCOUNT);
         Table accountTemplate2 = accountDataFeedTask.getImportTemplate();

@@ -61,6 +61,8 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
 
         DataLakeService spiedDataLakeService = spy(new DataLakeServiceImpl(null));
         doReturn(TEST_ACCOUNT_ID).when(spiedDataLakeService).getInternalAccountId(TEST_ACCOUNT_ID, null);
+        doReturn(generateTestData("com/latticeengines/app/exposed/controller/test-contacts-data.json", DataPage.class))
+                .when(spiedDataLakeService).getAllContactsByAccountId(TEST_ACCOUNT_ID, null);
         ((ActivityTimelineServiceImpl) activityTimelineService).setDataLakeService(spiedDataLakeService);
 
         ActivityStoreProxy spiedActivityStoreProxy = spy(
@@ -69,6 +71,11 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
                 "com/latticeengines/app/exposed/controller/test-journey-stage-configurations.json", List.class);
         doReturn(JsonUtils.convertList(raws, JourneyStage.class)).when(spiedActivityStoreProxy)
                 .getJourneyStages(any(String.class));
+        List<AtlasStream> streams = Arrays.asList(
+                new AtlasStream.Builder().withStreamType(AtlasStream.StreamType.WebVisit).build(),
+                new AtlasStream.Builder().withStreamType(AtlasStream.StreamType.MarketingActivity).build(),
+                new AtlasStream.Builder().withStreamType(AtlasStream.StreamType.Opportunity).build());
+        doReturn(streams).when(spiedActivityStoreProxy).getStreams(any(String.class));
         ((ActivityTimelineServiceImpl) activityTimelineService).setActivityStoreProxy(spiedActivityStoreProxy);
 
         Path cdlPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
@@ -83,20 +90,30 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
         List<ActivityTimelineMetrics> metrics = activityTimelineService.getActivityTimelineMetrics(TEST_ACCOUNT_ID,
                 null, null);
 
-        Assert.assertEquals(metrics.get(0).getLabel(), "New Page Visits");
-        Assert.assertEquals(metrics.get(0).getCount().intValue(), 139);
-        Assert.assertEquals(metrics.get(0).getDescription(), "in last 10 days");
+        Assert.assertEquals(metrics.get(0).getLabel(), "New Activities");
+        Assert.assertEquals(String.valueOf(metrics.get(0).getMessage()), "139");
+        Assert.assertEquals(metrics.get(0).getDescription(), " in last 10 days");
         Assert.assertEquals(metrics.get(0).getContext(), "Total number of web activity in the last 10 days");
 
-        Assert.assertEquals(metrics.get(1).getLabel(), "New Engagements");
-        Assert.assertEquals(metrics.get(1).getCount().intValue(), 207);
-        Assert.assertEquals(metrics.get(1).getDescription(), "in last 10 days");
-        Assert.assertEquals(metrics.get(1).getContext(), "Total number of engagements in the last in the last 10 days");
+        Assert.assertEquals(metrics.get(1).getLabel(), "New Contacts");
+        Assert.assertEquals(String.valueOf(metrics.get(1).getMessage()), "0");
+        Assert.assertEquals(metrics.get(1).getDescription(), "");
+        Assert.assertEquals(metrics.get(1).getContext(), "Total number of new contacts in the last 10 days");
 
-        Assert.assertEquals(metrics.get(2).getLabel(), "New Opportunities");
-        Assert.assertEquals(metrics.get(2).getCount().intValue(), 97);
-        Assert.assertEquals(metrics.get(2).getDescription(), "in last 10 days");
-        Assert.assertEquals(metrics.get(2).getContext(), "Number of present open opportunities in the last 10 days");
+        Assert.assertEquals(metrics.get(2).getLabel(), "New Engagements");
+        Assert.assertEquals(String.valueOf(metrics.get(2).getMessage()), "207");
+        Assert.assertEquals(metrics.get(2).getDescription(), " in last 10 days");
+        Assert.assertEquals(metrics.get(2).getContext(), "Total number of engagements in the last 10 days");
+
+        Assert.assertEquals(metrics.get(3).getLabel(), "New Opportunities");
+        Assert.assertEquals(String.valueOf(metrics.get(3).getMessage()), "97");
+        Assert.assertEquals(metrics.get(3).getDescription(), " in last 10 days");
+        Assert.assertEquals(metrics.get(3).getContext(), "Number of present open opportunities in the last 10 days");
+
+        Assert.assertEquals(metrics.get(4).getLabel(), "Account Intent");
+        Assert.assertEquals(String.valueOf(metrics.get(4).getMessage()), "Buying");
+        Assert.assertEquals(metrics.get(4).getDescription(), "");
+        Assert.assertEquals(metrics.get(4).getContext(), "Acount-level intent in the last 10 days");
 
     }
 
@@ -106,7 +123,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
                 .getAccountActivities(TEST_ACCOUNT_ID, null, null, //
                         Arrays.stream(AtlasStream.StreamType.values()).collect(Collectors.toSet()), null)
                 .getData();
-        Assert.assertEquals(dataWithbackStage.size(), 305);
+        Assert.assertEquals(dataWithbackStage.size(), 306);
         Map<String, Object> backStageEvent = dataWithbackStage.get(dataWithbackStage.size() - 1);
         Assert.assertEquals(backStageEvent.get("StreamType"), "JourneyStage");
         Assert.assertEquals(backStageEvent.get("Detail1"), "Engaged");
@@ -138,7 +155,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
                 .getAccountActivities(TEST_ACCOUNT_ID, null, null, //
                         Arrays.stream(AtlasStream.StreamType.values()).collect(Collectors.toSet()), null)
                 .getData();
-        Assert.assertEquals(dataWithbackStage.size(), 157);
+        Assert.assertEquals(dataWithbackStage.size(), 158);
         Map<String, Object> backStageEvent = dataWithbackStage.get(dataWithbackStage.size() - 1);
         Assert.assertEquals(backStageEvent.get("StreamType"), "JourneyStage");
         Assert.assertEquals(backStageEvent.get("Detail1"), "Dark");

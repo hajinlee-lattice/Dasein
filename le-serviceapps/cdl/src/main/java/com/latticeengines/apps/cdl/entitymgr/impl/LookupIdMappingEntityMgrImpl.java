@@ -22,6 +22,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -117,6 +118,12 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public LookupIdMap getLookupIdMap(String orgId, CDLExternalSystemType externalSystemType) {
         return lookupIdMappingRepository.findByOrgIdAndExternalSystemType(orgId, externalSystemType);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<LookupIdMap> getLookupIdMapsByExtSysName(CDLExternalSystemName externalSystemName) {
+        return lookupIdMappingRepository.findAllByExternalSystemName(externalSystemName);
     }
 
     @Override

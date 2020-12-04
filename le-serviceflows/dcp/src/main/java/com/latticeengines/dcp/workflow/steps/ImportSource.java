@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.dcp.DownloadFileType;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
@@ -172,9 +173,9 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
                     CollectionUtils.size(pathList), CollectionUtils.size(processedRecords)));
             throw new RuntimeException("Error in extract info, skip register data table!");
         }
-        updateUploadStatistics(eaiImportJobDetail);
         String resultPath = extractResultPath(eaiImportJobDetail);
         copyErrorFile(customerSpace, upload, dropBoxSummary, eaiImportJobDetail, resultPath);
+        updateUploadStatistics(eaiImportJobDetail);
     }
 
     private void copyErrorFile(String customerSpace, UploadDetails upload, DropBoxSummary dropBoxSummary,
@@ -201,6 +202,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
                 if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
                     copyToS3(errorFile, dropBoxSummary.getBucket(),
                             UploadS3PathBuilderUtils.combinePath(false, false, uploadErrorDirKey, errorFileName));
+                    upload.getUploadConfig().getDownloadableFiles().add(DownloadFileType.IMPORT_ERRORS);
                 } else {
                     log.error("Cannot find error file under: " + errorFile);
                 }

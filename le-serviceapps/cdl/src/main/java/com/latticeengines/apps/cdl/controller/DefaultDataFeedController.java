@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -74,14 +75,15 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedMaintenanceMode(customerSpace, maintenanceMode);
     }
 
-    @PostMapping("/jobtype/{jobType}/startexecution")
+    @PostMapping("/jobtype/{jobType}/jobId/{jobId}/startexecution")
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
             @PathVariable DataFeedExecutionJobType jobType, //
-            @RequestBody long jobId) {
+            @PathVariable Long jobId, //
+            @RequestBody(required = false) List<Long> actionIds) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.startExecution(customerSpace, "", jobType, jobId);
+        return datafeedService.startExecution(customerSpace, "", jobType, jobId, actionIds);
     }
 
     @PostMapping("/jobtype/{jobType}/restartexecution")
@@ -190,22 +192,6 @@ public class DefaultDataFeedController {
             @PathVariable Integer earliestDayPeriod, @PathVariable Integer latestDayPeriod) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.updateEarliestLatestTransaction(customerSpace, "", earliestDayPeriod, latestDayPeriod);
-    }
-
-    @PostMapping("/resetimport")
-    @ResponseBody
-    @ApiOperation(value = "Reset the pending import data for this data feed")
-    public void resetImport(@PathVariable String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        datafeedService.resetImport(customerSpace, "");
-    }
-
-    @PostMapping("/resetimport/{entity}")
-    @ResponseBody
-    @ApiOperation(value = "Reset the pending import data for this data feed")
-    public void resetImportByEntity(@PathVariable String customerSpace, @PathVariable String entity) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        datafeedService.resetImportByEntity(customerSpace, "", entity);
     }
 
     @GetMapping("/nextinvoketime")

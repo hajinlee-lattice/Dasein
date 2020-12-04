@@ -41,6 +41,7 @@ import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.app.exposed.util.FileDownloaderRegistry;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.DownloadFileType;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
@@ -190,8 +191,9 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
                 paths.addAll(filePaths);
             }
         }
+        log.info(paths.toString());
 
-        Map<String, UploadFileDownloadConfig.FileType> fileToType = new HashMap<>();
+        Map<String, DownloadFileType> fileToType = new HashMap<>();
         for (String path : paths) {
             fileToType.put(path, determineFileType(fileId, path, config));
         }
@@ -225,25 +227,28 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         zipOut.close();
     }
 
-    private UploadFileDownloadConfig.FileType determineFileType(String fileId, String filePath, UploadConfig config) {
+    private DownloadFileType determineFileType(String fileId, String filePath, UploadConfig config) {
         if (filePath.endsWith(config.getUploadRawFilePath())) {
-            return UploadFileDownloadConfig.FileType.RAW;
+            return DownloadFileType.RAW;
         }
         if (config.getUploadImportedErrorFilePath() != null && filePath.endsWith(config.getUploadImportedErrorFilePath())) {
-            return UploadFileDownloadConfig.FileType.IMPORT_ERRORS;
+            return DownloadFileType.IMPORT_ERRORS;
         }
         if (filePath.endsWith(config.getUploadMatchResultAccepted())) {
-            return UploadFileDownloadConfig.FileType.MATCHED;
+            return DownloadFileType.MATCHED;
         }
         if (filePath.endsWith(config.getUploadMatchResultRejected())) {
-            return UploadFileDownloadConfig.FileType.UNMATCHED;
+            return DownloadFileType.UNMATCHED;
+        }
+        if (filePath.endsWith(config.getUploadMatchResultErrored())) {
+            return DownloadFileType.PROCESS_ERRORS;
         }
 
         // unknown/unexpected file
         return null;
     }
 
-    private boolean includeInDownload(UploadFileDownloadConfig config, UploadFileDownloadConfig.FileType fileType) {
+    private boolean includeInDownload(UploadFileDownloadConfig config, DownloadFileType fileType) {
         if (fileType == null) {
             return false;
         }
@@ -255,14 +260,16 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
             case UNMATCHED:
                 return config.getIncludeUnmatched();
             case IMPORT_ERRORS:
-                return config.getIncludeErrors();
+                return config.getIncludeIngestionErrors();
+            case PROCESS_ERRORS:
+                return config.getIncludeProcessingErrors();
 
             default:
                 return false;
         }
     }
 
-    private String generateFileName(String displayPrefix, String filePath, UploadFileDownloadConfig.FileType fileType) {
+    private String generateFileName(String displayPrefix, String filePath, DownloadFileType fileType) {
         if (fileType != null) {
             switch (fileType) {
                 case RAW:
@@ -272,7 +279,9 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
                 case UNMATCHED:
                     return displayPrefix + "_Unmatched.csv";
                 case IMPORT_ERRORS:
-                    return displayPrefix + "_Error.csv";
+                    return displayPrefix + "_Ingestion_Errors.csv";
+                case PROCESS_ERRORS:
+                    return displayPrefix + "_Processing_Errors.csv";
 
                 default:
                     break;
@@ -282,16 +291,17 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
     }
 
     @Override
-    public String generateToken(String uploadId, List<UploadFileDownloadConfig.FileType> files) {
+    public String generateToken(String uploadId, List<DownloadFileType> files) {
         UploadFileDownloadConfig config = new UploadFileDownloadConfig();
         config.setUploadId(uploadId);
         boolean includeAll = (files == null || files.isEmpty());
         config.setIncludeRaw(includeAll);
         config.setIncludeMatched(includeAll);
         config.setIncludeUnmatched(includeAll);
-        config.setIncludeErrors(includeAll);
+        config.setIncludeIngestionErrors(includeAll);
+        config.setIncludeProcessingErrors(includeAll);
         if (!includeAll) {
-            for (UploadFileDownloadConfig.FileType type : files) {
+            for (DownloadFileType type : files) {
                 switch (type) {
                     case RAW:
                         config.setIncludeRaw(true);
@@ -306,7 +316,11 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
                         break;
 
                     case IMPORT_ERRORS:
-                        config.setIncludeErrors(true);
+                        config.setIncludeIngestionErrors(true);
+                        break;
+
+                    case PROCESS_ERRORS:
+                        config.setIncludeProcessingErrors(true);
                         break;
 
                     default:

@@ -32,6 +32,10 @@ public class DCPImportRequest {
     @ApiModelProperty(required = false, value = "userID")
     private String userId;
 
+    @JsonProperty("suppressKnownMatchErrors")
+    @ApiModelProperty(required = false, value = "suppressKnownMatchErrors")
+    private Boolean suppressKnownMatchErrors;
+
     public String getProjectId() {
         return projectId;
     }
@@ -70,5 +74,13 @@ public class DCPImportRequest {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public Boolean getSuppressKnownMatchErrors() {
+        return suppressKnownMatchErrors;
+    }
+
+    public void setSuppressKnownMatchErrors(Boolean suppressKnownMatchErrors) {
+        this.suppressKnownMatchErrors = suppressKnownMatchErrors;
     }
 }

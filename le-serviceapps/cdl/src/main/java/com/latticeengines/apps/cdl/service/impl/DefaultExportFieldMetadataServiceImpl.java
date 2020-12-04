@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 
 @Component("defaultExportFieldMetadataService")
 public class DefaultExportFieldMetadataServiceImpl extends ExportFieldMetadataServiceBase {
@@ -23,10 +22,7 @@ public class DefaultExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        CDLExternalSystemName externalSystemName = channel.getLookupIdMap().getExternalSystemName();
-        AudienceType audienceType = channel.getChannelConfig().getAudienceType();
-
-        return enrichDefaultFieldsMetadata(customerSpace, externalSystemName, audienceType);
+        return enrichDefaultFieldsMetadata(customerSpace, channel);
     }
 
 }

@@ -5,16 +5,20 @@ import static org.mockito.ArgumentMatchers.any;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
@@ -34,9 +38,11 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MediaMathChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLiveRampLaunchArtifactStepConfiguration;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.match.BulkMatchService;
+import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-workflow-context.xml",
@@ -51,7 +57,7 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
     @Value("${camille.zk.pod.id}")
     protected String podId;
 
-    @Inject
+    @Spy
     @InjectMocks
     private GenerateLiveRampLaunchArtifacts generateLiveRampLaunchArtifacts;
 
@@ -63,6 +69,9 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
 
     @Spy
     private BulkMatchService bulkMatchService;
+
+    @Mock
+    private SparkJobService sparkJobService;
 
     private GenerateLiveRampLaunchArtifactStepConfiguration configuration;
     private ExecutionContext executionContext;
@@ -80,9 +89,12 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
     private static final Integer MATCHED_ADD_ACCOUNTS_ROWS = 123;
     private static final Integer MATCHED_REMOVED_ACCOUNTS_ROWS = 321;
     private static final String FAKE_EXECUTION_ID = "1234321";
+    private static Long ZERO_EXPECTED = 0L;
 
     @BeforeClass(groups = "functional")
     public void setupTest() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         customerSpace = CustomerSpace.parse(WORKFLOW_TENANT);
         setupHdfs();
 
@@ -98,35 +110,30 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
         configuration.setExecutionId(FAKE_EXECUTION_ID);
         generateLiveRampLaunchArtifacts.setConfiguration(configuration);
 
-        MockitoAnnotations.initMocks(this);
-
-        Table fakeTable = Mockito.mock(Table.class);
-
-        HdfsDataUnit addDataUnit = new HdfsDataUnit();
-        addDataUnit.setPath(MATCHED_ADD_ACCOUNTS_LOCATION);
-        HdfsDataUnit removeDataUnit = new HdfsDataUnit();
-        removeDataUnit.setPath(MATCHED_REMOVE_ACCOUNTS_LOCATION);
-
-        Mockito.doReturn(addDataUnit, removeDataUnit).when(fakeTable).toHdfsDataUnit(any());
-
         Mockito.doReturn(channel).when(playProxy).getChannelById(any(), any(), any());
         Mockito.doNothing().when(metadataProxy).createTable(any(), any(), any());
-        Mockito.doReturn(fakeTable).when(metadataProxy).getTable(any(), any());
 
-        MatchCommand fakeAddMatch = new MatchCommand();
-        fakeAddMatch.setResultLocation(addContactsAvroLocation);
-        fakeAddMatch.setRowsMatched(MATCHED_ADD_ACCOUNTS_ROWS);
+        Mockito.doAnswer(new Answer<SparkJobResult>() {
+            @Override
+            public SparkJobResult answer(InvocationOnMock invocation) throws Throwable {
+                HdfsDataUnit addContact = (HdfsDataUnit) invocation.getArguments()[0];
+                HdfsDataUnit removeContact = (HdfsDataUnit) invocation.getArguments()[1];
+                SparkJobResult res = new SparkJobResult();
+                res.setTargets(Arrays.asList(new HdfsDataUnit[] { addContact, removeContact }));
+                return res;
+            }
+        }).when(generateLiveRampLaunchArtifacts).executeSparkJob(any(), any());
 
-        MatchCommand fakeRemoveMatch = new MatchCommand();
-        fakeRemoveMatch.setResultLocation(removeContactsAvroLocation);
-        fakeRemoveMatch.setRowsMatched(MATCHED_REMOVED_ACCOUNTS_ROWS);
-
-        Mockito.doReturn(fakeAddMatch, fakeRemoveMatch).when(bulkMatchService).match(any(), any());
-
+        // Have to reflect fields into baseSparkStep b/c @Inject does not work
+        // with @Spy and @InjectMocks combined
+        FieldUtils.writeField(generateLiveRampLaunchArtifacts, "podId", podId, true);
+        FieldUtils.writeField(generateLiveRampLaunchArtifacts, "yarnConfiguration", yarnConfiguration, true);
     }
 
     @Test(groups = "functional")
-    public void testBulkMathTps() {
+    public void testBulkMathTpsForAddAndDelete() {
+        setupMockitoForAddAndDelete();
+
         executionContext = new ExecutionContext();
         generateLiveRampLaunchArtifacts.setExecutionContext(executionContext);
 
@@ -155,6 +162,154 @@ public class GenerateLiveRampLaunchArtifactsTestNG extends WorkflowTestNGBase {
                 Long.valueOf(MATCHED_ADD_ACCOUNTS_ROWS));
         Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE),
                 Long.valueOf(MATCHED_REMOVED_ACCOUNTS_ROWS));
+    }
+
+    private void setupMockitoForAddAndDelete() {
+        Table fakeTable = Mockito.mock(Table.class);
+
+        HdfsDataUnit addDataUnit = new HdfsDataUnit();
+        addDataUnit.setPath(MATCHED_ADD_ACCOUNTS_LOCATION);
+        HdfsDataUnit removeDataUnit = new HdfsDataUnit();
+        removeDataUnit.setPath(MATCHED_REMOVE_ACCOUNTS_LOCATION);
+
+        Mockito.doReturn(addDataUnit, removeDataUnit).when(fakeTable).toHdfsDataUnit(any());
+
+        Mockito.doReturn(fakeTable).when(metadataProxy).getTable(any(), any());
+
+        MatchCommand fakeAddMatch = new MatchCommand();
+        fakeAddMatch.setResultLocation(addContactsAvroLocation);
+        fakeAddMatch.setRowsMatched(MATCHED_ADD_ACCOUNTS_ROWS);
+
+        MatchCommand fakeRemoveMatch = new MatchCommand();
+        fakeRemoveMatch.setResultLocation(removeContactsAvroLocation);
+        fakeRemoveMatch.setRowsMatched(MATCHED_REMOVED_ACCOUNTS_ROWS);
+
+        Mockito.doReturn(fakeAddMatch, fakeRemoveMatch).when(bulkMatchService).match(any(), any());
+    }
+
+    @Test(groups = "functional")
+    public void testBulkMathTpsForOnlyAdd() {
+        setupMockitoForOnlyAdd();
+
+        executionContext = new ExecutionContext();
+        generateLiveRampLaunchArtifacts.setExecutionContext(executionContext);
+
+        generateLiveRampLaunchArtifacts.putObjectInContext(GenerateLiveRampLaunchArtifacts.ADDED_ACCOUNTS_DELTA_TABLE,
+                INPUT_ADD_ACCOUNTS_TABLE);
+
+        generateLiveRampLaunchArtifacts.execute();
+
+        String addedContactsDeltaTable = generateLiveRampLaunchArtifacts
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE, String.class);
+        String removedContactsDeltaTable = generateLiveRampLaunchArtifacts
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE, String.class);
+
+        Map<String, Long> counts = generateLiveRampLaunchArtifacts
+                .getMapObjectFromContext(GenerateLiveRampLaunchArtifacts.DELTA_TABLE_COUNTS, String.class, Long.class);
+
+        Assert.assertNotNull(addedContactsDeltaTable);
+        Assert.assertNull(removedContactsDeltaTable);
+        log.info(String.format("Table %s was created", addedContactsDeltaTable));
+        log.info(String.format("Table %s was not created", removedContactsDeltaTable));
+
+        log.info(counts.toString());
+        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE),
+                Long.valueOf(MATCHED_ADD_ACCOUNTS_ROWS));
+        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE),
+                ZERO_EXPECTED);
+    }
+
+    private void setupMockitoForOnlyAdd() {
+        Table fakeTable = Mockito.mock(Table.class);
+
+        HdfsDataUnit addDataUnit = new HdfsDataUnit();
+        addDataUnit.setPath(MATCHED_ADD_ACCOUNTS_LOCATION);
+
+        Mockito.doReturn(addDataUnit).when(fakeTable).toHdfsDataUnit(any());
+
+        Mockito.doReturn(fakeTable).when(metadataProxy).getTable(any(), any());
+
+        MatchCommand fakeAddMatch = new MatchCommand();
+        fakeAddMatch.setResultLocation(addContactsAvroLocation);
+        fakeAddMatch.setRowsMatched(MATCHED_ADD_ACCOUNTS_ROWS);
+
+        Mockito.doReturn(fakeAddMatch).when(bulkMatchService).match(any(), any());
+    }
+
+    @Test(groups = "functional")
+    public void testBulkMathTpsForOnlyRemove() {
+        setupMockitoForOnlyRemove();
+
+        executionContext = new ExecutionContext();
+        generateLiveRampLaunchArtifacts.setExecutionContext(executionContext);
+
+        generateLiveRampLaunchArtifacts.putObjectInContext(
+                GenerateLiveRampLaunchArtifacts.REMOVED_ACCOUNTS_DELTA_TABLE,
+                INPUT_REMOVE_ACCOUNTS_TABLE);
+
+        generateLiveRampLaunchArtifacts.execute();
+
+        String addedContactsDeltaTable = generateLiveRampLaunchArtifacts
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE, String.class);
+        String removedContactsDeltaTable = generateLiveRampLaunchArtifacts
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE, String.class);
+
+        Map<String, Long> counts = generateLiveRampLaunchArtifacts
+                .getMapObjectFromContext(GenerateLiveRampLaunchArtifacts.DELTA_TABLE_COUNTS, String.class, Long.class);
+
+        Assert.assertNull(addedContactsDeltaTable);
+        Assert.assertNotNull(removedContactsDeltaTable);
+        log.info(String.format("Table %s was not created", addedContactsDeltaTable));
+        log.info(String.format("Table %s was created", removedContactsDeltaTable));
+
+        log.info(counts.toString());
+        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE),
+                ZERO_EXPECTED);
+        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE),
+                Long.valueOf(MATCHED_REMOVED_ACCOUNTS_ROWS));
+    }
+
+    private void setupMockitoForOnlyRemove() {
+        Table fakeTable = Mockito.mock(Table.class);
+
+        HdfsDataUnit removeDataUnit = new HdfsDataUnit();
+        removeDataUnit.setPath(MATCHED_REMOVE_ACCOUNTS_LOCATION);
+
+        Mockito.doReturn(removeDataUnit).when(fakeTable).toHdfsDataUnit(any());
+
+        Mockito.doReturn(fakeTable).when(metadataProxy).getTable(any(), any());
+
+        MatchCommand fakeAddMatch = new MatchCommand();
+        fakeAddMatch.setResultLocation(removeContactsAvroLocation);
+        fakeAddMatch.setRowsMatched(MATCHED_REMOVED_ACCOUNTS_ROWS);
+
+        Mockito.doReturn(fakeAddMatch).when(bulkMatchService).match(any(), any());
+    }
+
+    @Test(groups = "functional")
+    public void testBulkMathTpsForNoAddOrRemove() {
+        executionContext = new ExecutionContext();
+        generateLiveRampLaunchArtifacts.setExecutionContext(executionContext);
+
+        generateLiveRampLaunchArtifacts.execute();
+
+        String addedContactsDeltaTable = generateLiveRampLaunchArtifacts
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE, String.class);
+        String removedContactsDeltaTable = generateLiveRampLaunchArtifacts
+                .getObjectFromContext(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE, String.class);
+
+        Map<String, Long> counts = generateLiveRampLaunchArtifacts
+                .getMapObjectFromContext(GenerateLiveRampLaunchArtifacts.DELTA_TABLE_COUNTS, String.class, Long.class);
+
+        Assert.assertNull(addedContactsDeltaTable);
+        Assert.assertNull(removedContactsDeltaTable);
+        log.info(String.format("Table %s was not created", addedContactsDeltaTable));
+        log.info(String.format("Table %s was not created", removedContactsDeltaTable));
+
+        log.info(counts.toString());
+        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.ADDED_CONTACTS_DELTA_TABLE), ZERO_EXPECTED);
+        Assert.assertEquals(counts.get(GenerateLiveRampLaunchArtifacts.REMOVED_CONTACTS_DELTA_TABLE),
+                ZERO_EXPECTED);
     }
 
     @AfterClass(groups = "functional")

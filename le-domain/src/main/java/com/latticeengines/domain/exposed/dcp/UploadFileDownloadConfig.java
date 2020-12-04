@@ -10,8 +10,6 @@ import com.latticeengines.domain.exposed.pls.FileDownloadConfig;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class UploadFileDownloadConfig extends FileDownloadConfig {
 
-    public enum FileType { RAW, MATCHED, UNMATCHED, IMPORT_ERRORS };
-
     public UploadFileDownloadConfig() {
     }
 
@@ -28,7 +26,10 @@ public class UploadFileDownloadConfig extends FileDownloadConfig {
     private Boolean includeUnmatched;
 
     @JsonProperty
-    private Boolean includeErrors;
+    private Boolean includeIngestionErrors;
+
+    @JsonProperty
+    private Boolean includeProcessingErrors;
 
     public String getUploadId() {
         return uploadId;
@@ -62,11 +63,19 @@ public class UploadFileDownloadConfig extends FileDownloadConfig {
         this.includeUnmatched = includeUnmatched;
     }
 
-    public Boolean getIncludeErrors() {
-        return includeErrors;
+    public Boolean getIncludeIngestionErrors() {
+        return includeIngestionErrors;
     }
 
-    public void setIncludeErrors(Boolean includeErrors) {
-        this.includeErrors = includeErrors;
+    public void setIncludeIngestionErrors(Boolean includeIngestionErrors) {
+        this.includeIngestionErrors = includeIngestionErrors;
+    }
+
+    public Boolean getIncludeProcessingErrors() {
+        return includeProcessingErrors;
+    }
+
+    public void setIncludeProcessingErrors(Boolean includeProcessingErrors) {
+        this.includeProcessingErrors = includeProcessingErrors;
     }
 }

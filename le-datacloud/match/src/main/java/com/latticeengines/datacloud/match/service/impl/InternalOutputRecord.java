@@ -67,6 +67,7 @@ public class InternalOutputRecord extends OutputRecord {
 
     private List<String> debugValues;
     private DnBReturnCode dnbCode;
+    private String rawError;
     private MatchHistory fabricMatchHistory = new MatchHistory();
     private Date requestTimeStamp = new Date();
     private String dataCloudVersion;
@@ -343,6 +344,14 @@ public class InternalOutputRecord extends OutputRecord {
 
     public DnBReturnCode getDnbCode() {
         return dnbCode;
+    }
+
+    public void setRawError(String rawError) {
+        this.rawError = rawError;
+    }
+
+    public String getRawError() {
+        return rawError;
     }
 
     public MatchHistory getFabricMatchHistory() {

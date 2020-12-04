@@ -18,7 +18,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.TimeLineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
@@ -26,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 
 public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -39,10 +39,13 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
     private TimeLineService timeLineService;
 
     private TimeLine timeLine1;
+    private RetryTemplate retry;
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
+        retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
     }
 
     @Test(groups = "functional")
@@ -93,16 +96,12 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(created.getPid());
         Assert.assertNotNull(created.getTimelineId());
 
-        List<TimeLine> timeLineList = timeLineService.findByTenant(mainCustomerSpace);
-        Assert.assertEquals(timeLineList.size(), 1);
-        created = timeLineList.get(0);
-        log.info("timeline is {}.", JsonUtils.serialize(created));
+        created = timeLineService.findByPid(mainCustomerSpace, created.getPid());
+
         Assert.assertEquals(created.getName(), timelineName1);
         Assert.assertTrue(created.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity.name()));
         Assert.assertTrue(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).containsKey(MOTION));
         Assert.assertEquals(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
-        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
-                Collections.singleton(AssertionError.class), null);
         AtomicReference<TimeLine> createdAtom = new AtomicReference<>();
         retry.execute(context -> {
             createdAtom.set(timeLineService.findByTimelineId(mainCustomerSpace, timeLine1.getTimelineId()));
@@ -111,5 +110,32 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         });
         created = createdAtom.get();
         Assert.assertEquals(created.getTimelineId(), timeLine1.getTimelineId());
+        timeLineService.delete(mainCustomerSpace, created);
+        retry.execute(context -> {
+            createdAtom.set(timeLineService.findByTimelineId(mainCustomerSpace, timeLine1.getTimelineId()));
+            Assert.assertNull(createdAtom.get());
+            return true;
+        });
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCRUD")
+    public void testDefault() {
+        timeLineService.createDefaultTimeLine(mainCustomerSpace);
+        AtomicReference<List<TimeLine>> createdAtom = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom.set(timeLineService.findByTenant(mainCustomerSpace));
+            Assert.assertEquals(createdAtom.get().size(), 2);
+            return true;
+        });
+        List<TimeLine> timeLines = createdAtom.get();
+        Assert.assertEquals(timeLines.size(), 2);
+        AtomicReference<TimeLine> createdAtom1 = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom1.set(timeLineService.findByTenantAndEntity(mainCustomerSpace, BusinessEntity.Account));
+            Assert.assertNotNull(createdAtom1.get());
+            return true;
+        });
+        TimeLine created = createdAtom1.get();
+        Assert.assertEquals(created.getName(), TimeLineStoreUtils.ACCOUNT360_TIMELINE_NAME);
     }
 }

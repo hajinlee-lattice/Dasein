@@ -147,6 +147,12 @@ public class DataBlock {
         @JsonProperty("displayName")
         private String displayName;
 
+        @JsonProperty("description")
+        private String description;
+
+        @JsonProperty("dataType")
+        private String dataType;
+
         @JsonProperty("example")
         private String example;
 
@@ -156,9 +162,10 @@ public class DataBlock {
         public Element(PrimeColumn primeColumn) {
             this.elementId = primeColumn.getColumnId();
             this.displayName = primeColumn.getDisplayName();
+            this.description = primeColumn.getDescription();
+            this.dataType = primeColumn.getJavaClass();
             this.example = primeColumn.getExample();
         }
-
     }
 
 }

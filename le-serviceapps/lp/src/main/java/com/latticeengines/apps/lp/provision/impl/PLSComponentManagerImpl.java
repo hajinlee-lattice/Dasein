@@ -521,7 +521,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<User> users = userService.getUsers(tenant.getId());
         if (users != null) {
             for (User user : users) {
-                userService.deleteUser(tenant.getId(), user.getUsername());
+                userService.deleteUser(tenant.getId(), user.getUsername(), false);
             }
         }
         if (tenantService.hasTenantId(tenant.getId())) {
@@ -554,7 +554,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             String email = user.getEmailAddress();
 
             User createUserData = new User();
-            createUserData.setEmail(user.getEmailAddress());
+            createUserData.setEmail(user.getEmailAddress().toLowerCase());
             createUserData.setFirstName(user.getFirstName());
             createUserData.setLastName(user.getLastName());
             createUserData.setUsername(user.getUserName());
@@ -579,6 +579,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
                 createdUsers.add(createdUser);
             } else {
+                user.setEmailAddress(email.toLowerCase());
                 createdUsers.add(user);
             }
         }

@@ -23,7 +23,6 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
 
         val newProdsWithBundleId = validNewBundle union validVdb
         val newAnalytic = newProdsWithBundleId
-                .withColumn(Description, col(BundleDescription))
                 .withColumn(Id, col(BundleId))
                 .select(Id, BundleId, Description, Bundle, Priority, Status)
         val allAnalytic = oldProdsOpt match {

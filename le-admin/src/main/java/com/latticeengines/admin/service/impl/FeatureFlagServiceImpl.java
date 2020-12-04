@@ -149,7 +149,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.PLAYBOOK_MODULE, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.IMPORT_WITHOUT_ID, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA, cg).setDefaultValue(true);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_APS_IMPUTATION, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_EXTERNAL_INTEGRATION, cg).setDefaultValue(false);
@@ -172,7 +172,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         // DCP & CG
         Collection<LatticeProduct> dcpCg = Arrays.asList(LatticeProduct.CG, LatticeProduct.DCP);
         createDefaultFeatureFlag(LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, dcpCg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH, dcpCg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH, dcpCg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.PROTOTYPE_FEATURE, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALPHA_FEATURE, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.BETA_FEATURE, dcpCg).setDefaultValue(false);

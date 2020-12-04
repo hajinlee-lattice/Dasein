@@ -1,19 +1,18 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
@@ -44,13 +43,14 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
                 Arrays.asList(BusinessEntity.Contact), channelConfig.getAttributeSetName());
 
-        Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMapForAudienceType(
-                CDLExternalSystemName.AWS_S3, channelAudienceType);
+        Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+                channel);
 
-        Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = generateRemappingMap(channel);
-
-        List<ColumnMetadata> exportColumnMetadataList = combineAttributeMapsWithDefaultFields(accountAttributesMap,
-                contactAttributesMap, defaultFieldsMetadataMap, defaultFieldsAttributesToServingStoreAttributesRemap);
+        List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(
+                CDLExternalSystemName.AWS_S3,
+                accountAttributesMap,
+                contactAttributesMap, defaultFieldsAttributesToServingStoreAttributesRemap,
+                channelConfig.getAudienceType());
 
         if (channelConfig.isIncludeExportAttributes()) {
             includeExportAttributes(customerSpace, channelConfig, accountAttributesMap, contactAttributesMap,
@@ -61,68 +61,23 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
         return exportColumnMetadataList;
     }
 
-    private Map<String, String> generateRemappingMap(PlayLaunchChannel channel) {
+    @Override
+    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();
 
-        String contactId = channel.getLookupIdMap().getContactId();
         String accountId = channel.getLookupIdMap().getAccountId();
-        log.info("S3 contactId " + contactId);
         log.info("S3 accountId " + accountId);
+        if (!StringUtils.isEmpty(accountId)) {
+            remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, accountId);
+        }
 
-        putIfValueNotNull(remappingMap, SFDC_CONTACT_ID_INTERNAL_NAME, contactId);
-        putIfValueNotNull(remappingMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, accountId);
+        String contactId = channel.getLookupIdMap().getContactId();
+        log.info("S3 contactId " + contactId);
+        if (!StringUtils.isEmpty(contactId)) {
+            remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, contactId);
+        }
 
         return remappingMap;
-    }
-
-    private void putIfValueNotNull(Map<String, String> map, String key, String value) {
-        if (value != null) {
-            map.put(key, value);
-        }
-    }
-
-    protected List<ColumnMetadata> combineAttributeMapsWithDefaultFields(
-            Map<String, ColumnMetadata> accountAttributesMap,
-            Map<String, ColumnMetadata> contactAttributesMap,
-            Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap,
-            Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap) {
-
-        List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
-
-        defaultFieldsMetadataMap.values().forEach(defaultField -> {
-            String attrName = defaultField.getAttrName();
-            ColumnMetadata cm = null;
-
-            if (defaultField.getStandardField()) {
-                if (defaultField.getEntity() != BusinessEntity.Contact) {
-                    if (defaultFieldsAttributesToServingStoreAttributesRemap.containsKey(attrName)) {
-                        attrName = defaultFieldsAttributesToServingStoreAttributesRemap.get(attrName);
-                    }
-                    if (accountAttributesMap.containsKey(attrName)) {
-                        cm = accountAttributesMap.get(attrName);
-                        cm.setDisplayName(defaultField.getDisplayName());
-                        accountAttributesMap.remove(attrName);
-                    }
-                }
-                if (defaultField.getEntity() == BusinessEntity.Contact) {
-                    if (defaultFieldsAttributesToServingStoreAttributesRemap.containsKey(attrName)) {
-                        attrName = defaultFieldsAttributesToServingStoreAttributesRemap.get(attrName);
-                    }
-                    if (contactAttributesMap.containsKey(attrName)) {
-                        cm = contactAttributesMap.get(attrName);
-                        cm.setDisplayName(defaultField.getDisplayName());
-                        contactAttributesMap.remove(attrName);
-                    }
-                }
-            }
-
-            if (cm == null) {
-                cm = constructCampaignDerivedColumnMetadata(defaultField);
-            }
-            exportColumnMetadataList.add(cm);
-        });
-
-        return exportColumnMetadataList;
     }
 
     private void includeExportAttributes(String customerSpace, S3ChannelConfig channelConfig,
@@ -130,13 +85,12 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
             List<ColumnMetadata> exportColumnMetadataList, AudienceType channelAudienceType) {
         if (channelAudienceType == AudienceType.CONTACTS) {
             exportColumnMetadataList.addAll(contactAttributesMap.values());
+            List<BusinessEntity> contactEntities = BusinessEntity.EXPORT_CONTACT_ENTITIES.stream().filter(entity -> !BusinessEntity.Contact.equals(entity)).collect(Collectors.toList());
+            exportColumnMetadataList.addAll(getServingMetadata(customerSpace, contactEntities, channelConfig.getAttributeSetName()).collect(Collectors.toList()).block());
         }
         exportColumnMetadataList.addAll(accountAttributesMap.values());
-        List<BusinessEntity> accountEntities =
-                BusinessEntity.EXPORT_ACCOUNT_ENTITIES.stream().filter(entity -> !BusinessEntity.Account.equals(entity)).collect(Collectors.toList());
-        List<BusinessEntity> contactEntities =
-                BusinessEntity.EXPORT_CONTACT_ENTITIES.stream().filter(entity -> !BusinessEntity.Contact.equals(entity)).collect(Collectors.toList());
+        List<BusinessEntity> accountEntities = BusinessEntity.EXPORT_ACCOUNT_ENTITIES.stream().filter(entity -> !BusinessEntity.Account.equals(entity)).collect(Collectors.toList());
         exportColumnMetadataList.addAll(getServingMetadata(customerSpace, accountEntities, channelConfig.getAttributeSetName()).collect(Collectors.toList()).block());
-        exportColumnMetadataList.addAll(getServingMetadata(customerSpace, contactEntities, channelConfig.getAttributeSetName()).collect(Collectors.toList()).block());
+
     }
 }

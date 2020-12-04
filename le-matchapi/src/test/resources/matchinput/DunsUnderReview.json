@@ -1,0 +1,36 @@
+{
+  "Tenant": {
+    "Identifier": "bleh"
+  },
+  "UseDirectPlus": true,
+  "RegNumberType": "2541",
+  "TargetEntity": "PrimeAccount",
+  "DataCloudVersion": "2.0.25",
+  "LogLevel": "INFO",
+  "Fields": [
+    "Duns"
+  ],
+  "Data": [
+    [ "195009423"]
+  ],
+  "KeyMap": {
+    "DUNS": [
+      "Duns"
+    ]
+  },
+  "CustomSelection": {"Columns": [
+    {"ExternalColumnID": "duns_number", "ColumnName": "duns_number"},
+    {"ExternalColumnID": "primaryname", "ColumnName": "primaryname"},
+    {"ExternalColumnID": "tradestylenames_name", "ColumnName": "tradestylenames_name"},
+    {"ExternalColumnID": "telephone_telephonenumber", "ColumnName": "telephone_telephonenumber"},
+    {"ExternalColumnID": "primaryindcode_ussicv4", "ColumnName": "primaryindcode_ussicv4"}
+  ]},
+  "DPlusMatchConfig": {
+    "BaseRule": {
+      "AcceptCriterion": {
+        "LowestConfidenceCode": 5,
+        "HighestConfidenceCode": 10
+      }
+    }
+  }
+}

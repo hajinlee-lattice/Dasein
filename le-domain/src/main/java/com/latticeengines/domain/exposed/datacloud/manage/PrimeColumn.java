@@ -114,6 +114,10 @@ public class PrimeColumn implements MetadataColumn {
         this.jsonPath = jsonPath;
     }
 
+    public String getExample() { return example; }
+
+    public void setExample(String example) { this.example = example; }
+
     @Override
     public String getDisplayName() {
         return displayName;
@@ -181,11 +185,4 @@ public class PrimeColumn implements MetadataColumn {
         return false;
     }
 
-    public String getExample() {
-        return example;
-    }
-
-    public void setExample(String example) {
-        this.example = example;
-    }
 }

@@ -441,4 +441,14 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     public List<String> getAccountLookupSource() {
         return this.detail.getAccountLookupSource();
     }
+
+    @JsonProperty("EvaluationDateMap")
+    public Map<String, Long> getEvaluationDateMap() {
+        return this.detail.getEvaluationDateMap();
+    }
+
+    @JsonProperty("EvaluationDateMap")
+    public void setEvaluationDateMap(Map<String, Long> evaluationDateMap) {
+        this.detail.setEvaluationDateMap(evaluationDateMap);
+    }
 }

@@ -108,6 +108,10 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
         entity = BusinessEntity.getByName(dataFeedTask.getEntity());
         log.info("Import match entity: " + entity.name());
         ImportFileSignature signature = getObjectFromContext(IMPORT_FILE_SIGNATURE, ImportFileSignature.class);
+        if (signature == null) {
+            log.info("There's no import signature generated, skip match.");
+            return true;
+        }
         if (!(signature.getHasCompanyName() || signature.getHasDomain() || signature.getHasDUNS())) {
             log.info("Import file does not have CompanyName or DUNS or Website. Skip match");
             return true;
@@ -131,7 +135,7 @@ public class MatchDataFeedImport extends BaseSparkStep<ImportDataFeedTaskConfigu
 
     protected void postMatchProcessing(List<MatchCommand> commandList) {
         String customer = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
-        String finalResultTable = NamingUtils.timestamp("DataFeedImportMatchResult");
+        String finalResultTable = NamingUtils.timestampWithRandom("DataFeedImportMatchResult");
 
         bulkMatchService.registerResultTable(customer, commandList, finalResultTable);
         saveOutputValue(WorkflowContextConstants.Outputs.MATCH_RESULT_TABLE_NAME, finalResultTable);

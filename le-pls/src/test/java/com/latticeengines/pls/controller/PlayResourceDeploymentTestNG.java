@@ -619,7 +619,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         PlayLaunchChannel playLaunchChannel = new PlayLaunchChannel();
         playLaunchChannel.setBucketsToLaunch(bucketsToLaunch);
         playLaunchChannel.setLookupIdMap(lookupIdMap);
-        playLaunchChannel.setMaxAccountsToLaunch(topNCount);
+        playLaunchChannel.setMaxEntitiesToLaunch(topNCount);
         playLaunchChannel.setLaunchUnscored(false);
         playLaunchChannel.setLaunchType(LaunchType.FULL);
         playLaunchChannel.setCreatedBy(CREATED_BY);

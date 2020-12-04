@@ -81,7 +81,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         data = activityAlertsService.findActivityAlertsByAccountAndCategory(mainTestCustomerSpace.getTenantId(),
                 TEST_ACCOUNT_ID, AlertCategory.PRODUCTS, 3, null);
         Assert.assertNotNull(data);
-        Assert.assertEquals(data.getData().size(), 3);
+        Assert.assertEquals(data.getData().size(), 2);
     }
 
     private void setupDataCollection() {
@@ -98,7 +98,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         Tenant t = mainTestTenant;
         // record 1
         ActivityAlert record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.SHOWN_INTENT);
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
         record.setEntityId(TEST_ACCOUNT_ID);
         record.setEntityType(BusinessEntity.Account);
         record.setTenantId(t.getPid());
@@ -112,8 +112,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
         data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
         Map<String, Object> alertData = new HashMap<>();
-        alertData.put("NumBuyIntents", 2);
-        alertData.put("NumResearchIntents", 5);
+        alertData.put("PageName", "Database Products");
         data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
         record.setAlertData(data);
 
@@ -121,7 +120,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
 
         // record 2
         record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.SHOWN_INTENT);
+        record.setAlertName(ActivityStoreConstants.Alert.RESEARCHING_INTENT_AROUND_PRODUCT_PAGES);
         record.setEntityId(TEST_ACCOUNT_ID);
         record.setEntityType(BusinessEntity.Account);
         record.setTenantId(t.getPid());
@@ -135,54 +134,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
         data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
         alertData = new HashMap<>();
-        alertData.put("NumBuyIntents", 2);
-        alertData.put("NumResearchIntents", 0);
-        data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
-        record.setAlertData(data);
-
-        alerts.add(record);
-
-        // record 3
-        record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.SHOWN_INTENT);
-        record.setEntityId(TEST_ACCOUNT_ID);
-        record.setEntityType(BusinessEntity.Account);
-        record.setTenantId(t.getPid());
-        record.setCreationTimestamp(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
-        record.setVersion(TEST_ALERT_VERSION);
-        record.setCategory(AlertCategory.PRODUCTS);
-
-        data = new HashMap<>();
-        end = Instant.now().minus(7, ChronoUnit.DAYS);
-        start = end.minus(10, ChronoUnit.DAYS);
-        data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
-        data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
-        alertData = new HashMap<>();
-        alertData.put("NumBuyIntents", 0);
-        alertData.put("NumResearchIntents", 3);
-        data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
-        record.setAlertData(data);
-
-        alerts.add(record);
-
-        // record 4
-        record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.SHOWN_INTENT);
-        record.setEntityId(TEST_ACCOUNT_ID);
-        record.setEntityType(BusinessEntity.Account);
-        record.setTenantId(t.getPid());
-        record.setCreationTimestamp(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
-        record.setVersion(TEST_ALERT_VERSION);
-        record.setCategory(AlertCategory.PRODUCTS);
-
-        data = new HashMap<>();
-        end = Instant.now().minus(11, ChronoUnit.DAYS);
-        start = end.minus(10, ChronoUnit.DAYS);
-        data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
-        data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
-        alertData = new HashMap<>();
-        alertData.put("NumBuyIntents", 1);
-        alertData.put("NumResearchIntents", 3);
+        alertData.put("PageName", "BI Products");
         data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
         record.setAlertData(data);
 
@@ -221,7 +173,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
 
         // record 2
         record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY_ON_PRODUCT);
+        record.setAlertName(ActivityStoreConstants.Alert.ANONYMOUS_WEB_VISITS);
         record.setEntityId(TEST_ACCOUNT_ID);
         record.setEntityType(BusinessEntity.Account);
         record.setTenantId(t.getPid());
@@ -236,7 +188,6 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
         alertData = new HashMap<>();
         alertData.put("PageVisits", 349);
-        alertData.put("PageName", "About-Us");
         data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
         record.setAlertData(data);
 

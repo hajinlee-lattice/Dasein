@@ -318,7 +318,7 @@ public class UserResource {
                 return SimpleBooleanResponse.failedResponse(Collections.singletonList(String
                         .format("Could not delete a %s user using a %s user.", targetLevel.name(), loginLevel.name())));
             }
-            userService.deleteUser(tenantId, safeUsername);
+            userService.deleteUser(tenantId, safeUsername, true);
             LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, safeUsername, tenantId));
             return SimpleBooleanResponse.successResponse();
         } else {

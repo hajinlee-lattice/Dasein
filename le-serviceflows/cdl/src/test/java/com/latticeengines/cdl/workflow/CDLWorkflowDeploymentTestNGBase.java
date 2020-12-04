@@ -2,8 +2,9 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.log4testng.Logger;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -15,7 +16,7 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsWorkflowD
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-workflow-context.xml", "classpath:test-serviceflows-cdl-context.xml" })
 public abstract class CDLWorkflowDeploymentTestNGBase extends ServiceFlowsWorkflowDeploymentTestNGBase {
 
-    private static final Logger log = Logger.getLogger(CDLWorkflowDeploymentTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(CDLWorkflowDeploymentTestNGBase.class);
 
     @Inject
     private WorkflowProxy workflowProxy;

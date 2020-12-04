@@ -77,9 +77,11 @@ import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourcefileConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.LatticeFieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -222,8 +224,22 @@ public class CDLServiceImpl implements CDLService {
         String email = MultiTenantContext.getEmailAddress();
         log.info(String.format("The email of the s3 file upload initiator is %s", email));
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateFileName, templateFileName, email);
-        return cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, true, email,
-                metaData);
+        String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, subType, displayName, true,
+                email, metaData);
+        addAttributeLengthValidatorToTask(customerSpace, templateFileName, taskId);
+        return taskId;
+    }
+
+    private void addAttributeLengthValidatorToTask(String customerSpace, String templateFileName, String taskId) {
+        SourceFile sourceFile = sourceFileService.findByName(templateFileName);
+        if (sourceFile != null) {
+            SourcefileConfig config = sourceFile.getSourcefileConfig();
+            if (config != null && config.getUniqueIdentifierConfig() != null) {
+                cdlProxy.updateAttributeLengthValidator(customerSpace, taskId,
+                        config.getUniqueIdentifierConfig().getName(), config.getUniqueIdentifierConfig().getLength(),
+                        !config.getUniqueIdentifierConfig().isRequired());
+            }
+        }
     }
 
     @Override
@@ -258,7 +274,7 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public UIAction softDelete(DeleteRequest deleteRequest) {
+    public UIAction delete(DeleteRequest deleteRequest) {
         log.info(deleteRequest.toString());
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         UIAction uiAction = new UIAction();
@@ -273,7 +289,6 @@ public class CDLServiceImpl implements CDLService {
         try {
             String email = MultiTenantContext.getEmailAddress();
             deleteRequest.setUser(email);
-            deleteRequest.setHardDelete(false);
             cdlProxy.registerDeleteData(customerSpace.toString(), deleteRequest);
         } catch (RuntimeException e) {
             uiAction.setTitle(DELETE_FAIL_TITLE);
@@ -720,7 +735,7 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public List<TemplateFieldPreview> getTemplatePreview(String customerSpace, Table templateTable,
-            Table standardTable) {
+            Table standardTable, Set<String> matchingFieldNames) {
         List<TemplateFieldPreview> templatePreview = templateTable.getAttributes().stream()
                 .map(this::getFieldPreviewFromAttribute).collect(Collectors.toList());
         List<TemplateFieldPreview> standardPreview = standardTable.getAttributes().stream()
@@ -730,6 +745,11 @@ public class CDLServiceImpl implements CDLService {
         for (TemplateFieldPreview fieldPreview : templatePreview) {
             if (standardAttrNames.contains(fieldPreview.getNameInTemplate())) {
                 fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                if (matchingFieldNames.contains(fieldPreview.getNameInTemplate())) {
+                    fieldPreview.setLatticeFieldCategory(LatticeFieldCategory.MatchField);
+                } else {
+                    fieldPreview.setLatticeFieldCategory(LatticeFieldCategory.Other);
+                }
                 standardPreview
                         .removeIf(preview -> preview.getNameInTemplate().equals(fieldPreview.getNameInTemplate()));
             } else {
@@ -738,6 +758,11 @@ public class CDLServiceImpl implements CDLService {
         }
         standardPreview.forEach(preview -> {
             preview.setUnmapped(true);
+            if (matchingFieldNames.contains(preview.getNameInTemplate())) {
+                preview.setLatticeFieldCategory(LatticeFieldCategory.MatchField);
+            } else {
+                preview.setLatticeFieldCategory(LatticeFieldCategory.Other);
+            }
             preview.setFieldCategory(FieldCategory.LatticeField);
         });
         templatePreview.addAll(standardPreview);

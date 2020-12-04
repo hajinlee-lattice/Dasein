@@ -61,6 +61,12 @@ public class DataUnitResource {
         return dataUnitService.findAllByType(DataUnit.StorageType.valueOf(type));
     }
 
+    @GetMapping("/template/{templateId}")
+    public DataUnit getByDataTemplateIdAndRole(@PathVariable String customerSpace, @PathVariable String templateId,
+                                               @RequestParam(name = "role") DataUnit.Role role) {
+        return dataUnitService.findByDataTemplateIdAndRole(templateId, role);
+    }
+
     @GetMapping("/name/{name}")
     public List<DataUnit> getDataUnit(@PathVariable String customerSpace, @PathVariable String name,
                                       @RequestParam(name = "type", required = false) DataUnit.StorageType storageType) {

@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -52,7 +54,7 @@ public final class MatchUtils {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setOperationalMode(OperationalMode.LDC_MATCH);
-        baseMatchInput.setKeyMap(getAccountMatchKeysAccount(columnNames, null, false));
+        baseMatchInput.setKeyMap(getAccountMatchKeysAccount(columnNames, null, false, null));
         baseMatchInput.setPartialMatchEnabled(true);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         config.setMatchInput(baseMatchInput);
@@ -79,7 +81,8 @@ public final class MatchUtils {
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
-        entityKeyMap.setKeyMap(getAccountMatchKeysAccount(columnNames, systemIds, hasConvertBatchStore));
+        entityKeyMap.setKeyMap(getAccountMatchKeysAccount(columnNames, systemIds, hasConvertBatchStore,
+                getSkippedMatchFields(baseMatchInput, Account.name())));
         Map<String, MatchInput.EntityKeyMap> entityKeyMaps = new HashMap<>();
         entityKeyMaps.put(Account.name(), entityKeyMap);
         baseMatchInput.setEntityKeyMaps(entityKeyMaps);
@@ -108,11 +111,13 @@ public final class MatchUtils {
         baseMatchInput.setIncludeLineageFields(true);
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
+
         MatchInput.EntityKeyMap accountKeyMap = MatchInput.EntityKeyMap
                 .fromKeyMap(getAccountMatchKeysForContact(columnNames, accountSystemIds, hasConvertBatchStore,
-                        ignoreDomainMatchKey));
+                        ignoreDomainMatchKey, getSkippedMatchFields(baseMatchInput, Account.name())));
         MatchInput.EntityKeyMap contactKeyMap = MatchInput.EntityKeyMap
-                .fromKeyMap(getContactMatchKeys(columnNames, contactSystemIds, hasConvertBatchStore));
+                .fromKeyMap(getContactMatchKeys(columnNames, contactSystemIds, hasConvertBatchStore,
+                        getSkippedMatchFields(baseMatchInput, Contact.name())));
         baseMatchInput.setEntityKeyMaps(new HashMap<>(ImmutableMap.of( //
                 Account.name(), accountKeyMap, //
                 Contact.name(), contactKeyMap)));
@@ -121,25 +126,33 @@ public final class MatchUtils {
     }
 
     public static Map<MatchKey, List<String>> getAccountMatchKeysAccount(Set<String> columnNames,
-            List<String> systemIds, boolean hasConvertBatchStore) {
-        return getAccountMatchKeys(columnNames, systemIds, false, hasConvertBatchStore);
+            List<String> systemIds, boolean hasConvertBatchStore, Set<String> fieldsToSkip) {
+        return getAccountMatchKeys(columnNames, systemIds, false, hasConvertBatchStore, fieldsToSkip);
     }
 
     public static Map<MatchKey, List<String>> getAccountMatchKeysForContact(Set<String> columnNames,
-            List<String> systemIds, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey) {
-        return getAccountMatchKeys(columnNames, systemIds, true, hasConvertBatchStore, ignoreDomainMatchKey);
+            List<String> systemIds, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey,
+            Set<String> fieldsToSkip) {
+        return getAccountMatchKeys(columnNames, systemIds, true, hasConvertBatchStore, ignoreDomainMatchKey,
+                fieldsToSkip);
     }
 
     private static Map<MatchKey, List<String>> getAccountMatchKeys(Set<String> columnNames, List<String> systemIds,
-            boolean considerEmail, boolean hasConvertBatchStore) {
-        return getAccountMatchKeys(columnNames, systemIds, considerEmail, hasConvertBatchStore, false);
+            boolean considerEmail, boolean hasConvertBatchStore, Set<String> fieldsToSkip) {
+        return getAccountMatchKeys(columnNames, systemIds, considerEmail, hasConvertBatchStore, false, fieldsToSkip);
     }
 
     /*-
      * ignoreDomainMatchKey is added to determine whether domain lookup is causing hot partition
      */
     private static Map<MatchKey, List<String>> getAccountMatchKeys(Set<String> columnNames, List<String> systemIds,
-            boolean considerEmail, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey) {
+            boolean considerEmail, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey,
+            Set<String> fieldsToSkip) {
+        Set<String> skippedFields = SetUtils.emptyIfNull(fieldsToSkip);
+        log.info("Account match fields to skip from input {}, fields actually skipped {}", skippedFields,
+                SetUtils.intersection(columnNames, skippedFields));
+        columnNames = SetUtils.difference(columnNames, skippedFields);
+
         Map<MatchKey, List<String>> matchKeys = new HashMap<>();
         if (considerEmail && !ignoreDomainMatchKey) {
             addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Domain, InterfaceName.Email.name());
@@ -165,7 +178,12 @@ public final class MatchUtils {
         return matchKeys;
     }
 
-    public static Map<MatchKey, List<String>> getContactMatchKeys(Set<String> columnNames, List<String> systemIds, boolean hasConvertBatchStore) {
+    public static Map<MatchKey, List<String>> getContactMatchKeys(Set<String> columnNames, List<String> systemIds,
+            boolean hasConvertBatchStore, Set<String> fieldsToSkip) {
+        Set<String> skippedFields = SetUtils.emptyIfNull(fieldsToSkip);
+        log.info("Contact match fields to skip from input {}, fields actually skipped {}", skippedFields,
+                SetUtils.intersection(columnNames, skippedFields));
+        columnNames = SetUtils.difference(columnNames, skippedFields);
         Map<MatchKey, List<String>> matchKeys = new HashMap<>();
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Name, InterfaceName.ContactName.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Country, InterfaceName.Country.name());
@@ -221,6 +239,17 @@ public final class MatchUtils {
             keyMap.putIfAbsent(key, new ArrayList<>());
             keyMap.get(key).add(columnName);
         }
+    }
+
+    private static Set<String> getSkippedMatchFields(MatchInput matchInput, @NotNull String entity) {
+        if (matchInput == null || matchInput.getEntityMatchConfiguration() == null) {
+            return null;
+        }
+
+        EntityMatchConfiguration config = matchInput.getEntityMatchConfiguration();
+        Set<String> skippedFields = MapUtils.emptyIfNull(config.getSkippedMatchFields()).get(entity);
+        log.info("Skipped fields for entity {} = {}", entity, skippedFields);
+        return skippedFields;
     }
 
 }

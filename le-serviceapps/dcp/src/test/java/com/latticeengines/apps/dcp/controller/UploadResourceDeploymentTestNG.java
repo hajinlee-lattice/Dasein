@@ -113,30 +113,33 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config.setUploadRawFilePath(rawPath);
         config.setUploadMatchResultPrefix(resultsPath);
         config.setUploadTSPrefix(uploadTS);
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5);
+        uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5,  Collections.singleton(AssertionError.class), null);
         retry.execute(context -> {
-            uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
+            List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace,
+            source.getSourceId(), null, Boolean.TRUE, 0, 20);
+            Assert.assertNotNull(uploads);
+            Assert.assertEquals(uploads.size(), 1);
+            UploadDetails retrievedUpload = uploads.get(0);
+            UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
+            Assert.assertEquals(retrievedConfig.getUploadMatchResultPrefix(), resultsPath);
+            Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), uploadTS);
+            Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
+            Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
             return true;
         });
 
-        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null,
-                Boolean.TRUE, 0, 20);
-        Assert.assertNotNull(uploads);
-        Assert.assertEquals(uploads.size(), 1);
-        UploadDetails retrievedUpload = uploads.get(0);
-        UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
-        Assert.assertEquals(retrievedConfig.getUploadMatchResultPrefix(), resultsPath);
-        Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), uploadTS);
-        Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
-        Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
-
         uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getUploadId(), Upload.Status.MATCH_STARTED, null);
-        uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED, Boolean.FALSE, 0, 20);
-        Assert.assertNotNull(uploads);
-        Assert.assertEquals(uploads.size(), 1);
-        retrievedUpload = uploads.get(0);
-        Assert.assertEquals(retrievedUpload.getStatus(), Upload.Status.MATCH_STARTED);
-
+        retry.execute(context -> {
+            List<UploadDetails>  uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(),
+                    Upload.Status.MATCH_STARTED, Boolean.FALSE, 0, 20);
+            Assert.assertNotNull(uploads);
+            Assert.assertEquals(uploads.size(), 1);
+            UploadDetails retrievedUpload = uploads.get(0);
+            Assert.assertEquals(retrievedUpload.getStatus(), Upload.Status.MATCH_STARTED);
+            return true;
+        });
         // create another upload
         UploadConfig config2 = new UploadConfig();
         UploadRequest uploadRequest2 = new UploadRequest();
@@ -177,13 +180,16 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         StringInputStream sis4 = new StringInputStream("rejected");
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadMatchResultRejected(), sis4, true);
 
+        StringInputStream sis5 = new StringInputStream("processing_errors");
+        s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadMatchResultErrored(), sis5, true);
+
         // drop file to another upload
         List<UploadDetails> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW, Boolean.TRUE, 0, 20);
         Assert.assertNotNull(uploads2);
         Assert.assertEquals(uploads2.size(), 1);
         UploadDetails upload2 = uploads2.get(0);
-        StringInputStream sis5 = new StringInputStream("file3");
-        s3Service.uploadInputStream(bucket, upload2.getUploadConfig().getUploadRawFilePath(), sis5, true);
+        StringInputStream sis6 = new StringInputStream("file3");
+        s3Service.uploadInputStream(bucket, upload2.getUploadConfig().getUploadRawFilePath(), sis6, true);
 
         RestTemplate template = testBed.getRestTemplate();
         String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
@@ -196,7 +202,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(zipFile);
         List<FileHeader> fileHeaders = zipFile.getFileHeaders();
         Assert.assertNotNull(fileHeaders);
-        Assert.assertEquals(fileHeaders.size(), 4);
+        Assert.assertEquals(fileHeaders.size(), 5);
         String tmp = System.getProperty("java.io.tmpdir");
         if (tmp.endsWith("/")) {
             tmp = tmp.substring(0, tmp.length() - 1);
@@ -206,14 +212,15 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         File destDir = new File(destPath);
         Assert.assertTrue(destDir.isDirectory());
         String[] files = destDir.list();
-        Assert.assertEquals(ArrayUtils.getLength(files), 4);
+        Assert.assertEquals(ArrayUtils.getLength(files), 5);
 
         // Check the correct file names for each
         List<String> fileNames = Arrays.asList(destDir.list());
         Assert.assertTrue(fileNames.contains("file2.csv"));
-        Assert.assertTrue(fileNames.contains("file2_Error.csv"));
+        Assert.assertTrue(fileNames.contains("file2_Ingestion_Errors.csv"));
         Assert.assertTrue(fileNames.contains("file2_Matched.csv"));
         Assert.assertTrue(fileNames.contains("file2_Unmatched.csv"));
+        Assert.assertTrue(fileNames.contains("file2_Processing_Errors.csv"));
         FileUtils.forceDelete(destDir);
     }
 
@@ -222,14 +229,15 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         RestTemplate template = testBed.getRestTemplate();
         String tokenUrlBase = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort, uploadId);
 
-        for (int i = 1; i <= 15; ++i) {
+        for (int i = 1; i <= 31; ++i) {
             boolean includeRaw = (i % 2 == 1);
             boolean includeMatched = ((i / 2) % 2 == 1);
             boolean includeUnmatched = ((i / 4) % 2 == 1);
             boolean includeErrors = ((i / 8) % 2 == 1);
+            boolean includeProcessing = ((i / 16) % 2 == 1);
 
-            Boolean[] includes = {includeRaw, includeMatched, includeUnmatched, includeErrors};
-            int numFiles = (int) Arrays.stream(includes).filter(x -> x).count();
+            Boolean[] includes = {includeRaw, includeMatched, includeUnmatched, includeErrors, includeProcessing};
+            int numFiles = (int) Arrays.stream(includes).filter(Boolean::booleanValue).count();
 
             String downloadParams = "";
             if (includeRaw) {
@@ -243,6 +251,9 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             }
             if (includeErrors) {
                 downloadParams = downloadParams + ",IMPORT_ERRORS";
+            }
+            if (includeProcessing) {
+                downloadParams = downloadParams + ",PROCESS_ERRORS";
             }
             downloadParams = downloadParams.substring(1);
 
@@ -260,7 +271,8 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             Assert.assertEquals(includeRaw, fileNames.contains("file2.csv"));
             Assert.assertEquals(includeMatched, fileNames.contains("file2_Matched.csv"));
             Assert.assertEquals(includeUnmatched, fileNames.contains("file2_Unmatched.csv"));
-            Assert.assertEquals(includeErrors, fileNames.contains("file2_Error.csv"));
+            Assert.assertEquals(includeErrors, fileNames.contains("file2_Ingestion_Errors.csv"));
+            Assert.assertEquals(includeProcessing, fileNames.contains("file2_Processing_Errors.csv"));
         }
     }
 

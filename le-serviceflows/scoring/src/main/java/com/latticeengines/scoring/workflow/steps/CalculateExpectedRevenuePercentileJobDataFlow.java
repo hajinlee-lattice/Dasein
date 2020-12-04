@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CalculateExpectedRevenuePercentileJobConfig;
+import com.latticeengines.domain.exposed.serviceflows.scoring.spark.CalculateExpectedRevenuePercentileJobConfig.ScoreDerivationType;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CalculateExpectedRevenuePercentileDataFlowConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.spark.exposed.job.score.CalculateExpectedRevenuePercentileJob;
@@ -71,6 +73,11 @@ public class CalculateExpectedRevenuePercentileJobDataFlow extends
         if (MapUtils.isNotEmpty(originalScoreFieldMap)) {
             config.originalScoreFieldMap = originalScoreFieldMap;
         }
+        Map<String, Map<ScoreDerivationType, ScoreDerivation>> scoreDerivationMaps = ExpectedRevenueDataFlowUtil
+                .getNewScoreDerivationMap(
+                customerSpace, yarnConfiguration, modelSummaryProxy, originalScoreFieldMap,
+                ScoreResultField.ExpectedRevenue.displayName, true);
+        config.scoreDerivationMaps = scoreDerivationMaps;
 
         // load evFitFunctionParamaters
         config.fitFunctionParametersMap = ExpectedRevenueDataFlowUtil.getEVFitFunctionParametersMap(

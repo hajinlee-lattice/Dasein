@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.spark.cdl;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
@@ -19,27 +20,42 @@ public class JourneyStageJobConfig extends SparkJobConfig {
     @JsonProperty
     public Integer masterJourneyStageIdx;
 
-    // timeline master store's index in input list (required)
+    // timeline master store's index in input list
+    @NotNull
     @JsonProperty
     public Integer masterAccountTimeLineIdx;
 
-    // diff timeline store's index in input list (required)
+    // diff timeline store's index in input list
+    @NotNull
     @JsonProperty
     public Integer diffAccountTimeLineIdx;
 
+    @NotNull
+    @JsonProperty
+    public Long earliestBackfillEpochMilli;
+
+    @NotNull
     @JsonProperty
     public Long currentEpochMilli;
 
+    @NotNull
+    @JsonProperty
+    public Long backfillStepInDays;
+
+    @NotNull
     @JsonProperty
     public String accountTimeLineId;
 
+    @NotNull
     @JsonProperty
     public String accountTimeLineVersion;
 
     // non-default stages
+    @NotNull
     @JsonProperty
     public List<JourneyStage> journeyStages;
 
+    @NotNull
     @JsonProperty
     public JourneyStage defaultStage;
 

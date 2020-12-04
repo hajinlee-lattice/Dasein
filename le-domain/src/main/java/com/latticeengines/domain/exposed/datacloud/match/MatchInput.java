@@ -210,7 +210,7 @@ public class MatchInput implements Fact, Dimension {
 
     // can be retired after fully cutting over to Direct+
     @JsonProperty("UseDirectPlus")
-    private Boolean useDirectPlus;
+    private Boolean useDirectPlus = true;
 
     @JsonProperty("DPlusMatchConfig")
     private DplusMatchConfig dplusMatchConfig;

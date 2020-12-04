@@ -83,7 +83,6 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
         resetBatchStore(customerSpaceStr, BusinessEntity.Contact);
         resetBatchStore(customerSpaceStr, BusinessEntity.Account);
 
-        resetImport(customerSpaceParseStr);
         return true;
     }
 
@@ -125,10 +124,6 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
             dataFeedService.finishExecution(CustomerSpace.parse(customerSpaceStr).toString(), "",
                     DataFeed.Status.Active.getName());
         }
-    }
-
-    private void resetImport(String customerSpaceStr) {
-        dataFeedService.resetImport(customerSpaceStr, "");
     }
 
     private void resetBatchStore(String customerSpaceStr, BusinessEntity entity) {

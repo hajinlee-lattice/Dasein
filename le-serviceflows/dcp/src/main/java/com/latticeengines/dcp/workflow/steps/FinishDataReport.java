@@ -22,7 +22,6 @@ public class FinishDataReport  extends BaseSparkStep<RollupDataReportStepConfigu
         customerSpace = configuration.getCustomerSpace();
         String customerSpaceStr = customerSpace.toString();
         Set<String> names = getSetObjectFromContext(DUNS_COUNT_TABLE_NAMES, String.class);
-        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("rollup", 16);
         names.forEach(tableName -> {
             registerTable(tableName);
             Table table = metadataProxy.getTable(customerSpaceStr, tableName);

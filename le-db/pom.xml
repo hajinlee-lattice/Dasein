@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.33.0-SNAPSHOT</version>
+        <version>4.35.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
@@ -52,6 +52,7 @@
                                 <argument>com.latticeengines.domain.exposed.cdl.tray</argument>
                                 <argument>com.latticeengines.domain.exposed.cdl.activity</argument>
                                 <argument>com.latticeengines.domain.exposed.cdl.sla</argument>
+                                <argument>com.latticeengines.domain.exposed.cdl.dashboard</argument>
                                 <argument>com.latticeengines.domain.exposed.dcp</argument>
                                 <argument>com.latticeengines.domain.exposed.dcp.match</argument>
                                 <argument>com.latticeengines.domain.exposed.ulysses</argument>

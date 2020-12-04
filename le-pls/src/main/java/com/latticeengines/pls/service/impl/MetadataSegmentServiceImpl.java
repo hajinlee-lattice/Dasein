@@ -255,6 +255,9 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         }
         try {
             TeamUtils.fillTeamInfo(segment, globalTeam, teamIds);
+            if (MetadataSegment.SegmentType.List.equals(segment.getType())) {
+                segment.setViewOnly(true);
+            }
             Restriction accountRestriction = segment.getAccountRestriction();
             if (accountRestriction == null) {
                 segment.setAccountFrontEndRestriction(emptyFrontEndRestriction());

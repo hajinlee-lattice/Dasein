@@ -97,6 +97,7 @@ public class BulkMatchService {
                     "The terminal status of match is " + status + " instead of " + MatchStatus.FINISHED);
             throw new LedpException(LedpCode.LEDP_00006, inner);
         }
+
         return matchCommand;
     }
 

@@ -179,6 +179,30 @@ public class HdfsToS3PathBuilder {
         return getS3AtlasDataDir(s3Bucket, tenantId) + PATH_SEPARATOR + "TableSchemas";
     }
 
+    public String getS3AtlasDataTemplatesDir(String s3Bucket, String tenantId) {
+        return getS3AtlasDataDir(s3Bucket, tenantId) + PATH_SEPARATOR + "DataTemplates";
+    }
+
+    public String getS3AtlasDataTemplatePrefix(String s3Bucket, String tenantId, String templateId) {
+        return getS3AtlasDataTemplatesDir(s3Bucket, tenantId) + PATH_SEPARATOR + templateId;
+    }
+
+    public String getS3AtlasDataUnitPrefix(String s3Bucket, String tenantId, String templateId, String unitName) {
+        return getS3AtlasDataTemplatePrefix(s3Bucket, tenantId, templateId) + PATH_SEPARATOR + unitName;
+    }
+
+    public String getHdfsAtlasDataTemplatesDir(String pod, String tenantId) {
+        return getHdfsAtlasDataDir(pod, tenantId) + PATH_SEPARATOR + "DataTemplates";
+    }
+
+    public String getHdfsAtlasDataTemplatePrefix(String pod, String tenantId, String templateId) {
+        return getHdfsAtlasDataTemplatesDir(pod, tenantId) + PATH_SEPARATOR + templateId;
+    }
+
+    public String getHdfsAtlasDataUnitPrefix(String pod, String tenantId, String templateId, String unitName) {
+        return getHdfsAtlasDataTemplatePrefix(pod, tenantId, templateId) + PATH_SEPARATOR + unitName;
+    }
+
     public String getS3AtlasFilesDir(String s3Bucket, String tenantId) {
         return getS3AtlasDataDir(s3Bucket, tenantId) + PATH_SEPARATOR + "Files";
     }

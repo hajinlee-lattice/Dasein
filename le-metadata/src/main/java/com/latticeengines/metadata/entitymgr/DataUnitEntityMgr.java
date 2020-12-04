@@ -30,4 +30,6 @@ public interface DataUnitEntityMgr {
 
     List<DataUnit> findAllByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role);
 
+    DataUnit findByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role);
+
 }
