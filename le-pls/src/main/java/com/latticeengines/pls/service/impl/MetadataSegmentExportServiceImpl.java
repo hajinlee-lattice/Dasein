@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.NameStringStandardizationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
@@ -189,7 +190,9 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                     String suffix = fileName.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
                     String exportType = getExportType(atlasExport);
                     if (StringUtils.isNotEmpty(exportType)) {
-                        fileName = exportType + "_" + atlasExport.getSegmentName() + "_" + atlasExport.getUuid() + suffix;
+                        fileName = exportType + "_"
+                                + NameStringStandardizationUtils.getStandardString(atlasExport.getSegmentName()) + "_"
+                                + atlasExport.getUuid() + suffix;
                     }
                 }
                 ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv",
