@@ -4,6 +4,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +37,8 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/project")
 public class ProjectResource {
 
+    private static final Logger log = LoggerFactory.getLogger(ProjectResource.class);
+
     @Inject
     private ProjectService projectService;
 
@@ -56,6 +61,9 @@ public class ProjectResource {
             }
             return ResponseDocument.successResponse(result);
         } catch (LedpException e) {
+            String stackTrace = ExceptionUtils.getStackTrace(e);
+            log.error(String.format(
+                    "Failed to create project %s for user %s:\n%s", projectRequest.getDisplayName(), user, stackTrace));
             return ResponseDocument.failedResponse(e);
         }
     }

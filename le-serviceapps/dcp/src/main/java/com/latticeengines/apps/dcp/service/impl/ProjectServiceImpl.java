@@ -80,6 +80,7 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
         String projectId = generateRandomProjectId();
         String rootPath = generateRootPath(projectId);
         validatePurposeOfUse(purposeOfUse);
+        log.info(String.format("Creating DCP Project %s for user %s", displayName, user));
         projectEntityMgr.create(
                 generateProjectObject(projectId, displayName, projectType, user, rootPath, purposeOfUse, description));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
@@ -87,6 +88,7 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
         dropBoxService.createFolderUnderDropFolder(project.getRootPath());
+        log.info("Created Drop Folder at " + project.getRootPath());
         return getProjectDetails(customerSpace, project, Boolean.FALSE);
     }
 
@@ -96,6 +98,7 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
         validateProjectId(projectId);
         validatePurposeOfUse(purposeOfUse);
         String rootPath = generateRootPath(projectId);
+        log.info(String.format("Creating DCP Project %s for user %s", displayName, user));
         projectEntityMgr.create(
                 generateProjectObject(projectId, displayName, projectType, user, rootPath, purposeOfUse, description));
         ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
@@ -103,6 +106,7 @@ public class ProjectServiceImpl extends ServiceCommonImpl implements ProjectServ
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
         dropBoxService.createFolderUnderDropFolder(project.getRootPath());
+        log.info("Created Drop Folder at " + project.getRootPath());
         return getProjectDetails(customerSpace, project, Boolean.FALSE);
     }
 
