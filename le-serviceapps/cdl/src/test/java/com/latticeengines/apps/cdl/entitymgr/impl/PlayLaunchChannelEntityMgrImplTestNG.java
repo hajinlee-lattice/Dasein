@@ -370,11 +370,13 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         MarketoChannelConfig config = ((MarketoChannelConfig) channel2.getChannelConfig());
         config.setAudienceName("somethingElse");
         channel2.setChannelConfig(config);
+        channel2.setMaxContactsPerAccount(5L);
         retrieved2 = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved2, channel2);
         Assert.assertNotNull(retrieved2);
         Assert.assertEquals(retrieved2.getId(), channel2.getId());
         Assert.assertEquals(retrieved2.getChannelConfig().getAudienceName(), "somethingElse");
         Assert.assertTrue(retrieved2.getResetDeltaCalculationData());
+        Assert.assertEquals(retrieved2.getMaxContactsPerAccount(), channel2.getMaxContactsPerAccount());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })

@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NameStringStandardizationUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
@@ -142,7 +143,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
                     request.srcPath = path;
                     request.tgtPath = pathBuilder.convertS3CampaignExportDir(path, s3Bucket,
                             dropBoxSummary.getDropBox(), getConfiguration().getPlayName(),
-                            getConfiguration().getPlayDisplayName());
+                            NameStringStandardizationUtils.getStandardString(getConfiguration().getPlayDisplayName()));
                     requests.add(request);
                     targetPaths.add(request.tgtPath);
                     hdfsExportFilePaths.add(request.srcPath);
