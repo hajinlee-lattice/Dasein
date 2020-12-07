@@ -210,7 +210,7 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
                  * duplicate alert that will be not be generated again
                  */
                 { "a1", Alert.ANONYMOUS_WEB_VISITS, 10L,
-                        "{\"Data\":{\"PageVisits\":2,\"PageName\":\"page 4\"},\"StartTimestamp\":-863999990,\"EndTimestamp\":10}" }, //
+                        "{\"Data\":{\"PageVisits\":2},\"StartTimestamp\":-863999990,\"EndTimestamp\":10}" }, //
                 /*-
                  * no duplicate
                  */
@@ -238,7 +238,7 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         counts.put(Pair.of("a8", Alert.RE_ENGAGED_ACTIVITY), 1);
         counts.put(Pair.of("a9", Alert.RE_ENGAGED_ACTIVITY), 1);
 
-        counts.put(Pair.of("a11", Alert.HIGH_ENGAGEMENT_IN_ACCOUNT), 6);
+        counts.put(Pair.of("a11", Alert.HIGH_ENGAGEMENT_IN_ACCOUNT), 1);
 
         counts.put(Pair.of("a8", Alert.KNOWN_WEB_VISITS), 1);
         counts.put(Pair.of("a9", Alert.KNOWN_WEB_VISITS), 1);

@@ -135,11 +135,16 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
   def generateAnonymousWebVisitsAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
     val contactCntDf = getActiveContactsInTimeRange(timelineDf)
 
-    val topPageVisitDf = getPageVisitCountInTimeRange(timelineDf)
+    val totalPageVisitDf = timelineDf
+      .filter(col(streamType).equalTo(WebVisit.name))
+      .filter(col(detail2).isNotNull)
+      .withColumn(pageName, explode(split(col(detail2), ",")))
+      .groupBy(accountId)
+      .agg(count("*").as(pageVisit))
 
     // ones without any active contact -- anonymous visit
-    addTimeRange(topPageVisitDf.join(contactCntDf, Seq(accountId), "leftanti"), startTime, endTime)
-      .select(col(accountId), col(CreationTimestamp.name), packAlertData(pageVisit, pageName))
+    addTimeRange(totalPageVisitDf.join(contactCntDf, Seq(accountId), "leftanti"), startTime, endTime)
+      .select(col(accountId), col(CreationTimestamp.name), packAlertData(pageVisit))
   }
 
   def generateReEngagedActivity(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
@@ -233,6 +238,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
       .join(maCountsDf, Seq(accountId))
       .filter(maCountsDf.col(maCounts).gt(5)), startTime, endTime)
       .select(col(accountId), col(CreationTimestamp.name), packAlertData(maCounts))
+      .distinct()
   }
 
   def generateKnownWebVisitsAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
