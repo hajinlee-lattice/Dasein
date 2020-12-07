@@ -64,6 +64,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         restTemplate = testBed.getRestTemplate();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment.import.group2")

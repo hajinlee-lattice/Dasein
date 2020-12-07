@@ -49,6 +49,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         templates = cdlService.getS3ImportTemplate(customerSpace, "", null);
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment.import.group2")
