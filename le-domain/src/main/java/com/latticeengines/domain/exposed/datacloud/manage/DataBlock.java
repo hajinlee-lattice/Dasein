@@ -64,7 +64,7 @@ public class DataBlock {
             .put(Id.salesmarketinginsight, "Sales and Marketing Insights") //
             .put(Id.thirdpartyriskinsight, "Third-Party Risk Insights") //
             .put(Id.businessactivityinsight, "Business Activity Insights") //
-            .put(Id.derivedtradeinsight, "Derived Trade Insights") //
+            .put(Id.derivedtradeinsight, "Derived Trade Insights") //  In the spreadsheet and in LDC_ManageDB.DataBlockElement this is abbreviated dtri
             .put(Id.externaldisruptioninsight, "External Disruption Insights") //
             .put(Id.inquiryinsight, "Inquiry Insights") //
             .put(Id.spendinsight, "Spend Insights") //
