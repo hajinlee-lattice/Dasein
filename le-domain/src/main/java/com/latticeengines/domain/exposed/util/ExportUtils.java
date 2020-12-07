@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,8 @@ public final class ExportUtils {
     public static final String CONTACT_ATTR_PREFIX = "ContactRenamed_";
 
     public static final String EMPTY_CATEGORY = "emptyCategory";
+
+    public static final String replacedBySpace = "[<>:\"/\\\\|?*]";
 
     protected ExportUtils() {
         throw new UnsupportedOperationException();
@@ -118,5 +121,13 @@ public final class ExportUtils {
             insertDataIntoDisplayNameMap(cm, exportEntity, outputCols, displayNameMap, originalDisplayName, indexToAppend);
         });
         return displayNameMap;
+    }
+
+    public static String getReplacedName(String name) {
+        if (StringUtils.isNotEmpty(name)) {
+            return name.replaceAll(replacedBySpace, " ");
+        } else {
+            return name;
+        }
     }
 }

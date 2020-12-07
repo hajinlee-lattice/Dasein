@@ -248,7 +248,7 @@ public class SaveAtlasExportCSV extends BaseSparkStep<EntityExportStepConfigurat
         if (StringUtils.isEmpty(atlasExport.getSegmentName())) {
             return atlasExport.getUuid();
         }
-        return atlasExport.getSegmentName() + "_" + atlasExport.getUuid();
+        return ExportUtils.getReplacedName(atlasExport.getSegmentName()) + "_" + atlasExport.getUuid();
     }
 
     private void cleanUpTempPath(List<String> deletePathList) {
