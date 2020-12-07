@@ -39,7 +39,7 @@ public class DataBlock {
         public static final String salesmarketinginsight = "salesmarketinginsight";
         public static final String thirdpartyriskinsight = "thirdpartyriskinsight";
         public static final String businessactivityinsight = "businessactivityinsight";
-        public static final String derivedtradeinsight = "derivedtradeinsight";
+        public static final String derivedtradeinsight = "dtri"; // Derived Trade Insight
         public static final String externaldisruptioninsight = "externaldisruptioninsight";
         public static final String inquiryinsight = "inquiryinsight";
         public static final String spendinsight = "spendinsight";
@@ -64,7 +64,7 @@ public class DataBlock {
             .put(Id.salesmarketinginsight, "Sales and Marketing Insights") //
             .put(Id.thirdpartyriskinsight, "Third-Party Risk Insights") //
             .put(Id.businessactivityinsight, "Business Activity Insights") //
-            .put(Id.derivedtradeinsight, "Derived Trade Insights") //  In the spreadsheet and in LDC_ManageDB.DataBlockElement this is abbreviated dtri
+            .put(Id.derivedtradeinsight, "Derived Trade Insights") //  In the spreadsheet, in LDC_ManageDB.DataBlockElement, and IDaaS API this is abbreviated dtri
             .put(Id.externaldisruptioninsight, "External Disruption Insights") //
             .put(Id.inquiryinsight, "Inquiry Insights") //
             .put(Id.spendinsight, "Spend Insights") //
