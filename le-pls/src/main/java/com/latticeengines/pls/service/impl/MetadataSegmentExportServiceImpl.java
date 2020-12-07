@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.MetadataSegmentExportConverter;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
-import com.latticeengines.pls.util.SegmentExportUtils;
+import com.latticeengines.pls.util.ExporDownloadtUtils;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -179,7 +179,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderDropFolder())) {
                 filePath = atlasExportProxy.getDropFolderExportPath(customerSpace, atlasExport.getExportType(), atlasExport.getDatePrefix(), false);
                 fileName = atlasExport.getFilesUnderDropFolder().get(0);
-                SegmentExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv", request
+                ExporDownloadtUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv", request
                         , response, importFromS3Service, batonService);
             } else if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderSystemPath())) {
                 filePath = atlasExportProxy.getSystemExportPath(customerSpace, false);
@@ -193,7 +193,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                         fileName = exportType + "_" + ExportUtils.getReplacedName(atlasExport.getSegmentName()) + "_" + atlasExport.getUuid() + suffix;
                     }
                 }
-                SegmentExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv",
+                ExporDownloadtUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv",
                         request, response, importFromS3Service, batonService);
             } else {
                 throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});

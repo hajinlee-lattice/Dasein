@@ -7,9 +7,9 @@ import com.latticeengines.app.exposed.download.CustomerSpaceS3FileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 
-public final class SegmentExportUtils {
+public final class ExporDownloadtUtils {
 
-    protected SegmentExportUtils() {
+    protected ExporDownloadtUtils() {
         throw new UnsupportedOperationException();
     }
 

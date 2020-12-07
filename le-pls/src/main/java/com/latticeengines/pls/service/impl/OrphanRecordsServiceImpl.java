@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.service.OrphanRecordsService;
-import com.latticeengines.pls.util.SegmentExportUtils;
+import com.latticeengines.pls.util.ExporDownloadtUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -98,7 +98,7 @@ public class OrphanRecordsServiceImpl implements OrphanRecordsService {
             throw new LedpException(LedpCode.LEDP_18243, ImmutableMap.of("exportId", exportId));
         }
         String filename = exportId + ".csv";
-        SegmentExportUtils.downloadS3ExportFile(filePath, filename, MediaType.APPLICATION_OCTET_STREAM, request, response, importFromS3Service, batonService);
+        ExporDownloadtUtils.downloadS3ExportFile(filePath, filename, MediaType.APPLICATION_OCTET_STREAM, request, response, importFromS3Service, batonService);
     }
 
     @Override
