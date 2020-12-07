@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.common.exposed.util.NameStringStandardizationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
@@ -30,10 +29,11 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.MetadataSegmentExportConverter;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
-import com.latticeengines.pls.util.ExportUtils;
+import com.latticeengines.pls.util.SegmentExportUtils;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -179,7 +179,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderDropFolder())) {
                 filePath = atlasExportProxy.getDropFolderExportPath(customerSpace, atlasExport.getExportType(), atlasExport.getDatePrefix(), false);
                 fileName = atlasExport.getFilesUnderDropFolder().get(0);
-                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv", request
+                SegmentExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv", request
                         , response, importFromS3Service, batonService);
             } else if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderSystemPath())) {
                 filePath = atlasExportProxy.getSystemExportPath(customerSpace, false);
@@ -190,12 +190,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                     String suffix = fileName.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
                     String exportType = getExportType(atlasExport);
                     if (StringUtils.isNotEmpty(exportType)) {
-                        fileName = exportType + "_"
-                                + NameStringStandardizationUtils.getStandardString(atlasExport.getSegmentName()) + "_"
-                                + atlasExport.getUuid() + suffix;
+                        fileName = exportType + "_" + ExportUtils.getReplacedName(atlasExport.getSegmentName()) + "_" + atlasExport.getUuid() + suffix;
                     }
                 }
-                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv",
+                SegmentExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv",
                         request, response, importFromS3Service, batonService);
             } else {
                 throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
