@@ -95,6 +95,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     private String cron = "0 0 12 ? * WED *";
     private static final long MAX_ACCOUNTS_TO_LAUNCH = 20L;
     private static final long NULL_MAX_ACCOUNTS_TO_LAUNCH = -1L;
+    private static final long NULL_MAX_CONTACTS_PER_ACCOUNT = -1L;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -346,6 +347,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertEquals(retrieved.getExpirationPeriodString(), channel1.getExpirationPeriodString());
 
         channel1.setMaxEntitiesToLaunch(NULL_MAX_ACCOUNTS_TO_LAUNCH);
+        channel1.setMaxContactsPerAccount(NULL_MAX_CONTACTS_PER_ACCOUNT);
         Assert.assertNotNull(channel1);
 
         channel1.setIsAlwaysOn(false);
@@ -357,6 +359,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         Assert.assertFalse(retrieved.getIsAlwaysOn());
         Assert.assertNull(retrieved.getExpirationDate());
         Assert.assertNull(retrieved.getMaxEntitiesToLaunch());
+        Assert.assertNull(retrieved.getMaxContactsPerAccount());
 
         channel1.setLaunchUnscored(false);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
