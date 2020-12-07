@@ -156,6 +156,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
             launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
                     maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, channelConfig.getSystemName());
+        }
 
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
     }

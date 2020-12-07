@@ -10,8 +10,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum LatticeModule {
 
     TalkingPoint("Talking Point"), //
-    HandHoldPA("Hand-hold PA"), //
-    ABM("ABM");
+    HandHoldPA("Hand-hold PA");
 
     private static Map<String, LatticeModule> lookup = new HashMap<>();
     private static List<String> names;
