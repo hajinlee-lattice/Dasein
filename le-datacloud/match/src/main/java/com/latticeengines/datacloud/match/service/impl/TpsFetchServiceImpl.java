@@ -10,7 +10,6 @@ import java.util.Random;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -62,12 +61,14 @@ public class TpsFetchServiceImpl implements TpsFetchService {
         ContactTpsEntryMgr tpsEntityMgr = getTpsEntityMgr();
         for (String recordId : recordIds) {
             ContactTpsEntry entry = tpsEntityMgr.findByKey(recordId);
-            GenericFetchResult fetchResult = new GenericFetchResult();
-            fetchResult.setRecordId(recordId);
-            fetchResult.setResult(entry.getAttributes());
+            if ((entry != null) && (entry.getAttributes() != null)) {
+                GenericFetchResult fetchResult = new GenericFetchResult();
+                fetchResult.setRecordId(recordId);
+                fetchResult.setResult(entry.getAttributes());
 
-            if (matchConfig == null || isValid(fetchResult, matchConfig)) {
-                results.add(fetchResult);
+                if (matchConfig == null || isValid(fetchResult, matchConfig)) {
+                    results.add(fetchResult);
+                }
             }
         }
 
@@ -109,9 +110,7 @@ public class TpsFetchServiceImpl implements TpsFetchService {
         List<String> filterLevels = matchConfig.getJobLevels();
         LiveRampDestination destination = matchConfig.getDestination();
         Map<String, Object> result = fetchResult.getResult();
-        if (MapUtils.isEmpty(result)) {
-            return false;
-        }
+
         // Filter by job function
         String jobFunction = result.get(ContactMasterConstants.TPS_STANDARD_JOB_FUNCTION).toString();
         if ((filterFunctions != null) && !filterFunctions.contains(jobFunction)) {

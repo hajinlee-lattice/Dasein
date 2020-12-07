@@ -56,7 +56,7 @@ public final class JourneyStageUtils {
 
     private static JourneyStage contactInquiryStage(@NotNull Tenant tenant) {
         return stage(tenant, "Contact Inquiry", "Contact has taken action", 5, "#8E71B2",
-                predicate(MarketingActivity, 1, 90, formFilledFilter()));
+                predicate(MarketingActivity, 1, 90, formFillFilter()));
     }
 
     private static JourneyStage knownEngagedStage(@NotNull Tenant tenant) {
@@ -113,11 +113,11 @@ public final class JourneyStageUtils {
         return filter;
     }
 
-    private static StreamFieldToFilter formFilledFilter() {
+    private static StreamFieldToFilter formFillFilter() {
         StreamFieldToFilter filter = new StreamFieldToFilter();
-        filter.setComparisonType(ComparisonType.EQUAL);
+        filter.setComparisonType(ComparisonType.IN_COLLECTION);
         filter.setColumnName(InterfaceName.EventType);
-        filter.setColumnValue("Form Filled");
+        filter.setColumnValues(Arrays.asList("Fill Out Form", "FormSubmit"));
         return filter;
     }
 

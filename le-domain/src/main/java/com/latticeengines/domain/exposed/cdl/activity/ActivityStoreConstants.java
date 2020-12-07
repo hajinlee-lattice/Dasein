@@ -34,8 +34,10 @@ public final class ActivityStoreConstants {
 
     public static class JourneyStage {
         public static final String STREAM_SOURCE_ATLAS = "Atlas";
-        public static final String STREAM_DETAIL1_DARK = "Dark";
         public static final String STREAM_EVENT_TYPE_JOURNEYSTAGECHANGE = "Journey Stage Change";
+
+        public static final long BACKFILL_STEP_IN_DAYS = 7L;
+        public static final long MAX_BACKFILL_STEPS = 12L;
     }
 
     /**
@@ -48,7 +50,6 @@ public final class ActivityStoreConstants {
         public static final String INC_WEB_ACTIVITY = "IncWebActivity";
         public static final String ANONYMOUS_WEB_VISITS = "AnonymousWebVisits";
         public static final String RE_ENGAGED_ACTIVITY = "ReEngagedActivity";
-        public static final String SHOWN_INTENT = "HasShownIntent";
         public static final String HIGH_ENGAGEMENT_IN_ACCOUNT = "HighEngagementInAccount";
         public static final String KNOWN_WEB_VISITS = "KnownWebVisits";
         public static final String ACTIVE_CONTACT_WEB_VISITS = "AcitiveContactsAndWebVisits";

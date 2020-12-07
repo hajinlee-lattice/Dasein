@@ -103,7 +103,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
         Assert.assertEquals(metrics.get(2).getLabel(), "New Engagements");
         Assert.assertEquals(String.valueOf(metrics.get(2).getMessage()), "207");
         Assert.assertEquals(metrics.get(2).getDescription(), " in last 10 days");
-        Assert.assertEquals(metrics.get(2).getContext(), "Total number of engagements in the last in the last 10 days");
+        Assert.assertEquals(metrics.get(2).getContext(), "Total number of engagements in the last 10 days");
 
         Assert.assertEquals(metrics.get(3).getLabel(), "New Opportunities");
         Assert.assertEquals(String.valueOf(metrics.get(3).getMessage()), "97");
@@ -113,7 +113,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
         Assert.assertEquals(metrics.get(4).getLabel(), "Account Intent");
         Assert.assertEquals(String.valueOf(metrics.get(4).getMessage()), "Buying");
         Assert.assertEquals(metrics.get(4).getDescription(), "");
-        Assert.assertEquals(metrics.get(4).getContext(), "Acount level Intent in the last 10 days");
+        Assert.assertEquals(metrics.get(4).getContext(), "Acount-level intent in the last 10 days");
 
     }
 

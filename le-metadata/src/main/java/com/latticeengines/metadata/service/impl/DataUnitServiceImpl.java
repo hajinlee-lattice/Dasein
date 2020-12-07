@@ -48,7 +48,11 @@ public class DataUnitServiceImpl implements DataUnitService {
         return entityMgr.findByNameTypeFromReader(tenantId, name, storageType);
     }
 
-
+    @Override
+    public DataUnit findByDataTemplateIdAndRole(String dataTemplateId, DataUnit.Role role) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        return entityMgr.findByDataTemplateIdAndRoleFromReader(tenantId, dataTemplateId, role);
+    }
     @Override
     public void deleteByNameAndStorageType(String name, DataUnit.StorageType storageType) {
         String tenantId = MultiTenantContext.getShortTenantId();
@@ -120,7 +124,7 @@ public class DataUnitServiceImpl implements DataUnitService {
     }
 
     @Override
-    public List<DataUnit> findAllByDataTemplateIdAndRoleFromReader(String dataTemplateId, DataUnit.Role role) {
+    public List<DataUnit> findAllByDataTemplateIdAndRole(String dataTemplateId, DataUnit.Role role) {
         String tenantId = MultiTenantContext.getShortTenantId();
         return entityMgr.findAllByDataTemplateIdAndRoleFromReader(tenantId, dataTemplateId, role);
     }

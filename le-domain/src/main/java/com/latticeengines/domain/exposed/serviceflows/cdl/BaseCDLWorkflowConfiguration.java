@@ -112,7 +112,10 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = MigrateDynamoWorkflowConfiguration.class, name = "MigrateDynamoWorkflowConfiguration"),
         @Type(value = PublishAccountLookupWorkflowConfiguration.class, name = PublishAccountLookupWorkflowConfiguration.NAME),
         @Type(value = GenerateIntentEmailAlertWorkflowConfiguration.class, name = GenerateIntentEmailAlertWorkflowConfiguration.NAME),
-        @Type(value = ImportListSegmentWorkflowConfiguration.class, name = "ImportListSegmentWorkflowConfiguration")
+        @Type(value = ImportListSegmentWorkflowConfiguration.class, name = "ImportListSegmentWorkflowConfiguration"),
+        @Type(value = GenerateIntentEmailAlertWorkflowConfiguration.class, name =
+                GenerateIntentEmailAlertWorkflowConfiguration.NAME),
+        @Type(value = PublishVIDataWorkflowConfiguration.class, name = "PublishVIDataWorkflowConfiguration")
 })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 

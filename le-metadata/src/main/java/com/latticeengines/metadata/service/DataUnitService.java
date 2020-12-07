@@ -6,6 +6,8 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 
 public interface DataUnitService {
 
+    DataUnit findByDataTemplateIdAndRole(String dataTemplateId, DataUnit.Role role);
+
     DataUnit createOrUpdateByNameAndStorageType(DataUnit dataUnit);
 
     List<DataUnit> findByNameFromReader(String name);
@@ -26,5 +28,5 @@ public interface DataUnitService {
 
     void updateSignature(DataUnit dataUnit, String signature);
 
-    List<DataUnit> findAllByDataTemplateIdAndRoleFromReader(String dataTemplateId, DataUnit.Role role);
+    List<DataUnit> findAllByDataTemplateIdAndRole(String dataTemplateId, DataUnit.Role role);
 }

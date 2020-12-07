@@ -58,10 +58,9 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
             return;
         }
         Map<String, String> rawStreamTables = updateRawStreamTableEntries();
-        exportToS3AndAddToContext(rawStreamTables, RAW_ACTIVITY_STREAM_TABLE_NAME);
         updateEntityValueMapInContext(PERFORM_SOFT_DELETE, Boolean.TRUE, Boolean.class);
         if (MapUtils.isNotEmpty(rawStreamTables)) {
-            putObjectInContext(RAW_STREAM_TABLE_AFTER_DELETE, rawStreamsAfterDelete);
+            exportToS3AndAddToContext(rawStreamsAfterDelete, RAW_STREAM_TABLE_AFTER_DELETE);
             log.info("Put updated raw stream table in context: {}", rawStreamsAfterDelete);
         }
     }

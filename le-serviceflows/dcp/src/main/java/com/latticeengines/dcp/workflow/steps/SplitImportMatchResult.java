@@ -5,6 +5,8 @@ import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.
 import static com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate.Attr.MatchedDuns;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,11 +68,19 @@ import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.dcp.SplitImportMatchResultJob;
 
+import au.com.bytecode.opencsv.CSVReader;
+
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfiguration, SplitImportMatchResultConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(SplitImportMatchResult.class);
+
+    private static final List<String> BASE_SCHEMA = Arrays.asList(
+            "duns_number", //
+            "primaryname", //
+            "countryisoalpha2code" //
+    );
 
     @Inject
     private UploadProxy uploadProxy;
@@ -143,7 +153,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             boolean isFromDataBlock = isFromDataBlock(cm);
             return isCustomer && !isIdToExclude && !isFromDataBlock;
         }).collect(Collectors.toList());
-        // Map<String, String> rejectedAttrs = convertToDispMap(rejectedCms);
         List<String> rejectedAttrs = sortOutputAttrs(rejectedCms);
         jobConfig.setRejectedAttrs(rejectedAttrs);
 
@@ -255,8 +264,6 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         matchToDUNSReport.setUnmatched(unmatchedCnt);
         dataReportProxy.updateDataReport(configuration.getCustomerSpace().toString(), DataReportRecord.Level.Upload,
                 configuration.getUploadId(), report);
-
-
     }
 
     private String getCsvFilePath(HdfsDataUnit dataUnit) {
@@ -266,11 +273,67 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             return getFirstCsvFilePath(dataUnit);
         }
     }
-    
+
+    private String getUploadS3Path() {
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
+        String uploadId = configuration.getUploadId();
+        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId, Boolean.TRUE);
+        return upload.getUploadConfig().getUploadRawFilePath();
+    }
+
+    private List<String> getCustomerFileHeaders() {
+        List<String> headers = new ArrayList<>();
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
+        String filePath = getUploadS3Path();
+
+        if (s3Service.objectExist(dropBoxSummary.getBucket(), filePath)) {
+            InputStream inputStream = s3Service.readObjectAsStream(dropBoxSummary.getBucket(), filePath);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            try (CSVReader csvReader = new CSVReader(inputStreamReader)) {
+                String[] nextRecord = csvReader.readNext();
+                headers.addAll(Arrays.asList(nextRecord));
+            } catch (IOException e) {
+                log.error("Error reading S3 file", e);
+            }
+        } else {
+            log.error("Import file does not exist at the given path " + filePath);
+        }
+        return headers;
+    }
+
+    private List<ColumnMetadata> sortCustomerAttrs(List<ColumnMetadata> attrs) {
+        List<String> customerHeaders = getCustomerFileHeaders();
+
+        int sortedAttrsSize = attrs.size();
+        if (customerHeaders.size() > sortedAttrsSize) {
+            sortedAttrsSize = customerHeaders.size();
+        }
+
+        List<ColumnMetadata> sortedCustomerAttrs = new ArrayList<>(sortedAttrsSize);
+        for(int index = 0; index < sortedAttrsSize; index++) {
+            sortedCustomerAttrs.add(index, null);
+        }
+
+        List<ColumnMetadata> otherAttrs = new ArrayList<>();
+
+        attrs.stream().forEach(columnMetadata -> {
+            int index = customerHeaders.indexOf(columnMetadata.getDisplayName());
+            if (index == -1) {
+                otherAttrs.add(columnMetadata);
+            } else {
+                sortedCustomerAttrs.set(index, columnMetadata);
+            }
+        });
+
+        sortedCustomerAttrs.removeIf(columnMetadata -> columnMetadata == null);
+        sortedCustomerAttrs.addAll(otherAttrs);
+        return sortedCustomerAttrs;
+    }
+
     private List<String> sortOutputAttrs(Collection<ColumnMetadata> cms) {
         Map<String, String> candidateFieldDispNames = candidateFieldDisplayNames();
         List<ColumnMetadata> customerAttrs = new ArrayList<>();
-        List<ColumnMetadata> dataBlockAttrs = new ArrayList<>();
+        LinkedHashMap<String, ColumnMetadata> dataBlockAttrMap = new LinkedHashMap<>();
         List<ColumnMetadata> candidateAttrs = new ArrayList<>();
         List<ColumnMetadata> otherAttrs = new ArrayList<>();
         // MatchedDuns belongs to candidate attribute
@@ -279,7 +342,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             if (MatchedDuns.equals(cm.getAttrName())) {
                 duns = cm;
             } else if (dataBlockDispNames.containsKey(cm.getAttrName())) {
-                dataBlockAttrs.add(cm);
+                dataBlockAttrMap.put(cm.getAttrName(), cm);
             } else if (candidateFieldDispNames.containsKey(cm.getAttrName())) {
                 candidateAttrs.add(cm);
             } else if ((cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL)){
@@ -288,8 +351,12 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
                 otherAttrs.add(cm);
             }
         }
+        // order base + enrichment columns
+        List<ColumnMetadata> dataBlockAttrs = orderAttributes(dataBlockAttrMap, BASE_SCHEMA);
+
         List<String> attrNames = new ArrayList<>();
-        customerAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
+        List<ColumnMetadata> sortedCustomerAttrs = sortCustomerAttrs(customerAttrs);
+        sortedCustomerAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
         attrNames.add(duns.getAttrName());
         candidateAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
         dataBlockAttrs.forEach(cm -> attrNames.add(cm.getAttrName()));
@@ -413,6 +480,21 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             dispNames.put(primeColumn.getPrimeColumnId(), primeColumn.getDisplayName());
         }
         return dispNames;
+    }
+
+    private List<ColumnMetadata> orderAttributes(LinkedHashMap<String, ColumnMetadata> attrMap, List<String> schema) {
+        List<ColumnMetadata> orderedAttrs = new ArrayList<>();
+        // when present, add schema values in order
+        for (String e: schema) {
+            if (attrMap.containsKey(e)) {
+                orderedAttrs.add(attrMap.get(e));
+                attrMap.remove(e);
+            }
+        }
+        // add remaining attributes, maintaining initial order
+        orderedAttrs.addAll(attrMap.values());
+
+        return orderedAttrs;
     }
 
 }

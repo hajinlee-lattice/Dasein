@@ -19,6 +19,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -127,6 +128,11 @@ public class SourceFile
     @JsonProperty("workflow_pid")
     @Column(name = "WORKFLOW_PID")
     private Long workflowPid;
+
+    @Column(name = "SOURCEFILE_CONFIG", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    @JsonProperty("sourcefile_config")
+    private SourcefileConfig sourcefileConfig;
 
     @Override
     public String getName() {
@@ -296,4 +302,13 @@ public class SourceFile
     public void setWorkflowPid(Long workflowPid) {
         this.workflowPid = workflowPid;
     }
+
+    public SourcefileConfig getSourcefileConfig() {
+        return sourcefileConfig;
+    }
+
+    public void setSourcefileConfig(SourcefileConfig sourcefileConfig) {
+        this.sourcefileConfig = sourcefileConfig;
+    }
+
 }

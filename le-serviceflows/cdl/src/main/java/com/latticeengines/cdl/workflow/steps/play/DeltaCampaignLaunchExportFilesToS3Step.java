@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NameStringStandardizationUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
@@ -84,16 +85,20 @@ public class DeltaCampaignLaunchExportFilesToS3Step
 
     private boolean createDeleteCsvDataFrame;
 
+    private boolean createTaskDescriptionFile;
+
     private Map<String, List<String>> exportFiles = new HashMap<>();
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
         createAddCsvDataFrame = Boolean.toString(true)
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
-        createDeleteCsvDataFrame = Boolean.toString(true).equals(
-                getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
+        createDeleteCsvDataFrame = Boolean.toString(true)
+                .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
+        createTaskDescriptionFile = Boolean.toString(true)
+                .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE));
         log.info("createAddCsvDataFrame=" + createAddCsvDataFrame + ", createDeleteCsvDataFrame="
-                + createDeleteCsvDataFrame);
+                + createDeleteCsvDataFrame + ", createTaskDescriptionFile=" + createTaskDescriptionFile);
 
         if (!createAddCsvDataFrame && !createDeleteCsvDataFrame) {
             return;
@@ -106,6 +111,10 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         if (createDeleteCsvDataFrame) {
             exportFiles.put(DeltaCampaignLaunchWorkflowConfiguration.DELETE, getListObjectFromContext(
                     DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_FILES, String.class));
+        }
+        if (createTaskDescriptionFile) {
+            exportFiles.put(DeltaCampaignLaunchWorkflowConfiguration.TASK_DESCRIPTION, getListObjectFromContext(
+                    DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE, String.class));
         }
         log.info("Before processing, Uploading all HDFS files to S3. {}", exportFiles);
         LookupIdMap lookupIdMap = getConfiguration().getLookupIdMap();
@@ -134,7 +143,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
                     request.srcPath = path;
                     request.tgtPath = pathBuilder.convertS3CampaignExportDir(path, s3Bucket,
                             dropBoxSummary.getDropBox(), getConfiguration().getPlayName(),
-                            getConfiguration().getPlayDisplayName());
+                            NameStringStandardizationUtils.getStandardString(getConfiguration().getPlayDisplayName()));
                     requests.add(request);
                     targetPaths.add(request.tgtPath);
                     hdfsExportFilePaths.add(request.srcPath);

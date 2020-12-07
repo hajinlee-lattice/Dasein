@@ -88,4 +88,13 @@ public class S3DataUnit extends DataUnit {
     public void setLinkedHdfsPath(String linkedHdfsPath) {
         this.linkedHdfsPath = linkedHdfsPath;
     }
+
+    public HdfsDataUnit toHdfsDataUnit(){
+        HdfsDataUnit hdfsDataUnit = new HdfsDataUnit();
+        hdfsDataUnit.setDataFormat(getDataFormat());
+        hdfsDataUnit.setName(getName());
+        hdfsDataUnit.setPath(getLinkedHdfsPath());
+        hdfsDataUnit.setCount(getCount());
+        return hdfsDataUnit;
+    }
 }

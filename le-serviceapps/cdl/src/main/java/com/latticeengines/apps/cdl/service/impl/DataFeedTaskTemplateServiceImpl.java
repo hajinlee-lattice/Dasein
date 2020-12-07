@@ -644,6 +644,37 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
+    public void updateAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, Integer length,
+                                        boolean nullable) {
+        DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, uniqueTaskId);
+        if (dataFeedTask == null) {
+            throw new IllegalArgumentException("Cannot find data feed task with uniqueId " + uniqueTaskId);
+        }
+        if (dataFeedTask.getDataFeedTaskConfig() == null) {
+            DataFeedTaskConfig config = new DataFeedTaskConfig();
+            config.addTemplateValidator(getAttributeLengthValidator(attrName, length, nullable));
+            dataFeedTask.setDataFeedTaskConfig(config);
+
+        } else {
+            if (CollectionUtils.isNotEmpty(dataFeedTask.getDataFeedTaskConfig().getTemplateValidators())) {
+                for (TemplateValidator validator : dataFeedTask.getDataFeedTaskConfig().getTemplateValidators()) {
+                    if (validator instanceof AttributeLengthValidator) {
+                        AttributeLengthValidator lengthValidator = (AttributeLengthValidator) validator;
+                        if (lengthValidator.getAttributeName().equalsIgnoreCase(attrName)) {
+                            lengthValidator.setLength(length);
+                            lengthValidator.setNullable(nullable);
+                            dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, true);
+                            return;
+                        }
+                    }
+                }
+            }
+            dataFeedTask.getDataFeedTaskConfig().addTemplateValidator(getAttributeLengthValidator(attrName, length, nullable));
+        }
+        dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, true);
+    }
+
+    @Override
     public void addSimpleValueFilter(String customerSpace, String uniqueTaskId, SimpleValueFilter simpleValueFilter) {
         Preconditions.checkNotNull(simpleValueFilter);
         DataFeedTask dataFeedTask = dataFeedTaskService.getDataFeedTask(customerSpace, uniqueTaskId);

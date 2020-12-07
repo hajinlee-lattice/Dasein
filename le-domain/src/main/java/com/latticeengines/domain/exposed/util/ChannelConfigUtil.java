@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 
 public final class ChannelConfigUtil {
 
@@ -72,5 +73,15 @@ public final class ChannelConfigUtil {
         default:
             return false;
         }
+    }
+
+    public static String getTaskDescription(CDLExternalSystemName destinationSystemName,
+            ChannelConfig channelConfig) {
+        if (destinationSystemName != CDLExternalSystemName.Outreach) {
+            return "";
+        }
+
+        OutreachChannelConfig config = (OutreachChannelConfig) channelConfig;
+        return config.getTaskDescription();
     }
 }

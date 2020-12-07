@@ -82,24 +82,22 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         if (eventDetail == null) {
             return;
         }
-
+        // Assume this is always true:
+        // totalRecords = recordsProcessed + recordsFailed + duplicatedRecords
         Long totalRecords = eventDetail.getTotalRecordsSubmitted();
         Long recordsProcessed = eventDetail.getProcessed();
         Long recordsFailed = eventDetail.getFailed();
         Long duplicatedRecords = eventDetail.getDuplicates() == null ? 0L : eventDetail.getDuplicates();
-        Long processedAndFailed = recordsFailed + duplicatedRecords;
+        Long recordsDuplicateAndFailed = recordsFailed + duplicatedRecords;
 
-        if (recordsFailed.equals(totalRecords) || processedAndFailed.equals(totalRecords)) {
+        if (recordsProcessed.equals(totalRecords)) {
+            playLaunch.setLaunchState(LaunchState.Synced);
+        } else if (recordsFailed.equals(totalRecords) || recordsDuplicateAndFailed.equals(totalRecords)) {
             playLaunch.setLaunchState(LaunchState.SyncFailed);
         } else {
-            if (recordsProcessed.equals(totalRecords)) {
-                playLaunch.setLaunchState(LaunchState.Synced);
-            } else if (recordsFailed.equals(totalRecords) || processedAndFailed.equals(totalRecords)) {
-                playLaunch.setLaunchState(LaunchState.SyncFailed);
-            } else {
-                playLaunch.setLaunchState(LaunchState.PartialSync);
-            }
+            playLaunch.setLaunchState(LaunchState.PartialSync);
         }
+
         sendEmailIfSyncFailed(playLaunch);
 
         log.info("Channel Config for launch ID " + playLaunch.getLaunchId() + ": "

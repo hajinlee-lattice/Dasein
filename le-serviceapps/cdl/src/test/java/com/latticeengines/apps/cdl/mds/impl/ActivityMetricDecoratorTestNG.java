@@ -17,7 +17,9 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.mockito.Mockito;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -31,6 +33,7 @@ import com.latticeengines.apps.cdl.repository.reader.StringTemplateReaderReposit
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.TemplateUtils;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -130,12 +133,13 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
 
         ColumnMetadata cm1 = rendered.get(0);
         Assert.assertEquals(cm1.getCategory(), Category.WEB_VISIT_PROFILE);
-        Assert.assertEquals(cm1.getDisplayName(), "Last 2 weeks");
-        Assert.assertEquals(cm1.getDescription(), "This attribute shows companies with the unique Website Visits counts (organic + lead) within the previous 2 weeks plus this week till today, based on real-time web traffic records. The previous 2 weeks is the 3 weeks period beginning 2 weeks ago as of the last data refresh.");
+        Assert.assertEquals(cm1.getDisplayName(), "8 weeks till today");
+        Assert.assertEquals(cm1.getDescription(), "This attribute shows companies with the unique Website Visits counts (organic + lead) within the previous 8 weeks plus this week till today, based on real-time web traffic records. The previous 8 weeks is the 9 weeks period beginning 8 weeks ago as of the last data refresh.");
         Assert.assertEquals(cm1.getSubcategory(), "Page 123");
         Assert.assertEquals(cm1.getSecondarySubCategoryDisplayName(), PATTERN);
-        Assert.assertEquals(cm1.getFilterTags(), Arrays.asList("w_2_w", FilterOptions.Option.ANY_VALUE));
-        Assert.assertTrue(cm1.isHiddenInCategoryTile());
+        Assert.assertEquals(cm1.getFilterTags(), Arrays.asList("wi_8_w", FilterOptions.Option.ANY_VALUE, "8 weeks"));
+        System.out.println(":::" + cm1.isHiddenInCategoryTile());
+        Assert.assertTrue(BooleanUtils.isNotTrue(cm1.isHiddenInCategoryTile()));
         Assert.assertEquals(cm1.getFundamentalType(), FundamentalType.NUMERIC);
 
         ColumnMetadata cm2 = rendered.get(1);
@@ -144,7 +148,7 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         Assert.assertEquals(cm2.getDescription(), "This attribute shows companies with the unique Website Visits counts (organic + lead) within the previous 1 week plus this week till today, based on real-time web traffic records. The previous 1 week is the 2 weeks period beginning 1 week ago as of the last data refresh.");
         Assert.assertEquals(cm2.getSubcategory(), "Page 123");
         Assert.assertEquals(cm2.getSecondarySubCategoryDisplayName(), PATTERN);
-        Assert.assertEquals(cm2.getFilterTags(), Arrays.asList("wi_1_w", FilterOptions.Option.ANY_VALUE));
+        Assert.assertEquals(cm2.getFilterTags(), Arrays.asList("wi_1_w", FilterOptions.Option.ANY_VALUE, "1 week"));
         Assert.assertTrue(cm2.isHiddenInCategoryTile());
         Assert.assertEquals(cm2.getFundamentalType(), FundamentalType.NUMERIC);
 
@@ -199,7 +203,7 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         multiWeeksGroupAttrs.put("GroupId", groupId);
         multiWeeksGroupAttrs.put("RollupDimIds", Collections.singletonList(PATTERN_ID));
 
-        TimeFilter timeFilter = TimeFilter.within(2, PERIOD);
+        TimeFilter timeFilter = TimeFilter.withinInclude(8, PERIOD);
         multiWeeksGroupAttrs.put("TimeRange", ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
         String attr1 = TemplateUtils.renderByMap(ACTIVITY_METRICS_GROUP_ATTRNAME, multiWeeksGroupAttrs).toLowerCase();
         ColumnMetadata cm1 = new ColumnMetadata(attr1, "String");
@@ -237,10 +241,18 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
     }
 
     private void prepareMetricGroup() {
-        ActivityMetricsGroup group = prepareMetricsGroup();
-        activityMetricsGroupEntityMgr.createOrUpdate(group);
-        ActivityMetricsGroup currentWeekGroup = prepareCurrentWeekMetricsGroup();
-        activityMetricsGroupEntityMgr.createOrUpdate(currentWeekGroup);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        retry.execute(ctx -> {
+            ActivityMetricsGroup group = prepareMetricsGroup();
+            activityMetricsGroupEntityMgr.createOrUpdate(group);
+            return true;
+        });
+        RetryTemplate retryCurWeek = RetryUtils.getRetryTemplate(3);
+        retryCurWeek.execute(ctx -> {
+            ActivityMetricsGroup currentWeekGroup = prepareCurrentWeekMetricsGroup();
+            activityMetricsGroupEntityMgr.createOrUpdate(currentWeekGroup);
+            return true;
+        });
     }
 
     private StreamDimension getWebVisitDimension() {

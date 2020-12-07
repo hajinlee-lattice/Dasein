@@ -3,6 +3,8 @@ package com.latticeengines.cdl.workflow.steps.campaign;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -38,7 +41,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -220,12 +225,26 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 List<String> sortConfig = getSortConfigFromZK(customerSpace);
                 String sortAttr = sortConfig.get(0);
                 String sortDir = sortConfig.get(1);
+                Lookup lookup = new AttributeLookup(BusinessEntity.Contact, sortAttr);
+                HdfsDataUnit contactDataUnit = null;
+
+                if (lookup != null) {
+                    Set<Lookup> lookupSet = new HashSet<>();
+                    Lookup contactId = new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name());
+                    lookupSet.addAll(Arrays.asList(lookup, contactId));
+
+                    FrontEndQuery query = new FrontEndQuery();
+                    query.setLookups(new ArrayList<>(lookupSet));
+                    query.setMainEntity(BusinessEntity.Contact);
+
+                    contactDataUnit = getEntityQueryData(query);
+                }
 
                 List<DataUnit> inputUnits = new ArrayList<>();
                 inputUnits.add(launchDataUniverseDataUnit);
 
                 GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig( //
-                        getRandomWorkspace(), maxContactsPerAccount, maxEntitiesToLaunch, sortAttr, sortDir);
+                        getRandomWorkspace(), maxContactsPerAccount, maxEntitiesToLaunch, sortAttr, sortDir, contactDataUnit);
 
                 config.setInput(inputUnits);
                 log.info("Executing GenerateLaunchUniverseJob with config: " + JsonUtils.serialize(config));

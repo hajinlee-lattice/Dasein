@@ -94,7 +94,7 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
                     LoginDocument.class);
             assertFalse(loginDoc.getResult().getTenants().contains(tenant));
         } finally {
-            userService.deleteUser(tenant.getId(), adminUsername);
+            userService.deleteUser(tenant.getId(), adminUsername, true);
             globalTenantManagementService.discardTenant(tenant);
         }
     }

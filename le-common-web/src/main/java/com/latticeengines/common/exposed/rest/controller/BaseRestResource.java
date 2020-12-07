@@ -3,7 +3,8 @@ package com.latticeengines.common.exposed.rest.controller;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,7 +20,7 @@ import org.springframework.data.domain.Sort.Direction;
  */
 public class BaseRestResource {
 
-    private static final Logger log = Logger.getLogger(BaseRestResource.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseRestResource.class);
     
     /**
      * @param pageIndex

@@ -39,7 +39,7 @@ public interface UserService {
 
     AccessLevel getAccessLevel(String tenantId, String username);
 
-    boolean deleteUser(String tenantId, String username);
+    boolean deleteUser(String tenantId, String username, boolean clearSession);
 
     void clearSession(boolean expireSession, String tenantId, List<Long> userIds);
 

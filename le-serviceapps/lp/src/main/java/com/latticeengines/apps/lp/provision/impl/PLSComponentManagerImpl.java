@@ -521,7 +521,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<User> users = userService.getUsers(tenant.getId());
         if (users != null) {
             for (User user : users) {
-                userService.deleteUser(tenant.getId(), user.getUsername());
+                userService.deleteUser(tenant.getId(), user.getUsername(), false);
             }
         }
         if (tenantService.hasTenantId(tenant.getId())) {

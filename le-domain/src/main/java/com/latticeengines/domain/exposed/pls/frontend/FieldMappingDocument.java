@@ -10,6 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.pls.SourcefileConfig;
 
 public class FieldMappingDocument {
     @JsonProperty
@@ -23,6 +24,9 @@ public class FieldMappingDocument {
 
     @JsonProperty
     private ExtraFieldMappingInfo extraFieldMappingInfo;
+
+    @JsonProperty
+    private SourcefileConfig sourcefileConfig;
 
     public List<FieldMapping> getFieldMappings() {
         return this.fieldMappings;
@@ -56,6 +60,14 @@ public class FieldMappingDocument {
         this.extraFieldMappingInfo = extraFieldMappingInfo;
     }
 
+    public SourcefileConfig getSourcefileConfig() {
+        return sourcefileConfig;
+    }
+
+    public void setSourcefileConfig(SourcefileConfig sourcefileConfig) {
+        this.sourcefileConfig = sourcefileConfig;
+    }
+
     @JsonIgnore
     public void dedupFieldMappings() {
         if (CollectionUtils.isEmpty(fieldMappings)) {
@@ -63,7 +75,7 @@ public class FieldMappingDocument {
         }
         Set<String> mappingKeys = new HashSet<>();
         Iterator<FieldMapping> iterator = fieldMappings.iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             FieldMapping fieldMapping = iterator.next();
             String key = fieldMapping.toString();
             if (mappingKeys.contains(key)) {

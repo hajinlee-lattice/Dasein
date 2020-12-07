@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConf
 import com.latticeengines.domain.exposed.spark.cdl.GenerateIntentAlertArtifactsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchUniverseJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateLiveRampLaunchArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
@@ -63,6 +64,7 @@ import com.latticeengines.domain.exposed.spark.cdl.MigrateActivityPartitionKeyJo
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.PublishVIDataJobConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
@@ -194,7 +196,11 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = PublishActivityAlertsJobConfig.class, name = PublishActivityAlertsJobConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateRecommendationCSVConfig.class, name = GenerateRecommendationCSVConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateIntentAlertArtifactsConfig.class, name = GenerateIntentAlertArtifactsConfig.NAME), //
-        @JsonSubTypes.Type(value = ExtractListSegmentCSVConfig.class, name = ExtractListSegmentCSVConfig.NAME)
+        @JsonSubTypes.Type(value = ExtractListSegmentCSVConfig.class, name = ExtractListSegmentCSVConfig.NAME), //
+        @JsonSubTypes.Type(value = GenerateLiveRampLaunchArtifactsJobConfig.class, name =
+                GenerateLiveRampLaunchArtifactsJobConfig.NAME), //
+        @JsonSubTypes.Type(value = PublishVIDataJobConfiguration.class, name =
+                PublishVIDataJobConfiguration.NAME),
 })
 public abstract class SparkJobConfig implements Serializable {
 

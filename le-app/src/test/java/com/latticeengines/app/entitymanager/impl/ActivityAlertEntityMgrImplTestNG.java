@@ -51,7 +51,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     public void findByKey() {
         List<ActivityAlert> records = activityAlertEntityMgr.findTopNAlertsByEntityId("12345", BusinessEntity.Account,
                 "version1", AlertCategory.PEOPLE, 3);
-        assertEquals(records.size(), 3);
+        assertEquals(records.size(), 2);
     }
 
     private List<ActivityAlert> generateAlerts(Tenant t) {
@@ -59,7 +59,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
 
         // record 1
         ActivityAlert record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.SHOWN_INTENT);
+        record.setAlertName(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY);
         record.setEntityId("12345");
         record.setEntityType(BusinessEntity.Account);
         record.setTenantId(t.getPid());
@@ -73,8 +73,9 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
         data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
         data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
         Map<String, Object> alertData = new HashMap<>();
-        alertData.put("NumBuyIntents", 2);
-        alertData.put("NumResearchIntents", 5);
+        alertData.put("PageVisits", 2);
+        alertData.put("PageName", "Database Product");
+        alertData.put("ActiveContacts", 3);
         data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
         record.setAlertData(data);
 
@@ -82,7 +83,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
 
         // record 2
         record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.SHOWN_INTENT);
+        record.setAlertName(ActivityStoreConstants.Alert.ANONYMOUS_WEB_VISITS);
         record.setEntityId("12345");
         record.setEntityType(BusinessEntity.Account);
         record.setTenantId(t.getPid());
@@ -96,8 +97,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
         data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
         data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
         alertData = new HashMap<>();
-        alertData.put("NumBuyIntents", 2);
-        alertData.put("NumResearchIntents", 0);
+        alertData.put("PageVisits", 2);
         data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
         record.setAlertData(data);
 
@@ -105,13 +105,13 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
 
         // record 3
         record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.SHOWN_INTENT);
-        record.setEntityId("12345");
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
+        record.setEntityId("23456");
         record.setEntityType(BusinessEntity.Account);
         record.setTenantId(t.getPid());
         record.setCreationTimestamp(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
         record.setVersion("version1");
-        record.setCategory(AlertCategory.PEOPLE);
+        record.setCategory(AlertCategory.PRODUCTS);
 
         data = new HashMap<>();
         end = Instant.now().minus(7, ChronoUnit.DAYS);
@@ -119,31 +119,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
         data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
         data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
         alertData = new HashMap<>();
-        alertData.put("NumBuyIntents", 0);
-        alertData.put("NumResearchIntents", 3);
-        data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
-        record.setAlertData(data);
-
-        alerts.add(record);
-
-        // record 4
-        record = new ActivityAlert();
-        record.setAlertName(ActivityStoreConstants.Alert.SHOWN_INTENT);
-        record.setEntityId("12345");
-        record.setEntityType(BusinessEntity.Account);
-        record.setTenantId(t.getPid());
-        record.setCreationTimestamp(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
-        record.setVersion("version1");
-        record.setCategory(AlertCategory.PEOPLE);
-
-        data = new HashMap<>();
-        end = Instant.now().minus(11, ChronoUnit.DAYS);
-        start = end.minus(10, ChronoUnit.DAYS);
-        data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
-        data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
-        alertData = new HashMap<>();
-        alertData.put("NumBuyIntents", 1);
-        alertData.put("NumResearchIntents", 3);
+        alertData.put("PageName", "Database Products");
         data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
         record.setAlertData(data);
 

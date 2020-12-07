@@ -41,11 +41,13 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
         Session session = getSessionFactory().getCurrentSession();
         Class<ExportFieldMetadataDefaults> entityClz = getEntityClass();
         String queryStr = String.format(
-                "SELECT field FROM %s field JOIN field.audienceTypes audience WHERE field.externalSystemName=:systemName AND audience=:audienceType",
+                "SELECT field FROM %s field JOIN field.audienceTypes audience WHERE field.externalSystemName=:systemName AND audience=:audienceType "
+                        + "AND field.exportEnabled=:exportEnabled",
                 entityClz.getSimpleName());
         TypedQuery<ExportFieldMetadataDefaults> q = session.createQuery(queryStr, ExportFieldMetadataDefaults.class);
         q.setParameter("systemName", systemName);
         q.setParameter("audienceType", audienceType);
+        q.setParameter("exportEnabled", true);
         return q.getResultList();
     }
 

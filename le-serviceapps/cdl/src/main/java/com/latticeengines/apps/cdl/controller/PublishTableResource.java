@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.workflow.PublishTableRoleWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.PublishVIDataWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.PublishTableRoleRequest;
+import com.latticeengines.domain.exposed.cdl.PublishVIDataRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,6 +26,8 @@ public class PublishTableResource {
 
     @Inject
     private PublishTableRoleWorkflowSubmitter workflowSubmitter;
+    @Inject
+    private PublishVIDataWorkflowSubmitter publishVIDataWorkflowSubmitter;
 
     @PostMapping("/dynamo")
     @ApiOperation(value = "publish dynamo table")
@@ -37,6 +41,26 @@ public class PublishTableResource {
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
         }
+    }
+
+    @PostMapping("/vidata")
+    @ApiOperation(value = "publish VIData to elasticsearch")
+    public ResponseDocument<String> publishVIData(@PathVariable String customerSpace, //
+                                                  @RequestBody(required = false) PublishVIDataRequest request) {
+        if (request == null) {
+            request = getDefaultPublishViDataRequest();
+        }
+        try {
+            ApplicationId appId = publishVIDataWorkflowSubmitter.submitPublishViData(customerSpace, //
+                     request.getVersion(), new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    private PublishVIDataRequest getDefaultPublishViDataRequest() {
+        return new PublishVIDataRequest();
     }
 
 }
