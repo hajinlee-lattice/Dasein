@@ -323,7 +323,7 @@ public class BatonServiceImpl implements BatonService {
         int cnt = 0;
         boolean result;
         try {
-            result = ContractLifecycleManager.exists(contractId))
+            result = ContractLifecycleManager.exists(contractId));
             if (result) {
                 do {
                     ContractLifecycleManager.delete(contractId);
@@ -335,13 +335,8 @@ public class BatonServiceImpl implements BatonService {
                 return false;
             }
         } catch (Exception e) {
-            if (cnt == 0) {
-                log.error("Error retrieving tenants", e);
-                return false;
-            } else {
-                log.info("node has been deleted");
-                return true;
-            }
+            log.error("Error retrieving tenants", e);
+            return false;
         }
         log.info("contract exists in zk {}, retry cnt is {}", result, cnt);
         return !result && cnt > 0;
