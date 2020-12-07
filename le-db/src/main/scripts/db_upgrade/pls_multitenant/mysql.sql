@@ -13,6 +13,24 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
+      CREATE TABLE `DCP_ENRICHMENT_TEMPLATE` (
+        `PID` bigint(20) NOT NULL AUTO_INCREMENT,
+        `TEMPLATE_ID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+        `NAME` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+        `DOMAIN` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+        `RECORD_TYPE` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+        `ARCHIVED` boolean NOT NULL,
+        `CREATE_TIME` datetime NOT NULL,
+        `UPDATE_TIME` datetime NOT NULL,
+        `CREATED_BY` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+        `FK_TENANT_ID` bigint(20) NOT NULL,
+        PRIMARY KEY (`PID`),
+        UNIQUE KEY `UX_TEMPLATE_ID` (`FK_TENANT_ID`,`TEMPLATE_ID`),
+        CONSTRAINT `FK_ENRICHMENTTEMPLATE_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE
+      ) ENGINE = InnoDB
+        DEFAULT CHARSET = utf8mb4
+        COLLATE = utf8mb4_unicode_ci;
+
       DROP TABLE IF EXISTS `METADATA_LIST_SEGMENT`;
       CREATE TABLE `METADATA_LIST_SEGMENT` (
         `PID` bigint(20) NOT NULL AUTO_INCREMENT,
