@@ -323,7 +323,7 @@ public class BatonServiceImpl implements BatonService {
         int cnt = 0;
         boolean result;
         try {
-            result = ContractLifecycleManager.exists(contractId));
+            result = ContractLifecycleManager.exists(contractId);
             if (result) {
                 do {
                     ContractLifecycleManager.delete(contractId);
