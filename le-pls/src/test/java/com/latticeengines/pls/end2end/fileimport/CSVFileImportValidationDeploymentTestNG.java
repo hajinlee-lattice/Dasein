@@ -79,6 +79,7 @@ public class CSVFileImportValidationDeploymentTestNG extends CSVFileImportDeploy
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment.import.group1")
