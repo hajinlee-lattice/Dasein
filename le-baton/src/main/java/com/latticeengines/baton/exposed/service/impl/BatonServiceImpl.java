@@ -43,6 +43,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -319,19 +320,25 @@ public class BatonServiceImpl implements BatonService {
 
     @Override
     public boolean deleteContract(String contractId) {
+        int cnt = 0;
+        boolean result;
         try {
-            CamilleEnvironment.getCamille();
-            if (ContractLifecycleManager.exists(contractId)) {
+             do {
                 ContractLifecycleManager.delete(contractId);
-                return true;
-            } else {
-                return false;
-            }
-
+                cnt++;
+                SleepUtils.sleep(500);
+            } while ((result = ContractLifecycleManager.exists(contractId)) && cnt < 3);
         } catch (Exception e) {
-            log.error("Error retrieving tenants", e);
-            return false;
+            if (cnt == 0) {
+                log.error("Error retrieving tenants", e);
+                return false;
+            } else {
+                log.info("node has been deleted");
+                return true;
+            }
         }
+        log.info("contract exists in zk {}, retry cnt is {}", result, cnt);
+        return !result && cnt > 0;
     }
 
     @Override
