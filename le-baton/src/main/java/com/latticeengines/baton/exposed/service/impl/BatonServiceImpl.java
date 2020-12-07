@@ -323,11 +323,17 @@ public class BatonServiceImpl implements BatonService {
         int cnt = 0;
         boolean result;
         try {
-             do {
-                ContractLifecycleManager.delete(contractId);
-                cnt++;
-                SleepUtils.sleep(500);
-            } while ((result = ContractLifecycleManager.exists(contractId)) && cnt < 3);
+            result = ContractLifecycleManager.exists(contractId))
+            if (result) {
+                do {
+                    ContractLifecycleManager.delete(contractId);
+                    cnt++;
+                    SleepUtils.sleep(500);
+                } while ((result = ContractLifecycleManager.exists(contractId)) && cnt < 3);
+            } else {
+                log.info("node {} doesn't exist", contractId);
+                return false;
+            }
         } catch (Exception e) {
             if (cnt == 0) {
                 log.error("Error retrieving tenants", e);
