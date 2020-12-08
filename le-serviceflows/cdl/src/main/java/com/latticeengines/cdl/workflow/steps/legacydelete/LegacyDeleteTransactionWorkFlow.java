@@ -17,7 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LegacyDeleteTransactionWorkFlow extends AbstractWorkflow<LegacyDeleteTransactionWorkFlowConfiguration> {
     @Inject
-    private LegacyDeleteByUploadStepWrapper legacyDeleteByUploadStepWrapper;
+    private LegacyDeleteByUploadStep legacyDeleteByUploadStep;
 
     @Inject
     private LegacyDeleteByDateRangeStep legacyDeleteByDateRangeStep;
@@ -25,7 +25,7 @@ public class LegacyDeleteTransactionWorkFlow extends AbstractWorkflow<LegacyDele
     @Override
     public Workflow defineWorkflow(LegacyDeleteTransactionWorkFlowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
-                .next(legacyDeleteByUploadStepWrapper)
+                .next(legacyDeleteByUploadStep)
                 .next(legacyDeleteByDateRangeStep)
                 .build();
     }
