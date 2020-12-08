@@ -1,7 +1,7 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.domain.exposed.metadata.{InterfaceName, UserDefinedType}
 import com.latticeengines.domain.exposed.metadata.template.{CSVAdaptor, ImportFieldMapping}
+import com.latticeengines.domain.exposed.metadata.{InterfaceName, UserDefinedType}
 import com.latticeengines.domain.exposed.spark.cdl.ExtractListSegmentCSVConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.functions.{col, lit, udf, when}
@@ -38,12 +38,12 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     importCSVDf = importCSVDf.select(columnsExist map col: _*)
     val outputSchema = StructType(structFields)
     val transformedInput = spark.createDataFrame(importCSVDf.rdd, outputSchema)
-    finalDfs += generateEntityDf(transformedInput, accountAttributes)
-    finalDfs += generateEntityDf(transformedInput, contactAttributes)
+    finalDfs += generateEntityDf(true, transformedInput, accountAttributes)
+    finalDfs += generateEntityDf(false, transformedInput, contactAttributes)
     lattice.output = finalDfs.toList
   }
 
-  private def generateEntityDf(input: DataFrame, attributes: Seq[String]): DataFrame = {
+  private def generateEntityDf(distinct: Boolean, input: DataFrame, attributes: Seq[String]): DataFrame = {
     val columnsExist: ListBuffer[String] = ListBuffer()
     val columnsNotExist: ListBuffer[String] = ListBuffer()
     attributes.foreach { attribute =>
@@ -69,6 +69,9 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
             contactNameUdf(col("FirstName"), col("LastName"))).otherwise(lit(null).cast(StringType)))
         }
       }
+    }
+    if (distinct) {
+      result = result.distinct()
     }
     result
   }
