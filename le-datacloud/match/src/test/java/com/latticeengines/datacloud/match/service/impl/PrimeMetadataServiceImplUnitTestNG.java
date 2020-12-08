@@ -68,7 +68,7 @@ public class PrimeMetadataServiceImplUnitTestNG {
 
     private DataBlockElement getBlockElement(int block, DataBlockLevel level, int element) {
         DataBlockElement blockElement = new DataBlockElement();
-        PrimeColumn column = new PrimeColumn(String.format("element%d", element), "", "");
+        PrimeColumn column = new PrimeColumn(String.format("element%d", element), "", "", "");
         blockElement.setPrimeColumn(column);
         blockElement.setBlock(String.format("block%d", block));
         blockElement.setLevel(level);

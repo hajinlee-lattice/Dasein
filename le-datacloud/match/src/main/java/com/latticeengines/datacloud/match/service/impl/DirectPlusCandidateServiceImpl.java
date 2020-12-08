@@ -104,23 +104,23 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     public List<PrimeColumn> candidateColumns() {
         return Arrays.asList( //
                 new PrimeColumn(MatchedDuns, "Matched D-U-N-S Number", //
-                        "matchCandidates.organization.duns"), //
+                        "matchCandidates.organization.duns", "123456789"), //
                 new PrimeColumn(MatchType, "Match Type", //
-                        "matchDataCriteria"), //
+                        "matchDataCriteria", "Name and Address Lookup"), //
                 new PrimeColumn(ConfidenceCode, "Match Confidence Code", //
-                        "matchCandidates.matchQualityInformation.confidenceCode"), //
+                        "matchCandidates.matchQualityInformation.confidenceCode", "6"), //
                 new PrimeColumn(MatchGrade, "Match Grade", //
-                        "matchCandidates.matchQualityInformation.matchGrade"), //
+                        "matchCandidates.matchQualityInformation.matchGrade", "AZZZZZZZFZZ"), //
                 new PrimeColumn(MatchDataProfile, "Match Data Profile", //
-                        "matchCandidates.matchQualityInformation.matchDataProfile"), //
+                        "matchCandidates.matchQualityInformation.matchDataProfile", "01"), //
                 new PrimeColumn(NameMatchScore, "Name Match Score", //
-                        "matchCandidates.matchQualityInformation.nameMatchScore"), //
+                        "matchCandidates.matchQualityInformation.nameMatchScore", "85.5"), //
                 new PrimeColumn(OperatingStatusText, "Match Candidate Operating Status", //
-                        "matchCandidates.organization.dunsControlStatus.operatingStatus.description"), //
+                        "matchCandidates.organization.dunsControlStatus.operatingStatus.description", "Active"), //
                 new PrimeColumn(MatchPrimaryBusinessName, "Match Primary Business Name", //
-                        "matchCandidates.organization.primaryName"), //
+                        "matchCandidates.organization.primaryName", "Bayer AG"), //
                 new PrimeColumn(MatchIso2CountryCode, "Match ISO Alpha 2 Char Country Code", //
-                        "matchCandidates.organization.primaryAddress.addressCountry.isoAlpha2Code") //
+                        "matchCandidates.organization.primaryAddress.addressCountry.isoAlpha2Code", "DE") //
         );
     }
 

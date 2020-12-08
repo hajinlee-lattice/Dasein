@@ -127,19 +127,19 @@ public class DirectPlusUtilsUnitTestNG {
 
     private List<PrimeColumn> getDataBlockMetadata() {
         return Arrays.asList(
-                new PrimeColumn("DunsNumber", "D-U-N-S Number", "organization.duns"),
-                new PrimeColumn("PrimaryBusinessName", "Primary Business Name", "organization.primaryName"),
-                new PrimeColumn("TradeStyleName", "Trade Style Name", "organization.tradeStyleNames.name"),
-                new PrimeColumn("PrimaryAddressStreetLine1", "Primary Address Street Line 1", "organization.primaryAddress.streetAddress.line1"),
-                new PrimeColumn("PrimaryAddressStreetLine2", "Primary Address Street Line 2", "organization.primaryAddress.streetAddress.line2"),
-                new PrimeColumn("PrimaryAddressLocalityName", "Primary Address Locality Name", "organization.primaryAddress.addressLocality.name"),
-                new PrimeColumn("PrimaryAddressRegionName", "Primary Address Region Name", "organization.primaryAddress.addressRegion.name"),
-                new PrimeColumn("PrimaryAddressPostalCode", "Primary Address Postal Code", "organization.primaryAddress.postalCode"),
-                new PrimeColumn("PrimaryAddressCountryName", "Primary Address Country/Market Name", "organization.primaryAddress.addressCountry.name"),
-                new PrimeColumn("TelephoneNumber", "Telephone Number", "organization.telephone.telephoneNumber"),
-                new PrimeColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4"),
-                new PrimeColumn("BankAddressLocality", "Bank Address Locality Name", "organization.banks.address.addressLocality.name"), // test nulls and hash collisions in cache
-                new PrimeColumn("OperatingStatusCode", "Operating Status Code", "organization.dunsControlStatus.operatingStatus.dnbCode", "Integer") // test integer value
+                new PrimeColumn("DunsNumber", "D-U-N-S Number", "organization.duns", "804735132"),
+                new PrimeColumn("PrimaryBusinessName", "Primary Business Name", "organization.primaryName", "Primary Name"),
+                new PrimeColumn("TradeStyleName", "Trade Style Name", "organization.tradeStyleNames.name", "Alternate Name"),
+                new PrimeColumn("PrimaryAddressStreetLine1", "Primary Address Street Line 1", "organization.primaryAddress.streetAddress.line1", "7700 W Parmer Ln"),
+                new PrimeColumn("PrimaryAddressStreetLine2", "Primary Address Street Line 2", "organization.primaryAddress.streetAddress.line2", "Suite 300"),
+                new PrimeColumn("PrimaryAddressLocalityName", "Primary Address Locality Name", "organization.primaryAddress.addressLocality.name", "Austin"),
+                new PrimeColumn("PrimaryAddressRegionName", "Primary Address Region Name", "organization.primaryAddress.addressRegion.name", "Travis County"),
+                new PrimeColumn("PrimaryAddressPostalCode", "Primary Address Postal Code", "organization.primaryAddress.postalCode", "78701"),
+                new PrimeColumn("PrimaryAddressCountryName", "Primary Address Country/Market Name", "organization.primaryAddress.addressCountry.name", "USA"),
+                new PrimeColumn("TelephoneNumber", "Telephone Number", "organization.telephone.telephoneNumber", "800-555-5555"),
+                new PrimeColumn("IndustryCodeUSSicV4Code", "Industry Code USSicV4 Code", "organization.primaryIndustryCode.usSicV4", "7323"),
+                new PrimeColumn("BankAddressLocality", "Bank Address Locality Name", "organization.banks.address.addressLocality.name", "New York"), // test nulls and hash collisions in cache
+                new PrimeColumn("OperatingStatusCode", "Operating Status Code", "organization.dunsControlStatus.operatingStatus.dnbCode", "Integer", "1") // test integer value
         );
     }
 
