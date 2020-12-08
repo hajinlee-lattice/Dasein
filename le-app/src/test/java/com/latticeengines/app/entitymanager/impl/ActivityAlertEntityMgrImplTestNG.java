@@ -129,7 +129,6 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    @Transactional
     public void teardown() {
         activityAlertRepository.deleteInBatch(alerts);
     }
