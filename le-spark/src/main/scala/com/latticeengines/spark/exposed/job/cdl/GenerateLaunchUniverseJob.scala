@@ -39,10 +39,9 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
 
     if (maxContactsPerAccount != null) {
       trimmedData = limitContactsPerAccount(trimmedData, accountId, contactId, sortAttr, sortDir, maxContactsPerAccount)
-    }
-
-    if (maxEntitiesToLaunch != null) {
-      trimmedData = trimmedData.limit(maxEntitiesToLaunch.toInt)
+      if (maxEntitiesToLaunch != null) {
+        trimmedData = trimmedData.limit(maxEntitiesToLaunch.toInt)
+      }
     }
 
     lattice.output = List(trimmedData)

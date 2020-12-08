@@ -61,6 +61,8 @@ public final class WorkflowJobUtils {
     private static final int DEFAULT_WORKFLOW_JOB_QUOTA_LIMIT = 1000;
     private static final String WORKFLOW_JOB_QUOTA_LIMIT = "WorkflowJobQuotaLimit";
     private static final String PUBLISH_RECOMMENDATION_FOR_S3_LAUNCH = "PublishRecommendationsForS3Launch";
+    private static final String CONTACT_ACCOUNT_RATIO_THRESHOLD = "ContactAccountRatioThreshold";
+    private static final Long DEFAULT_CONTACT_ACCOUNT_RATIO_THRESHOLD = 100000L;
     private static final String CDL = "CDL";
     private static ObjectMapper om = new ObjectMapper();
 
@@ -339,4 +341,16 @@ public final class WorkflowJobUtils {
         return publishRecommendationsForS3Launch;
     }
 
+    public static Long getContactAccountRatioThresholdFromZK(CustomerSpace customerSpace) {
+        Long contactAccountRatioThreshold = DEFAULT_CONTACT_ACCOUNT_RATIO_THRESHOLD;
+        try {
+            String contactAccountRatioThresholdStr = getValueFromZK(customerSpace, PathConstants.CDL, WORKFLOW_JOB_QUOTA_LIMIT);
+            if (StringUtils.isNotEmpty(contactAccountRatioThresholdStr)) {
+                contactAccountRatioThreshold = Long.valueOf(contactAccountRatioThresholdStr);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get count of workflow job quota limit from ZK for " + customerSpace.getTenantId(), e);
+        }
+        return contactAccountRatioThreshold;
+    }
 }
