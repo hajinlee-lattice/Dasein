@@ -472,7 +472,11 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         for (PrimeColumn primeColumn: primeColumns) {
             // TODO: don't hardcode access to the 0th datablock
             //       unsafe .get()?
-            blockNames.put(primeColumn.getAttrName(), primeColumn.getDataBlocks().get(0).getBlock());
+            if (primeColumn.getDataBlocks() == null) {
+                blockNames.put(primeColumn.getAttrName(), "missing datablocks");
+            } else {
+                blockNames.put(primeColumn.getAttrName(), primeColumn.getDataBlocks().get(0).getBlock());
+            }
         }
         return blockNames;
     }

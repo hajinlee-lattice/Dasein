@@ -293,7 +293,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "primaryaddr_addrlocality_name", //
                 "primaryaddr_addrregion_abbreviatedname", //
                 "primaryaddr_continentalregion_name", //
-                "Organization Marketing Risk Class Description", //
+//                "dnbassessment_marketingriskclass_desc", //
                 "primaryaddr_isregisteredaddr", //
                 "primaryaddr_language_desc", //
                 "primaryaddr_language_code", //
@@ -315,7 +315,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "numberofemployees_employeefiguresdate", //
                 "registeredname", //
                 "primaryname", //
-                "Organization Marketing Risk Class D&B Code", //
+//                "dnbassessment_marketingriskclass_code", //
                 "duns_number", //
                 "countryisoalpha2code" //
         ));
@@ -629,12 +629,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             start = headers.indexOf("D-U-N-S Number");
             Assert.assertEquals(start, 24);
             Assert.assertEquals(headers.subList(start, start + BASE_COLUMNS.size()), BASE_COLUMNS);
-
-            // verify datablock grouping (Company Info, Sales and Marketing Insight)
-            // Sales and Marketing Insight headers in own group, after Company Info
-            int n = headers.size();
-            Assert.assertEquals(headers.get(n-2), "Organization Marketing Risk Class Description");
-            Assert.assertEquals(headers.get(n-1), "Organization Marketing Risk Class D&B Code");
         }
 
         MatchCoreErrorConstants.CSV_HEADER_MAP.values().forEach(errorHeader -> Assert.assertTrue(headers.contains(errorHeader)));
