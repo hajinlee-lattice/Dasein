@@ -2,9 +2,12 @@ package com.latticeengines.domain.exposed.pls.frontend;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
+
+import it.unimi.dsi.fastutil.Hash;
 
 public abstract class FieldDefinitionBody {
     @JsonProperty
@@ -116,6 +119,24 @@ public abstract class FieldDefinitionBody {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCurrentFieldDefinitionsRecord(),
+                getImportWorkflowSpec(),
+                toHashMap(getExistingFieldDefinitionsMap()),
+                toHashMap(getAutodetectionResultsMap()),
+                toHashMap(getOtherTemplateDataMap())
+        );
+    }
+
+    private <T> HashMap<String, T> toHashMap(Map<String, T> map) {
+        HashMap<String, T> result = null;
+        if (map != null) {
+            result = (map instanceof HashMap) ? (HashMap)map : new HashMap<String, T>(map);
+        }
+        return result;
     }
 
     public static <V> boolean mapEquals(Map<String, V> map1, Map<String, V> map2) {

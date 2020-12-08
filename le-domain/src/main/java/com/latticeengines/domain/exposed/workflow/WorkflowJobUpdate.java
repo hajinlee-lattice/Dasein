@@ -10,6 +10,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
@@ -71,4 +72,7 @@ public class WorkflowJobUpdate implements HasPid {
     public boolean equals(Object obj) {
         return EqualsBuilder.reflectionEquals(this, obj);
     }
+
+    @Override
+    public int hashCode() { return HashCodeBuilder.reflectionHashCode(this); }
 }

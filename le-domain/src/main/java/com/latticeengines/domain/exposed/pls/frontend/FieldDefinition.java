@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.pls.frontend;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -455,5 +456,30 @@ public class FieldDefinition {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.fieldName,
+                this.fieldType,
+                this.screenName,
+                this.columnName,
+                this.dateFormat,
+                this.timeFormat,
+                this.timeZone,
+                this.logicalDataType,
+                this.fundamentalType,
+                this.statisticalType,
+                this.category,
+                this.subcategory,
+                this.externalSystemType,
+                this.externalSystemName,
+                this.matchingColumnNames,
+                this.required,
+                this.nullable,
+                this.defaultValue,
+                this.approvedUsage,
+                this.inCurrentImport,
+                this.mappedToLatticeId);
     }
 }

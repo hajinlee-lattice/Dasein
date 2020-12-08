@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
@@ -88,6 +89,19 @@ public class ModelingJob extends Job {
                 .append(containerProperties, modelingJob.getContainerPropertiesObject())
                 .append(model, modelingJob.getModel()).append(parentPid, modelingJob.getParentPid())
                 .append(childIds, modelingJob.getChildIdList()).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(pid)
+                .append(id)
+                .append(client)
+                .append(appMasterProperties)
+                .append(containerProperties)
+                .append(model)
+                .append(parentPid)
+                .append(childIds)
+                .build();
     }
 
 }
