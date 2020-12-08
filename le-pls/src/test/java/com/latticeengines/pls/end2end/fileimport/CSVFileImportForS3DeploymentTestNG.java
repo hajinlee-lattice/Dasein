@@ -3,7 +3,9 @@ package com.latticeengines.pls.end2end.fileimport;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -16,6 +18,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -45,11 +48,13 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
 
     @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        flags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         templates = cdlService.getS3ImportTemplate(customerSpace, "", null);
-        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment.import.group2")
