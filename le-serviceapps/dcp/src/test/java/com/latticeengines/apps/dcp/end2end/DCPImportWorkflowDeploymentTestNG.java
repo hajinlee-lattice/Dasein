@@ -293,6 +293,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "primaryaddr_addrlocality_name", //
                 "primaryaddr_addrregion_abbreviatedname", //
                 "primaryaddr_continentalregion_name", //
+//                "dnbassessment_marketingriskclass_desc", //
                 "primaryaddr_isregisteredaddr", //
                 "primaryaddr_language_desc", //
                 "primaryaddr_language_code", //
@@ -314,6 +315,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "numberofemployees_employeefiguresdate", //
                 "registeredname", //
                 "primaryname", //
+//                "dnbassessment_marketingriskclass_code", //
                 "duns_number", //
                 "countryisoalpha2code" //
         ));

@@ -113,6 +113,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     private String password;
 
     private Map<String, String> dataBlockDispNames = new HashMap<>();
+    private Map<String, String> dataBlockBlockNames = new HashMap<>();
 
     @Override
     protected Class<SplitImportMatchResultJob> getJobClz() {
@@ -145,7 +146,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         jobConfig.setIgnoreErrors(stepConfiguration.getSuppressErrors() ? MatchCoreErrorConstants.IGNORE_ERRORS : Collections.emptyMap());
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
-        dataBlockDispNames = dataBlockFieldDisplayNames();
+        List<PrimeColumn> primeColumns = getPrimeColumns();
+        dataBlockDispNames = dataBlockFieldDisplayNames(primeColumns);
+        dataBlockBlockNames = getBlockNames(primeColumns);
         log.info("InputSchema=" + JsonUtils.serialize(cms));
         List<ColumnMetadata> rejectedCms = cms.stream().filter(cm -> {
             boolean isCustomer = (cm.getTagList() == null) || !cm.getTagList().contains(Tag.EXTERNAL);
@@ -352,7 +355,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             }
         }
         // order base + enrichment columns
-        List<ColumnMetadata> dataBlockAttrs = orderAttributes(dataBlockAttrMap, BASE_SCHEMA);
+        List<ColumnMetadata> dataBlockAttrs = orderDataBlockAttributes(dataBlockAttrMap);
 
         List<String> attrNames = new ArrayList<>();
         List<ColumnMetadata> sortedCustomerAttrs = sortCustomerAttrs(customerAttrs);
@@ -464,7 +467,29 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     }
 
     // to be changed to metadata driven
-    private Map<String, String> dataBlockFieldDisplayNames() {
+    private Map<String, String> dataBlockFieldDisplayNames(List<PrimeColumn> primeColumns) {
+        Map<String, String> dispNames = new HashMap<>();
+        for (PrimeColumn primeColumn: primeColumns) {
+            dispNames.put(primeColumn.getPrimeColumnId(), primeColumn.getDisplayName());
+        }
+        return dispNames;
+    }
+
+    private Map<String, String> getBlockNames(List<PrimeColumn> primeColumns) {
+        Map<String, String> blockNames = new HashMap<>();
+        for (PrimeColumn primeColumn: primeColumns) {
+            // TODO: don't hardcode access to the 0th datablock
+            //       unsafe .get()?
+            if (primeColumn.getDataBlocks() == null) {
+                blockNames.put(primeColumn.getAttrName(), "missing datablocks");
+            } else {
+                blockNames.put(primeColumn.getAttrName(), primeColumn.getDataBlocks().get(0).getBlock());
+            }
+        }
+        return blockNames;
+    }
+
+    private List<PrimeColumn> getPrimeColumns() {
         List<PrimeColumn> primeColumns = new ArrayList<>();
         List<String> elementIds = configuration.getAppendConfig().getElementIds();
         log.info("Start retrieving metadata for {} data block elements from match api", elementIds.size());
@@ -483,24 +508,32 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             chunk.clear();
         }
         log.info("Retrieved {} prime columns from match api", primeColumns.size());
-        Map<String, String> dispNames = new HashMap<>();
-        for (PrimeColumn primeColumn: primeColumns) {
-            dispNames.put(primeColumn.getPrimeColumnId(), primeColumn.getDisplayName());
-        }
-        return dispNames;
+        return primeColumns;
     }
 
-    private List<ColumnMetadata> orderAttributes(LinkedHashMap<String, ColumnMetadata> attrMap, List<String> schema) {
+    private List<ColumnMetadata> orderDataBlockAttributes(LinkedHashMap<String, ColumnMetadata> attrMap) {
         List<ColumnMetadata> orderedAttrs = new ArrayList<>();
-        // when present, add schema values in order
-        for (String e: schema) {
+        // when present, add schema (base info) values in order
+        for (String e: BASE_SCHEMA) {
             if (attrMap.containsKey(e)) {
                 orderedAttrs.add(attrMap.get(e));
                 attrMap.remove(e);
             }
         }
-        // add remaining attributes, maintaining initial order
-        orderedAttrs.addAll(attrMap.values());
+        // add remaining attributes in attrMap, grouping by data block name
+        LinkedHashMap<String, List<ColumnMetadata>> groups = new LinkedHashMap<>();
+        String blockId;
+        for (ColumnMetadata cm : attrMap.values()) {
+            blockId = dataBlockBlockNames.get(cm.getAttrName());
+            if (groups.containsKey(blockId)) {
+                groups.get(blockId).add(cm);
+            } else {
+                List<ColumnMetadata> cms = new ArrayList<>();
+                cms.add(cm);
+                groups.put(blockId, cms);
+            }
+        }
+        groups.keySet().forEach(block -> orderedAttrs.addAll(groups.get(block)));
 
         return orderedAttrs;
     }
