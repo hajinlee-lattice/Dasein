@@ -132,19 +132,20 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
         String hdfsDir = result.getTargets().get(0).getPath();
         String fieldName = "ContactId";
         List<String> avroFilePaths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, avroFileFilter);
-        String filePathStr = avroFilePaths.get(0).toString();
-        int index = 0;
-        log.info("File path is: " + filePathStr);
+
+        for (Object filePath : avroFilePaths) {
+            String filePathStr = filePath.toString();
+            log.info("File path is: " + filePathStr);
     
-        try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration, new Path(filePathStr))) {
-            for (GenericRecord record : reader) {
-                String contactId = getString(record, fieldName);
-                String expectedId = getExpectedId(index);
-                if (contactId != expectedId) {
-                    log.info("ContactId in data: " + contactId + " / Expected: " + expectedId);
-                    return false;
+            try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration, new Path(filePathStr))) {
+                for (GenericRecord record : reader) {
+                    String contactId = getString(record, fieldName);
+                    List<String> expectedIds = getExpectedIds();
+                    if (!expectedIds.contains(contactId)) {
+                        log.info("Unexpected contactId: " + contactId);
+                        return false;
+                    }
                 }
-                index++;
             }
         }
 
@@ -161,10 +162,10 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
         return value;
     }
 
-    private static String getExpectedId(int index) {
+    private static List<String> getExpectedIds() {
         List<String> expectedIds = Arrays.asList(
-                "C11", "C12", "C22", "C21", "C3", "C4", "C5", "C6",
-                "C72", "C73", "C81", "C82", "C92", "C91", "C115", "C98");
-        return expectedIds.get(index);
+                "C11", "C12", "C21", "C22", "C3", "C4", "C5", "C6",
+                "C71", "C72", "C81", "C82", "C91", "C92", "C110", "C115");
+        return expectedIds;
     }
 }
