@@ -1,7 +1,9 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -131,7 +133,10 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
     private boolean verifyDefaultSort(SparkJobResult result) throws Exception {
         String hdfsDir = result.getTargets().get(0).getPath();
         String fieldName = "ContactId";
+        String ACCOUNT_ID = "AccountId";
         List<String> avroFilePaths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, avroFileFilter);
+        Map<String, List<String>> expectedIdsMap = getExpectedIdsMap();
+        int index = 0;
 
         for (Object filePath : avroFilePaths) {
             String filePathStr = filePath.toString();
@@ -140,10 +145,18 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
             try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration, new Path(filePathStr))) {
                 for (GenericRecord record : reader) {
                     String contactId = getString(record, fieldName);
-                    List<String> expectedIds = getExpectedIds();
-                    if (!expectedIds.contains(contactId)) {
-                        log.info("Unexpected contactId: " + contactId);
+                    String accountId = getString(record, ACCOUNT_ID);
+                    List<String> expectedIds = expectedIdsMap.get(accountId);
+                    log.info("contactId: " + contactId + " / accountId: " + accountId);
+                    if (!expectedIds.get(index).equals(contactId)) {
+                        log.info("Unexpected contactId at index: " + index);
                         return false;
+                    }
+                    if (index == expectedIds.size() - 1) {
+                        // Sometimes two accounts are combined in one avro file
+                        index = 0;
+                    } else {
+                        index++;
                     }
                 }
             }
@@ -162,10 +175,30 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
         return value;
     }
 
-    private static List<String> getExpectedIds() {
-        List<String> expectedIds = Arrays.asList(
-                "C11", "C12", "C21", "C22", "C3", "C4", "C5", "C6",
-                "C71", "C72", "C81", "C82", "C91", "C92", "C110", "C115");
-        return expectedIds;
+    private static Map<String, List<String>> getExpectedIdsMap() {
+        Map<String, List<String>> idMap = new HashMap<>();
+        List<String> account1 = Arrays.asList("C11", "C12");
+        List<String> account2 = Arrays.asList("C21", "C22");
+        List<String> account3 = Arrays.asList("C3");
+        List<String> account4 = Arrays.asList("C4");
+        List<String> account5 = Arrays.asList("C5");
+        List<String> account6 = Arrays.asList("C6");
+        List<String> account7 = Arrays.asList("C71", "C72");
+        List<String> account8 = Arrays.asList("C81", "C82");
+        List<String> account9 = Arrays.asList("C91", "C92");
+        List<String> account10 = Arrays.asList("C110", "C115");
+
+        idMap.put("A1", account1);
+        idMap.put("A2", account2);
+        idMap.put("A3", account3);
+        idMap.put("A4", account4);
+        idMap.put("A5", account5);
+        idMap.put("A6", account6);
+        idMap.put("A7", account7);
+        idMap.put("A8", account8);
+        idMap.put("A9", account9);
+        idMap.put("A10", account10);
+
+        return idMap;
     }
 }
