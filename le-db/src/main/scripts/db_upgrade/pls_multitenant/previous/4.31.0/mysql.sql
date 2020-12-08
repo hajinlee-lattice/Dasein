@@ -74,17 +74,12 @@ CREATE PROCEDURE `UpdateSchema`()
           `TEAM_ID`      varchar(255),
           `UPDATED`      datetime     not null,
           `FK_TENANT_ID` bigint       not null,
-          `TEMPLATE_ID`  varchar(255),
           primary key (`PID`)
       ) engine = InnoDB;
 
       alter table `DCP_ENRICHMENT_LAYOUT`
           add constraint `FK_DCPENRICHMENTLAYOUT_FKTENANTID_TENANT`
               foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
-
-      alter table `DCP_ENRICHMENT_LAYOUT`
-          add constraint `FK_DCPENRICHMENTTEMPLATE_FKTEMPLATEID_ENCRICHMENTTEMPLATE`
-              foreign key (`TEMPLATE_ID`) references `DCP_ENRICHMENT_TEMPLATE` (`TEMPLATE_ID`) on delete cascade;
 
       alter table `DCP_ENRICHMENT_LAYOUT`
           add constraint UX_LAYOUT_LAYOUT_ID unique (`LAYOUT_ID`);
