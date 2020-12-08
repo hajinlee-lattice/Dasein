@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -76,7 +77,7 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @JsonProperty("published_version")
     @Column(name = "PUBLISHED_VERSION")
     private Integer publishedVersion;
-    
+
     @JsonProperty("creation_timestamp")
     @Column(name = "CREATION_TIMESTAMP", nullable = false)
     private long creationTimestamp;
@@ -100,7 +101,7 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @JsonProperty("model_summary_id")
     @Transient
     private String modelSummaryId;
-    
+
     public BucketMetadata() {
     }
 
@@ -264,6 +265,16 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
                     && this.getLift() == bucketMetadata.getLift() && this.getNumLeads() == bucketMetadata.getNumLeads();
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getModelSummary().getId(),
+                this.getRatingEngine().getId(),
+                this.getBucketName(),
+                this.getRightBoundScore(),
+                this.getLift(),
+                this.getNumLeads());
     }
 
 }

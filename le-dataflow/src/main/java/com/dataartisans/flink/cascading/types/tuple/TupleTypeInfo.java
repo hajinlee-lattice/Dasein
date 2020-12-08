@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeinfo.AtomicType;
@@ -294,6 +295,11 @@ public class TupleTypeInfo extends CompositeType<Tuple> {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.schema);
     }
 
     private FieldTypeInfo getFieldTypeInfo(int pos, Class[] typeClasses,

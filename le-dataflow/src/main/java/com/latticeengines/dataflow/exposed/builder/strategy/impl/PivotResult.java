@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.exposed.builder.strategy.impl;
 
+import java.util.Objects;
+
 public class PivotResult {
 
     private final String columnName;
@@ -20,6 +22,11 @@ public class PivotResult {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getColumnName(), this.getValue());
     }
 
     public String getColumnName() { return columnName; }
