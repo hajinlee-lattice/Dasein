@@ -71,7 +71,7 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
       }
     }
     if (distinct) {
-      result = result.distinct()
+      result = result.dropDuplicates(InterfaceName.DUNS.name())
     }
     result
   }
