@@ -51,9 +51,9 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
 
     if (trimmedData.columns.contains(sortAttr)) {
       if (sortDir == "DESC") {
-        w = w.orderBy(col(sortAttr).desc)
+        w = w.orderBy(col(sortAttr).desc, col(contactId))
       } else {
-        w = w.orderBy(col(sortAttr))
+        w = w.orderBy(col(sortAttr), col(contactId))
       }
     } else {
       w = w.orderBy(col(contactId))
