@@ -7,8 +7,6 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 
-import it.unimi.dsi.fastutil.Hash;
-
 public abstract class FieldDefinitionBody {
     @JsonProperty
     protected FieldDefinitionsRecord currentFieldDefinitionsRecord;
