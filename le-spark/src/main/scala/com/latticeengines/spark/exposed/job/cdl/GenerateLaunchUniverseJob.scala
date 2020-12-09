@@ -78,11 +78,5 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     if (!accountDF.rdd.isEmpty) {
       throw new IllegalStateException("Contact/Account ratio exceed threshold!")
     }
-    accountDF.collect().foreach(row => {
-      val accId: String = row.getAs(accountId)
-      val count: Long = row.getAs("cnt")
-      if (count > contactAccountRatioThreshold)
-        throw new IllegalStateException(s"Contact/Account ratio exceed threshold for Account=$accId!")
-    })
   }
 }
