@@ -131,6 +131,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
                 featureFlagMap = new HashMap<>();
             }
             // use non entity match path by default unless its overwritten explicitly
+            featureFlagMap.putIfAbsent(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
             featureFlagMap.putIfAbsent(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
             testBed.bootstrapForProduct(LatticeProduct.CG, featureFlagMap);
         }
