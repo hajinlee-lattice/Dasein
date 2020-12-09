@@ -118,7 +118,6 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         ThreadPoolUtils.runInParallel(runnables);
         MultiTenantContext.setTenant(mainTestTenant);
         Assert.assertFalse(zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(mainCustomerSpace)));
-//        createDefaultImportSystem();
 
         // setup external id attrs
         createExternalSystems();
