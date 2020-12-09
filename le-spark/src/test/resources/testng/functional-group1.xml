@@ -15,9 +15,6 @@
             <class name="com.latticeengines.spark.exposed.job.cdl.CalculateDeltaJobTestNG"/>
             <class name="com.latticeengines.spark.exposed.job.cdl.TransformTxnStreamJobTestNG"/>
             <class name="com.latticeengines.spark.exposed.job.cdl.PublishActivityAlertsJobTestNG"/>
-            <class name="com.latticeengines.spark.exposed.job.cdl.DeltaCampaignLaunchTestNG"/>
-            <class name="com.latticeengines.spark.exposed.job.cdl.MetricsGroupGeneratorTestNG"/>
-            <class name="com.latticeengines.spark.exposed.job.cdl.ValidateProductTestNG"/>
         </classes>
     </test>
 </suite>
