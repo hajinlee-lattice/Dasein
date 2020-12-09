@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -42,6 +43,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -50,12 +52,12 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.ScriptJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.SparkScript;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
@@ -66,12 +68,13 @@ import com.latticeengines.spark.service.impl.LivyServerManager;
 public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(SparkJobFunctionalTestNGBase.class);
+    private static final String S3_ROOT = "test-staging/spark-job-tests";
 
     @Inject
     private LivySessionService sessionService;
 
     @Inject
-    private EMRCacheService emrCacheService;
+    private S3Service s3Service;
 
     @Inject
     protected Configuration yarnConfiguration;
@@ -103,7 +106,12 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     @Value("${dataflowapi.spark.max.executors}")
     private String maxExecutors;
 
+    @Value("${aws.s3.data.stage.bucket}")
+    private String s3Bucket;
+
     protected LivySession session;
+    private String workspace;
+    private String randomId;
     private AtomicInteger inputSeq = new AtomicInteger(0);
     private Map<String, DataUnit> inputUnits = new ConcurrentHashMap<>();
     protected Callable<List<DataUnit>> inputProvider = () -> this.getInputUnits(getInputOrder());
@@ -166,9 +174,15 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         sessionService.stopSession(session);
     }
 
+    private String getRandomId() {
+        if (randomId == null) {
+            randomId = RandomStringUtils.randomAlphanumeric(6);
+        }
+        return randomId;
+    }
+
     protected String getWorkspace() {
-        return String.format("/tmp/%s/%s/%s", leStack, this.getClass().getSimpleName(),
-                RandomStringUtils.randomAlphanumeric(6));
+        return String.format("/tmp/%s/%s/%s", leStack, this.getClass().getSimpleName(), getRandomId());
     }
 
     private void initializeScenario() {
@@ -352,6 +366,33 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return recordName;
     }
 
+    protected String uploadS3DataUnit(Object[][] data, List<Pair<String, Class<?>>> columns) {
+        int seq = inputSeq.getAndIncrement();
+        String recordName = "Input" + seq;
+        String dirPath = getWorkspace() + "/" + recordName;
+        try {
+            AvroUtils.uploadAvro(yarnConfiguration, data, columns, recordName, dirPath);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload avro to hdfs.", e);
+        }
+        String randomId = getRandomId();
+        String localDir = "upload/" + randomId;
+        if (new File(localDir).exists()) {
+            FileUtils.deleteQuietly(new File(localDir));
+        }
+        try {
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, dirPath, localDir);
+            String prefix = S3_ROOT + "/" + randomId;
+            s3Service.uploadLocalDirectory(s3Bucket, prefix, localDir, true);
+            putS3DataUnit(recordName, prefix, DataUnit.DataFormat.AVRO);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to copy avro from hdfs to s3.", e);
+        } finally {
+            FileUtils.deleteQuietly(new File(localDir));
+        }
+        return recordName;
+    }
+
     private void copyCSVDataToHdfs(String dirPath, String fileName, String[] headers, Object[] values)
             throws IOException {
         try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
@@ -371,6 +412,15 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         dataUnit.setPath(dirPath);
         dataUnit.setDataFormat(dataFormat);
         inputUnits.put(recordName, dataUnit);
+    }
+
+    private void putS3DataUnit(String recordName, String prefix, DataUnit.DataFormat dataFormat) {
+        S3DataUnit s3DataUnit = new S3DataUnit();
+        s3DataUnit.setName(recordName);
+        s3DataUnit.setBucket(s3Bucket);
+        s3DataUnit.setPrefix(prefix);
+        s3DataUnit.setDataFormat(dataFormat);
+        inputUnits.put(recordName, s3DataUnit);
     }
 
     protected void uploadHdfsDataUnitWithCSVFmt(String[] headers, Object[][] values) {
