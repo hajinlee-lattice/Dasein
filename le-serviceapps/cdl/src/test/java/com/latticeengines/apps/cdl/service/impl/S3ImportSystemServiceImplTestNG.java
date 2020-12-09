@@ -71,8 +71,15 @@ public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         system3.setName("SYSTEM3");
         s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, system3);
+
+        S3ImportSystem pardon = new S3ImportSystem();
+        pardon.setTenant(mainTestTenant);
+        pardon.setName("PARDON");
+        pardon.setSystemType(S3ImportSystem.SystemType.Pardon);
+        s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, pardon);
+
         allSystems = s3ImportSystemService.getAllS3ImportSystem(mainCustomerSpace);
-        Assert.assertEquals(allSystems.size(), 3);
+        Assert.assertEquals(allSystems.size(), 4);
         for (S3ImportSystem importSystem : allSystems) {
             if (importSystem.getName().equals("SYSTEM1")) {
                 importSystem.setPriority(3);
