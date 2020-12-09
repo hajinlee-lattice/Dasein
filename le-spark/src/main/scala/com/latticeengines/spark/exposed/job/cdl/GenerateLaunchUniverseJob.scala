@@ -34,7 +34,7 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     trimmedData.printSchema
 
     if(contactAccountRatioThreshold != null) {
-      trimmedData = checkContactAccountRatio(trimmedData, accountId, contactAccountRatioThreshold)
+      checkContactAccountRatio(trimmedData, accountId, contactAccountRatioThreshold)
     }
 
     if (maxContactsPerAccount != null) {
@@ -69,17 +69,20 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
       .drop(rowNumber, sortAttr)
   }
 
-  def checkContactAccountRatio(trimmedData: DataFrame, accountId: String, contactAccountRatioThreshold: Long): DataFrame = {
+  def checkContactAccountRatio(trimmedData: DataFrame, accountId: String, contactAccountRatioThreshold: Long) {
 
     val accountDF = trimmedData.select(col(accountId))
       .groupBy(col(accountId))
       .agg(count("*").alias("cnt"))
+      .where(col("cnt") > contactAccountRatioThreshold).limit(1)
+    if (!accountDF.rdd.isEmpty) {
+      throw new IllegalStateException("Contact/Account ratio exceed threshold!")
+    }
     accountDF.collect().foreach(row => {
       val accId: String = row.getAs(accountId)
       val count: Long = row.getAs("cnt")
       if (count > contactAccountRatioThreshold)
         throw new IllegalStateException(s"Contact/Account ratio exceed threshold for Account=$accId!")
     })
-    trimmedData
   }
 }
