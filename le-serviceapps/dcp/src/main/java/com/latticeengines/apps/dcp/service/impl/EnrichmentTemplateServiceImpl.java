@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.dcp.entitymgr.EnrichmentLayoutEntityMgr;
 import com.latticeengines.apps.dcp.entitymgr.EnrichmentTemplateEntityMgr;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
+@Service("enrichmentTemplateService")
 public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService {
 
     private static final Logger log = LoggerFactory.getLogger(EnrichmentTemplateServiceImpl.class);
