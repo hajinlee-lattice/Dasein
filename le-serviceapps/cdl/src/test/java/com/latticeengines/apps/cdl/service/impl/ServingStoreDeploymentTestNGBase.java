@@ -118,7 +118,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         ThreadPoolUtils.runInParallel(runnables);
         MultiTenantContext.setTenant(mainTestTenant);
         Assert.assertFalse(zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(mainCustomerSpace)));
-        createDefaultImportSystem();
+//        createDefaultImportSystem();
 
         // setup external id attrs
         createExternalSystems();
@@ -143,16 +143,6 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         cdlExternalSystemContact.setEntity(BusinessEntity.Contact);
         externalSystemService.createOrUpdateExternalSystem(mainCustomerSpace, cdlExternalSystemContact,
                 BusinessEntity.Contact);
-    }
-
-    protected void createDefaultImportSystem() {
-        S3ImportSystem importSystem = new S3ImportSystem();
-        importSystem.setPriority(1);
-        importSystem.setName("DefaultSystem");
-        importSystem.setDisplayName("DefaultSystem");
-        importSystem.setSystemType(S3ImportSystem.SystemType.Other);
-        importSystem.setTenant(mainTestTenant);
-        s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, importSystem);
     }
 
     private void updateDefaultSystemAndCreateNew() {
