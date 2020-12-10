@@ -12,6 +12,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboUserSeatUsageEvent;
 import com.latticeengines.security.service.AuthorizationServiceBase;
@@ -80,5 +81,37 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
 
     private String getUsageEventUrl() {
         return usageEventUrl + "/usage";
+    }
+
+    @Override
+    public JsonNode getSubscriberMeter(String subscriberNumber) {
+        refreshToken();
+        String urlPattern = "/event/meter/";
+        URI uri = URI.create(usageEventUrl + urlPattern + subscriberNumber);
+        try {
+            ResponseEntity<JsonNode> response = restTemplate.getForEntity(uri, JsonNode.class);
+            if (response.getStatusCodeValue() != 200) {
+                log.error(String.format("Retrieved status code %s while trying to get usage meter for subscriber %s",
+                        response.getStatusCodeValue(), subscriberNumber));
+                return null;
+            }
+            // return "meter" node from "D&B Connect" node
+            JsonNode dnbConnect = getNodeFromList(response.getBody(),
+                    "products", "name", "D&B Connect");
+            return getNodeFromList(dnbConnect, "domain_add_ons", "canonical_name", "STCT");
+        } catch (Exception e) {
+            log.error(String.format("Failed to get usage meter for subscriber %s:", subscriberNumber), e);
+        }
+        return null;
+    }
+
+    private JsonNode getNodeFromList(JsonNode node, String listField, String key, String value) {
+        if (node == null) return null;
+        if (node.has(listField) && node.get(listField).size() > 0) {
+            for (JsonNode n : node.get(listField)) {
+                if (n.get(key).asText().equals(value)) return n;
+            }
+        }
+        return null;
     }
 }

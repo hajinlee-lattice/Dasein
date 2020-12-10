@@ -56,6 +56,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.VboService;
 import com.latticeengines.security.service.impl.IDaaSServiceImpl;
 import com.latticeengines.security.util.IntegrationUserUtils;
 
@@ -88,6 +89,9 @@ public class UserServiceImpl implements UserService {
 
     @Inject
     private TenantService tenantService;
+
+    @Inject
+    private VboService vboService;
 
     private static EmailValidator emailValidator = EmailValidator.getInstance();
 
@@ -290,13 +294,11 @@ public class UserServiceImpl implements UserService {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
-        // case: external user
+        // case: external user; not in tenant already; no available seats
         if (!EmailUtils.isInternalUser(username)) {
             Tenant t = tenantService.findByTenantId(tenantId);
             if (t != null && !inTenant(tenantId, username) && !checkSeatAvailability(t.getSubscriberNumber())) {
-                // TODO: return error code to indicate user limit has been reached
-                LOGGER.error("No available seats for tenant: " + tenantId);
-                return false;
+                throw new LedpException(LedpCode.LEDP_18250, new String[]{username});
             }
         }
         if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {
@@ -312,9 +314,9 @@ public class UserServiceImpl implements UserService {
 
     private boolean checkSeatAvailability(String subscriberNumber) {
         if (subscriberNumber == null) return false;
-        JsonNode meter = iDaaSService.getMeter(subscriberNumber);
+        JsonNode meter = vboService.getSubscriberMeter(subscriberNumber);
         if (meter == null || !meter.has("limit") || !meter.has("current_usage")) {
-            LOGGER.warn("Unable to retrieve meter for subscriber " + subscriberNumber);
+            LOGGER.warn("Unable to retrieve valid meter for subscriber " + subscriberNumber);
             return false;
         }
         return meter.get("current_usage").asInt() < meter.get("limit").asInt();
@@ -334,10 +336,7 @@ public class UserServiceImpl implements UserService {
         if (!EmailUtils.isInternalUser(username)) {
             Tenant t = tenantService.findByTenantId(tenantId);
             if (t != null && !inTenant(tenantId, username) && !checkSeatAvailability(t.getSubscriberNumber())) {
-                // TODO: return error code to indicate user limit has been reached
-                LOGGER.error(String.format("No seats available in tenant %s for external user %s",
-                        tenantId, username));
-                return false;
+                throw new LedpException(LedpCode.LEDP_18250, new String[]{username});
             }
         }
 
