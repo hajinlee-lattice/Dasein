@@ -153,7 +153,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     }
 
     private String getMatchConfig(List<String> convertedRematchTableNames) {
-        MatchInput matchInput = getBaseMatchInput();
+        MatchInput matchInput = getBaseMatchInput(false);
         if (configuration.isEntityMatchEnabled()) {
             // combine columns from all imports
             Set<String> columnNames = getInputTableColumnNames();
