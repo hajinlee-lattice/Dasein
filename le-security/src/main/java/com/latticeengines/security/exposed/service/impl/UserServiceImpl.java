@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductSubscription;
+import com.latticeengines.domain.exposed.dcp.vbo.VboUserSeatUsageEvent;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -753,21 +754,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public IDaaSUser createIDaaSUser(User user, String subscriberNumber) {
-        String email = user.getEmail();
+    public IDaaSUser createIDaaSUser(User toCreate, String subscriberNumber, User requester, String traceId) {
+        String email = toCreate.getEmail();
         IDaaSUser idaasUser = iDaaSService.getIDaaSUser(email);
-        Tracer tracer = GlobalTracer.get();
-        Span span = tracer.activeSpan();
+
+        VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
+        if (requester != null) {
+            usageEvent.setEmailAddress(requester.getEmail());
+        }
+        usageEvent.setSubscriberID(subscriberNumber);
+        usageEvent.setPOAEID(traceId);
+        usageEvent.setFeatureURI("STCT");
 
         if (idaasUser == null) {
-            if (span != null)
-                span.log("Creating new IDaaS User for " + user.getEmail());
             IDaaSUser newUser = new IDaaSUser();
             newUser.setSubscriberNumber(subscriberNumber);
-            newUser.setFirstName(user.getFirstName());
+            newUser.setFirstName(toCreate.getFirstName());
             newUser.setEmailAddress(email);
-            newUser.setLastName(user.getLastName());
-            newUser.setUserName(StringUtils.isNotEmpty(email) ? email.toLowerCase() : user.getUsername());
+            newUser.setLastName(toCreate.getLastName());
+            newUser.setUserName(StringUtils.isNotEmpty(email) ? email.toLowerCase() : toCreate.getUsername());
             Preconditions.checkState(StringUtils.isNotEmpty(newUser.getLastName()),
                     "Last name is required");
             Preconditions.checkState(StringUtils.isNotEmpty(newUser.getEmailAddress()),
@@ -778,8 +783,6 @@ public class UserServiceImpl implements UserService {
             idaasUser = iDaaSService.createIDaaSUser(newUser);
         } else if (!idaasUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
             // add product access and default role to user when user already exists in IDaaS
-            if (span != null)
-                span.log("Adding product access to existing user " + user.getEmail());
             LOGGER.info("user exist in IDaaS, add product access to user {}", email);
             ProductRequest request = new ProductRequest();
             request.setEmailAddress(email);

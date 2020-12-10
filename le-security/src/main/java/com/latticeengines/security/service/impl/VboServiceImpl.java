@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,9 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
 
     @Inject
     private VboServiceImpl _self;
+
+    @Value("${security.vbo.usageevent.url}")
+    private String usageEventUrl;
 
     @Override
     protected String refreshOAuthTokens(String cacheKey) {
@@ -50,5 +54,16 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
     }
 
     @Override
-    public void sendUserUsageEvent(VboUserSeatUsageEvent usageEvent) {}
+    public void sendUserUsageEvent(VboUserSeatUsageEvent usageEvent) {
+        refreshToken();
+
+        log.info("Sending VBO User Seat Usage Event for user " + usageEvent.getEmailAddress());
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(URI.create(usageEventUrl), usageEvent, String.class);
+        } catch (Exception e) {
+            log.error("Exception in usage event: " + e.toString());
+            throw e;
+        }
+    }
 }

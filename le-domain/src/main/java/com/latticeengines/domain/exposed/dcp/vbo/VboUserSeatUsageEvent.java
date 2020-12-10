@@ -101,4 +101,8 @@ public class VboUserSeatUsageEvent {
     public void setContractTermEndDate(String contractTermEndDate) {
         this.contractTermEndDate = contractTermEndDate;
     }
+
+    public String getEmailAddress() {
+        return emailAddress;
+    }
 }

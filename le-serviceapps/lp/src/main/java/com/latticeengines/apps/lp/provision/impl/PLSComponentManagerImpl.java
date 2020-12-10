@@ -168,7 +168,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                 }
             }
         }
-        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantDisplayName);
+        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantDisplayName, null);
         String tenantStatus = installDocument.getProperty(ComponentConstants.Install.TENANT_STATUS);
         String tenantType = installDocument.getProperty(ComponentConstants.Install.TENANT_TYPE);
         String contract = installDocument.getProperty(ComponentConstants.Install.CONTRACT);
@@ -429,7 +429,19 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                 }
             }
         }
-        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
+
+        Map<String, String> parentCtxMap = null;
+        try {
+            String contextStr = configDir.get("/TracingContext").getDocument().getData();
+            Map<?, ?> rawMap = JsonUtils.deserialize(contextStr, Map.class);
+            parentCtxMap = JsonUtils.convertMap(rawMap, String.class, String.class);
+        } catch (Exception e) {
+            log.warn("no tracing context node exist {}.", e.getMessage());
+        }
+        Tracer tracer = GlobalTracer.get();
+        SpanContext parentCtx = TracingUtils.getSpanContext(parentCtxMap);
+
+        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName, parentCtx.toTraceId());
 
         // Update IDaaS users node with email sent times; to be stored in Camille
         if (hasNode) {
@@ -469,17 +481,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         } catch (Exception e) {
             log.info("no node exist {}.", e.getMessage());
         }
-        Map<String, String> parentCtxMap = null;
-        try {
-            String contextStr = configDir.get("/TracingContext").getDocument().getData();
-            Map<?, ?> rawMap = JsonUtils.deserialize(contextStr, Map.class);
-            parentCtxMap = JsonUtils.convertMap(rawMap, String.class, String.class);
-        } catch (Exception e) {
-            log.warn("no tracing context node exist {}.", e.getMessage());
-        }
         long start = System.currentTimeMillis() * 1000;
-        Tracer tracer = GlobalTracer.get();
-        SpanContext parentCtx = TracingUtils.getSpanContext(parentCtxMap);
         Span provisionSpan = null;
         try (Scope scope = startProvisionSpan(parentCtx, PLSTenantId, start)) {
             provisionSpan = tracer.activeSpan();
@@ -547,7 +549,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
     }
 
     private List<IDaaSUser> OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
-                                   List<String> externalAdminEmails, String tenantName) {
+                                   List<String> externalAdminEmails, String tenantName, String traceId) {
         log.info("Operating IDaaS users");
         List<IDaaSUser> createdUsers = new ArrayList<>();
         for (IDaaSUser user : iDaaSUsers) {
@@ -559,7 +561,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             createUserData.setLastName(user.getLastName());
             createUserData.setUsername(user.getUserName());
             createUserData.setPhoneNumber(user.getPhoneNumber());
-            IDaaSUser createdUser = userService.createIDaaSUser(createUserData, user.getSubscriberNumber());
+            IDaaSUser createdUser = userService.createIDaaSUser(createUserData, user.getSubscriberNumber(), null, traceId);
 
             if (EmailUtils.isInternalUser(email)) {
                 superAdminEmails.add(email.toLowerCase());

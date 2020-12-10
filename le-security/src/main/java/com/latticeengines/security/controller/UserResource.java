@@ -54,6 +54,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
+import com.latticeengines.security.service.VboService;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -89,6 +90,9 @@ public class UserResource {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private VboService vboService;
 
     @GetMapping("")
     @ResponseBody
@@ -185,7 +189,7 @@ public class UserResource {
                     emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
                 }
             } else {
-                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
+                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber(), loginUser, traceId);
                 if (idaasUser == null) {
                     LOGGER.error(
                             String.format("Failed to create IDaaS user for %s at level %s.", loginUsername, loginLevel));
@@ -310,7 +314,7 @@ public class UserResource {
                 return document;
             }
             if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
+                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber(), loginUser, traceId);
                 if (idaasUser == null) {
                     LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
                             loginUser.getUsername(), loginUser.getAccessLevel(), tenantId));
