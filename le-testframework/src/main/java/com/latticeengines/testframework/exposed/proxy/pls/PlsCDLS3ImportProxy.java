@@ -27,7 +27,24 @@ public class PlsCDLS3ImportProxy extends PlsRestApiProxyBase {
                                                       Boolean primary) {
         String url = constructUrl("/system?systemDisplayName={systemDisplayName}&systemType={systemType}&primary" +
                 "={primary}", systemDisplayName, systemType, primary);
-        Map map = post("create s3 import system", url, null, Map.class);
+        Map<?, ?> map = post("create s3 import system", url, null, Map.class);
         return JsonUtils.convertMap(map, String.class, UIAction.class);
     }
+
+    public List<S3ImportSystem> getS3ImportSystem(Boolean filterAccount, Boolean filterContact) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(constructUrl("/s3import/system/list"));
+        boolean isFirst = false;
+        if (filterAccount != null) {
+            builder.append(String.format("?Account=%s", filterAccount));
+            isFirst = true;
+        }
+        if (filterContact != null) {
+            builder.append(isFirst ? String.format("?Contact=%s", filterContact) :
+                    String.format("&Contact=%s", filterContact));
+        }
+        List<?> result = get("get import system", builder.toString(), List.class);
+        return JsonUtils.convertList(result, S3ImportSystem.class);
+    }
+
 }
