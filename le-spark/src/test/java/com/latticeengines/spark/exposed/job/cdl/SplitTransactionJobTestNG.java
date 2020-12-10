@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.domain.exposed.spark.cdl.SplitTransactionConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
@@ -57,7 +57,7 @@ public class SplitTransactionJobTestNG extends SparkJobFunctionalTestNGBase {
         SplitTransactionConfig config = new SplitTransactionConfig();
         SparkJobResult result = runSparkJob(SplitTransactionJob.class, config, inputs, getWorkspace());
         log.info("Output metadata: {}", result.getOutput());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 2);
         verify(result, Arrays.asList(this::verifyAnalytic, this::verifySpending));
     }
@@ -69,7 +69,7 @@ public class SplitTransactionJobTestNG extends SparkJobFunctionalTestNGBase {
         config.retainProductType = Collections.singletonList(analytic);
         SparkJobResult result = runSparkJob(SplitTransactionJob.class, config, inputs, getWorkspace());
         log.info("Output metadata: {}", result.getOutput());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         verify(result, Collections.singletonList(this::verifyAnalytic));
     }

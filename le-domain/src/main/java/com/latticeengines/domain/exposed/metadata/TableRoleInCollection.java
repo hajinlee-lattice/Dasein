@@ -22,6 +22,7 @@ public enum TableRoleInCollection {
     RawTransactionStream, //
     DailyTransactionStream, //
     PeriodTransactionStream, //
+    SpendingAnalysisPeriod, //
 
     SystemAccount, //
     SystemContact, //

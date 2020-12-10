@@ -21,8 +21,8 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class MergeActivityMetricsTestNG extends SparkJobFunctionalTestNGBase {
@@ -50,13 +50,13 @@ public class MergeActivityMetricsTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void test() {
         String mergedTableLabel = String.format("%s_%s", ACCOUNT_ENTITY, SERVING_ENTITY);
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        ActivityStoreSparkIOMetadata.Details newMetricsDetails = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        SparkIOMetadataWrapper.Partition newMetricsDetails = new SparkIOMetadataWrapper.Partition();
         newMetricsDetails.setStartIdx(0);
         newMetricsDetails.setLabels(Arrays.asList("someGroup1", "someGroup2"));
-        ActivityStoreSparkIOMetadata.Details activeMetricsDetails = new ActivityStoreSparkIOMetadata.Details();
+        SparkIOMetadataWrapper.Partition activeMetricsDetails = new SparkIOMetadataWrapper.Partition();
         activeMetricsDetails.setStartIdx(2);
-        Map<String, ActivityStoreSparkIOMetadata.Details> metadata = new HashMap<>();
+        Map<String, SparkIOMetadataWrapper.Partition> metadata = new HashMap<>();
         metadata.put(mergedTableLabel, newMetricsDetails);
         metadata.put(SERVING_ENTITY, activeMetricsDetails);
         inputMetadata.setMetadata(metadata);
@@ -67,7 +67,7 @@ public class MergeActivityMetricsTestNG extends SparkJobFunctionalTestNGBase {
 
         SparkJobResult result = runSparkJob(MergeActivityMetrics.class, config);
         Assert.assertFalse(StringUtils.isEmpty(result.getOutput()));
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertNotNull(outputMetadata.getMetadata());
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         Assert.assertEquals( // verify attributes to be deprecated

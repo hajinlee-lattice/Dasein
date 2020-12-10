@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,21 +17,22 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
-import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.domain.exposed.spark.cdl.DailyTxnStreamPostAggregationConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.spark.exposed.job.cdl.AggDailyActivityJob;
+import com.latticeengines.spark.exposed.job.cdl.DailyTxnStreamPostAggregationJob;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -54,30 +54,49 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
                 return Pair.of(productType, table.getName());
             }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
             log.info("Found daily transaction streams {}. Going through shortcut mode.", signatureTableNames);
-            log.info("Retaining transactions of product type: {}", getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class));
+            log.info("Retaining transactions of product type: {}",
+                    getListObjectFromContext(RETAIN_PRODUCT_TYPE, String.class));
             dataCollectionProxy.upsertTablesWithSignatures(customerSpaceStr, signatureTableNames,
                     TableRoleInCollection.DailyTransactionStream, inactive);
             return;
         }
         SparkJobResult result = runSparkJob(AggDailyActivityJob.class, getSparkConfig());
-        processOutputMetadata(result);
+        Map<String, HdfsDataUnit> outputs = processOutputMetadata(result);
+        if (outputs.containsKey(ProductType.Analytic.name())) {
+            outputs.put(ProductType.Analytic.name(),
+                    fillMissingProductBundle(outputs.get(ProductType.Analytic.name())));
+        }
+        saveDailyTxnTables(outputs.entrySet().stream().map(entry -> {
+            String productType = entry.getKey();
+            String prefix = String.format(DAILY_TXN_FORMAT, productType);
+            String tableName = NamingUtils.timestamp(prefix);
+            Table table = dirToTable(tableName, entry.getValue());
+            metadataProxy.createTable(customerSpaceStr, tableName, table);
+            return Pair.of(productType, table);
+        }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
     }
 
-    private void processOutputMetadata(SparkJobResult result) {
+    private HdfsDataUnit fillMissingProductBundle(HdfsDataUnit analyticRawDaily) {
+        DailyTxnStreamPostAggregationConfig config = new DailyTxnStreamPostAggregationConfig();
+        Table consolidatedProduct = attemptGetTableRole(TableRoleInCollection.ConsolidatedProduct, false);
+        if (consolidatedProduct == null) {
+            log.warn("No product batch store found in both versions, skip post aggregation process.");
+            return analyticRawDaily;
+        }
+        config.setInput(Arrays.asList(analyticRawDaily, consolidatedProduct.toHdfsDataUnit(null)));
+        // TODO - do I need to create temp table for raw daily stream?
+        SparkJobResult result = runSparkJob(DailyTxnStreamPostAggregationJob.class, config);
+        return result.getTargets().get(0);
+    }
+
+    private Map<String, HdfsDataUnit> processOutputMetadata(SparkJobResult result) {
         log.info("Output metadata: {}", result.getOutput());
         List<HdfsDataUnit> outputs = result.getTargets();
-        Map<String, ActivityStoreSparkIOMetadata.Details> outputMetadata = JsonUtils
-                .deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
-        Map<String, Table> dailyStores = new HashMap<>(); // type -> table
-        outputMetadata.forEach((productType, details) -> {
-            String prefix = String.format(DAILY_TXN_FORMAT, productType);
-            String tableName = TableUtils.getFullTableName(prefix,
-                    HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
-            Table table = dirToTable(tableName, outputs.get(details.getStartIdx()));
-            metadataProxy.createTable(customerSpaceStr, tableName, table);
-            dailyStores.put(productType, table);
-        });
-        saveDailyTxnTables(dailyStores);
+        Map<String, SparkIOMetadataWrapper.Partition> outputMetadata = JsonUtils
+                .deserialize(result.getOutput(), SparkIOMetadataWrapper.class).getMetadata();
+        return outputMetadata.entrySet().stream()
+                .map(entry -> Pair.of(entry.getKey(), outputs.get(entry.getValue().getStartIdx())))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     }
 
     private void saveDailyTxnTables(Map<String, Table> dailyStores) {
@@ -102,8 +121,8 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
                         .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
         List<StreamAttributeDeriver> derivers = getDerivers();
         List<String> additionalAttrs = getAdditionalAttrs();
-        ActivityStoreSparkIOMetadata metadataWrapper = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> metadata = new HashMap<>();
+        SparkIOMetadataWrapper metadataWrapper = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> metadata = new HashMap<>();
         retainTypes.forEach(type -> {
             config.streamDateAttrs.put(type, InterfaceName.TransactionTime.name());
             config.attrDeriverMap.put(type, derivers);
@@ -121,8 +140,8 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
         return config;
     }
 
-    private ActivityStoreSparkIOMetadata.Details getIdxDetils(int idx) {
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+    private SparkIOMetadataWrapper.Partition getIdxDetils(int idx) {
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(idx);
         return details;
     }

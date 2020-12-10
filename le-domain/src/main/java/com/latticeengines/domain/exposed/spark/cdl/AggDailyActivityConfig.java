@@ -60,7 +60,7 @@ public class AggDailyActivityConfig extends SparkJobConfig {
 
     // two tables in each input section if incremental stream, first one raw stream import, second existing batch
     @JsonProperty
-    public ActivityStoreSparkIOMetadata inputMetadata;
+    public SparkIOMetadataWrapper inputMetadata;
 
     @JsonProperty
     public Map<String, Integer> streamRetentionDays = new HashMap<>();

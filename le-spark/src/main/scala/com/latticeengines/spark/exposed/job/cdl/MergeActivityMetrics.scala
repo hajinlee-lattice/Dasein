@@ -5,8 +5,8 @@ import java.util
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId}
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection
 import com.latticeengines.domain.exposed.query.BusinessEntity
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
-import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, MergeActivityMetricsJobConfig}
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition
+import com.latticeengines.domain.exposed.spark.cdl.{MergeActivityMetricsJobConfig, SparkIOMetadataWrapper}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeriveAttrsUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -23,12 +23,12 @@ class MergeActivityMetrics extends AbstractSparkJob[MergeActivityMetricsJobConfi
     val inputMetadata = config.inputMetadata.getMetadata
     val mergedTableLabels: Seq[String] = config.mergedTableLabels.iterator.toSeq
 
-    val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
-    val detailsMap = new util.HashMap[String, Details]() // mergedTableLabel -> details
+    val outputMetadata: SparkIOMetadataWrapper = new SparkIOMetadataWrapper()
+    val detailsMap = new util.HashMap[String, Partition]() // mergedTableLabel -> details
     var mergedIdx: Int = 0
     var mergedTables: Seq[DataFrame] = Seq()
     mergedTableLabels.foreach((mergedTableLabel: String) => {
-      val details: Details = new Details()
+      val details: Partition = new Partition()
       details.setStartIdx(mergedIdx)
       mergedIdx += 1
 
@@ -43,7 +43,7 @@ class MergeActivityMetrics extends AbstractSparkJob[MergeActivityMetricsJobConfi
     lattice.output = mergedTables.toList
   }
 
-  private def mergeGroup(input: List[DataFrame], details: Details, entity: BusinessEntity, activeMetricsDetails: Details): (DataFrame, Seq[String]) = {
+  private def mergeGroup(input: List[DataFrame], details: Partition, entity: BusinessEntity, activeMetricsDetails: Partition): (DataFrame, Seq[String]) = {
     val start = details.getStartIdx
     val end = details.getStartIdx + details.getLabels.size
     val groupDFsToMerge: Seq[DataFrame] = input.slice(start, end)

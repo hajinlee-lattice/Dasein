@@ -19,7 +19,7 @@ public class MergeActivityMetricsJobConfig extends SparkJobConfig implements Ser
     @JsonProperty("inputMetadata")
     // describe mergedTableName -> dataframes to merge
     // labels: groupId
-    public ActivityStoreSparkIOMetadata inputMetadata;
+    public SparkIOMetadataWrapper inputMetadata;
 
     @Override
     public String getName() {

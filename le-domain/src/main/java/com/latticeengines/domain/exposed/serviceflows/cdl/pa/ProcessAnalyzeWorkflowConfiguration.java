@@ -250,6 +250,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             apsGenerationStepConfiguration.setRollingPeriod(apsRollingPeriod);
             processStepConfiguration.setApsRollingPeriod(apsRollingPeriod);
             processRatingWorkflowBuilder.apsRollupPeriod(apsRollingPeriod);
+            processTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
             return this;
         }
 

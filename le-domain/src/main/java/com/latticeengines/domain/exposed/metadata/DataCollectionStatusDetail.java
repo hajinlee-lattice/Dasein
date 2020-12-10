@@ -117,6 +117,9 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("IntentAlertVersion")
     private String intentAlertVersion;
 
+    @JsonProperty("spendingAnalysisPublished")
+    private Boolean spendingAnalysisPublished;
+
     /*-
      * general key -> epoch timestamp map where some data/metric/stat is calculated
      * TODO consider just use table role as key
@@ -363,5 +366,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setEvaluationDateMap(Map<String, Long> evaluationDateMap) {
         this.evaluationDateMap = evaluationDateMap;
+    }
+
+    public Boolean getSpendingAnalysisPublished() {
+        return spendingAnalysisPublished;
+    }
+
+    public void setSpendingAnalysisPublished(Boolean spendingAnalysisPublished) {
+        this.spendingAnalysisPublished = spendingAnalysisPublished;
     }
 }

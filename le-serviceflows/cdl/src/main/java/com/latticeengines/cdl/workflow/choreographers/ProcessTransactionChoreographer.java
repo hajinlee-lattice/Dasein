@@ -31,18 +31,16 @@ import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistory;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.PAReportUtils;
-import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
-import com.latticeengines.domain.exposed.util.TransactionUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -272,10 +270,10 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     protected boolean shouldRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
         boolean should = super.shouldRebuild(step);
 
-        log.info(String.format(
-                "Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, "
-                        + "hasProducts=%b, productChoreographer.hasChange=%b, isBusinessCalendarChanged=%b, forceRebuildForNewSteps=%b",
-                reset, hasRawStore, hasProducts, productChoreographer.hasChange, isBusinessCalenderChanged, forceRebuildForNewSteps));
+        log.info(String.format("Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, "
+                + "hasProducts=%b, productChoreographer.hasChange=%b, isBusinessCalendarChanged=%b, forceRebuildForNewSteps=%b",
+                reset, hasRawStore, hasProducts, productChoreographer.hasChange, isBusinessCalenderChanged,
+                forceRebuildForNewSteps));
 
         if (reset) {
             return should;
@@ -396,26 +394,25 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             return false;
         }
 
-        List<Table> periodTables = dataCollectionProxy.getTables(customerSpace,
-                TableRoleInCollection.ConsolidatedPeriodTransaction, active.complement());
-        if (CollectionUtils.isEmpty(periodTables)) {
+        List<String> periodStreamNames = dataCollectionProxy.getTableNames(customerSpace,
+                TableRoleInCollection.PeriodTransactionStream, active.complement());
+        if (CollectionUtils.isEmpty(periodStreamNames)) {
             log.info("Did not find period transaction table in inactive version.");
-            periodTables = dataCollectionProxy.getTables(customerSpace,
-                    TableRoleInCollection.ConsolidatedPeriodTransaction, active);
-            if (CollectionUtils.isEmpty(periodTables)) {
+            periodStreamNames = dataCollectionProxy.getTableNames(customerSpace,
+                    TableRoleInCollection.PeriodTransactionStream, active);
+            if (CollectionUtils.isEmpty(periodStreamNames)) {
                 log.info(
                         "Did not find period transaction table in both versions. Treated as no transaction existing with Analytic Product");
                 return false;
             }
         }
-        Table yearTable = PeriodStrategyUtils.findPeriodTableFromStrategy(periodTables, PeriodStrategy.CalendarYear);
 
-        log.info("Checking Analytic Product existence in table " + yearTable.getName() + ". Might take long time.");
-        if (TransactionUtils.hasAnalyticProduct(yarnConfiguration, yearTable.getExtracts().get(0).getPath())) {
-            log.info("Found Analytic Product in table " + yearTable.getName());
+        log.info("Checking Analytic Product transaction stream existence");
+        if (periodStreamNames.stream().anyMatch(tableName -> tableName.contains(ProductType.Analytic.name()))) {
+            log.info("Found Analytic Product period transaction stream.");
             return true;
         } else {
-            log.info("Did not find Analytic Product in table " + yearTable.getName());
+            log.info("Did not find Analytic Product period transaction stream");
             if (addWarning) {
                 String warning = "No analytic product id matched between products and transactions. Skip generating curated attributes.";
                 addWarningToProductReport(step, warning);
