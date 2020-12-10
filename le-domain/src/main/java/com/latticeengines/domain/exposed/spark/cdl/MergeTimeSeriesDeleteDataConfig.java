@@ -20,6 +20,12 @@ public class MergeTimeSeriesDeleteDataConfig extends SparkJobConfig {
     @JsonProperty("TimeRanges")
     public Map<Integer, List<Long>> timeRanges = new HashMap<>();
 
+    @JsonProperty("DeleteIDs")
+    public Map<Integer, String> deleteIDs = new HashMap<>();
+
+    @JsonProperty("JoinTableIdx")
+    public Integer joinTableIdx;
+
     @Override
     public String getName() {
         return NAME;

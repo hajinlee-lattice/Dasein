@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.maintenance;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_TS_DELETE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
+import static com.latticeengines.domain.exposed.query.EntityType.MarketingActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -45,6 +47,8 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
     static final String BEAN_NAME = "softDeleteActivityStream";
 
     private List<Action> softDeleteActivityActions;
+
+    private String consolidatedContactTable;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -100,6 +104,13 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
             DeleteActionConfiguration config = (DeleteActionConfiguration) deleteAction.getActionConfiguration();
             return config.hasEntity(BusinessEntity.ActivityStream);
         }).collect(Collectors.toList());
+
+        consolidatedContactTable = dataCollectionProxy.getTableName(customerSpace.getTenantId(),
+                TableRoleInCollection.ConsolidatedContact, inactive);
+        if (StringUtils.isBlank(consolidatedContactTable)) {
+            consolidatedContactTable = dataCollectionProxy.getTableName(customerSpace.getTenantId(),
+                    TableRoleInCollection.ConsolidatedContact, active);
+        }
     }
 
     @Override
@@ -201,6 +212,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_TS_DELETE_TXFMR);
         Map<Integer, List<Long>> timeRanges = new HashMap<>();
+        Map<Integer, String> deleteIDs = new HashMap<>();
         int timeRangeIdx = 0;
         for (DeleteActionConfiguration deleteConfig : deleteConfigsForStream) {
             if (StringUtils.isNotBlank(deleteConfig.getDeleteDataTable())) {
@@ -209,14 +221,34 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
                 if (StringUtils.isNotBlank(deleteConfig.getFromDate()) && StringUtils.isNotBlank(deleteConfig.getToDate())) {
                     timeRanges.put(timeRangeIdx, DateTimeUtils.parseTimeRange(deleteConfig.getFromDate(), deleteConfig.getToDate()));
                 }
+                if (MarketingActivity.equals(deleteConfig.getDeleteEntityType())) {
+                    deleteIDs.put(timeRangeIdx, getDeleteId(deleteConfig.getIdEntity(), joinKey));
+                }
                 timeRangeIdx++;
             }
         }
         MergeTimeSeriesDeleteDataConfig config = new MergeTimeSeriesDeleteDataConfig();
         config.joinKey = joinKey;
         config.timeRanges.putAll(timeRanges);
+        //add join table if joinkey is not the same with delete entity id for marketing
+        if (deleteIDs.values().stream().anyMatch(deleteId -> !deleteId.equals(joinKey))) {
+            config.deleteIDs.putAll(deleteIDs);
+            config.joinTableIdx = timeRangeIdx;
+            addBaseTables(step, consolidatedContactTable);
+        }
         step.setConfiguration((appendEngineConf(config, lightEngineConfig())));
         return step;
+    }
+
+    private String getDeleteId(BusinessEntity entity, String joinKey) {
+        switch (entity) {
+            case Account:
+                return InterfaceName.AccountId.name();
+            case Contact:
+                return InterfaceName.ContactId.name();
+            default:
+                return joinKey;
+        }
     }
 
     protected TransformationWorkflowConfiguration generateWorkflowConf() {
