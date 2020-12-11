@@ -70,7 +70,7 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
 //        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         legacyDeleteByUpload();
         uploadTxnsForDelete();
-        cleanupByDateRange();
+        //cleanupByDateRange();
         processAnalyze();
         verifyCleanup();
     }

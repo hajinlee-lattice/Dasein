@@ -74,14 +74,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @Inject
-    private DataUnitProxy dataUnitProxy;
-
     private Table masterTable;
-
-    private Table cleanupTable;
-
-    private String cleanupTableName;
 
     private TableRoleInCollection batchStore;
 
@@ -138,10 +131,9 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                 collectMasterStep = 3;
                 collectStep = 5;
 
-                TransformationStepConfig merge = mergeDelete(canMergeActions, getJoinKey(configuration.getEntity(),
-                        CleanupOperationType.BYUPLOAD_MINDATE));
+                TransformationStepConfig merge = mergeDelete(canMergeActions, InterfaceName.TransactionDayPeriod.name());
                 TransformationStepConfig prepare = addTrxDate(null);
-                TransformationStepConfig cleanup = cleanup(null, CleanupOperationType.BYUPLOAD_MINDATE);
+                TransformationStepConfig cleanup = cleanup(CleanupOperationType.BYUPLOAD_MINDATE);
                 TransformationStepConfig collectMaster = collectMaster();
                 TransformationStepConfig cleanupMaster = cleanupMaster();
                 TransformationStepConfig dayPeriods = collectDays();
@@ -163,13 +155,15 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
             if (CollectionUtils.isNotEmpty(otherActions)) {
                 mergeStep = -1;
                 for (Action action : otherActions) {
-                    lastCleanupStep = cleanupStep;
                     LegacyDeleteByUploadActionConfiguration legacyDeleteByUploadActionConfiguration =
                             (LegacyDeleteByUploadActionConfiguration) action.getActionConfiguration();
+                    if (legacyDeleteByUploadActionConfiguration == null || legacyDeleteByUploadActionConfiguration.getCleanupOperationType() == null) {
+                        continue;
+                    }
+                    lastCleanupStep = cleanupStep;
                     steps.add(addTrxDate(legacyDeleteByUploadActionConfiguration));
                     prepareStep = steps.size() - 1;
-                    steps.add(cleanup(legacyDeleteByUploadActionConfiguration,
-                            legacyDeleteByUploadActionConfiguration.getCleanupOperationType()));
+                    steps.add(cleanup(legacyDeleteByUploadActionConfiguration.getCleanupOperationType()));
                     cleanupStep = steps.size() - 1;
                     steps.add(collectMaster());
                     collectMasterStep = steps.size() - 1;
@@ -300,7 +294,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         return step;
     }
 
-    private TransformationStepConfig cleanup(LegacyDeleteByUploadActionConfiguration legacyDeleteByUploadActionConfiguration, CleanupOperationType type) {
+    private TransformationStepConfig cleanup(CleanupOperationType type) {
         TransformationStepConfig step = new TransformationStepConfig();
         BusinessEntity entity = configuration.getEntity();
         List<Integer> inputSteps = new ArrayList<>();
@@ -324,7 +318,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         LegacyDeleteJobConfig legacyDeleteJobConfig = new LegacyDeleteJobConfig();
         legacyDeleteJobConfig.setBusinessEntity(entity);
         legacyDeleteJobConfig.setOperationType(type);
-        legacyDeleteJobConfig.setJoinedColumns(getJoinedColumns(entity, type));
+        legacyDeleteJobConfig.setJoinedColumns(getJoinedColumns(type));
         legacyDeleteJobConfig.setDeleteSourceIdx(0);
 
         String configStr = appendEngineConf(legacyDeleteJobConfig, lightEngineConfig());
@@ -352,63 +346,30 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         return step;
     }
 
-    private LegacyDeleteJobConfig.JoinedColumns getJoinedColumns(BusinessEntity entity, CleanupOperationType type) {
+    private LegacyDeleteJobConfig.JoinedColumns getJoinedColumns(CleanupOperationType type) {
         LegacyDeleteJobConfig.JoinedColumns joinedColumns = new LegacyDeleteJobConfig.JoinedColumns();
         String account_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerAccountId.name() :
                 InterfaceName.AccountId.name();
         String contact_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerContactId.name() :
                 InterfaceName.ContactId.name();
-        switch (entity) {
-            case Account:
+        switch (type) {
+            case BYUPLOAD_MINDATE:
+                joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
+                break;
+            case BYUPLOAD_MINDATEANDACCOUNT:
                 joinedColumns.setAccountId(account_id);
+                joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                 break;
-            case Contact:
+            case BYUPLOAD_ACPD:
+                joinedColumns.setAccountId(account_id);
                 joinedColumns.setContactId(contact_id);
-                break;
-            case Transaction:
-                switch (type) {
-                    case BYUPLOAD_MINDATE:
-                        joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
-                        break;
-                    case BYUPLOAD_MINDATEANDACCOUNT:
-                        joinedColumns.setAccountId(account_id);
-                        joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
-                        break;
-                    case BYUPLOAD_ACPD:
-                        joinedColumns.setAccountId(account_id);
-                        joinedColumns.setContactId(contact_id);
-                        joinedColumns.setProductId(InterfaceName.ProductId.name());
-                        joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
-                        break;
-                    default:
-                        break;
-                }
+                joinedColumns.setProductId(InterfaceName.ProductId.name());
+                joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                 break;
             default:
                 break;
         }
         return joinedColumns;
-    }
-
-    private String getJoinKey(BusinessEntity entity, CleanupOperationType type) {
-        String account_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerAccountId.name() :
-                InterfaceName.AccountId.name();
-        String contact_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerContactId.name() :
-                InterfaceName.ContactId.name();
-        switch (entity) {
-            case Account:
-                return account_id;
-            case Contact:
-                return contact_id;
-            case Transaction:
-                if (type.equals(CleanupOperationType.BYUPLOAD_MINDATE)) {
-                    return InterfaceName.TransactionDayPeriod.name();
-                } else {
-                    return null;
-                }
-            default:
-                return null;
-        }
     }
 
     protected void onPostTransformationCompleted() {
