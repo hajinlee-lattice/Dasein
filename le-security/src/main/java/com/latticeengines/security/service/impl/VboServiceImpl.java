@@ -95,10 +95,10 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
                         response.getStatusCodeValue(), subscriberNumber));
                 return null;
             }
-            // return "meter" node from "D&B Connect" node
-            JsonNode dnbConnect = getNodeFromList(response.getBody(),
-                    "products", "name", "D&B Connect");
-            return getNodeFromList(dnbConnect, "domain_add_ons", "canonical_name", "STCT");
+            // return "meter" node from D&B Connect product's "STCT" domain add-on
+            JsonNode n = getNodeFromList(response.getBody(), "products", "name", "D&B Connect");
+            n = getNodeFromList(n, "domain_add_ons", "canonical_name", "STCT");
+            return (n != null && n.has("meter")) ? n.get("meter") : null;
         } catch (Exception e) {
             log.error(String.format("Failed to get usage meter for subscriber %s:", subscriberNumber), e);
         }

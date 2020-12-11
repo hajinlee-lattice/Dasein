@@ -295,7 +295,8 @@ public class UserServiceImpl implements UserService {
             return resignAccessLevel(tenantId, username);
         }
         // case: external user; not in tenant already; no available seats
-        if (!EmailUtils.isInternalUser(username)) {
+        User user = globalUserManagementService.getUserByUsername(username);
+        if (!EmailUtils.isInternalUser(user.getEmail())) {
             Tenant t = tenantService.findByTenantId(tenantId);
             if (t != null && !inTenant(tenantId, username) && !checkSeatAvailability(t.getSubscriberNumber())) {
                 throw new LedpException(LedpCode.LEDP_18250, new String[]{username});
@@ -333,7 +334,8 @@ public class UserServiceImpl implements UserService {
             expirationDate = null;
         }
         // case: external user; not in tenant already; no available seats
-        if (!EmailUtils.isInternalUser(username)) {
+        User user = globalUserManagementService.getUserByUsername(username);
+        if (!EmailUtils.isInternalUser(user.getEmail())) {
             Tenant t = tenantService.findByTenantId(tenantId);
             if (t != null && !inTenant(tenantId, username) && !checkSeatAvailability(t.getSubscriberNumber())) {
                 throw new LedpException(LedpCode.LEDP_18250, new String[]{username});
