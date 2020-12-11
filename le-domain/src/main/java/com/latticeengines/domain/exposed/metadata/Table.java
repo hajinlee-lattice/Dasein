@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
@@ -67,6 +68,7 @@ import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_TABLE", //
@@ -765,6 +767,28 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode, HasAuditi
             unit.setDataFormat(DataUnit.DataFormat.PARQUET);
         }
         unit.setCount(this.getExtracts().get(0).getProcessedRecords());
+        return unit;
+    }
+
+    public S3DataUnit toS3DataUnit(String alias, String bucket, String tenantId) {
+        if (StringUtils.isBlank(alias)) {
+            alias = name;
+        }
+        S3DataUnit unit = new S3DataUnit();
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
+        unit.setName(alias);
+        String hdfsPath = this.getExtracts().get(0).getPath();
+        if (!hdfsPath.endsWith(".avro") && !hdfsPath.endsWith(".parquet")) {
+            hdfsPath = PathUtils.toAvroGlob(hdfsPath);
+        }
+        if (hdfsPath.endsWith(".parquet")) {
+            unit.setDataFormat(DataUnit.DataFormat.PARQUET);
+        }
+        unit.setBucket(bucket);
+        String tableDir = pathBuilder.getS3AtlasTablePrefix(tenantId, name);
+        String prefix = tableDir.substring(tableDir.indexOf(bucket) + bucket.length() + 1);
+        unit.setPrefix(prefix);
+        unit.setCount(extracts.get(0).getProcessedRecords());
         return unit;
     }
 

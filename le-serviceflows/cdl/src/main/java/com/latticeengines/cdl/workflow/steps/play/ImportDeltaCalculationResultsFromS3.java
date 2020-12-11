@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.LaunchBaseType;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
@@ -56,16 +55,6 @@ public class ImportDeltaCalculationResultsFromS3
         if (CollectionUtils.isNotEmpty(tables)) {
             if (baseOnOtherTapType) {
                 log.info("Play {} is based on list segment and will read from s3 directly.", play.getName());
-            } else {
-                tables.forEach(tblName -> {
-                    Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
-                    if (table == null) {
-                        throw new RuntimeException("Table " + tblName + " for customer " //
-                                + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
-                                + " does not exists.");
-                    }
-                    addTableToRequestForImport(table, requests);
-                });
             }
         } else {
             log.error(
