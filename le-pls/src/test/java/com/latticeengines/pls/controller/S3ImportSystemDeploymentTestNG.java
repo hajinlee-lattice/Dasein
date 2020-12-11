@@ -52,12 +52,16 @@ public class S3ImportSystemDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertTrue(MapUtils.isNotEmpty(result));
 
         systems = plsCDLS3ImportProxy.getS3ImportSystem(true, false);
-        Assert.assertTrue(CollectionUtils.isEmpty(systems));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(systems));
         Assert.assertEquals(systems.size(), 1);
 
-        // create pardon system , verify contact system id
+        // create pardon system , verify generate contact system id
         result = plsCDLS3ImportProxy.createS3ImportSystem("salesforce1", S3ImportSystem.SystemType.Pardon, true);
         Assert.assertTrue(MapUtils.isNotEmpty(result));
+        Assert.assertEquals(systems.size(), 1);
+
+        systems = plsCDLS3ImportProxy.getS3ImportSystem(false, true);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(systems));
         Assert.assertEquals(systems.size(), 1);
     }
 
