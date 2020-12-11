@@ -1,5 +1,6 @@
 package com.latticeengines.testframework.exposed.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -21,5 +22,7 @@ public interface CDLTestDataService {
     void mockRatingTableWithSingleEngine(String tenantId, String engineId, List<BucketMetadata> coverage, boolean uploadRatingTable);
 
     String createLaunchTable(String tenantId, String s3AvroDir, String version, String tableName) throws IOException;
+
+    void uploadAvroToS3(File file, String tenantId, String tableName);
 
 }
