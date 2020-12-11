@@ -785,9 +785,8 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode, HasAuditi
             unit.setDataFormat(DataUnit.DataFormat.PARQUET);
         }
         unit.setBucket(bucket);
-        String tableDir = pathBuilder.getS3AtlasTablePrefix(tenantId, name);
-        String prefix = tableDir.substring(tableDir.indexOf(bucket) + bucket.length() + 1);
-        unit.setPrefix(prefix);
+        String tablePrefix = pathBuilder.getS3AtlasTablePrefix(tenantId, name);
+        unit.setPrefix(tablePrefix);
         unit.setCount(extracts.get(0).getProcessedRecords());
         return unit;
     }
