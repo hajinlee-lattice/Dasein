@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVPrinter;
@@ -51,6 +52,7 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
     private SourceFile cleanupTemplate;
     private int originalTxnRecordCount;
     private int numTxnToDelete;
+    private List<GenericRecord> deleteTransRecords;
 
     @BeforeClass(groups = "end2end")
     @Override
@@ -67,10 +69,9 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
     @Test(groups = "end2end")
     public void testDeleteContactByUpload() throws Exception {
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-//        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         legacyDeleteByUpload();
         uploadTxnsForDelete();
-        //cleanupByDateRange();
+        cleanupByDateRange();
         processAnalyze();
         verifyCleanup();
     }
@@ -132,6 +133,7 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
         List<GenericRecord> transactionRecordsAfterDelete = getRecords(table3);
         log.info("There are " + transactionRecordsAfterDelete.size() + " rows in transaction avro after delete.");
         Assert.assertTrue(transactionRecordsAfterDelete.size() + numTxnToDelete <= originalTxnRecordCount);
+        assertFalse(transactionRecordsAfterDelete.containsAll(deleteTransRecords));
         assertFalse(HdfsUtils.fileExists(yarnConfiguration, avroDir));
     }
 
@@ -157,10 +159,12 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
         originalTxnRecordCount = recordsBeforeDelete.size();
         numTxnToDelete = getNumDeletedRecord(originalTxnRecordCount);
 
+        deleteTransRecords = new ArrayList<>();
         CSVPrinter csvPrinter = new CSVPrinter(new FileWriter(filename),
                 LECSVFormat.format.withHeader("AccountId", "ProductId", "TransactionTime"));
         //get records from last
         for(int i = recordsBeforeDelete.size() - 1; i >= recordsBeforeDelete.size() - numTxnToDelete; i--) {
+            deleteTransRecords.add(recordsBeforeDelete.get(i));
             csvPrinter.printRecord(recordsBeforeDelete.get(i).get("AccountId").toString(),
                     recordsBeforeDelete.get(i).get("ProductId").toString(),
                     recordsBeforeDelete.get(i).get("TransactionTime").toString());
