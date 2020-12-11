@@ -5,9 +5,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -102,7 +104,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         MockitoAnnotations.initMocks(this);
         Mockito.doReturn(false).when(deltaCampaignWorkflowSubmitter).enableExternalLaunch(any(), any());
         testPlayCreationHelper.setupTenantAndData();
-        CustomerSpace customerSpace = CustomerSpace.parse(testPlayCreationHelper.getCustomerSpace());
+        moveAvroFilesToHDFS();
         uploadAvrosToS3();
         String addContactsTable = setupLiveRampTable("/tmp/addLiveRampResult", addLiveRampContacts);
         String removeContactsTable = setupLiveRampTable("/tmp/removeLiveRampResult", removeLiveRampContacts);
@@ -195,6 +197,22 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         cleanupS3Files(s3FolderPath);
     }
 
+    private void moveAvroFilesToHDFS() throws IOException {
+        moveAvroFileToHDFS("campaign/liveramp/addLiverampBlock.avro", "/tmp/addLiveRampResult/addLiverampBlock.avro");
+        moveAvroFileToHDFS("campaign/liveramp/removeLiverampBlock.avro",
+                "/tmp/removeLiveRampResult/removeLiverampBlock.avro");
+    }
+
+    private void moveAvroFileToHDFS(String fromPath, String toPath) throws IOException {
+        String toFolder = toPath.substring(0, toPath.lastIndexOf('/'));
+        createDirsIfDoesntExist(toFolder);
+        URL url = ClassLoader.getSystemResource(fromPath);
+        File localFile = new File(url.getFile());
+        log.info("Taking file from: " + localFile.getAbsolutePath());
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(), toPath);
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, toPath));
+        log.info("Added Match Block uploaded to: " + toPath);
+    }
 
     private void createDirsIfDoesntExist(String dir) throws IOException {
         if (!HdfsUtils.isDirectory(yarnConfiguration, dir)) {
