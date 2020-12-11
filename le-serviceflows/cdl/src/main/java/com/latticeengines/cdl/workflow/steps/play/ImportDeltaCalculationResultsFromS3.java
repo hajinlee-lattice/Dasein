@@ -18,8 +18,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.LaunchBaseType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
@@ -57,15 +55,7 @@ public class ImportDeltaCalculationResultsFromS3
         boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(play.getTapType());
         if (CollectionUtils.isNotEmpty(tables)) {
             if (baseOnOtherTapType) {
-                log.info("Play {} is based on list segment.", play.getName());
-                tables.forEach(dataUnitName -> {
-                    S3DataUnit dataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), dataUnitName,
-                            DataUnit.StorageType.S3);
-                    if (dataUnit == null) {
-                        throw new RuntimeException("Data Unit " + dataUnitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
-                    }
-                    addS3DataUnitToRequestForImport(dataUnit, requests);
-                });
+                log.info("Play {} is based on list segment and will read from s3 directly.", play.getName());
             } else {
                 tables.forEach(tblName -> {
                     Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
@@ -176,7 +166,7 @@ public class ImportDeltaCalculationResultsFromS3
 
         if (isOutreachTaskLaunch) {
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE,
-                Boolean.toString(true));
+                    Boolean.toString(true));
         }
 
         log.info(String.format("totalDfs=%d, tableNames=%s", totalDfs, Arrays.toString(tableNames.toArray())));

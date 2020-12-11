@@ -596,7 +596,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             if (s3DataUnit == null) {
                 throw new RuntimeException("S3 data unit " + unitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
             }
-            return s3DataUnit.toHdfsDataUnit();
+            return s3DataUnit;
         } else {
             Table table = metadataProxy.getTable(customerSpace.toString(), unitName);
             if (table == null) {
