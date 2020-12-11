@@ -34,10 +34,10 @@ public class PlsCDLS3ImportProxy extends PlsRestApiProxyBase {
     public List<S3ImportSystem> getS3ImportSystem(Boolean filterAccount, Boolean filterContact) {
         StringBuilder builder = new StringBuilder();
         builder.append(constructUrl("/system/list"));
-        boolean isFirst = false;
+        boolean isFirst = true;
         if (filterAccount != null) {
             builder.append(String.format("?Account=%s", filterAccount));
-            isFirst = true;
+            isFirst = false;
         }
         if (filterContact != null) {
             builder.append(isFirst ? String.format("?Contact=%s", filterContact) :
