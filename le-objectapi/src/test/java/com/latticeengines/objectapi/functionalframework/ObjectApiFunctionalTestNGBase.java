@@ -91,6 +91,9 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
         attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
         attrRepo.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
         if (version >= 3) {
+            if (uploadHdfs) {
+                uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);
+            }
             tblPathMap = new HashMap<>();
             Map<TableRoleInCollection, String> pathMap = readTablePaths(version);
             for (TableRoleInCollection role : QueryTestUtils.getRolesInAttrRepo()) {
@@ -132,9 +135,6 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
                 }
             }
             insertPurchaseHistory(attrRepo, version);
-            if (uploadHdfs) {
-                uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);
-            }
 
             for (TableRoleInCollection role : attrRepo.getTableNameMap().keySet()) {
                 String tblName = QueryTestUtils.getServingStoreName(role, version);
