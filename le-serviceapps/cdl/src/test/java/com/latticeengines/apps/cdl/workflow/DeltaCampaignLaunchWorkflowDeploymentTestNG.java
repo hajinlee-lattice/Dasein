@@ -103,7 +103,7 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         Mockito.doReturn(false).when(deltaCampaignWorkflowSubmitter).enableExternalLaunch(any(), any());
         testPlayCreationHelper.setupTenantAndData();
         CustomerSpace customerSpace = CustomerSpace.parse(testPlayCreationHelper.getCustomerSpace());
-        uploadAvrosToS3(customerSpace.getTenantId());
+        uploadAvrosToS3();
         String addContactsTable = setupLiveRampTable("/tmp/addLiveRampResult", addLiveRampContacts);
         String removeContactsTable = setupLiveRampTable("/tmp/removeLiveRampResult", removeLiveRampContacts);
         testPerformancePlayChannelConfig = new TestPlayChannelConfig.Builder()
