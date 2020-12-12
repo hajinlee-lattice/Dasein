@@ -778,9 +778,6 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode, HasAuditi
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         unit.setName(alias);
         String hdfsPath = this.getExtracts().get(0).getPath();
-        if (!hdfsPath.endsWith(".avro") && !hdfsPath.endsWith(".parquet")) {
-            hdfsPath = PathUtils.toAvroGlob(hdfsPath);
-        }
         if (hdfsPath.endsWith(".parquet")) {
             unit.setDataFormat(DataUnit.DataFormat.PARQUET);
         }
