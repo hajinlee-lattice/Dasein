@@ -155,29 +155,32 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
         Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
         List<GenericRecord> recordsBeforeDelete = getRecords(table);
         Assert.assertTrue(recordsBeforeDelete.size() > 0);
-        String filename = "Cleanup_Template_Transaction.csv";
+        String filename_holder = "Cleanup_Template_Transaction_%s.csv";
         originalTxnRecordCount = recordsBeforeDelete.size();
         numTxnToDelete = getNumDeletedRecord(originalTxnRecordCount);
 
         deleteTransRecords = new ArrayList<>();
-        CSVPrinter csvPrinter = new CSVPrinter(new FileWriter(filename),
-                LECSVFormat.format.withHeader("AccountId", "ProductId", "TransactionTime"));
-        //get records from last
-        for(int i = recordsBeforeDelete.size() - 1; i >= recordsBeforeDelete.size() - numTxnToDelete; i--) {
-            deleteTransRecords.add(recordsBeforeDelete.get(i));
-            csvPrinter.printRecord(recordsBeforeDelete.get(i).get("AccountId").toString(),
-                    recordsBeforeDelete.get(i).get("ProductId").toString(),
-                    recordsBeforeDelete.get(i).get("TransactionTime").toString());
+        for (int j=0; j < 3; j++) {
+            String filename = String.format(filename_holder, j);
+            CSVPrinter csvPrinter = new CSVPrinter(new FileWriter(filename),
+                    LECSVFormat.format.withHeader("AccountId", "ProductId", "TransactionTime"));
+            //get records from last
+            for (int i = recordsBeforeDelete.size() - (numTxnToDelete * j); i >= recordsBeforeDelete.size() - (numTxnToDelete * (j + 1)); i--) {
+                deleteTransRecords.add(recordsBeforeDelete.get(i));
+                csvPrinter.printRecord(recordsBeforeDelete.get(i).get("AccountId").toString(),
+                        recordsBeforeDelete.get(i).get("ProductId").toString(),
+                        recordsBeforeDelete.get(i).get("TransactionTime").toString());
+            }
+            csvPrinter.flush();
+            csvPrinter.close();
+            Resource csvResrouce = new FileSystemResource(filename);
+            cleanupTemplate = uploadDeleteCSV(filename, SchemaInterpretation.DeleteTransactionTemplate,
+                    CleanupOperationType.BYUPLOAD_ACPD, csvResrouce);
+            ApplicationId appId = cdlProxy.legacyDeleteByUpload(customerSpace, cleanupTemplate,
+                    BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_ACPD, MultiTenantContext.getEmailAddress());
+            JobStatus status = waitForWorkflowStatus(appId.toString(), false);
+            Assert.assertEquals(JobStatus.COMPLETED, status);
         }
-        csvPrinter.flush();
-        csvPrinter.close();
-        Resource csvResrouce = new FileSystemResource(filename);
-        cleanupTemplate = uploadDeleteCSV(filename, SchemaInterpretation.DeleteTransactionTemplate,
-                CleanupOperationType.BYUPLOAD_ACPD, csvResrouce);
-        ApplicationId appId = cdlProxy.legacyDeleteByUpload(customerSpace, cleanupTemplate,
-                BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_ACPD, MultiTenantContext.getEmailAddress());
-        JobStatus status = waitForWorkflowStatus(appId.toString(), false);
-        Assert.assertEquals(JobStatus.COMPLETED, status);
     }
 
     private List<GenericRecord> getRecords(Table table) {
@@ -192,9 +195,9 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
     }
 
     private int getNumDeletedRecord(int numTotalRecords) {
-        if (numTotalRecords > 100) {
+        if (numTotalRecords > 300) {
             return 100;
-        } else if (numTotalRecords > 10) {
+        } else if (numTotalRecords > 30) {
             return 10;
         } else {
             return 1;
