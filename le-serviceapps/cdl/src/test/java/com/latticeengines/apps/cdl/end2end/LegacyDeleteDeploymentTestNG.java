@@ -71,7 +71,7 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         legacyDeleteByUpload();
         uploadTxnsForDelete();
-        cleanupByDateRange();
+//        cleanupByDateRange();
         processAnalyze();
         verifyCleanup();
     }
@@ -134,7 +134,7 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
         log.info("There are " + transactionRecordsAfterDelete.size() + " rows in transaction avro after delete.");
         Assert.assertTrue(transactionRecordsAfterDelete.size() + numTxnToDelete <= originalTxnRecordCount);
         assertFalse(transactionRecordsAfterDelete.containsAll(deleteTransRecords));
-        assertFalse(HdfsUtils.fileExists(yarnConfiguration, avroDir));
+//        assertFalse(HdfsUtils.fileExists(yarnConfiguration, avroDir));
     }
 
     private void cleanupByDateRange() throws ParseException {
