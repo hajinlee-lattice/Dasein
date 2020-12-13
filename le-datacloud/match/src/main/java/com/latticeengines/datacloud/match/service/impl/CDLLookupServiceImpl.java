@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -205,20 +206,22 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             String tenantId = lookupDataUnit.getTenant();
             Integer version = lookupDataUnit.getVersion();
             String tableName = String.format(ACCOUNT_LOOKUP_TABLE_FORMAT, signature);
-            List<PrimaryKey> searchKeys = new ArrayList<>();
+            List<String> keys = new ArrayList<>();
             if (StringUtils.isNotBlank(lookupIdKey)) {
-                searchKeys.add(constructAccountLookupKey(tenantId, version, lookupIdKey, lookupIdValue));
+                keys.add(constructAccountLookupKey(tenantId, version, lookupIdKey, lookupIdValue));
             }
             if (!InterfaceName.AccountId.name().equalsIgnoreCase(lookupIdKey)) {
-                searchKeys.add(
-                        constructAccountLookupKey(tenantId, version, InterfaceName.AccountId.name(), lookupIdValue));
+                keys.add(constructAccountLookupKey(tenantId, version, InterfaceName.AccountId.name(), lookupIdValue));
             }
-            List<Item> records = dynamoItemService.batchGet(tableName, searchKeys);
-            List<String> accountIds = records.stream()
+            List<PrimaryKey> searchKeys = keys.stream()
+                    .map(key -> new PrimaryKey(InterfaceName.AtlasLookupKey.name(), key)).collect(Collectors.toList());
+            Map<String, Item> records = dynamoItemService.batchGet(tableName, searchKeys).stream()
                     .filter(record -> BooleanUtils.isNotTrue(record.getBoolean(LOOKUP_DELETED)))
-                    .map(record -> record.getString(InterfaceName.AccountId.name())).collect(Collectors.toList());
-            if (accountIds.size() >= 1) {
-                return accountIds.get(0);
+                    .map(record -> Pair.of(record.getString(InterfaceName.AtlasLookupKey.name()), record))
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            List<Item> validRecords = keys.stream().map(records::get).filter(Objects::nonNull).collect(Collectors.toList());
+            if (records.size() >= 1) { // find first added to search key
+                return validRecords.get(0).getString(InterfaceName.AccountId.name());
             }
         }
         return null;
@@ -373,10 +376,9 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         return data;
     }
 
-    private PrimaryKey constructAccountLookupKey(String tenantId, Integer version, String lookupIdKey,
+    private String constructAccountLookupKey(String tenantId, Integer version, String lookupIdKey,
             String lookupIdValue) {
-        return new PrimaryKey(InterfaceName.AtlasLookupKey.name(),
-                String.format(ACCOUNT_LOOKUP_KEY_FORMAT, tenantId, version, lookupIdKey, lookupIdValue));
+        return String.format(ACCOUNT_LOOKUP_KEY_FORMAT, tenantId, version, lookupIdKey, lookupIdValue);
     }
 
     private String extractAccountLookupSignature(DynamoDataUnit du) {
