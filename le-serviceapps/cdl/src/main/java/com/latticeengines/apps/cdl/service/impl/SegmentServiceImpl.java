@@ -361,14 +361,16 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     private Map<BusinessEntity, Long> updateSegmentCounts(MetadataSegment segment) {
-        // use a deep copy to avoid changing restriction format to break UI
-        MetadataSegment segmentCopy = segment.getDeepCopy();
-        Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
-        counts.forEach(segmentCopy::setEntityCount);
-        log.info("Updating counts for segment " + segment.getName() + " (" + segment.getDisplayName() + ")" //
-                + " to " + JsonUtils.serialize(segmentCopy.getEntityCounts()));
-        segmentCopy.setCountsOutdated(false);
-        segment = segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+        if (!MetadataSegment.SegmentType.List.equals(segment.getType())) {
+            // use a deep copy to avoid changing restriction format to break UI
+            MetadataSegment segmentCopy = segment.getDeepCopy();
+            Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
+            counts.forEach(segmentCopy::setEntityCount);
+            log.info("Updating counts for segment " + segment.getName() + " (" + segment.getDisplayName() + ")" //
+                    + " to " + JsonUtils.serialize(segmentCopy.getEntityCounts()));
+            segmentCopy.setCountsOutdated(false);
+            segment = segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+        }
         return segment.getEntityCounts();
     }
 
