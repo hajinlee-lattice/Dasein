@@ -121,6 +121,14 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
         return elements;
     }
 
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
     public void setTemplateName(String templateName) {
         this.templateName = templateName;
     }

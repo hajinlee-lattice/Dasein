@@ -65,6 +65,7 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
 
         EnrichmentTemplate enrichmentTemplate = new EnrichmentTemplate(enrichmentLayout);
 
+        enrichmentTemplate.setCreatedBy(MultiTenantContext.getUser().getEmail());
         enrichmentTemplate.setTemplateName(templateName);
         enrichmentTemplate.setTenant(tenant);
 
@@ -91,6 +92,9 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
             }
             if (enrichmentTemplate.getTenant() == null) {
                 errors.add("Required field Tenant is null");
+            }
+            if (enrichmentTemplate.getCreatedBy() == null) {
+                errors.add("Required creator is null");
             }
             result = new ResponseDocument<>();
             result.setErrors(errors);
