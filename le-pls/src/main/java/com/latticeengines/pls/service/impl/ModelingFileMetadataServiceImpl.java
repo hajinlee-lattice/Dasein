@@ -36,6 +36,7 @@ import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -711,15 +712,24 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         attributes = attributes.stream().filter(name -> !inactiveNames.contains(name)).collect(Collectors.toSet());
         int fieldSize = attributes.size();
-        ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
+        ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit, entity);
     }
 
     private void validateOtherIdSize(FieldValidationResult fieldValidationResult,
                                      FieldMappingDocument fieldMappingDocument, int otherIdLimit) {
-
-        int fieldSize = (int)
-                fieldMappingDocument.getFieldMappings().stream().filter(mapping -> mapping.getCdlExternalSystemType() != null).count();
-        ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, otherIdLimit);
+        Map<CDLExternalSystemType, Integer> sizeMap = new HashMap<>();
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getCdlExternalSystemType() != null) {
+                sizeMap.putIfAbsent(fieldMapping.getCdlExternalSystemType(), 0);
+                sizeMap.put(fieldMapping.getCdlExternalSystemType(),
+                        sizeMap.get(fieldMapping.getCdlExternalSystemType()) + 1);
+            }
+        }
+        for (Map.Entry<CDLExternalSystemType, Integer> entry : sizeMap.entrySet()) {
+            CDLExternalSystemType type = entry.getKey();
+            Integer fieldSize = entry.getValue();
+            ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, otherIdLimit, type.name());
+        }
     }
 
     private void crosscheckDataType(CustomerSpace customerSpace, String entity, String source, Table metaTable,
