@@ -33,14 +33,6 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
         data.add(candidate.getClassification().name()); // classification
         String duns = candidate.getDuns();
         data.add(duns); // duns
-        if (candidate.getNameLocation() != null) {
-            NameLocation location = candidate.getNameLocation();
-            data.add(location.getName());
-            data.add(location.getCountryCode());
-        } else {
-            data.add(null); // primary name
-            data.add(null); // country code
-        }
         data.add(candidate.getMatchType()); // match type
         if (candidate.getMatchInsight() != null) {
             DnBMatchInsight matchInsight = candidate.getMatchInsight();
@@ -55,6 +47,14 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
             data.add(null); // name match score
         }
         data.add(candidate.getOperatingStatus());
+        if (candidate.getNameLocation() != null) {
+            NameLocation location = candidate.getNameLocation();
+            data.add(location.getName());
+            data.add(location.getCountryCode());
+        } else {
+            data.add(null); // primary name
+            data.add(null); // country code
+        }
         return data;
     }
 
@@ -73,14 +73,14 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
         return Arrays.asList( //
                 Classification, //
                 MatchedDuns, //
-                MatchPrimaryBusinessName, //
-                MatchIso2CountryCode, //
                 MatchType, //
                 ConfidenceCode, //
                 MatchGrade, //
                 MatchDataProfile, //
                 NameMatchScore, //
-                OperatingStatusText //
+                OperatingStatusText, //
+                MatchPrimaryBusinessName, //
+                MatchIso2CountryCode //
         );
     }
 
@@ -89,14 +89,14 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
         return Arrays.asList( //
                 Pair.of(Classification, String.class), //
                 Pair.of(MatchedDuns, String.class), //
-                Pair.of(MatchPrimaryBusinessName, String.class), //
-                Pair.of(MatchIso2CountryCode, String.class), //
                 Pair.of(MatchType, String.class), //
                 Pair.of(ConfidenceCode, Integer.class), //
                 Pair.of(MatchGrade, String.class), //
                 Pair.of(MatchDataProfile, String.class), //
                 Pair.of(NameMatchScore, String.class), //
-                Pair.of(OperatingStatusText, String.class) //
+                Pair.of(OperatingStatusText, String.class), //
+                Pair.of(MatchPrimaryBusinessName, String.class), //
+                Pair.of(MatchIso2CountryCode, String.class) //
         );
     }
 
@@ -104,23 +104,23 @@ public class DirectPlusCandidateServiceImpl implements DirectPlusCandidateServic
     public List<PrimeColumn> candidateColumns() {
         return Arrays.asList( //
                 new PrimeColumn(MatchedDuns, "Matched D-U-N-S Number", //
-                        "matchCandidates.organization.duns"), //
-                new PrimeColumn(MatchPrimaryBusinessName, "Match Primary Business Name", //
-                        "matchCandidates.organization.primaryName"), //
-                new PrimeColumn(MatchIso2CountryCode, "Match ISO Alpha 2 Char Country Code", //
-                        "matchCandidates.organization.primaryAddress.addressCountry.isoAlpha2Code"), //
+                        "matchCandidates.organization.duns", "123456789"), //
                 new PrimeColumn(MatchType, "Match Type", //
-                        "matchDataCriteria"), //
+                        "matchDataCriteria", "Name and Address Lookup"), //
                 new PrimeColumn(ConfidenceCode, "Match Confidence Code", //
-                        "matchCandidates.matchQualityInformation.confidenceCode"), //
+                        "matchCandidates.matchQualityInformation.confidenceCode", "6"), //
                 new PrimeColumn(MatchGrade, "Match Grade", //
-                        "matchCandidates.matchQualityInformation.matchGrade"), //
+                        "matchCandidates.matchQualityInformation.matchGrade", "AZZZZZZZFZZ"), //
                 new PrimeColumn(MatchDataProfile, "Match Data Profile", //
-                        "matchCandidates.matchQualityInformation.matchDataProfile"), //
+                        "matchCandidates.matchQualityInformation.matchDataProfile", "01"), //
                 new PrimeColumn(NameMatchScore, "Name Match Score", //
-                        "matchCandidates.matchQualityInformation.nameMatchScore"), //
+                        "matchCandidates.matchQualityInformation.nameMatchScore", "85.5"), //
                 new PrimeColumn(OperatingStatusText, "Match Candidate Operating Status", //
-                        "matchCandidates.organization.dunsControlStatus.operatingStatus.description") //
+                        "matchCandidates.organization.dunsControlStatus.operatingStatus.description", "Active"), //
+                new PrimeColumn(MatchPrimaryBusinessName, "Match Primary Business Name", //
+                        "matchCandidates.organization.primaryName", "Bayer AG"), //
+                new PrimeColumn(MatchIso2CountryCode, "Match ISO Alpha 2 Char Country Code", //
+                        "matchCandidates.organization.primaryAddress.addressCountry.isoAlpha2Code", "DE") //
         );
     }
 

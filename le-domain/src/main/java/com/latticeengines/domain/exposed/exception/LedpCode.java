@@ -389,6 +389,8 @@ public enum LedpCode {
     LEDP_18247("{0}, Please confirm need to reset template."), //
     LEDP_18248("Cannot validate and update system priority."), //
     LEDP_18249("standard field {0} is unmapped but is mapped previously"),//
+    LEDP_18250("Invalid data block domain provided."),//
+    LEDP_18251("Invalid data block record type provided."),//
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

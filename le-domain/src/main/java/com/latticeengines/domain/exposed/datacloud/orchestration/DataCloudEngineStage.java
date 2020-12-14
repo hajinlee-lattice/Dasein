@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.orchestration;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -134,6 +136,11 @@ public class DataCloudEngineStage {
         }
         DataCloudEngineStage step = (DataCloudEngineStage) obj;
         return this.engine == step.engine && this.engineName.equals(step.engineName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(engine, engineName);
     }
 
     @Override

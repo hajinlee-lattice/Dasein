@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -260,12 +261,18 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
             String msg = String.format("Entity type %s is not supported for deletion", deleteEntityType);
             throw new IllegalArgumentException(msg);
         }
-        validateDeleteIdEntity(BooleanUtils.isTrue(request.getHardDelete()), idEntity, deleteEntityType,
+        boolean hardDelete = BooleanUtils.isTrue(request.getHardDelete());
+        validateDeleteIdEntity(hardDelete, idEntity, deleteEntityType,
                 request.getFilename());
         validateDeleteIdSystem(customerSpace, idSystem, idEntity);
         validateAndStandardizeDeleteDateRange(request);
         addStreamIds(customerSpace, request);
         translateEntityTypeToDeleteEntities(request);
+        // TODO modify when supporting hard delete by contact
+        if (hardDelete) {
+            // hard delete should have empty entity list for now
+            request.setDeleteEntities(Collections.emptyList());
+        }
     }
 
     /*-
@@ -377,12 +384,6 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
             String msg = String.format("Need to provide a file containing %s IDs that will be used for deletion",
                     idEntity.name().toLowerCase());
             throw new IllegalArgumentException(msg);
-        }
-        if (MarketingActivity.equals(deleteEntityType) && Account.equals(idEntity)
-                && StringUtils.isNotBlank(deleteFilename)) {
-            // FIXME remove this when delete contact level stream by account id is supported
-            throw new UnsupportedOperationException(
-                    "Delete marketing activity data by Account ID is not supported at the moment");
         }
     }
 

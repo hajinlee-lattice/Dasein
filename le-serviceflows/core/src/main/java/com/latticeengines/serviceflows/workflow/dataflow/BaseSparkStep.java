@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 import com.latticeengines.domain.exposed.spark.LivyScalingConfig;
 import com.latticeengines.domain.exposed.spark.LivySession;
@@ -122,6 +123,26 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         }
     }
 
+    protected DataUnit getS3DataUnit(boolean queryDataUnit, CustomerSpace customerSpace, String unitName) {
+        if (unitName == null) {
+            return null;
+        } else if (queryDataUnit) {
+            S3DataUnit s3DataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.getTenantId(), unitName, DataUnit.StorageType.S3);
+            if (s3DataUnit == null) {
+                throw new RuntimeException("S3 data unit " + unitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
+            }
+            return s3DataUnit;
+        } else {
+            Table table = metadataProxy.getTable(customerSpace.toString(), unitName);
+            if (table == null) {
+                throw new RuntimeException("Table " + unitName + " for customer " + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
+                        + " does not exists.");
+            }
+            return table.toS3DataUnit(unitName, s3Bucket, customerSpace.getTenantId());
+        }
+    }
+
+
     protected LivySession createLivySession(String jobName) {
         Map<String, String> extraConf = null;
         if (sparkMaxResultSize != null) {
@@ -170,7 +191,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         log.info("Run spark job " + jobClz.getSimpleName() + " with configuration: " + configStr);
         computeScalingMultiplier(jobConfig.getInput(), jobConfig.getNumTargets());
         try {
-            RetryTemplate retry = RetryUtils.getRetryTemplate(4);
+            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             return retry.execute(context -> {
                 if (context.getRetryCount() > 0) {
                     log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
@@ -266,6 +287,10 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     protected Table toTable(String tableName, String primaryKey, HdfsDataUnit jobTarget) {
         return SparkUtils.hdfsUnitToTable(tableName, primaryKey, jobTarget, yarnConfiguration, podId, customerSpace);
+    }
+
+    protected S3DataUnit toS3DataUnit(HdfsDataUnit jobTarget, BusinessEntity entity, String templateId, List<DataUnit.Role> roles) {
+        return SparkUtils.hdfsUnitToS3DataUnit(jobTarget, yarnConfiguration, entity, podId, customerSpace, s3Bucket, templateId, roles);
     }
 
     protected Table toTable(String tableName, HdfsDataUnit jobTarget) {

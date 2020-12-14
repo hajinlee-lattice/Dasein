@@ -16,6 +16,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatte
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumber;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Title;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__Row_Count__;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDate;
@@ -123,7 +124,8 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of(ContactId.name(), String.class), //
             Pair.of(AccountId.name(), String.class), //
             Pair.of(ContactName.name(), String.class), //
-            Pair.of(PhoneNumber.name(), String.class) //
+            Pair.of(PhoneNumber.name(), String.class), //
+            Pair.of(Title.name(), String.class)
     );
 
     private static final long now = LocalDate.of(2019, 11, 23) //
@@ -235,10 +237,10 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
 
         // ContactId, AccountId, ContactName, PhoneNumber
         Object[][] ctkBatchStore = new Object[][]{ //
-                {"C1", "A1", "john doe", "(000)-000-0000"}, //
-                {"C2", "A1", "jane doe", "(000)-000-0000"}, //
-                {"C3", "A2", "tourist", "(000)-000-0000"}, //
-                {"C4", "A3", "hello world", "(000)-000-0000"}, //
+                {"C1", "A1", "john doe", "(000)-000-0000", "CEO"}, //
+                {"C2", "A1", "jane doe", "(000)-000-0000", "CEO"}, //
+                {"C3", "A2", "tourist", "(000)-000-0000", "CEO"}, //
+                {"C4", "A3", "hello world", "(000)-000-0000", "CEO"} //
         };
         uploadHdfsDataUnit(ctkBatchStore, CTK_TABLE_FIELDS);
         contactTableIdx = 3;

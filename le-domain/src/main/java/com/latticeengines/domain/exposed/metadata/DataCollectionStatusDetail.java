@@ -117,6 +117,18 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("IntentAlertVersion")
     private String intentAlertVersion;
 
+    @JsonProperty("spendingAnalysisPublished")
+    private Boolean spendingAnalysisPublished;
+
+    /*-
+     * general key -> epoch timestamp map where some data/metric/stat is calculated
+     * TODO consider just use table role as key
+     *
+     * separated from dateMap which is currently using Category enum as key
+     */
+    @JsonProperty("EvaluationDateMap")
+    private Map<String, Long> evaluationDateMap;
+
     @JsonProperty("accountLookupSource")
     private List<String> accountLookupSource = new ArrayList<>();
 
@@ -346,5 +358,21 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setAccountLookupSource(List<String> accountLookupSource) {
         this.accountLookupSource = accountLookupSource;
+    }
+
+    public Map<String, Long> getEvaluationDateMap() {
+        return evaluationDateMap;
+    }
+
+    public void setEvaluationDateMap(Map<String, Long> evaluationDateMap) {
+        this.evaluationDateMap = evaluationDateMap;
+    }
+
+    public Boolean getSpendingAnalysisPublished() {
+        return spendingAnalysisPublished;
+    }
+
+    public void setSpendingAnalysisPublished(Boolean spendingAnalysisPublished) {
+        this.spendingAnalysisPublished = spendingAnalysisPublished;
     }
 }

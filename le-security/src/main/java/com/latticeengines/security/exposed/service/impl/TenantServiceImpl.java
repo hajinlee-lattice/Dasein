@@ -103,7 +103,7 @@ public class TenantServiceImpl implements TenantService {
         }
         try {
             for (User user : userService.getUsers(tenant.getId())) {
-                userService.deleteUser(tenant.getId(), user.getUsername());
+                userService.deleteUser(tenant.getId(), user.getUsername(), false);
                 // check if the user has any tenant right, if not, deactivate zendesk user
                 gaUserManagementService.checkRedundant(user.getUsername());
             }

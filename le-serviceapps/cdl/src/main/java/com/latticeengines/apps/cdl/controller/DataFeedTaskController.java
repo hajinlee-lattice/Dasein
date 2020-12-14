@@ -465,9 +465,20 @@ public class DataFeedTaskController {
     public void addAttributeLengthValidator(@PathVariable String customerSpace,
                                             @PathVariable String uniqueTaskId,
                                             @RequestParam String attrName,
-                                            @RequestParam int length,
+                                            @RequestParam(required = false) Integer length,
                                             @RequestParam(required = false, defaultValue = "false") boolean nullable) {
         dataFeedTaskTemplateService.addAttributeLengthValidator(customerSpace, uniqueTaskId, attrName, length, nullable);
+    }
+
+    @PutMapping("/updateLengthValidator/{uniqueTaskId}")
+    @ResponseBody
+    @ApiOperation(value = "Update attribute length validator")
+    public void updateAttributeLengthValidator(@PathVariable String customerSpace,
+                                            @PathVariable String uniqueTaskId,
+                                            @RequestParam String attrName,
+                                            @RequestParam(required = false) Integer length,
+                                            @RequestParam(required = false, defaultValue = "false") boolean nullable) {
+        dataFeedTaskTemplateService.updateAttributeLengthValidator(customerSpace, uniqueTaskId, attrName, length, nullable);
     }
 
     @PostMapping("/appendSimpleValueFilter/{uniqueTaskId}")

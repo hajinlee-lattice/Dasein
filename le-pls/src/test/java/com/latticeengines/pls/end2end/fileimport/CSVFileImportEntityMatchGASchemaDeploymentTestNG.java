@@ -27,8 +27,10 @@ public class CSVFileImportEntityMatchGASchemaDeploymentTestNG extends CSVFileImp
     @BeforeClass(groups = "deployment.import.group2")
     public void setup() throws Exception {
         String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName();
+        String flagEntityMatch = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
         Map<String, Boolean> flags = new HashMap<>();
         flags.put(featureFlag, true);
+        flags.put(flagEntityMatch, false);
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();

@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Random;
 import java.util.TimeZone;
 
-import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
 public final class SegmentUtils {
 
@@ -37,9 +37,12 @@ public final class SegmentUtils {
         return val.toString();
     }
 
-    public static CSVAdaptor getDefaultCSVAdaptor() {
-        CSVAdaptor csvAdaptor = new CSVAdaptor();
-        return csvAdaptor;
+    public static boolean hasListSegment(MetadataSegment metadataSegment) {
+        if (metadataSegment != null && metadataSegment.getListSegment() != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

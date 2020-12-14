@@ -8,19 +8,39 @@
 
     <import resource="classpath:ulysses-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
-    <import resource="classpath:oauth2db-context.xml" />
+    <import resource="classpath:oauth2db-context.xml"/>
     <import resource="classpath:oauth2db-auth-mgr-context.xml"/>
-    
+
     <import resource="classpath:common-webapp-env-context.xml"/>
-    
-    <bean class="com.latticeengines.ulysses.swagger.SwaggerConfig" />
+
+    <bean class="com.latticeengines.ulysses.swagger.SwaggerConfig"/>
 
     <bean id="ulyssesHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
-        <property name="componentName" value="ulysses" />
+        <property name="componentName" value="ulysses"/>
     </bean>
 
-    <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/" />
-    <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/" />
+    <mvc:interceptors>
+        <bean class="io.opentracing.contrib.spring.web.interceptor.TracingHandlerInterceptor">
+            <constructor-arg ref="tracer"/>
+        </bean>
+    </mvc:interceptors>
+
+    <bean id="tracingFilter" class="io.opentracing.contrib.web.servlet.filter.TracingFilter">
+        <constructor-arg ref="tracer"/>
+    </bean>
+
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment"/>
+        <property name="targetMethod" value="setService"/>
+        <property name="arguments">
+            <list>
+                <value>ulysses</value>
+            </list>
+        </property>
+    </bean>
+
+    <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
+    <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
     <mvc:interceptors>
         <bean class="com.latticeengines.ulysses.utils.LoggerInterceptor"/>
     </mvc:interceptors>

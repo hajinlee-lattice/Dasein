@@ -73,6 +73,9 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
     @JsonProperty("dnbCode")
     private DnBReturnCode dnbCode;
 
+    @JsonProperty("rawError")
+    private String rawError;
+
     @JsonProperty("hitWhiteCache")
     private Boolean hitWhiteCache = false;
 
@@ -373,6 +376,14 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
 
     public void setDnbCode(DnBReturnCode dnbCode) {
         this.dnbCode = dnbCode;
+    }
+
+    public String getRawError() {
+        return rawError;
+    }
+
+    public void setRawError(String rawError) {
+        this.rawError = rawError;
     }
 
     public String getCacheId() {

@@ -14,6 +14,7 @@ import com.latticeengines.cdl.workflow.steps.AggDailyTransactionStep;
 import com.latticeengines.cdl.workflow.steps.AggPeriodTransactionStep;
 import com.latticeengines.cdl.workflow.steps.BuildDailyTransaction;
 import com.latticeengines.cdl.workflow.steps.BuildPeriodTransaction;
+import com.latticeengines.cdl.workflow.steps.BuildSpendingAnalysis;
 import com.latticeengines.cdl.workflow.steps.RollupProductStepWrapper;
 import com.latticeengines.cdl.workflow.steps.SplitTransactionStep;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistoryWrapper;
@@ -57,6 +58,9 @@ public class RebuildTransactionWorkflow extends AbstractWorkflow<RebuildTransact
     @Inject
     private BuildPeriodTransaction buildPeriodTransaction;
 
+    @Inject
+    private BuildSpendingAnalysis buildSpendingAnalysis;
+
     @Override
     public Workflow defineWorkflow(RebuildTransactionWorkflowConfiguration config) {
         log.info("Using legacy steps: {}", useLegacyTransactionSteps);
@@ -73,6 +77,7 @@ public class RebuildTransactionWorkflow extends AbstractWorkflow<RebuildTransact
                 .next(aggPeriodTransactionStep) //
                 .next(buildDailyTransaction) //
                 .next(buildPeriodTransaction) //
+                .next(buildSpendingAnalysis) //
                 .next(profilePurchaseHistoryWrapper) //
                 .build();
     }

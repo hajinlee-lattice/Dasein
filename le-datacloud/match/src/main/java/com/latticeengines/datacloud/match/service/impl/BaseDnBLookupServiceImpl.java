@@ -32,6 +32,9 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
+/*
+ * Base class for the service sending lookup requests to a D&B API (e.g. Direct+)
+ */
 public abstract class BaseDnBLookupServiceImpl<T> {
     private static final Logger log = LoggerFactory.getLogger(BaseDnBLookupServiceImpl.class);
 
@@ -44,6 +47,12 @@ public abstract class BaseDnBLookupServiceImpl<T> {
 
     protected abstract HttpEntity<String> constructEntity(T context, String token);
 
+    /*
+     * Parse a 200 response from the D&B lookup
+     * @param response - response from lookup
+     * @param context - context for the given match
+     * @param apiType
+     */
     protected abstract void parseResponse(String response, T context, DnBAPIType apiType);
 
     protected abstract void parseError(Exception ex, T context);
@@ -97,6 +106,11 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         return dnbClient.get(entity, url);
     }
 
+    /**
+     * Convert an error response from D&B lookup service to a local enum
+     * @param ex - HttpClientErrorException
+     * @return - corresponding enum for the given status code and embedded status code
+     */
     DnBReturnCode parseDnBHttpError(HttpClientErrorException ex) {
         String response = ex.getResponseBodyAsString();
         switch (ex.getStatusCode()) {

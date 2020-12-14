@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.dnb;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.metric.Fact;
@@ -73,5 +75,10 @@ public class DnBMatchGrade implements Fact {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.rawCode);
     }
 }

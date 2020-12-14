@@ -73,6 +73,10 @@ public class PrimeColumn implements MetadataColumn {
     @Column(name = "JavaClass", nullable = false, length = 16)
     private String javaClass;
 
+    @JsonProperty("example")
+    @Column(name = "Example", nullable = true, length = 4000)
+    private String example;
+
     @JsonIgnore
     @LazyCollection(LazyCollectionOption.TRUE)
     @OneToMany(mappedBy = "primeColumn")
@@ -110,6 +114,10 @@ public class PrimeColumn implements MetadataColumn {
         this.jsonPath = jsonPath;
     }
 
+    public String getExample() { return example; }
+
+    public void setExample(String example) { this.example = example; }
+
     @Override
     public String getDisplayName() {
         return displayName;
@@ -137,17 +145,19 @@ public class PrimeColumn implements MetadataColumn {
 
     private PrimeColumn(){}
 
-    public PrimeColumn(String attrName, String displayName, String jsonPath) {
+    public PrimeColumn(String attrName, String displayName, String jsonPath, String example) {
         this.primeColumnId = attrName;
         this.displayName = displayName;
         this.jsonPath = jsonPath;
+        this.example = example;
     }
 
-    public PrimeColumn(String attrName, String displayName, String jsonPath, String javaClass) {
+    public PrimeColumn(String attrName, String displayName, String jsonPath, String javaClass, String example) {
         this.primeColumnId = attrName;
         this.displayName = displayName;
         this.jsonPath = jsonPath;
         this.javaClass = javaClass;
+        this.example = example;
     }
 
     public String getAttrName() {

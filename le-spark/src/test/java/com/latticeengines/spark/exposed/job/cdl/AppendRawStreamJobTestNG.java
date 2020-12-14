@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -66,6 +67,8 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
     static {
         WEB_ACTIVITY_MASTER_FIELDS.add(Pair.of(__StreamDate.name(), String.class));
         WEB_ACTIVITY_MASTER_FIELDS.add(Pair.of(StreamDateId.name(), Integer.class));
+        ActivityStoreConstants.WebVisit.UTM_COLUMNS
+                .forEach(col -> WEB_ACTIVITY_MASTER_FIELDS.add(Pair.of(col.name(), String.class)));
     }
 
     private static final String ID_DAY_1 = "2";
@@ -218,13 +221,22 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
     private Object[] testRow(long id, boolean isImport, int nDaysBeforeNow) {
         long time = Instant.ofEpochMilli(now).minus(nDaysBeforeNow, ChronoUnit.DAYS).toEpochMilli();
         String accountId = String.format("a%d", id);
+        String url = String
+                .format("/contents/%d?utm_source=google&utm_campaign=spring_sale" + "&utm_term=running%%20shows", id);
+        if (id % 2 == 0) {
+            // test both the case where every parameter is populated or only partial
+            url += "&utm_content=textlink&utm_medium=cpc";
+        }
         List<Object> row = Lists.newArrayList(id, accountId, accountId, String.format("Company %d", id),
-                String.format("/contents/%d", id), time);
+                url, time);
         if (!isImport) {
             String dateStr = DateTimeUtils.toDateOnlyFromMillis(String.valueOf(time));
             Integer datePeriod = DateTimeUtils.dateToDayPeriod(dateStr);
             row.add(dateStr);
             row.add(datePeriod);
+            for (InterfaceName utmCol : ActivityStoreConstants.WebVisit.UTM_COLUMNS) {
+                row.add(null);
+            }
         }
         return row.toArray();
     }

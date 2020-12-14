@@ -122,7 +122,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         final Tenant tenant = MultiTenantContext.getTenant();
         boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
 
-        List<AttrConfig> configs = new ArrayList<>();
+        List<AttrConfig> configs = Collections.synchronizedList(new ArrayList<>());
         List<Runnable> runnables = new ArrayList<>();
         categories.forEach(category -> {
             Runnable runnable = () -> {
@@ -662,9 +662,19 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     private void mergeConfigWithExisting(String tenantId, Map<BusinessEntity, List<AttrConfig>> attrConfigGrps,
             List<AttrConfigEntity> toDeleteEntities, boolean mergeUsageGroupProps) {
 
+        Map<BusinessEntity, List<AttrConfigEntity>> entityMap = new HashMap<>();
+        List<AttrConfigEntity> allConfigEntities = attrConfigEntityMgr.findAllObjectsInEntitiesInReader(tenantId,
+                new ArrayList<>(attrConfigGrps.keySet()));
+        allConfigEntities.forEach(entry -> {
+            if (entry.getDocument() != null) {
+                BusinessEntity entity = entry.getDocument().getEntity();
+                entityMap.putIfAbsent(entity, new ArrayList());
+                entityMap.get(entity).add(entry);
+            }
+
+        });
         attrConfigGrps.forEach((entity, configList) -> {
-            List<AttrConfigEntity> existingConfigEntities = attrConfigEntityMgr.findAllByTenantAndEntity(tenantId,
-                    entity);
+            List<AttrConfigEntity> existingConfigEntities = entityMap.getOrDefault(entity, new ArrayList<>());
 
             Map<String, AttrConfig> existingMap = new HashMap<>();
             Map<String, AttrConfigEntity> existingEntityMap = new HashMap<>();

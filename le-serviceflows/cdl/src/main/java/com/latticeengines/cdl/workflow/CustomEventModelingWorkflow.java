@@ -14,6 +14,7 @@ import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.AttributeCategoryModifier;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
+import com.latticeengines.modeling.workflow.steps.ExcludeLDCDeprecatedAttributes;
 import com.latticeengines.modeling.workflow.steps.MergeUserRefinedAttributes;
 import com.latticeengines.modeling.workflow.steps.UseConfiguredModelingAttributes;
 import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
@@ -54,6 +55,9 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
 
     @Inject
     private AddStandardAttributes addStandardAttributesDataFlow;
+
+    @Inject
+    private ExcludeLDCDeprecatedAttributes excludeLDCDeprecatedAttributes;
 
     @Inject
     private UseConfiguredModelingAttributes useConfiguredModelingAttributes;
@@ -102,6 +106,7 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(customEventMatchWorkflow) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
+                .next(excludeLDCDeprecatedAttributes) //
                 .next(useConfiguredModelingAttributes) //
                 .next(ldcOnlyAttributesDataFlow) //
                 .next(attributeCategoryModifier) //

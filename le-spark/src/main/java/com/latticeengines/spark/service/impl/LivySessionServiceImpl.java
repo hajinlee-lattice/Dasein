@@ -56,6 +56,12 @@ public class LivySessionServiceImpl implements LivySessionService {
     @Value("${spark.jars.repositories}")
     private String sparkJarsRepo;
 
+    @Value("${aws.default.access.key}")
+    protected String awsKey;
+
+    @Value("${aws.default.secret.key.encrypted}")
+    protected String awsSecret;
+
     private static final Logger log = LoggerFactory.getLogger(LivySessionServiceImpl.class);
 
     private static final String URI_SESSIONS = "/sessions";
@@ -88,6 +94,10 @@ public class LivySessionServiceImpl implements LivySessionService {
             conf.put("spark.jars.repositories", sparkJarsRepo);
         }
         log.info("conf=" + JsonUtils.serialize(conf));
+        // do not log these 2 configuration
+        conf.put("spark.hadoop.fs.s3a.access.key", awsKey);
+        conf.put("spark.hadoop.fs.s3a.secret.key", awsSecret);
+        conf.put("spark.hadoop.fs.s3a.endpoint", "s3.us-east-1.amazonaws.com");
         payLoad.put("conf", conf);
         if (MapUtils.isNotEmpty(livyConf)) {
             payLoad.putAll(livyConf);

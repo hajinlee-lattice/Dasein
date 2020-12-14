@@ -173,7 +173,6 @@ public class GenerateProfileReport extends BaseSparkStep<ProfileReportStepConfig
                 .map(field -> MetadataConverter.getAttribute(field).getColumnMetadata()).collect(Collectors.toList());
         ProfileJobConfig jobConfig = new ProfileJobConfig();
         statsProfiler.initProfileConfig(jobConfig);
-        statsProfiler.classifyAttrs(cms, jobConfig);
 
         jobConfig.setAutoDetectCategorical(true);
         jobConfig.setAutoDetectDiscrete(true);
@@ -187,6 +186,7 @@ public class GenerateProfileReport extends BaseSparkStep<ProfileReportStepConfig
         jobConfig.setDeclaredAttrs(declaredAttrs);
 
         jobConfig.setInput(Collections.singletonList(enrichedData));
+        statsProfiler.classifyAttrs(cms, jobConfig);
         SparkJobResult profileResult = runSparkJob(ProfileJob.class, jobConfig);
 
         HdfsDataUnit result = profileResult.getTargets().get(0);

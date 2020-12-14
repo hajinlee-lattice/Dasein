@@ -101,7 +101,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         expiredDate = Date
                 .from(Instant.now().atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS).minusYears(1).toInstant());
 
-        tenantCnt = recommendationEntityMgr.getAllTenantIds().size();
+        // tenantCnt = recommendationEntityMgr.getAllTenantIds().size();
 
         System.out.println(String.format("LAUNCH_DATE = %s, LAUNCH_1_DATE = %s, LAUNCH_2_DATE = %s, " //
                 + "T1 = %s, T2 = %s, T3 = %s, T4 = %s", LAUNCH_DATE, LAUNCH_1_DATE, LAUNCH_2_DATE, T1, T2, T3, T4));
@@ -137,7 +137,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
     public void testCreateRecommendation() {
         allRecommendationsAcrossAllLaunches.stream()//
                 .forEach(rec -> testCreateRecommendation(rec));
-        testGetTenantIds(tenantCnt + 1);
+        // testGetTenantIds(tenantCnt + 1);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
@@ -259,7 +259,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Date current = PlaymakerUtils.dateFromEpochSeconds(CURRENT_TIME_MILLIS / (1 * 1000L));
         bulkDeleteByTenantId(TENANT_PID, current, isHardDelete);
         verifyDeletingCount(0);
-        testGetTenantIds(tenantCnt);
+        // testGetTenantIds(tenantCnt);
     }
 
     private void testGetTenantIds(int count) {

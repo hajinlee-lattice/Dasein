@@ -12,8 +12,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{FALSE, NULL, ZERO}
 import com.latticeengines.domain.exposed.query.{BusinessEntity, TimeFilter}
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
-import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DeriveActivityMetricGroupJobConfig}
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition
+import com.latticeengines.domain.exposed.spark.cdl.{DeriveActivityMetricGroupJobConfig, SparkIOMetadataWrapper}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeriveAttrsUtils
@@ -47,7 +47,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val input: Seq[DataFrame] = lattice.input
     val groups: Seq[ActivityMetricsGroup] = config.activityMetricsGroups.toSeq
     val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(groups, calendar), evaluationDate)
-    val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
+    val inputMetadata: SparkIOMetadataWrapper = config.inputMetadata
     val streamMetadata = config.streamMetadataMap
     currentVersion = config.currentVersionStamp
     hasAccountBatchStore = inputMetadata.getMetadata.contains(ACCOUNT_BATCH_STORE)
@@ -68,8 +68,8 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       contactBatchStoreTable = input.get(inputMetadata.getMetadata.get(CONTACT_BATCH_STORE).getStartIdx)
     }
 
-    val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
-    val detailsMap = new util.HashMap[String, Details]() // groupId -> details
+    val outputMetadata: SparkIOMetadataWrapper = new SparkIOMetadataWrapper()
+    val detailsMap = new util.HashMap[String, Partition]() // groupId -> details
     var metrics: Seq[DataFrame] = Seq()
     for (group: ActivityMetricsGroup <- groups) {
       val dimensionMetadataMap = streamMetadata.get(group.getStream.getStreamId)
@@ -92,7 +92,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
                                evaluationDate: String,
                                aggregatedPeriodStores: Seq[DataFrame],
                                translator: TimeFilterTranslator,
-                               periodStoresMetadata: ActivityStoreSparkIOMetadata.Details,
+                               periodStoresMetadata: Partition,
                                dimensionMetadataMap: util.Map[String, DimensionMetadata]): DataFrame = {
     // construct period map: period -> idx
     var offsetMap: Map[String, Int] = Map()
@@ -232,8 +232,8 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     )
   }
 
-  def setDetails(index: Int): Details = {
-    val details = new Details()
+  def setDetails(index: Int): Partition = {
+    val details = new Partition()
     details.setStartIdx(index)
     details
   }

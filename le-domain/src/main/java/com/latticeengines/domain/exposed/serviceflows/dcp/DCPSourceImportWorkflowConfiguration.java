@@ -81,9 +81,10 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
             return this;
         }
 
-        public Builder matchConfig(DplusMatchConfig matchConfig, PurposeOfUse matchPurpose) {
+        public Builder matchConfig(DplusMatchConfig matchConfig, PurposeOfUse matchPurpose, Boolean suppressKnownErrors) {
             importSource.setMatchConfig(matchConfig);
             importSource.setMatchPurpose(matchPurpose);
+            importSource.setSuppressErrors(suppressKnownErrors);
             return this;
         }
 

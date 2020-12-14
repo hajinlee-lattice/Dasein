@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -24,6 +26,8 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.repository.document.reader.DataUnitCrossTenantReaderRepository;
 import com.latticeengines.metadata.repository.document.reader.DataUnitReaderRepository;
@@ -54,7 +58,10 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("dataunit-mgr", ThreadPoolUtils.NUM_CORES * 2);
 
+    private int purgeSize = 3;
+
     @Override
+    @Transactional(transactionManager = "documentTransactionManager", propagation = Propagation.REQUIRED)
     public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit) {
         String name = dataUnit.getName();
         dataUnit.setTenant(tenantId);
@@ -65,9 +72,38 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         }
         DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (existing == null) {
-            return createNewDataUnit(tenantId, dataUnit);
+            dataUnit = createNewDataUnit(tenantId, dataUnit);
+            return dataUnit;
         } else {
             return updateExistingDataUnit(dataUnit, existing);
+        }
+    }
+
+    private void removeMasterRole(DataUnit dataUnit) {
+        List<DataUnit.Role> roles = dataUnit.getRoles();
+        if (CollectionUtils.isNotEmpty(roles) && roles.contains(DataUnit.Role.Master)) {
+            List<DataUnitEntity> dataUnitEntities = findDataUnitEntitiesByDataTemplateIdAndRoleFromReader(dataUnit.getTenant(),
+                    dataUnit.getDataTemplateId(), DataUnit.Role.Master);
+            for (DataUnitEntity entity : dataUnitEntities) {
+                entity.getDocument().getRoles().remove(DataUnit.Role.Master);
+            }
+            repository.saveAll(dataUnitEntities);
+        }
+    }
+
+    private void purgeOlsSnapShot(DataUnit dataUnit) {
+        List<DataUnitEntity> dataUnitEntities = findDataUnitEntitiesNeedToPurge(dataUnit, DataUnit.Role.Snapshot);
+        if (CollectionUtils.isNotEmpty(dataUnitEntities)) {
+            if (dataUnitEntities.size() > purgeSize) {
+                List<DataUnitEntity> entitiesToPurge = dataUnitEntities.subList(0, dataUnitEntities.size() - purgeSize);
+                Runnable runnable = () -> {
+                    for (DataUnitEntity dataUnitEntity : entitiesToPurge) {
+                        dataUnitEntity.getDocument().setRetentionPolicy(RetentionPolicyUtil.toRetentionPolicyStr(7, RetentionPolicyTimeUnit.DAY));
+                    }
+                    repository.saveAll(dataUnitEntities);
+                };
+                service.submit(runnable);
+            }
         }
     }
 
@@ -140,6 +176,8 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         reformatS3DataUnit(dataUnit);
         newEntity.setDocument(dataUnit);
         DataUnitEntity saved = repository.save(newEntity);
+        removeMasterRole(dataUnit);
+        purgeOlsSnapShot(dataUnit);
         return convertEntity(saved);
     }
 
@@ -168,6 +206,33 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         List<DataUnitEntity> entitiesWithRole = entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role))
                 .collect(Collectors.toList());
         return convertList(entitiesWithRole, true);
+    }
+
+    private List<DataUnitEntity> findDataUnitEntitiesByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role) {
+        List<DataUnitEntity> entities = readerRepository.findByTenantIdAndDataTemplateId(tenantId, dataTemplateId);
+        return entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role)).collect(Collectors.toList());
+    }
+
+    private List<DataUnitEntity> findDataUnitEntitiesNeedToPurge(DataUnit dataUnit, DataUnit.Role role) {
+        if (StringUtils.isEmpty(dataUnit.getDataTemplateId())) {
+            return new ArrayList<>();
+        }
+        List<DataUnitEntity> entities = readerRepository.
+                findByTenantIdAndDataTemplateIdOrderByCreatedDate(dataUnit.getTenant(), dataUnit.getDataTemplateId());
+        return entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role) &&
+                RetentionPolicyUtil.getExpireTimeByRetentionPolicyStr(dataUnit.getRetentionPolicy()) == -1).collect(Collectors.toList());
+    }
+
+    @Override
+    public DataUnit findByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role) {
+        List<DataUnitEntity> entities = readerRepository.findByTenantIdAndDataTemplateId(tenantId, dataTemplateId);
+        List<DataUnitEntity> entitiesWithRole = entities.stream().filter(entity -> entity.getDocument().getRoles().contains(role))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(entitiesWithRole)) {
+            return convertEntity(entitiesWithRole.get(0));
+        } else {
+            return null;
+        }
     }
 
     @Override

@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
+import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("playLaunchService")
@@ -75,6 +77,9 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Inject
     private TableEntityMgr tableEntityMgr;
+
+    @Inject
+    private DataUnitEntityMgr dataUnitEntityMgr;
 
     @Override
     public void create(PlayLaunch playLaunch) {
@@ -148,9 +153,31 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Override
     public PlayLaunch update(PlayLaunch playLaunch) {
-        verifyTablesInLaunch(playLaunch);
+        if (Play.TapType.ListSegment.equals(playLaunch.getTapType())) {
+            verifyDataUnitsInLaunch(playLaunch);
+        } else {
+            verifyTablesInLaunch(playLaunch);
+        }
         playLaunchEntityMgr.update(playLaunch);
         return playLaunchEntityMgr.findByKey(playLaunch);
+    }
+
+    private void verifyDataUnitsInLaunch(PlayLaunch playLaunch) {
+        if (StringUtils.isNotBlank(playLaunch.getAddAccountsTable())) {
+            verifyDataUnitExists(playLaunch.getAddAccountsTable(), playLaunch.getLaunchId(), "AddAccounts");
+        }
+        if (StringUtils.isNotBlank(playLaunch.getCompleteContactsTable())) {
+            verifyDataUnitExists(playLaunch.getCompleteContactsTable(), playLaunch.getLaunchId(), "CompleteContacts");
+        }
+        if (StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable())) {
+            verifyDataUnitExists(playLaunch.getRemoveAccountsTable(), playLaunch.getLaunchId(), "RemoveAccounts");
+        }
+        if (StringUtils.isNotBlank(playLaunch.getAddContactsTable())) {
+            verifyDataUnitExists(playLaunch.getAddContactsTable(), playLaunch.getLaunchId(), "AddContacts");
+        }
+        if (StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())) {
+            verifyDataUnitExists(playLaunch.getRemoveContactsTable(), playLaunch.getLaunchId(), "RemoveContacts");
+        }
     }
 
     private void verifyTablesInLaunch(PlayLaunch playLaunch) {
@@ -169,7 +196,6 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         if (StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())) {
             verifyTableExists(playLaunch.getRemoveContactsTable(), playLaunch.getLaunchId(), "RemoveContacts");
         }
-
     }
 
     private String verifyTableExists(String tableName, String launchId, String tag) {
@@ -179,6 +205,16 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         } else {
             throw new LedpException(LedpCode.LEDP_32000, new String[] {
                     "Failed to update Launch: " + launchId + " since no " + tag + " table found by Id: " + tableName });
+        }
+    }
+
+    private String verifyDataUnitExists(String dataUnitName, String launchId, String tag) {
+        List<DataUnit> dataUnits = dataUnitEntityMgr.findByNameFromReader(MultiTenantContext.getShortTenantId(), dataUnitName);
+        if (CollectionUtils.isNotEmpty(dataUnits)) {
+            return dataUnitName;
+        } else {
+            throw new LedpException(LedpCode.LEDP_32000, new String[]{
+                    "Failed to update Launch: " + launchId + " since no " + tag + " data unit found by Id: " + dataUnitName});
         }
     }
 

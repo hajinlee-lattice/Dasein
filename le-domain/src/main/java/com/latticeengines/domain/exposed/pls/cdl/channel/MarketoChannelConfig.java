@@ -36,6 +36,9 @@ public class MarketoChannelConfig implements ChannelConfig {
     @JsonProperty("folderName")
     private String folderName;
 
+    @JsonProperty("earliestUpdatedDays")
+    private String earliestUpdatedDays;
+
     public Long getContactLimit() {
         return contactLimit;
     }
@@ -114,6 +117,14 @@ public class MarketoChannelConfig implements ChannelConfig {
         return systemName;
     }
 
+    public void setEarliestUpdatedDays(String earliestUpdatedDays) {
+        this.earliestUpdatedDays = earliestUpdatedDays;
+    }
+
+    public String getEarliestUpdatedDays() {
+        return earliestUpdatedDays;
+    }
+
     @Override
     public void populateLaunchFromChannelConfig(PlayLaunch playLaunch) {
         playLaunch.setAudienceId(this.getAudienceId());
@@ -154,6 +165,7 @@ public class MarketoChannelConfig implements ChannelConfig {
         marketoChannelConfig.setAudienceName(newMarketoChannelConfig.getAudienceName());
         marketoChannelConfig.setFolderId(newMarketoChannelConfig.getFolderId());
         marketoChannelConfig.setFolderName(newMarketoChannelConfig.getFolderName());
+        marketoChannelConfig.setEarliestUpdatedDays(newMarketoChannelConfig.getEarliestUpdatedDays());
         return this;
     }
 }

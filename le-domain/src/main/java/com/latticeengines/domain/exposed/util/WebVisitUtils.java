@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.util;
 
-import static com.latticeengines.domain.exposed.util.ActivityStoreUtils.DEFAULT_TIME_RANGE;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,7 +20,6 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMo
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.FilterOptions;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -162,13 +160,13 @@ public final class WebVisitUtils {
      */
     public static boolean shouldHideInCategoryTile(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group,
             @NotNull String timeRange) {
-        return !TOTAL_VISIT_GROUPNAME.equals(group.getGroupName()) || !DEFAULT_TIME_RANGE.equals(timeRange);
+        return !TOTAL_VISIT_GROUPNAME.equals(group.getGroupName()) || !ActivityStoreUtils.isDefaultPeriodRange(timeRange);
     }
 
     public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group,
             @NotNull String timeRange, @NotNull Map<String, Object> params) {
         // any tag for filtering all attrs
-        cm.setFilterTags(Arrays.asList(timeRange, FilterOptions.Option.ANY_VALUE));
+        cm.setFilterTags(ActivityStoreUtils.getFilterTagsFromTimeRange(timeRange));
         if (shouldHideInCategoryTile(cm, group, timeRange)) {
             // leave null for not hidden attrs to save some space
             cm.setIsHiddenInCategoryTile(true);

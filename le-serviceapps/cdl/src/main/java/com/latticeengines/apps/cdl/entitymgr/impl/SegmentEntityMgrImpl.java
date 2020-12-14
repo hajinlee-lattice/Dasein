@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.domain.exposed.util.SegmentUtils;
+import com.latticeengines.metadata.entitymgr.DataTemplateEntityMgr;
 
 @Component("segmentEntityMgr")
 public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
@@ -69,6 +70,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
     @Inject
     private ListSegmentEntityMgr listSegmentEntityMgr;
+
+    @Inject
+    private DataTemplateEntityMgr dataTemplateEntityMgr;
 
     @Inject
     private SegmentEntityMgr _self;
@@ -199,6 +203,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         return metadataSegment;
     }
 
+    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MetadataSegment findByExternalInfo(MetadataSegment segment) {
         if (segment.getListSegment() != null) {

@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.workflow;
 
 
 import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.FULL_PROFILE;
+import static com.latticeengines.domain.exposed.metadata.DataCollectionArtifact.Status.GENERATING;
 
 import javax.inject.Inject;
 
@@ -45,7 +46,16 @@ public class AtlasProfileReportWorkflowSubmitter extends WorkflowSubmitter {
                 .allowInternalEnrichAttrs(internalEnrichEnabled) //
                 .userId(request.getUserId()) //
                 .build();
-        return workflowJobService.submit(configuration, pidWrapper.getPid());
+        ApplicationId applicationId = workflowJobService.submit(configuration, pidWrapper.getPid());
+
+        artifact = new DataCollectionArtifact();
+        artifact.setName(FULL_PROFILE);
+        artifact.setUrl(null);
+        artifact.setStatus(GENERATING);
+        dataCollectionService.createArtifact(customerSpace, artifact.getName(), artifact.getUrl(),
+                artifact.getStatus(), activeVersion);
+
+        return applicationId;
     }
 
 }

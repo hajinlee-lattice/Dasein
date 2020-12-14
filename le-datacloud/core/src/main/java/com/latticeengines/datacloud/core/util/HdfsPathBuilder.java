@@ -21,6 +21,9 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
+/*
+ * This class should be used to generate consistent file paths and names in HDFS
+ */
 @Component("hdfsPathBuilder")
 public class HdfsPathBuilder {
 

@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.admin;
 
+import java.util.Objects;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -489,6 +491,11 @@ public class BardJamsTenant implements HasPid {
         }
         BardJamsTenant theOther = (BardJamsTenant) other;
         return new EqualsBuilder().append(tenantId, theOther.getPid()).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(tenantId);
     }
 
     @Override

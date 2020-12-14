@@ -172,6 +172,9 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.getMaxEntitiesToLaunch() == null || playLaunchChannel.getMaxEntitiesToLaunch() < 0) {
             playLaunchChannel.setMaxEntitiesToLaunch(null);
         }
+        if (playLaunchChannel.getMaxContactsPerAccount() == null || playLaunchChannel.getMaxContactsPerAccount() < 0) {
+            playLaunchChannel.setMaxContactsPerAccount(null);
+        }
         playLaunchChannel.setLookupIdMap(lookupIdMap);
         playLaunchChannel.setId(playLaunchChannel.generateChannelId());
         playLaunchChannelDao.create(playLaunchChannel);
@@ -192,6 +195,15 @@ public class PlayLaunchChannelEntityMgrImpl
                 existingPlayLaunchChannel.setMaxEntitiesToLaunch(updatedChannel.getMaxEntitiesToLaunch());
             }
         }
+
+        if (updatedChannel.getMaxContactsPerAccount() != null) {
+            if (updatedChannel.getMaxContactsPerAccount() < 0) {
+                existingPlayLaunchChannel.setMaxContactsPerAccount(null);
+            } else {
+                existingPlayLaunchChannel.setMaxContactsPerAccount(updatedChannel.getMaxContactsPerAccount());
+            }
+        }
+
         if (updatedChannel.getLaunchType() != null) {
             existingPlayLaunchChannel.setLaunchType(updatedChannel.getLaunchType());
         }

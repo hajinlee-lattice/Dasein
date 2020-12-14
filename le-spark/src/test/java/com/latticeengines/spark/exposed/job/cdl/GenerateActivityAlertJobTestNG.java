@@ -30,6 +30,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,17 +75,16 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         prepareData();
 
         ActivityAlertJobConfig config = new ActivityAlertJobConfig();
-        config.alertNameToQualificationPeriodDays.put(Alert.INC_WEB_ACTIVITY, 10L);
-        config.alertNameToQualificationPeriodDays.put(Alert.ANONYMOUS_WEB_VISITS, 10L);
-        config.alertNameToQualificationPeriodDays.put(Alert.RE_ENGAGED_ACTIVITY, 10L);
-        config.alertNameToQualificationPeriodDays.put(Alert.SHOWN_INTENT, 10L);
-        config.alertNameToQualificationPeriodDays.put(Alert.HIGH_ENGAGEMENT_IN_ACCOUNT, 10L);
-        config.alertNameToQualificationPeriodDays.put(Alert.KNOWN_WEB_VISITS, 10L);
-        config.alertNameToQualificationPeriodDays.put(Alert.ACTIVE_CONTACT_WEB_VISITS, 10L);
-        config.alertNameToQualificationPeriodDays.put(Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES, 10L);
-        config.alertNameToQualificationPeriodDays.put(Alert.RESEARCHING_INTENT_AROUND_PRODUCT_PAGES, 10L);
+        Arrays.asList( //
+                Alert.INC_WEB_ACTIVITY, Alert.ANONYMOUS_WEB_VISITS, Alert.RE_ENGAGED_ACTIVITY, //
+                Alert.HIGH_ENGAGEMENT_IN_ACCOUNT, Alert.KNOWN_WEB_VISITS, //
+                Alert.ACTIVE_CONTACT_WEB_VISITS, Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES, //
+                Alert.RESEARCHING_INTENT_AROUND_PRODUCT_PAGES)
+                .forEach(alert -> config.alertNameToQualificationPeriodDays.put(alert, 10L));
         config.currentEpochMilli = 10L;
         config.masterAccountTimeLineIdx = 0;
+        config.masterAlertIdx = 1;
+        config.dedupAlert = true;
 
         SparkJobResult result = runSparkJob(GenerateActivityAlertJob.class, config);
         log.info("Result = {}", JsonUtils.serialize(result));
@@ -119,6 +119,9 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
             records.forEach(record -> log.info(name + ": " + debugStr(record, cols)));
             log.info("Alert count: {}", counts);
 
+            SetUtils.SetView<Pair<String, String>> diffKeys = SetUtils.difference(counts.keySet(),
+                    expectedCounts.keySet());
+            log.info("Different alerts = {}", diffKeys);
             // make sure we have the expected amount of alerts
             // TODO check more detail than count
             Assert.assertEquals(counts, expectedCounts);
@@ -128,7 +131,7 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
 
     // TODO enhance test cases when requirement detail is clear
     private void prepareData() {
-        Object[][] masterData = new Object[][] { //
+        Object[][] timelineMasterData = new Object[][] { //
                 newTimelineRecord("a2", WebVisit, "Page 1", "page 1,page 2,page 3"), //
                 newTimelineRecord("a2", WebVisit, "Page 1", "page 3"), //
                 newTimelineRecord("a2", WebVisit, "Page 1", "page 1,page 2"), //
@@ -200,7 +203,20 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
                 newTimelineContactRecord("a13", "c1", "QA", WebVisit, "Page group 2", "AI products"), //
                 newMARecord("a13", "c3", 2L), // => this should go to KNOWN_WEB_VISITS since there is MA
         };
-        uploadHdfsDataUnit(masterData, TIMELINE_FIELDS);
+        uploadHdfsDataUnit(timelineMasterData, TIMELINE_FIELDS);
+
+        Object[][] alertMasterData = new Object[][] { //
+                /*-
+                 * duplicate alert that will be not be generated again
+                 */
+                { "a1", Alert.ANONYMOUS_WEB_VISITS, 10L,
+                        "{\"Data\":{\"PageVisits\":2},\"StartTimestamp\":-863999990,\"EndTimestamp\":10}" }, //
+                /*-
+                 * no duplicate
+                 */
+                { "a100", Alert.ANONYMOUS_WEB_VISITS, 10L, "{}" }, //
+        };
+        uploadHdfsDataUnit(alertMasterData, ALERT_FIELDS);
     }
 
     // [ account id, alert name ] => count
@@ -217,17 +233,12 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
         counts.put(Pair.of("a5", Alert.ANONYMOUS_WEB_VISITS), 1);
         counts.put(Pair.of("a6", Alert.ANONYMOUS_WEB_VISITS), 1);
         counts.put(Pair.of("a7", Alert.ANONYMOUS_WEB_VISITS), 1);
+        counts.put(Pair.of("a100", Alert.ANONYMOUS_WEB_VISITS), 1); // from existing alert table
 
         counts.put(Pair.of("a8", Alert.RE_ENGAGED_ACTIVITY), 1);
         counts.put(Pair.of("a9", Alert.RE_ENGAGED_ACTIVITY), 1);
 
-        counts.put(Pair.of("a3", Alert.SHOWN_INTENT), 1);
-        counts.put(Pair.of("a4", Alert.SHOWN_INTENT), 1);
-        counts.put(Pair.of("a5", Alert.SHOWN_INTENT), 1);
-        counts.put(Pair.of("a6", Alert.SHOWN_INTENT), 1);
-        counts.put(Pair.of("a8", Alert.SHOWN_INTENT), 1);
-
-        counts.put(Pair.of("a11", Alert.HIGH_ENGAGEMENT_IN_ACCOUNT), 6);
+        counts.put(Pair.of("a11", Alert.HIGH_ENGAGEMENT_IN_ACCOUNT), 1);
 
         counts.put(Pair.of("a8", Alert.KNOWN_WEB_VISITS), 1);
         counts.put(Pair.of("a9", Alert.KNOWN_WEB_VISITS), 1);

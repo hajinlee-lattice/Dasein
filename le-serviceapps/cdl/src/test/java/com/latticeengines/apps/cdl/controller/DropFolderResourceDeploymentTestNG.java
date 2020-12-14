@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -9,6 +11,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -26,7 +29,10 @@ public class DropFolderResourceDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @BeforeClass(groups = "deployment-app")
     public void setup() {
-        setupTestEnvironment();
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
+        setupTestEnvironmentWithFeatureFlags(featureFlagMap);
     }
 
     @Test(groups = "deployment-app")

@@ -193,7 +193,8 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         for (Map<String, Object> map : data.getData()) {
             String detail2 = (String) map.get(InterfaceName.Detail2.name());
             try {
-                message = Double.valueOf(detail2) >= BUYING_STAGE_THRESHOLD ? STAGE_BUYING : STAGE_RESEARCHING;
+                message = STAGE_BUYING.equals(message) ? STAGE_BUYING
+                        : (Double.valueOf(detail2) >= BUYING_STAGE_THRESHOLD ? STAGE_BUYING : STAGE_RESEARCHING);
             } catch (Exception e) {
                 log.warn("Fail getting Detail2 from DnbIntentData", e);
                 break;

@@ -30,15 +30,31 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     sudo mv "${ARTIFACT_DIR}/spark-${SPARK_VERSION}-bin-hadoop2.7" "${SPARK_HOME}"
 
     if [[ ! -f "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar" ]]; then
-        JERSEY_URL="https://repo1.maven.org/maven2/com/sun/jersey/jersey-bundle/1.19.1/jersey-bundle-1.19.1.jar"
-        wget --no-check-certificate ${JERSEY_URL} -O "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar"
+        MAVEN_URL="https://repo1.maven.org/maven2/com/sun/jersey/jersey-bundle/1.19.1/jersey-bundle-1.19.1.jar"
+        wget --no-check-certificate ${MAVEN_URL} -O "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar"
     fi
     sudo cp "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar" "${SPARK_HOME}/jars"
 
+    # match spark build dependency
+    AWS_SDK_VERSION=1.7.4
+    if [[ ! -f "${ARTIFACT_DIR}/aws-java-sdk-${AWS_SDK_VERSION}.jar" ]]; then
+        MAVEN_URL="https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/${AWS_SDK_VERSION}/aws-java-sdk-${AWS_SDK_VERSION}.jar"
+        wget --no-check-certificate ${MAVEN_URL} -O "${ARTIFACT_DIR}/aws-java-sdk-${AWS_SDK_VERSION}.jar"
+    fi
+    sudo cp "${ARTIFACT_DIR}/aws-java-sdk-${AWS_SDK_VERSION}.jar" "${SPARK_HOME}/jars"
+
+    # match spark build dependency
+    HADOOP_AWS_VERSION="2.7.3"
+    if [[ ! -f "${ARTIFACT_DIR}/hadoop-aws-${HADOOP_AWS_VERSION}.jar" ]]; then
+        MAVEN_URL="https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar"
+        wget --no-check-certificate ${MAVEN_URL} -O "${ARTIFACT_DIR}/hadoop-aws-${HADOOP_AWS_VERSION}.jar"
+    fi
+    sudo cp "${ARTIFACT_DIR}/hadoop-aws-${HADOOP_AWS_VERSION}.jar" "${SPARK_HOME}/jars"
+
     PARANAMER_PATH="${HOME}/.m2/repository/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar"
     if [[ ! -f "${PARANAMER_PATH}" ]]; then
-        PARANAMER_URL="https://repo1.maven.org/maven2/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar"
-        wget ${PARANAMER_URL} -O "${PARANAMER_PATH}"
+        MAVEN_URL="https://repo1.maven.org/maven2/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar"
+        wget ${MAVEN_URL} -O "${PARANAMER_PATH}"
     fi
 
     sudo chown -R "${USER}" "${SPARK_HOME}"

@@ -26,16 +26,19 @@ public class TransformTxnStreamConfig extends SparkJobConfig {
     public List<String> targetColumns = new ArrayList<>(); // all columns in output schema
 
     @JsonProperty
-    public List<String> inputPeriods = new ArrayList<>(); // same order as inputs,
-
-    @JsonProperty
     public String partitionKey;
 
     @JsonProperty
     public String repartitionKey;
 
     @JsonProperty
-    public List<String> retainTypes = new ArrayList<>(); // remain empty to retain both spending and analytic
+    public SparkIOMetadataWrapper inputMetadataWrapper;
+
+    @JsonProperty
+    public List<String> retainTypes = new ArrayList<>();
+
+    @JsonProperty
+    public boolean outputParquet = false;
 
     @Override
     public String getName() {

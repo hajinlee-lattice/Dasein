@@ -67,7 +67,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     private final Map<String, String> matchRootOperationUids = new HashMap<>();
     // streamId -> table name of entities created by matching raw stream
     private final Map<String, String> newEntitiesTables = new HashMap<>();
-    private long paTimestamp;
+    private long currentTime;
 
     private Map<String, String> rawActivityStreamFromHardDelete;
 
@@ -77,8 +77,8 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        paTimestamp = getLongValueFromContext(PA_TIMESTAMP);
-        log.info("Timestamp used as current time to build raw stream = {}", paTimestamp);
+        currentTime = getCurrentTimestamp();
+        log.info("Timestamp used as current time to build raw stream = {}", currentTime);
         log.info("IsRematch={}, isReplace={}", configuration.isRematchMode(), configuration.isReplaceMode());
         if (hardDeleteEntities.containsKey(configuration.getMainEntity())) {
             log.info("Hard delete performed for Activity Stream");
@@ -148,7 +148,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
             configuration.getActivityStreamMap().forEach((streamId, stream) -> {
                 Integer matchedStepIdx = matchedImportTableIdx.get(streamId);
                 String activeTable = getRawStreamActiveTable(streamId, stream);
-                appendRawStream(steps, stream, paTimestamp, matchedStepIdx, activeTable,
+                appendRawStream(steps, stream, currentTime, matchedStepIdx, activeTable,
                         RAWSTREAM_PRE_REMATCH_TABLE_PREFIX_FORMAT, DISCARD_ATTRS_IN_REMATCH).ifPresent(pair -> {
                             int appendStepIdx = pair.getValue();
                             // input table columns = [ import columns ] union [ active batch store columns ]

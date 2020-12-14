@@ -32,8 +32,8 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ListSegmentImportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
-import com.latticeengines.domain.exposed.cdl.SegmentImportRequest;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
@@ -352,7 +352,7 @@ public class S3ImportServiceImpl implements S3ImportService {
     }
 
     private boolean submitListSegmentImport(String tenantId, String segmentName, String key, String hostUrl) {
-        SegmentImportRequest request = new SegmentImportRequest();
+        ListSegmentImportRequest request = new ListSegmentImportRequest();
         request.setSegmentName(segmentName);
         request.setS3FileKey(key);
         try {

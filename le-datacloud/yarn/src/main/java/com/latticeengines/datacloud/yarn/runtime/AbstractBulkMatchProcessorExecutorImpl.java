@@ -66,6 +66,7 @@ import com.latticeengines.datacloud.match.service.MatchMetricService;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
+import com.latticeengines.domain.exposed.datacloud.MatchCoreErrorConstants;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -183,6 +184,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         return matchInput;
     }
 
+    /*
+     * Write to Avro and merge into block output
+     */
     @MatchStep
     protected void processMatchOutput(ProcessorContext processorContext, MatchOutput groupOutput) {
         try {
@@ -305,6 +309,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                 }
                 if (BusinessEntity.PrimeAccount.name().equals(processorContext.getOriginalInput().getTargetEntity())) {
                     appendCandidateValues(allValues, outputRecord);
+                    appendMatchEngineErrors(allValues, outputRecord);
                 }
                 data.add(allValues);
             }
@@ -609,6 +614,42 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             candidateVals = directPlusCandidateService.emptyCandidate();
         }
         allValues.addAll(candidateVals);
+    }
+
+    private void appendMatchEngineErrors(List<Object> allValues, OutputRecord outputRecord) {
+        StringBuilder errorTypes = new StringBuilder();
+        StringBuilder errorCodes = new StringBuilder();
+        StringBuilder errorInfo = new StringBuilder();
+
+        if (outputRecord.getErrorCodes() != null) {
+            for (Map.Entry<MatchCoreErrorConstants.ErrorType, List<String>> entry : outputRecord.getErrorCodes().entrySet()) {
+                if (errorCodes.length() > 0) {
+                    errorCodes.append("||");
+                }
+                if (errorTypes.length() > 0) {
+                    errorTypes.append('|');
+                }
+                if (errorInfo.length() > 0) {
+                    errorInfo.append('|');
+                }
+                if (CollectionUtils.isNotEmpty(entry.getValue())) {
+                    errorTypes.append(entry.getKey().toString());
+                    List<String> codes = new ArrayList<>();
+                    List<String> info = new ArrayList<>();
+                    for (String error : entry.getValue()) {
+                        int index = error.indexOf(':');
+                        codes.add(error.substring(0, index));
+                        info.add(error.substring(index + 1));
+                    }
+                    errorCodes.append(StringUtils.join(codes, "|"));
+                    errorInfo.append(StringUtils.join(info, "|"));
+                }
+            }
+        }
+
+        allValues.add(errorTypes.toString());
+        allValues.add(errorCodes.toString());
+        allValues.add(errorInfo.toString());
     }
 
     private Object convertToClaimedType(Schema.Type avroType, Object value, String columnName) {

@@ -20,7 +20,10 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.AttributeLengthValidator;
 import com.latticeengines.domain.exposed.metadata.datafeed.validator.SimpleValueFilter;
+import com.latticeengines.domain.exposed.metadata.datafeed.validator.TemplateValidator;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
@@ -56,8 +59,10 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
                 fieldMapping.setIdType(FieldMapping.IdType.Account);
                 fieldMapping.setSystemName(DEFAULT_SYSTEM);
                 fieldMapping.setMapToLatticeId(true);
+                fieldMapping.setRequired(true);
+                fieldMapping.setLength(18);
             }
-            //remove id field.
+            // remove id field.
             if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
                 fieldMapping.setMappedField(null);
             }
@@ -65,18 +70,23 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         modelingFileMetadataService.resolveMetadata(sourceFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
                 feedType);
         sourceFile = sourceFileService.findByName(sourceFile.getName());
-
-        String dataFeedTaskId = cdlService.createS3Template(customerSpace, sourceFile.getName(),
-                SOURCE, ENTITY_ACCOUNT, feedType, null, ENTITY_ACCOUNT + "Data");
-        Assert.assertNotNull(sourceFile);
-        Assert.assertNotNull(dataFeedTaskId);
-
+        // check if length attribute is stored in sourcefileconfig
         S3ImportSystem importSystem = cdlProxy.getS3ImportSystem(customerSpace, DEFAULT_SYSTEM);
         Assert.assertNotNull(importSystem);
         Assert.assertTrue(StringUtils.isNotBlank(importSystem.getAccountSystemId()));
+        Assert.assertNotNull(sourceFile.getSourcefileConfig());
+        Assert.assertEquals(sourceFile.getSourcefileConfig().getUniqueIdentifierConfig().getName(),
+                importSystem.getAccountSystemId());
+        Assert.assertEquals(sourceFile.getSourcefileConfig().getUniqueIdentifierConfig().getLength().intValue(), 18);
+        Assert.assertEquals(sourceFile.getSourcefileConfig().getUniqueIdentifierConfig().isRequired(), true);
 
-        cdlProxy.addAttributeLengthValidator(customerSpace, dataFeedTaskId, importSystem.getAccountSystemId(), 18,
-                false);
+        String dataFeedTaskId = cdlService.createS3Template(customerSpace, sourceFile.getName(), SOURCE, ENTITY_ACCOUNT,
+                feedType, null, ENTITY_ACCOUNT + "Data");
+        Assert.assertNotNull(sourceFile);
+        Assert.assertNotNull(dataFeedTaskId);
+
+        // check if length attribute is stored in datafeedtask
+        Assert.assertTrue(assertAttributeInDataFeedTask(dataFeedTaskId, importSystem.getAccountSystemId(), 18, false));
 
         startCDLImport(sourceFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
 
@@ -100,7 +110,7 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         simpleValueFilter.setRestrictions(Arrays.asList(r1, r2));
         cdlProxy.addSimpleValueFilter(customerSpace, dataFeedTaskId, simpleValueFilter);
 
-        startCDLImport(sourceFile, ENTITY_ACCOUNT,DEFAULT_SYSTEM);
+        startCDLImport(sourceFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
 
         list = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
         reports = JsonUtils.convertList(list, Report.class);
@@ -110,5 +120,23 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
 
         reports.sort(Comparator.comparing(Report::getCreated));
         verifyReport(reports.get(1), 4L, 4L, 16L);
+    }
+
+    public boolean assertAttributeInDataFeedTask(String dataFeedTaskId, String name, Integer length,
+            boolean isNullable) {
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, dataFeedTaskId);
+        Assert.assertNotNull(dataFeedTask);
+        Assert.assertNotNull(dataFeedTask.getDataFeedTaskConfig());
+        for (TemplateValidator validator : dataFeedTask.getDataFeedTaskConfig().getTemplateValidators()) {
+            if (validator instanceof AttributeLengthValidator) {
+                AttributeLengthValidator lengthValidator = (AttributeLengthValidator) validator;
+                if (lengthValidator.getAttributeName().equalsIgnoreCase(name)) {
+                    Assert.assertEquals(length.intValue(), lengthValidator.getLength().intValue());
+                    Assert.assertTrue(isNullable == lengthValidator.getNullable());
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

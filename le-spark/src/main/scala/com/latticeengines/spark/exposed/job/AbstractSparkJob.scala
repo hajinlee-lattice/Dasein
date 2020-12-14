@@ -1,13 +1,12 @@
 package com.latticeengines.spark.exposed.job
 
 import java.io.StringWriter
-
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit.StorageType
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
+import com.latticeengines.domain.exposed.metadata.datastore.{DataUnit, HdfsDataUnit, S3DataUnit}
 import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
@@ -74,6 +73,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
           val storage = dataUnit.getStorageType
           storage match {
             case StorageType.Hdfs => loadHdfsUnit(spark, dataUnit.asInstanceOf[HdfsDataUnit])
+            case StorageType.S3 => loadS3Unit(spark, dataUnit.asInstanceOf[S3DataUnit])
             case _ => throw new UnsupportedOperationException(s"Unknown storage $storage")
           }
         }
@@ -131,6 +131,20 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
               .load("hdfs://" + path)
     } else {
       spark.read.format(fmt).load("hdfs://" + path)
+    }
+  }
+
+  def loadS3Unit(spark: SparkSession, unit: S3DataUnit): DataFrame = {
+    val fmt: String = if (unit.getDataFormat != null) unit.getDataFormat.name.toLowerCase else "avro"
+    if (fmt.equals("csv")) {
+      spark.read.format(fmt) //
+        .option("header", value = true) //
+        .option("multiLine", value = true) // should avoid reading csv, because multiLine is purely on driver
+        .option("quote", "\"") //
+        .option("escape", "\"") //
+        .load(s"s3a://${unit.getBucket}/${unit.getPrefix}")
+    } else {
+      spark.read.format(fmt).load(s"s3a://${unit.getBucket}/${unit.getPrefix}")
     }
   }
 

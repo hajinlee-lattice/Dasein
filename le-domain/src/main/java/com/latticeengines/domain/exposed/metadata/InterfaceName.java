@@ -148,6 +148,7 @@ public enum InterfaceName {
 
     // WebVisit
     WebVisitPageUrl, UserId, WebVisitDate, SourceMedium, SourceMediumId, WebVisitProfile, //
+    UtmSource, UtmMedium, UtmCampaign, UtmTerm, UtmContent, //
 
     // WebVisitPathPattern
     PathPatternName, PathPattern, PathPatternId,
@@ -178,7 +179,10 @@ public enum InterfaceName {
 
     // Internal
     __Row_Count__, // total row count in activity store aggregation
-    __Composite_Key__; // primary key for internal use
+    __Composite_Key__, // primary key for internal use
+
+    //DataVison
+    GCA_ID;
 
     private static final Set<String> KeyIds = ImmutableSet.of( //
             InterfaceName.EntityId.name(), //

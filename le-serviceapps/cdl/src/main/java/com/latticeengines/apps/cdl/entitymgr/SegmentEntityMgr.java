@@ -39,4 +39,5 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
     MetadataSegment findByExternalInfo(String externalSystem, String externalSegmentId);
 
     MetadataSegment findByExternalInfo(MetadataSegment segment);
+
 }

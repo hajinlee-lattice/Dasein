@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -224,6 +225,25 @@ public class FieldDefinitionsRecord {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.systemName,
+                this.systemType,
+                this.systemObject,
+                toHashMap(fieldDefinitionsRecordsMap));
+    }
+
+    private HashMap<String, ArrayList<FieldDefinition>> toHashMap(Map<String, List<FieldDefinition>> srcMap) {
+        HashMap<String, ArrayList<FieldDefinition>> result = null;
+        if (srcMap != null) {
+            result = new HashMap<>();
+            for(Map.Entry<String, List<FieldDefinition>> entry: srcMap.entrySet()) {
+                result.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+            }
+        }
+        return result;
     }
 
     public String toString() {

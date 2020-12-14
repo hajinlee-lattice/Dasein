@@ -14,6 +14,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
+import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("outreachExportFieldMetadataService")
@@ -30,7 +32,13 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        log.info("Calling OutreachExportFieldMetadataService for channle " + channel.getId());
+        log.info("Calling OutreachExportFieldMetadataService for channel " + channel.getId());
+
+        OutreachChannelConfig channelConfig = (OutreachChannelConfig) channel.getChannelConfig();
+        AudienceType audienceType = channelConfig.getAudienceType();
+
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+                channel);
 
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
                 channel.getLookupIdMap().getTenant().getPid());
@@ -43,19 +51,22 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
         List<ColumnMetadata> exportColumnMetadataList;
 
-        if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
+        if (audienceType == AudienceType.ACCOUNTS) {
+            exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Outreach, accountAttributesMap,
+                    contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap, audienceType);
+        } else if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Outreach, mappedFieldNames,
                     accountAttributesMap, contactAttributesMap);
         } else {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Outreach, accountAttributesMap,
-                    contactAttributesMap);
+                    contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
         }
 
         // Retrieves enriched fields for prospect owner and account Id and
         // update
         // displayName
         String prospectOwner = channel.getLookupIdMap().getProspectOwner();
-        log.info("Outreach account owner " + prospectOwner);
+        log.info("Outreach account owner: " + prospectOwner);
         if (StringUtils.isNotBlank(prospectOwner) && accountAttributesMap.containsKey(prospectOwner)) {
             ColumnMetadata prospectOwnerColumnMetadata = accountAttributesMap.get(prospectOwner);
             prospectOwnerColumnMetadata.setDisplayName(TRAY_PROSPECT_OWNER_COLUMN_NAME);
@@ -66,7 +77,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
         }
 
         String lookupId = channel.getLookupIdMap().getAccountId();
-        log.info("Outreach account owner " + lookupId);
+        log.info("Outreach account ID: " + lookupId);
         if (StringUtils.isNotBlank(lookupId) && accountAttributesMap.containsKey(lookupId)) {
             ColumnMetadata lookupIdColumnMetadata = accountAttributesMap.get(lookupId);
             lookupIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);

@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceapps.core;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -280,6 +281,23 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
             flag2 = false;
         }
         return flag2;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(attrName,
+                attrType,
+                attrSubType,
+                entity,
+                toHashMap(attrProps));
+    }
+
+    private <T> HashMap<String, T> toHashMap(Map<String, T> srcMap) {
+        HashMap<String, T> result = null;
+        if (srcMap != null) {
+            result = (srcMap instanceof HashMap) ? (HashMap)srcMap : new HashMap<String, T>(srcMap);
+        }
+        return result;
     }
 
     public AttrConfig cloneAttrConfig() {

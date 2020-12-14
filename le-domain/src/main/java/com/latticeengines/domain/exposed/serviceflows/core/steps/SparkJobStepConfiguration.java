@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ExportTimelineSparkStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.PublishVIDataStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
@@ -30,7 +31,10 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @JsonSubTypes.Type(value = ActivityStreamSparkStepConfiguration.class, name =
                 "ActivityStreamSparkStepConfiguration"), //
         @JsonSubTypes.Type(value = TimeLineSparkStepConfiguration.class, name = "TimeLineSparkStepConfiguration"), //
-        @JsonSubTypes.Type(value = ExportTimelineSparkStepConfiguration.class, name = "ExportTimelineSparkStepConfiguration") //
+        @JsonSubTypes.Type(value = ExportTimelineSparkStepConfiguration.class, name =
+                "ExportTimelineSparkStepConfiguration"), //
+        @JsonSubTypes.Type(value = PublishVIDataStepConfiguration.class, name =
+                "PublishVIDataStepConfiguration")
 })
 public class SparkJobStepConfiguration extends BaseStepConfiguration {
 

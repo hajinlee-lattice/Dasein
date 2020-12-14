@@ -31,6 +31,7 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
         log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
         setupEnd2EndTestEnvironment(featureFlagMap);
         checkpointService
                 .setPrecedingCheckpoints(Collections.singletonList(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT));
@@ -75,7 +76,7 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
         // FIXME (Ray): ConsolidatedDailyTxn is partitioned by TxnDayPeriod and AvroUtils is unable to count
         // FIXME (Ray): Only verifying AggregatedTxn for now as it has same table (only not partitioned)
         // map.put(BusinessEntity.Transaction, DAILY_TXN_PT_EM);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_PT_EM);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_BATCH_EM); // from 62037 to 62065 after filling in missing periods and product bundles
         return map;
     }
 
@@ -86,8 +87,8 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
         map.put(BusinessEntity.Contact, CONTACT_PA_EM_SERVING);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
-        map.put(BusinessEntity.Transaction, DAILY_TXN_PT_EM);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_PT_EM);
+        map.put(BusinessEntity.Transaction, DAILY_TXN_PT_EM); // Changed 41064 to 41071 after filling in missing product bundle for analytic daily stream
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TXN_SERVING_EM); // from 62037 to 62065 after filling missing product bundle and period gaps
         return map;
     }
 

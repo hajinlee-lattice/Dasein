@@ -34,8 +34,6 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
   private val detail2 = TimelineStandardColumn.Detail2.getColumnName
   private val pageVisit = Alert.COL_PAGE_VISITS
   private val pageName = Alert.COL_PAGE_NAME
-  private val pageVisitTime = Alert.COL_PAGE_VISIT_TIME
-  private val prevPageVisitTime = Alert.COL_PREV_PAGE_VISIT_TIME
   private val activeContacts = Alert.COL_ACTIVE_CONTACTS
   private val maCounts = Alert.COL_TOTAL_MA_COUNTS
   private val accountStage = Alert.COL_STAGE
@@ -46,6 +44,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
   private val buyingStage = "Buying Stage"
   private val researchingStage = "Researching Stage"
   private val titles = Alert.COL_TITLES
+  private val titleCnt = Alert.COL_TITLE_CNT
   private val buyingStageThreshold = ActivityStoreConstants.DnbIntent.BUYING_STAGE_THRESHOLD
   private val anonymousId = DataCloudConstants.ENTITY_ANONYMOUS_ID
 
@@ -81,9 +80,6 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
           Some(generateAnonymousWebVisitsAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
         case Alert.RE_ENGAGED_ACTIVITY =>
           Some(generateReEngagedActivity(timelineDf, startTimestamp, endTimestamp))
-        // intent need data in all time range
-        case Alert.SHOWN_INTENT =>
-          Some(generateShownIntentAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
         case Alert.HIGH_ENGAGEMENT_IN_ACCOUNT =>
           Some(generateHighEngagementInAccountAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
         case Alert.KNOWN_WEB_VISITS =>
@@ -102,12 +98,25 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
         .map(mergedAlertDf.unionByName)
         .getOrElse(mergedAlertDf)
     }
+    val dedupedAlertDf = if (!config.dedupAlert) {
+      alertDf
+    } else {
+      filterDuplicateAlerts(alertDf, alertIdx.map(lattice.input(_)))
+    }
 
-    val mergedAlertDf = alertIdx.map(idx => lattice.input(idx).unionByName(alertDf)).getOrElse(alertDf)
-    lattice.output = mergedAlertDf :: alertDf :: Nil
+    val mergedAlertDf = alertIdx.map(idx => lattice.input(idx).unionByName(dedupedAlertDf)).getOrElse(dedupedAlertDf)
+    lattice.output = mergedAlertDf :: dedupedAlertDf :: Nil
     // count and output whether there are new alert or not
     // TODO change to json object if needed
-    lattice.outputStr = alertDf.count.toString
+    lattice.outputStr = dedupedAlertDf.count.toString
+  }
+
+  def filterDuplicateAlerts(newAlertDf: DataFrame, existingAlertDf: Option[DataFrame]): DataFrame = {
+    val joinCols = Seq(accountId, CreationTimestamp.name, AlertName.name)
+    existingAlertDf
+      .map(_.select(joinCols.map(col): _*))
+      .map(df => newAlertDf.join(df, joinCols, "leftanti"))
+      .getOrElse(newAlertDf)
   }
 
   def generateIncreasedWebActivityAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
@@ -126,11 +135,16 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
   def generateAnonymousWebVisitsAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
     val contactCntDf = getActiveContactsInTimeRange(timelineDf)
 
-    val topPageVisitDf = getPageVisitCountInTimeRange(timelineDf)
+    val totalPageVisitDf = timelineDf
+      .filter(col(streamType).equalTo(WebVisit.name))
+      .filter(col(detail2).isNotNull)
+      .withColumn(pageName, explode(split(col(detail2), ",")))
+      .groupBy(accountId)
+      .agg(count("*").as(pageVisit))
 
     // ones without any active contact -- anonymous visit
-    addTimeRange(topPageVisitDf.join(contactCntDf, Seq(accountId), "leftanti"), startTime, endTime)
-      .select(col(accountId), col(CreationTimestamp.name), packAlertData(pageVisit, pageName))
+    addTimeRange(totalPageVisitDf.join(contactCntDf, Seq(accountId), "leftanti"), startTime, endTime)
+      .select(col(accountId), col(CreationTimestamp.name), packAlertData(pageVisit))
   }
 
   def generateReEngagedActivity(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
@@ -224,6 +238,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
       .join(maCountsDf, Seq(accountId))
       .filter(maCountsDf.col(maCounts).gt(5)), startTime, endTime)
       .select(col(accountId), col(CreationTimestamp.name), packAlertData(maCounts))
+      .distinct()
   }
 
   def generateKnownWebVisitsAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
@@ -249,7 +264,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
     // b) Show the titles of those known contacts
     addTimeRange(contactCntTitleDf
       .filter(col(activeContacts).geq(2)).join(maCntDf.filter(col(maCounts).gt(0)), Seq(accountId), "leftanti"), startTime, endTime)
-      .select(col(accountId), col(CreationTimestamp.name), packAlertData(activeContacts, titles))
+      .select(col(accountId), col(CreationTimestamp.name), packAlertData(activeContacts, titles, titleCnt))
   }
 
   def generateIntentAroundProductAlerts(timelineDf: DataFrame, stage: String, startTime: Long, endTime: Long): DataFrame = {
@@ -320,7 +335,7 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
       .filter(col(accountId).isNotNull.and(col(accountId).notEqual(anonymousId)))
       .filter(col(contactId).isNotNull.and(col(contactId).notEqual(anonymousId)))
       .groupBy(accountId)
-      .agg(countDistinct(contactId).as(activeContacts), concatTitles(col(title)).as(titles))
+      .agg(countDistinct(contactId).as(activeContacts), concatTitles(col(title)).as(titles), count(col(title)).as(titleCnt))
   }
 
   def filterByTimeRange(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {

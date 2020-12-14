@@ -33,9 +33,9 @@ import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputat
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 import com.latticeengines.spark.util.DeriveAttrsUtils;
 
@@ -134,7 +134,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.currentVersionStamp = CURRENT_VERSION;
         WEB_ACTIVITY_ATTR_COUNT = calculateWebActivityAttrsCount(config.streamMetadataMap, group) + 1; // +1 entity Id column
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountBatchStore), getWorkspace());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         verify(result, Collections.singletonList(this::verifyWebVisitMetrics));
     }
@@ -152,7 +152,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.currentVersionStamp = CURRENT_VERSION;
         OPPORTUNITY_ATTR_COUNT = calculateOpportunityAttrsCount(config.streamMetadataMap, group) + 1;
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountBatchStore), getWorkspace());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         verify(result, Collections.singletonList(this::verifyOpportunityMetrics));
     }
@@ -171,7 +171,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.currentVersionStamp = CURRENT_VERSION;
         MARKETING_ATTR_COUNT = calculateMarketingAttrsCount(config.streamMetadataMap, group) + 1;
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountBatchStore, contactBatchStore), getWorkspace());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         verify(result, Collections.singletonList(this::verifyMarketingMetrics));
     }
@@ -216,19 +216,19 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 * group.getActivityTimeRange().getParamSet().size();
     }
 
-    private ActivityStoreSparkIOMetadata constructInputMetadata(AtlasStream stream, List<BusinessEntity> batchStoreEntities) {
-        ActivityStoreSparkIOMetadata metadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
+    private SparkIOMetadataWrapper constructInputMetadata(AtlasStream stream, List<BusinessEntity> batchStoreEntities) {
+        SparkIOMetadataWrapper metadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> detailsMap = new HashMap<>();
 
         // add period stores details
-        Details details = new Details();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(new ArrayList<>(TIMEFILTER_PERIODS));
         detailsMap.put(stream.getStreamId(), details);
 
         // add batch store details
         batchStoreEntities.forEach(entity -> {
-            Details batchStoreDetails = new Details();
+            Partition batchStoreDetails = new Partition();
             batchStoreDetails.setStartIdx(detailsMap.size());
             detailsMap.put(entity.name(), batchStoreDetails);
         });

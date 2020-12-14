@@ -62,6 +62,18 @@ public class DirectPlusEnrichServiceImplTestNG extends DataCloudMatchFunctionalT
         // SleepUtils.sleep(5000); // wait for background thread to save dynamo cache
     }
 
+    @Test(groups = "functional")
+    public void testFetchDunsUnderReview() {
+        DirectPlusEnrichRequest request = new DirectPlusEnrichRequest();
+        request.setDunsNumber("404090824"); // NOTE: This number is not guaranteed to work forever; works as of 2020-10-29
+        List<PrimeColumn> reqColumns = primeMetadataService.getPrimeColumns(defaultSelection());
+        request.setReqColumnsByBlockId(primeMetadataService.divideIntoBlocks(reqColumns));
+        PrimeAccount result = enrichService.fetch(Collections.singleton(request)).get(0);
+        Assert.assertNotNull(result);
+        Assert.assertFalse(MapUtils.isEmpty(result.getResult()));
+        Assert.assertTrue(result.getResult().containsKey(PrimeAccount.ENRICH_ERROR_CODE));
+    }
+
     private List<String> defaultSelection() {
         return Arrays.asList( //
                 "duns_number", //

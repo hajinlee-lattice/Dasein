@@ -268,6 +268,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         log.info("Set inputMasterTableName=" + inputMasterTableName);
 
         systemBatchTable = dataCollectionProxy.getTable(customerSpace.toString(), systemBatchStore, inactive);
+        if (systemBatchTable == null) {
+            systemBatchTable = dataCollectionProxy.getTable(customerSpace.toString(), systemBatchStore, active);
+        }
         if (systemBatchTable != null) {
             systemBatchTableName = systemBatchTable.getName();
         }

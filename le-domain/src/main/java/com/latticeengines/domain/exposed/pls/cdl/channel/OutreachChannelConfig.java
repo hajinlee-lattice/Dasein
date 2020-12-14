@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.LaunchBaseType;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -13,7 +14,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 public class OutreachChannelConfig implements ChannelConfig {
 
     private static final CDLExternalSystemName systemName = CDLExternalSystemName.Outreach;
-    private static final AudienceType audienceType = AudienceType.CONTACTS;
 
     @JsonProperty("contactLimit")
     private Long contactLimit;
@@ -32,6 +32,21 @@ public class OutreachChannelConfig implements ChannelConfig {
 
     @JsonProperty("audienceName")
     private String audienceName;
+
+    @JsonProperty("audienceType")
+    private AudienceType audienceType;
+
+    @JsonProperty("launchBaseType")
+    private LaunchBaseType launchBaseType;
+
+    @JsonProperty("taskDescription")
+    private String taskDescription;
+
+    @JsonProperty("taskPriority")
+    private String taskPriority;
+
+    @JsonProperty("taskType")
+    private String taskType;
 
     public Long getContactLimit() {
         return contactLimit;
@@ -89,13 +104,53 @@ public class OutreachChannelConfig implements ChannelConfig {
     }
 
     @Override
+    @JsonProperty("audienceType")
     public AudienceType getAudienceType() {
+        if (audienceType == null) {
+            audienceType = AudienceType.CONTACTS;
+        }
         return audienceType;
+    }
+
+    public void setAudienceType(AudienceType audienceType) {
+        this.audienceType = audienceType;
     }
 
     @Override
     public CDLExternalSystemName getSystemName() {
         return systemName;
+    }
+
+    public LaunchBaseType getLaunchBaseType() {
+        return launchBaseType;
+    }
+
+    public void setLaunchBaseType(LaunchBaseType launchBaseType) {
+        this.launchBaseType = launchBaseType;
+    }
+
+    public String getTaskDescription() {
+        return taskDescription;
+    }
+
+    public void setTaskDescription(String taskDescription) {
+        this.taskDescription = taskDescription;
+    }
+
+    public String getTaskPriority() {
+        return taskPriority;
+    }
+
+    public void setTaskPriority(String taskPriority) {
+        this.taskPriority = taskPriority;
+    }
+
+    public String getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(String taskType) {
+        this.taskType = taskType;
     }
 
     @Override
@@ -132,6 +187,11 @@ public class OutreachChannelConfig implements ChannelConfig {
                 .setSuppressAccountsWithoutLookupId(newOutreachChannelConfig.isSuppressAccountsWithoutLookupId());
         outreachChannelConfig.setAudienceId(newOutreachChannelConfig.getAudienceId());
         outreachChannelConfig.setAudienceName(newOutreachChannelConfig.getAudienceName());
+        outreachChannelConfig.setAudienceType(newOutreachChannelConfig.getAudienceType());
+        outreachChannelConfig.setLaunchBaseType(newOutreachChannelConfig.getLaunchBaseType());
+        outreachChannelConfig.setTaskDescription(newOutreachChannelConfig.getTaskDescription());
+        outreachChannelConfig.setTaskPriority(newOutreachChannelConfig.getTaskPriority());
+        outreachChannelConfig.setTaskType(newOutreachChannelConfig.getTaskType());
         return this;
 
     }

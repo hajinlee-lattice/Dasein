@@ -19,6 +19,7 @@ import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -349,6 +350,9 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     public boolean equals(Object obj) {
         return EqualsBuilder.reflectionEquals(this, obj);
     }
+
+    @Override
+    public int hashCode() { return HashCodeBuilder.reflectionHashCode(this); }
 
     public String getErrorCategory() {
         return errorCategory;

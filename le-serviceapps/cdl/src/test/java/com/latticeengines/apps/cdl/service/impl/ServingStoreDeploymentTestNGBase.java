@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
@@ -27,6 +28,7 @@ import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -143,16 +145,22 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
     }
 
     private void updateDefaultSystemAndCreateNew() {
-        S3ImportSystem defaultSystem = s3ImportSystemService.getS3ImportSystem(mainCustomerSpace, DEFAULT_SYSTEM);
-        defaultSystem.setAccountSystemId(ACCOUNT_SYSTEM_ID);
-        s3ImportSystemService.updateS3ImportSystem(mainCustomerSpace, defaultSystem);
-        S3ImportSystem otherSystem = new S3ImportSystem();
-        otherSystem.setAccountSystemId(OTHERSYSTEM_ACCOUNT_SYSTEM_ID);
-        otherSystem.setSystemType(S3ImportSystem.SystemType.Other);
-        otherSystem.setName(DEFAULT_SYSTEM + "_2");
-        otherSystem.setDisplayName(DEFAULT_SYSTEM + "_2");
-        otherSystem.setTenant(mainTestTenant);
-        s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, otherSystem);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5,
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(ctx -> {
+            S3ImportSystem defaultSystem = s3ImportSystemService.getS3ImportSystem(mainCustomerSpace, DEFAULT_SYSTEM);
+            Assert.assertNotNull(defaultSystem);
+            defaultSystem.setAccountSystemId(ACCOUNT_SYSTEM_ID);
+            s3ImportSystemService.updateS3ImportSystem(mainCustomerSpace, defaultSystem);
+            S3ImportSystem otherSystem = new S3ImportSystem();
+            otherSystem.setAccountSystemId(OTHERSYSTEM_ACCOUNT_SYSTEM_ID);
+            otherSystem.setSystemType(S3ImportSystem.SystemType.Other);
+            otherSystem.setName(DEFAULT_SYSTEM + "_2");
+            otherSystem.setDisplayName(DEFAULT_SYSTEM + "_2");
+            otherSystem.setTenant(mainTestTenant);
+            s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, otherSystem);
+            return true;
+        });
     }
 
     protected void testAccountMetadata() {

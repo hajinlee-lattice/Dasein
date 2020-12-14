@@ -1,5 +1,8 @@
 package com.latticeengines.workflow.exposed.build;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +34,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -41,6 +46,7 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -56,6 +62,7 @@ import com.latticeengines.proxy.exposed.app.LatticeInsightsInternalProxy;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.EmailProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -317,6 +324,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
     protected static final String MERGED_METRICS_GROUP_TABLE_NAME = "MERGED_METRICS_GROUP_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
+    protected static final String SPENDING_ANALYSIS_PERIOD_TABLE_NAME = "SPENDING_ANALYSIS_PERIOD_TABLE_NAME";
     protected static final String TIMELINE_MASTER_TABLE_NAME = "TIMELINE_MASTER_TABLE_NAME";
     protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
     protected static final String JOURNEY_STAGE_TABLE_NAME = "JOURNEY_STAGE_TABLE_NAME";
@@ -515,6 +523,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     @Inject
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    protected DataUnitProxy dataUnitProxy;
 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
@@ -897,5 +908,42 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
         log.info("{} templates = {}", entity.name(), templateNames);
         return templateNames;
+    }
+
+    protected long getCurrentTimestamp() {
+        String evaluationDateStr = getStringValueFromContext(CDL_EVALUATION_DATE);
+        if (StringUtils.isNotBlank(evaluationDateStr)) {
+            long currTime = LocalDate
+                    .parse(evaluationDateStr, DateTimeFormatter.ofPattern(DateTimeUtils.DATE_ONLY_FORMAT_STRING)) //
+                    .atStartOfDay(ZoneId.of("UTC")) // start of date in UTC
+                    .toInstant() //
+                    .toEpochMilli();
+            log.info("Found evaluation date {}, use end of date as current time. Timestamp = {}", evaluationDateStr,
+                    currTime);
+            return currTime;
+        } else {
+            Long paTime = getLongValueFromContext(PA_TIMESTAMP);
+            Preconditions.checkNotNull(paTime, "pa timestamp should be set in context");
+            log.info("No evaluation date str found in context, use pa timestamp = {}", paTime);
+            return paTime;
+        }
+    }
+
+    protected Long getLastEvaluationTime(@NotNull TableRoleInCollection role) {
+        Preconditions.checkNotNull(role, "Table role should not be null");
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        return MapUtils.emptyIfNull(dcStatus.getEvaluationDateMap()).get(role.name());
+    }
+
+    protected void setLastEvaluationTime(@NotNull Long currentTimestamp, @NotNull TableRoleInCollection role) {
+        Preconditions.checkNotNull(currentTimestamp, "Current time should be set already");
+        Preconditions.checkNotNull(role, "Table role should not be null");
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus.getEvaluationDateMap() == null) {
+            dcStatus.setEvaluationDateMap(new HashMap<>());
+        }
+        dcStatus.getEvaluationDateMap().put(role.name(), currentTimestamp);
+        log.info("Set evaluation date for {} to {}", role.name(), currentTimestamp);
+        putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
     }
 }

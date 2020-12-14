@@ -25,12 +25,12 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
+import com.latticeengines.domain.exposed.cdl.ListSegmentImportRequest;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.MigrateDynamoRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
-import com.latticeengines.domain.exposed.cdl.SegmentImportRequest;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
@@ -788,12 +788,40 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         return JsonUtils.convertList(rawList, String.class);
     }
 
-    public void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, int length,
+    public void addAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName, Integer length,
             boolean nullable) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks"
-                + "/appendLengthValidator/{uniqueTaskId}?attrName={attrName}&length={length}&nullable={nullable}",
-                shortenCustomerSpace(customerSpace), uniqueTaskId, attrName, length, nullable);
+        String baseUrl = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks"
+                + "/appendLengthValidator/{uniqueTaskId}?attrName={attrName}&nullable={nullable}";
+        List<String> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(uniqueTaskId);
+        args.add(attrName);
+        args.add(String.valueOf(nullable));
+        if (length != null) {
+            baseUrl = baseUrl + "&length={length}";
+            args.add(String.valueOf(length));
+        }
+        String url = constructUrl(baseUrl, args.toArray());
+
         put("Add attribute length validator", url);
+    }
+
+    public void updateAttributeLengthValidator(String customerSpace, String uniqueTaskId, String attrName,
+            Integer length, boolean nullable) {
+        String baseUrl = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks"
+                + "/updateLengthValidator/{uniqueTaskId}?attrName={attrName}&nullable={nullable}";
+        List<String> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(uniqueTaskId);
+        args.add(attrName);
+        args.add(String.valueOf(nullable));
+        if (length != null) {
+            baseUrl = baseUrl + "&length={length}";
+            args.add(String.valueOf(length));
+        }
+        String url = constructUrl(baseUrl, args.toArray());
+
+        put("Update attribute length validator", url);
     }
 
     public void addSimpleValueFilter(String customerSpace, String uniqueTaskId, SimpleValueFilter simpleValueFilter) {
@@ -816,7 +844,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
     }
 
-    public ApplicationId importListSegment(String customerSpace, SegmentImportRequest request) {
+    public ApplicationId importListSegment(String customerSpace, ListSegmentImportRequest request) {
         String baseUrl = "/customerspaces/{customerSpace}/segments/importListSegment";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
         String appIdStr = post("Start import listsegment", url, request, String.class);

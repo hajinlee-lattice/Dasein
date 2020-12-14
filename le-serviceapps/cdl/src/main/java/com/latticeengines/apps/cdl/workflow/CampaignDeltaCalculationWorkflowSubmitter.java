@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationI
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CampaignDeltaCalculationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -40,12 +42,15 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
     @Inject
     private WorkflowProxy workflowProxy;
 
+    @Inject
+    private PlayService playService;
+
     public Long submit(String customerSpace, String playId, String channelId, String launchId) {
         if (!batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "Delta Calculation not enabled for tenant: " + customerSpace });
         }
-
+        Play play = playService.getPlayByName(playId, false);
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "campaignDeltaCalculationWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_NAME, playId);
@@ -62,6 +67,7 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
                 .channelId(channelId) //
                 .launchId(launchId) //
                 .executionId(UUID.randomUUID().toString()) //
+                .tapType(play.getTapType())
                 .build();
         ApplicationId appId = workflowJobService.submit(configuration);
 

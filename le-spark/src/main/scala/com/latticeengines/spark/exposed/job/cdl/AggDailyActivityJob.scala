@@ -8,8 +8,8 @@ import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, to
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
 import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, StreamDateId, __Row_Count__, __StreamDate}
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
-import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, AggDailyActivityConfig}
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition
+import com.latticeengines.domain.exposed.spark.cdl.{AggDailyActivityConfig, SparkIOMetadataWrapper}
 import com.latticeengines.domain.exposed.util.ActivityStoreUtils
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
@@ -27,8 +27,8 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
   override def runJob(spark: SparkSession, lattice: LatticeContext[AggDailyActivityConfig]): Unit = {
     val inputMetadata = lattice.config.inputMetadata.getMetadata
     var output: Seq[DataFrame] = Seq()
-    val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
-    val detailsMap = new util.HashMap[String, Details]() // streamId -> details
+    val outputMetadata: SparkIOMetadataWrapper = new SparkIOMetadataWrapper()
+    val detailsMap = new util.HashMap[String, Partition]() // streamId -> details
     var idx: Int = 0
     lattice.config.streamReducerMap.values().asScala.foreach((reducer: ActivityRowReducer) => {
       if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator) && !reducer.getGroupByFields.contains(__StreamDate.name)) {
@@ -37,7 +37,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     })
     inputMetadata.asScala.foreach(entry => {
       var missingBatch: Boolean = false
-      val (streamId: String, details: ActivityStoreSparkIOMetadata.Details) = entry
+      val (streamId: String, details: Partition) = entry
       if (lattice.config.incrementalStreams.contains(streamId)) {
         val matchedImportDF: DataFrame = lattice.input(details.getStartIdx)
         if (CollectionUtils.isNotEmpty(details.getLabels) && details.getLabels.contains(ActivityMetricsGroupUtils.NO_BATCH)) {
@@ -218,8 +218,8 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     }
   }
 
-  def setDetails(index: Int): Details = {
-    val details = new Details()
+  def setDetails(index: Int): Partition = {
+    val details = new Partition()
     details.setStartIdx(index)
     details
   }

@@ -39,12 +39,15 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConf
 import com.latticeengines.domain.exposed.spark.cdl.CreateEventTableFilterJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.DailyTxnStreamPostAggregationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.ExtractListSegmentCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateIntentAlertArtifactsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchUniverseJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateLiveRampLaunchArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateTimelineExportArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.JoinAccountStoresConfig;
@@ -59,9 +62,11 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeTimeSeriesDeleteDataConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MigrateActivityPartitionKeyJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.PeriodTxnStreamPostAggregationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.PublishVIDataJobConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
@@ -192,7 +197,12 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = CountProductTypeConfig.class, name = CountProductTypeConfig.NAME), //
         @JsonSubTypes.Type(value = PublishActivityAlertsJobConfig.class, name = PublishActivityAlertsJobConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateRecommendationCSVConfig.class, name = GenerateRecommendationCSVConfig.NAME), //
-        @JsonSubTypes.Type(value = GenerateIntentAlertArtifactsConfig.class, name = GenerateIntentAlertArtifactsConfig.NAME) //
+        @JsonSubTypes.Type(value = GenerateIntentAlertArtifactsConfig.class, name = GenerateIntentAlertArtifactsConfig.NAME), //
+        @JsonSubTypes.Type(value = ExtractListSegmentCSVConfig.class, name = ExtractListSegmentCSVConfig.NAME), //
+        @JsonSubTypes.Type(value = GenerateLiveRampLaunchArtifactsJobConfig.class, name = GenerateLiveRampLaunchArtifactsJobConfig.NAME), //
+        @JsonSubTypes.Type(value = PublishVIDataJobConfiguration.class, name = PublishVIDataJobConfiguration.NAME), //
+        @JsonSubTypes.Type(value = DailyTxnStreamPostAggregationConfig.class, name = DailyTxnStreamPostAggregationConfig.NAME), //
+        @JsonSubTypes.Type(value = PeriodTxnStreamPostAggregationConfig.class, name = PeriodTxnStreamPostAggregationConfig.NAME) //
 })
 public abstract class SparkJobConfig implements Serializable {
 

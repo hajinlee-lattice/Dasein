@@ -19,6 +19,8 @@ public class DnBBatchMatchContext extends DnBMatchContextBase implements Fact, D
 
     private DnBReturnCode dnbCode;
 
+    private String rawCode;
+
     private Map<String, DnBMatchContext> contexts;
 
     private Long duration;
@@ -85,6 +87,14 @@ public class DnBBatchMatchContext extends DnBMatchContextBase implements Fact, D
 
     public void setDnbCode(DnBReturnCode dnbCode) {
         this.dnbCode = dnbCode;
+    }
+
+    public String getRawCode() {
+        return rawCode;
+    }
+
+    public void setRawCode(String rawCode) {
+        this.rawCode = rawCode;
     }
 
     public Map<String, DnBMatchContext> getContexts() {

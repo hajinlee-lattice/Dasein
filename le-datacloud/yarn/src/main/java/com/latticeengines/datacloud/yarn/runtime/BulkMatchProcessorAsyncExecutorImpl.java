@@ -56,7 +56,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         List<InternalOutputRecord> internalCompletedRecords = new ArrayList<>();
         MatchContext combinedContext = null;
         int block = 0;
+
         checkIfProceed(processorContext);
+
         while (processorContext.getDivider().hasNextGroup()) {
             MatchInput input = constructMatchInputFromData(processorContext);
             // cache an input to generate output metric
@@ -65,7 +67,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 processorContext.setGroupMatchInput(matchInput);
             }
 
-            log.info("a block " + block + " of " + input.getData().size() + " records to Async match.");
+            log.info("Block " + block + " containing " + input.getData().size() + " records to Async match.");
             MatchContext matchContext = matchPlanner.plan(input);
             if (combinedContext == null) {
                 combinedContext = matchContext;
@@ -78,7 +80,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             }
             matchContext = matchExecutor.executeAsync(matchContext);
             if (CollectionUtils.isNotEmpty(matchContext.getFuturesResult())) {
-                log.info("Returned block " + block + " of " + matchContext.getFuturesResult().size()
+                log.info("Returned block " + block + " with " + matchContext.getFuturesResult().size()
                         + " futures from Async match.");
             }
             processFutures(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
@@ -179,12 +181,16 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         if (completedFutures.size() >= completedThreshold) {
             consumeFutures(processorContext, internalCompletedRecords, completedFutures, combinedContext);
         }
+
         if (futures.size() > waitThreshold) {
             sleepSeconds(futures.size());
         }
         checkTimeout(processorContext, startTime);
     }
 
+    /*
+     * Complete processing on the finished futures and clear out lists
+     */
     private void consumeFutures(ProcessorContext processorContext, List<InternalOutputRecord> internalCompletedRecords,
             List<Future<Object>> completedFutures, MatchContext combinedContext) {
         List<InternalOutputRecord> batchCompletedRecords = new ArrayList<>();
@@ -223,6 +229,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         }
     }
 
+    /*
+     * Process a batch of match records and write to avro, then clear records/futures for next batch
+     */
     private void consumeBatchFutures(ProcessorContext processorContext,
             List<InternalOutputRecord> batchCompletedRecords, List<Future<Object>> batchCompletedFutures,
             MatchContext combinedContext) {
@@ -254,6 +263,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         batchCompletedRecords.clear();
     }
 
+    /*
+     * Check for timeout issues
+     */
     private void checkMatchCode(ProcessorContext processorContext, MatchContext combinedContext) {
         for (InternalOutputRecord outputRecord : combinedContext.getInternalResults()) {
             if (DnBReturnCode.UNMATCH_TIMEOUT.equals(outputRecord.getDnbCode())) {
@@ -264,11 +276,14 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         }
     }
 
+    /*
+     * Find completed records/futures in internalRecords and completedFutures and split them into separate lists
+     */
     private void getCompletedRecords(ProcessorContext processorContext, List<InternalOutputRecord> internalRecords,
             List<InternalOutputRecord> internalCompletedRecords, List<Future<Object>> futures,
             List<Future<Object>> completedFutures) {
 
-        List<Future<Object>> currentCompletedfutures = new ArrayList<>();
+        List<Future<Object>> currentCompletedFutures = new ArrayList<>();
         List<InternalOutputRecord> currentCompletedRecords = new ArrayList<>();
         for (int i = 0; i < futures.size(); i++) {
             Future<Object> future = futures.get(i);
@@ -276,7 +291,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
             if (future == null) {
                 if (isAttrLookup(processorContext) && record.isMatched()) {
                     // can already found custom account during pre-lookup by account ID
-                    currentCompletedfutures.add(null);
+                    currentCompletedFutures.add(null);
                     currentCompletedRecords.add(record);
                 } else if (CollectionUtils.isNotEmpty(record.getErrorMessages())) {
                     log.warn("There's match input errors=" + String.join("|", record.getErrorMessages()));
@@ -286,13 +301,13 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 continue;
             }
             if (future.isCompleted()) {
-                currentCompletedfutures.add(future);
+                currentCompletedFutures.add(future);
                 currentCompletedRecords.add(record);
             }
         }
-        if (currentCompletedfutures.size() > 0) {
-            completedFutures.addAll(currentCompletedfutures);
-            futures.removeAll(currentCompletedfutures);
+        if (currentCompletedFutures.size() > 0) {
+            completedFutures.addAll(currentCompletedFutures);
+            futures.removeAll(currentCompletedFutures);
         }
         if (currentCompletedRecords.size() > 0) {
             internalCompletedRecords.addAll(currentCompletedRecords);
@@ -311,6 +326,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         return OperationalMode.ENTITY_MATCH_ATTR_LOOKUP.equals(ctx.getOriginalInput().getOperationalMode());
     }
 
+    // Limit congestion on bulk match
     private void checkIfProceed(ProcessorContext processorContext) {
         if (!processorContext.getDivider().hasNextGroup() || !processorContext.isUseRemoteDnB() || disableDnBCheck) {
             return;

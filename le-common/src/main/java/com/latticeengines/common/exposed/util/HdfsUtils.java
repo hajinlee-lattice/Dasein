@@ -182,8 +182,7 @@ public final class HdfsUtils {
         }
     }
 
-    public static void uncompressGZFileWithinHDFS(Configuration configuration, String gzHdfsPath,
-            String uncompressedFilePath) throws IOException {
+    public static void uncompressGZFileWithinHDFS(Configuration configuration, String gzHdfsPath, String uncompressedFilePath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path inputFilePath = new Path(gzHdfsPath);
             Path outputFilePath = new Path(uncompressedFilePath);
@@ -194,25 +193,34 @@ public final class HdfsUtils {
         }
     }
 
-    public static void uncompressZipFileWithinHDFS(Configuration configuration, String compressedFile,
-            String uncompressedDir) throws IOException {
+    public static void uncompressZipFileWithinHDFS(Configuration configuration, String compressedFile, String uncompressedDir) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path inputFile = new Path(compressedFile);
-            Path outputFolder = new Path(uncompressedDir);
-            try (ZipInputStream is = new ZipInputStream(fs.open(inputFile))) {
-                ZipEntry entry = is.getNextEntry();
-                while (entry != null) {
-                    if (entry.isDirectory()) {
-                        entry = is.getNextEntry();
-                        continue;
-                    }
-                    Path outputFile = new Path(outputFolder, entry.getName());
-                    OutputStream os = fs.create(outputFile, true);
-                    org.apache.hadoop.io.IOUtils.copyBytes(is, os, configuration, false);
-                    os.close();
+            uncompressZipFile(configuration, fs, fs.open(inputFile), uncompressedDir);
+        }
+    }
+
+    private static void uncompressZipFile(Configuration configuration, FileSystem fs, InputStream inputStream, String uncompressedDir) throws IOException {
+        Path outputFolder = new Path(uncompressedDir);
+        try (ZipInputStream is = new ZipInputStream(inputStream)) {
+            ZipEntry entry = is.getNextEntry();
+            while (entry != null) {
+                if (entry.isDirectory()) {
                     entry = is.getNextEntry();
+                    continue;
                 }
+                Path outputFile = new Path(outputFolder, entry.getName());
+                OutputStream os = fs.create(outputFile, true);
+                org.apache.hadoop.io.IOUtils.copyBytes(is, os, configuration, false);
+                os.close();
+                entry = is.getNextEntry();
             }
+        }
+    }
+
+    public static void uncompressZipFileFromInputStream(Configuration configuration, InputStream inputStream, String uncompressedDir) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            uncompressZipFile(configuration, fs, inputStream, uncompressedDir);
         }
     }
 
@@ -240,7 +248,6 @@ public final class HdfsUtils {
 
     public static List<String> getFilesForDir(Configuration configuration, String hdfsDir, final String regex)
             throws IOException {
-
         return getFilesForDir(configuration, hdfsDir, (HdfsFilenameFilter) filename -> {
             Pattern p = Pattern.compile(regex);
             Matcher matcher = p.matcher(filename);
