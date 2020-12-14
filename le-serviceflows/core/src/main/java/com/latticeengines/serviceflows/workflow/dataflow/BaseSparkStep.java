@@ -123,6 +123,26 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         }
     }
 
+    protected DataUnit getS3DataUnit(boolean queryDataUnit, CustomerSpace customerSpace, String unitName) {
+        if (unitName == null) {
+            return null;
+        } else if (queryDataUnit) {
+            S3DataUnit s3DataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.getTenantId(), unitName, DataUnit.StorageType.S3);
+            if (s3DataUnit == null) {
+                throw new RuntimeException("S3 data unit " + unitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
+            }
+            return s3DataUnit;
+        } else {
+            Table table = metadataProxy.getTable(customerSpace.toString(), unitName);
+            if (table == null) {
+                throw new RuntimeException("Table " + unitName + " for customer " + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
+                        + " does not exists.");
+            }
+            return table.toS3DataUnit(unitName, s3Bucket, customerSpace.getTenantId());
+        }
+    }
+
+
     protected LivySession createLivySession(String jobName) {
         Map<String, String> extraConf = null;
         if (sparkMaxResultSize != null) {
