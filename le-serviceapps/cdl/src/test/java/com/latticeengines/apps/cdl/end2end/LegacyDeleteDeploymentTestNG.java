@@ -165,7 +165,7 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
             CSVPrinter csvPrinter = new CSVPrinter(new FileWriter(filename),
                     LECSVFormat.format.withHeader("AccountId", "ProductId", "TransactionTime"));
             //get records from last
-            for (int i = recordsBeforeDelete.size() - (numTxnToDelete * j); i >= recordsBeforeDelete.size() - (numTxnToDelete * (j + 1)); i--) {
+            for (int i = (numTxnToDelete * j); i <= numTxnToDelete * (j + 1); i++) {
                 deleteTransRecords.add(recordsBeforeDelete.get(i));
                 csvPrinter.printRecord(recordsBeforeDelete.get(i).get("AccountId").toString(),
                         recordsBeforeDelete.get(i).get("ProductId").toString(),
