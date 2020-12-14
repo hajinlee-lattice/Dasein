@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.security.TenantStatus;
+
 public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
 
     @Inject
@@ -37,7 +38,7 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
     @Inject
     private ServiceConfigEntityMgr serviceConfigEntityMgr;
 
-    @Test(groups = "functional", timeOut = 10000)
+    @Test(groups = "functional", timeOut = 50000)
     public void getTenantServiceState() throws Exception {
         bootstrap(TestContractId, TestTenantId, testLatticeComponent.getName());
 
@@ -75,9 +76,7 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
         FeatureFlagValueMap featureFlags = new FeatureFlagValueMap();
         SpaceConfiguration spaceConfiguration = new SpaceConfiguration();
         tenantConfigEntityMgr.createTenant(TestContractId, TestTenantId, contractProperties, tenantProperties,
-                customerSpaceProperties,
-                featureFlags,
-                spaceConfiguration);
+                customerSpaceProperties, featureFlags, spaceConfiguration);
         // wait 500ms replication lag
         Thread.sleep(500);
 
