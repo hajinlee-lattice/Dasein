@@ -29,20 +29,17 @@ public class EloquaExportFieldMetadataServiceImpl extends ExportFieldMetadataSer
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling EloquaExportFieldMetadataService for channel " + channel.getId());
-
         return enrichDefaultFieldsMetadata(customerSpace, channel);
     }
 
     @Override
     protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();
-
         String accountId = channel.getLookupIdMap().getAccountId();
         log.info("Eloqua accountId " + accountId);
         if (!StringUtils.isEmpty(accountId)) {
             remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, accountId);
         }
-
         String contactId = channel.getLookupIdMap().getContactId();
         log.info("Eloqua contactId " + contactId);
         if (!StringUtils.isEmpty(contactId)) {

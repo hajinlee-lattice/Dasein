@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -29,21 +30,15 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling MarketoExportFieldMetadataService for channel " + channel.getId());
-
-        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
-                channel);
-
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(channel);
+        Play play = channel.getPlay();
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
-                Collections.singletonList(BusinessEntity.Account));
-
+                Collections.singletonList(BusinessEntity.Account), play);
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
-                Collections.singletonList(BusinessEntity.Contact));
-
+                Collections.singletonList(BusinessEntity.Contact), play);
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
                 channel.getLookupIdMap().getTenant().getPid());
-
         List<ColumnMetadata> exportColumnMetadataList;
-
         if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Marketo, mappedFieldNames,
                     accountAttributesMap, contactAttributesMap);
@@ -51,7 +46,6 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Marketo, accountAttributesMap,
                     contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
         }
-
         String accountId = channel.getLookupIdMap().getAccountId();
         log.info("Marketo accountId " + accountId);
         if (accountId != null && accountAttributesMap.containsKey(accountId)) {
@@ -59,7 +53,6 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
             accountIdColumnMetadata.setDisplayName(TRAY_ACCOUNT_ID_COLUMN_NAME);
             exportColumnMetadataList.add(accountIdColumnMetadata);
         }
-
         String contactId = channel.getLookupIdMap().getContactId();
         log.info("Marketo contactId " + contactId);
         if (contactId != null && contactAttributesMap.containsKey(contactId)) {
@@ -67,7 +60,6 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
             contactIdColumnMetadata.setDisplayName(TRAY_CONTACT_ID_COLUMN_NAME);
             exportColumnMetadataList.add(contactIdColumnMetadata);
         }
-
         return exportColumnMetadataList;
     }
 

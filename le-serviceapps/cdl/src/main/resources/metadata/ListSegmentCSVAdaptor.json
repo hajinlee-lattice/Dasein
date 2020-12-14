@@ -46,38 +46,6 @@
       "fieldType": "TEXT"
     },
     {
-      "fieldName": "LDC_City",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "LDC_Country",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "LDC_Domain",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "LDC_Industry",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "LDC_Name",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "LDC_PostalCode",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "LDC_State",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "SDR_Email",
-      "fieldType": "TEXT"
-    },
-    {
       "fieldName": "SFDC_ACCOUNT_ID",
       "userFieldName": "External ID",
       "fieldType": "TEXT"
@@ -122,26 +90,6 @@
       "fieldType": "TEXT"
     },
     {
-      "fieldName": "Contact_Address_Street_1",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "Contact_Address_Street_2",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "ContactCity",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "ContactState",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "ContactCountry",
-      "fieldType": "TEXT"
-    },
-    {
       "fieldName": "Email",
       "userFieldName": "Email",
       "fieldType": "TEXT"
@@ -164,11 +112,6 @@
     {
       "fieldName": "ContactPostalCode",
       "userFieldName": "Postal Code",
-      "fieldType": "TEXT"
-    },
-    {
-      "fieldName": "Title",
-      "userFieldName": "Title",
       "fieldType": "TEXT"
     },
     {

@@ -134,6 +134,14 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunchChannel findChannelAndPlayById(String channelId) {
+        PlayLaunchChannel channel = readerRepository.findById(channelId);
+        Hibernate.initialize(channel.getPlay());
+        return channel;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PlayLaunchChannel findById(String channelId, boolean useWriterRepo) {
         if (useWriterRepo) {
             return writerRepository.findById(channelId);

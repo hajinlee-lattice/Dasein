@@ -1,5 +1,8 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.metadata.entitymgr.DataTemplateEntityMgr;
 import com.latticeengines.metadata.service.DataTemplateService;
@@ -41,5 +45,11 @@ public class DataTemplateServiceImpl implements DataTemplateService {
     public void deleteByUuid(String uuid) {
         String tenantId = MultiTenantContext.getShortTenantId();
         entityMgr.deleteByUuid(tenantId, uuid);
+    }
+
+    @Override
+    public Map<String, ColumnMetadata> getTemplateMetadata(String templateId) {
+        DataTemplate dataTemplate = findByUuid(templateId);
+        return dataTemplate.getMasterSchema().getFields().stream().collect(Collectors.toMap(columnField -> columnField.getAttrName(), columnField -> columnField.toColumnMetadata()));
     }
 }

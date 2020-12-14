@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -31,6 +32,8 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
+import com.latticeengines.domain.exposed.metadata.template.ImportFieldMapping;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ImportListSegmentWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ExtractListSegmentCSVConfiguration;
@@ -89,9 +92,9 @@ public class ExtractListSegmentCSV
             ExtractListSegmentCSVConfig extractListSegmentCSVConfig = new ExtractListSegmentCSVConfig();
             extractListSegmentCSVConfig.setAccountAttributes(accountAttributes);
             extractListSegmentCSVConfig.setContactAttributes(contactAttributes);
-            MetadataSegment metadataSegment = segmentProxy.getListSegmentByName(tenantId, segmentName);
-            if (SegmentUtils.hasListSegment(metadataSegment)) {
-                extractListSegmentCSVConfig.setCsvAdaptor(metadataSegment.getListSegment().getCsvAdaptor());
+            MetadataSegment segment = segmentProxy.getListSegmentByName(tenantId, segmentName);
+            if (SegmentUtils.hasListSegment(segment)) {
+                extractListSegmentCSVConfig.setCsvAdaptor(segment.getListSegment().getCsvAdaptor());
                 String hdfsPath = s3DataUnit.getLinkedHdfsPath();
                 extractListSegmentCSVConfig.setInput(Collections.singletonList(getInputCSVDataUnit(hdfsPath, dataUnitName)));
                 extractListSegmentCSVConfig.setTargetNums(2);
@@ -101,15 +104,19 @@ public class ExtractListSegmentCSV
                 extractListSegmentCSVConfig.setSpecialTargets(specialTargets);
                 SparkJobResult result = runSparkJob(ExtractListSegmentCSVJob.class, extractListSegmentCSVConfig);
                 HdfsDataUnit accountDataUnit = result.getTargets().get(0);
-                processImportResult(BusinessEntity.Account, accountDataUnit, ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME);
+                CSVAdaptor csvAdaptor = segment.getListSegment().getCsvAdaptor();
+                Map<String, ImportFieldMapping> fieldMap = csvAdaptor.getImportFieldMappings().stream()
+                        .collect(Collectors.toMap(importFieldMapping -> importFieldMapping.getFieldName(), importFieldMapping -> importFieldMapping));
+                processImportResult(BusinessEntity.Account, accountDataUnit,
+                        ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME, fieldMap);
                 HdfsDataUnit contactUnit = result.getTargets().get(1);
-                processImportResult(BusinessEntity.Contact, contactUnit, ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME);
+                processImportResult(BusinessEntity.Contact, contactUnit,
+                        ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME, fieldMap);
                 //update segment count
-                metadataSegment = segmentProxy.getListSegmentByName(tenantId, segmentName);
-                metadataSegment.setAccounts(accountDataUnit.getCount());
-                metadataSegment.setContacts(contactUnit.getCount());
-                metadataSegment.setCountsOutdated(false);
-                segmentProxy.createOrUpdateListSegment(tenantId, metadataSegment);
+                segment.setAccounts(accountDataUnit.getCount());
+                segment.setContacts(contactUnit.getCount());
+                segment.setCountsOutdated(false);
+                segmentProxy.createOrUpdateListSegment(tenantId, segment);
             } else {
                 throw new RuntimeException(String.format("Can't find segment by name {}.", segmentName));
             }
@@ -130,7 +137,7 @@ public class ExtractListSegmentCSV
         return unit;
     }
 
-    private MasterSchema getSchema(HdfsDataUnit hdfsDataUnit, BusinessEntity entity) {
+    private MasterSchema getSchema(HdfsDataUnit hdfsDataUnit, BusinessEntity entity, Map<String, ImportFieldMapping> fieldMap) {
         String path = hdfsDataUnit.getPath();
         MasterSchema masterSchema = new MasterSchema();
         List<ColumnField> attributes = new ArrayList<>();
@@ -142,6 +149,8 @@ public class ExtractListSegmentCSV
                 for (Schema.Field field : parquetSchema.getFields()) {
                     ColumnField attribute = new ColumnField();
                     attribute.setAttrName(field.name());
+                    attribute.setDisplayName(fieldMap.get(field.name()).getUserFieldName());
+                    attribute.setEntity(entity);
                     attributes.add(attribute);
                 }
             } else {
@@ -174,9 +183,9 @@ public class ExtractListSegmentCSV
         return request;
     }
 
-    private void processImportResult(BusinessEntity entity, HdfsDataUnit hdfsDataUnit, String contextKey) {
+    private void processImportResult(BusinessEntity entity, HdfsDataUnit hdfsDataUnit, String contextKey, Map<String, ImportFieldMapping> fieldMap) {
         String tenantId = customerSpace.getTenantId();
-        CreateDataTemplateRequest request = createRequest(entity.name(), getSchema(hdfsDataUnit, entity));
+        CreateDataTemplateRequest request = createRequest(entity.name(), getSchema(hdfsDataUnit, entity, fieldMap));
         String templateId = segmentProxy.createOrUpdateDataTemplate(tenantId, configuration.getSegmentName(), request);
         S3DataUnit s3DataUnit = toS3DataUnit(hdfsDataUnit, entity, templateId,
                 Lists.newArrayList(DataUnit.Role.Master, DataUnit.Role.Snapshot));
