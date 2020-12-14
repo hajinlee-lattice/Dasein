@@ -23,7 +23,7 @@ public final class ExportUtils {
 
     public static final String EMPTY_CATEGORY = "emptyCategory";
 
-    public static final String replacedBySpace = "[<>:\"/\\\\|?*]";
+    public static final String replacedByUnderscore = "[<>:\"/\\\\|?*]";
 
     protected ExportUtils() {
         throw new UnsupportedOperationException();
@@ -125,7 +125,7 @@ public final class ExportUtils {
 
     public static String getReplacedName(String name) {
         if (StringUtils.isNotEmpty(name)) {
-            return name.replaceAll(replacedBySpace, " ");
+            return name.replaceAll(replacedByUnderscore, "_");
         } else {
             return name;
         }
