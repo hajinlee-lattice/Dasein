@@ -300,30 +300,30 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long DAILY_TXN_PT = 41156L;
     // Number of aggregated daily transaction after ProcessTransaction entity
     // match test
-    static final Long DAILY_TXN_PT_EM = 41071L;
+    static final Long DAILY_TXN_PT_EM = 41064L;
     // Number of aggregated daily transaction after UpdateTransaction test
     static final Long DAILY_TXN_UT = 50238L;
     // Number of aggregated daily transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long DAILY_TXN_UT_EM = 50870L;
+    static final Long DAILY_TXN_UT_EM = 50863L;
     // Number of aggregated period transaction after ProcessTransaction test
     static final Long PERIOD_TRANSACTION_PT = 62550L;
     // Number of aggregated period transaction after ProcessTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long PERIOD_TXN_SERVING_EM = 62065L;
+    static final Long PERIOD_TXN_SERVING_EM = 62037L;
 //    static final Long PERIOD_TXN_SERVING_EM = 12247L; // TODO - use this after spending analysis query hooked up
     // Sum of all period transaction batch stores
-    static final Long PERIOD_TXN_BATCH_EM = 62065L;
+    static final Long PERIOD_TXN_BATCH_EM = 62037L;
     // Number of aggregated period transaction after UpdateTransaction test
     static final Long PERIOD_TRANSACTION_UT = 73892L;
     // Number of aggregated period transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long PERIOD_TRANSACTION_UT_SERVING_EM = 75211L;
+    static final Long PERIOD_TRANSACTION_UT_SERVING_EM = 75183L;
 //    static final Long PERIOD_TRANSACTION_UT_SERVING_EM = 14234; // TODO - use this after spending analysis query hooked up
-    static final Long PERIOD_TRANSACTION_UT_BATCH_EM = 75211L;
+    static final Long PERIOD_TRANSACTION_UT_BATCH_EM = 75183L;
     // Number of total purchase history attributes after ProcessTransaction test
     static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
     // Number of total purchase history attributes after UpdateTransaction test

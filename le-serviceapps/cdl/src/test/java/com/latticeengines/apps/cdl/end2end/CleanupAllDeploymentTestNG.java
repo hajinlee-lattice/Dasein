@@ -16,9 +16,11 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -45,6 +47,15 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private CDLAttrConfigProxy cdlAttrConfigProxy;
 
     private Map<BusinessEntity, String> tablename = new HashMap();
+
+    @BeforeClass(groups = { "end2end" })
+    @Override
+    public void setup() throws Exception {
+        // create VDB migration tenant
+        HashMap<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
+        setupEnd2EndTestEnvironment(featureFlagMap);
+    }
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {

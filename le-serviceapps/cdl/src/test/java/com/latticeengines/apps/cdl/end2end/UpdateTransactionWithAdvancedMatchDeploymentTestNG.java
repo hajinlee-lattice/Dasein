@@ -25,6 +25,7 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
         log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
         setupEnd2EndTestEnvironment(featureFlagMap);
         checkpointService
                 .setPrecedingCheckpoints(Arrays.asList( //

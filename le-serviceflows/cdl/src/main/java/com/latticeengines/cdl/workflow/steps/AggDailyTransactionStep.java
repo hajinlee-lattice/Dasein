@@ -63,8 +63,8 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
         SparkJobResult result = runSparkJob(AggDailyActivityJob.class, getSparkConfig());
         Map<String, HdfsDataUnit> outputs = processOutputMetadata(result);
         if (outputs.containsKey(ProductType.Analytic.name())) {
-            outputs.put(ProductType.Analytic.name(),
-                    fillMissingProductBundle(outputs.get(ProductType.Analytic.name())));
+//            outputs.put(ProductType.Analytic.name(),
+//                    fillMissingProductBundle(outputs.get(ProductType.Analytic.name())));
         }
         saveDailyTxnTables(outputs.entrySet().stream().map(entry -> {
             String productType = entry.getKey();
