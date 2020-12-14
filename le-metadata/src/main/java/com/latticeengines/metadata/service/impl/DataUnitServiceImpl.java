@@ -69,12 +69,16 @@ public class DataUnitServiceImpl implements DataUnitService {
         }
         try {
             dataUnitRuntimeService.delete(dataUnit);
-            deleteByNameAndStorageType(dataUnit.getName(), dataUnit.getStorageType());
+            deleteByTenantIdAndNameAndStorageType(dataUnit.getTenant(), dataUnit.getName(), dataUnit.getStorageType());
             return true;
         } catch (Exception e) {
             log.error(e.getMessage());
             return false;
         }
+    }
+
+    private void deleteByTenantIdAndNameAndStorageType(String tenantId, String name, DataUnit.StorageType storageType) {
+        entityMgr.deleteByName(tenantId, name, storageType);
     }
 
     @Override
@@ -127,6 +131,11 @@ public class DataUnitServiceImpl implements DataUnitService {
     public List<DataUnit> findAllByDataTemplateIdAndRole(String dataTemplateId, DataUnit.Role role) {
         String tenantId = MultiTenantContext.getShortTenantId();
         return entityMgr.findAllByDataTemplateIdAndRoleFromReader(tenantId, dataTemplateId, role);
+    }
+
+    @Override
+    public List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy() {
+        return entityMgr.findAllDataUnitEntitiesWithExpiredRetentionPolicy();
     }
 
 }

@@ -34,4 +34,9 @@ public class DataUnitEntity extends BaseMultiTenantDocEntity<DataUnit> {
             insertable = false, updatable = false)
     private String dataTemplateId;
 
+    @Column(name = "RetentionPolicy", //
+            columnDefinition = "'VARCHAR(255) GENERATED ALWAYS AS (`Document` ->> '$.retentionPolicy')'", //
+            insertable = false, updatable = false)
+    private String retentionPolicy;
+
 }

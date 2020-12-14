@@ -64,11 +64,11 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
             return true;
         });
 
-        dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
-        retry.execute(context -> {
-            Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));
-            return true;
-        });
+//        dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
+//        retry.execute(context -> {
+//            Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));
+//            return true;
+//        });
     }
 
     @Test(groups = "functional")
@@ -90,11 +90,11 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
             return true;
         });
 
-        dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
-        retry.execute(context -> {
-            Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));
-            return true;
-        });
+//        dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
+//        retry.execute(context -> {
+//            Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));
+//            return true;
+//        });
     }
 
     private DynamoDataUnit createDynamoUnit(String name) {
@@ -105,6 +105,7 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
         dataUnit.setSortKey("sk");
         dataUnit.setSignature("0000");
         dataUnit.setDataTemplateId(DATATEMPLATE_ID);
+        dataUnit.setRetentionPolicy("KEEP_3_DAYS");
         List<DataUnit.Role> roles = new ArrayList<DataUnit.Role>();
         roles.add(DataUnit.Role.Master);
         roles.add(DataUnit.Role.Import);

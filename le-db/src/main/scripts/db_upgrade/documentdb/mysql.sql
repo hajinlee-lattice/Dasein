@@ -13,7 +13,9 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
-      
+
+      ALTER TABLE `DataUnit`
+        ADD COLUMN `RetentionPolicy` VARCHAR(255) GENERATED ALWAYS AS (json_unquote(json_extract(`Document`,'$.retentionPolicy'))) VIRTUAL;
   END //
 -- ##############################################################
 

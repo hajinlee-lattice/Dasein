@@ -236,6 +236,13 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     @Override
+    public List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy() {
+        List<DataUnitEntity> entities = readerRepository.findAllDataUnitEntitiesWithExpiredRetentionPolicy(
+                RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
+        return convertList(entities, false);
+    }
+
+    @Override
     public DataUnit findByNameTypeFromReader(String tenantId, String name, DataUnit.StorageType storageType) {
         DataUnitEntity entity = readerRepository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (entity != null) {
@@ -287,6 +294,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         if (dataUnit instanceof RedshiftDataUnit) {
             setRedshiftPartition((RedshiftDataUnit) dataUnit);
         }
+        dataUnit.setUpdated(entity.getLastModifiedDate());
         return dataUnit;
     }
 

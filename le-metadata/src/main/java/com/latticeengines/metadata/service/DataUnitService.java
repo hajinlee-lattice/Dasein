@@ -29,4 +29,6 @@ public interface DataUnitService {
     void updateSignature(DataUnit dataUnit, String signature);
 
     List<DataUnit> findAllByDataTemplateIdAndRole(String dataTemplateId, DataUnit.Role role);
+
+    List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy();
 }

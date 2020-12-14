@@ -11,14 +11,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
+import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.metadata.service.MetadataTableCleanupService;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 
 @Component("metadataTableCleanupServiceImpl")
 public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupService {
@@ -27,6 +31,15 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
 
     @Inject
     private MetadataService metadataService;
+
+    @Inject
+    private DataUnitService dataUnitService;
+
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
+
+    @Inject
+    private S3Service s3Service;
 
     @Value("${metadata.table.cleanup.size}")
     private int maxCleanupSize;
@@ -91,7 +104,48 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
                 log.info(String.format("No tables needs to clean up after scan %d records and scan index is %d.", batchSize * searchCount, lastIndex));
             }
         }
+        cleanupDataUnits();
         return true;
+    }
+
+    private void cleanupDataUnits() {
+        log.info("DataUnit cleanup task started.");
+        List<DataUnit> dataUnitsToDelete = new ArrayList<>();
+
+        try (PerformanceTimer timer =
+                     new PerformanceTimer("DataUnit cleanup task at step find dataunits to delete")) {
+            List<DataUnit> dataUnits = dataUnitService.findAllDataUnitEntitiesWithExpiredRetentionPolicy();
+            int index = 0;
+            for (DataUnit dataUnit : dataUnits) {
+                index++;
+                long expireTime = RetentionPolicyUtil.getExpireTimeByRetentionPolicyStr(dataUnit.getRetentionPolicy());
+                if (expireTime > 0) {
+                    if (System.currentTimeMillis() > dataUnit.getUpdated().getTime() + expireTime) {
+                        dataUnitsToDelete.add(dataUnit);
+                    }
+                }
+            }
+        }
+        try (PerformanceTimer timer = new PerformanceTimer("Dataunit cleanup task at step delete dataunits")) {
+            if (CollectionUtils.isNotEmpty(dataUnitsToDelete)) {
+                dataUnitsToDelete.forEach(dataUnit -> {
+                    cleanupDataUnit(dataUnit);
+                });
+                log.info(String.format("Size of dataunit needs to be deleted is %d.", dataUnitsToDelete.size()));
+            } else {
+                log.info("No dataunit needs to clean up.");
+            }
+        }
+    }
+
+
+    private void cleanupDataUnit(DataUnit dataUnit) {
+        try {
+            dataUnitService.delete(dataUnit);
+        } catch (Exception ex) {
+            log.error(String.format("Could not cleanup dataunit for tenant: %s, table name %s and type %s",
+                    dataUnit.getTenant(), dataUnit.getName(), dataUnit.getDataFormat(), ex.getMessage()));
+        }
     }
 
     private void cleanupTable(Table table) {
