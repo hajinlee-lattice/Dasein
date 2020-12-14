@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -725,10 +726,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         sizeMap.get(fieldMapping.getCdlExternalSystemType()) + 1);
             }
         }
-        for (Map.Entry<CDLExternalSystemType, Integer> entry : sizeMap.entrySet()) {
-            CDLExternalSystemType type = entry.getKey();
-            Integer fieldSize = entry.getValue();
-            ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, otherIdLimit, type.name());
+        if (MapUtils.isNotEmpty(sizeMap)) {
+            for (Map.Entry<CDLExternalSystemType, Integer> entry : sizeMap.entrySet()) {
+                CDLExternalSystemType type = entry.getKey();
+                Integer fieldSize = entry.getValue();
+                ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, otherIdLimit, type.name());
+            }
         }
     }
 

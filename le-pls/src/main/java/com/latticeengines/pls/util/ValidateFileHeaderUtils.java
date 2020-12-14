@@ -238,6 +238,9 @@ public class ValidateFileHeaderUtils {
                 String message = LedpException.buildMessage(LedpCode.LEDP_18226,
                         new String[]{String.valueOf(limit), type, String.valueOf(fieldSize)});
                 validationResult.setErrorMessage(String.format("%s\n%s", errorMessage, message));
+            } else {
+                validationResult.setErrorMessage(LedpException.buildMessage(LedpCode.LEDP_18226,
+                        new String[]{String.valueOf(limit), type, String.valueOf(fieldSize)}));
             }
         }
     }
