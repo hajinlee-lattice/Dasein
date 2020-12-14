@@ -546,6 +546,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
             validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit, enableEntityMatch, enableEntityMatchGA);
         }
+        int otherIdLimit =
+                appTenantConfigService.getOtherIdQuotaLimit(MultiTenantContext.getShortTenantId());
+        validateOtherIdSize(fieldValidationResult, fieldMappingDocument, otherIdLimit);
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
         // compare type, require flag between template and standard schema
         checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch || enableEntityMatchGA,
@@ -709,6 +712,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         attributes = attributes.stream().filter(name -> !inactiveNames.contains(name)).collect(Collectors.toSet());
         int fieldSize = attributes.size();
         ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
+    }
+
+    private void validateOtherIdSize(FieldValidationResult fieldValidationResult,
+                                     FieldMappingDocument fieldMappingDocument, int otherIdLimit) {
+
+        int fieldSize = (int)
+                fieldMappingDocument.getFieldMappings().stream().filter(mapping -> mapping.getCdlExternalSystemType() != null).count();
+        ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, otherIdLimit);
     }
 
     private void crosscheckDataType(CustomerSpace customerSpace, String entity, String source, Table metaTable,
