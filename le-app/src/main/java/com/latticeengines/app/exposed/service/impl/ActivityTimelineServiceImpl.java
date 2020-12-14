@@ -147,7 +147,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         Instant cutoffTimeStamp = getTimeWindowFromPeriod(customerSpace, timelinePeriod).getLeft();
 
         DataPage intentData = new DataPage();
-        intentData.setData(data.getData());
+        intentData.setData(getDeduplicateIntentData(data));
         String accountIntent = getAccountIntent(intentData);
 
         int newIdentifiedContactsCount = (int) dataFilter(data, AtlasStream.StreamType.MarketingActivity,
@@ -185,6 +185,21 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                         ActivityTimelineMetrics.MetricsType.AccountIntent.getContext(days)));
 
         return metrics;
+    }
+
+    private List<Map<String, Object>> getDeduplicateIntentData(DataPage data) {
+        Map<String, Map<String, Object>> modelIntentMap = new HashMap<String, Map<String, Object>>();
+        for (Map<String, Object> map : data.getData()) {
+            String model = (String) map.get(InterfaceName.Detail1.name());
+            if (modelIntentMap.containsKey(model)) {
+                Long latest = (Long) modelIntentMap.get(model).get(InterfaceName.EventTimestamp.name());
+                if (latest > (Long) map.get(InterfaceName.EventTimestamp.name())) {
+                    break;
+                }
+            }
+            modelIntentMap.put(model, map);
+        }
+        return new ArrayList(modelIntentMap.values());
     }
 
     private String getAccountIntent(DataPage data) {
