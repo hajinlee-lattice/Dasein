@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchUniverseJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions.{col, row_number}
+import org.apache.spark.sql.functions.{col, count, row_number}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 
@@ -21,6 +21,7 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     val maxEntitiesToLaunch = config.getMaxEntitiesToLaunch
     val sortAttr = config.getContactsPerAccountSortAttribute
     val sortDir = config.getContactsPerAccountSortDirection
+    val contactAccountRatioThreshold = config.getContactAccountRatioThreshold
 
     var trimmedData = input
 
@@ -32,12 +33,15 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     logSpark("Input schema is as follows:")
     trimmedData.printSchema
 
-    if (maxContactsPerAccount != null) {
-      trimmedData = limitContactsPerAccount(trimmedData, accountId, contactId, sortAttr, sortDir, maxContactsPerAccount)
+    if(contactAccountRatioThreshold != null) {
+      checkContactAccountRatio(trimmedData, accountId, contactAccountRatioThreshold)
     }
 
-    if (maxEntitiesToLaunch != null) {
-      trimmedData = trimmedData.limit(maxEntitiesToLaunch.toInt)
+    if (maxContactsPerAccount != null) {
+      trimmedData = limitContactsPerAccount(trimmedData, accountId, contactId, sortAttr, sortDir, maxContactsPerAccount)
+      if (maxEntitiesToLaunch != null) {
+        trimmedData = trimmedData.limit(maxEntitiesToLaunch.toInt)
+      }
     }
 
     lattice.output = List(trimmedData)
@@ -63,5 +67,16 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
       .withColumn(rowNumber, row_number.over(w))
       .filter(col(rowNumber) <= maxContactsPerAccount.toInt)
       .drop(rowNumber, sortAttr)
+  }
+
+  def checkContactAccountRatio(trimmedData: DataFrame, accountId: String, contactAccountRatioThreshold: Long) {
+
+    val accountDF = trimmedData.select(col(accountId))
+      .groupBy(col(accountId))
+      .agg(count("*").alias("cnt"))
+      .where(col("cnt") > contactAccountRatioThreshold).limit(1)
+    if (!accountDF.rdd.isEmpty) {
+      throw new IllegalStateException("Contact/Account ratio exceed threshold!")
+    }
   }
 }

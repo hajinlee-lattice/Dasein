@@ -85,6 +85,10 @@
         {"Node": "Attribute", "Data": "CDLUpdatedTime"},
         {"Node": "Direction", "Data": "DESC"}
       ]
+    },
+    {
+      "Node": "ContactAccountRatioThreshold",
+      "Data": 1000000
     }
   ]
 }
