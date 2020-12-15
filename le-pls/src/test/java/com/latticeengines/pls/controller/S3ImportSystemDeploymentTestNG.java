@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +12,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.exception.UIAction;
@@ -27,10 +25,7 @@ public class S3ImportSystemDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
-        Map<String, Boolean> flags = new HashMap<>();
-        flags.put(featureFlag, true);
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         attachProtectedProxy(plsCDLS3ImportProxy);
     }
