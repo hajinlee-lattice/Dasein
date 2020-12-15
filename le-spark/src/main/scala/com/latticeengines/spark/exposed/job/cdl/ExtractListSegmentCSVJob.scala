@@ -44,20 +44,10 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
   }
 
   private def generateEntityDf(distinct: Boolean, input: DataFrame, attributes: Seq[String]): DataFrame = {
-    val columnsExist: ListBuffer[String] = ListBuffer()
-    val columnsNotExist: ListBuffer[String] = ListBuffer()
-    attributes.foreach { attribute =>
-      if (input.columns.contains(attribute)) {
-        columnsExist += attribute
-      } else {
-        columnsNotExist += attribute
-      }
-    }
-    var result = input.select(columnsExist map col: _*)
-    columnsNotExist.map(accountColumn => result = result.withColumn(accountColumn, lit(null).cast(StringType)))
+    var result = input.select(attributes map col: _*)
     val columns = result.columns
-    val contactNameFunc: (String, String) => String = (firstname, lastname) => {
-      firstname + " " + lastname
+    val contactNameFunc: (String, String) => String = (firstName, lastName) => {
+      firstName + " " + lastName
     }
     val contactNameUdf = udf(contactNameFunc)
     if (!columns.contains(InterfaceName.PhoneNumber.name())) {

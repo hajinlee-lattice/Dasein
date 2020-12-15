@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -47,6 +49,12 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
 
     @JsonProperty("SaltHint")
     private String saltHint;
+
+    @JsonProperty("accountAttributes")
+    private Set<String> accountAttributes;
+
+    @JsonProperty("contactAttributes")
+    private Set<String> contactAttributes;
 
     public GenerateLaunchArtifactsJobConfig() {
     }
@@ -180,5 +188,21 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
 
     public void setSaltHint(String saltHint) {
         this.saltHint = saltHint;
+    }
+
+    public Set<String> getContactAttributes() {
+        return contactAttributes;
+    }
+
+    public void setContactAttributes(Set<String> contactAttributes) {
+        this.contactAttributes = contactAttributes;
+    }
+
+    public Set<String> getAccountAttributes() {
+        return accountAttributes;
+    }
+
+    public void setAccountAttributes(Set<String> accountAttributes) {
+        this.accountAttributes = accountAttributes;
     }
 }

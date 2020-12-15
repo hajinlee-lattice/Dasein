@@ -64,17 +64,13 @@ public class ExtractListSegmentCSV
     private final List<String> accountAttributes = Lists.newArrayList(InterfaceName.CompanyName.name(),
             InterfaceName.Address_Street_1.name(), InterfaceName.Address_Street_2.name(), InterfaceName.City.name(),
             InterfaceName.State.name(), InterfaceName.Country.name(), InterfaceName.PostalCode.name(),
-            InterfaceName.DUNS.name(), InterfaceName.PhoneNumber.name(), "LDC_City", "LDC_Country", "LDC_Domain",
-            "LDC_Industry", InterfaceName.LDC_Name.name(), "LDC_PostalCode", "LDC_State", "SDR_Email", "SFDC_ACCOUNT_ID",
+            InterfaceName.DUNS.name(), InterfaceName.PhoneNumber.name(), "SFDC_ACCOUNT_ID",
             InterfaceName.Website.name(), InterfaceName.Industry.name(), "user_us_8_digit_sic_code",
             InterfaceName.AccountId.name(), "user_employees", "user_direct_marketing_status");
 
-    private final List<String> contactAttributes = Lists.newArrayList(InterfaceName.AccountId.name(), "SFDC_CONTACT_ID", InterfaceName.ContactName.name(),
-            InterfaceName.Contact_Address_Street_1.name(), InterfaceName.Contact_Address_Street_2.name(),
-            InterfaceName.ContactCity.name(), InterfaceName.ContactState.name(), InterfaceName.ContactCountry.name(),
-            InterfaceName.Email.name(), InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
-            "Direct_Phone", InterfaceName.ContactPostalCode.name(), InterfaceName.Title.name(),
-            InterfaceName.ContactId.name(), "user_level_name", "user_job_function", InterfaceName.GCA_ID.name());
+    private final List<String> contactAttributes = Lists.newArrayList(InterfaceName.AccountId.name(), "SFDC_CONTACT_ID",
+            InterfaceName.ContactName.name(), InterfaceName.Email.name(), InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
+            "Direct_Phone", InterfaceName.Title.name(), InterfaceName.ContactId.name(), "user_level_name", "user_job_function", InterfaceName.GCA_ID.name());
 
     @Override
     protected CustomerSpace parseCustomerSpace(ExtractListSegmentCSVConfiguration stepConfiguration) {
@@ -150,7 +146,6 @@ public class ExtractListSegmentCSV
                     ColumnField attribute = new ColumnField();
                     attribute.setAttrName(field.name());
                     attribute.setDisplayName(fieldMap.get(field.name()).getUserFieldName());
-                    attribute.setEntity(entity);
                     attributes.add(attribute);
                 }
             } else {

@@ -7,9 +7,12 @@ import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.CountryCodeUtils
+import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
+import scala.collection.JavaConverters._
+import scala.collection.mutable.{ListBuffer, Set}
 class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifactsJobConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateLaunchArtifactsJobConfig]): Unit = {
@@ -25,7 +28,8 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     val contactId = InterfaceName.ContactId.name()
     val country = InterfaceName.Country.name()
     val contactCountry = InterfaceName.ContactCountry.name()
-
+    val accountAttributes: Set[String] = config.getAccountAttributes.asScala
+    val contactAttributes: Set[String] = config.getContactAttributes.asScala
     val accountsDf = loadHdfsUnit(spark, config.getAccountsData.asInstanceOf[HdfsDataUnit])
     val contactsDf = if (config.getContactsData != null) loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(BusinessEntity.Contact))
     val targetSegmentsContactsDF = if (config.getTargetSegmentsContactsData != null) loadHdfsUnit(spark, config.getTargetSegmentsContactsData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(BusinessEntity.Contact))
@@ -33,7 +37,9 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     val negativeDeltaDf = if (config.getNegativeDelta != null) loadHdfsUnit(spark, config.getNegativeDelta.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
     var distinctPositiveAccountsDf = positiveDeltaDf
     var distinctNegativeAccountsDf = negativeDeltaDf
-
+    enrichAttributes(accountsDf, accountAttributes)
+    enrichAttributes(contactsDf, contactAttributes)
+    enrichAttributes(targetSegmentsContactsDF, contactAttributes)
     if (mainEntity == BusinessEntity.Contact) {
       distinctPositiveAccountsDf = positiveDeltaDf.select(positiveDeltaDf(accountId)).distinct()
       distinctNegativeAccountsDf = negativeDeltaDf.select(negativeDeltaDf(accountId)).distinct()
@@ -59,6 +65,22 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
       lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData)
     }
   }
+
+  private def enrichAttributes(input: DataFrame, attributes: Set[String]): DataFrame = {
+    var result: DataFrame = input
+    val columnsExist: ListBuffer[String] = ListBuffer()
+    val columnsNotExist: ListBuffer[String] = ListBuffer()
+    attributes.foreach { attribute =>
+      if (input.columns.contains(attribute)) {
+        columnsExist += attribute
+      } else {
+        columnsNotExist += attribute
+      }
+    }
+    columnsNotExist.map(accountColumn => result = result.withColumn(accountColumn, lit(null).cast(StringType)))
+    result
+  }
+
 
   def getSchema(entity: BusinessEntity): StructType = {
     if (entity == BusinessEntity.Account) {

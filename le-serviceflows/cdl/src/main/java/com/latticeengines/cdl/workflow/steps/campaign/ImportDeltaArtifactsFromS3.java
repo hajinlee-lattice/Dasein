@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.campaign;
 
+import static com.latticeengines.domain.exposed.pls.Play.TapType;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
 import java.util.List;
@@ -19,12 +20,16 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaArtifactsFromS3Configuration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.serviceflows.workflow.export.BaseImportExportS3;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
@@ -41,50 +46,60 @@ public class ImportDeltaArtifactsFromS3 extends BaseImportExportS3<ImportDeltaAr
     @Inject
     private PlayProxy playProxy;
 
+    @Inject
+    private DataUnitProxy dataUnitProxy;
+
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-
-        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), configuration.getPlayId(),
-                configuration.getChannelId());
-
-        if (StringUtils.isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
-                && !channel.getResetDeltaCalculationData()) {
-            log.info("Importing PreviousAccountLaunchUniverse table: "
-                    + channel.getCurrentLaunchedAccountUniverseTable());
-            addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
-                    channel.getCurrentLaunchedAccountUniverseTable()), requests);
-            putStringValueInContext(PREVIOUS_ACCOUNTS_UNIVERSE, channel.getCurrentLaunchedAccountUniverseTable());
-        }
-
-        if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
-                && !channel.getResetDeltaCalculationData()) {
-            log.info("Importing PreviousContactLaunchUniverse table: "
-                    + channel.getCurrentLaunchedContactUniverseTable());
-            addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
-                    channel.getCurrentLaunchedContactUniverseTable()), requests);
-            putStringValueInContext(PREVIOUS_CONTACTS_UNIVERSE, channel.getCurrentLaunchedContactUniverseTable());
-        }
-
-        AttributeRepository attrRepo = buildAttrRepo(customerSpace);
-
-        if (channel.getChannelConfig().getAudienceType().asBusinessEntity() == BusinessEntity.Contact) {
-            if (!AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact)) {
-                log.error("Unable to Launch Contact based channel since no contact data exists in attribute Repo");
-                throw new LedpException(LedpCode.LEDP_32000,
-                        new String[] { "Failed to find Contact data in Attribute repo" });
+        Play play = playProxy.getPlay(customerSpace.getTenantId(), configuration.getPlayId(), false, false);
+        TapType tapType = play.getTapType();
+        boolean baseOnOtherTapType = TapType.ListSegment.equals(tapType);
+        if (baseOnOtherTapType) {
+            addDataUnitRequest(play.getAccountTemplateId(), requests, ACCOUNTS_DATA_UNIT);
+            addDataUnitRequest(play.getContactTemplateId(), requests, CONTACTS_DATA_UNIT);
+        } else {
+            PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), configuration.getPlayId(),
+                    configuration.getChannelId());
+            if (StringUtils.isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
+                    && !channel.getResetDeltaCalculationData()) {
+                log.info("Importing PreviousAccountLaunchUniverse table: "
+                        + channel.getCurrentLaunchedAccountUniverseTable());
+                addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
+                        channel.getCurrentLaunchedAccountUniverseTable()), requests);
+                putStringValueInContext(PREVIOUS_ACCOUNTS_UNIVERSE, channel.getCurrentLaunchedAccountUniverseTable());
             }
-        }
-
-        attrRepo.getTableNames().forEach(tblName -> {
-            Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
-            if (table == null) {
-                throw new RuntimeException("Table " + tblName + " for customer " //
-                        + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
-                        + " in attr repo does not exists.");
+            if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
+                    && !channel.getResetDeltaCalculationData()) {
+                log.info("Importing PreviousContactLaunchUniverse table: "
+                        + channel.getCurrentLaunchedContactUniverseTable());
+                addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
+                        channel.getCurrentLaunchedContactUniverseTable()), requests);
+                putStringValueInContext(PREVIOUS_CONTACTS_UNIVERSE, channel.getCurrentLaunchedContactUniverseTable());
             }
-            addTableToRequestForImport(table, requests);
-        });
+            AttributeRepository attrRepo = buildAttrRepo(customerSpace);
+            if (channel.getChannelConfig().getAudienceType().asBusinessEntity() == BusinessEntity.Contact) {
+                if (!AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact)) {
+                    log.error("Unable to Launch Contact based channel since no contact data exists in attribute Repo");
+                    throw new LedpException(LedpCode.LEDP_32000,
+                            new String[]{"Failed to find Contact data in Attribute repo"});
+                }
+            }
+            attrRepo.getTableNames().forEach(tblName -> {
+                Table table = metadataProxy.getTable(customerSpace.toString(), tblName);
+                if (table == null) {
+                    throw new RuntimeException("Table " + tblName + " for customer " //
+                            + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
+                            + " in attr repo does not exists.");
+                }
+                addTableToRequestForImport(table, requests);
+            });
+        }
+    }
+
+    private void addDataUnitRequest(String templateId, List<ImportExportRequest> requests, String contextKey) {
+        S3DataUnit dataUnit = (S3DataUnit) dataUnitProxy.getByDataTemplateIdAndRole(tenantId, templateId, DataUnit.Role.Master);
+        putObjectInContext(contextKey, dataUnit);
     }
 
     private AttributeRepository buildAttrRepo(CustomerSpace customerSpace) {

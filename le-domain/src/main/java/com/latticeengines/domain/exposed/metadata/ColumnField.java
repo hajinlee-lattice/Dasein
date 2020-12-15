@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -16,9 +15,6 @@ public class ColumnField {
     @JsonProperty("displayName")
     private String displayName;
 
-    @JsonProperty("entity")
-    private BusinessEntity entity;
-
     public String getAttrName() {
         return attrName;
     }
@@ -29,7 +25,6 @@ public class ColumnField {
 
     public ColumnMetadata toColumnMetadata() {
         ColumnMetadata columnMetadata = new ColumnMetadata();
-        columnMetadata.setEntity(entity);
         columnMetadata.setAttrName(attrName);
         columnMetadata.setDisplayName(displayName);
         return columnMetadata;
@@ -43,11 +38,4 @@ public class ColumnField {
         this.displayName = displayName;
     }
 
-    public BusinessEntity getEntity() {
-        return entity;
-    }
-
-    public void setEntity(BusinessEntity entity) {
-        this.entity = entity;
-    }
 }

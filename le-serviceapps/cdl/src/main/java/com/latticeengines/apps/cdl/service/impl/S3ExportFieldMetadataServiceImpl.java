@@ -45,7 +45,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
         Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = getDefaultFieldsAttrToServingStoreAttrRemap(channel);
         List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.AWS_S3,
                 accountAttributesMap, contactAttributesMap, defaultFieldsAttributesToServingStoreAttributesRemap, channelConfig.getAudienceType());
-        if (channelConfig.isIncludeExportAttributes()) {
+        if (channelConfig.isIncludeExportAttributes() && !Play.TapType.ListSegment.equals(play.getTapType())) {
             includeExportAttributes(customerSpace, channelConfig, accountAttributesMap, contactAttributesMap,
                     exportColumnMetadataList, channelAudienceType);
         }
@@ -69,8 +69,8 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
     }
 
     private void includeExportAttributes(String customerSpace, S3ChannelConfig channelConfig,
-            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
-            List<ColumnMetadata> exportColumnMetadataList, AudienceType channelAudienceType) {
+                                         Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
+                                         List<ColumnMetadata> exportColumnMetadataList, AudienceType channelAudienceType) {
         if (channelAudienceType == AudienceType.CONTACTS) {
             exportColumnMetadataList.addAll(contactAttributesMap.values());
             List<BusinessEntity> contactEntities = BusinessEntity.EXPORT_CONTACT_ENTITIES.stream().filter(entity -> !BusinessEntity.Contact.equals(entity)).collect(Collectors.toList());

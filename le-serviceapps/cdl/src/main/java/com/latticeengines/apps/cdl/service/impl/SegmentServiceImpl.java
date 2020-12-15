@@ -562,7 +562,7 @@ public class SegmentServiceImpl implements SegmentService {
             ListSegment listSegment = segment.getListSegment();
             BusinessEntity entity = getBusinessEntity(entities);
             String templateId = listSegment.getTemplateId(entity.name());
-            return dataTemplateService.getTemplateMetadata(templateId);
+            return dataTemplateService.getTemplateMetadata(templateId, entity);
         } else {
             log.info("can't find list segment info for segment {}.", segmentName);
             throw new LedpException(LedpCode.LEDP_00002, new RuntimeException("List segment does not exists"));

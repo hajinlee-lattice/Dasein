@@ -129,10 +129,8 @@ public class DeltaCampaignLaunchInitStep
         String delContacts = playLaunch.getRemoveContactsTable();
         String completeContacts = playLaunch.getCompleteContactsTable();
         List<String> tableNames = Arrays.asList(addAccounts, addContacts, delAccounts, delContacts, completeContacts);
-        boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(play.getTapType());
-        List<DataUnit> input = processTableNames(tableNames, baseOnOtherTapType);
+        List<DataUnit> input = processTableNames(tableNames, false);
         sparkConfig.setInput(input);
-
         String totalDfs = getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.DATA_FRAME_NUM);
         log.info("Going to generate " + totalDfs + " dataframes.");
         sparkConfig.setTargetNums(Integer.parseInt(totalDfs));

@@ -13,14 +13,13 @@ class CalculateDeltaJob extends AbstractSparkJob[CalculateDeltaJobConfig] {
   override def runJob(spark: SparkSession, lattice: LatticeContext[CalculateDeltaJobConfig]): Unit = {
     val config: CalculateDeltaJobConfig = lattice.config
     val newData = loadHdfsUnit(spark, config.getNewData.asInstanceOf[HdfsDataUnit])
-    val oldData = if (config.getOldData != null) loadHdfsUnit(spark, config.getOldData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], newData.schema)
+    val oldData = if (config.getOldData != null) loadDataUnit(spark, config.getOldData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], newData.schema)
     val newDFAlias = "newDfAlias"
     val oldDFAlias = "oldDFAlias"
     val compositeKey = "account_contact"
     val accountId = InterfaceName.AccountId.name()
-    val contactId = InterfaceName.ContactId.name()
     val isAccountEntity = config.getIsAccountEntity
-    var accountAndContactNums = new Array[Long](2)
+    val accountAndContactNums = new Array[Long](2)
 
     logSpark("OldData schema is as follows:")
     oldData.printSchema
