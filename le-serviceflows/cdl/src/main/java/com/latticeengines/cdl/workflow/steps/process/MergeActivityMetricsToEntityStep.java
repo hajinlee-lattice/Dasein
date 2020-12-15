@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,21 +107,17 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         active = inactive.complement();
         streamMetadataCache = JsonUtils.deserializeByTypeRef(getStringValueFromContext(ACTIVITY_STREAM_METADATA_CACHE), streamMetadataCacheTypeRef);
         Set<String> skippedStreams = getSkippedStreamIds();
-        List<ActivityMetricsGroup> allGroups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
+        // TODO - link unchanged activity profiles
+        List<ActivityMetricsGroup> groups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
                 .filter(g -> !skippedStreams.contains(g.getStream().getStreamId())).collect(Collectors.toList());
-
-        Set<String> streamsToRelink = getRelinkStreamIds();
-        relinkMergedGroup(allGroups.stream().filter(g -> streamsToRelink.contains(g.getStream().getStreamId())).collect(Collectors.toList()));
-
-        List<ActivityMetricsGroup> groupsNeedProcess = allGroups.stream().filter(g -> !streamsToRelink.contains(g.getStream().getStreamId())).collect(Collectors.toList());
 
         Map<String, List<ActivityMetricsGroup>> mergedTablesMap = new HashMap<>(); // merged table label -> groups to merge
         Set<String> activityMetricsServingEntities = new HashSet<>();
-        if (CollectionUtils.isEmpty(groupsNeedProcess)) {
+        if (CollectionUtils.isEmpty(groups)) {
             log.info("No groups to merge for tenant {}. Skip merging metrics groups", customerSpace);
             return null;
         }
-        groupsNeedProcess.forEach(group -> {
+        groups.forEach(group -> {
             activityMetricsServingEntities.add(CategoryUtils.getEntity(group.getCategory()).get(0).name());
             String mergedTableLabel = getMergedLabel(group); // entity_servingStore e.g. Account_OpportunityProfile
             mergedTablesMap.putIfAbsent(mergedTableLabel, new ArrayList<>());
@@ -162,33 +157,10 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             MergeActivityMetricsJobConfig config = new MergeActivityMetricsJobConfig();
             config.inputMetadata = inputMetadata;
             config.mergedTableLabels = new ArrayList<>(mergedTablesMap.keySet());
-            appendActiveActivityMetrics(inputs, inputMetadata, groupsNeedProcess);
+            appendActiveActivityMetrics(inputs, inputMetadata, groups);
             config.setInput(inputs);
             return config;
         }
-    }
-
-    private void relinkMergedGroup(List<ActivityMetricsGroup> groups) {
-        if (CollectionUtils.isEmpty(groups)) {
-            log.info("No metrics need to relink.");
-            return;
-        }
-        // role CustomIntentProfile; signature entity (account/contact)
-        Set<TableRoleInCollection> rolesToRelink = groups.stream().map(group -> getServingStore(group.getCategory())).collect(Collectors.toSet());
-        List<String> allowedSignatures = Arrays.asList(BusinessEntity.Account.name(), BusinessEntity.Contact.name());
-        rolesToRelink.forEach(role -> {
-            Map<String, String> signatureTableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), role, active, allowedSignatures);
-            if (MapUtils.isNotEmpty(signatureTableNames)) {
-                dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, role, inactive);
-                relinkedMetrics.putAll(signatureTableNames.entrySet().stream().map(entry -> {
-                    String entity = entry.getKey();
-                    String tableName = entry.getValue();
-                    String mergedLabel = String.format("%s_%s", entity, role);
-                    return Pair.of(mergedLabel, tableName);
-                }).collect(Collectors.toMap(Pair::getLeft, Pair::getRight)));
-            }
-        });
-        log.info("Linked existing metrics to inactive version {}: {}", inactive, relinkedMetrics);
     }
 
     private void appendActiveActivityMetrics(List<DataUnit> inputs, SparkIOMetadataWrapper inputMetadata, List<ActivityMetricsGroup> groups) {
