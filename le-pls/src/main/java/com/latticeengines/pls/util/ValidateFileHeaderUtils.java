@@ -227,11 +227,21 @@ public class ValidateFileHeaderUtils {
     }
 
     // total field size should not be greater than quota limit
-    public static void exceedQuotaFieldSize(FieldValidationResult validationResult, int fieldSize, int limit) {
+    public static void exceedQuotaFieldSize(FieldValidationResult validationResult, int fieldSize, int limit,
+                                            String type) {
         if (fieldSize > limit) {
-            validationResult.setExceedQuotaLimit(true);
-            validationResult.setErrorMessage(LedpException.buildMessage(LedpCode.LEDP_18226,
-                    new String[]{String.valueOf(limit), String.valueOf(fieldSize)}));
+            if (!validationResult.isExceedQuotaLimit()) {
+                validationResult.setExceedQuotaLimit(true);
+            }
+            String errorMessage = validationResult.getErrorMessage();
+            if (StringUtils.isNotBlank(errorMessage)) {
+                String message = LedpException.buildMessage(LedpCode.LEDP_18226,
+                        new String[]{String.valueOf(limit), type, String.valueOf(fieldSize)});
+                validationResult.setErrorMessage(String.format("%s\n%s", errorMessage, message));
+            } else {
+                validationResult.setErrorMessage(LedpException.buildMessage(LedpCode.LEDP_18226,
+                        new String[]{String.valueOf(limit), type, String.valueOf(fieldSize)}));
+            }
         }
     }
 
