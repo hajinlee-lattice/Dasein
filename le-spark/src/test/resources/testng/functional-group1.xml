@@ -13,7 +13,6 @@
             <class name="com.latticeengines.spark.exposed.job.cdl.GenerateLaunchArtifactsJobTestNG"/>
             <class name="com.latticeengines.spark.exposed.job.cdl.AggDailyActivityJobTestNG"/>
             <class name="com.latticeengines.spark.exposed.job.cdl.CalculateDeltaJobTestNG"/>
-            <class name="com.latticeengines.spark.exposed.job.cdl.TransformTxnStreamJobTestNG"/>
             <class name="com.latticeengines.spark.exposed.job.cdl.PublishActivityAlertsJobTestNG"/>
         </classes>
     </test>

@@ -36,11 +36,6 @@
                     <exclude name=".*"/>
                 </methods>
             </class>
-            <class name="com.latticeengines.spark.exposed.job.cdl.TransformTxnStreamJobTestNG">
-                <methods>
-                    <exclude name=".*"/>
-                </methods>
-            </class>
             <class name="com.latticeengines.spark.exposed.job.cdl.PublishActivityAlertsJobTestNG">
                 <methods>
                     <exclude name=".*"/>
