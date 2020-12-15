@@ -123,7 +123,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
                 .getAccountActivities(TEST_ACCOUNT_ID, null, null, //
                         Arrays.stream(AtlasStream.StreamType.values()).collect(Collectors.toSet()), null)
                 .getData();
-        Assert.assertEquals(dataWithbackStage.size(), 306);
+        Assert.assertEquals(dataWithbackStage.size(), 309);
         Map<String, Object> backStageEvent = dataWithbackStage.get(dataWithbackStage.size() - 1);
         Assert.assertEquals(backStageEvent.get("StreamType"), "JourneyStage");
         Assert.assertEquals(backStageEvent.get("Detail1"), "Engaged");
@@ -155,7 +155,7 @@ public class ActivityTimelineServiceFunctionalTestNG extends AppFunctionalTestNG
                 .getAccountActivities(TEST_ACCOUNT_ID, null, null, //
                         Arrays.stream(AtlasStream.StreamType.values()).collect(Collectors.toSet()), null)
                 .getData();
-        Assert.assertEquals(dataWithbackStage.size(), 158);
+        Assert.assertEquals(dataWithbackStage.size(), 161);
         Map<String, Object> backStageEvent = dataWithbackStage.get(dataWithbackStage.size() - 1);
         Assert.assertEquals(backStageEvent.get("StreamType"), "JourneyStage");
         Assert.assertEquals(backStageEvent.get("Detail1"), "Dark");
