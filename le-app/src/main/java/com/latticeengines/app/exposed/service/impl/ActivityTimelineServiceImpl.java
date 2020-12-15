@@ -194,7 +194,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
             if (modelIntentMap.containsKey(model)) {
                 Long latest = (Long) modelIntentMap.get(model).get(InterfaceName.EventTimestamp.name());
                 if (latest > (Long) map.get(InterfaceName.EventTimestamp.name())) {
-                    break;
+                    continue;
                 }
             }
             modelIntentMap.put(model, map);
