@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude
 public class VboUserSeatUsageEvent {
+
+    public enum FeatureURI { STCT, STCTDEC }
     @JsonProperty
     private final Object GUID = null;
     @JsonProperty
@@ -60,7 +62,7 @@ public class VboUserSeatUsageEvent {
     private String timeStamp;
 
     @JsonProperty
-    private String featureURI;
+    private FeatureURI featureURI;
 
     @JsonProperty
     private String subscriberCountry;
@@ -86,7 +88,7 @@ public class VboUserSeatUsageEvent {
     public void setTimeStamp(String timeStamp) {
         this.timeStamp = timeStamp;
     }
-    public void setFeatureURI(String featureURI) {
+    public void setFeatureURI(FeatureURI featureURI) {
         this.featureURI = featureURI;
     }
     public void setSubscriberCountry(String subscriberCountry) {
@@ -100,5 +102,9 @@ public class VboUserSeatUsageEvent {
     }
     public void setContractTermEndDate(String contractTermEndDate) {
         this.contractTermEndDate = contractTermEndDate;
+    }
+
+    public String getEmailAddress() {
+        return emailAddress;
     }
 }
