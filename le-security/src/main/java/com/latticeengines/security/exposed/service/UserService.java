@@ -6,6 +6,7 @@ import java.util.Set;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.vbo.VboUserSeatUsageEvent;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
@@ -74,5 +75,5 @@ public interface UserService {
 
     List<User> getUsers(String tenantId, UserFilter filter, Set<String> emails, boolean withTeam);
 
-    IDaaSUser createIDaaSUser(User user, String subscriberNumber, User requester, String traceId);
+    IDaaSUser createIDaaSUser(User user, String subscriberNumber, VboUserSeatUsageEvent usageEvent);
 }

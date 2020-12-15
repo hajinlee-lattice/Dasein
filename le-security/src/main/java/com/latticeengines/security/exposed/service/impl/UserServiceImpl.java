@@ -754,25 +754,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public IDaaSUser createIDaaSUser(User toCreate, String subscriberNumber, User requester, String traceId) {
-        String email = toCreate.getEmail();
+    public IDaaSUser createIDaaSUser(User user, String subscriberNumber, VboUserSeatUsageEvent usageEvent) {
+        String email = user.getEmail();
         IDaaSUser idaasUser = iDaaSService.getIDaaSUser(email);
-
-        VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
-        if (requester != null) {
-            usageEvent.setEmailAddress(requester.getEmail());
-        }
-        usageEvent.setSubscriberID(subscriberNumber);
-        usageEvent.setPOAEID(traceId);
-        usageEvent.setFeatureURI("STCT");
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.activeSpan();
 
         if (idaasUser == null) {
+            if (span != null)
+                span.log("Creating new IDaaS User for " + user.getEmail());
             IDaaSUser newUser = new IDaaSUser();
             newUser.setSubscriberNumber(subscriberNumber);
-            newUser.setFirstName(toCreate.getFirstName());
+            newUser.setFirstName(user.getFirstName());
             newUser.setEmailAddress(email);
-            newUser.setLastName(toCreate.getLastName());
-            newUser.setUserName(StringUtils.isNotEmpty(email) ? email.toLowerCase() : toCreate.getUsername());
+            newUser.setLastName(user.getLastName());
+            newUser.setUserName(StringUtils.isNotEmpty(email) ? email.toLowerCase() : user.getUsername());
             Preconditions.checkState(StringUtils.isNotEmpty(newUser.getLastName()),
                     "Last name is required");
             Preconditions.checkState(StringUtils.isNotEmpty(newUser.getEmailAddress()),
@@ -783,6 +779,8 @@ public class UserServiceImpl implements UserService {
             idaasUser = iDaaSService.createIDaaSUser(newUser);
         } else if (!idaasUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
             // add product access and default role to user when user already exists in IDaaS
+            if (span != null)
+                span.log("Adding product access to existing user " + user.getEmail());
             LOGGER.info("user exist in IDaaS, add product access to user {}", email);
             ProductRequest request = new ProductRequest();
             request.setEmailAddress(email);

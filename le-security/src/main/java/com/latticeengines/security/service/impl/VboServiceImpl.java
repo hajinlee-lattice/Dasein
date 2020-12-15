@@ -61,6 +61,8 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(URI.create(usageEventUrl), usageEvent, String.class);
+            log.info(response.getStatusCode().toString());
+            log.info(response.getBody());
         } catch (Exception e) {
             log.error("Exception in usage event: " + e.toString());
             throw e;

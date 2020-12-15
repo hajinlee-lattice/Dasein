@@ -1,5 +1,8 @@
 package com.latticeengines.security.controller;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +32,7 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.vbo.VboUserSeatUsageEvent;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -92,7 +96,7 @@ public class UserResource {
     private BatonService batonService;
 
     @Inject
-    private VboService vboService;
+    VboService vboService;
 
     @GetMapping("")
     @ResponseBody
@@ -165,7 +169,21 @@ public class UserResource {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
 
+            VboUserSeatUsageEvent usageEvent = null;
+
+            if (!EmailUtils.isInternalUser(user.getEmail())) {
+                usageEvent = new VboUserSeatUsageEvent();
+                usageEvent.setEmailAddress(loginUser.getEmail());
+                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                usageEvent.setPOAEID(traceId);
+                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                usageEvent.setLUID(loginUser.getPid());
+            }
+
             RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
+            if (usageEvent != null)
+                usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+
             String tempPass = result.getPassword();
             if (!Boolean.TRUE.equals(setTempPass)) {
                 result.setPassword(null);
@@ -189,7 +207,7 @@ public class UserResource {
                     emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
                 }
             } else {
-                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber(), loginUser, traceId);
+                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber(), usageEvent);
                 if (idaasUser == null) {
                     LOGGER.error(
                             String.format("Failed to create IDaaS user for %s at level %s.", loginUsername, loginLevel));
@@ -205,6 +223,9 @@ public class UserResource {
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
                 }
+
+                if (usageEvent != null)
+                    vboService.sendUserUsageEvent(usageEvent);
             }
         } finally {
             TracingUtils.finish(userSpan);
@@ -273,6 +294,16 @@ public class UserResource {
             updateResponse.setTraceId(traceId);
             document.setResult(updateResponse);
 
+            VboUserSeatUsageEvent usageEvent = null;
+            if (newUser) {
+                usageEvent = new VboUserSeatUsageEvent();
+                usageEvent.setEmailAddress(loginUser.getEmail());
+                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                usageEvent.setPOAEID(traceId);
+                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                usageEvent.setLUID(loginUser.getPid());
+            }
+
             if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
                 // using access level if it is provided
                 String loginUsername = loginUser.getUsername();
@@ -306,6 +337,7 @@ public class UserResource {
                     } else {
                         emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
                     }
+                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                 }
             }
             // update other information
@@ -314,7 +346,7 @@ public class UserResource {
                 return document;
             }
             if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber(), loginUser, traceId);
+                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber(), usageEvent);
                 if (idaasUser == null) {
                     LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
                             loginUser.getUsername(), loginUser.getAccessLevel(), tenantId));

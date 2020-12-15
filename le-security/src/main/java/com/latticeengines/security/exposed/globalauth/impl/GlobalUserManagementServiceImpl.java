@@ -560,6 +560,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         if (userData.getAuthentications() != null && userData.getAuthentications().size() > 0) {
             authData = userData.getAuthentications().get(0);
         }
+        user.setPid(userData.getPid());
         if (authData != null) {
             user.setUsername(authData.getUsername());
         }

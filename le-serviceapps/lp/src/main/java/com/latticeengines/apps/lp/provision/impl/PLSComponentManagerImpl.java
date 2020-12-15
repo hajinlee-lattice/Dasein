@@ -168,7 +168,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                 }
             }
         }
-        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantDisplayName, null);
+        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantDisplayName);
         String tenantStatus = installDocument.getProperty(ComponentConstants.Install.TENANT_STATUS);
         String tenantType = installDocument.getProperty(ComponentConstants.Install.TENANT_TYPE);
         String contract = installDocument.getProperty(ComponentConstants.Install.CONTRACT);
@@ -441,7 +441,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         Tracer tracer = GlobalTracer.get();
         SpanContext parentCtx = TracingUtils.getSpanContext(parentCtxMap);
 
-        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName, parentCtx.toTraceId());
+        List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
 
         // Update IDaaS users node with email sent times; to be stored in Camille
         if (hasNode) {
@@ -549,7 +549,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
     }
 
     private List<IDaaSUser> OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
-                                   List<String> externalAdminEmails, String tenantName, String traceId) {
+                                   List<String> externalAdminEmails, String tenantName) {
         log.info("Operating IDaaS users");
         List<IDaaSUser> createdUsers = new ArrayList<>();
         for (IDaaSUser user : iDaaSUsers) {
@@ -561,7 +561,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             createUserData.setLastName(user.getLastName());
             createUserData.setUsername(user.getUserName());
             createUserData.setPhoneNumber(user.getPhoneNumber());
-            IDaaSUser createdUser = userService.createIDaaSUser(createUserData, user.getSubscriberNumber(), null, traceId);
+            IDaaSUser createdUser = userService.createIDaaSUser(createUserData, user.getSubscriberNumber());
 
             if (EmailUtils.isInternalUser(email)) {
                 superAdminEmails.add(email.toLowerCase());
