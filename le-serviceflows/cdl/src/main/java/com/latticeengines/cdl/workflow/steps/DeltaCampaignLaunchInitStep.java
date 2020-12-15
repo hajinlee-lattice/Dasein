@@ -129,7 +129,7 @@ public class DeltaCampaignLaunchInitStep
         String delContacts = playLaunch.getRemoveContactsTable();
         String completeContacts = playLaunch.getCompleteContactsTable();
         List<String> tableNames = Arrays.asList(addAccounts, addContacts, delAccounts, delContacts, completeContacts);
-        List<DataUnit> input = processTableNames(tableNames, false);
+        List<DataUnit> input = processTableNames(tableNames);
         sparkConfig.setInput(input);
         String totalDfs = getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.DATA_FRAME_NUM);
         log.info("Going to generate " + totalDfs + " dataframes.");
@@ -175,8 +175,8 @@ public class DeltaCampaignLaunchInitStep
     }
 
     @VisibleForTesting
-    List<DataUnit> processTableNames(List<String> tableNames, boolean baseOnOtherTapType) {
-        return tableNames.stream().map(tableName -> getS3DataUnit(baseOnOtherTapType, customerSpace, tableName)).collect(Collectors.toList());
+    List<DataUnit> processTableNames(List<String> tableNames) {
+        return tableNames.stream().map(tableName -> getS3DataUnit(false, customerSpace, tableName)).collect(Collectors.toList());
     }
 
     private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
