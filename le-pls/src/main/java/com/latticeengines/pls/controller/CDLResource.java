@@ -439,7 +439,7 @@ public class CDLResource {
                     break;
                 case Marketo:
                 case Eloqua:
-                case Pardon:
+                case Pardot:
                     cdlService.createDefaultMarketingTemplate(customerSpace.toString(), systemName, systemType.toString());
                     break;
                 default:
