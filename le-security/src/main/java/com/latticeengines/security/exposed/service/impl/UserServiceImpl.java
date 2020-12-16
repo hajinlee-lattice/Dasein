@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductSubscription;
-import com.latticeengines.domain.exposed.dcp.vbo.VboUserSeatUsageEvent;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -754,7 +753,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public IDaaSUser createIDaaSUser(User user, String subscriberNumber, VboUserSeatUsageEvent usageEvent) {
+    public IDaaSUser createIDaaSUser(User user, String subscriberNumber) {
         String email = user.getEmail();
         IDaaSUser idaasUser = iDaaSService.getIDaaSUser(email);
         Tracer tracer = GlobalTracer.get();

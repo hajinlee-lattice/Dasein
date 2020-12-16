@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.dcp.vbo;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -69,9 +71,9 @@ public class VboUserSeatUsageEvent {
     @JsonProperty
     private String subjectCountry;
     @JsonProperty
-    private String contractTermStartDate;
+    private Date contractTermStartDate;
     @JsonProperty
-    private String contractTermEndDate;
+    private Date contractTermEndDate;
 
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
@@ -97,14 +99,18 @@ public class VboUserSeatUsageEvent {
     public void setSubjectCountry(String subjectCountry) {
         this.subjectCountry = subjectCountry;
     }
-    public void setContractTermStartDate(String contractTermStartDate) {
+    public void setContractTermStartDate(Date contractTermStartDate) {
         this.contractTermStartDate = contractTermStartDate;
     }
-    public void setContractTermEndDate(String contractTermEndDate) {
+    public void setContractTermEndDate(Date contractTermEndDate) {
         this.contractTermEndDate = contractTermEndDate;
     }
 
     public String getEmailAddress() {
         return emailAddress;
+    }
+
+    public String getSubscriberID() {
+        return subscriberID;
     }
 }

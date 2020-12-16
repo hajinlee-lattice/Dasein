@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
 import com.latticeengines.domain.exposed.dcp.vbo.VboUserSeatUsageEvent;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -58,6 +59,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
+import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.service.VboService;
 
 import io.opentracing.Scope;
@@ -96,7 +98,10 @@ public class UserResource {
     private BatonService batonService;
 
     @Inject
-    VboService vboService;
+    private IDaaSService iDaaSService;
+
+    @Inject
+    private VboService vboService;
 
     @GetMapping("")
     @ResponseBody
@@ -207,7 +212,7 @@ public class UserResource {
                     emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
                 }
             } else {
-                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber(), usageEvent);
+                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
                 if (idaasUser == null) {
                     LOGGER.error(
                             String.format("Failed to create IDaaS user for %s at level %s.", loginUsername, loginLevel));
@@ -224,8 +229,10 @@ public class UserResource {
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
                 }
 
-                if (usageEvent != null)
+                if (usageEvent != null) {
+                    populateWithSubscriberDetails(usageEvent);
                     vboService.sendUserUsageEvent(usageEvent);
+                }
             }
         } finally {
             TracingUtils.finish(userSpan);
@@ -295,7 +302,7 @@ public class UserResource {
             document.setResult(updateResponse);
 
             VboUserSeatUsageEvent usageEvent = null;
-            if (newUser) {
+            if (newUser && !EmailUtils.isInternalUser(user.getEmail())) {
                 usageEvent = new VboUserSeatUsageEvent();
                 usageEvent.setEmailAddress(loginUser.getEmail());
                 usageEvent.setSubscriberID(tenant.getSubscriberNumber());
@@ -337,7 +344,8 @@ public class UserResource {
                     } else {
                         emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
                     }
-                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+                    if (usageEvent != null)
+                        usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                 }
             }
             // update other information
@@ -346,7 +354,7 @@ public class UserResource {
                 return document;
             }
             if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber(), usageEvent);
+                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
                 if (idaasUser == null) {
                     LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
                             loginUser.getUsername(), loginUser.getAccessLevel(), tenantId));
@@ -360,6 +368,11 @@ public class UserResource {
                         welcomeUrl = idaasUser.getInvitationLink();
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
+                }
+
+                if (usageEvent != null) {
+                    populateWithSubscriberDetails(usageEvent);
+                    vboService.sendUserUsageEvent(usageEvent);
                 }
             }
         } finally {
@@ -419,5 +432,17 @@ public class UserResource {
                 .withStartTimestamp(startTimeStamp)
                 .start();
         return tracer.activateSpan(span);
+    }
+
+    private void populateWithSubscriberDetails(VboUserSeatUsageEvent usageEvent) {
+        SubscriberDetails details = iDaaSService.getSubscriberDetails(usageEvent.getSubscriberID());
+        if (details != null) {
+            if (details.getAddress() != null) {
+                usageEvent.setSubscriberCountry(details.getAddress().getCountryCode());
+                usageEvent.setSubjectCountry(details.getAddress().getCountryCode());
+            }
+            usageEvent.setContractTermStartDate(details.getEffectiveDate());
+            usageEvent.setContractTermEndDate(details.getExpirationDate());
+        }
     }
 }
