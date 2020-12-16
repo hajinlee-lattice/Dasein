@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NameStringStandardizationUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
@@ -35,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportFilesToS3Configuration;
+import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.proxy.exposed.cdl.DataIntegrationMonitoringProxy;
 import com.latticeengines.serviceflows.workflow.export.BaseImportExportS3;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
@@ -143,7 +143,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
                     request.srcPath = path;
                     request.tgtPath = pathBuilder.convertS3CampaignExportDir(path, s3Bucket,
                             dropBoxSummary.getDropBox(), getConfiguration().getPlayName(),
-                            NameStringStandardizationUtils.getStandardString(getConfiguration().getPlayDisplayName()));
+                            ExportUtils.getReplacedName(getConfiguration().getPlayDisplayName()));
                     requests.add(request);
                     targetPaths.add(request.tgtPath);
                     hdfsExportFilePaths.add(request.srcPath);

@@ -117,6 +117,7 @@
           }
         }
       ]
-    }
+    },
+    { "Node": "ContactAccountRatioThreshold", "Data": {"Type": "number", "Required": false}}
   ]
 }

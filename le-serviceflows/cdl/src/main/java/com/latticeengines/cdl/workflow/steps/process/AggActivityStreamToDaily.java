@@ -48,8 +48,8 @@ import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeU
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -164,8 +164,8 @@ public class AggActivityStreamToDaily
 
             // set input
             List<DataUnit> units = new ArrayList<>();
-            ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-            Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+            SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+            Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
             rawStreamTableNames.forEach((streamId, table) -> {
                 if (streamsToRelink.contains(streamId)) {
                     return;
@@ -173,7 +173,7 @@ public class AggActivityStreamToDaily
                 Preconditions.checkArgument(CollectionUtils.size(table.getExtracts()) == 1,
                         String.format("Table %s should only have one extract, got %d", table.getName(),
                                 CollectionUtils.size(table.getExtracts())));
-                ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+                SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
                 details.setStartIdx(units.size());
                 if (config.incrementalStreams.contains(streamId)) {
                     Table importDelta = rawStreamDeltaTables.get(streamId);
@@ -261,7 +261,7 @@ public class AggActivityStreamToDaily
         if (shortCutMode) {
             return;
         }
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
 
         Map<String, HdfsDataUnit> dailyAggUnits = new HashMap<>();
         Map<String, HdfsDataUnit> dailyDeltaUnits = new HashMap<>();

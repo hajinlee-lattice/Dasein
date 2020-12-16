@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,9 +79,9 @@ public class DataBlockResource {
                 log.info("Encoded domain name " + domainName + " as " + dataDomainName);
                 return dataDomainName;
             } catch (Exception e) {
-                log.error("Failed to parse domain name " + domainName, e);
-                String title = "Invalid Domain Name.";
-                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_00002);
+                log.error("Failed to parse domain name " + domainName + " for user " + MultiTenantContext.getEmailAddress() + " in tenant " + MultiTenantContext.getShortTenantId(), e);
+                String title = "Failed to parse data block domain name";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18250);
                 UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
                 throw UIActionException.fromAction(action);
             }
@@ -98,9 +99,9 @@ public class DataBlockResource {
                 log.info("Encoded record type " + recordType + " as " + recordTypeName);
                 return recordTypeName;
             } catch (Exception e) {
-                log.error("Failed to parse record type " + recordType, e);
-                String title = "Invalid Record Type.";
-                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_00002);
+                log.error("Failed to parse record type " + recordType + " for user " + MultiTenantContext.getEmailAddress() + " in tenant " + MultiTenantContext.getShortTenantId(), e);
+                String title = "Failed to parse data block record type.";
+                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18251);
                 UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
                 throw UIActionException.fromAction(action);
             }
@@ -124,7 +125,7 @@ public class DataBlockResource {
 
             if ((!"ALL".equals(domainName) || !"ALL".equals(recordType))
                     && dataBlockEntitlementContainer.getDomains().isEmpty()) {
-                String title = "Subscriber not entitled to the given domain and record type combination.";
+                String title = "Subscriber is not entitled to the given domain and record type combination.";
                 UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_00002);
                 UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
                 throw UIActionException.fromAction(action);
@@ -135,7 +136,15 @@ public class DataBlockResource {
                 return dataBlockEntitlementContainer;
             }
         } catch (Exception ex) {
-            throw UIActionUtils.handleException(ex);
+            String stackTrace = ExceptionUtils.getStackTrace(ex);
+            log.error(String.format("Failed to get entitlements for tenant %s with parameters domainName=%s," +
+                    " recordType=%s, includeElements=%s : %s",
+                    MultiTenantContext.getShortTenantId(), encodeDataDomain(domainName), encodeRecordType(recordType),
+                    includeElements.toString(), stackTrace));
+            String title = "There was an error retrieving Data Block entitlements.";
+            UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_00002);
+            UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+            throw UIActionException.fromAction(action);
         }
     }
 }

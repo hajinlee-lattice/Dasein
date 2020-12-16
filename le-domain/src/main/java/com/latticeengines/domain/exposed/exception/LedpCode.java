@@ -362,7 +362,7 @@ public enum LedpCode {
     LEDP_18223("Cannot update System Priority: {0}"), //
     LEDP_18224("AWS credentials have not been generated yet. Please ask your administrator to generate one first."), //
     LEDP_18225("Play launch channel given belongs to play: {0} and does not belong play: {1}."), //
-    LEDP_18226("The input contains more than {0} fields. Please reduce the no. of {1} fields and try again"), //
+    LEDP_18226("The input contains more than {0} {1} fields. Please reduce the no. of {2} fields and try again"), //
     LEDP_18227("Can't get entity data from cache when cache is in build."), //
     LEDP_18228("Play Launch Channel {0} not found."), //
     LEDP_18229("{0} Field Definition Request has invalid parameter: {1}"), //
@@ -389,6 +389,8 @@ public enum LedpCode {
     LEDP_18247("{0}, Please confirm need to reset template."), //
     LEDP_18248("Cannot validate and update system priority."), //
     LEDP_18249("standard field {0} is unmapped but is mapped previously"),//
+    LEDP_18250("Invalid data block domain provided."),//
+    LEDP_18251("Invalid data block record type provided."),//
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

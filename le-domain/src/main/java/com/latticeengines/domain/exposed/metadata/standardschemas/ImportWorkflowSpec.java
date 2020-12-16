@@ -49,6 +49,10 @@ public class ImportWorkflowSpec extends FieldDefinitionsRecord {
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)

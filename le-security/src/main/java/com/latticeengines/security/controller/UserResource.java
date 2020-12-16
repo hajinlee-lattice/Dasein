@@ -184,11 +184,10 @@ public class UserResource {
                 usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
                 usageEvent.setLUID(loginUser.getPid());
             }
-
+          
             RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
             if (usageEvent != null)
                 usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
-
             String tempPass = result.getPassword();
             if (!Boolean.TRUE.equals(setTempPass)) {
                 result.setPassword(null);
@@ -344,6 +343,7 @@ public class UserResource {
                     } else {
                         emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
                     }
+                  
                     if (usageEvent != null)
                         usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                 }

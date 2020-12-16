@@ -8,6 +8,7 @@
     { "Node": "SubscriptionEmails", "Data": [] },
     { "Node": "EnrichAttributesMaxNumber", "Data": 32},
     { "Node": "WorkflowJobQuotaLimit", "Data": 1000},
+    { "Node": "OtherIdQuotaLimit", "Data":  20},
     { "Node": "DataCloudLicense",
       "Children" : [
         { "Node": "MaxEnrichAttributes", "Data": 1000},

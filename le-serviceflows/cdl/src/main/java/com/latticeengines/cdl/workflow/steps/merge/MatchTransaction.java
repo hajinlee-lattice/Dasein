@@ -121,7 +121,7 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         // NOTE get all imports just to be safe, currently txn should only have one
         // template
         Set<String> columnNames = getInputTableColumnNames();
-        MatchInput matchInput = getBaseMatchInput();
+        MatchInput matchInput = getBaseMatchInput(true);
         boolean hasConvertedRematchTables = CollectionUtils.isNotEmpty(convertedRematchTableNames);
         if (hasConvertedRematchTables) {
             convertedRematchTableNames.forEach(tableName -> {

@@ -17,6 +17,8 @@ public interface CommonTenantConfigService {
 
     FeatureFlagValueMap getFeatureFlags(String tenantId);
 
+    int getOtherIdQuotaLimit(String tenantId);
+
     TenantConfiguration getTenantConfiguration();
 
     int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense);

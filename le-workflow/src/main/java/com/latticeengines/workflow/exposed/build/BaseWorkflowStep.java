@@ -47,8 +47,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -326,6 +324,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
     protected static final String MERGED_METRICS_GROUP_TABLE_NAME = "MERGED_METRICS_GROUP_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
+    protected static final String SPENDING_ANALYSIS_PERIOD_TABLE_NAME = "SPENDING_ANALYSIS_PERIOD_TABLE_NAME";
     protected static final String TIMELINE_MASTER_TABLE_NAME = "TIMELINE_MASTER_TABLE_NAME";
     protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
     protected static final String JOURNEY_STAGE_TABLE_NAME = "JOURNEY_STAGE_TABLE_NAME";
@@ -585,25 +584,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(jobId);
         workflowJob.setOutputContext(getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class));
         workflowJobEntityMgr.updateWorkflowJob(workflowJob);
-    }
-
-    protected DataUnit getDataUnit(boolean queryDataUnit, CustomerSpace customerSpace, String unitName) {
-        if (unitName == null) {
-            return null;
-        } else if (queryDataUnit) {
-            S3DataUnit s3DataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(customerSpace.getTenantId(), unitName, DataUnit.StorageType.S3);
-            if (s3DataUnit == null) {
-                throw new RuntimeException("S3 data unit " + unitName + " for customer " + customerSpace.getTenantId() + " does not exists.");
-            }
-            return s3DataUnit.toHdfsDataUnit();
-        } else {
-            Table table = metadataProxy.getTable(customerSpace.toString(), unitName);
-            if (table == null) {
-                throw new RuntimeException("Table " + unitName + " for customer " + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
-                        + " does not exists.");
-            }
-            return table.toHdfsDataUnit(unitName);
-        }
     }
 
     protected void saveReport(Map<String, String> map) {

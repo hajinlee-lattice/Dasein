@@ -48,6 +48,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -120,6 +121,9 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     @Value("${camille.zk.pod.id}")
     private String podId;
+
+    @Inject
+    private S3Service s3Service;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -697,5 +701,12 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             str = str.replaceAll(tenantName, testTenant);
         }
         return JsonUtils.deserialize(str, Table.class);
+    }
+
+    @Override
+    public void uploadAvroToS3(File file, String tenantId, String tableName) {
+        HdfsToS3PathBuilder hdfsToS3PathBuilder = new HdfsToS3PathBuilder(useEmr);
+        String prefix = hdfsToS3PathBuilder.getS3AtlasTablePrefix(tenantId, tableName);
+        s3Service.uploadLocalFile(s3Bucket, prefix, file, true);
     }
 }

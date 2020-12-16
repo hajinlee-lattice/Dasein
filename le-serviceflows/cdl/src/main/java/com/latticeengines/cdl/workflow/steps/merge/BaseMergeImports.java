@@ -406,7 +406,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    MatchInput getBaseMatchInput() {
+    MatchInput getBaseMatchInput(boolean enableFuzzyMatch) {
         MatchInput matchInput = new MatchInput();
         matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
         matchInput.setApplicationId(getApplicationId());
@@ -416,7 +416,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         matchInput.setDataCloudVersion(getDataCloudVersion());
         matchInput.setSkipKeyResolution(true);
         matchInput.setUseDnBCache(true);
-        matchInput.setUseRemoteDnB(true);
+        matchInput.setUseRemoteDnB(enableFuzzyMatch);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(false);
         matchInput.setUseDirectPlus(useDirectPlus);

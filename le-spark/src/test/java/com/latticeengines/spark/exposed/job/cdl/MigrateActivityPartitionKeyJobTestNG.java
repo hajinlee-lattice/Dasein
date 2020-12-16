@@ -13,8 +13,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.MigrateActivityPartitionKeyJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class MigrateActivityPartitionKeyJobTestNG extends SparkJobFunctionalTestNGBase {
@@ -27,7 +27,7 @@ public class MigrateActivityPartitionKeyJobTestNG extends SparkJobFunctionalTest
     @Test(groups = "functional")
     public void test() {
         MigrateActivityPartitionKeyJobConfig config = new MigrateActivityPartitionKeyJobConfig();
-        config.inputMetadata = new ActivityStoreSparkIOMetadata();
+        config.inputMetadata = new SparkIOMetadataWrapper();
         config.inputMetadata.setMetadata(constructInputMetadata());
         List<String> inputs = appendInput();
         SparkJobResult result = runSparkJob(MigrateActivityPartitionKeyJob.class, config, inputs, getWorkspace());
@@ -35,13 +35,13 @@ public class MigrateActivityPartitionKeyJobTestNG extends SparkJobFunctionalTest
 
         Assert.assertEquals(result.getTargets().size(), inputs.size());
         result.getTargets().forEach(table -> Assert.assertEquals(table.getPartitionKeys(), Collections.singletonList(StreamDateId)));
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertEquals(outputMetadata.getMetadata().get(STREAM_ID).getLabels(), Arrays.asList(StreamDateId, StreamDateId));
     }
 
-    private Map<String, ActivityStoreSparkIOMetadata.Details> constructInputMetadata() {
-        Map<String, ActivityStoreSparkIOMetadata.Details> inputMetadata = new HashMap<>();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+    private Map<String, SparkIOMetadataWrapper.Partition> constructInputMetadata() {
+        Map<String, SparkIOMetadataWrapper.Partition> inputMetadata = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
         details.setStartIdx(0);
         details.setLabels(Arrays.asList(__StreamDateId, __StreamDateId));
         inputMetadata.put(STREAM_ID, details);

@@ -20,7 +20,7 @@ public class DeriveActivityMetricGroupJobConfig extends SparkJobConfig implement
     public List<ActivityMetricsGroup> activityMetricsGroups;
 
     @JsonProperty("inputMetadata")
-    public ActivityStoreSparkIOMetadata inputMetadata; // describe streamId -> period stores
+    public SparkIOMetadataWrapper inputMetadata; // describe streamId -> period stores
 
     @JsonProperty("evaluationDate")
     // period -> current period Id

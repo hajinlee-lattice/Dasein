@@ -3,8 +3,8 @@ package com.latticeengines.spark.exposed.job.cdl
 import java.util
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
-import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, MigrateActivityPartitionKeyJobConfig}
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition
+import com.latticeengines.domain.exposed.spark.cdl.{MigrateActivityPartitionKeyJobConfig, SparkIOMetadataWrapper}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -19,11 +19,11 @@ class MigrateActivityPartitionKeyJob extends AbstractSparkJob[MigrateActivityPar
   override def runJob(spark: SparkSession, lattice: LatticeContext[MigrateActivityPartitionKeyJobConfig]): Unit = {
     val inputMetadata = lattice.config.inputMetadata.getMetadata // streamId -> details[origin partition keys]
 
-    val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata
-    val detailsMap = new util.HashMap[String, Details] // streamId -> details[migrated partition keys]
+    val outputMetadata: SparkIOMetadataWrapper = new SparkIOMetadataWrapper
+    val detailsMap = new util.HashMap[String, Partition] // streamId -> details[migrated partition keys]
     var migrated: Seq[DataFrame] = Seq()
     lattice.config.inputMetadata.getMetadata.foreach(entry => {
-      val details: Details = new Details
+      val details: Partition = new Partition
       details.setStartIdx(migrated.size)
       details.setLabels(new util.ArrayList[String])
       val (streamId: String, labels: util.List[String]) = (entry._1, entry._2.getLabels)

@@ -8,8 +8,8 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver, StreamDimension}
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, PeriodId, __Row_Count__, __StreamDate}
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
-import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DailyStoreToPeriodStoresJobConfig}
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition
+import com.latticeengines.domain.exposed.spark.cdl.{DailyStoreToPeriodStoresJobConfig, SparkIOMetadataWrapper}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeriveAttrsUtils.VERSION_COL
@@ -29,19 +29,19 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     val config: DailyStoreToPeriodStoresJobConfig = lattice.config
     val streams: Seq[AtlasStream] = config.streams.toSeq
     val input = lattice.input
-    val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
+    val inputMetadata: SparkIOMetadataWrapper = config.inputMetadata
     val incrementalStreams = config.incrementalStreams
     val evaluationDate = config.evaluationDate
 
-    val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
-    val detailsMap = new util.HashMap[String, Details]() // streamId -> details
+    val outputMetadata: SparkIOMetadataWrapper = new SparkIOMetadataWrapper()
+    val detailsMap = new util.HashMap[String, Partition]() // streamId -> details
     var periodStores: Seq[DataFrame] = Seq()
     streams.foreach(stream => {
       val streamId: String = stream.getStreamId
       val calendar: BusinessCalendar = config.businessCalendar.getOrElse(streamId, null)
       val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(stream.getPeriods, calendar), evaluationDate)
       val inputDetails = inputMetadata.getMetadata.get(streamId)
-      val outputDetails: Details = new Details()
+      val outputDetails: Partition = new Partition()
       outputDetails.setStartIdx(periodStores.size)
       outputDetails.setLabels(stream.getPeriods)
       detailsMap.put(stream.getStreamId, outputDetails)

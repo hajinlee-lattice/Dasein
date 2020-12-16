@@ -28,7 +28,7 @@ public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements
     public String evaluationDate;
 
     @JsonProperty("inputMetadata")
-    public ActivityStoreSparkIOMetadata inputMetadata; // describes streamId -> dailyStore input index
+    public SparkIOMetadataWrapper inputMetadata; // describes streamId -> dailyStore input index
 
     @JsonProperty("businessCalendar")
     public Map<String, BusinessCalendar> businessCalendar = new HashMap<>();

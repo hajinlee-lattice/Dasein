@@ -1,8 +1,10 @@
 package com.latticeengines.testframework.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1034,5 +1036,11 @@ public class TestPlayCreationHelper {
 
     public Long kickoffWorkflowForLaunch(String customerSpace, String playName, String launchId) {
         return playProxy.kickoffWorkflowForLaunch(customerSpace, playName, launchId);
+    }
+
+    public void uploadAvroToS3(String filePath, String tableName) {
+        URL url = ClassLoader.getSystemResource(filePath);
+        File localFile = new File(url.getFile());
+        cdlTestDataService.uploadAvroToS3(localFile, customerSpace, tableName);
     }
 }

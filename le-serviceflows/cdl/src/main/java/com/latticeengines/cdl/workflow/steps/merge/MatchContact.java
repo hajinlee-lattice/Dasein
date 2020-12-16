@@ -174,7 +174,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         // combine columns from all imports
         Set<String> columnNames = getInputTableColumnNames();
         boolean hasConvertedRematchTables = CollectionUtils.isNotEmpty(convertedRematchTableNames);
-        MatchInput matchInput = getBaseMatchInput();
+        MatchInput matchInput = getBaseMatchInput(false);
         if (hasConvertedRematchTables) {
             convertedRematchTableNames.forEach(tableName -> {
                 columnNames.addAll(getTableColumnNames(tableName));

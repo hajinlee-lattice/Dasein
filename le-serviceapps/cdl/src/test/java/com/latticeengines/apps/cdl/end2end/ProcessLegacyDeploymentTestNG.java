@@ -57,6 +57,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         // create VDB migration tenant
         HashMap<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.VDB_MIGRATION.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
         setupEnd2EndTestEnvironment(featureFlagMap);
     }
 
