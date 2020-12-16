@@ -670,7 +670,7 @@ public class CDLServiceImpl implements CDLService {
                 break;
             case Marketo:
             case Eloqua:
-            case Pardon:
+            case Pardot:
                 String contactSystemId = s3ImportSystem.generateContactSystemId();
                 s3ImportSystem.setContactSystemId(contactSystemId);
                 break;

@@ -75,7 +75,7 @@ public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
         S3ImportSystem pardon = new S3ImportSystem();
         pardon.setTenant(mainTestTenant);
         pardon.setName("PARDON");
-        pardon.setSystemType(S3ImportSystem.SystemType.Pardon);
+        pardon.setSystemType(S3ImportSystem.SystemType.Pardot);
         s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, pardon);
 
         allSystems = s3ImportSystemService.getAllS3ImportSystem(mainCustomerSpace);

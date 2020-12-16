@@ -311,7 +311,7 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
                 return "Default_Salesforce_System";
             }
         },
-        Pardon {
+        Pardot {
             @Override
             public Collection<EntityType> getEntityTypes() {
                 return Collections.singletonList(EntityType.Leads);
