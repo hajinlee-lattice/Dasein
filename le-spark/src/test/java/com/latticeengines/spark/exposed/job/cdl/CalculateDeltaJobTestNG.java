@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -100,8 +101,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCalculateDeltaSalesForceUseCase() {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
-        config.setOldData(previousAccounts);
-        config.setNewData(currentAccounts);
+        config.setInput(Lists.newArrayList(previousAccounts, currentAccounts));
         config.setPrimaryJoinKey(InterfaceName.AccountId.name());
         config.setIsAccountEntity(true);
         log.info(JsonUtils.serialize(config));
@@ -120,8 +120,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCalculateDeltaMarketoUseCase() {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
-        config.setOldData(previousContacts);
-        config.setNewData(currentContacts);
+        config.setInput(Lists.newArrayList(previousContacts, currentContacts));
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
         config.setIsAccountEntity(false);
         config.setFilterPrimaryJoinKeyNulls(true);
@@ -141,8 +140,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCalculateDeltaS3UseCase() {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
-        config.setOldData(previousS3Contacts);
-        config.setNewData(currentContacts);
+        config.setInput(Lists.newArrayList(previousS3Contacts, currentContacts));
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
         config.setSecondaryJoinKey(InterfaceName.AccountId.name());
         config.setFilterPrimaryJoinKeyNulls(false);
@@ -163,8 +161,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCalculateFirstTimeAccountDelta() {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
-        config.setOldData(null);
-        config.setNewData(currentAccounts);
+        config.setInput(Lists.newArrayList(null, currentAccounts));
         config.setPrimaryJoinKey(InterfaceName.AccountId.name());
         config.setIsAccountEntity(true);
         log.info(JsonUtils.serialize(config));
@@ -183,8 +180,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCalculateFirstTimeContactDelta() {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
-        config.setOldData(null);
-        config.setNewData(currentContacts);
+        config.setInput(Lists.newArrayList(null, currentContacts));
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
         config.setFilterPrimaryJoinKeyNulls(true);
         config.setIsAccountEntity(false);
@@ -204,8 +200,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCalculateFirstTimeContactDeltaWithoutJoinKeyNulls() {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
-        config.setOldData(null);
-        config.setNewData(currentContacts);
+        config.setInput(Lists.newArrayList(null, currentAccounts));
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
         config.setFilterPrimaryJoinKeyNulls(false);
         config.setIsAccountEntity(false);
@@ -225,8 +220,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCalculateNoChange() {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
-        config.setOldData(previousContacts);
-        config.setNewData(previousContacts);
+        config.setInput(Lists.newArrayList(previousContacts, previousContacts));
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
         config.setFilterPrimaryJoinKeyNulls(false);
         config.setIsAccountEntity(false);

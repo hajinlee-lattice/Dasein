@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit.StorageType
-import com.latticeengines.domain.exposed.metadata.datastore.{DataUnit, HdfsDataUnit, S3DataUnit}
+import com.latticeengines.domain.exposed.metadata.datastore.{HdfsDataUnit, S3DataUnit}
 import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
@@ -106,15 +106,6 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       filePrefix + "*" + suffix
     } else {
       "*" + suffix
-    }
-  }
-
-  def loadDataUnit(spark: SparkSession, dataUnit: DataUnit): DataFrame = {
-    val storage = dataUnit.getStorageType
-    storage match {
-      case StorageType.Hdfs => loadHdfsUnit(spark, dataUnit.asInstanceOf[HdfsDataUnit])
-      case StorageType.S3 => loadS3Unit(spark, dataUnit.asInstanceOf[S3DataUnit])
-      case _ => throw new UnsupportedOperationException(s"Unknown storage $storage")
     }
   }
 
