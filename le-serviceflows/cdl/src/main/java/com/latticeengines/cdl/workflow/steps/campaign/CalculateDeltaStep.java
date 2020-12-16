@@ -56,7 +56,7 @@ public class CalculateDeltaStep extends BaseSparkStep<CalculateDeltaStepConfigur
     @Override
     public void execute() {
         CalculateDeltaStepConfiguration config = getConfiguration();
-        customerSpace = parseCustomerSpace(configuration);
+        parseCustomerSpace(configuration);
         Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(), false, false);
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000,

@@ -2,7 +2,6 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -30,11 +29,23 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     val contactCountry = InterfaceName.ContactCountry.name()
     val accountAttributes: Set[String] = config.getAccountAttributes.asScala
     val contactAttributes: Set[String] = config.getContactAttributes.asScala
-    val accountsDf = loadHdfsUnit(spark, config.getAccountsData.asInstanceOf[HdfsDataUnit])
-    val contactsDf = if (config.getContactsData != null) loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(BusinessEntity.Contact))
-    val targetSegmentsContactsDF = if (config.getTargetSegmentsContactsData != null) loadHdfsUnit(spark, config.getTargetSegmentsContactsData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(BusinessEntity.Contact))
-    val positiveDeltaDf = if (config.getPositiveDelta != null) loadHdfsUnit(spark, config.getPositiveDelta.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
-    val negativeDeltaDf = if (config.getNegativeDelta != null) loadHdfsUnit(spark, config.getNegativeDelta.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
+    val accountsDf = lattice.input(0)
+    var contactsDf = lattice.input(1)
+    if (contactsDf.rdd.isEmpty) {
+      contactsDf = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(BusinessEntity.Contact))
+    }
+    var targetSegmentsContactsDF = lattice.input(2)
+    if (targetSegmentsContactsDF.rdd.isEmpty()) {
+      targetSegmentsContactsDF = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(BusinessEntity.Contact))
+    }
+    var negativeDeltaDf = lattice.input(3)
+    if (negativeDeltaDf.rdd.isEmpty()) {
+      negativeDeltaDf = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
+    }
+    var positiveDeltaDf = lattice.input(4)
+    if (positiveDeltaDf.rdd.isEmpty()) {
+      positiveDeltaDf = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
+    }
     var distinctPositiveAccountsDf = positiveDeltaDf
     var distinctNegativeAccountsDf = negativeDeltaDf
     enrichAttributes(accountsDf, accountAttributes)
