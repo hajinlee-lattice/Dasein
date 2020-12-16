@@ -21,6 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
@@ -53,6 +54,10 @@ import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.service.impl.IDaaSServiceImpl;
 import com.latticeengines.security.util.IntegrationUserUtils;
+
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 @Component("userService")
 public class UserServiceImpl implements UserService {
@@ -170,21 +175,38 @@ public class UserServiceImpl implements UserService {
         return globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail()) != null;
     }
 
+    private static void logErrorToSpanAndConsole(String message, Span span) {
+        if (span != null)
+            span.log(message);
+        LOGGER.error(message);
+    }
+
     @Override
     public boolean createUser(String userName, UserRegistration userRegistration) {
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.activeSpan();
+        String errorMsg = null;
+        boolean errored = false;
+
+        if (span != null)
+            span.log("Creating User: " + userName);
+
         if (userRegistration == null) {
-            LOGGER.error("User registration cannot be null.");
+            errorMsg = "User registration cannot be null.";
+            errored = true;
+        } else if (userRegistration.getUser() == null) {
+            errorMsg = "User cannot be null.";
+            errored = true;
+        } else if (!userRegistration.isUseIDaaS() && userRegistration.getCredentials() == null) {
+            errorMsg = "Credentials cannot be null.";
+            errored = true;
+        }
+
+        if (errored) {
+            logErrorToSpanAndConsole(errorMsg, span);
             return false;
         }
 
-        if (userRegistration.getUser() == null) {
-            LOGGER.error("User cannot be null.");
-            return false;
-        }
-        if (!userRegistration.isUseIDaaS() && userRegistration.getCredentials() == null) {
-            LOGGER.error("Credentials cannot be null.");
-            return false;
-        }
         userRegistration.toLowerCase();
         User user = userRegistration.getUser();
         boolean useIDaaS = userRegistration.isUseIDaaS();
@@ -204,14 +226,19 @@ public class UserServiceImpl implements UserService {
         User userByEmail = globalUserManagementService.getUserByEmail(user.getEmail());
 
         if (userByEmail != null) {
-            LOGGER.warn(String.format(
+            logErrorToSpanAndConsole(String.format(
                     "A user with the same email address %s already exists. Please update instead of create user.",
-                    userByEmail));
+                    userByEmail), span);
         } else {
             try {
                 globalUserManagementService.registerUser(userName, user, creds);
                 userByEmail = globalUserManagementService.getUserByEmail(user.getEmail());
+                if (userByEmail != null && span != null) {
+                    span.log("User created");
+                }
             } catch (Exception e) {
+                if (span != null)
+                    span.log(e.toString());
                 LOGGER.warn("Error creating admin user.");
                 globalUserManagementService.deleteUser(user.getUsername());
                 globalUserManagementService.deleteUser(user.getEmail());
@@ -278,6 +305,9 @@ public class UserServiceImpl implements UserService {
             expirationDate = null;
         }
 
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.activeSpan();
+
         // if loginUser is not super admin
 
         // remove comparing user with same access level to tenant in different
@@ -292,6 +322,8 @@ public class UserServiceImpl implements UserService {
             } else {
                 if (globalUserManagementService.existExpireDateChanged(username, tenantId, accessLevel.name(),
                         expirationDate)) {
+                    if (span != null)
+                        span.log("ERROR: Access denied");
                     throw new AccessDeniedException("Access denied.");
                 }
             }
@@ -308,6 +340,15 @@ public class UserServiceImpl implements UserService {
                 } else if (CollectionUtils.isNotEmpty(userTeams)) {
                     globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(userTeamIds, false);
                 }
+
+                if (span != null)
+                    span.log(ImmutableMap.of(
+                            "Operation", "Grant access",
+                            "User", username,
+                            "Tenant", tenantId,
+                            "Right", accessLevel.name()
+                    ));
+
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
                         createdByUser, expirationDate, globalAuthTeams);
                 if (result && clearSession) {
@@ -327,10 +368,13 @@ public class UserServiceImpl implements UserService {
                 }
                 return result;
             } catch (Exception e) {
-                LOGGER.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
+                logErrorToSpanAndConsole(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username), span);
                 return true;
             }
         }
+
+        if (span != null)
+            span.log("Could not revoke original rights");
         return false;
     }
 
@@ -351,12 +395,26 @@ public class UserServiceImpl implements UserService {
 
     private boolean resignAccessLevel(String tenantId, String username, String right) {
         boolean success = true;
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.activeSpan();
+
+        if (span != null) {
+            ImmutableMap.Builder<Object, Object> builder = new ImmutableMap.Builder<>()
+                    .put("Operation", "Revoke access")
+                    .put("User", username)
+                    .put("Tenant", tenantId);
+
+            if (right != null)
+                builder = builder.put("Right", right);
+
+            span.log(builder.build().toString());
+        }
         try {
             AccessLevel level = AccessLevel.valueOf(right);
             success = globalUserManagementService.revokeRight(level.name(), tenantId, username);
         } catch (Exception e) {
-            LOGGER.warn(
-                    String.format("Error resigning access level %s from user %s.", right, username));
+            logErrorToSpanAndConsole(
+                    String.format("Error resigning access level %s from user %s.", right, username), span);
         }
         return success;
     }
@@ -495,6 +553,12 @@ public class UserServiceImpl implements UserService {
         String tenantId = userRegistrationWithTenant.getTenant();
 
         RegistrationResult result = validateNewUser(user, tenantId);
+
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.activeSpan();
+        String traceId = span.context().toTraceId();
+        result.setTraceId(traceId);
+
         if (!result.isValid()) {
             return result;
         }
@@ -692,7 +756,12 @@ public class UserServiceImpl implements UserService {
     public IDaaSUser createIDaaSUser(User user, String subscriberNumber) {
         String email = user.getEmail();
         IDaaSUser idaasUser = iDaaSService.getIDaaSUser(email);
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.activeSpan();
+
         if (idaasUser == null) {
+            if (span != null)
+                span.log("Creating new IDaaS User for " + user.getEmail());
             IDaaSUser newUser = new IDaaSUser();
             newUser.setSubscriberNumber(subscriberNumber);
             newUser.setFirstName(user.getFirstName());
@@ -709,6 +778,8 @@ public class UserServiceImpl implements UserService {
             idaasUser = iDaaSService.createIDaaSUser(newUser);
         } else if (!idaasUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
             // add product access and default role to user when user already exists in IDaaS
+            if (span != null)
+                span.log("Adding product access to existing user " + user.getEmail());
             LOGGER.info("user exist in IDaaS, add product access to user {}", email);
             ProductRequest request = new ProductRequest();
             request.setEmailAddress(email);

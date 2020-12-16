@@ -202,5 +202,10 @@
             <artifactId>le-baton</artifactId>
             <version>${project.version}</version>
         </dependency>
+		<dependency>
+			<groupId>com.latticeengines</groupId>
+			<artifactId>le-monitor</artifactId>
+			<version>${project.version}</version>
+		</dependency>
     </dependencies>
 </project>
