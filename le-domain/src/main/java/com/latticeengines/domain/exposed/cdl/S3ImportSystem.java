@@ -318,7 +318,7 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
             }
             @Override
             public String getDefaultSystemName() {
-                return "Default_Pardon_System";
+                return "Default_Pardot_System";
             }
         },
         Marketo {
