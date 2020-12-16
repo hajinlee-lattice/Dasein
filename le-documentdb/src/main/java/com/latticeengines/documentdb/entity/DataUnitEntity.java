@@ -33,4 +33,5 @@ public class DataUnitEntity extends BaseMultiTenantDocEntity<DataUnit> {
             columnDefinition = "'VARCHAR(200) GENERATED ALWAYS AS (`Document` ->> '$.DataTemplateId')'", //
             insertable = false, updatable = false)
     private String dataTemplateId;
+
 }
