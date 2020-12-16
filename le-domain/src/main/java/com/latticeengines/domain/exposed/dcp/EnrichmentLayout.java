@@ -92,7 +92,7 @@ public class EnrichmentLayout implements HasPid, HasTenant {
     private List<String> elements;
 
     @JoinColumn(name = "TEMPLATE_ID")
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JsonProperty("templateId")
     private String templateId;
 
