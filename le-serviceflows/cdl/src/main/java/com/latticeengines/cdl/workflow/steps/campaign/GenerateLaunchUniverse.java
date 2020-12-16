@@ -1,5 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.campaign;
-
+import static com.latticeengines.domain.exposed.pls.Play.TapType;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
 import java.util.ArrayList;
@@ -122,42 +122,48 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         String lookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
         boolean launchUnScored = launch == null ? channel.getLaunchUnscored() : launch.isLaunchUnscored();
         CDLExternalSystemName externalSystemName = channel.getLookupIdMap().getExternalSystemName();
-
-        // 1) setup queries from play and channel settings
-        FrontEndQuery frontEndquery = new CampaignFrontEndQueryBuilder.Builder() //
-                .mainEntity(mainEntity) //
-                .customerSpace(customerSpace) //
-                .baseAccountRestriction(play.getTargetSegment().getAccountRestriction()) //
-                .baseContactRestriction(contactsDataExists ? play.getTargetSegment().getContactRestriction() : null)
-                .isSuppressAccountsWithoutLookupId(channelConfig.isSuppressAccountsWithoutLookupId()) //
-                .isSuppressAccountsWithoutContacts(
-                        contactsDataExists && channelConfig.isSuppressAccountsWithoutContacts())
-                .isSuppressContactsWithoutEmails(contactsDataExists && channelConfig.isSuppressContactsWithoutEmails())
-                .isSuppressAccountsWithoutWebsiteOrCompanyName(ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(
-                        channel.getLookupIdMap().getExternalSystemName(), channelConfig))
-                .bucketsToLaunch(launchBuckets) //
-                .limit(maxEntitiesToLaunch, useContactsPerAccountLimit) //
-                .lookupId(lookupId) //
-                .launchUnScored(launchUnScored) //
-                .destinationSystemName(externalSystemName) //
-                .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
-                .getCampaignFrontEndQueryBuilder() //
-                .build();
-
-        log.info("Full Launch Universe Query: " + frontEndquery.toString());
-
-        // 2) get DataFrame for Account and Contact
-        HdfsDataUnit launchUniverseDataUnit = executeSparkJob(frontEndquery);
-        log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
-
-        // 3) check for 'Contacts per Account' limit
-        if (useContactsPerAccountLimit || CDLExternalSystemName.Eloqua.equals(channelConfig.getSystemName())) {
-            Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
-            Long contactAccountRatioThreshold = WorkflowJobUtils.getContactAccountRatioThresholdFromZK(customerSpace);
-            launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
-                    maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, contactAccountRatioThreshold);
+        HdfsDataUnit launchUniverseDataUnit;
+        TapType tapType = play.getTapType();
+        boolean baseOnOtherTapType = TapType.ListSegment.equals(tapType);
+        if (baseOnOtherTapType) {
+            if (BusinessEntity.Account.equals(mainEntity)) {
+                launchUniverseDataUnit = getObjectFromContext(ACCOUNTS_DATA_UNIT, HdfsDataUnit.class);
+            } else {
+                launchUniverseDataUnit = getObjectFromContext(CONTACTS_DATA_UNIT, HdfsDataUnit.class);
+            }
+        } else {
+            // 1) setup queries from play and channel settings
+            FrontEndQuery frontEndquery = new CampaignFrontEndQueryBuilder.Builder() //
+                    .mainEntity(mainEntity) //
+                    .customerSpace(customerSpace) //
+                    .baseAccountRestriction(play.getTargetSegment().getAccountRestriction()) //
+                    .baseContactRestriction(contactsDataExists ? play.getTargetSegment().getContactRestriction() : null)
+                    .isSuppressAccountsWithoutLookupId(channelConfig.isSuppressAccountsWithoutLookupId()) //
+                    .isSuppressAccountsWithoutContacts(
+                            contactsDataExists && channelConfig.isSuppressAccountsWithoutContacts())
+                    .isSuppressContactsWithoutEmails(contactsDataExists && channelConfig.isSuppressContactsWithoutEmails())
+                    .isSuppressAccountsWithoutWebsiteOrCompanyName(ChannelConfigUtil.shouldApplyAccountNameOrWebsiteFilter(
+                            channel.getLookupIdMap().getExternalSystemName(), channelConfig))
+                    .bucketsToLaunch(launchBuckets) //
+                    .limit(maxEntitiesToLaunch, useContactsPerAccountLimit) //
+                    .lookupId(lookupId) //
+                    .launchUnScored(launchUnScored) //
+                    .destinationSystemName(externalSystemName) //
+                    .ratingId(play.getRatingEngine() != null ? play.getRatingEngine().getId() : null) //
+                    .getCampaignFrontEndQueryBuilder() //
+                    .build();
+            log.info("Full Launch Universe Query: " + frontEndquery.toString());
+            // 2) get DataFrame for Account and Contact
+            launchUniverseDataUnit = executeSparkJob(frontEndquery);
+            log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
+            // 3) check for 'Contacts per Account' limit
+            if (useContactsPerAccountLimit || CDLExternalSystemName.Eloqua.equals(channelConfig.getSystemName())) {
+                Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
+                Long contactAccountRatioThreshold = WorkflowJobUtils.getContactAccountRatioThresholdFromZK(customerSpace);
+                launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
+                        maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, contactAccountRatioThreshold);
+            }
         }
-
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
     }
 
