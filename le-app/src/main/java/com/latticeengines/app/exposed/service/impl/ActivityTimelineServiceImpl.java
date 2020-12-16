@@ -147,7 +147,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         Instant cutoffTimeStamp = getTimeWindowFromPeriod(customerSpace, timelinePeriod).getLeft();
 
         DataPage intentData = new DataPage();
-        intentData.setData(getDeduplicateIntentData(data));
+        intentData.setData(data.getData());
         String accountIntent = getAccountIntent(intentData);
 
         int newIdentifiedContactsCount = (int) dataFilter(data, AtlasStream.StreamType.MarketingActivity,
@@ -205,7 +205,7 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     private String getAccountIntent(DataPage data) {
         String message = messageNoDataSource;
         data = filterStreamData(data, new HashSet<>(Arrays.asList(AtlasStream.StreamType.DnbIntentData)));
-        for (Map<String, Object> map : data.getData()) {
+        for (Map<String, Object> map : getDeduplicateIntentData(data)) {
             String detail2 = (String) map.get(InterfaceName.Detail2.name());
             try {
                 message = STAGE_BUYING.equals(message) ? STAGE_BUYING
