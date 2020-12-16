@@ -78,6 +78,7 @@ public class AggActivityStreamToDaily
     @Inject
     private MetadataProxy metadataProxy;
 
+    private boolean isRematchPA;
     private boolean shortCutMode = false;
     private DataCollection.Version inactive;
     private final Set<String> streamsIncrUpdated = new HashSet<>();
@@ -92,6 +93,7 @@ public class AggActivityStreamToDaily
         }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         catalogsWithImports = getCatalogsWithNewImports();
+        isRematchPA = Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class));
         Map<String, String> rawStreamTablesAfterDelete = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
         streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Map<String, String> dailyTableNames = getMapObjectFromContext(AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, String.class, String.class);
@@ -120,6 +122,9 @@ public class AggActivityStreamToDaily
             dataCollectionProxy.upsertTablesWithSignatures(configuration.getCustomer(), dailyTableNames, AggregatedActivityStream, inactive);
             return null;
         } else {
+            if (isRematchPA) {
+                log.info("PA is performing rematch, rebuilding all streams");
+            }
             Long paTimestamp = getLongValueFromContext(PA_TIMESTAMP);
             Map<String, String> dailyStoreActiveBatchNames = getActiveDailyStoreTableNames(new ArrayList<>(streams.keySet()));
             // set dimensions
@@ -247,7 +252,8 @@ public class AggActivityStreamToDaily
     }
 
     private boolean shouldIncrUpdate(AtlasStream stream) {
-        return !configuration.isShouldRebuild() && !streamsPerformedDelete.contains(stream.getStreamId())
+        return !isRematchPA && !configuration.isShouldRebuild()
+                && !streamsPerformedDelete.contains(stream.getStreamId())
                 && noCatalogHasImport(stream);
     }
 
