@@ -30,5 +30,5 @@ public interface DataUnitService {
 
     List<DataUnit> findAllByDataTemplateIdAndRole(String dataTemplateId, DataUnit.Role role);
 
-    List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy();
+    List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize);
 }

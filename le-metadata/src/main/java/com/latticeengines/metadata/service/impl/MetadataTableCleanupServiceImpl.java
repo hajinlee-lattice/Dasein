@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -37,9 +36,6 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
 
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
-
-    @Inject
-    private S3Service s3Service;
 
     @Value("${metadata.table.cleanup.size}")
     private int maxCleanupSize;
@@ -112,17 +108,29 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
         log.info("DataUnit cleanup task started.");
         List<DataUnit> dataUnitsToDelete = new ArrayList<>();
 
+        // only query 50000 records per clean up job
+        int count = 0;
+        int pageIndex = 0;
         try (PerformanceTimer timer =
                      new PerformanceTimer("DataUnit cleanup task at step find dataunits to delete")) {
-            List<DataUnit> dataUnits = dataUnitService.findAllDataUnitEntitiesWithExpiredRetentionPolicy();
-            int index = 0;
-            for (DataUnit dataUnit : dataUnits) {
-                index++;
-                long expireTime = RetentionPolicyUtil.getExpireTimeByRetentionPolicyStr(dataUnit.getRetentionPolicy());
-                if (expireTime > 0) {
-                    if (System.currentTimeMillis() > dataUnit.getUpdated().getTime() + expireTime) {
-                        dataUnitsToDelete.add(dataUnit);
+            while (count < searchCount) {
+                List<DataUnit> dataUnits = dataUnitService.findAllDataUnitEntitiesWithExpiredRetentionPolicy(pageIndex, batchSize);
+                for (DataUnit dataUnit : dataUnits) {
+                    long expireTime = RetentionPolicyUtil.getExpireTimeByRetentionPolicyStr(dataUnit.getRetentionPolicy());
+                    if (expireTime > 0) {
+                        if (System.currentTimeMillis() > dataUnit.getUpdated().getTime() + expireTime) {
+                            dataUnitsToDelete.add(dataUnit);
+                        }
+                        if (dataUnitsToDelete.size() >= maxCleanupSize) {
+                            break;
+                        }
                     }
+                }
+                count++;
+                if (dataUnits.size() == batchSize) {
+                    pageIndex++;
+                } else {
+                    break;
                 }
             }
         }
@@ -133,7 +141,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
                 });
                 log.info(String.format("Size of dataunit needs to be deleted is %d.", dataUnitsToDelete.size()));
             } else {
-                log.info("No dataunit needs to clean up.");
+                log.info(String.format("No dataunits needs to clean up after scan %d records.", batchSize * searchCount));
             }
         }
     }

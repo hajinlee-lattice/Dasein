@@ -134,8 +134,8 @@ public class DataUnitServiceImpl implements DataUnitService {
     }
 
     @Override
-    public List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy() {
-        return entityMgr.findAllDataUnitEntitiesWithExpiredRetentionPolicy();
+    public List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize) {
+        return entityMgr.findAllDataUnitEntitiesWithExpiredRetentionPolicy(pageIndex, pageSize);
     }
 
 }

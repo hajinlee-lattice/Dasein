@@ -13,6 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -236,9 +237,9 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     @Override
-    public List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy() {
+    public List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize) {
         List<DataUnitEntity> entities = readerRepository.findAllDataUnitEntitiesWithExpiredRetentionPolicy(
-                RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
+                RetentionPolicyUtil.NEVER_EXPIRE_POLICY, PageRequest.of(pageIndex, pageSize));
         return convertList(entities, false);
     }
 
