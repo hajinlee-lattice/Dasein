@@ -70,7 +70,8 @@ public class ExtractListSegmentCSV
 
     private final List<String> contactAttributes = Lists.newArrayList(InterfaceName.AccountId.name(), "SFDC_CONTACT_ID",
             InterfaceName.ContactName.name(), InterfaceName.Email.name(), InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
-            "Direct_Phone", InterfaceName.Title.name(), InterfaceName.ContactId.name(), "user_level_name", "user_job_function", InterfaceName.GCA_ID.name());
+            ExtractListSegmentCSVConfiguration.Direct_Phone, InterfaceName.Title.name(), InterfaceName.ContactId.name(),
+            "user_level_name", "user_job_function", InterfaceName.GCA_ID.name());
 
     @Override
     protected CustomerSpace parseCustomerSpace(ExtractListSegmentCSVConfiguration stepConfiguration) {
@@ -145,7 +146,11 @@ public class ExtractListSegmentCSV
                 for (Schema.Field field : parquetSchema.getFields()) {
                     ColumnField attribute = new ColumnField();
                     attribute.setAttrName(field.name());
-                    attribute.setDisplayName(fieldMap.get(field.name()).getUserFieldName());
+                    if (BusinessEntity.Contact.equals(entity) && InterfaceName.PhoneNumber.name().equals(field.name())) {
+                        attribute.setDisplayName(fieldMap.get(ExtractListSegmentCSVConfiguration.Direct_Phone).getUserFieldName());
+                    } else {
+                        attribute.setDisplayName(fieldMap.get(field.name()).getUserFieldName());
+                    }
                     attributes.add(attribute);
                 }
             } else {
@@ -153,8 +158,7 @@ public class ExtractListSegmentCSV
                 throw new RuntimeException("Did not find any parquet files under folder " + path + ".");
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            log.info(ex.getMessage());
+            log.error("Unexpected exception: ", ex);
             throw new RuntimeException("Did not find any parquet files under folder " + path + ".");
         }
         masterSchema.setFields(attributes);

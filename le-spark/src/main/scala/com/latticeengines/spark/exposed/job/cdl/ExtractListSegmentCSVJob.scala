@@ -2,6 +2,7 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.metadata.template.{CSVAdaptor, ImportFieldMapping}
 import com.latticeengines.domain.exposed.metadata.{InterfaceName, UserDefinedType}
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ExtractListSegmentCSVConfiguration
 import com.latticeengines.domain.exposed.spark.cdl.ExtractListSegmentCSVConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.functions.{col, lit, udf, when}
@@ -62,7 +63,7 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     val contactNameUdf = udf(contactNameFunc)
     if (!columns.contains(InterfaceName.PhoneNumber.name())) {
       for (field <- columns) {
-        if (field.equalsIgnoreCase("Direct_Phone")) {
+        if (field.equalsIgnoreCase(ExtractListSegmentCSVConfiguration.Direct_Phone)) {
           result = result.withColumnRenamed(field, InterfaceName.PhoneNumber.name)
         } else if (field.equalsIgnoreCase("ContactName")) {
           result = result.withColumn(field, when(col("FirstName").isNotNull,
