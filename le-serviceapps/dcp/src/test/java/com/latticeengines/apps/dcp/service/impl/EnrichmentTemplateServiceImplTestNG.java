@@ -67,11 +67,9 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
 
         String templateName = "Test_Enrichment_Template";
 
-        EnrichmentTemplate template = enrichmentTemplateService.create(layoutId, templateName);
+        ResponseDocument<String> createTemplateResult = enrichmentTemplateService.create(layoutId, templateName);
 
-        Assert.assertNotNull(template);
-        Assert.assertEquals(template.getDomain().getDisplayName(), layout.getDomain().getDisplayName());
-        Assert.assertEquals(template.getTemplateName(), templateName);
-        Assert.assertEquals(template.getTenant().getId(), tenantId);
+        Assert.assertNotNull(createTemplateResult);
+        Assert.assertTrue(createTemplateResult.isSuccess(), "Enrichment Template is not valid");
     }
 }

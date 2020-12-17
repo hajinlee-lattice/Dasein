@@ -53,7 +53,7 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
     private TenantService tenantService;
 
     @Override
-    public EnrichmentTemplate create(String layoutId, String templateName) {
+    public ResponseDocument<String> create(String layoutId, String templateName) {
         Tenant tenant = tenantService
                 .findByTenantId(CustomerSpace.parse(MultiTenantContext.getShortTenantId()).toString());
         EnrichmentLayout enrichmentLayout = enrichmentLayoutEntityMgr.findByLayoutId(layoutId);
@@ -72,11 +72,10 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
         ResponseDocument<String> result = validateEnrichmentTemplate(enrichmentTemplate);
         if (result.isSuccess()) {
             enrichmentTemplateEntityMgr.create(enrichmentTemplate);
+            enrichmentLayout.setTemplateId(enrichmentTemplate.getTemplateId());
+            enrichmentLayoutEntityMgr.update(enrichmentLayout);
         }
-
-        enrichmentLayout.setTemplateId(enrichmentTemplate.getTemplateId());
-        enrichmentLayoutEntityMgr.update(enrichmentLayout);
-        return enrichmentTemplate;
+        return result;
     }
 
     private ResponseDocument<String> validateEnrichmentTemplate(EnrichmentTemplate enrichmentTemplate) {

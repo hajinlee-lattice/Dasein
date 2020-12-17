@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.pls.service.dcp.EnrichmentTemplateService;
 
 import io.swagger.annotations.Api;
@@ -32,7 +32,7 @@ public class EnrichmentTemplateResource {
     @ResponseBody
     @ApiOperation("Create enrichment template")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public EnrichmentTemplate createTemplate(@RequestParam(value = "layoutId") String layoutId,
+    public ResponseDocument<String> createTemplate(@RequestParam(value = "layoutId") String layoutId,
             @RequestParam(value = "templateName") String templateName) {
         return enrichmentTemplateService.createEnrichmentTemplate(MultiTenantContext.getShortTenantId(), layoutId,
                 templateName);

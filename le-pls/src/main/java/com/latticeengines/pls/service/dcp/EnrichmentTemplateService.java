@@ -1,9 +1,9 @@
 package com.latticeengines.pls.service.dcp;
 
-import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
+import com.latticeengines.domain.exposed.ResponseDocument;
 
 public interface EnrichmentTemplateService {
 
-    EnrichmentTemplate createEnrichmentTemplate(String customerSpace, String layoutId, String templateName);
+    ResponseDocument<String> createEnrichmentTemplate(String customerSpace, String layoutId, String templateName);
 
 }

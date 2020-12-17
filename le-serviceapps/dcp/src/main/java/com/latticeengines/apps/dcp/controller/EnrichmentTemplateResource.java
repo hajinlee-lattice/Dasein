@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
-import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
+import com.latticeengines.domain.exposed.ResponseDocument;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +25,7 @@ public class EnrichmentTemplateResource {
     @PostMapping("/{layoutId}/{templateName}")
     @ResponseBody
     @ApiOperation(value = "Create an EnrichmentTemplate from Layout")
-    public EnrichmentTemplate create(@PathVariable String layoutId, @PathVariable String templateName) {
+    public ResponseDocument<String> create(@PathVariable String layoutId, @PathVariable String templateName) {
         return enrichmentTemplateService.create(layoutId, templateName);
     }
 }
