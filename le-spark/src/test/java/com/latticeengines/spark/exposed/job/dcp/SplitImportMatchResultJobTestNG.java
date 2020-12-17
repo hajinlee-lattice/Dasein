@@ -61,8 +61,8 @@ public class SplitImportMatchResultJobTestNG extends SparkJobFunctionalTestNGBas
 
     @Test(groups = "functional")
     public void test() {
-        List<Runnable> threads = Arrays.asList(this::testDataReport, this::testNoDunsDuplicate);
-        ThreadPoolUtils.runInParallel(threads);
+        testDataReport();
+        testNoDunsDuplicate();
     }
 
     public void testDataReport() {
