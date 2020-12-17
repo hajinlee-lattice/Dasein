@@ -329,6 +329,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
     protected static final String JOURNEY_STAGE_TABLE_NAME = "JOURNEY_STAGE_TABLE_NAME";
     protected static final String ACTIVITY_ALERT_GENERATED = "ALERT_GENERATED";
+    protected static final String ACTIVITY_ALERT_PUBLISHED = "ALERT_PUBLISHED";
     protected static final String ACTIVITY_ALERT_MASTER_TABLE_NAME = "ALERT_MASTER_TABLE_NAME";
     protected static final String ACTIVITY_ALERT_DIFF_TABLE_NAME = "ALERT_DIFF_TABLE_NAME";
     protected static final String INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME = "INTENT_ALERT_NEW_ACCOUNT_TABLE_NAME";
@@ -492,6 +493,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACTIVITY_METRICS_CATEGORICAL_ATTR, //
             ACTIVITY_METRICS_CATEGORIES, //
             ACTIVITY_ALERT_GENERATED, //
+            ACTIVITY_ALERT_PUBLISHED, //
             RETAIN_PRODUCT_TYPE);
 
     @Autowired
