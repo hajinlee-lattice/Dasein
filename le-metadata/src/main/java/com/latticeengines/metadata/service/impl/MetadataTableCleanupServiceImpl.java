@@ -1,7 +1,9 @@
 package com.latticeengines.metadata.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -44,11 +46,21 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
 
     private int searchCount = 20;
 
-    private int lastIndex;
+    private int lastIndexMetaData;
+
+    private int lastIndexDataUnit;
+
+    private Map<String, DataUnit> tableNameToDataUnit;
 
     @Override
     public Boolean cleanup() {
-        log.info("Metadata table cleanup task started.");
+        cleanpTables("metadata", lastIndexMetaData);
+        cleanpTables("dataunit", lastIndexDataUnit);
+        return true;
+    }
+
+    private void cleanpTables(String tableType, int lastIndex) {
+        log.info(tableType + " cleanup task started for.");
         List<Table> tablesToDelete = new ArrayList<>();
         // only query 50000 records per clean up job
         int count = 0;
@@ -56,7 +68,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
         try (PerformanceTimer timer =
                      new PerformanceTimer("Metadata table cleanup task at step find tables to delete")) {
             while (count < searchCount) {
-                List<Table> tables = metadataService.findAllWithExpiredRetentionPolicy(lastIndex, batchSize);
+                List<Table> tables = getAllWithExpiredRetentionPolicyTables(tableType, lastIndex);
                 int index = 0;
                 for (Table table : tables) {
                     index++;
@@ -88,7 +100,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
         try (PerformanceTimer timer = new PerformanceTimer("Metadata table cleanup task at step delete tables")) {
             if (CollectionUtils.isNotEmpty(tablesToDelete)) {
                 tablesToDelete.forEach(table -> {
-                    cleanupTable(table);
+                    cleanupTable(tableType, table);
                 });
                 if (lastIndex >= tablesToDelete.size()) {
                     lastIndex -= tablesToDelete.size();
@@ -100,54 +112,71 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
                 log.info(String.format("No tables needs to clean up after scan %d records and scan index is %d.", batchSize * searchCount, lastIndex));
             }
         }
-        cleanupDataUnits();
-        return true;
+        updateLastIndex(tableType, lastIndex);
     }
 
-    private void cleanupDataUnits() {
-        log.info("DataUnit cleanup task started.");
-        List<DataUnit> dataUnitsToDelete = new ArrayList<>();
-
-        // only query 50000 records per clean up job
-        int count = 0;
-        int pageIndex = 0;
-        try (PerformanceTimer timer =
-                     new PerformanceTimer("DataUnit cleanup task at step find dataunits to delete")) {
-            while (count < searchCount) {
-                List<DataUnit> dataUnits = dataUnitService.findAllDataUnitEntitiesWithExpiredRetentionPolicy(pageIndex, batchSize);
-                for (DataUnit dataUnit : dataUnits) {
-                    long expireTime = RetentionPolicyUtil.getExpireTimeByRetentionPolicyStr(dataUnit.getRetentionPolicy());
-                    if (expireTime > 0) {
-                        if (System.currentTimeMillis() > dataUnit.getUpdated().getTime() + expireTime) {
-                            dataUnitsToDelete.add(dataUnit);
-                        }
-                        if (dataUnitsToDelete.size() >= maxCleanupSize) {
-                            break;
-                        }
-                    }
-                }
-                count++;
-                if (dataUnits.size() == batchSize) {
-                    pageIndex++;
-                } else {
-                    break;
-                }
-            }
-        }
-        try (PerformanceTimer timer = new PerformanceTimer("Dataunit cleanup task at step delete dataunits")) {
-            if (CollectionUtils.isNotEmpty(dataUnitsToDelete)) {
-                dataUnitsToDelete.forEach(dataUnit -> {
-                    cleanupDataUnit(dataUnit);
-                });
-                log.info(String.format("Size of dataunit needs to be deleted is %d.", dataUnitsToDelete.size()));
-            } else {
-                log.info(String.format("No dataunits needs to clean up after scan %d records.", batchSize * searchCount));
-            }
+    private void cleanupTable(String tableType, Table table) {
+        switch (tableType) {
+            case "metadata":
+                cleanupMetaDataTable(table);
+                break;
+            case "dataunit":
+                cleanupDataUnit(tableNameToDataUnit.get(table.getName()));
+                break;
+            default:
+                log.info("Unknown tableType to cleanup :" + tableType);
         }
     }
 
+    private List<Table> getAllWithExpiredRetentionPolicyTables(String tableType, int lastIndex) {
+        List<Table> tables = new ArrayList<>();
+        switch (tableType) {
+            case "metadata":
+                tables = metadataService.findAllWithExpiredRetentionPolicy(lastIndex, batchSize);
+                break;
+            case "dataunit":
+                tableNameToDataUnit = new HashMap<>();
+                tables = getDataUnitTables(lastIndex);
+                break;
+            default:
+                log.info("Unknown tableType to cleanup :" + tableType);
+        }
+        return tables;
+    }
+
+    private void updateLastIndex(String tableType, int lastIndex) {
+        switch (tableType) {
+            case "metadata":
+                lastIndexMetaData = lastIndex;
+                break;
+            case "dataunit":
+                lastIndexDataUnit = lastIndex;
+                break;
+            default:
+                log.info("Unknown tableType to cleanup :" + tableType);
+        }
+    }
+
+    private List<Table> getDataUnitTables(int lastindex) {
+        int pageIndex = lastindex/batchSize;
+        List<Table>tables = new ArrayList<>();
+        List<DataUnit> dataUnits = dataUnitService.findAllDataUnitEntitiesWithExpiredRetentionPolicy(pageIndex, batchSize);
+        if (CollectionUtils.isNotEmpty(dataUnits)) {
+            dataUnits.forEach(dataUnit -> {
+                Table table = new Table();
+                table.setName(dataUnit.getTenant() + "_" + dataUnit.getName());
+                table.setUpdated(dataUnit.getUpdated());
+                table.setRetentionPolicy(dataUnit.getRetentionPolicy());
+                tables.add(table);
+                tableNameToDataUnit.put(table.getName(), dataUnit);
+            });
+        }
+        return tables;
+    }
 
     private void cleanupDataUnit(DataUnit dataUnit) {
+        if (dataUnit == null)
+            return;
         try {
             dataUnitService.delete(dataUnit);
         } catch (Exception ex) {
@@ -156,7 +185,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
         }
     }
 
-    private void cleanupTable(Table table) {
+    private void cleanupMetaDataTable(Table table) {
         Tenant tenant = table.getTenant();
         try {
             MultiTenantContext.setTenant(tenant);
