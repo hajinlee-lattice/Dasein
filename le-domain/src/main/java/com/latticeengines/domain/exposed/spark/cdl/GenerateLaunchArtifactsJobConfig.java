@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,10 +37,10 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
     private String saltHint;
 
     @JsonProperty("accountAttributes")
-    private Set<String> accountAttributes;
+    private Set<String> accountAttributes = new HashSet<>();
 
     @JsonProperty("contactAttributes")
-    private Set<String> contactAttributes;
+    private Set<String> contactAttributes = new HashSet<>();
 
     public GenerateLaunchArtifactsJobConfig() {
     }
