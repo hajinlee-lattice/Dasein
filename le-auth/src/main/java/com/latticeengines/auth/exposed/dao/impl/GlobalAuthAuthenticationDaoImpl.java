@@ -3,7 +3,6 @@ package com.latticeengines.auth.exposed.dao.impl;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.dao.GlobalAuthAuthenticationDao;
@@ -24,11 +23,11 @@ public class GlobalAuthAuthenticationDaoImpl extends BaseDaoImpl<GlobalAuthAuthe
     public GlobalAuthAuthentication findByUsernameJoinUser(String username) {
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthAuthentication> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where Username = '%s'",
-                entityClz.getSimpleName(),
-                username);
-        Query<?> query = session.createQuery(queryStr);
-        List<?> list = query.list();
+        String queryStr = String.format("from %s where Username = :username",
+                entityClz.getSimpleName());
+        List<?> list = session.createQuery(queryStr)
+                .setParameter("username", username)
+                .list();
         if (list.size() == 0) {
             return null;
         } else {
