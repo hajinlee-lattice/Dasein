@@ -104,15 +104,6 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         if (StringUtils.isNotBlank(config.getLaunchId())) {
             launch = playProxy.getPlayLaunch(customerSpace.getTenantId(), config.getPlayId(), config.getLaunchId());
         }
-
-        version = parseDataCollectionVersion(configuration);
-        attrRepo = parseAttrRepo(configuration);
-        evaluationDate = parseEvaluationDateStr(configuration);
-        contactsDataExists = AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact);
-        if (!contactsDataExists) {
-            log.info("No Contact data found in the Attribute Repo");
-        }
-
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         BusinessEntity mainEntity = channelConfig.getAudienceType().asBusinessEntity();
         Long maxEntitiesToLaunch = channel.getMaxEntitiesToLaunch();
@@ -132,6 +123,13 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 launchUniverseDataUnit = getObjectFromContext(CONTACTS_DATA_UNIT, HdfsDataUnit.class);
             }
         } else {
+            version = parseDataCollectionVersion(configuration);
+            attrRepo = parseAttrRepo(configuration);
+            evaluationDate = parseEvaluationDateStr(configuration);
+            contactsDataExists = AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact);
+            if (!contactsDataExists) {
+                log.info("No Contact data found in the Attribute Repo");
+            }
             // 1) setup queries from play and channel settings
             FrontEndQuery frontEndquery = new CampaignFrontEndQueryBuilder.Builder() //
                     .mainEntity(mainEntity) //
