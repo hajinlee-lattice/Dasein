@@ -37,7 +37,7 @@ public class MergeProductCDLE2ETestNG extends SparkJobFunctionalTestNGBase {
         HdfsDataUnit oldProds = result.getTargets().get(0);
         inputProvider = () -> Arrays.asList(getUploadedDataSet(1), oldProds);
         outputVerifier = this::verifySecondOutput;
-        result = runSparkJob(MergeProduct.class, config);
+        result = runSparkJob(MergeProduct.class, config, true);
         targetVerifier = this::verifySecondTarget;
         verifyResult(result);
     }
