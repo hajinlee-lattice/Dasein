@@ -35,7 +35,7 @@ public class VboUserSeatUsageEvent {
     private final Object orderedBy = null;
 
     @JsonProperty
-    private final String drt = "D&B Connect";
+    private final String drt = "D&B Connect-Domain Use";
     @JsonProperty
     private final String eventType = "Report";
     @JsonProperty
