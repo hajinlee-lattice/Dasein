@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ParquetUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -101,12 +102,14 @@ public class ExtractListSegmentCSV
                 extractListSegmentCSVConfig.setSpecialTargets(specialTargets);
                 SparkJobResult result = runSparkJob(ExtractListSegmentCSVJob.class, extractListSegmentCSVConfig);
                 HdfsDataUnit accountDataUnit = result.getTargets().get(0);
+                log.info("account info data unit: {}.", JsonUtils.serialize(accountDataUnit));
                 CSVAdaptor csvAdaptor = segment.getListSegment().getCsvAdaptor();
                 Map<String, ImportFieldMapping> fieldMap = csvAdaptor.getImportFieldMappings().stream()
                         .collect(Collectors.toMap(importFieldMapping -> importFieldMapping.getFieldName(), importFieldMapping -> importFieldMapping));
                 processImportResult(BusinessEntity.Account, accountDataUnit,
                         ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME, fieldMap);
                 HdfsDataUnit contactUnit = result.getTargets().get(1);
+                log.info("contactUnit info data unit: {}.", JsonUtils.serialize(accountDataUnit));
                 processImportResult(BusinessEntity.Contact, contactUnit,
                         ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME, fieldMap);
                 //update segment count

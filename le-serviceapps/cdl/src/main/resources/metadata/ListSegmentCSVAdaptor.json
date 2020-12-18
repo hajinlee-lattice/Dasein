@@ -110,8 +110,8 @@
       "fieldType": "TEXT"
     },
     {
-      "fieldName": "ContactPostalCode",
-      "userFieldName": "Postal Code",
+      "fieldName": "Title",
+      "userFieldName": "Title",
       "fieldType": "TEXT"
     },
     {
