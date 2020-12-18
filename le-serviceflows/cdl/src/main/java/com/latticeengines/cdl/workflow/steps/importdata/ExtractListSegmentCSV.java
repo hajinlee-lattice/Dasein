@@ -109,7 +109,7 @@ public class ExtractListSegmentCSV
                 processImportResult(BusinessEntity.Account, accountDataUnit,
                         ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME, fieldMap);
                 HdfsDataUnit contactUnit = result.getTargets().get(1);
-                log.info("contactUnit info data unit: {}.", JsonUtils.serialize(accountDataUnit));
+                log.info("contactUnit info data unit: {}.", JsonUtils.serialize(contactUnit));
                 processImportResult(BusinessEntity.Contact, contactUnit,
                         ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME, fieldMap);
                 //update segment count
