@@ -100,7 +100,7 @@ public class ImportDeltaArtifactsFromS3 extends BaseImportExportS3<ImportDeltaAr
     private void addDataUnitRequest(String templateId, List<ImportExportRequest> requests, String contextKey) {
         S3DataUnit dataUnit = (S3DataUnit) dataUnitProxy.getByDataTemplateIdAndRole(tenantId, templateId, DataUnit.Role.Master);
         addS3DataUnitToRequestForImport(dataUnit, requests);
-        putObjectInContext(contextKey, dataUnit);
+        putObjectInContext(contextKey, dataUnit.toHdfsDataUnit());
     }
 
     private AttributeRepository buildAttrRepo(CustomerSpace customerSpace) {
