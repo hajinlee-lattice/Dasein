@@ -298,7 +298,7 @@ public class UserServiceImpl implements UserService {
         User user = globalUserManagementService.getUserByUsername(username);
         if (!EmailUtils.isInternalUser(user.getEmail())) {
             Tenant t = tenantService.findByTenantId(tenantId);
-            if (t != null && !inTenant(tenantId, username) && !checkSeatAvailability(t.getSubscriberNumber())) {
+            if (t != null && !inTenant(tenantId, username) && !hasAvailableSeats(t.getSubscriberNumber())) {
                 throw new LedpException(LedpCode.LEDP_18250, new String[]{username});
             }
         }
@@ -313,8 +313,10 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-    private boolean checkSeatAvailability(String subscriberNumber) {
-        if (subscriberNumber == null) return false;
+    private boolean hasAvailableSeats(String subscriberNumber) {
+        if (subscriberNumber == null) {
+            return false;
+        }
         JsonNode meter = vboService.getSubscriberMeter(subscriberNumber);
         if (meter == null || !meter.has("limit") || !meter.has("current_usage")) {
             LOGGER.warn("Unable to retrieve valid meter for subscriber " + subscriberNumber);
@@ -337,7 +339,7 @@ public class UserServiceImpl implements UserService {
         User user = globalUserManagementService.getUserByUsername(username);
         if (!EmailUtils.isInternalUser(user.getEmail())) {
             Tenant t = tenantService.findByTenantId(tenantId);
-            if (t != null && !inTenant(tenantId, username) && !checkSeatAvailability(t.getSubscriberNumber())) {
+            if (t != null && !inTenant(tenantId, username) && !hasAvailableSeats(t.getSubscriberNumber())) {
                 throw new LedpException(LedpCode.LEDP_18250, new String[]{username});
             }
         }
