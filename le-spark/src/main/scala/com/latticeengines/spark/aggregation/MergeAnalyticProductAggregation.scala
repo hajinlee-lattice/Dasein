@@ -67,8 +67,8 @@ private[spark] class MergeAnalyticProductAggregation extends UserDefinedAggregat
     if (newPrio >= oldPrio) {
       val status = input.get(statusIdx)
       if (Active.equals(status)) {
-        val oldId = input.getString(idIdx)
-        val newId = buffer.getString(idIdx)
+        val oldId = buffer.getString(idIdx)
+        val newId = input.getString(idIdx)
         val message = s"Conflicting sku $newId with $oldId"
         buffer(msgIdx) = message :: buffer.getList[String](msgIdx).asScala.toList
       }
