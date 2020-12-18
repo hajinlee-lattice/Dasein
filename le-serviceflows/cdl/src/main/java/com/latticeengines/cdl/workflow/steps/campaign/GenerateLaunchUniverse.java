@@ -5,6 +5,7 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.AT
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,11 +46,13 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchUniverseJobConfig;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.spark.exposed.job.cdl.GenerateLaunchUniverseJob;
+import com.latticeengines.spark.exposed.job.common.CopyJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
@@ -102,11 +105,17 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         TapType tapType = play.getTapType();
         boolean baseOnOtherTapType = TapType.ListSegment.equals(tapType);
         if (baseOnOtherTapType) {
+            DataUnit input;
             if (BusinessEntity.Account.equals(mainEntity)) {
-                launchUniverseDataUnit = getObjectFromContext(ACCOUNTS_DATA_UNIT, HdfsDataUnit.class);
+                input = getObjectFromContext(ACCOUNTS_DATA_UNIT, HdfsDataUnit.class);
             } else {
-                launchUniverseDataUnit = getObjectFromContext(CONTACTS_DATA_UNIT, HdfsDataUnit.class);
+                input = getObjectFromContext(CONTACTS_DATA_UNIT, HdfsDataUnit.class);
             }
+            CopyConfig copyConfig = new CopyConfig();
+            copyConfig.setInput(Collections.singletonList(input));
+            copyConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
+            SparkJobResult sparkJobResult = runSparkJob(CopyJob.class, copyConfig);
+            launchUniverseDataUnit = sparkJobResult.getTargets().get(0);
         } else {
             version = parseDataCollectionVersion(configuration);
             attrRepo = parseAttrRepo(configuration);
