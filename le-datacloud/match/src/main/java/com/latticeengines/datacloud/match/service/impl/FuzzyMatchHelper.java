@@ -14,12 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,6 +37,7 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -105,6 +110,8 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
+
+    private ExecutorService tpsFetcher = null;
 
     @Override
     public boolean accept(String version) {
@@ -321,30 +328,88 @@ public class FuzzyMatchHelper implements DbHelper {
                 recordIds.addAll(fetchIds);
             }
         }
-
-        List<GenericFetchResult> fetchResults;
-        try (PerformanceTimer timer = //
-                     new PerformanceTimer("Fetch " + recordIds.size() + " tps records.")) {
-            TpsMatchConfig matchConfig = context.getInput().getTpsMatchConfig();
-            if (matchConfig != null) {
-                log.info("TpsMatchConfig={}", JsonUtils.serialize(matchConfig));
-            }
-            fetchResults = tpsFetchService.fetchAndFilter(recordIds, matchConfig);
+        if (recordIds.isEmpty()) {
+            return;
         }
 
-        for (InternalOutputRecord record : context.getInternalResults()) {
-            List<String> fetchIds = record.getFetchIds();
-            List<GenericFetchResult> resultsForRecord = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(fetchIds)) {
-                Set<String> fetchIdSet = new HashSet<>(fetchIds);
-                for (GenericFetchResult result: fetchResults) {
-                    if (fetchIdSet.contains(result.getRecordId())) {
-                        resultsForRecord.add(result.getDeepCopy());
-                    }
+        int numChunks = getNumOfChunks(recordIds.size());
+        int size = recordIds.size() / numChunks;
+        List<List<String>> chunks = ListUtils.partition(new ArrayList<>(recordIds), size);
+
+        log.info("No. internal records = {}", context.getInternalResults().size());
+        log.info("Fetching {} contacts, numChunks = {}, size = {}, chunks = {}", recordIds.size(), numChunks, size,
+                chunks.stream().map(List::size).collect(Collectors.toList()));
+
+        ExecutorService fetcher = getTpsFetcher();
+        List<CompletableFuture<List<GenericFetchResult>>> futures = new ArrayList<>();
+        for (List<String> chunk : chunks) {
+            try (PerformanceTimer timer = //
+                    new PerformanceTimer("Fetch " + chunk.size() + " tps records.")) {
+                TpsMatchConfig matchConfig = context.getInput().getTpsMatchConfig();
+                if (matchConfig != null) {
+                    log.info("TpsMatchConfig={}", JsonUtils.serialize(matchConfig));
                 }
-                record.setMultiFetchResults(resultsForRecord);
+
+                futures.add(CompletableFuture.supplyAsync(() -> tpsFetchService.fetchAndFilter(chunk, matchConfig),
+                        fetcher));
             }
         }
+        CompletableFuture<List<GenericFetchResult>> listCompletableFuture = CompletableFuture
+                .allOf(futures.toArray(new CompletableFuture[0])).thenApply(v -> futures.stream()
+                        .map(CompletableFuture::join).flatMap(List::stream).collect(Collectors.toList()));
+        String msg = String.format("Fetching %d contacts", recordIds.size());
+        try (PerformanceTimer timer = new PerformanceTimer(msg)) {
+            List<GenericFetchResult> fetchResults = listCompletableFuture.get();
+            log.info("Fetch result size = {}", fetchResults.size());
+
+            for (InternalOutputRecord record : context.getInternalResults()) {
+                List<String> fetchIds = record.getFetchIds();
+                List<GenericFetchResult> resultsForRecord = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(fetchIds)) {
+                    Set<String> fetchIdSet = new HashSet<>(fetchIds);
+                    for (GenericFetchResult result : fetchResults) {
+                        if (fetchIdSet.contains(result.getRecordId())) {
+                            resultsForRecord.add(result.getDeepCopy());
+                        }
+                    }
+                    record.setMultiFetchResults(resultsForRecord);
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Failed to fetch tps records in parallel", e);
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("Unexpected error", e);
+            // testing and making sure nothing is blocked here
+        }
+    }
+
+    private ExecutorService getTpsFetcher() {
+        if (tpsFetcher == null) {
+            synchronized (this) {
+                if (tpsFetcher == null) {
+                    tpsFetcher = ThreadPoolUtils.getCachedThreadPool("tps-fetcher");
+                }
+            }
+        }
+
+        return tpsFetcher;
+    }
+
+    private int getNumOfChunks(int recordSize) {
+        int chunks = 0;
+        int blocks = (int) Math.floor(recordSize / 25.0);
+        if (blocks <= 1) {
+            chunks = 1;
+        } else if (blocks <= 1000) {
+            chunks = 36;
+        } else if (blocks <= 5000) {
+            chunks = 48;
+        } else {
+            chunks = 60;
+        }
+        log.info("Pick {} chunks", chunks);
+        return chunks;
     }
 
     private void fetchPrimeAccount(MatchContext context) {
@@ -358,7 +423,7 @@ public class FuzzyMatchHelper implements DbHelper {
 
         List<String> elementIds = context.getColumnSelection().getColumnIds();
         // these are from baseinfo_L1_v1 block, ok to always fetch
-        for (String requiredElement: Arrays.asList( //
+        for (String requiredElement : Arrays.asList( //
                 PrimeMetadataService.DunsNumber, //
                 PrimeMetadataService.SubjectName, //
                 PrimeMetadataService.SubjectCountry //
@@ -376,9 +441,10 @@ public class FuzzyMatchHelper implements DbHelper {
         List<PrimeColumn> reqColumns = retry.execute(ctx -> primeMetadataService.getPrimeColumns(elementIds));
         Map<String, List<PrimeColumn>> reqColumnsByBlockId = //
                 retry.execute(ctx -> primeMetadataService.divideIntoBlocks(reqColumns));
-        // these are from compnayinfo_L1_v1 block, need to be excluded from usage tracking if not required by user
+        // these are from compnayinfo_L1_v1 block, need to be excluded from usage
+        // tracking if not required by user
         List<String> extraCompanyInfoElements = new ArrayList<>();
-        for (String requiredElement: Arrays.asList( //
+        for (String requiredElement : Arrays.asList( //
                 PrimeMetadataService.SubjectCity, //
                 PrimeMetadataService.SubjectState, //
                 PrimeMetadataService.SubjectState2 //
@@ -397,9 +463,9 @@ public class FuzzyMatchHelper implements DbHelper {
         List<PrimeAccount> accounts;
         long start = System.currentTimeMillis();
         try (PerformanceTimer timer = //
-                     new PerformanceTimer("Fetch " + ids.size() + " accounts from Direct+.")) {
+                new PerformanceTimer("Fetch " + ids.size() + " accounts from Direct+.")) {
             List<DirectPlusEnrichRequest> requests = new ArrayList<>();
-            for (String duns: ids) {
+            for (String duns : ids) {
                 DirectPlusEnrichRequest request = new DirectPlusEnrichRequest();
                 request.setDunsNumber(duns);
                 request.setReqColumnsByBlockId(reqColumnsByBlockId);
@@ -447,7 +513,7 @@ public class FuzzyMatchHelper implements DbHelper {
         reportBlocks.addAll(blockIds);
         String duns = account.getId();
         List<VboUsageEvent> events = new ArrayList<>();
-        for (String blockId: reportBlocks) {
+        for (String blockId : reportBlocks) {
             VboUsageEvent event = new VboUsageEvent();
             event.setSubjectDuns(duns);
             event.setEventType(EVENT_DATA);
@@ -589,7 +655,8 @@ public class FuzzyMatchHelper implements DbHelper {
         if (MapUtils.isNotEmpty(primeAccount)) {
             queryResult.putAll(primeAccount);
         }
-        if (record.isMatched() && (record.getFetchResult() == null || record.getFetchResult().getResult().containsKey(PrimeAccount.ENRICH_ERROR_CODE))) {
+        if (record.isMatched() && (record.getFetchResult() == null
+                || record.getFetchResult().getResult().containsKey(PrimeAccount.ENRICH_ERROR_CODE))) {
             record.setMatched(false);
         }
         record.setQueryResult(queryResult);
@@ -613,12 +680,12 @@ public class FuzzyMatchHelper implements DbHelper {
     }
 
     private List<Map<String, Object>> parseMultiFetchResult(List<GenericFetchResult> fetchResults, //
-                                                            ColumnSelection columnSelection) {
+            ColumnSelection columnSelection) {
         if (CollectionUtils.isEmpty(fetchResults)) {
             return Collections.emptyList();
         } else {
             List<Map<String, Object>> parsedList = new ArrayList<>();
-            for (GenericFetchResult fetchResult: fetchResults) {
+            for (GenericFetchResult fetchResult : fetchResults) {
                 Map<String, Object> parsed = parseFetchResult(fetchResult, columnSelection);
                 if (MapUtils.isNotEmpty(parsed)) {
                     parsedList.add(parsed);
@@ -635,7 +702,7 @@ public class FuzzyMatchHelper implements DbHelper {
             Map<String, Object> result = fetchResult.getResult();
             Set<String> attrsToRemove = new HashSet<>(result.keySet());
             attrsToRemove.removeAll(columnSelection.getColumnIds());
-            for (String attr: attrsToRemove) {
+            for (String attr : attrsToRemove) {
                 result.remove(attr);
             }
             return result;
@@ -715,5 +782,4 @@ public class FuzzyMatchHelper implements DbHelper {
         record.setMatchedDuns((String) amAttributes.get(MatchConstants.AM_DUNS_FIELD));
         record.setMatchedDduns((String) amAttributes.get(MatchConstants.AM_DDUNS_FIELD));
     }
-
 }

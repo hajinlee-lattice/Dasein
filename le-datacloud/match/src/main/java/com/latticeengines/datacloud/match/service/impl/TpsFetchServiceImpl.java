@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.domain.GenericFetchResult;
@@ -60,15 +61,18 @@ public class TpsFetchServiceImpl implements TpsFetchService {
         List<GenericFetchResult> results = new ArrayList<>();
         ContactTpsEntryMgr tpsEntityMgr = getTpsEntityMgr();
         List<String> ids = new ArrayList<>(recordIds);
-        List<ContactTpsEntry> entries = tpsEntityMgr.batchFindByKey(ids);
-        for (ContactTpsEntry entry : entries) {
-            if ((entry != null) && (entry.getAttributes() != null)) {
-                GenericFetchResult fetchResult = new GenericFetchResult();
-                fetchResult.setRecordId(entry.getId());
-                fetchResult.setResult(entry.getAttributes());
+        String msg = String.format("Batch getting %d items in dynamo", recordIds.size());
+        try (PerformanceTimer timer = new PerformanceTimer(msg)) {
+            List<ContactTpsEntry> entries = tpsEntityMgr.batchFindByKey(ids);
+            for (ContactTpsEntry entry : entries) {
+                if ((entry != null) && (entry.getAttributes() != null)) {
+                    GenericFetchResult fetchResult = new GenericFetchResult();
+                    fetchResult.setRecordId(entry.getId());
+                    fetchResult.setResult(entry.getAttributes());
 
-                if (matchConfig == null || isValid(fetchResult, matchConfig)) {
-                    results.add(fetchResult);
+                    if (matchConfig == null || isValid(fetchResult, matchConfig)) {
+                        results.add(fetchResult);
+                    }
                 }
             }
         }
@@ -78,7 +82,7 @@ public class TpsFetchServiceImpl implements TpsFetchService {
 
     public ContactTpsEntryMgr getTpsEntityMgr() {
         String version = versionEntityMgr.currentApprovedVersion().getVersion();
-        log.info("TpsFetchServiceImpl, datacloud version " + version);
+        log.debug("TpsFetchServiceImpl, datacloud version " + version);
         ContactTpsEntryMgr entityMgr = tpsEntityMgrs.get(version);
         if (entityMgr == null) {
             entityMgr = new ContactTpsEntryMgrImpl(messageService, dataService, version);

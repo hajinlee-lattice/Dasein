@@ -241,6 +241,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             matchContext.setNameLocations(new HashSet<>());
         }
 
+        log.info("No. columns = {}, no. records = {}", columns.size(), records.size());
+
         // Convert InternalOutputRecords to OutputRecords
         for (InternalOutputRecord internalRecord : records) {
             if (internalRecord.isFailed()) {
@@ -259,6 +261,12 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             List<List<Object>> outputList = new LinkedList<>();
             if (isMultiResultMatch(matchContext)) {
                 queryResults = internalRecord.getMultiQueryResult();
+                if (queryResults.size() > 1000) {
+                    log.info("Multi query result size = {}", queryResults.size());
+                }
+                // clear these internal field, otherwise deep copy might take a long time
+                internalRecord.setMultiQueryResult(null);
+                internalRecord.setMultiFetchResults(null);
             } else {
                 queryResults.add(internalRecord.getQueryResult());
             }
