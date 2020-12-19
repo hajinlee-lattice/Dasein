@@ -465,7 +465,7 @@ public class ProcessorContext {
 
         keyMap = originalInput.getKeyMap();
         blockSize = jobConfiguration.getBlockSize();
-        timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(60));
+        timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(180));
         this.recordTimeOut = timeOut;
         if (useRemoteDnB) {
             timeOut = timeOut * 2;
