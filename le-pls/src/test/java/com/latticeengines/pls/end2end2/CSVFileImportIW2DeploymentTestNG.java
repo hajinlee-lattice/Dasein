@@ -86,6 +86,7 @@ public class CSVFileImportIW2DeploymentTestNG extends CSVFileImportIW2Deployment
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment")

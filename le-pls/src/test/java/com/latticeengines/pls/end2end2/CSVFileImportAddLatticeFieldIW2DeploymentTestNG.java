@@ -32,6 +32,7 @@ public class CSVFileImportAddLatticeFieldIW2DeploymentTestNG extends CSVFileImpo
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment")

@@ -40,6 +40,7 @@ public class CSVFileImportDateFormatIW2DeploymentTestNG extends CSVFileImportIW2
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         restTemplate = testBed.getRestTemplate();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment")
