@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignFrontEndQueryBuilder;
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
@@ -106,12 +107,14 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         boolean baseOnOtherTapType = TapType.ListSegment.equals(tapType);
         if (baseOnOtherTapType) {
             DataUnit input;
+            CopyConfig copyConfig = new CopyConfig();
             if (BusinessEntity.Account.equals(mainEntity)) {
                 input = getObjectFromContext(ACCOUNTS_DATA_UNIT, HdfsDataUnit.class);
+                copyConfig.setSelectAttrs(Lists.newArrayList(InterfaceName.AccountId.name()));
             } else {
                 input = getObjectFromContext(CONTACTS_DATA_UNIT, HdfsDataUnit.class);
+                copyConfig.setSelectAttrs(Lists.newArrayList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name()));
             }
-            CopyConfig copyConfig = new CopyConfig();
             copyConfig.setInput(Collections.singletonList(input));
             copyConfig.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
             SparkJobResult sparkJobResult = runSparkJob(CopyJob.class, copyConfig);
