@@ -44,7 +44,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
                 Arrays.asList(BusinessEntity.Contact), channelConfig.getAttributeSetName(), play);
         Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = getDefaultFieldsAttrToServingStoreAttrRemap(channel);
         List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.AWS_S3,
-                accountAttributesMap, contactAttributesMap, defaultFieldsAttributesToServingStoreAttributesRemap, channelConfig.getAudienceType());
+                accountAttributesMap, contactAttributesMap, defaultFieldsAttributesToServingStoreAttributesRemap, channelAudienceType);
         if (channelConfig.isIncludeExportAttributes() && !Play.TapType.ListSegment.equals(play.getTapType())) {
             includeExportAttributes(customerSpace, channelConfig, accountAttributesMap, contactAttributesMap,
                     exportColumnMetadataList, channelAudienceType);

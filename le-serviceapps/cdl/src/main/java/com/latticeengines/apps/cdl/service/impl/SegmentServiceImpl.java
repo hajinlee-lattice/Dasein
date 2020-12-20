@@ -278,9 +278,11 @@ public class SegmentServiceImpl implements SegmentService {
             List<MetadataSegment> segments = getSegments();
             if (CollectionUtils.isNotEmpty(segments)) {
                 segments.forEach(segment -> {
-                    MetadataSegment segmentCopy = segment.getDeepCopy();
-                    segmentCopy.setCountsOutdated(true);
-                    segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+                    if (!SegmentUtils.hasListSegment(segment)) {
+                        MetadataSegment segmentCopy = segment.getDeepCopy();
+                        segmentCopy.setCountsOutdated(true);
+                        segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+                    }
                 });
             }
             UpdateSegmentCountResponse response = updateSegmentsCounts();
