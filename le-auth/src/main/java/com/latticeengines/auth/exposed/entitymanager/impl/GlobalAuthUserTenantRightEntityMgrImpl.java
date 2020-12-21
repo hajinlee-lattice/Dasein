@@ -36,7 +36,7 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     }
 
     @Override
-    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED, readOnly = true)
     public GlobalAuthUserTenantRight findByUserIdAndTenantId(Long userId, Long tenantId, boolean inflate) {
         GlobalAuthUserTenantRight globalAuthUserTenantRight = gaUserTenantRightDao.findByUserIdAndTenantId(userId, tenantId);
         if (inflate && globalAuthUserTenantRight != null) {

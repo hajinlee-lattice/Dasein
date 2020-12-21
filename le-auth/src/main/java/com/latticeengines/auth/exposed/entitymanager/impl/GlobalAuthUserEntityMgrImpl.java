@@ -71,7 +71,7 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     }
 
     @Override
-    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED, readOnly = true)
     public GlobalAuthUser findByEmail(String email) {
         return gaUserDao.findByField("Email", email);
     }
