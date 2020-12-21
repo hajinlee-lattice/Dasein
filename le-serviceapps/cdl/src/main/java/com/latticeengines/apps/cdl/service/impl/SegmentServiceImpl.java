@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -564,7 +565,11 @@ public class SegmentServiceImpl implements SegmentService {
             ListSegment listSegment = segment.getListSegment();
             BusinessEntity entity = getBusinessEntity(entities);
             String templateId = listSegment.getTemplateId(entity.name());
-            return dataTemplateService.getTemplateMetadata(templateId, entity);
+            if (StringUtils.isNotEmpty(templateId)) {
+                return dataTemplateService.getTemplateMetadata(templateId, entity);
+            } else {
+                return Collections.emptyMap();
+            }
         } else {
             log.info("can't find list segment info for segment {}.", segmentName);
             throw new LedpException(LedpCode.LEDP_00002, new RuntimeException("List segment does not exists"));

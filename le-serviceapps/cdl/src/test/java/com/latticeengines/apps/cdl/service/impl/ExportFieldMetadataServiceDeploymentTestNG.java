@@ -488,26 +488,24 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         listSegment.setExternalSystem("External system");
         listSegment.setExternalSegmentId(UUID.randomUUID().toString());
         metadataSegment.setListSegment(listSegment);
-        segmentService.createOrUpdateListSegment(metadataSegment);
+        metadataSegment = segmentService.createOrUpdateListSegment(metadataSegment);
         Play play = new Play();
         populatePlay(play, NAME_FOR_LIST_SEGMENT_PLAY, metadataSegment);
-        playEntityMgr.create(play);
+        playEntityMgr.createPlay(play);
         return playEntityMgr.getPlayByName(NAME_FOR_LIST_SEGMENT_PLAY, false);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
     public void testPlayBasedOnListSegment() {
+        CDLExternalSystemName externalSystemName = CDLExternalSystemName.AWS_S3;
         S3ChannelConfig channelConfig = new S3ChannelConfig();
         Play playBasedOnListSegment = createPlayBasedOnListSegment();
+        registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, externalSystemName, "AWS_S3_4");
         createPlayLaunchChannel(channelConfig, lookupIdMap, playBasedOnListSegment);
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase.getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info("Column metadata from play based on list segment:, {}.", JsonUtils.serialize(columnMetadata));
         assertEquals(columnMetadata.size(), 37);
-        List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
-        log.info("Campaign derived field from play based on list segment, {}.", JsonUtils.serialize(attrNames));
-        long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
-        assertEquals(nonStandardFields, 30);
     }
 
     private void testLiveRampChannel(ChannelConfig channelConfig) {
