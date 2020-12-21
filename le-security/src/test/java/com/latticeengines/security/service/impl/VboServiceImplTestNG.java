@@ -26,8 +26,8 @@ public class VboServiceImplTestNG extends AbstractTestNGSpringContextTests {
         // valid request
         JsonNode meter = vboService.getSubscriberMeter(TEST_SUBSCRIBER_NUMBER);
         Assert.assertNotNull(meter);
-        Assert.assertTrue(meter.has("current_usage"));
-        Assert.assertTrue(meter.has("limit"));
+        Assert.assertNotNull(meter.get("current_usage"));
+        Assert.assertEquals(meter.get("limit").asInt(), 100);
 
         // bad subscriber number
         meter = vboService.getSubscriberMeter("123456789");

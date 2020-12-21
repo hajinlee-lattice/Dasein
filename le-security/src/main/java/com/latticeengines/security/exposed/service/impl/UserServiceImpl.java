@@ -20,11 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
-import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
@@ -42,7 +40,6 @@ import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
@@ -52,11 +49,9 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
-import com.latticeengines.security.service.VboService;
 import com.latticeengines.security.service.impl.IDaaSServiceImpl;
 import com.latticeengines.security.util.IntegrationUserUtils;
 
@@ -86,12 +81,6 @@ public class UserServiceImpl implements UserService {
 
     @Inject
     private IDaaSService iDaaSService;
-
-    @Inject
-    private TenantService tenantService;
-
-    @Inject
-    private VboService vboService;
 
     private static EmailValidator emailValidator = EmailValidator.getInstance();
 
@@ -294,14 +283,6 @@ public class UserServiceImpl implements UserService {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
-        // case: external user; not in tenant already; no available seats
-        User user = globalUserManagementService.getUserByUsername(username);
-        if (!EmailUtils.isInternalUser(user.getEmail())) {
-            Tenant t = tenantService.findByTenantId(tenantId);
-            if (t != null && !inTenant(tenantId, username) && !hasAvailableSeats(t.getSubscriberNumber())) {
-                throw new LedpException(LedpCode.LEDP_18250, new String[]{username});
-            }
-        }
         if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
@@ -313,18 +294,6 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-    private boolean hasAvailableSeats(String subscriberNumber) {
-        if (subscriberNumber == null) {
-            return false;
-        }
-        JsonNode meter = vboService.getSubscriberMeter(subscriberNumber);
-        if (meter == null || !meter.has("limit") || !meter.has("current_usage")) {
-            LOGGER.warn("Unable to retrieve valid meter for subscriber " + subscriberNumber);
-            return false;
-        }
-        return meter.get("current_usage").asInt() < meter.get("limit").asInt();
-    }
-
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
             Long expirationDate, boolean createUser, boolean clearSession, List<GlobalTeam> userTeams) {
@@ -334,14 +303,6 @@ public class UserServiceImpl implements UserService {
         // make sure only internal user has expiration date
         if (!AccessLevel.getInternalAccessLevel().contains(accessLevel)) {
             expirationDate = null;
-        }
-        // case: external user; not in tenant already; no available seats
-        User user = globalUserManagementService.getUserByUsername(username);
-        if (!EmailUtils.isInternalUser(user.getEmail())) {
-            Tenant t = tenantService.findByTenantId(tenantId);
-            if (t != null && !inTenant(tenantId, username) && !hasAvailableSeats(t.getSubscriberNumber())) {
-                throw new LedpException(LedpCode.LEDP_18250, new String[]{username});
-            }
         }
 
         Tracer tracer = GlobalTracer.get();

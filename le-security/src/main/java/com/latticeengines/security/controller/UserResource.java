@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.pls.UserUpdateResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
@@ -143,6 +145,7 @@ public class UserResource {
         uRegTenant.setUserRegistration(userReg);
         uRegTenant.setTenant(tenant.getId());
         User user = userReg.getUser();
+        boolean isDCPTenant = batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP);
 
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
@@ -167,6 +170,10 @@ public class UserResource {
             response.setErrors(Collections.singletonList("Cannot create a user with higher access level."));
             return response;
         }
+        if (isDCPTenant && tenant.getTenantType() == TenantType.CUSTOMER && !EmailUtils.isInternalUser(user.getEmail())
+                && !hasAvailableSeats(tenant.getSubscriberNumber())) {
+            throw new LedpException(LedpCode.LEDP_18252, new String[]{tenant.getId()});
+        }
 
         Tracer tracer = GlobalTracer.get();
         Span userSpan = null;
@@ -184,7 +191,7 @@ public class UserResource {
                 usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
                 usageEvent.setLUID(loginUser.getPid());
             }
-          
+
             RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
             if (usageEvent != null)
                 usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
@@ -288,6 +295,7 @@ public class UserResource {
         checkUser(loginUser);
         User user = userService.findByUsername(username);
         boolean newUser = !userService.inTenant(tenantId, username);
+        boolean isDCPTenant = batonService.hasProduct(CustomerSpace.parse(tenantId), LatticeProduct.DCP);
         // update access level
 
         Tracer tracer = GlobalTracer.get();
@@ -329,6 +337,12 @@ public class UserResource {
                     return document;
                 }
 
+                if (newUser && isDCPTenant && tenant.getTenantType() == TenantType.CUSTOMER
+                        && !EmailUtils.isInternalUser(user.getEmail())
+                        && !hasAvailableSeats(tenant.getSubscriberNumber())) {
+                    throw new LedpException(LedpCode.LEDP_18252, new String[]{tenantId});
+                }
+
                 userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
                         false, !newUser, data.getUserTeams());
                 LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
@@ -343,7 +357,7 @@ public class UserResource {
                     } else {
                         emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
                     }
-                  
+
                     if (usageEvent != null)
                         usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                 }
@@ -444,5 +458,15 @@ public class UserResource {
             usageEvent.setContractTermStartDate(details.getEffectiveDate());
             usageEvent.setContractTermEndDate(details.getExpirationDate());
         }
+    }
+
+    private boolean hasAvailableSeats(String subscriberNumber) {
+        JsonNode meter = vboService.getSubscriberMeter(subscriberNumber);
+        if (meter == null || !meter.has("limit") || !meter.has("current_usage")) {
+            LOGGER.warn("Unable to retrieve meter for subscriber: " + subscriberNumber);
+            return false;
+        }
+        int current_usage = (meter.get("current_usage") == null) ? 0 : meter.get("current_usage").asInt();
+        return current_usage < meter.get("limit").asInt();
     }
 }
