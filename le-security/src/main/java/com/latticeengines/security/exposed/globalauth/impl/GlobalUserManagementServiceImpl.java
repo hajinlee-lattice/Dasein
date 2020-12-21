@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
@@ -257,6 +258,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    @Transactional
     public String getRight(String username, String tenantId) {
         try {
             log.info(String.format("Getting rights of user %s in tenant %s.", username, tenantId));
