@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -31,7 +32,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessT
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig;
-import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.spark.exposed.job.cdl.BuildPeriodTransactionJob;
 
@@ -73,9 +73,6 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
 
     @Inject
     private PeriodProxy periodProxy;
-
-    @Inject
-    private ActivityMetricsProxy activityMetricsProxy;
 
     @Override
     protected void bootstrap() {
@@ -169,27 +166,28 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         exportTableRoleToRedshift(table, TableRoleInCollection.AggregatedPeriodTransaction);
     }
 
-    // TODO - remove this after query on spendingAnalysis stable
-    private TransformTxnStreamConfig buildAggregatedPeriodTxnConfig(Map<String, Table> periodTransactionTables,
-                                                                    List<String> retainTypes) {
-        TransformTxnStreamConfig config = new TransformTxnStreamConfig();
-        config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, periodId, periodName);
-        config.renameMapping = constructPeriodRename();
-        config.targetColumns = STANDARD_PERIOD_TXN_FIELDS;
-        config.repartitionKey = periodId;
-        config.inputMetadataWrapper = new SparkIOMetadataWrapper();
-        List<DataUnit> inputs = new ArrayList<>();
-        periodProxy.getPeriodNames(customerSpaceStr).forEach(periodName -> {
-            config.inputMetadataWrapper.getMetadata().put(periodName, new SparkIOMetadataWrapper.Partition(inputs.size(), retainTypes));
-            retainTypes.forEach(type -> {
-                String periodStreamPrefix = String.format(PERIOD_STREAM_PREFIX, type, periodName);
-                Table table = periodTransactionTables.get(periodStreamPrefix);
-                inputs.add(table.partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)));
-            });
-        });
-        config.setInput(inputs);
-        return config;
-    }
+    // build periodTxn serving store with all product type and all periods
+    // TODO - remove this after PurchaseHistoryServiceImpl#getPeriodTransactionsByAccountId stable
+//    private TransformTxnStreamConfig buildAggregatedPeriodTxnConfig(Map<String, Table> periodTransactionTables,
+//                                                                    List<String> retainTypes) {
+//        TransformTxnStreamConfig config = new TransformTxnStreamConfig();
+//        config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, periodId, periodName);
+//        config.renameMapping = constructPeriodRename();
+//        config.targetColumns = STANDARD_PERIOD_TXN_FIELDS;
+//        config.repartitionKey = periodId;
+//        config.inputMetadataWrapper = new SparkIOMetadataWrapper();
+//        List<DataUnit> inputs = new ArrayList<>();
+//        periodProxy.getPeriodNames(customerSpaceStr).forEach(periodName -> {
+//            config.inputMetadataWrapper.getMetadata().put(periodName, new SparkIOMetadataWrapper.Partition(inputs.size(), retainTypes));
+//            retainTypes.forEach(type -> {
+//                String periodStreamPrefix = String.format(PERIOD_STREAM_PREFIX, type, periodName);
+//                Table table = periodTransactionTables.get(periodStreamPrefix);
+//                inputs.add(table.partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)));
+//            });
+//        });
+//        config.setInput(inputs);
+//        return config;
+//    }
 
     private TransformTxnStreamConfig buildConsolidatedPeriodTxnConfig(String period, List<String> retainTypes,
             Map<String, Table> periodTransactionTables) {
@@ -215,40 +213,41 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         return config;
     }
 
-//    private TransformTxnStreamConfig buildAggregatedPeriodTxnConfig(Map<String, Table> periodTransactionTables,
-//            List<String> retainTypes) {
-//        TransformTxnStreamConfig config = new TransformTxnStreamConfig();
-//        config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, periodId, periodName);
-//        config.renameMapping = constructPeriodRename();
-//        config.targetColumns = STANDARD_PERIOD_TXN_FIELDS;
-//        config.repartitionKey = periodId;
-//        config.inputMetadataWrapper = new SparkIOMetadataWrapper();
-//        List<DataUnit> inputs = new ArrayList<>();
-//        if (retainTypes.contains(analytic)) {
-//            config.inputMetadataWrapper.getMetadata().put(rollingPeriod, new SparkIOMetadataWrapper.Partition(0, null));
-//            List<String> rollingPeriodStreamTypes = new ArrayList<>();
-//            rollingPeriodStreamTypes.add(analytic);
-//            inputs.add(periodTransactionTables.get(String.format(PERIOD_STREAM_PREFIX, analytic, rollingPeriod))
-//                    .partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)));
-//            config.inputMetadataWrapper.getMetadata().get(rollingPeriod).setLabels(rollingPeriodStreamTypes);
-//        }
-//        if (retainTypes.contains(spending)) {
-//            if (config.inputMetadataWrapper.getMetadata().containsKey(PeriodStrategy.Template.Month.name())) {
-//                // rollingPeriod == month, append to label list
-//                config.inputMetadataWrapper.getMetadata().get(PeriodStrategy.Template.Month.name()).getLabels()
-//                        .add(spending);
-//            } else {
-//                // add new partition for month period
-//                config.inputMetadataWrapper.getMetadata().put(PeriodStrategy.Template.Month.name(),
-//                        new SparkIOMetadataWrapper.Partition(inputs.size(), Collections.singletonList(spending)));
-//            }
-//            inputs.add(periodTransactionTables
-//                    .get(String.format(PERIOD_STREAM_PREFIX, spending, PeriodStrategy.Template.Month.name()))
-//                    .partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)));
-//        }
-//        config.setInput(inputs);
-//        return config;
-//    }
+    // build periodTxn serving store with analytic rolling period + spending month
+    private TransformTxnStreamConfig buildAggregatedPeriodTxnConfig(Map<String, Table> periodTransactionTables,
+            List<String> retainTypes) {
+        TransformTxnStreamConfig config = new TransformTxnStreamConfig();
+        config.compositeSrc = Arrays.asList(accountId, productId, productType, txnType, periodId, periodName);
+        config.renameMapping = constructPeriodRename();
+        config.targetColumns = STANDARD_PERIOD_TXN_FIELDS;
+        config.repartitionKey = periodId;
+        config.inputMetadataWrapper = new SparkIOMetadataWrapper();
+        List<DataUnit> inputs = new ArrayList<>();
+        if (retainTypes.contains(analytic)) {
+            config.inputMetadataWrapper.getMetadata().put(rollingPeriod, new SparkIOMetadataWrapper.Partition(0, null));
+            List<String> rollingPeriodStreamTypes = new ArrayList<>();
+            rollingPeriodStreamTypes.add(analytic);
+            inputs.add(periodTransactionTables.get(String.format(PERIOD_STREAM_PREFIX, analytic, rollingPeriod))
+                    .partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)));
+            config.inputMetadataWrapper.getMetadata().get(rollingPeriod).setLabels(rollingPeriodStreamTypes);
+        }
+        if (retainTypes.contains(spending)) {
+            if (config.inputMetadataWrapper.getMetadata().containsKey(PeriodStrategy.Template.Month.name())) {
+                // rollingPeriod == month, append to label list
+                config.inputMetadataWrapper.getMetadata().get(PeriodStrategy.Template.Month.name()).getLabels()
+                        .add(spending);
+            } else {
+                // add new partition for month period
+                config.inputMetadataWrapper.getMetadata().put(PeriodStrategy.Template.Month.name(),
+                        new SparkIOMetadataWrapper.Partition(inputs.size(), Collections.singletonList(spending)));
+            }
+            inputs.add(periodTransactionTables
+                    .get(String.format(PERIOD_STREAM_PREFIX, spending, PeriodStrategy.Template.Month.name()))
+                    .partitionedToHdfsDataUnit(null, Collections.singletonList(periodId)));
+        }
+        config.setInput(inputs);
+        return config;
+    }
 
     private Map<String, String> constructPeriodRename() {
         Map<String, String> map = new HashMap<>();

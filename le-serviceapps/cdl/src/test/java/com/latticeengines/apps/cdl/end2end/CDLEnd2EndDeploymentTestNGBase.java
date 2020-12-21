@@ -312,8 +312,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after ProcessTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long PERIOD_TXN_SERVING_EM = 62037L;
-//    static final Long PERIOD_TXN_SERVING_EM = 12247L; // TODO - use this after spending analysis query hooked up
+    static final Long PERIOD_TXN_SERVING_EM = 12240L;
     // Sum of all period transaction batch stores
     static final Long PERIOD_TXN_BATCH_EM = 62037L;
     // Number of aggregated period transaction after UpdateTransaction test
@@ -321,8 +320,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long PERIOD_TRANSACTION_UT_SERVING_EM = 75183L;
-//    static final Long PERIOD_TRANSACTION_UT_SERVING_EM = 14234; // TODO - use this after spending analysis query hooked up
+    static final Long PERIOD_TRANSACTION_UT_SERVING_EM = 14227L;
+    // Sum of all period transaction batch stores
     static final Long PERIOD_TRANSACTION_UT_BATCH_EM = 75183L;
     // Number of total purchase history attributes after ProcessTransaction test
     static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
