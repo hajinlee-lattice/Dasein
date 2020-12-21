@@ -488,6 +488,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         listSegment.setExternalSystem("External system");
         listSegment.setExternalSegmentId(UUID.randomUUID().toString());
         metadataSegment.setListSegment(listSegment);
+        segmentService.createOrUpdateListSegment(metadataSegment);
         Play play = new Play();
         populatePlay(play, NAME_FOR_LIST_SEGMENT_PLAY, metadataSegment);
         playEntityMgr.create(play);
