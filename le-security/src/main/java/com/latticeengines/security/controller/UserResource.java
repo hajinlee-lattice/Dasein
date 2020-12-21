@@ -466,6 +466,8 @@ public class UserResource {
             LOGGER.warn("Unable to retrieve meter for subscriber: " + subscriberNumber);
             return false;
         }
+        if (meter.get("current_usage") == null)
+            LOGGER.info("Null current_usage in meter for subscriber: " + subscriberNumber);
         int current_usage = (meter.get("current_usage") == null) ? 0 : meter.get("current_usage").asInt();
         return current_usage < meter.get("limit").asInt();
     }
