@@ -192,7 +192,7 @@ public class SegmentServiceImpl implements SegmentService {
         if (segment == null) {
             return false;
         }
-        segmentEntityMgr.delete(segment, true, hardDelete);
+        segmentEntityMgr.delete(segment, false, hardDelete);
         return true;
     }
 
