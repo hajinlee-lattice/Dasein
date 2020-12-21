@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.metadata.service.MetadataTableCleanupService;
-import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 
 @Component("metadataTableCleanupServiceImpl")
 public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupService {
@@ -35,9 +34,6 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
 
     @Inject
     private DataUnitService dataUnitService;
-
-    @Inject
-    private RedshiftPartitionService redshiftPartitionService;
 
     @Value("${metadata.table.cleanup.size}")
     private int maxCleanupSize;
@@ -62,6 +58,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
     private void cleanpTables(String tableType, int lastIndex) {
         log.info(tableType + " cleanup task started for.");
         List<Table> tablesToDelete = new ArrayList<>();
+        tableNameToDataUnit = new HashMap<>();
         // only query 50000 records per clean up job
         int count = 0;
         int preLastIndex = lastIndex;
@@ -135,7 +132,6 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
                 tables = metadataService.findAllWithExpiredRetentionPolicy(lastIndex, batchSize);
                 break;
             case "dataunit":
-                tableNameToDataUnit = new HashMap<>();
                 tables = getDataUnitTables(lastIndex);
                 break;
             default:
@@ -164,7 +160,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
         if (CollectionUtils.isNotEmpty(dataUnits)) {
             dataUnits.forEach(dataUnit -> {
                 Table table = new Table();
-                table.setName(dataUnit.getTenant() + "_" + dataUnit.getName());
+                table.setName(dataUnit.getTenant() + "_" + dataUnit.getStorageType().name() + "_" + dataUnit.getName());
                 table.setUpdated(dataUnit.getUpdated());
                 table.setRetentionPolicy(dataUnit.getRetentionPolicy());
                 tables.add(table);
