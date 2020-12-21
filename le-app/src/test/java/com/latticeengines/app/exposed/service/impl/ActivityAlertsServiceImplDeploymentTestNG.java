@@ -96,8 +96,7 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
     }
 
     @Test(groups = "deployment")
-    public void testDeletingDueToExpire() {
-
+    public void testCleanupAlertsDueToExpire() {
         activityAlertsCleanupService.cleanup();
 
         DataPage data = activityAlertsService.findActivityAlertsByAccountAndCategory(
