@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -50,7 +51,25 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     @Test(groups = "functional")
     public void findByKey() {
         List<ActivityAlert> records = activityAlertEntityMgr.findTopNAlertsByEntityId("12345", BusinessEntity.Account,
-                "version1", AlertCategory.PEOPLE, 3);
+                "version1", AlertCategory.PEOPLE, 6);
+        assertEquals(records.size(), 2);
+
+        records = activityAlertEntityMgr.findTopNAlertsByEntityId("23456", BusinessEntity.Account, "version1",
+                AlertCategory.PRODUCTS, 6);
+        assertEquals(records.size(), 4);
+
+        int deleted = activityAlertEntityMgr
+                .deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
+        records = activityAlertEntityMgr.findTopNAlertsByEntityId("23456", BusinessEntity.Account, "version1",
+                AlertCategory.PRODUCTS, 6);
+        Assert.assertEquals(deleted,1);
+        assertEquals(records.size(), 3);
+
+        deleted = activityAlertEntityMgr
+                .deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
+        records = activityAlertEntityMgr.findTopNAlertsByEntityId("23456", BusinessEntity.Account, "version1",
+                AlertCategory.PRODUCTS, 6);
+        Assert.assertEquals(deleted,1);
         assertEquals(records.size(), 2);
     }
 
@@ -125,11 +144,53 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
 
         alerts.add(record);
 
+        // record 4
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
+        record.setEntityId("23456");
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(89, ChronoUnit.DAYS)));
+        record.setVersion("version1");
+        record.setCategory(AlertCategory.PRODUCTS);
+
+        alerts.add(record);
+
+        // record 5
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
+        record.setEntityId("23456");
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(91, ChronoUnit.DAYS)));
+        record.setVersion("version1");
+        record.setCategory(AlertCategory.PRODUCTS);
+
+        alerts.add(record);
+
+        // record6
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
+        record.setEntityId("23456");
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(95, ChronoUnit.DAYS)));
+        record.setVersion("version1");
+        record.setCategory(AlertCategory.PRODUCTS);
+
+        alerts.add(record);
+
         return alerts;
     }
 
     @AfterClass(groups = "functional")
     public void teardown() {
         activityAlertRepository.deleteInBatch(alerts);
+        List<ActivityAlert> records = activityAlertEntityMgr.findTopNAlertsByEntityId("12345", BusinessEntity.Account,
+                "version1", AlertCategory.PEOPLE, 6);
+        assertEquals(records.size(), 0);
+        records = activityAlertEntityMgr.findTopNAlertsByEntityId("23456", BusinessEntity.Account, "version1",
+                AlertCategory.PRODUCTS, 6);
+        assertEquals(records.size(), 0);
     }
 }

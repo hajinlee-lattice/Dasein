@@ -1,5 +1,6 @@
 package com.latticeengines.app.exposed.entitymanager.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,6 +34,12 @@ public class ActivityAlertEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Activ
             int limit) {
         return activityAlertRepository.findByEntityIdAndEntityTypeAndVersionAndCategoryOrderByCreationTimestampDesc(
                 entityId, entityType, version, category, PageRequest.of(0, limit));
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int deleteByExpireDateBefore(Date expireDate, int maxUpdateRows) {
+        return activityAlertRepository.deleteByCreationTimestampBefore(expireDate, maxUpdateRows);
     }
 
     @Override

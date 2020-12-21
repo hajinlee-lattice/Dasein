@@ -19,6 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.repository.datadb.ActivityAlertRepository;
+import com.latticeengines.app.exposed.service.ActivityAlertsCleanupService;
 import com.latticeengines.app.exposed.service.ActivityAlertsService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.testframework.AppDeploymentTestNGBase;
@@ -52,9 +53,15 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
     @Inject
     private ActivityAlertsService activityAlertsService;
 
+    @Inject
+    private ActivityAlertsCleanupService activityAlertsCleanupService;
+
     private final DataCollection.Version DATA_COLLECTION_VERSION = DataCollection.Version.Blue;
     private final String TEST_ACCOUNT_ID = "v5k5xq52updfo67n";
     private final String TEST_ALERT_VERSION = "AlertVersion";
+
+    private List<ActivityAlert> peopleAlerts;
+    private List<ActivityAlert> productsAlerts;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -62,8 +69,12 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ACCOUNT360.getName(), true);
         setupTestEnvironmentWithOneTenant(featureFlagMap);
         setupDataCollection();
-        activityAlertRepository.saveAll(generatePeopleAlerts());
-        activityAlertRepository.saveAll(generateProductsAlerts());
+
+        peopleAlerts = generatePeopleAlerts();
+        productsAlerts = generateProductsAlerts();
+
+        activityAlertRepository.saveAll(peopleAlerts);
+        activityAlertRepository.saveAll(productsAlerts);
         activityStoreProxy.generateDefaultActivityAlertsConfiguration(mainTestCustomerSpace.getTenantId());
 
         DataLakeService spiedDataLakeService = spy(new DataLakeServiceImpl(null));
@@ -74,14 +85,30 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
     @Test(groups = "deployment")
     public void testActivityTimelineMetrics() {
         DataPage data = activityAlertsService.findActivityAlertsByAccountAndCategory(
-                mainTestCustomerSpace.getTenantId(), TEST_ACCOUNT_ID, AlertCategory.PEOPLE, 3, null);
+                mainTestCustomerSpace.getTenantId(), TEST_ACCOUNT_ID, AlertCategory.PEOPLE, 5, null);
         Assert.assertNotNull(data);
-        Assert.assertEquals(data.getData().size(), 3);
+        Assert.assertEquals(data.getData().size(), 5);
 
         data = activityAlertsService.findActivityAlertsByAccountAndCategory(mainTestCustomerSpace.getTenantId(),
-                TEST_ACCOUNT_ID, AlertCategory.PRODUCTS, 3, null);
+                TEST_ACCOUNT_ID, AlertCategory.PRODUCTS, 5, null);
         Assert.assertNotNull(data);
-        Assert.assertEquals(data.getData().size(), 2);
+        Assert.assertEquals(data.getData().size(), 4);
+    }
+
+    @Test(groups = "deployment")
+    public void testDeletingDueToExpire() {
+
+        activityAlertsCleanupService.cleanup();
+
+        DataPage data = activityAlertsService.findActivityAlertsByAccountAndCategory(
+                mainTestCustomerSpace.getTenantId(), TEST_ACCOUNT_ID, AlertCategory.PEOPLE, 5, null);
+        Assert.assertNotNull(data);
+        Assert.assertEquals(data.getData().size(), 4);
+
+        data = activityAlertsService.findActivityAlertsByAccountAndCategory(mainTestCustomerSpace.getTenantId(),
+                TEST_ACCOUNT_ID, AlertCategory.PRODUCTS, 5, null);
+        Assert.assertNotNull(data);
+        Assert.assertEquals(data.getData().size(), 3);
     }
 
     private void setupDataCollection() {
@@ -125,6 +152,50 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         record.setEntityType(BusinessEntity.Account);
         record.setTenantId(t.getPid());
         record.setCreationTimestamp(Date.from(Instant.now().minus(10, ChronoUnit.HOURS)));
+        record.setVersion(TEST_ALERT_VERSION);
+        record.setCategory(AlertCategory.PRODUCTS);
+
+        data = new HashMap<>();
+        end = Instant.now().minus(1, ChronoUnit.DAYS);
+        start = end.minus(10, ChronoUnit.DAYS);
+        data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
+        data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
+        alertData = new HashMap<>();
+        alertData.put("PageName", "BI Products");
+        data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
+        record.setAlertData(data);
+
+        alerts.add(record);
+
+        // record 3
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
+        record.setEntityId(TEST_ACCOUNT_ID);
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(89, ChronoUnit.DAYS)));
+        record.setVersion(TEST_ALERT_VERSION);
+        record.setCategory(AlertCategory.PRODUCTS);
+
+        data = new HashMap<>();
+        end = Instant.now().minus(1, ChronoUnit.DAYS);
+        start = end.minus(10, ChronoUnit.DAYS);
+        data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
+        data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
+        alertData = new HashMap<>();
+        alertData.put("PageName", "BI Products");
+        data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
+        record.setAlertData(data);
+
+        alerts.add(record);
+
+        // record 4
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
+        record.setEntityId(TEST_ACCOUNT_ID);
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(91, ChronoUnit.DAYS)));
         record.setVersion(TEST_ALERT_VERSION);
         record.setCategory(AlertCategory.PRODUCTS);
 
@@ -214,11 +285,58 @@ public class ActivityAlertsServiceImplDeploymentTestNG extends AppDeploymentTest
         record.setAlertData(data);
 
         alerts.add(record);
+
+        // record 4
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY);
+        record.setEntityId(TEST_ACCOUNT_ID);
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)));
+        record.setVersion(TEST_ALERT_VERSION);
+        record.setCategory(AlertCategory.PEOPLE);
+
+        data = new HashMap<>();
+        end = Instant.now().minus(7, ChronoUnit.DAYS);
+        start = end.minus(10, ChronoUnit.DAYS);
+        data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
+        data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
+        alertData = new HashMap<>();
+        alertData.put("ReEngagedContacts", 3);
+        data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
+        record.setAlertData(data);
+
+        alerts.add(record);
+
+        // record 5
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.RE_ENGAGED_ACTIVITY);
+        record.setEntityId(TEST_ACCOUNT_ID);
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(91, ChronoUnit.DAYS)));
+        record.setVersion(TEST_ALERT_VERSION);
+        record.setCategory(AlertCategory.PEOPLE);
+
+        data = new HashMap<>();
+        end = Instant.now().minus(7, ChronoUnit.DAYS);
+        start = end.minus(10, ChronoUnit.DAYS);
+        data.put(ActivityStoreConstants.Alert.COL_START_TIMESTAMP, start.getEpochSecond());
+        data.put(ActivityStoreConstants.Alert.COL_END_TIMESTAMP, end.getEpochSecond());
+        alertData = new HashMap<>();
+        alertData.put("ReEngagedContacts", 3);
+        data.put(ActivityStoreConstants.Alert.COL_ALERT_DATA, alertData);
+        record.setAlertData(data);
+
+        alerts.add(record);
+
         return alerts;
     }
 
     @AfterClass(groups = "deployment")
     public void cleanup() {
         testBed.deleteTenant(mainTestTenant);
+        activityAlertRepository.deleteInBatch(peopleAlerts);
+        activityAlertRepository.deleteInBatch(productsAlerts);
     }
 }
