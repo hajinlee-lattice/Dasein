@@ -270,15 +270,15 @@
         <property name="jobTimeout" value="${quartz.matchapi.vboUsageReport.job.timeout:3600}"/>
     </bean>
 
-    <bean name="appActivityAlertsCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+    <bean name="plsActivityAlertsCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="alertCleanupJob"/>
-        <property name="cronTrigger" value="${quartz.app.altercleanup.job.cron:0 0 0/6 * * ?}"/>
-        <property name="destUrl" value="${quartz.app.predefined.job.primary.url:}"/>
-        <property name="secondaryDestUrl" value="${quartz.app.predefined.job.secondary.url:}"/>
-        <property name="queryApi" value="${quartz.app.predefined.job.query.api:}"/>
-        <property name="checkJobBeanUrl" value="${quartz.app.predefined.job.check.bean.url:}"/>
+        <property name="cronTrigger" value="${quartz.pls.altercleanup.job.cron:0 0 0/6 * * ?}"/>
+        <property name="destUrl" value="${quartz.pls.predefined.job.primary.url:}"/>
+        <property name="secondaryDestUrl" value="${quartz.pls.predefined.job.secondary.url:}"/>
+        <property name="queryApi" value="${quartz.pls.predefined.job.query.api:}"/>
+        <property name="checkJobBeanUrl" value="${quartz.pls.predefined.job.check.bean.url:}"/>
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;alertCleanupJob&quot;}"/>
-        <property name="jobTimeout" value="${quartz.app.alertcleanup.job.timeout:3600}"/>
+        <property name="jobTimeout" value="${quartz.pls.alertcleanup.job.timeout:3600}"/>
     </bean>
 
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
@@ -286,7 +286,7 @@
         <ref bean="lpModelSummaryDownload"/>
         <ref bean="lpEmrScaling"/>
         <ref bean="plsSegmentExportCleanupJob"/>
-        <ref bean="appActivityAlertsCleanupJob"/>
+        <ref bean="plsActivityAlertsCleanupJob"/>
         <ref bean="playmakerRecommendationCleanupJob"/>
         <ref bean="dataCloudRefresh"/>
         <ref bean="datacloudCollectionJob"/>
