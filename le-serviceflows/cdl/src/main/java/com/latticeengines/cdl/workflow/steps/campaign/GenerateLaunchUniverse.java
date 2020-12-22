@@ -54,6 +54,7 @@ import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.spark.exposed.job.cdl.GenerateLaunchUniverseJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
+import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
 @Component("generateLaunchUniverse")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -150,10 +151,11 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
 
         // 3) check for 'Contacts per Account' limit
-        if (useContactsPerAccountLimit) {
+        if (useContactsPerAccountLimit || CDLExternalSystemName.Eloqua.equals(channelConfig.getSystemName())) {
             Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
+            Long contactAccountRatioThreshold = WorkflowJobUtils.getContactAccountRatioThresholdFromZK(customerSpace);
             launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
-                    maxContactsPerAccount, maxEntitiesToLaunch, customerSpace);
+                    maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, contactAccountRatioThreshold);
         }
 
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
@@ -210,7 +212,8 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
     }
 
     private HdfsDataUnit executeSparkJobContactsPerAccount(HdfsDataUnit launchDataUniverseDataUnit, //
-            Long maxContactsPerAccount, Long maxEntitiesToLaunch, CustomerSpace customerSpace) {
+            Long maxContactsPerAccount, Long maxEntitiesToLaunch, CustomerSpace customerSpace,
+            Long contactAccountRatioThreshold) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -243,8 +246,9 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 List<DataUnit> inputUnits = new ArrayList<>();
                 inputUnits.add(launchDataUniverseDataUnit);
 
-                GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig( //
-                        getRandomWorkspace(), maxContactsPerAccount, maxEntitiesToLaunch, sortAttr, sortDir, contactDataUnit);
+                GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig(
+                        getRandomWorkspace(), maxContactsPerAccount, maxEntitiesToLaunch, sortAttr, sortDir,
+                        contactDataUnit, contactAccountRatioThreshold);
 
                 config.setInput(inputUnits);
                 log.info("Executing GenerateLaunchUniverseJob with config: " + JsonUtils.serialize(config));

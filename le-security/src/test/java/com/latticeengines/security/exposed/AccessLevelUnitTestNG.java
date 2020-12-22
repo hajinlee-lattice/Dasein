@@ -26,6 +26,7 @@ public class AccessLevelUnitTestNG {
                 AccessLevel.INTERNAL_USER, //
                 AccessLevel.EXTERNAL_ADMIN, //
                 AccessLevel.EXTERNAL_USER, //
+                AccessLevel.SALES, //
                 AccessLevel.BUSINESS_ANALYST,
                 AccessLevel.THIRD_PARTY_USER //
         };
@@ -61,7 +62,9 @@ public class AccessLevelUnitTestNG {
         // There's an exception: because INTERNAL_ANALYST & BUSINESS_ANALYST have exact same rights
         if (AccessLevel.BUSINESS_ANALYST.equals(expectedLevel)) {
             assertTrue(maxLevel.compareTo(expectedLevel) >= 0);
-        } else {
+        } else if (AccessLevel.SALES.equals(expectedLevel)) {
+            assertTrue(maxLevel.compareTo(expectedLevel) >= 0);
+        }else {
             assertEquals(maxLevel, expectedLevel);
         }
     }

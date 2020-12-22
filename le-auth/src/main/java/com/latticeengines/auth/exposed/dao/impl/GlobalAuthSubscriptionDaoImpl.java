@@ -29,7 +29,7 @@ public class GlobalAuthSubscriptionDaoImpl extends BaseDaoImpl<GlobalAuthSubscri
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthSubscription> entityClz = getEntityClass();
         String queryPattern = "from %s where gaUserTenantRight.globalAuthUser.email = :email and tenantId = :tenantId";
-        String queryStr = String.format(queryPattern, entityClz.getSimpleName(), tenantId);
+        String queryStr = String.format(queryPattern, entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("email", email);
         query.setParameter("tenantId", tenantId);

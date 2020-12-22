@@ -185,6 +185,10 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return String.format("/tmp/%s/%s/%s", leStack, this.getClass().getSimpleName(), getRandomId());
     }
 
+    protected String getNewWorkspace() {
+        return String.format("/tmp/%s/%s/%s", leStack, this.getClass().getSimpleName(), RandomStringUtils.randomAlphanumeric(6));
+    }
+
     private void initializeScenario() {
         String dataRoot = getJobName();
         if (StringUtils.isNotBlank(dataRoot)) {
@@ -258,6 +262,18 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         initializeScenario();
         jobConfig.setWorkspace(workspace);
         jobConfig.setInput(getInputUnits(orderedInput));
+        return sparkJobService.runJob(session, jobClz, jobConfig);
+    }
+
+    protected <J extends AbstractSparkJob<C>, C extends SparkJobConfig> //
+    SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig, boolean needNewWorkSpace) {
+        initializeScenario();
+        if(needNewWorkSpace){
+            jobConfig.setWorkspace(getNewWorkspace());
+        } else {
+            jobConfig.setWorkspace(getWorkspace());
+        }
+        jobConfig.setInput(getInputUnitValues());
         return sparkJobService.runJob(session, jobClz, jobConfig);
     }
 

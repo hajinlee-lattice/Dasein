@@ -62,6 +62,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
     private DataCollectionProxy dataCollectionProxy;
 
     private DataCollection.Version inactive;
+    private boolean isRematchPA;
 
     private Set<String> streamsPerformedDelete = new HashSet<>();
 
@@ -79,6 +80,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
     protected DailyStoreToPeriodStoresJobConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         catalogsWithImports = getCatalogsWithNewImports();
+        isRematchPA = Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class));
         Map<String, String> rawStreamTablesAfterDelete = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
         streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Set<String> skippedStreamIds = getSkippedStreamIds();
@@ -106,7 +108,8 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 .filter(stream -> shouldIncrUpdate(stream) && dailyDeltaTables.get(stream.getStreamId()) != null)
                 .map(AtlasStream::getStreamId).collect(Collectors.toSet());
 
-        log.info("Generating period stores. tenant: {}; evaluation date: {}", customerSpace, config.evaluationDate);
+        log.info("Generating period stores. tenant: {}; evaluation date: {}; rematch = {}", customerSpace,
+                config.evaluationDate, isRematchPA);
 
         List<DataUnit> inputs = new ArrayList<>();
 
@@ -251,7 +254,8 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
     }
 
     private boolean shouldIncrUpdate(AtlasStream stream) {
-        return !configuration.isShouldRebuild() && !streamsPerformedDelete.contains(stream.getStreamId())
+        return !isRematchPA && !configuration.isShouldRebuild()
+                && !streamsPerformedDelete.contains(stream.getStreamId())
                 && noCatalogHasImport(stream);
     }
 

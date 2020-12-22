@@ -22,6 +22,7 @@ import com.latticeengines.serviceflows.workflow.export.ExportTimelineRawTableToD
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.serviceflows.workflow.export.ImportProcessAnalyzeFromS3;
+import com.latticeengines.serviceflows.workflow.export.PublishActivityAlerts;
 import com.latticeengines.serviceflows.workflow.match.CommitEntityMatchWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -93,6 +94,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ExportTimelineRawTableToDynamo exportTimelineRawTableToDynamo;
 
     @Inject
+    private PublishActivityAlerts publishActivityAlerts;
+
+    @Inject
     private ImportProcessAnalyzeFromS3 importProcessAnalyzeFromS3;
 
     @Inject
@@ -135,6 +139,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(exportProcessAnalyzeToS3) //
                 .next(commitEntityMatchWorkflow) //
                 .next(exportTimelineRawTableToDynamo) //
+                .next(publishActivityAlerts) //
                 .next(atlasAccountLookupExportWorkflow) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //

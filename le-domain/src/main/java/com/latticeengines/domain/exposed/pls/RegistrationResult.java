@@ -13,6 +13,7 @@ public class RegistrationResult {
     private boolean valid;
     private String errMsg;
     private boolean validEmail;
+    private String traceId;
 
     @JsonProperty("Password")
     public String getPassword() {
@@ -57,6 +58,16 @@ public class RegistrationResult {
     @JsonProperty("ErrMsg")
     public void setErrMsg(String errMsg) {
         this.errMsg = errMsg;
+    }
+
+    @JsonProperty("TraceID")
+    public String getTraceId() {
+        return traceId;
+    }
+
+    @JsonProperty("TraceID")
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
     }
 
     @JsonIgnore

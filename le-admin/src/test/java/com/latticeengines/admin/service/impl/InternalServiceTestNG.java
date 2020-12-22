@@ -1,7 +1,6 @@
-package com.latticeengines.admin.controller;
+package com.latticeengines.admin.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -11,13 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
+import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
@@ -38,10 +36,9 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
-import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
 
-public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
+public class InternalServiceTestNG extends AdminFunctionalTestNGBase {
 
     @Inject
     private UserService userService;
@@ -52,31 +49,25 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
     @Inject
     private TenantService tenantService;
 
-    private String email = "lpl@lattice-engines.com";
+    private final String TEST_EMAIL = "lpl@lattice-engines.com";
 
-    private static final Logger log = LoggerFactory.getLogger(InternalResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(InternalServiceTestNG.class);
+
     /**
      * In setup, orchestrateForInstall a full tenant.
      **/
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "functional")
     public void setup() {
         TestTenantId = TestContractId;
-
-        loginAD();
-        // setup magic rest template
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-
         provisionTestTenants();
     }
 
-    @AfterClass(groups = "deployment")
-    public void tearDown() throws Exception {
+    @AfterClass(groups = "functional")
+    public void tearDown() {
         cleanup();
     }
 
     private void provisionTestTenants() {
-
         // TenantInfo
         TenantProperties tenantProperties = new TenantProperties();
         tenantProperties.description = "A test tenant across all component provisioned by tenant console through deployment tests.";
@@ -87,11 +78,12 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
         spaceProperties.description = tenantProperties.description;
         spaceProperties.displayName = tenantProperties.displayName;
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, "{\"Dante\":true,\"EnableDataEncryption\":true}");
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties,
+                "{\"Dante\":true,\"EnableDataEncryption\":true}");
 
         // SpaceConfiguration
         SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
-        //spaceConfiguration.setDlAddress(dlUrl);
+        // spaceConfiguration.setDlAddress(dlUrl);
         spaceConfiguration.setTopology(CRMTopology.ELOQUA);
 
         SerializableDocumentDirectory PLSconfig = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
@@ -116,15 +108,12 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         reg.setSpaceConfig(spaceConfiguration);
         reg.setConfigDirectories(configDirs);
 
-        String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), TestTenantId, TestContractId);
-        Boolean created = restTemplate.postForObject(url, reg, Boolean.class);
-        Assert.assertNotNull(created);
+        boolean created = tenantService.createTenant(TestContractId, TestTenantId, reg, ADTesterUsername, null, null);
         Assert.assertTrue(created);
-
     }
 
-    @Test(groups = { "deployment" }, enabled = false)
-    public void testUpdateUserStatusBaseOnEmails(){
+    @Test(groups = { "functional" }, enabled = false)
+    public void testUpdateUserStatusBaseOnEmails() {
         BootstrapState state = waitUntilStateIsNotInitial(TestContractId, TestTenantId, PLSComponent.componentName);
         try {
             Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
@@ -137,7 +126,7 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         String userName = "lpl@lattice-engines.com";
         User user = new User();
         user.setActive(true);
-        user.setEmail(email);
+        user.setEmail(TEST_EMAIL);
         user.setFirstName("Robin");
         user.setLastName("Liu");
         user.setUsername(userName);
@@ -146,7 +135,8 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         creds.setUsername(userName);
         creds.setPassword("lattice");
         UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
-        String tenant = String.format("%s.%s.%s", TestTenantId, TestContractId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        String tenant = String.format("%s.%s.%s", TestTenantId, TestContractId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         userRegistrationWithTenant.setTenant(tenant);
         UserRegistration userRegistration = new UserRegistration();
         userRegistrationWithTenant.setUserRegistration(userRegistration);
@@ -154,7 +144,7 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         userRegistration.setCredentials(creds);
         userService.addAdminUser(userRegistrationWithTenant);
 
-        GlobalAuthUser userAfterAdd = userService.findByEmailNoJoin(email);
+        GlobalAuthUser userAfterAdd = userService.findByEmailNoJoin(TEST_EMAIL);
         Assert.assertNotNull(userAfterAdd);
         Assert.assertTrue(userService.inTenant(tenant, userName));
 
@@ -165,20 +155,18 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
         String url = getRestHostPort() + "/admin/internal/services/deactiveUserStatus";
         restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Boolean.class);
 
-        GlobalAuthUser userAfterDeactive = userService.findByEmailNoJoin(email);
+        GlobalAuthUser userAfterDeactive = userService.findByEmailNoJoin(TEST_EMAIL);
         Assert.assertNotNull(userAfterDeactive);
         Assert.assertFalse(userAfterDeactive.getIsActive());
         Assert.assertFalse(userService.inTenant(tenant, userName));
     }
 
     /**
-     * ==================================================
-     * BEGIN: Tenant clean up methods
-     * ==================================================
+     * Tenant clean up methods
      */
     public void cleanup() {
         try {
-            userService.deleteUserByEmail(email);
+            userService.deleteUserByEmail(TEST_EMAIL);
             deleteTenant(TestTenantId, TestTenantId);
         } catch (Exception e) {
             log.error("clean up tenant error!");

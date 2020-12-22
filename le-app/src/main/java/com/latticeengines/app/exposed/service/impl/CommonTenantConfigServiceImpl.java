@@ -36,6 +36,8 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
     private static final String ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE = "/EnrichAttributesMaxNumber";
     private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
+    private static final String OTHER_ID_QUOTA_LIMIT = "OtherIdQuotaLimit";
+    private static final int DEFAULT_OTHER_ID_LIMIT = 20;
     private static final Logger log = LoggerFactory.getLogger(CommonTenantConfigServiceImpl.class);
     public static final String PLS = "PLS";
 
@@ -81,6 +83,22 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18049, e, new String[] { tenantId });
         }
+    }
+
+    public int getOtherIdQuotaLimit(String tenantId) {
+        Path path = null;
+        int otherIdLimit;
+        Camille camille = CamilleEnvironment.getCamille();
+        try {
+            CustomerSpace space = CustomerSpace.parse(tenantId);
+            path =
+                    PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space, PLS).append(OTHER_ID_QUOTA_LIMIT);
+             otherIdLimit = Integer.parseInt(camille.get(path).getData());
+        } catch (Exception e) {
+            log.warn("will use default value {} since no node for tenant {}", DEFAULT_OTHER_ID_LIMIT, tenantId);
+            otherIdLimit = DEFAULT_OTHER_ID_LIMIT;
+        }
+        return otherIdLimit;
     }
 
     @Override

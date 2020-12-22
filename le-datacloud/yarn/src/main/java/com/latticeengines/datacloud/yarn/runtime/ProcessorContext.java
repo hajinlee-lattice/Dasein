@@ -2,12 +2,12 @@ package com.latticeengines.datacloud.yarn.runtime;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.CREATED_TEMPLATE_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
-import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.MATCH_ERROR_CODE;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_MATCH_ERROR_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_DEDUPE_ID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_LID;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.INT_LDC_REMOVED;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.MATCH_ERROR_CODE;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.MATCH_ERROR_INFO;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.MATCH_ERROR_TYPE;
 
@@ -137,7 +137,7 @@ public class ProcessorContext {
     @Value("${datacloud.yarn.prime.group.size}")
     private int primeGroupSize;
 
-    private static final Long TIME_OUT_PER_10K = TimeUnit.MINUTES.toMillis(20);
+    private static final Long TIME_OUT_PER_10K = TimeUnit.MINUTES.toMillis(60);
 
     private DataCloudJobConfiguration jobConfiguration;
 
@@ -465,7 +465,7 @@ public class ProcessorContext {
 
         keyMap = originalInput.getKeyMap();
         blockSize = jobConfiguration.getBlockSize();
-        timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(60));
+        timeOut = Math.max(Math.round(TIME_OUT_PER_10K * blockSize / 10000.0), TimeUnit.MINUTES.toMillis(180));
         this.recordTimeOut = timeOut;
         if (useRemoteDnB) {
             timeOut = timeOut * 2;

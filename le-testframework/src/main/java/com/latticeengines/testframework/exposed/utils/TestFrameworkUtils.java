@@ -73,6 +73,7 @@ public final class TestFrameworkUtils {
             break;
         case EXTERNAL_USER:
         case BUSINESS_ANALYST:
+        case SALES:
             result = TestFrameworkUtils.EXTERNAL_USER_USERNAME;
             break;
         case THIRD_PARTY_USER:

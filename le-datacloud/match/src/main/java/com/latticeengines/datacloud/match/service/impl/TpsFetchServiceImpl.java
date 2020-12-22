@@ -59,11 +59,12 @@ public class TpsFetchServiceImpl implements TpsFetchService {
             TpsMatchConfig matchConfig) {
         List<GenericFetchResult> results = new ArrayList<>();
         ContactTpsEntryMgr tpsEntityMgr = getTpsEntityMgr();
-        for (String recordId : recordIds) {
-            ContactTpsEntry entry = tpsEntityMgr.findByKey(recordId);
+        List<String> ids = new ArrayList<>(recordIds);
+        List<ContactTpsEntry> entries = tpsEntityMgr.batchFindByKey(ids);
+        for (ContactTpsEntry entry : entries) {
             if ((entry != null) && (entry.getAttributes() != null)) {
                 GenericFetchResult fetchResult = new GenericFetchResult();
-                fetchResult.setRecordId(recordId);
+                fetchResult.setRecordId(entry.getId());
                 fetchResult.setResult(entry.getAttributes());
 
                 if (matchConfig == null || isValid(fetchResult, matchConfig)) {

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatistic
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.TimeLineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AtlasAccountLookupExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineRawTableToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
@@ -72,6 +74,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ExportToRedshiftStepConfiguration exportToRedshift = new ExportToRedshiftStepConfiguration();
         private ExportToDynamoStepConfiguration exportToDynamo = new ExportToDynamoStepConfiguration();
         private ExportTimelineRawTableToDynamoStepConfiguration exportTimelineRawTableToDynamo = new ExportTimelineRawTableToDynamoStepConfiguration();
+        private TimeLineSparkStepConfiguration timeLineSparkStepConfiguration = new TimeLineSparkStepConfiguration();
         private AtlasAccountLookupExportStepConfiguration atlasAccountLookupExportStepConfiguration = new AtlasAccountLookupExportStepConfiguration();
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
         private ApsGenerationStepConfiguration apsGenerationStepConfiguration = new ApsGenerationStepConfiguration();
@@ -103,6 +106,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             exportToRedshift.setCustomerSpace(customerSpace);
             exportToDynamo.setCustomerSpace(customerSpace);
             exportTimelineRawTableToDynamo.setCustomerSpace(customerSpace);
+            timeLineSparkStepConfiguration.setCustomer(customerSpace.toString());
             atlasAccountLookupExportStepConfiguration.setCustomerSpace(customerSpace);
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             apsGenerationStepConfiguration.setCustomer(customerSpace.getTenantId());
@@ -195,6 +199,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             curatedAttributesWorkflowBuilder.rebuildEntities(entities);
             processRatingWorkflowBuilder.rebuildEntities(entities);
             processActivityStreamWorkflowBuilder.rebuildEntities(entities);
+            if (SetUtils.emptyIfNull(entities).contains(BusinessEntity.ActivityStream)) {
+                timeLineSparkStepConfiguration.setShouldRebuild(true);
+            }
             return this;
         }
 
@@ -449,6 +456,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(exportToRedshift);
             configuration.add(exportToDynamo);
             configuration.add(exportTimelineRawTableToDynamo);
+            configuration.add(timeLineSparkStepConfiguration);
             configuration.add(atlasAccountLookupExportStepConfiguration);
             configuration.add(awsPythonDataConfiguration);
             configuration.add(apsGenerationStepConfiguration);
