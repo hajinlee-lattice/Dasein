@@ -98,6 +98,8 @@ public class AggPeriodTransactionStep extends BaseProcessAnalyzeSparkStep<Proces
         PeriodTxnStreamPostAggregationConfig config = new PeriodTxnStreamPostAggregationConfig();
         config.setInput(Collections.singletonList(rawPeriodStream));
         SparkJobResult result = runSparkJob(PeriodTxnStreamPostAggregationJob.class, config);
+        log.info("Filled in missing periods: {}", result.getOutput());
+        log.info("Analytic {} stream row count change: {} -> {}", rollingPeriod, rawPeriodStream.getCount(), result.getTargets().get(0).getCount());
         return result.getTargets().get(0);
     }
 

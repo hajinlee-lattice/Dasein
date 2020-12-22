@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType
 import com.latticeengines.domain.exposed.spark.cdl.DailyTxnStreamPostAggregationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils, TransactionUtils}
@@ -11,34 +12,41 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 class DailyTxnStreamPostAggregationJob extends AbstractSparkJob[DailyTxnStreamPostAggregationConfig] {
   val productId: String = InterfaceName.ProductId.name
-  val productBundleId: String = InterfaceName.ProductBundleId.name
+  val productBundle: String = InterfaceName.ProductBundle.name
+  val productType: String = InterfaceName.ProductType.name
   val streamDateId: String = InterfaceName.StreamDateId.name
+
+  val analytic: String = ProductType.Analytic.name
+  val bundle: String = ProductType.Bundle.name
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[DailyTxnStreamPostAggregationConfig]): Unit = {
 
     assert(lattice.input.size == 2)
     val rawDailyStream: DataFrame = lattice.input.head
-    val productBundleReference: DataFrame = lattice.input(1).select(productId, productBundleId).filter(col(productBundleId).isNotNull).distinct
+    val productStore: DataFrame = lattice.input(1).select(productBundle, productId, productType)
 
-    val existingBundles: Seq[String] = rawDailyStream.join(productBundleReference, Seq(productId), "left").filter(col(productBundleId).isNotNull)
-      .select(productBundleId).distinct.rdd.map(r => r(0).asInstanceOf[String]).collect
-    val allBundles: Seq[String] = productBundleReference.select(productBundleId).distinct.rdd.map(r => r(0).asInstanceOf[String]).collect
+    val allBundles: Seq[String] = productStore.filter(col(productType) === bundle && col(productBundle).isNotNull)
+      .select(productBundle).distinct.rdd.map(r => r(0).asInstanceOf[String]).collect
+    val existingBundles: Seq[String] = rawDailyStream
+      .join(productStore.filter(col(productType) === analytic), Seq(productId), "left")
+      .filter(col(productBundle).isNotNull) // analytic or spending products only have productBundle, no bundleId
+      .select(productBundle).distinct.rdd.map(r => r(0).asInstanceOf[String]).collect
     val missingBundles: Seq[String] = allBundles diff existingBundles
 
     setPartitionTargets(0, Seq(streamDateId), lattice)
-    val result = fillMissingBundles(spark, rawDailyStream, missingBundles, productBundleReference)
-    result.show(false)
-    lattice.output = result :: Nil
+    lattice.output = fillMissingBundles(spark, rawDailyStream, missingBundles, productStore) :: Nil
+    lattice.outputStr = serializeJson(missingBundles)
   }
 
-  def fillMissingBundles(spark: SparkSession, rawDailyStream: DataFrame, missingBundles: Seq[String], productBundleReference: DataFrame): DataFrame = {
+  def fillMissingBundles(spark: SparkSession, rawDailyStream: DataFrame, missingBundles: Seq[String], productStore: DataFrame): DataFrame = {
     if (missingBundles.isEmpty) {
       // raw daily stream already repartitioned in agg step
       return rawDailyStream
     }
 
-    val productBundleReferenceMap = productBundleReference.filter(col(productBundleId).isInCollection(missingBundles))
-      .groupBy(col(productBundleId)).agg(first(productId).as(productId)).select(productBundleId, productId).distinct
+    val bundleProductIdReferenceMap = productStore
+      .filter(col(productType) === analytic && col(productBundle).isInCollection(missingBundles) && col(productId).isNotNull)
+      .groupBy(col(productBundle)).agg(first(productId).as(productId)).select(productBundle, productId).distinct
       .rdd.map(row => row.getString(0) -> row.getString(1)).collectAsMap()
 
     val valueMap = rawDailyStream.orderBy(streamDateId).first.getValuesMap(rawDailyStream.columns) // earliest date
@@ -59,10 +67,10 @@ class DailyTxnStreamPostAggregationJob extends AbstractSparkJob[DailyTxnStreamPo
     ))
 
     var rows: List[List[Any]] = List()
-    missingBundles.foreach(bundleId => {
+    missingBundles.foreach(bundleName => {
       rows :+= List( //
         valueMap(InterfaceName.AccountId.name), //
-        productBundleReferenceMap(bundleId), //
+        bundleProductIdReferenceMap(bundleName), //
         valueMap(InterfaceName.TransactionType.name), //
         valueMap(InterfaceName.ProductType.name), //
         valueMap(InterfaceName.__StreamDate.name), //
