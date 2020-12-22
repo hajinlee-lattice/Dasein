@@ -257,6 +257,12 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         return null;
     }
 
+    /**
+     *
+     * this method was refactored to only require one transaction, before four dao method will consume 4 transactions
+     * will cause dead lock issue in connection: "java.lang.Exception: DEBUG STACK TRACE: Overdue resource check-out
+     * stack trace."
+     */
     @Override
     @Transactional
     public String getRight(String username, String tenantId) {
