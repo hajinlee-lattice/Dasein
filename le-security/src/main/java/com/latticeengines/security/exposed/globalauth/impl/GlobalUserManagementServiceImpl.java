@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
@@ -234,7 +233,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         return true;
     }
 
-    protected GlobalAuthUser findGlobalAuthUserByUsername(String username) throws Exception {
+    protected synchronized GlobalAuthUser findGlobalAuthUserByUsername(String username) throws Exception {
         return findGlobalAuthUserByUsername(username, false);
     }
 
@@ -257,14 +256,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         return null;
     }
 
-    /**
-     *
-     * this method was refactored to only require one transaction, before four dao method will consume 4 transactions
-     * will cause dead lock issue in connection: "java.lang.Exception: DEBUG STACK TRACE: Overdue resource check-out
-     * stack trace."
-     */
     @Override
-    @Transactional
     public String getRight(String username, String tenantId) {
         try {
             log.info(String.format("Getting rights of user %s in tenant %s.", username, tenantId));

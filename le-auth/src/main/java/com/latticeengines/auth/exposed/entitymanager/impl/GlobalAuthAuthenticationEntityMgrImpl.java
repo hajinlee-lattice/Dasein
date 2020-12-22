@@ -33,7 +33,7 @@ public class GlobalAuthAuthenticationEntityMgrImpl extends
     }
 
     @Override
-    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED, readOnly = true)
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public GlobalAuthAuthentication findByUsernameJoinUser(String username) {
         return gaAuthenticationDao.findByUsernameJoinUser(username);
     }

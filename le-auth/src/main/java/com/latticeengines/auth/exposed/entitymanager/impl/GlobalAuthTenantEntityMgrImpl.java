@@ -28,7 +28,7 @@ public class GlobalAuthTenantEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthT
     }
 
     @Override
-    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED, readOnly = true)
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public GlobalAuthTenant findByTenantId(String tenantId) {
         return gaTenantDao.findByField("Deployment_ID", tenantId);
     }
