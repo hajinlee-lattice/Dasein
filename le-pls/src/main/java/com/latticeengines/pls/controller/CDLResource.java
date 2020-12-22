@@ -431,7 +431,20 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         try {
-            cdlService.createS3ImportSystem(customerSpace.toString(), systemDisplayName, systemType, primary);
+            String systemName = cdlService.createS3ImportSystem(customerSpace.toString(), systemDisplayName, systemType,
+                    primary);
+            switch (systemType) {
+                case Salesforce:
+                    cdlService.createDefaultOpportunityTemplate(customerSpace.toString(), systemName);
+                    break;
+                case Marketo:
+                case Eloqua:
+                case Pardot:
+                    cdlService.createDefaultMarketingTemplate(customerSpace.toString(), systemName, systemType.toString());
+                    break;
+                default:
+                    break;
+            }
             UIAction uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                     String.format(createS3ImportSystemMsg, systemDisplayName));
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
