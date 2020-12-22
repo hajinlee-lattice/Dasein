@@ -283,6 +283,6 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
     }
 
     public enum RollupStatus {
-        READY, SUBMITTED, GENERATING, FAILED_NO_RETRY
+        READY, SUBMITTED, RUNNING, FAILED_NO_RETRY  // In the future, add 'failed retry' if needed
     }
 }
