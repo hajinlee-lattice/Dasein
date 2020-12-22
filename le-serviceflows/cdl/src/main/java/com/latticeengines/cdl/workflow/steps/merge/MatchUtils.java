@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
@@ -161,8 +160,6 @@ public final class MatchUtils {
         if (!ignoreDomainMatchKey) {
             addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Domain, InterfaceName.Website.name());
         }
-        // LDC_DUNS is the duns matched in import flow
-        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.DUNS, DataCloudConstants.ATTR_LDC_DUNS);
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.DUNS, InterfaceName.DUNS.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Name, InterfaceName.CompanyName.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.City, InterfaceName.City.name());
