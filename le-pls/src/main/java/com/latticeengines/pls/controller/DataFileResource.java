@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.download.HttpFileDownLoader;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.download.FileDownloadParams;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.DataFileProviderService;
@@ -31,7 +34,8 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/datafiles")
 @PreAuthorize("hasRole('View_PLS_Configurations')")
-public class DataFileResource {
+public class
+DataFileResource {
 
     private static final Logger log = LoggerFactory.getLogger(DataFileResource.class);
 
@@ -205,6 +209,26 @@ public class DataFileResource {
         try {
             dataFileProviderService.downloadFileByApplicationId(request, response, "application/csv", applicationId,
                     fileName);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @PostMapping("/sourcefile")
+    @ResponseBody
+    @ApiOperation(value = "Get source file uploaded to create model or score against model via internal file name")
+    public void downloadSourceFileViaFileName(@RequestBody FileDownloadParams fileDownloadParams,
+                                              HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            String fileName = fileDownloadParams.getFileName();
+            String filePath = fileDownloadParams.getFilePath();
+            String bucketName = fileDownloadParams.getBucketName();
+            if (StringUtils.isEmpty(filePath)) {
+                dataFileProviderService.downloadFileByFileName(request, response, "application/csv", fileName);
+            } else {
+                dataFileProviderService.downloadS3File(request, response, "application/csv", fileName, filePath,
+                        bucketName);
+            }
         } catch (Exception e) {
             throw e;
         }

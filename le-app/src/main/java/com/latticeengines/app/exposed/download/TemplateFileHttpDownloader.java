@@ -1,10 +1,9 @@
-package com.latticeengines.pls.download;
+package com.latticeengines.app.exposed.download;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import com.latticeengines.app.exposed.download.AbstractHttpFileDownLoader;
 import com.latticeengines.baton.exposed.service.BatonService;
 
 public class TemplateFileHttpDownloader extends AbstractHttpFileDownLoader {
