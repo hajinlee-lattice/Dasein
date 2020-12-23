@@ -1,17 +1,18 @@
 package com.latticeengines.spark.exposed.job
 
 import java.io.StringWriter
+
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit.StorageType
-import com.latticeengines.domain.exposed.metadata.datastore.{DataUnit, HdfsDataUnit, S3DataUnit}
+import com.latticeengines.domain.exposed.metadata.datastore.{HdfsDataUnit, S3DataUnit}
 import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.livy.scalaapi.ScalaJobContext
-import org.apache.spark.sql.functions.{col, struct}
+import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 

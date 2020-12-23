@@ -35,10 +35,7 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
     public void execute() {
         String customerSpace = configuration.getCustomerSpace().getTenantId();
         Play play = playProxy.getPlay(customerSpace, configuration.getPlayId(), false, false);
-        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace, configuration.getPlayId(),
-                configuration.getChannelId());
-        Play.TapType tapType = play.getTapType();
-        boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(tapType);
+        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace, configuration.getPlayId(), configuration.getChannelId());
         long accountsAdded = getCount(getLongValueFromContext(ACCOUNTS_ADDED));
         long accountsDeleted = getCount(getLongValueFromContext(ACCOUNTS_DELETED));
         long contactsAdded = getCount(getLongValueFromContext(CONTACTS_ADDED));
@@ -66,7 +63,7 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                 channel.getCurrentLaunchedContactUniverseTable()));
         playProxy.updatePlayLaunchChannel(customerSpace, configuration.getPlayId(), configuration.getChannelId(),
                 channel, false);
-        boolean deltaFound = baseOnOtherTapType || wasDeltaDataFound(channel.getChannelConfig().getAudienceType(),
+        boolean deltaFound = wasDeltaDataFound(channel.getChannelConfig().getAudienceType(),
                 channel.getLookupIdMap().getExternalSystemName());
         // For Eloqua, contactAdded should be fullContacts
         // Before migrating to Tray, Sureshot will do de-dup.

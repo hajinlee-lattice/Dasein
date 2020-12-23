@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Lists;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
@@ -29,12 +30,11 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
     public CalculateDeltaJobConfig(DataUnit newData, DataUnit oldData, String primaryJoinKey, String secondaryJoinKey,
                                    boolean filterPrimaryJoinKeyNulls, boolean isAccountEntity, String workSpace) {
         this.setWorkspace(workSpace);
-        this.newData = newData;
-        this.oldData = oldData;
         this.primaryJoinKey = primaryJoinKey;
         this.secondaryJoinKey = secondaryJoinKey;
         this.isAccountEntity = isAccountEntity;
         this.filterPrimaryJoinKeyNulls = filterPrimaryJoinKeyNulls;
+        this.setInput(Lists.newArrayList(oldData, newData));
     }
 
     @Override
@@ -46,22 +46,6 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
     @Override
     public int getNumTargets() {
         return 2;
-    }
-
-    public DataUnit getOldData() {
-        return oldData;
-    }
-
-    public void setOldData(DataUnit oldData) {
-        this.oldData = oldData;
-    }
-
-    public DataUnit getNewData() {
-        return newData;
-    }
-
-    public void setNewData(DataUnit newData) {
-        this.newData = newData;
     }
 
     public boolean getFilterPrimaryJoinKeyNulls() {

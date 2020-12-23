@@ -50,7 +50,7 @@ public abstract class DataUnit {
     private List<Role> roles;
 
     @JsonProperty("DataTemplateId")
-    private String DataTemplateId;
+    private String dataTemplateId;
 
     @JsonProperty("retentionPolicy")
     private String retentionPolicy;
@@ -106,11 +106,11 @@ public abstract class DataUnit {
     }
 
     public String getDataTemplateId() {
-        return DataTemplateId;
+        return dataTemplateId;
     }
 
     public void setDataTemplateId(String dataTemplateId) {
-        DataTemplateId = dataTemplateId;
+        this.dataTemplateId = dataTemplateId;
     }
 
     public List<Pair<String, String>> getTypedPartitionKeys() {

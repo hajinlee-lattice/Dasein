@@ -5,6 +5,8 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class ExtractListSegmentCSVConfiguration extends BaseStepConfiguration {
 
+    public static String Direct_Phone = "Direct_Phone";
+
     private CustomerSpace customerSpace;
 
     private String segmentName;

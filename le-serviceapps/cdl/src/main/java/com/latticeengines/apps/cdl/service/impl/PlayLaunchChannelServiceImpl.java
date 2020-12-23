@@ -198,6 +198,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
+    public PlayLaunchChannel findChannelAndPlayById(String channelId) {
+        return playLaunchChannelEntityMgr.findChannelAndPlayById(channelId);
+    }
+
+    @Override
     public PlayLaunchChannel findById(String channelId, boolean useWriterRepo) {
         PlayLaunchChannel channel = playLaunchChannelEntityMgr.findById(channelId, useWriterRepo);
         if (channel != null)
