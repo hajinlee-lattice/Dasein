@@ -981,6 +981,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 log.error("Cannot find tenant: " + customerSpaceStr);
                 continue;
             }
+            MultiTenantContext.setTenant(tenant);
             if (!runningCustomerSpaceSet.contains(customerSpaceStr) && isCronExpressionSatisfied(customerSpaceStr)
                     && isNewDataGenerated(customerSpaceStr)) {
                 ApplicationId appId = cdlProxy.generateIntentAlert(customerSpaceStr);
