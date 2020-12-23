@@ -233,7 +233,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         return true;
     }
 
-    protected GlobalAuthUser findGlobalAuthUserByUsername(String username) throws Exception {
+    protected synchronized GlobalAuthUser findGlobalAuthUserByUsername(String username) throws Exception {
         return findGlobalAuthUserByUsername(username, false);
     }
 
