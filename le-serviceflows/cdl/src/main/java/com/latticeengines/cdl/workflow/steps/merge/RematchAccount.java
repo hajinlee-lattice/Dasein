@@ -101,7 +101,7 @@ public class RematchAccount extends BaseSingleEntityMergeImports<ProcessAccountS
     }
 
     private String getMatchConfig() {
-        MatchInput matchInput = getBaseMatchInput(true);
+        MatchInput matchInput = getBaseMatchInput();
         Set<String> columnNames = getMasterTableColumnNames();
         return MatchUtils.getLegacyMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames);
     }
