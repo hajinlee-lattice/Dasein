@@ -1,5 +1,6 @@
 package com.latticeengines.app.exposed.entitymanager;
 
+import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.activity.AlertCategory;
@@ -13,4 +14,6 @@ public interface ActivityAlertEntityMgr {
             String version, //
             AlertCategory Category, //
             int limit);
+
+    int deleteByExpireDateBefore(Date expireDate, int maxUpdateRows);
 }
