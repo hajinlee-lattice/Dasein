@@ -13,6 +13,9 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
+      ALTER TABLE `PLS_MultiTenant`.`EXPORT_FIELD_METADATA_DEFAULTS`
+               DROP `HISTORY_ENABLED`;
+
       create table `DATA_OPERATION`
           (
               `PID`             bigint       not null auto_increment,
