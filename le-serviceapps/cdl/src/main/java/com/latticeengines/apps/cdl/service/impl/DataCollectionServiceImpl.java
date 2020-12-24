@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.persistence.RollbackException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -35,6 +36,7 @@ import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
+import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -194,13 +196,17 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             }
 
             log.info("Add table {} to collection {} as {} with signature {}", tableName, collName, role, signature);
-            DataCollectionTable result = dataCollectionEntityMgr.upsertTableToCollection(collName, tableName, role,
-                    signature, version);
-            // TODO probably should check before cleanup/upsert
-            if (result == null) {
-                throw new IllegalArgumentException(
-                        String.format("Cannot find table named %s for customer %s", tableName, customerSpace));
-            }
+            DatabaseUtils.retry("upsertTableToCollection", 10, RollbackException.class,
+                    "RollbackException detected performing", null, //
+                    input -> {
+                        DataCollectionTable result = dataCollectionEntityMgr.upsertTableToCollection(collName,
+                                tableName, role, signature, version);
+                        // TODO probably should check before cleanup/upsert
+                        if (result == null) {
+                            throw new IllegalArgumentException(String
+                                    .format("Cannot find table named %s for customer %s", tableName, customerSpace));
+                        }
+                    });
         });
     }
 
@@ -826,9 +832,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 Tenant currentTenant = MultiTenantContext.getTenant();
                 if (numLinks == 1) {
                     new Thread(() -> {
-                        MultiTenantContext.setTenant(currentTenant);
-                        log.info("{} is an orphan table, delete it completely.", name);
-                        tableEntityMgr.deleteTableAndCleanupByName(name);
+                        DatabaseUtils.retry("deleteTableAndCleanupByName", 10, RollbackException.class,
+                                "RollbackException detected performing", null, //
+                                input -> {
+                                    MultiTenantContext.setTenant(currentTenant);
+                                    log.info("{} is an orphan table, delete it completely.", name);
+                                    tableEntityMgr.deleteTableAndCleanupByName(name);
+                                });
                     }).start();
                 }
             }
