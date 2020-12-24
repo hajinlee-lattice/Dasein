@@ -564,6 +564,8 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         // Three of them have Account System Id : DefaultSystem, Test_SalesforceSystem, Test_OtherSystem
         // Two of them have Contact System Id : Test_SalesforceSystem, Test_SalesforceSystemLead
         // One of them has Leads System Id(secondary Id) : Test_SalesforceSystemLead
+        // For salesforce, system will automatically add opportunity template and Account system id
+        // For Marketo,Eloqua,Pardot, system will automatically add marketing activity template and Contact system id
         List<S3ImportTemplateDisplay> templateList = cdlService.getS3ImportTemplate(mainTestTenant.getId(), "", null);
         Optional<S3ImportTemplateDisplay> otherSystemAccountOpt = templateList.stream()
                 .filter(templateDisplay -> templateDisplay.getFeedType().equals("Test_OtherSystem_AccountData"))
@@ -573,7 +575,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertNotNull(otherSystemAccount);
         List<S3ImportSystem> filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
                 true, false, otherSystemAccount);
-        Assert.assertEquals(filteredS3ImportSystems.size(), 2);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 3);
 
         Optional<S3ImportTemplateDisplay> sfSystemContactOpt = templateList.stream()
                 .filter(templateDisplay -> templateDisplay.getFeedType().equals("Test_SalesforceSystemLead_ContactData"))
@@ -586,7 +588,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
 
         filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
                 true, false, sfSystemContact);
-        Assert.assertEquals(filteredS3ImportSystems.size(), 3);
+        Assert.assertEquals(filteredS3ImportSystems.size(), 4);
 
         Optional<S3ImportTemplateDisplay> sfSystemLeadOpt = templateList.stream()
                 .filter(templateDisplay -> templateDisplay.getFeedType().equals("Test_SalesforceSystemLead_LeadsData"))
