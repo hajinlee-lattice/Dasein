@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
@@ -35,7 +36,9 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
@@ -131,6 +134,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         ActivityMetricsGroup hasIntentGroup = setupHasIntentGroup(tenant, stream);
         ActivityMetricsGroup intentByTimeRangeGroup = setupHasIntentByTimeRangeGroup(tenant, stream,
                 ActivityStoreUtils.defaultTimeRange());
+        ActivityMetricsGroup last1WeekGroup = setupHasIntentByTimeRangeLegacyGroups(tenant, stream);
         ActivityMetricsGroup intentByTimeRangeCurWeekGroup = setupHasIntentByTimeRangeGroup(tenant, stream,
                 ActivityStoreUtils.currentWeekTimeRange());
         ActivityMetricsGroup buyingScoreGroup = setupBuyingStageGroup(tenant, stream);
@@ -307,6 +311,42 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
             activityMetricsGroupEntityMgr.create(modelGroup);
             return modelGroup;
         });
+    }
+
+    private ActivityMetricsGroup setupHasIntentByTimeRangeLegacyGroups(Tenant tenant, AtlasStream atlasStream) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> {
+            ActivityMetricsGroup last1WeekGroup = new ActivityMetricsGroup();
+            last1WeekGroup.setTenant(tenant);
+            last1WeekGroup.setStream(atlasStream);
+            last1WeekGroup.setGroupId(getGroupId(INTENTDATA_MODEL_GROUPNAME));
+            last1WeekGroup.setGroupName(INTENTDATA_MODEL_GROUPNAME);
+            last1WeekGroup.setJavaClass(Boolean.class.getSimpleName());
+            last1WeekGroup.setEntity(BusinessEntity.Account);
+            last1WeekGroup.setActivityTimeRange(getLast1WeekTimeRange());
+            last1WeekGroup.setRollupDimensions(DIM_NAME_DNBINTENT);
+            last1WeekGroup.setAggregation(createAttributeDeriver(Collections.emptyList(), InterfaceName.HasIntent.name(),
+                    StreamAttributeDeriver.Calculation.TRUE, FundamentalType.BOOLEAN));
+            last1WeekGroup.setCategory(Category.DNBINTENTDATA_PROFILE);
+            last1WeekGroup.setDisplayNameTmpl(
+                    getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DISPLAYNAME));
+            last1WeekGroup.setDescriptionTmpl(getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_DESCRIPTION));
+            last1WeekGroup.setSubCategoryTmpl(
+                    getTemplate(StringTemplateConstants.DNBINTENTDATA_METRICS_GROUP_MODEL_SUBCATEGORY));
+            last1WeekGroup.setNullImputation(NullMetricsImputation.FALSE);
+            last1WeekGroup.setUseLatestVersion(false);
+            last1WeekGroup.disable(Collections.singleton(ColumnSelection.Predefined.Segment));
+            activityMetricsGroupEntityMgr.create(last1WeekGroup);
+            return last1WeekGroup;
+        });
+    }
+
+    private ActivityTimeRange getLast1WeekTimeRange() {
+        ActivityTimeRange timeRange = new ActivityTimeRange();
+        timeRange.setOperator(ComparisonType.WITHIN);
+        timeRange.setPeriods(Collections.singleton(PeriodStrategy.Template.Week.name()));
+        timeRange.setParamSet(Collections.singleton(Collections.singletonList(1)));
+        return timeRange;
     }
 
     private ActivityMetricsGroup setupBuyingStageGroup(Tenant tenant, AtlasStream atlasStream) {

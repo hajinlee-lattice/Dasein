@@ -32,7 +32,10 @@ CREATE PROCEDURE `UpdateSchema`()
               ADD CONSTRAINT `FK_DATAOPERATION_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`)
                   REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
       CREATE INDEX IX_DROP_PATH ON `DATA_OPERATION` (`DROP_PATH`);
-      
+
+      ALTER TABLE `PLS_MultiTenant`.`ACTIVITY_METRIC_GROUP`
+              ADD COLUMN `CSOverwrite` JSON NULL DEFAULT NULL;
+
   END //
 -- ##############################################################
 
