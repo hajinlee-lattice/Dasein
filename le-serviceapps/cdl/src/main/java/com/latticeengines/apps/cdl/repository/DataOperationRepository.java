@@ -5,4 +5,5 @@ import com.latticeengines.domain.exposed.metadata.DataOperation;
 
 public interface DataOperationRepository extends BaseJpaRepository<DataOperation, Long> {
 
+    DataOperation findByDropPath(String dropPath);
 }

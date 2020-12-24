@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.DataOperationService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.RetryUtils;
-import com.latticeengines.domain.exposed.cdl.DataOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.DataDeleteOperationConfiguration;
 import com.latticeengines.domain.exposed.metadata.DataOperation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -37,18 +37,31 @@ public class DataOperationServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCRUD() {
-        DataOperationConfiguration configuration = new DataOperationConfiguration();
+        DataDeleteOperationConfiguration configuration = new DataDeleteOperationConfiguration();
         configuration.setEntity(BusinessEntity.Account);
         configuration.setSystemName("DefaultSystem");
-        String dropPath = dataOperationService.createDataOperation(mainCustomerSpace, DataOperation.OperationType.DELETE,configuration );
+        configuration.setDeleteType(DataDeleteOperationConfiguration.DeleteType.SOFT);
+        String dropPath = dataOperationService.createDataOperation(mainCustomerSpace, DataOperation.OperationType.DELETE,configuration);
         Assert.assertNotNull(dropPath);
         System.out.println(dropPath);
 
         List<DataOperation> dataOperations = dataOperationService.findAllDataOperation(mainCustomerSpace);
-
         Assert.assertNotNull(dataOperations);
         Assert.assertEquals(dataOperations.size(), 1);
         Assert.assertEquals(dataOperations.get(0).getDropPath(), dropPath);
+
+        DataOperation dataOperation = dataOperationService.findDataOperationByDropPath(mainCustomerSpace, dropPath);
+        Assert.assertNotNull(dataOperation);
+        Assert.assertEquals(dataOperation.getDropPath(), dropPath);
+        Assert.assertEquals(((DataDeleteOperationConfiguration)dataOperation.getConfiguration()).getDeleteType(),
+                DataDeleteOperationConfiguration.DeleteType.SOFT);
+
+        dataOperationService.createDataOperation(mainCustomerSpace, DataOperation.OperationType.DELETE,configuration);
+        dataOperations = dataOperationService.findAllDataOperation(mainCustomerSpace);
+        Assert.assertNotNull(dataOperations);
+        Assert.assertEquals(dataOperations.size(), 1);
+        Assert.assertEquals(dataOperations.get(0).getDropPath(), dropPath);
+
         dataOperationService.deleteDataOperation(mainCustomerSpace, dataOperations.get(0));
     }
 }

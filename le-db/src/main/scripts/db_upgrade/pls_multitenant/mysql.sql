@@ -13,17 +13,14 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- User input section (DDL/DML). This is just a template, developer can modify based on need.
-
-      ALTER TABLE `PLS_MultiTenant`.`EXPORT_FIELD_METADATA_DEFAULTS`
-               DROP `HISTORY_ENABLED`;
-               
       create table `DATA_OPERATION`
           (
               `PID`             bigint       not null auto_increment,
               `DROP_PATH`       varchar(255),
               `OPERATION_TYPE`  varchar(40),
               `CONFIGURATION`   JSON,
-              `CREATE_DATE`     datetime,
+              `CREATED`     datetime,
+              `UPDATED`     datetime,
               `FK_TENANT_ID`    bigint       not null,
               primary key (`PID`)
           ) engine = InnoDB;
@@ -31,7 +28,8 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `DATA_OPERATION`
               ADD CONSTRAINT `FK_DATAOPERATION_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`)
                   REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
-
+      CREATE INDEX IX_DROP_PATH ON `DATA_OPERATION` (`DROP_PATH`);
+      
   END //
 -- ##############################################################
 

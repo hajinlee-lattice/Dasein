@@ -13,5 +13,7 @@ public interface DataOperationService {
 
     List<DataOperation> findAllDataOperation(String customerSpace);
 
+    DataOperation findDataOperationByDropPath(String customerSpace, String dropPath);
+
     void deleteDataOperation(String customerSpace, DataOperation dataOperation);
 }

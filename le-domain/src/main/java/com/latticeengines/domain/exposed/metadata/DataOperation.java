@@ -14,6 +14,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
@@ -30,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.DataOperationConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
@@ -38,7 +41,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class DataOperation implements HasPid {
+public class DataOperation implements HasPid, HasAuditingFields {
 
     private static final Logger log = LoggerFactory.getLogger(DataOperation.class);
 
@@ -68,9 +71,15 @@ public class DataOperation implements HasPid {
     @Type(type = "json")
     private DataOperationConfiguration configuration;
 
-    @JsonProperty("createDate")
-    @Column(name = "CREATE_DATE")
-    private Date createDate;
+    @JsonProperty("created")
+    @Column(name = "CREATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
+
+    @JsonProperty("updated")
+    @Column(name = "UPDATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updated;
 
     @Override
     public Long getPid() {
@@ -114,17 +123,29 @@ public class DataOperation implements HasPid {
         this.configuration = configuration;
     }
 
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    @Override
+    public Date getCreated() {
+        return this.created;
+    }
+
+    @Override
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    @Override
+    public Date getUpdated() {
+        return this.updated;
+    }
+
+    @Override
+    public void setUpdated(Date updated) {
+        this.updated = updated;
     }
 
     public enum OperationType{

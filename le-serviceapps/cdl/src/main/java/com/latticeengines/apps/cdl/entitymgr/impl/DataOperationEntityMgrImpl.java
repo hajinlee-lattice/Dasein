@@ -5,6 +5,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.DataOperationDao;
 import com.latticeengines.apps.cdl.entitymgr.DataOperationEntityMgr;
@@ -53,4 +55,9 @@ public class DataOperationEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<D
         return dataOperationDao;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataOperation findByDropPath(String dropPath) {
+        return getReaderRepo().findByDropPath(dropPath);
+    }
 }

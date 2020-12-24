@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -39,20 +38,28 @@ public class DataOperationServiceImpl implements DataOperationService {
         dataOperation.setOperationType(operationType);
         dataOperation.setConfiguration(configuration);
         dataOperation.setTenant(MultiTenantContext.getTenant());
-        dataOperation.setCreateDate(new Date());
-        dataOperation.setDropPath(generateDropPath(dataOperation));
+        String dropPath = generateDropPath(dataOperation);
+        String fullPath = String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(), dropBoxService.getDropBoxPrefix(),
+                dropPath);
+        DataOperation existing = findDataOperationByDropPath(customerSpace, fullPath);
+        if (existing != null) {
+            return fullPath;
+        }
+        dropBoxService.createFolderUnderDropFolder(dropPath);
+        dataOperation.setDropPath(fullPath);
         dataOperationEntityMgr.create(dataOperation);
-        return dataOperation.getDropPath();
+        return fullPath;
+    }
+
+    public DataOperation findDataOperationByDropPath(String customerSpace, String dropPath) {
+        return dataOperationEntityMgr.findByDropPath(dropPath);
     }
 
     private String generateDropPath(DataOperation dataOperation) {
         String idColumn = BusinessEntity.Account.equals(dataOperation.getConfiguration().getEntity()) ? InterfaceName.AccountId.name()
                 : InterfaceName.ContactId.name();
-        String dataOperationPath = String.format(DATA_OPERATION_PATH_PATTERN, dataOperation.getOperationType(),
+        return String.format(DATA_OPERATION_PATH_PATTERN, dataOperation.getOperationType(),
                 dataOperation.getConfiguration().getSystemName(), idColumn);
-        dropBoxService.createFolderUnderDropFolder(dataOperationPath);
-        return String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(), dropBoxService.getDropBoxPrefix(),
-                dataOperationPath);
     }
 
     @Override
