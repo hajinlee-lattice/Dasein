@@ -97,6 +97,32 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
         });
     }
 
+    @Test(groups = "functional")
+    public void testFindAllDataUnitEntitiesWithExpiredRetentionPolicy() throws Exception {
+        String dataUnitStr = "{\"Roles\":[\"Master\", \"Test\"], \"StorageType\":\"Dynamo\"}";
+        DataUnit dataUnit = JsonUtils.deserialize(dataUnitStr, DynamoDataUnit.class);
+
+        String name = NamingUtils.timestamp("Dynamo");
+        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name));
+        Assert.assertNotNull(unit);
+        Assert.assertTrue(unit instanceof DynamoDataUnit);
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            List<DataUnit> found = dataUnitService.findAllDataUnitEntitiesWithExpiredRetentionPolicy(0, 5);
+            Assert.assertTrue(CollectionUtils.isNotEmpty(found));
+            Assert.assertTrue(found.get(0) instanceof DynamoDataUnit);
+            return true;
+        });
+
+        dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
+        retry.execute(context -> {
+            Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));
+            return true;
+        });
+    }
+
     private DynamoDataUnit createDynamoUnit(String name) {
         DynamoDataUnit dataUnit = new DynamoDataUnit();
         dataUnit.setName(name);
@@ -105,6 +131,7 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
         dataUnit.setSortKey("sk");
         dataUnit.setSignature("0000");
         dataUnit.setDataTemplateId(DATATEMPLATE_ID);
+        dataUnit.setRetentionPolicy("KEEP_3_DAYS");
         List<DataUnit.Role> roles = new ArrayList<DataUnit.Role>();
         roles.add(DataUnit.Role.Master);
         roles.add(DataUnit.Role.Import);
