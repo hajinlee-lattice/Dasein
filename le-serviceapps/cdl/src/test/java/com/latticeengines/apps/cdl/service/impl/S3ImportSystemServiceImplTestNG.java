@@ -72,21 +72,28 @@ public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
         system3.setName("SYSTEM3");
         s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, system3);
 
-        S3ImportSystem pardon = new S3ImportSystem();
-        pardon.setTenant(mainTestTenant);
-        pardon.setName("PARDON");
-        pardon.setSystemType(S3ImportSystem.SystemType.Pardot);
-        s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, pardon);
+        S3ImportSystem pardot = new S3ImportSystem();
+        pardot.setTenant(mainTestTenant);
+        pardot.setName("PARDOT");
+        pardot.setSystemType(S3ImportSystem.SystemType.Pardot);
+        s3ImportSystemService.createS3ImportSystem(mainCustomerSpace, pardot);
 
         allSystems = s3ImportSystemService.getAllS3ImportSystem(mainCustomerSpace);
         Assert.assertEquals(allSystems.size(), 4);
         for (S3ImportSystem importSystem : allSystems) {
-            if (importSystem.getName().equals("SYSTEM1")) {
-                importSystem.setPriority(3);
-            } else if (importSystem.getName().equals("SYSTEM2")) {
-                importSystem.setPriority(2);
-            } else {
-                importSystem.setPriority(1);
+            switch (importSystem.getName()) {
+                case "SYSTEM1":
+                    importSystem.setPriority(3);
+                    break;
+                case "SYSTEM2":
+                    importSystem.setPriority(2);
+                    break;
+                case "SYSTEM3":
+                    importSystem.setPriority(1);
+                    break;
+                default:
+                    importSystem.setPriority(4);
+                    break;
             }
         }
 
@@ -98,12 +105,19 @@ public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         allSystems = s3ImportSystemService.getAllS3ImportSystem(mainCustomerSpace);
         for (S3ImportSystem importSystem : allSystems) {
-            if (importSystem.getName().equals("SYSTEM1")) {
-                importSystem.setPriority(1);
-            } else if (importSystem.getName().equals("SYSTEM2")) {
-                importSystem.setPriority(2);
-            } else {
-                importSystem.setPriority(3);
+            switch (importSystem.getName()) {
+                case "SYSTEM1":
+                    importSystem.setPriority(1);
+                    break;
+                case "SYSTEM2":
+                    importSystem.setPriority(2);
+                    break;
+                case "SYSTEM3":
+                    importSystem.setPriority(3);
+                    break;
+                default:
+                    importSystem.setPriority(4);
+                    break;
             }
         }
         Assert.assertTrue(s3ImportSystemService.hasSystemMapToLatticeAccount(mainCustomerSpace));
@@ -111,5 +125,16 @@ public class S3ImportSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
         List<S3ImportSystem> finalAllSystems = allSystems;
         Assert.expectThrows(RuntimeException.class,
                 () -> s3ImportSystemService.updateAllS3ImportSystemPriority(mainCustomerSpace, finalAllSystems));
+
+        for (S3ImportSystem importSystem : allSystems) {
+            if (importSystem.getName().equals("SYSTEM3")) {
+                importSystem.setPriority(1);
+            } else {
+                importSystem.setPriority(2);
+            }
+        }
+        List<S3ImportSystem> finalAllSystems1 = allSystems;
+        Assert.expectThrows(RuntimeException.class,
+                () -> s3ImportSystemService.updateAllS3ImportSystemPriority(mainCustomerSpace, finalAllSystems1));
     }
 }
