@@ -68,7 +68,7 @@ public class SetTenantAspect {
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataOperationServiceImpl.*(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataOperationServiceImpl.create*(..))")
     public void allDataOperationService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());

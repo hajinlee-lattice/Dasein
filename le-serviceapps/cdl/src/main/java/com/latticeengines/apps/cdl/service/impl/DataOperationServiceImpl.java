@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @Component("dataOperationService")
 public class DataOperationServiceImpl implements DataOperationService {
 
-    private static final Logger log = LoggerFactory.getLogger(SegmentServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DataOperationServiceImpl.class);
 
     private static final String FULL_PATH_PATTERN = "%s/%s/%s";
 
