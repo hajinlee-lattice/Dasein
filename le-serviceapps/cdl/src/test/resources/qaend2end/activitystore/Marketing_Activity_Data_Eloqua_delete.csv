@@ -1,0 +1,81 @@
+ActivityDate,ActivityType,campaign_run_id,activityTypeId,ContactId,2019.11.30
+2019-11-20T02:39:34.000Z,Fill Out Form,,,A5C001,"Delete by account id ACC005 and ACC006 from 2019/11/8 to 2019/11/12. Expect: Fill Out Form account(last4)-2(last2)-2, Fill Out Form contact(last4)-2 (last2)-2"
+2019-11-09T02:39:34.000Z,Fill Out Form,,,A5C002,
+2019-11-12T02:39:34.000Z,Fill Out Form,,,A5C003,
+2019-11-11T02:39:34.000Z,Fill Out Form,,,A6C001,
+2019-11-09T02:39:34.000Z,Fill Out Form,,,A6C002,
+2019-11-12T02:39:34.000Z,Fill Out Form,,,A6C003,
+2019-11-20T02:39:34.000Z,Fill Out Form,,,A15C001,Delete by contact id A15C001 and A15C002 from 2019/11/8 to 2019/11/12. Expect:
+2019-11-09T02:39:34.000Z,Fill Out Form,,,A15C002,
+2019-11-12T02:39:34.000Z,Fill Out Form,,,A15C003,
+2019-11-19T02:39:34.000Z,Fill Out Form,,,A15C004,
+2019-11-20T02:39:34.000Z,Click Email,,,A7C001,"Delete by account customer id ACC007 and ACC008 from 2019/11/8 to 2019/11/12. Expect: Email Events account(last4)-2(last2)-2, Email Events contact(last4)-2 (last2)-2"
+2019-11-09T02:39:34.000Z,Open Email,,,A7C002,
+2019-11-12T02:39:34.000Z,Send Email,,,A7C003,
+2019-11-11T02:39:34.000Z,Send Email,,,A8C001,
+2019-11-09T02:39:34.000Z,Send Email,,,A8C002,
+2019-11-12T02:39:34.000Z,Send Email,,,A8C003,
+2019-11-20T02:39:34.000Z,Send Email,,,A16C001,Delete by contact customer id A16C001 and A16C002 from 2019/11/8 to 2019/11/12. Expect:
+2019-11-09T02:39:34.000Z,Send Email,,,A16C002,
+2019-11-12T02:39:34.000Z,Open Email,,,A16C003,
+2019-11-19T02:39:34.000Z,Open Email,,,A16C004,
+2019-11-20T02:39:34.000Z,Email Bounced,,,A9C001,"Delete by account id ACC009 and ACC010. Expect:Email Bounced account(last1)-1()last2)-1(last4)-1, Email Bounced contact(last1/2/4)-2"
+2019-11-10T02:39:34.000Z,Email Bounced,,,A9C002,
+2019-11-07T02:39:34.000Z,Email Bounced,,,A9C003,
+2019-11-20T02:39:34.000Z,Email Bounced,,,A10C001,
+2019-11-10T02:39:34.000Z,Email Bounced,,,A10C002,
+2019-11-07T02:39:34.000Z,Email Bounced,,,A10C003,
+2019-11-19T02:39:34.000Z,Email Bounced,,,A13C001,Delete by contact id A13C001 and A13C002. Expect:
+2019-11-09T02:39:34.000Z,Email Bounced,,,A13C002,
+2019-11-19T02:39:34.000Z,Email Bounced,,,A13C003,
+2019-11-09T02:39:34.000Z,Email Bounced,,,A13C004,
+2019-11-20T02:39:34.000Z,WebVisit,,,A11C001,"Delete by account customer id ACC011 and ACC012. Expect:WebVisit account(last1)-1()last2)-1(last4)-1, WebVisit contact(last1/2/4)-2"
+2019-11-20T02:39:34.000Z,WebVisit,,,A11C002,
+2019-11-20T02:39:34.000Z,WebVisit,,,A11C003,
+2019-11-20T02:39:34.000Z,WebVisit,,,A12C001,
+2019-11-20T02:39:34.000Z,WebVisit,,,A12C002,
+2019-11-19T02:39:34.000Z,WebVisit,,,A12C003,
+2019-11-19T02:39:34.000Z,WebVisit,,,A14C001,Delete by contact customer id A14C001 and A14C002. Expect:
+2019-11-19T02:39:34.000Z,WebVisit,,,A14C002,
+2019-11-19T02:39:34.000Z,WebVisit,,,A14C003,
+2019-11-19T02:39:34.000Z,WebVisit,,,A14C004,
+2019-09-01T02:39:34.000Z,From WeChat,,,A13C001,Delete by date from 2019/9/1 to 2019/10/26. Expect:WeChat Action=0
+2019-09-10T02:39:34.000Z,From WeChat,,,A13C002,
+2019-09-23T02:39:34.000Z,From WeChat,,,A13C003,
+2019-10-02T02:39:34.000Z,From WeChat,,,A13C001,
+2019-10-12T02:39:34.000Z,From WeChat,,,A14C001,
+2019-10-19T02:39:34.000Z,From WeChat,,,A14C002,
+2019-10-23T02:39:34.000Z,From WeChat,,,A14C003,
+2019-10-26T02:39:34.000Z,From WeChat,,,A14C001,
+2019-11-19T02:39:34.000Z,Phone Call,,,A2C001,"Delete account by id 3256534 and 5553571. Expect:Phone Call account(last1)-2, Phone Call contact(last1)-6"
+2019-11-18T02:39:34.000Z,Phone Call,,,A2C002,
+2019-11-17T02:39:34.000Z,Phone Call,,,A2C003,
+2019-11-19T02:39:34.000Z,Phone Call,,,A3C001,
+2019-11-18T02:39:34.000Z,Phone Call,,,A3C002,
+2019-11-17T02:39:34.000Z,Phone Call,,,A3C003,
+2019-11-19T02:39:34.000Z,Phone Call,,,A13C005,Delete contact by id A13C005 and A13C006. Expect:
+2019-11-18T02:39:34.000Z,Phone Call,,,A13C006,
+2019-11-18T02:39:34.000Z,Phone Call,,,A14C005,
+2019-11-18T02:39:34.000Z,Phone Call,,,A14C006,
+2019-11-19T02:39:34.000Z,Phone Call,,,A17C001,Delete contact by account id ACC017 and ACC018. Expect:
+2019-11-18T02:39:34.000Z,Phone Call,,,A17C002,
+2019-11-17T02:39:34.000Z,Phone Call,,,A17C003,
+2019-11-19T02:39:34.000Z,Phone Call,,,A18C001,
+2019-11-18T02:39:34.000Z,Phone Call,,,A18C002,
+2019-11-17T02:39:34.000Z,Phone Call,,,A18C003,
+2019-11-18T02:39:34.000Z,Subscribe Offical Account,,,A1C001,"Delete account by customer id 1667906 and 3396256. Expect:Subscribe Offical Account account(last1)-2, Subscribe Offical Account contact(last1)-6"
+2019-11-17T02:39:34.000Z,Subscribe Offical Account,,,A1C002,
+2019-11-20T02:39:34.000Z,Subscribe Offical Account,,,A1C003,
+2019-11-18T02:39:34.000Z,Subscribe Offical Account,,,A4C001,
+2019-11-17T02:39:34.000Z,Subscribe Offical Account,,,A4C002,
+2019-11-20T02:39:34.000Z,Subscribe Offical Account,,,A4C003,
+2019-11-24T02:39:34.000Z,Subscribe Offical Account,,,A15C005,Delete contact by customer id A15C005 and A16C006. Expect:
+2019-11-25T02:39:34.000Z,Subscribe Offical Account,,,A15C006,
+2019-11-26T02:39:34.000Z,Subscribe Offical Account,,,A16C005,
+2019-11-27T02:39:34.000Z,Subscribe Offical Account,,,A16C006,
+2019-11-18T02:39:34.000Z,Subscribe Offical Account,,,A19C001,Delete contact by customer account id ACC019 and ACC020. Expect:
+2019-11-17T02:39:34.000Z,Subscribe Offical Account,,,A19C002,
+2019-11-20T02:39:34.000Z,Subscribe Offical Account,,,A19C003,
+2019-11-18T02:39:34.000Z,Subscribe Offical Account,,,A20C001,
+2019-11-17T02:39:34.000Z,Subscribe Offical Account,,,A20C002,
+2019-11-20T02:39:34.000Z,Subscribe Offical Account,,,A20C003,

@@ -18,10 +18,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.service.TestFileImportService;
 import com.latticeengines.testframework.exposed.service.TestJobService;
@@ -54,6 +60,15 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
 
     @Inject
     protected TestJobService testJobService;
+
+    @Inject
+    protected DropBoxProxy dropBoxProxy;
+
+    @Inject
+    protected DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    protected CDLAttrConfigProxy cdlAttrConfigProxy;
 
     @Value("${qa.username}")
     protected String userName;
@@ -102,6 +117,12 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
         if (mainUserDocument != null) {
             testBed.logout(mainUserDocument);
         }
+    }
+
+    protected SourceFile uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type,
+            org.springframework.core.io.Resource source) {
+        log.info("Upload file " + fileName + ", operation type is " + type.name() + ", Schema is " + schema.name());
+        return testFileImportService.uploadDeleteFile(fileName, schema.name(), type.name(), source);
     }
 
     protected void cleanupTenant() {

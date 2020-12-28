@@ -1,0 +1,3 @@
+No,Name,DeleteEntityType,IDs,IdEntity,DoTransform,IdSystem,FromDate,ToDate
+1,HardDeleteAccountByLatticeAccountid,Accounts,"ACC002,ACC003",Account,TRUE,,,
+2,HardDeleteAccountByCustomerAccountid,Accounts,"ACC001,ACC004",Account,FALSE,DefaultSystem,,
