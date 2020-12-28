@@ -1,5 +1,8 @@
 package com.latticeengines.security.controller;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +32,8 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
+import com.latticeengines.domain.exposed.dcp.vbo.VboUserSeatUsageEvent;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -54,6 +59,8 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.VboService;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -89,6 +96,12 @@ public class UserResource {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private IDaaSService iDaaSService;
+
+    @Inject
+    private VboService vboService;
 
     @GetMapping("")
     @ResponseBody
@@ -161,7 +174,20 @@ public class UserResource {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
 
+            VboUserSeatUsageEvent usageEvent = null;
+
+            if (!EmailUtils.isInternalUser(user.getEmail())) {
+                usageEvent = new VboUserSeatUsageEvent();
+                usageEvent.setEmailAddress(loginUser.getEmail());
+                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                usageEvent.setPOAEID(traceId);
+                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                usageEvent.setLUID(loginUser.getPid());
+            }
+          
             RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
+            if (usageEvent != null)
+                usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
             String tempPass = result.getPassword();
             if (!Boolean.TRUE.equals(setTempPass)) {
                 result.setPassword(null);
@@ -200,6 +226,11 @@ public class UserResource {
                         welcomeUrl = idaasUser.getInvitationLink();
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
+                }
+
+                if (usageEvent != null) {
+                    populateWithSubscriberDetails(usageEvent);
+                    vboService.sendUserUsageEvent(usageEvent);
                 }
             }
         } finally {
@@ -269,6 +300,16 @@ public class UserResource {
             updateResponse.setTraceId(traceId);
             document.setResult(updateResponse);
 
+            VboUserSeatUsageEvent usageEvent = null;
+            if (newUser && !EmailUtils.isInternalUser(user.getEmail())) {
+                usageEvent = new VboUserSeatUsageEvent();
+                usageEvent.setEmailAddress(loginUser.getEmail());
+                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                usageEvent.setPOAEID(traceId);
+                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                usageEvent.setLUID(loginUser.getPid());
+            }
+
             if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
                 // using access level if it is provided
                 String loginUsername = loginUser.getUsername();
@@ -302,6 +343,9 @@ public class UserResource {
                     } else {
                         emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
                     }
+                  
+                    if (usageEvent != null)
+                        usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                 }
             }
             // update other information
@@ -324,6 +368,11 @@ public class UserResource {
                         welcomeUrl = idaasUser.getInvitationLink();
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
+                }
+
+                if (usageEvent != null) {
+                    populateWithSubscriberDetails(usageEvent);
+                    vboService.sendUserUsageEvent(usageEvent);
                 }
             }
         } finally {
@@ -383,5 +432,17 @@ public class UserResource {
                 .withStartTimestamp(startTimeStamp)
                 .start();
         return tracer.activateSpan(span);
+    }
+
+    private void populateWithSubscriberDetails(VboUserSeatUsageEvent usageEvent) {
+        SubscriberDetails details = iDaaSService.getSubscriberDetails(usageEvent.getSubscriberID());
+        if (details != null) {
+            if (details.getAddress() != null) {
+                usageEvent.setSubscriberCountry(details.getAddress().getCountryCode());
+                usageEvent.setSubjectCountry(details.getAddress().getCountryCode());
+            }
+            usageEvent.setContractTermStartDate(details.getEffectiveDate());
+            usageEvent.setContractTermEndDate(details.getExpirationDate());
+        }
     }
 }

@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.auth.GlobalTeam;
 
 public class User {
 
+    private Long pid;
     private String username;
     private String email;
     private String firstName;
@@ -19,6 +20,14 @@ public class User {
     // tenant level property will be set during getting tenant right
     private Long expirationDate;
     private List<GlobalTeam> userTeams;
+
+    public Long getPid() {
+        return pid;
+    }
+
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
 
     @JsonProperty("Email")
     public String getEmail() {
