@@ -34,8 +34,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/datafiles")
 @PreAuthorize("hasRole('View_PLS_Configurations')")
-public class
-DataFileResource {
+public class DataFileResource {
 
     private static final Logger log = LoggerFactory.getLogger(DataFileResource.class);
 
