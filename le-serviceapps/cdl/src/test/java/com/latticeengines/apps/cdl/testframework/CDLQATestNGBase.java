@@ -79,6 +79,9 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
     @Value("${qa.maintenant}")
     protected String mainTenant;
 
+    @Value("${qa.end2end.test.testdata.dir}")
+    protected String qaTestDataPath;
+
     @BeforeClass(groups = { "qaend2end" })
     public void init() {
         checkBasicInfo();

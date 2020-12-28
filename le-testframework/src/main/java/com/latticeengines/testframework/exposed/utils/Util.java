@@ -422,11 +422,6 @@ public class Util {
         }
     }
 
-    public static String getQAEnd2EndResourceDir() {
-        return getCurrentThreadResource("test-serviceapps-cdl-qa-end2end-context.xml").getParentFile().getAbsolutePath()
-                + "/qaend2end";
-    }
-
     public static File getFileInCurrentProject(String fileName) {
         return findFileInOneFolder(new File(System.getProperty("user.dir")), fileName);
     }
@@ -695,9 +690,7 @@ public class Util {
 
     public static void assertResult(String expectedResultJsonFile, JSONArray actualResult) {
         try {
-            String jsonStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(expectedResultJsonFile),
-                    "UTF-8");
+            String jsonStr = IOUtils.toString(new FileInputStream(expectedResultJsonFile), "UTF-8");
             JSONAssert.assertEquals(jsonStr, actualResult, false);
         } catch (Exception e) {
             throw new AssertionError("Test result assertion failed.", e);

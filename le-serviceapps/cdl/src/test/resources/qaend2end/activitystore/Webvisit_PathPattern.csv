@@ -1,6 +1,0 @@
-Path Pattern Name,Path Pattern,customerfield_1
-About-us,*/care/about-us,
-All Articles,*/care/Article/.*,
-Register,*/register,
-Home ,https://catalysts.basf.com,
-Orders,https://www.shop.basf.com.br/care/orders,

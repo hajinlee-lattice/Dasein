@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -85,7 +86,8 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     @Override
     protected void checkBasicInfo() {
         super.checkBasicInfo();
-        activityStoreTestDataPath = Util.getQAEnd2EndResourceDir() + File.separator + "activitystore";
+        Assert.assertTrue(StringUtils.isNotEmpty(qaTestDataPath), "Test Data directory is required");
+        activityStoreTestDataPath = qaTestDataPath + File.separator + "activitystore";
         log.info("Activity Store test data directory is " + activityStoreTestDataPath);
         redshiftJdbcTemplate = redshiftPartitionService.getBatchUserJdbcTemplate(null);
         testBed.attachProtectedProxy(plsCDLSoftDeleteProxy);
@@ -111,7 +113,8 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
         testFileImportService.doOneOffImport(contactFilePath, OTHER_SYSTEM_NAME, EntityType.Contacts);
 
         log.info("Importing DnbIntent data...");
-        File intentFile = Util.getCurrentThreadResource("qaend2end/activitystore/" + intentFileName);
+        String intentFilePath = activityStoreTestDataPath + File.separator + intentFileName;
+        File intentFile = new File(intentFilePath);
         String bucketName = getIntentS3BucketName();
         S3Utilities.uploadFileToS3(bucketName, intentFile);
 
@@ -161,7 +164,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testImportActivityStoreData" })
     public void testCustomIntentImportCorrectness() throws TimeoutException {
         JSONArray actualResult = queryCustomIntentRecords();
-        Util.assertResult("qaend2end/activitystore/importresults/customintent.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/importresults/customintent.json", actualResult);
     }
 
     @Test(groups = {
@@ -169,7 +172,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testImportActivityStoreData" })
     public void testOpportunityImportCorrectness() throws TimeoutException {
         JSONArray actualResult = queryOpportunityRecords();
-        Util.assertResult("qaend2end/activitystore/importresults/opportunity.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/importresults/opportunity.json", actualResult);
     }
 
     @Test(groups = {
@@ -177,7 +180,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testImportActivityStoreData" })
     public void testWebVisitImportCorrectness() throws TimeoutException {
         JSONArray actualResult = queryWebVisitRecords();
-        Util.assertResult("qaend2end/activitystore/importresults/webvisit.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/importresults/webvisit.json", actualResult);
     }
 
     @Test(groups = {
@@ -185,9 +188,9 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testImportActivityStoreData" })
     public void testMarketingImportCorrectness() throws TimeoutException {
         JSONArray actualResult = queryAccountMarketingRecords();
-        Util.assertResult("qaend2end/activitystore/importresults/accountmarketing.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/importresults/accountmarketing.json", actualResult);
         actualResult = queryContactMarketingRecords();
-        Util.assertResult("qaend2end/activitystore/importresults/contactmarketing.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/importresults/contactmarketing.json", actualResult);
     }
 
     @Test(groups = {
@@ -196,7 +199,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testOpportunityImportCorrectness", "testWebVisitImportCorrectness",
                     "testMarketingImportCorrectness" })
     public void testActivityStoreDelete() throws TimeoutException {
-        registerDeleteData("qaend2end/activitystore/SoftDeleteTestScenarios.csv", false);
+        registerDeleteData(activityStoreTestDataPath + "/SoftDeleteTestScenarios.csv", false);
         // wait all file import actions are done
         log.info("Waiting all soft delete actions are done...");
         testJobService.waitForProcessAnalyzeAllActionsDone(DEFAULT_WAIT_PA_READY_IN_MINUTES);
@@ -226,7 +229,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testActivityStoreDelete" })
     public void testCustomIntentSoftDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryCustomIntentRecords();
-        Util.assertResult("qaend2end/activitystore/softdeleteresults/customintent.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/softdeleteresults/customintent.json", actualResult);
     }
 
     @Test(groups = {
@@ -234,7 +237,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testActivityStoreDelete" })
     public void testOpportunitySoftDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryOpportunityRecords();
-        Util.assertResult("qaend2end/activitystore/softdeleteresults/opportunity.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/softdeleteresults/opportunity.json", actualResult);
     }
 
     @Test(groups = {
@@ -242,7 +245,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testActivityStoreDelete" })
     public void testWebVisitSoftDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryWebVisitRecords();
-        Util.assertResult("qaend2end/activitystore/softdeleteresults/webvisit.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/softdeleteresults/webvisit.json", actualResult);
     }
 
     @Test(groups = {
@@ -250,9 +253,9 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testActivityStoreDelete" })
     public void testMarketingSoftDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryAccountMarketingRecords();
-        Util.assertResult("qaend2end/activitystore/softdeleteresults/accountmarketing.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/softdeleteresults/accountmarketing.json", actualResult);
         actualResult = queryContactMarketingRecords();
-        Util.assertResult("qaend2end/activitystore/softdeleteresults/contactmarketing.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/softdeleteresults/contactmarketing.json", actualResult);
     }
 
     @Test(groups = { "qa-activitystore-end2end" }, description = "Activity store rematch tests", dependsOnMethods = {
@@ -300,7 +303,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testActivityStoreRematch" })
     public void testCustomIntentRematchCorrectness() throws TimeoutException {
         JSONArray actualResult = queryCustomIntentRecords();
-        Util.assertResult("qaend2end/activitystore/rematchresults/customintent.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/rematchresults/customintent.json", actualResult);
     }
 
     @Test(groups = {
@@ -308,7 +311,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testActivityStoreRematch" })
     public void testOpportunityRematchCorrectness() throws TimeoutException {
         JSONArray actualResult = queryOpportunityRecords();
-        Util.assertResult("qaend2end/activitystore/rematchresults/opportunity.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/rematchresults/opportunity.json", actualResult);
     }
 
     @Test(groups = {
@@ -316,7 +319,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testActivityStoreRematch" })
     public void testWebVisitRematchCorrectness() throws TimeoutException {
         JSONArray actualResult = queryWebVisitRecords();
-        Util.assertResult("qaend2end/activitystore/rematchresults/webvisit.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/rematchresults/webvisit.json", actualResult);
     }
 
     @Test(groups = {
@@ -324,9 +327,9 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testActivityStoreRematch" })
     public void testMarketingRematchCorrectness() throws TimeoutException {
         JSONArray actualResult = queryAccountMarketingRecords();
-        Util.assertResult("qaend2end/activitystore/rematchresults/accountmarketing.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/rematchresults/accountmarketing.json", actualResult);
         actualResult = queryContactMarketingRecords();
-        Util.assertResult("qaend2end/activitystore/rematchresults/contactmarketing.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/rematchresults/contactmarketing.json", actualResult);
     }
 
     @Test(groups = {
@@ -335,7 +338,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testCustomIntentRematchCorrectness", "testOpportunityRematchCorrectness",
                     "testWebVisitRematchCorrectness", "testMarketingRematchCorrectness" })
     public void testAccountHardDelete() throws TimeoutException {
-        registerDeleteData("qaend2end/activitystore/HardDeleteTestScenarios.csv", true);
+        registerDeleteData(activityStoreTestDataPath + "/HardDeleteTestScenarios.csv", true);
         // wait all file import actions are done
         log.info("Waiting all hard delete actions are done...");
         testJobService.waitForProcessAnalyzeAllActionsDone(DEFAULT_WAIT_PA_READY_IN_MINUTES);
@@ -368,7 +371,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testAccountHardDelete" })
     public void testCustomIntentHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryCustomIntentRecords();
-        Util.assertResult("qaend2end/activitystore/harddeleteresults/customintent.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/customintent.json", actualResult);
     }
 
     @Test(groups = {
@@ -376,7 +379,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testAccountHardDelete" })
     public void testOpportunityHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryOpportunityRecords();
-        Util.assertResult("qaend2end/activitystore/harddeleteresults/opportunity.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/opportunity.json", actualResult);
     }
 
     @Test(groups = {
@@ -384,7 +387,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testAccountHardDelete" })
     public void testWebVisitHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryWebVisitRecords();
-        Util.assertResult("qaend2end/activitystore/harddeleteresults/webvisit.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/webvisit.json", actualResult);
     }
 
     @Test(groups = {
@@ -392,9 +395,9 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
                     "testAccountHardDelete" })
     public void testMarketingHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryAccountMarketingRecords();
-        Util.assertResult("qaend2end/activitystore/harddeleteresults/accountmarketing.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/accountmarketing.json", actualResult);
         actualResult = queryContactMarketingRecords();
-        Util.assertResult("qaend2end/activitystore/harddeleteresults/contactmarketing.json", actualResult);
+        Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/contactmarketing.json", actualResult);
     }
 
     private String getIntentS3BucketName() {
@@ -597,7 +600,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     private void registerDeleteData(String scenarioFile, boolean hardDelete) {
         List<DeleteRequest> allRequests = new ArrayList<>();
-        Util.parseTestDataFile(scenarioFile, csvParser -> {
+        Util.parseFile(scenarioFile, csvParser -> {
             for (CSVRecord record : csvParser) {
                 String testCase = record.get("Name");
                 logger.info(String.format("\n\r\t%sDeleteTestCase%s, is for %s.", hardDelete ? "Hard" : "Soft",
