@@ -5,6 +5,7 @@ import static org.testng.Assert.assertEquals;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -21,6 +23,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.app.exposed.entitymanager.ActivityAlertEntityMgr;
 import com.latticeengines.app.exposed.repository.datadb.ActivityAlertRepository;
 import com.latticeengines.app.testframework.AppFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
 import com.latticeengines.domain.exposed.cdl.activity.AlertCategory;
@@ -37,6 +40,9 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     private ActivityAlertRepository activityAlertRepository;
 
     private List<ActivityAlert> alerts;
+
+    private RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, Collections.singleton(AssertionError.class),
+            null);
 
     @BeforeClass(groups = "functional")
     @Transactional
@@ -60,17 +66,23 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
 
         int deleted = activityAlertEntityMgr
                 .deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
-        records = activityAlertEntityMgr.findTopNAlertsByEntityId("23456", BusinessEntity.Account, "version1",
-                AlertCategory.PRODUCTS, 6);
         Assert.assertEquals(deleted,1);
-        assertEquals(records.size(), 3);
+        retryTemplate.execute(ctx -> {
+            List<ActivityAlert> recordsAfterDeletion = activityAlertEntityMgr.findTopNAlertsByEntityId("23456",
+                    BusinessEntity.Account, "version1", AlertCategory.PRODUCTS, 6);
+            assertEquals(recordsAfterDeletion.size(), 3);
+            return null;
+        });
 
         deleted = activityAlertEntityMgr
                 .deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
-        records = activityAlertEntityMgr.findTopNAlertsByEntityId("23456", BusinessEntity.Account, "version1",
-                AlertCategory.PRODUCTS, 6);
         Assert.assertEquals(deleted,1);
-        assertEquals(records.size(), 2);
+        retryTemplate.execute(ctx -> {
+            List<ActivityAlert> recordsAfterDeletion = activityAlertEntityMgr.findTopNAlertsByEntityId("23456",
+                    BusinessEntity.Account, "version1", AlertCategory.PRODUCTS, 6);
+            assertEquals(recordsAfterDeletion.size(), 2);
+            return null;
+        });
     }
 
     private List<ActivityAlert> generateAlerts(Tenant t) {
