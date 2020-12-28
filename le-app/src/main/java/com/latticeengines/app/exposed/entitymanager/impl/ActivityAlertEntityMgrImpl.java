@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.app.exposed.entitymanager.ActivityAlertEntityMgr;
 import com.latticeengines.app.exposed.repository.datadb.ActivityAlertRepository;
 import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
@@ -17,6 +18,7 @@ import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.cdl.activity.AlertCategory;
 import com.latticeengines.domain.exposed.cdl.activitydata.ActivityAlert;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("activityAlertEntityMgr")
 public class ActivityAlertEntityMgrImpl extends JpaEntityMgrRepositoryImpl<ActivityAlert, Long>
@@ -40,6 +42,15 @@ public class ActivityAlertEntityMgrImpl extends JpaEntityMgrRepositoryImpl<Activ
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int deleteByExpireDateBefore(Date expireDate, int maxUpdateRows) {
         return activityAlertRepository.deleteByCreationTimestampBefore(expireDate, maxUpdateRows);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int deleteByTenantAndExpireDateBefore(Tenant tenant, Date expireDate, int maxUpdateRows) {
+        Preconditions.checkNotNull(tenant, "tenant should not be null");
+        Preconditions.checkNotNull(tenant.getPid(), "tenant pid should not be null");
+        return activityAlertRepository.deleteByTenantAndCreationTimestampBefore(tenant.getPid(), expireDate,
+                maxUpdateRows);
     }
 
     @Override
