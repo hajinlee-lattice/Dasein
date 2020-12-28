@@ -40,6 +40,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     private ActivityAlertRepository activityAlertRepository;
 
     private List<ActivityAlert> alerts;
+    private Tenant t;
 
     private RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, Collections.singleton(AssertionError.class),
             null);
@@ -47,7 +48,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     @Transactional
     public void setup() {
-        Tenant t = new Tenant();
+        t = new Tenant();
         t.setPid(-10L);
         MultiTenantContext.setTenant(t);
         alerts = generateAlerts(t);
@@ -65,7 +66,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
         assertEquals(records.size(), 4);
 
         int deleted = activityAlertEntityMgr
-                .deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
+                .deleteByTenantAndExpireDateBefore(t, Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
         Assert.assertEquals(deleted,1);
         retryTemplate.execute(ctx -> {
             List<ActivityAlert> recordsAfterDeletion = activityAlertEntityMgr.findTopNAlertsByEntityId("23456",
@@ -75,7 +76,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
         });
 
         deleted = activityAlertEntityMgr
-                .deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
+                .deleteByTenantAndExpireDateBefore(t, Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
         Assert.assertEquals(deleted,1);
         retryTemplate.execute(ctx -> {
             List<ActivityAlert> recordsAfterDeletion = activityAlertEntityMgr.findTopNAlertsByEntityId("23456",
