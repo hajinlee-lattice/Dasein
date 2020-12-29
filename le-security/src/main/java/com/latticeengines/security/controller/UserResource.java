@@ -172,7 +172,10 @@ public class UserResource {
         }
         if (isDCPTenant && tenant.getTenantType() == TenantType.CUSTOMER && !EmailUtils.isInternalUser(user.getEmail())
                 && !hasAvailableSeats(tenant.getSubscriberNumber())) {
-            throw new LedpException(LedpCode.LEDP_18252, new String[]{tenant.getId()});
+            httpResponse.setStatus(403);
+            response.setErrors(Collections.
+                    singletonList(String.format("User seat limit for tenant %s has been reached.", tenant.getId())));
+            return response;
         }
 
         Tracer tracer = GlobalTracer.get();
@@ -340,7 +343,10 @@ public class UserResource {
                 if (newUser && isDCPTenant && tenant.getTenantType() == TenantType.CUSTOMER
                         && !EmailUtils.isInternalUser(user.getEmail())
                         && !hasAvailableSeats(tenant.getSubscriberNumber())) {
-                    throw new LedpException(LedpCode.LEDP_18252, new String[]{tenantId});
+                    response.setStatus(403);
+                    document.setErrors(Collections.
+                            singletonList(String.format("User seat limit for tenant %s has been reached.", tenantId)));
+                    return document;
                 }
 
                 userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),

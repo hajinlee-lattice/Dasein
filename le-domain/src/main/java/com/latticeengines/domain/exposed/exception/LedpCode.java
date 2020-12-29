@@ -391,7 +391,6 @@ public enum LedpCode {
     LEDP_18249("standard field {0} is unmapped but is mapped previously"),//
     LEDP_18250("Invalid data block domain provided."),//
     LEDP_18251("Invalid data block record type provided."),//
-    LEDP_18252("User {0} seat limit has been reached."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
