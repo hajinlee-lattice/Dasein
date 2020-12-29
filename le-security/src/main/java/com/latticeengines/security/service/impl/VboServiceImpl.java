@@ -53,7 +53,7 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
             log.info("Callback {} finished with response code {}", traceId, response.getStatusCodeValue());
             log.info("Callback {} response body: {}", traceId, response.getBody());
         } catch (Exception e) {
-            log.error(traceId + " Exception in callback:" + e.toString());
+            log.error(traceId + "Exception in callback:" + e.toString());
             throw e;
         }
     }
@@ -70,11 +70,14 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
         log.info(logMsg);
 
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(URI.create(getUsageEventUrl()), usageEvent, String.class);
-            log.info(response.getStatusCode().toString());
-            log.info(response.getBody());
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    URI.create(getUsageEventUrl()), usageEvent, String.class);
+            log.info("Post usage finished with response code " + response.getStatusCodeValue());
+            log.info("Post usage response body: " + response.getBody());
         } catch (Exception e) {
             log.error("Exception in usage event: " + e.toString());
+            log.info(String.format("Failed to post %s usage event for subscriber %s with email %s",
+                    usageEvent.getFeatureURI(), usageEvent.getSubscriberID(), usageEvent.getEmailAddress()));
             throw e;
         }
     }

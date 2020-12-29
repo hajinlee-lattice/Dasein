@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -237,10 +238,14 @@ public class UserResource {
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
                 }
-
                 if (usageEvent != null) {
                     populateWithSubscriberDetails(usageEvent);
-                    vboService.sendUserUsageEvent(usageEvent);
+                    try {
+                        vboService.sendUserUsageEvent(usageEvent);
+                    } catch (Exception e) {
+                        LOGGER.error("Exception in usage event: " + e.toString());
+                        LOGGER.error("Exception in usage event: " + ExceptionUtils.getStackTrace(e));
+                    }
                 }
             }
         } finally {
@@ -353,6 +358,8 @@ public class UserResource {
                         false, !newUser, data.getUserTeams());
                 LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                         targetLevel.name(), username, tenantId));
+                if (usageEvent != null)
+                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                 if (newUser && user != null
                         && !batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
                     userSpan.log("Sending email");
@@ -363,9 +370,6 @@ public class UserResource {
                     } else {
                         emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
                     }
-
-                    if (usageEvent != null)
-                        usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                 }
             }
             // update other information
@@ -389,10 +393,14 @@ public class UserResource {
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
                 }
-
                 if (usageEvent != null) {
                     populateWithSubscriberDetails(usageEvent);
-                    vboService.sendUserUsageEvent(usageEvent);
+                    try {
+                        vboService.sendUserUsageEvent(usageEvent);
+                    } catch (Exception e) {
+                        LOGGER.error("Exception in usage event: " + e.toString());
+                        LOGGER.error("Exception in usage event: " + ExceptionUtils.getStackTrace(e));
+                    }
                 }
             }
         } finally {
@@ -463,6 +471,8 @@ public class UserResource {
             }
             usageEvent.setContractTermStartDate(details.getEffectiveDate());
             usageEvent.setContractTermEndDate(details.getExpirationDate());
+        } else {
+            LOGGER.info("Failed to retrieve subscriber details from IDaaS for sub id: " + usageEvent.getSubscriberID());
         }
     }
 

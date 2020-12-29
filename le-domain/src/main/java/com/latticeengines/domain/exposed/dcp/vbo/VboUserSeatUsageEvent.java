@@ -113,4 +113,6 @@ public class VboUserSeatUsageEvent {
     public String getSubscriberID() {
         return subscriberID;
     }
+
+    public FeatureURI getFeatureURI() { return featureURI; }
 }
