@@ -33,10 +33,14 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 public class S3Utilities {
 
+    protected S3Utilities() {
+        throw new UnsupportedOperationException();
+    }
+
     private static AmazonS3 s3Client;
     private static Logger logger = LoggerFactory.getLogger(S3Utilities.class);
 
-    private final static String CLIENT_REGION = "us-east-1";
+    private static final String CLIENT_REGION = "us-east-1";
 
     static {
         s3Client = AmazonS3ClientBuilder.standard().withRegion(CLIENT_REGION)
