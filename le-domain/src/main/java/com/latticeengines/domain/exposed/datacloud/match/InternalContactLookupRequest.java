@@ -20,13 +20,6 @@ public class InternalContactLookupRequest {
     @JsonProperty("ContactId")
     private String contactId;
 
-    // contact index name
-    @JsonProperty("ESIndexName")
-    private String esIndexName;
-
-    @JsonProperty("AccountIndexName")
-    private String accountIndexName;
-
     @JsonProperty("AccountLookupId")
     private String accountLookupId;
 
@@ -73,19 +66,4 @@ public class InternalContactLookupRequest {
         this.accountLookupIdVal = accountLookupIdVal;
     }
 
-    public String getEsIndexName() {
-        return esIndexName;
-    }
-
-    public void setEsIndexName(String esIndexName) {
-        this.esIndexName = esIndexName;
-    }
-
-    public String getAccountIndexName() {
-        return accountIndexName;
-    }
-
-    public void setAccountIndexName(String accountIndexName) {
-        this.accountIndexName = accountIndexName;
-    }
 }

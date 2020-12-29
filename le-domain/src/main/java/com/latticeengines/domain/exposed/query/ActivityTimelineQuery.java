@@ -31,12 +31,6 @@ public class ActivityTimelineQuery {
     @NotNull(message = "Valid end timestamp needed")
     private Instant endTimeStamp;
 
-    @JsonProperty("es_indexname")
-    private String indexName;
-
-    @JsonProperty("customerspace")
-    private String customerSpace;
-
     public BusinessEntity getMainEntity() {
         return mainEntity;
     }
@@ -67,21 +61,5 @@ public class ActivityTimelineQuery {
 
     public void setEndTimeStamp(Instant endTimeStamp) {
         this.endTimeStamp = endTimeStamp;
-    }
-
-    public String getIndexName() {
-        return indexName;
-    }
-
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
-    }
-
-    public String getCustomerSpace() {
-        return customerSpace;
-    }
-
-    public void setCustomerSpace(String customerSpace) {
-        this.customerSpace = customerSpace;
     }
 }

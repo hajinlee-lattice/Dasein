@@ -266,18 +266,6 @@ public class MatchResource {
         );
     }
 
-    @PostMapping("/cdllookupByEs")
-    @ResponseBody
-    @ApiOperation(value = "Looking for AccountId using given LookupId in ES")
-    public String lookupInternalAccountIdByES(@RequestBody InternalAccountIdLookupRequest request) {
-        return cdlLookupService.lookupInternalAccountIdByEs( //
-                request.getCustomerSpace(), //
-                request.getEsIndexName(), //
-                request.getLookupId(), //
-                request.getLookupIdVal() //
-        );
-    }
-
     @PostMapping("/cdllookup/contacts")
     @ResponseBody
     @ApiOperation(value = "Looking for AccountId using given LookupId")
@@ -285,20 +273,6 @@ public class MatchResource {
         return cdlLookupService.lookupContactsByInternalAccountId( //
                 request.getCustomerSpace(), //
                 request.getDataCollectionVersion(), //
-                request.getAccountLookupId(), //
-                request.getAccountLookupIdVal(), //
-                request.getContactId()
-        );
-    }
-
-    @PostMapping("/cdllookup/contactsByEs")
-    @ResponseBody
-    @ApiOperation(value = "Looking for AccountId using given LookupId in ES")
-    public List<Map<String, Object>> lookupContactsByESInternalAccountId(@RequestBody InternalContactLookupRequest request) {
-        return cdlLookupService.lookupContactsByESInternalAccountId( //
-                request.getCustomerSpace(), //
-                request.getEsIndexName(), //
-                request.getAccountIndexName(), //
                 request.getAccountLookupId(), //
                 request.getAccountLookupIdVal(), //
                 request.getContactId()

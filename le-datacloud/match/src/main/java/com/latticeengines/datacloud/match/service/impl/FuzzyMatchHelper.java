@@ -166,18 +166,11 @@ public class FuzzyMatchHelper implements DbHelper {
                 // already done lookup before
                 continue;
             }
-//            Map<String, String> esIndexNames = context.getInput().getEsIndexNames();
-//            String indexName = esIndexNames.get(BusinessEntity.Account.name());
             String lookupIdKey = record.getLookupIdKey();
             String lookupIdValue = record.getLookupIdValue();
             if (StringUtils.isNotBlank(lookupIdValue)) {
                 List<DynamoDataUnit> dynamoDataUnits = context.getCustomDataUnits();
                 DynamoDataUnit lookupDataUnit = context.getAccountLookupDataUnit();
-//                String tenantId = context.getInput().getTenant().getId();
-//                Map<String, Object> customAccount = cdlLookupService.lookup(CustomerSpace.parse(tenantId).toString(),
-//                        indexName, record.getLookupIdKey(), record.getLookupIdValue());
-//                log.info("ES lookup result: index={}, key={}, id={}, account={}", indexName, record.getLookupIdKey(),
-//                        record.getLookupIdValue(), customAccount);
                 Map<String, Object> customAccount = cdlLookupService.lookup(lookupDataUnit, dynamoDataUnits,
                         lookupIdKey, lookupIdValue);
                 if (MapUtils.isNotEmpty(customAccount)) {

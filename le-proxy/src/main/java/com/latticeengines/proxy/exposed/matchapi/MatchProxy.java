@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.datacloud.match.InternalAccountIdLookup
 import com.latticeengines.domain.exposed.datacloud.match.InternalContactLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
-import com.latticeengines.domain.exposed.datacloud.match.TimelineRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -115,17 +114,6 @@ public class MatchProxy extends BaseRestApiProxy {
         return post("lookup_internal_account_id", url, request, String.class);
     }
 
-    public String lookupESInternalAccountId(@NotNull String customerSpace, @NotNull String lookupId,
-                                            @NotNull String lookupIdVal, @NotNull String esIndexName) {
-        String url = constructUrl("/cdllookupByEs", customerSpace);
-        InternalAccountIdLookupRequest request = new InternalAccountIdLookupRequest();
-        request.setCustomerSpace(customerSpace);
-        request.setLookupId(lookupId);
-        request.setLookupIdVal(lookupIdVal);
-        request.setEsIndexName(esIndexName);
-        return post("lookup_es_internal_account_id", url, request, String.class);
-    }
-
     public List<Map<String, Object>> lookupContacts(@NotNull String customerSpace, @NotNull String lookupId,
             @NotNull String lookupIdVal, String contactId, DataCollection.Version version) {
         String url = constructUrl("/cdllookup/contacts", customerSpace);
@@ -136,35 +124,6 @@ public class MatchProxy extends BaseRestApiProxy {
         request.setAccountLookupIdVal(lookupIdVal);
         request.setDataCollectionVersion(version);
         List<?> raw = post("lookup_contacts_by_account_id", url, request, List.class);
-        return JsonUtils.convertListOfMaps(raw, String.class, Object.class);
-    }
-
-    public List<Map<String, Object>> lookupContactsByES(@NotNull String customerSpace, @NotNull String lookupId,
-                                                        @NotNull String lookupIdVal, String contactId,
-                                                        @NotNull String esIndexName, String accountIndexName) {
-        String url = constructUrl("/cdllookup/contactsByEs", customerSpace);
-        InternalContactLookupRequest request = new InternalContactLookupRequest();
-        request.setCustomerSpace(customerSpace);
-        request.setContactId(contactId);
-        request.setAccountLookupId(lookupId);
-        request.setAccountLookupIdVal(lookupIdVal);
-        request.setEsIndexName(esIndexName);
-        request.setAccountIndexName(accountIndexName);
-        List<?> raw = post("lookup_contacts_by_es_account_id", url, request, List.class);
-        return JsonUtils.convertListOfMaps(raw, String.class, Object.class);
-    }
-
-    public List<Map<String, Object>> lookupTimeline(@NotNull String customerSpace, String indexName, String entity,
-                                                    String entityId, Long fromDate, Long toDate) {
-        String url = constructUrl("/cdllookup/timelineByEs", customerSpace);
-        TimelineRequest request = new TimelineRequest();
-        request.setCustomerSpace(customerSpace);
-        request.setIndexName(indexName);
-        request.setMainEntity(entity);
-        request.setEntityId(entityId);
-        request.setStartTimeStamp(fromDate);
-        request.setEndTimeStamp(toDate);
-        List<?> raw = post("timeline_by_es", url, request, List.class);
         return JsonUtils.convertListOfMaps(raw, String.class, Object.class);
     }
 }
