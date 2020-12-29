@@ -1,6 +1,6 @@
 package com.latticeengines.testframework.exposed.utils;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
@@ -63,6 +63,11 @@ import com.google.gson.JsonParser;
 import com.latticeengines.testframework.exposed.service.CSVParserAction;
 
 public class Util {
+
+    protected Util() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(Util.class);
     private static final long DOWNLOAD_TIMEOUT = 1000 * 60 * 20;
 
