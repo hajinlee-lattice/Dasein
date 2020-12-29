@@ -6,4 +6,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 
 public interface ActivityTimelineQueryService {
     DataPage getData(String customerSpace, DataCollection.Version version, ActivityTimelineQuery activityTimelineQuery);
+
+    DataPage getDataByES(String customerSpace, DataCollection.Version version,
+                      ActivityTimelineQuery activityTimelineQuery);
 }

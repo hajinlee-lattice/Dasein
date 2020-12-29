@@ -211,21 +211,31 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @Override
     public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
             String signature) {
+        return getDimensionMetadata(customerSpace, signature, true);
+    }
+
+    @Override
+    public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
+                                                                            String signature, boolean withStreamName) {
         if (StringUtils.isBlank(signature)) {
             signature = getDimensionMetadataSignature(MultiTenantContext.getShortTenantId());
             if (StringUtils.isBlank(signature)) {
                 return Collections.emptyMap();
             }
         }
-        Map<String, String> streamNameMap = getStreamNameMap(customerSpace);
+        if (withStreamName) {
+            Map<String, String> streamNameMap = getStreamNameMap(customerSpace);
 
-        Map<String, Map<String, DimensionMetadata>> metadata = dimensionMetadataService.getMetadata(signature);
+            Map<String, Map<String, DimensionMetadata>> metadata = dimensionMetadataService.getMetadata(signature);
 
-        // from streamId to streamName as key
-        return metadata.entrySet().stream() //
-                .filter(entry -> streamNameMap.containsKey(entry.getKey())) //
-                .map(entry -> Pair.of(streamNameMap.get(entry.getKey()), entry.getValue())) //
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            // from streamId to streamName as key
+            return metadata.entrySet().stream() //
+                    .filter(entry -> streamNameMap.containsKey(entry.getKey())) //
+                    .map(entry -> Pair.of(streamNameMap.get(entry.getKey()), entry.getValue())) //
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        } else {
+            return dimensionMetadataService.getMetadata(signature);
+        }
     }
 
     @Override

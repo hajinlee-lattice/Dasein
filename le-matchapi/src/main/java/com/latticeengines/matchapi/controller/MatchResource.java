@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.TimelineRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -265,6 +266,18 @@ public class MatchResource {
         );
     }
 
+    @PostMapping("/cdllookupByEs")
+    @ResponseBody
+    @ApiOperation(value = "Looking for AccountId using given LookupId in ES")
+    public String lookupInternalAccountIdByES(@RequestBody InternalAccountIdLookupRequest request) {
+        return cdlLookupService.lookupInternalAccountIdByEs( //
+                request.getCustomerSpace(), //
+                request.getEsIndexName(), //
+                request.getLookupId(), //
+                request.getLookupIdVal() //
+        );
+    }
+
     @PostMapping("/cdllookup/contacts")
     @ResponseBody
     @ApiOperation(value = "Looking for AccountId using given LookupId")
@@ -275,6 +288,34 @@ public class MatchResource {
                 request.getAccountLookupId(), //
                 request.getAccountLookupIdVal(), //
                 request.getContactId()
+        );
+    }
+
+    @PostMapping("/cdllookup/contactsByEs")
+    @ResponseBody
+    @ApiOperation(value = "Looking for AccountId using given LookupId in ES")
+    public List<Map<String, Object>> lookupContactsByESInternalAccountId(@RequestBody InternalContactLookupRequest request) {
+        return cdlLookupService.lookupContactsByESInternalAccountId( //
+                request.getCustomerSpace(), //
+                request.getEsIndexName(), //
+                request.getAccountIndexName(), //
+                request.getAccountLookupId(), //
+                request.getAccountLookupIdVal(), //
+                request.getContactId()
+        );
+    }
+
+    @PostMapping("/cdllookup/timelineByEs")
+    @ResponseBody
+    @ApiOperation(value = "Looking for AccountId using given LookupId in ES")
+    public List<Map<String, Object>> lookupTimelineByES(@RequestBody TimelineRequest request) {
+        return cdlLookupService.searchTimelineByES(
+                request.getCustomerSpace(), //
+                request.getIndexName(), //
+                request.getMainEntity(), //
+                request.getEntityId(), //
+                request.getStartTimeStamp(), //
+                request.getEndTimeStamp()
         );
     }
 

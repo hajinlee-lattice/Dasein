@@ -18,6 +18,10 @@ public class InternalAccountIdLookupRequest {
     @JsonProperty("DataCollectionVersion")
     private DataCollection.Version dataCollectionVersion;
 
+    // account es index name
+    @JsonProperty("ESIndexName")
+    private String esIndexName;
+
     @JsonProperty("LookupId")
     private String lookupId;
 
@@ -54,5 +58,13 @@ public class InternalAccountIdLookupRequest {
 
     public void setLookupIdVal(String lookupIdVal) {
         this.lookupIdVal = lookupIdVal;
+    }
+
+    public String getEsIndexName() {
+        return esIndexName;
+    }
+
+    public void setEsIndexName(String esIndexName) {
+        this.esIndexName = esIndexName;
     }
 }

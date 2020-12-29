@@ -126,7 +126,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         // set dimensions
         config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
         if (config.dimensionMetadataMap == null) {
-            config.dimensionMetadataMap = activityStoreProxy.getDimensionMetadata(customerSpace.toString(), null);
+            config.dimensionMetadataMap = activityStoreProxy.getDimensionMetadata(customerSpace.toString(), null, false);
         }
         if (MapUtils.isEmpty(config.dimensionMetadataMap)) {
             log.info("can't find the DimensionMetadata, will skip generate timeline.");

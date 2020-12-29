@@ -111,6 +111,21 @@ public interface ActivityStoreService {
     Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace, String signature);
 
     /**
+     *
+     * @param customerSpace
+     *          target tenant
+     * @param signature
+     *          signature of metadata, if not provided, will use the signature
+     *          associated to current active version
+     * @param withStreamName
+     *          if true, will return map of streamName -> dimensionName -> metadata,
+     *          if false, will return map of streamId -> dimensionName -> metadata,
+     * @return
+     */
+    Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
+                                                                     String signature, boolean withStreamName);
+
+    /**
      * Retrieve a ActivityMetricsGroup
      *
      * @param customerSpace

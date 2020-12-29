@@ -1,6 +1,4 @@
-package com.latticeengines.domain.exposed.query;
-
-import java.time.Instant;
+package com.latticeengines.domain.exposed.datacloud.match;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -13,35 +11,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ActivityTimelineQuery {
+public class TimelineRequest {
 
-    @JsonProperty("main_entity")
+    @JsonProperty("MainEntity")
     @NotBlank(message = "Main Entity cannot be empty")
-    private BusinessEntity mainEntity;
+    private String mainEntity;
 
-    @JsonProperty("entity_id")
+    @JsonProperty("EntityId")
     @NotBlank(message = "Main Entity cannot be empty")
     private String entityId;
 
-    @JsonProperty("start_timestamp")
+    @JsonProperty("StartTimeStamp")
     @NotNull(message = "Valid start timestamp needed")
-    private Instant startTimeStamp;
+    private Long startTimeStamp;
 
-    @JsonProperty("end_timestamp")
+    @JsonProperty("EndTimeStamp")
     @NotNull(message = "Valid end timestamp needed")
-    private Instant endTimeStamp;
+    private Long endTimeStamp;
 
-    @JsonProperty("es_indexname")
+    @JsonProperty("IndexName")
     private String indexName;
 
-    @JsonProperty("customerspace")
+    @JsonProperty("CustomerSpace")
     private String customerSpace;
 
-    public BusinessEntity getMainEntity() {
+    public String getMainEntity() {
         return mainEntity;
     }
 
-    public void setMainEntity(BusinessEntity mainEntity) {
+    public void setMainEntity(String mainEntity) {
         this.mainEntity = mainEntity;
     }
 
@@ -53,19 +51,19 @@ public class ActivityTimelineQuery {
         this.entityId = entityId;
     }
 
-    public Instant getStartTimeStamp() {
+    public Long getStartTimeStamp() {
         return startTimeStamp;
     }
 
-    public void setStartTimeStamp(Instant startTimeStamp) {
+    public void setStartTimeStamp(Long startTimeStamp) {
         this.startTimeStamp = startTimeStamp;
     }
 
-    public Instant getEndTimeStamp() {
+    public Long getEndTimeStamp() {
         return endTimeStamp;
     }
 
-    public void setEndTimeStamp(Instant endTimeStamp) {
+    public void setEndTimeStamp(Long endTimeStamp) {
         this.endTimeStamp = endTimeStamp;
     }
 

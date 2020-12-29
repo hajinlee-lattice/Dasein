@@ -142,7 +142,7 @@ public abstract class DataUnit {
     }
 
     public enum StorageType {
-        Dynamo, Hdfs, Redshift, S3, Presto, Athena, Unknown;
+        Dynamo, Hdfs, Redshift, S3,ElasticSearch, Presto, Athena, Unknown;
 
         @JsonCreator
         public static StorageType safeValueOf(String string) {

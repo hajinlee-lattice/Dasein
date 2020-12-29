@@ -293,6 +293,9 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("EntityMatchConfiguration")
     private EntityMatchConfiguration entityMatchConfiguration;
 
+    @JsonProperty("ESIndexNames")
+    private Map<String, String> esIndexNames;
+
     // ====================
     // END ENTITY MATCH PROPERTIES
     // ====================
@@ -793,6 +796,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setEntityMatchConfiguration(EntityMatchConfiguration entityMatchConfiguration) {
         this.entityMatchConfiguration = entityMatchConfiguration;
+    }
+
+    public Map<String, String> getEsIndexNames() {
+        return esIndexNames;
+    }
+
+    public void setEsIndexNames(Map<String, String> esIndexNames) {
+        this.esIndexNames = esIndexNames;
     }
 
     @Override

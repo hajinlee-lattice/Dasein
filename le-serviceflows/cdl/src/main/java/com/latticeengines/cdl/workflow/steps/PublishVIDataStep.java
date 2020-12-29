@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilterValue;
+import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -37,7 +38,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.PublishVIDataSte
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.PublishVIDataJobConfiguration;
 import com.latticeengines.elasticsearch.Service.ElasticSearchService;
-import com.latticeengines.elasticsearch.config.ElasticSearchConfig;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DashboardProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -102,12 +102,14 @@ public class PublishVIDataStep extends RunSparkJob<PublishVIDataStepConfiguratio
         // set dimensions
         config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
         if (config.dimensionMetadataMap == null) {
-            config.dimensionMetadataMap = activityStoreProxy.getDimensionMetadata(customerSpace.toString(), null);
+            config.dimensionMetadataMap = activityStoreProxy.getDimensionMetadata(customerSpace.toString(), null,
+                    false);
         }
         if (MapUtils.isEmpty(config.dimensionMetadataMap)) {
             log.info("can't find the DimensionMetadata, will skip publish VI Data.");
             return null;
         }
+        config.setInput(inputs);
         return config;
     }
 
@@ -170,7 +172,7 @@ public class PublishVIDataStep extends RunSparkJob<PublishVIDataStepConfiguratio
         String idxName = String
                 .format("%s_%s", CustomerSpace.shortenCustomerSpace(customerSpace), newVersion)
                 .toLowerCase();
-        elasticSearchService.createIndex(idxName);
+        elasticSearchService.createIndex(idxName, TableRoleInCollection.WebVisitProfile.name());
         log.info("create Index is {}.", idxName);
         return idxName;
     }
