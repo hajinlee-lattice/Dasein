@@ -98,6 +98,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private String org1 = "org1_" + CURRENT_TIME_MILLIS;
     private String org2 = "org2_" + CURRENT_TIME_MILLIS;
+    private String orgDoesNotExist = "orgDoesNotExist" + CURRENT_TIME_MILLIS;
 
     private String orgIdMarketo = "org1" + CURRENT_TIME_MILLIS;
     private String orgNameMarketo = "marketo_org";
@@ -267,6 +268,15 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunchList = playLaunchService.findByPlayId(play.getPid(), states);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 2);
+        Assert.assertEquals(playLaunchList.get(0).getPid(), retreivedPlayLaunch.getPid());
+
+        playLaunchList = playLaunchService.findByDestinationOrgId(orgDoesNotExist);
+        Assert.assertNotNull(playLaunchList);
+        Assert.assertEquals(playLaunchList.size(), 0);
+
+        playLaunchList = playLaunchService.findByDestinationOrgId(org2);
+        Assert.assertNotNull(playLaunchList);
+        Assert.assertEquals(playLaunchList.size(), 1);
         Assert.assertEquals(playLaunchList.get(0).getPid(), retreivedPlayLaunch.getPid());
 
         playLaunchList = playLaunchService.findByState(LaunchState.Launching);
