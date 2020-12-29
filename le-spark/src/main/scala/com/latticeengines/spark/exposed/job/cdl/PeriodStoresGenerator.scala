@@ -25,6 +25,8 @@ import scala.collection.JavaConversions._
 
 class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJobConfig] {
 
+  val partitionKey: String = PeriodId.name
+
   override def runJob(spark: SparkSession, lattice: LatticeContext[DailyStoreToPeriodStoresJobConfig]): Unit = {
     val config: DailyStoreToPeriodStoresJobConfig = lattice.config
     val streams: Seq[AtlasStream] = config.streams.toSeq
@@ -58,11 +60,11 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     })
     outputMetadata.setMetadata(detailsMap)
     for (index <- periodStores.indices) {
-      setPartitionTargets(index, Seq(PeriodId.name), lattice)
+      setPartitionTargets(index, Seq(partitionKey), lattice)
     }
     val result = {
-      if (BooleanUtils.isTrue(lattice.config.repartition)) {
-        periodStores.map(_.repartition(200, col(PeriodId.name)))
+      if (BooleanUtils.isNotFalse(lattice.config.repartition)) {
+        periodStores.map(_.repartition(200, col(partitionKey)))
       } else {
         periodStores
       }
