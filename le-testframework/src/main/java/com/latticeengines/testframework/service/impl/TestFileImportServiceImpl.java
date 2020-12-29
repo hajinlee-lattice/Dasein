@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLS3ImportProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLS3TemplateImportProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLS3TemplateProxy;
 import com.latticeengines.testframework.exposed.service.TestFileImportService;
 
@@ -40,6 +41,9 @@ public class TestFileImportServiceImpl implements TestFileImportService {
 
     @Inject
     private ModelingFileUploadProxy modelingFileUploadProxy;
+
+    @Inject
+    private PlsCDLS3TemplateImportProxy plsCDLS3TemplateImportProxy;
 
     @Override
     public List<S3ImportTemplateDisplay> getAllTemplates() {
@@ -62,13 +66,22 @@ public class TestFileImportServiceImpl implements TestFileImportService {
     }
 
     @Override
+    public SourceFile uploadDeleteFile(String csvFileName, String schemaInterpretation, String cleanupOperationType,
+            org.springframework.core.io.Resource source) {
+        deploymentTestBed.attachProtectedProxy(modelingFileUploadProxy);
+        return modelingFileUploadProxy.uploadDeleteFile(false, String.format("file_%s.csv", System.currentTimeMillis()),
+                schemaInterpretation, cleanupOperationType, source);
+    }
+
+    @Override
     public FieldMappingDocument getFieldMappings(String sourceFileName, EntityType entity, SourceType source,
             String feedType) {
         deploymentTestBed.attachProtectedProxy(modelingFileUploadProxy);
         if (StringUtils.isEmpty(feedType)) {
             feedType = EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, entity);
         }
-        return modelingFileUploadProxy.getFieldMappings(sourceFileName, entity.getEntity().name(), source.getName(), feedType);
+        return modelingFileUploadProxy.getFieldMappings(sourceFileName, entity.getEntity().name(), source.getName(),
+                feedType);
     }
 
     @Override
@@ -123,5 +136,27 @@ public class TestFileImportServiceImpl implements TestFileImportService {
         }
         upsertTemplateByAutoMapping(filePath, defaultTemplateName, defaultFeedType, entity, importData,
                 defaultTemplate);
+    }
+
+    @Override
+    public void doDefaultTemplateOneOffImport(String filePath, EntityType entity) {
+        doOneOffImport(filePath, DEFAULT_SYSTEM, entity);
+    }
+
+    @Override
+    public void doOneOffImport(String filePath, String systemName, EntityType entity) {
+        deploymentTestBed.attachProtectedProxy(plsCDLS3TemplateImportProxy);
+        String feedType = EntityTypeUtils.generateFullFeedType(systemName, entity);
+        String templateName = getTemplateNameByFeedType(feedType);
+        S3ImportTemplateDisplay template = getTemplate(feedType, templateName);
+        if (template == null) {
+            throw new RuntimeException(
+                    String.format("Not able to find default template %s, with feedType %s", templateName, feedType));
+        }
+        log.info("Uploading file {}", filePath);
+        SourceFile sourceFile = uploadFile(filePath, entity);
+
+        log.info("Do One-off import for template {} with feedType {}", templateName, feedType);
+        plsCDLS3TemplateImportProxy.doS3Import(sourceFile.getName(), SourceType.FILE.getName(), true, template);
     }
 }
