@@ -174,8 +174,8 @@ public class UserResource {
         if (isDCPTenant && tenant.getTenantType() == TenantType.CUSTOMER && !EmailUtils.isInternalUser(user.getEmail())
                 && !hasAvailableSeats(tenant.getSubscriberNumber())) {
             httpResponse.setStatus(403);
-            response.setErrors(Collections.
-                    singletonList(String.format("User seat limit for tenant %s has been reached.", tenant.getId())));
+            response.setErrors(Collections
+                    .singletonList(String.format("User seat limit for tenant %s has been reached.", tenant.getId())));
             return response;
         }
 
@@ -416,21 +416,53 @@ public class UserResource {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
         String safeUsername = userService.getURLSafeUsername(username).toLowerCase();
-        if (userService.inTenant(tenantId, safeUsername)) {
-            String loginUsername = loginUser.getUsername();
-            AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
-            AccessLevel targetLevel = userService.getAccessLevel(tenantId, safeUsername);
-            if (!userService.isSuperior(loginLevel, targetLevel)) {
-                response.setStatus(403);
-                return SimpleBooleanResponse.failedResponse(Collections.singletonList(String
-                        .format("Could not delete a %s user using a %s user.", targetLevel.name(), loginLevel.name())));
+        User user = userService.findByUsername(safeUsername);
+
+        Tracer tracer = GlobalTracer.get();
+        Span userSpan = null;
+        try (Scope scope = startUserSpan(username, System.currentTimeMillis())) {
+            userSpan = tracer.activeSpan();
+            String traceId = userSpan.context().toTraceId();
+
+            VboUserSeatUsageEvent usageEvent = null;
+            if (!EmailUtils.isInternalUser(user.getEmail())
+                    && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+                usageEvent = new VboUserSeatUsageEvent();
+                usageEvent.setEmailAddress(loginUser.getEmail());
+                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                usageEvent.setPOAEID(traceId);
+                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCTDEC);
+                usageEvent.setLUID(loginUser.getPid());
             }
-            userService.deleteUser(tenantId, safeUsername, true);
-            LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, safeUsername, tenantId));
-            return SimpleBooleanResponse.successResponse();
-        } else {
-            return SimpleBooleanResponse.failedResponse(
-                    Collections.singletonList("Could not delete a user that is not in the current tenant"));
+
+            if (userService.inTenant(tenantId, safeUsername)) {
+                String loginUsername = loginUser.getUsername();
+                AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
+                AccessLevel targetLevel = userService.getAccessLevel(tenantId, safeUsername);
+                if (!userService.isSuperior(loginLevel, targetLevel)) {
+                    response.setStatus(403);
+                    return SimpleBooleanResponse.failedResponse(Collections.singletonList(String
+                            .format("Could not delete a %s user using a %s user.", targetLevel.name(), loginLevel.name())));
+                }
+                userService.deleteUser(tenantId, safeUsername, true);
+                LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, safeUsername, tenantId));
+                if (usageEvent != null) {
+                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+                    populateWithSubscriberDetails(usageEvent);
+                    try {
+                        vboService.sendUserUsageEvent(usageEvent);
+                    } catch (Exception e) {
+                        LOGGER.error("Exception in usage event: " + e.toString());
+                        LOGGER.error("Exception in usage event: " + ExceptionUtils.getStackTrace(e));
+                    }
+                }
+                return SimpleBooleanResponse.successResponse();
+            } else {
+                return SimpleBooleanResponse.failedResponse(
+                        Collections.singletonList("Could not delete a user that is not in the current tenant"));
+            }
+        } finally {
+            TracingUtils.finish(userSpan);
         }
     }
 

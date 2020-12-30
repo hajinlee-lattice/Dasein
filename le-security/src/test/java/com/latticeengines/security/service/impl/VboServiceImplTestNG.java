@@ -73,6 +73,17 @@ public class VboServiceImplTestNG extends AbstractTestNGSpringContextTests {
             vboService.sendUserUsageEvent(usageEvent);
             Assert.fail("Usage event request succeeded, but should have failed.");
         } catch (HttpClientErrorException.NotAcceptable ignored) { }
+
+        // valid STCTDEC (decrement) request
+        usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCTDEC);
+        try {
+            vboService.sendUserUsageEvent(usageEvent);
+            Thread.sleep(3000);
+            updatedUsage = vboService.getSubscriberMeter(TEST_SUBSCRIBER_NUMBER).get("current_usage").asInt();
+            Assert.assertEquals(updatedUsage, currentUsage);
+        } catch (Exception e) {
+            Assert.fail("Failed to decrement seat count.");
+        }
     }
 
     private void populateUsageEvent(VboUserSeatUsageEvent usageEvent) {
