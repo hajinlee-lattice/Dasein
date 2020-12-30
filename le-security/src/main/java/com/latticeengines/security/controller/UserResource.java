@@ -197,8 +197,6 @@ public class UserResource {
             }
 
             RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
-            if (usageEvent != null)
-                usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
             String tempPass = result.getPassword();
             if (!Boolean.TRUE.equals(setTempPass)) {
                 result.setPassword(null);
@@ -213,6 +211,8 @@ public class UserResource {
             }
             LOGGER.info(String.format("%s registered %s as a new user in tenant %s", loginUsername, user.getUsername(),
                     tenant.getId()));
+            if (usageEvent != null)
+                usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
             if (!batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                     emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,

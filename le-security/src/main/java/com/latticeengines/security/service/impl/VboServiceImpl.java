@@ -62,6 +62,7 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
     public void sendUserUsageEvent(VboUserSeatUsageEvent usageEvent) {
         refreshToken();
 
+        String splunkMsg = "Exception in usage event: ";
         String logMsg = "Sending VBO User Seat Usage Event for user " + usageEvent.getEmailAddress();
         Tracer tracer = GlobalTracer.get();
         Span span = tracer.activeSpan();
@@ -70,14 +71,17 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
         log.info(logMsg);
 
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    URI.create(getUsageEventUrl()), usageEvent, String.class);
-            log.info("Post usage finished with response code " + response.getStatusCodeValue());
-            log.info("Post usage response body: " + response.getBody());
+            ResponseEntity<String> response = restTemplate.postForEntity(URI.create(getUsageEventUrl()), usageEvent, String.class);
+            String responseMsg = String.format("API call finished with response code %s for subscriber %s: %s",
+                    response.getStatusCodeValue(), usageEvent.getSubscriberID(), response.getBody());
+            // logging to splunk in case API call fails
+            if (response.getStatusCodeValue() != 202 || response.getBody() != null)
+                responseMsg = splunkMsg + responseMsg;
+            log.info(responseMsg);
         } catch (Exception e) {
-            log.error("Exception in usage event: " + e.toString());
-            log.info(String.format("Failed to post %s usage event for subscriber %s with email %s",
-                    usageEvent.getFeatureURI(), usageEvent.getSubscriberID(), usageEvent.getEmailAddress()));
+            log.error(splunkMsg + String.format("Failed to post %s usage event for subscriber %s with email %s:",
+                    usageEvent.getFeatureURI(), usageEvent.getSubscriberID(),
+                    usageEvent.getEmailAddress()), e);
             throw e;
         }
     }
