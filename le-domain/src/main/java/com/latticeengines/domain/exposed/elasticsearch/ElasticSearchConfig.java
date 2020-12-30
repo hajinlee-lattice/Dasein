@@ -1,4 +1,4 @@
-package com.latticeengines.elasticsearch.config;
+package com.latticeengines.domain.exposed.elasticsearch;
 
 import java.io.Serializable;
 
@@ -16,6 +16,8 @@ public class ElasticSearchConfig implements Serializable {
     private String refreshInterval;
     @JsonProperty("Dynamic")
     private Boolean dynamic;
+    @JsonProperty("HttpScheme")
+    private String httpScheme;
     @JsonProperty("ESHost")
     private String esHost;
     @JsonProperty("ESPort")
@@ -87,5 +89,13 @@ public class ElasticSearchConfig implements Serializable {
 
     public void setEsPassword(String esPassword) {
         this.esPassword = esPassword;
+    }
+
+    public String getHttpScheme() {
+        return httpScheme;
+    }
+
+    public void setHttpScheme(String httpScheme) {
+        this.httpScheme = httpScheme;
     }
 }

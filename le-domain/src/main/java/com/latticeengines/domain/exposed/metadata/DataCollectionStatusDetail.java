@@ -108,8 +108,12 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("activityPartitionKeyMigrated")
     private boolean activityPartitionKeyMigrated = false;
 
-    @JsonProperty("timeline_rebuild_flag")
+    @JsonProperty("timelineRebuildFlag")
     private Boolean timelineRebuildFlag;
+
+    //key: BusinessEntity.name() -> value: elasticsearchVersion
+    @JsonProperty("entityWithESVersionMap")
+    private Map<String, String> entityWithESVersionMap;
 
     @JsonProperty("ActivityAlertVersion")
     private String activityAlertVersion;
@@ -334,6 +338,14 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setTimelineRebuildFlag(Boolean timelineRebuildFlag) {
         this.timelineRebuildFlag = timelineRebuildFlag;
+    }
+
+    public Map<String, String> getEntityWithESVersionMap() {
+        return entityWithESVersionMap;
+    }
+
+    public void setEntityWithESVersionMap(Map<String, String> entityWithESVersionMap) {
+        this.entityWithESVersionMap = entityWithESVersionMap;
     }
 
     public String getActivityAlertVersion() {
