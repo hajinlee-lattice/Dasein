@@ -354,8 +354,13 @@ public class UserResource {
                     return document;
                 }
 
-                userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
-                        false, !newUser, data.getUserTeams());
+                boolean result = userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername,
+                        data.getExpirationDate(), false, !newUser, data.getUserTeams());
+                if (!result) {
+                    response.setStatus(500);
+                    document.setErrors(Collections.singletonList("Failed to assign access level to user."));
+                    return document;
+                }
                 LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                         targetLevel.name(), username, tenantId));
                 if (usageEvent != null)
