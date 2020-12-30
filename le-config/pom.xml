@@ -94,7 +94,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>python</executable>
+                            <executable>python3</executable>
                             <workingDirectory>src/main/python</workingDirectory>
                             <arguments>
                                 <argument>aggregate.py</argument>
