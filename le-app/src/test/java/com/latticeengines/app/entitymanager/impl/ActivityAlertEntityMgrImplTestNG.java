@@ -56,7 +56,7 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void findByKey() {
+    public void testFindByKey() {
         List<ActivityAlert> records = activityAlertEntityMgr.findTopNAlertsByEntityId("12345", BusinessEntity.Account,
                 "version1", AlertCategory.PEOPLE, 6);
         assertEquals(records.size(), 2);
@@ -64,10 +64,13 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
         records = activityAlertEntityMgr.findTopNAlertsByEntityId("23456", BusinessEntity.Account, "version1",
                 AlertCategory.PRODUCTS, 6);
         assertEquals(records.size(), 4);
+    }
 
+    @Test(groups = "manual", enabled = false)
+    public void testDeleteByDate() {
         int deleted = activityAlertEntityMgr
-                .deleteByTenantAndExpireDateBefore(t, Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
-        Assert.assertEquals(deleted,1);
+                .deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
+        Assert.assertEquals(deleted, 1);
         retryTemplate.execute(ctx -> {
             List<ActivityAlert> recordsAfterDeletion = activityAlertEntityMgr.findTopNAlertsByEntityId("23456",
                     BusinessEntity.Account, "version1", AlertCategory.PRODUCTS, 6);
@@ -75,9 +78,9 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
             return null;
         });
 
-        deleted = activityAlertEntityMgr
-                .deleteByTenantAndExpireDateBefore(t, Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
-        Assert.assertEquals(deleted,1);
+        deleted = activityAlertEntityMgr.deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)),
+                1);
+        Assert.assertEquals(deleted, 1);
         retryTemplate.execute(ctx -> {
             List<ActivityAlert> recordsAfterDeletion = activityAlertEntityMgr.findTopNAlertsByEntityId("23456",
                     BusinessEntity.Account, "version1", AlertCategory.PRODUCTS, 6);
