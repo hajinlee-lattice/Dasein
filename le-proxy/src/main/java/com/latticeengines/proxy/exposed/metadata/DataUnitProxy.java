@@ -20,6 +20,8 @@ public interface DataUnitProxy {
 
     Boolean delete(String customerSpace, DataUnit dataUnit);
 
+    Boolean delete(String customerSpace, String name, DataUnit.StorageType type);
+
     void updateSignature(String customerSpace, DataUnit dataUnit, String signature);
 
 }

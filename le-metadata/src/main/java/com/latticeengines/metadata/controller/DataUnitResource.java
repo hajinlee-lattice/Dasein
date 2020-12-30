@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +42,12 @@ public class DataUnitResource {
     @PutMapping("/delete")
     public Boolean delete(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
         return dataUnitService.delete(dataUnit);
+    }
+
+    @DeleteMapping("/delete/name/{name}")
+    public Boolean deleteByNameAndType(@PathVariable String customerSpace, @PathVariable String name,
+                                       @RequestParam(name = "type") DataUnit.StorageType storageType) {
+        return dataUnitService.delete(name, storageType);
     }
 
     @PostMapping("/updateSignature")

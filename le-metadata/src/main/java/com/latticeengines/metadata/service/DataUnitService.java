@@ -20,6 +20,8 @@ public interface DataUnitService {
 
     boolean delete(DataUnit dataUnit);
 
+    boolean delete(String name, DataUnit.StorageType type);
+
     boolean renameTableName(DataUnit dataUnit, String tableName);
 
     boolean cleanupByTenant();

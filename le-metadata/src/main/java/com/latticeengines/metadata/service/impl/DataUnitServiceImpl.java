@@ -77,6 +77,17 @@ public class DataUnitServiceImpl implements DataUnitService {
         }
     }
 
+    @Override
+    public boolean delete(String name, DataUnit.StorageType type) {
+        DataUnit dataUnit = findByNameTypeFromReader(name, type);
+        if (dataUnit != null) {
+            delete(dataUnit);
+        } else {
+            log.info("Can't find data unit with name %s and type %s.", name, type.name());
+        }
+        return true;
+    }
+
     private void deleteByTenantIdAndNameAndStorageType(String tenantId, String name, DataUnit.StorageType storageType) {
         entityMgr.deleteByName(tenantId, name, storageType);
     }
