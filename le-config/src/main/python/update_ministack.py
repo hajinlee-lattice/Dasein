@@ -4,6 +4,8 @@ import base64
 import http.client
 import json
 import os
+import socket
+import sys
 
 NEW_SUFFIX=".new"
 HAPROXY_KEY="HAProxy"
@@ -67,7 +69,11 @@ def _write_to_consul(server, key, value):
 
 def _read_from_consul(server, key):
     conn = http.client.HTTPConnection(server)
-    conn.request("GET", "/v1/kv/%s" % key)
+    try:
+        conn.request("GET", "/v1/kv/%s" % key)
+    except socket.gaierror as e:
+        print("ERROR: fail to read from consul server %s with this error: %s" % (server, e.strerror))
+        sys.exit(-1)
     response = conn.getresponse()
     print(response.status, response.reason)
     body = response.read()
