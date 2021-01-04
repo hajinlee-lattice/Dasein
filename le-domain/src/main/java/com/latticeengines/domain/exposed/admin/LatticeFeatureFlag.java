@@ -49,6 +49,7 @@ public enum LatticeFeatureFlag {
     ENABLE_ACXIOM("EnableAcxiom", "Enable Acxiom in ads platform integrations"), //
     ENABLE_IMPORT_V2("EnableImportV2", "Enable Import UI 2.0"), //
     SSVI_REPORT("SSVIReport", "SSVIReport"), //
+    ENABLE_IMPORT_ERASE_BY_NULL("EnableImportEraseByNull", "enable using null in import to erase the previous value"),
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

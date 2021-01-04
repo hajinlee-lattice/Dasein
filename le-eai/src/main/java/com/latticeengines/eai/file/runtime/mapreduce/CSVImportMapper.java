@@ -137,6 +137,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private final String AVRO_SUFFIX_NAME = ".avro";
 
+    private final String ERASE_PREFIX = "Erase_";
+
+    private final String VAL_NULL = "null";
+
     /**
      * RFC 4180 defines line breaks as CRLF
      */
@@ -174,6 +178,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private DataFeedTaskConfig.SanitizerList sanitizerList = null;
 
+    private boolean eraseByNullEnabled = false;
+
+    private Schema OPTIONAL_BOOLEAN_SCHEMA = Schema
+            .createUnion(Arrays.asList(Schema.create(Type.BOOLEAN), Schema.create(Type.NULL)));
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         LogManager.getLogger(CSVImportMapper.class).setLevel(Level.INFO);
@@ -181,6 +190,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
         conf = context.getConfiguration();
         schema = AvroJob.getOutputKeySchema(conf);
+        eraseByNullEnabled = conf.getBoolean("eai.import.erase.by.null", false);
+        if (eraseByNullEnabled) {
+            schema = appendErasePrefixField(schema);
+        }
         LOG.info("schema is: " + schema.toString());
         table = JsonUtils.deserialize(conf.get("eai.table.schema"), Table.class);
         LOG.info("table is:" + table);
@@ -232,6 +245,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         String avroFileName = getFileName(avroFile, ".avro", index);
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
             dataFileWriter.create(schema, new File(avroFileName));
+
             try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(getFileName("error", ".csv", index)),
                     LECSVFormat.format.withHeader((String[]) null))) {
                 ConvertCSVToAvro convertCSVToAvro = new ConvertCSVToAvro(csvFilePrinter, dataFileWriter);
@@ -457,6 +471,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         return false;
     }
 
+    boolean isNullString(String inputStr) {
+        if (StringUtils.isEmpty(inputStr))
+            return false;
+        return VAL_NULL.equalsIgnoreCase(inputStr.trim());
+    }
+
     @Override
     protected void cleanup(Context context) throws IOException {
         context.getCounter(RecordImportCounter.IMPORTED_RECORDS).setValue(importedRecords.longValue());
@@ -569,6 +589,17 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
     }
 
+    private Schema appendErasePrefixField(Schema schema) {
+        ArrayList<Schema.Field> appendList = new ArrayList();
+        for (Schema.Field f : schema.getFields()) {
+            Schema.Field field = new Schema.Field(f.name(), f.schema(), f.doc(), f.defaultVal());
+            appendList.add(field);
+            field = new Schema.Field(ERASE_PREFIX + f.name(), OPTIONAL_BOOLEAN_SCHEMA, null, false);
+            appendList.add(field);
+        }
+        return Schema.createRecord(schema.getName(), schema.getDoc(), schema.getNamespace(), false, appendList);
+    }
+
     private class RecordLine {
 
         RecordLine(CSVRecord csvRecord, long lineNum) {
@@ -660,6 +691,10 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
                 }
             }
+            // erase by null can't be used on attribute that not nullable
+            if (eraseByNullEnabled && !attr.isNullable() && isNullString(csvRecord.get(csvColumnName))) {
+                throw new RuntimeException(String.format("Column can't be null.", attr.getDisplayName()));
+            }
             List<InputValidatorWrapper> validatorWrappers = attr.getValidatorWrappers();
             if (CollectionUtils.isNotEmpty(validatorWrappers)) {
                 for (InputValidatorWrapper validatorWrapper : validatorWrappers) {
@@ -729,7 +764,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         }
                         validateUTF8String(csvFieldValue);
                         validateAttribute(csvRecord, attr, headerCaseMapping, csvColumnNameInLowerCase);
-                        if (StringUtils.isNotEmpty(attr.getDefaultValueStr()) || StringUtils.isNotEmpty(csvFieldValue)) {
+                        if (eraseByNullEnabled && isNullString(csvFieldValue)) {
+                            avroRecord.put(ERASE_PREFIX + attr.getName(), true);
+                        } else if (StringUtils.isNotEmpty(attr.getDefaultValueStr()) || StringUtils.isNotEmpty(csvFieldValue)) {
                             if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
                                 csvFieldValue = attr.getDefaultValueStr();
                             }
