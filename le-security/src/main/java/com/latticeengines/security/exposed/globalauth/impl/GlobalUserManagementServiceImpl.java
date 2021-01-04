@@ -233,7 +233,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         return true;
     }
 
-    protected GlobalAuthUser findGlobalAuthUserByUsername(String username) throws Exception {
+    protected synchronized GlobalAuthUser findGlobalAuthUserByUsername(String username) throws Exception {
         return findGlobalAuthUserByUsername(username, false);
     }
 
@@ -560,6 +560,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         if (userData.getAuthentications() != null && userData.getAuthentications().size() > 0) {
             authData = userData.getAuthentications().get(0);
         }
+        user.setPid(userData.getPid());
         if (authData != null) {
             user.setUsername(authData.getUsername());
         }

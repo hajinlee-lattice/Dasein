@@ -201,4 +201,23 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
 
         return idMap;
     }
+
+    @Test(groups = "functional")
+    public void testGenerateLaunchUniverseJobContactAccountRatioExceed() throws Exception {
+        GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig();
+        config.setWorkspace("testGenerateLaunchUniverseJobBothLimits");
+
+        config.setContactAccountRatioThreshold(3L);
+        config.setContactsPerAccountSortAttribute(CDL_UPDATED_TIME);
+        config.setContactsPerAccountSortDirection(DESC);
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        try {
+            SparkJobResult result = runSparkJob(GenerateLaunchUniverseJob.class, config);
+        } catch (RuntimeException e){
+            return;
+        }
+        Assert.fail("Failed in testGenerateLaunchUniverseJobContactAccountRatioExceed\n");
+    }
+
 }

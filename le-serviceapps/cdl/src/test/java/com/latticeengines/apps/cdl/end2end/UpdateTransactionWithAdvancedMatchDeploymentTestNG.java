@@ -25,6 +25,7 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
         log.info("Running setup with ENABLE_ENTITY_MATCH_GA enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
         setupEnd2EndTestEnvironment(featureFlagMap);
         checkpointService
                 .setPrecedingCheckpoints(Arrays.asList( //
@@ -114,8 +115,8 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
         map.put(BusinessEntity.Account, ACCOUNT_UT_EMGA);
         map.put(BusinessEntity.Contact, CONTACT_PA_EM);
         map.put(BusinessEntity.Product, BATCH_STORE_PRODUCT_PT);
-//        map.put(BusinessEntity.Transaction, DAILY_TXN_UT_EM);
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT_BATCH_EM); // from 75183 to 75211 after filling missing periods and product bundles
+        // Only verifying AggregatedTxn for now as it has same table without partition
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT_BATCH_EM);
         return map;
     }
 
@@ -134,8 +135,8 @@ public class UpdateTransactionWithAdvancedMatchDeploymentTestNG extends UpdateTr
         map.put(BusinessEntity.Contact, CONTACT_PA_EM_SERVING);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
-        map.put(BusinessEntity.Transaction, DAILY_TXN_UT_EM); // from 50863 to 50870 after filling missing product bundles
-        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT_SERVING_EM); // from 75183 to 75211 after filling missing periods and product bundles
+        map.put(BusinessEntity.Transaction, DAILY_TXN_UT_EM);
+        map.put(BusinessEntity.PeriodTransaction, PERIOD_TRANSACTION_UT_SERVING_EM); // from 75183 to 14227 with only analytic quarter and spending month
         return map;
     }
 }

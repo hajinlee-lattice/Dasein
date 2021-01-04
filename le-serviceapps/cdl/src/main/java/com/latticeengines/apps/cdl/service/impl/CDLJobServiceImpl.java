@@ -47,7 +47,6 @@ import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.SchedulingPAService;
-import com.latticeengines.apps.cdl.workflow.GenerateIntentAlertWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.auth.exposed.service.GlobalAuthSubscriptionService;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -58,7 +57,6 @@ import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StatusDocument;
@@ -192,9 +190,6 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     @Inject
     private PlsHealthCheckProxy plsHealthCheckProxy;
-
-    @Inject
-    private GenerateIntentAlertWorkflowSubmitter intentAlertWorkflowSubmitter;
 
     @Inject
     private ActivityStoreService activityStoreService;
@@ -983,14 +978,13 @@ public class CDLJobServiceImpl implements CDLJobService {
         for (String customerSpaceStr : customerSpaceList) {
             Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpaceStr).toString());
             if (tenant == null) {
+                log.error("Cannot find tenant: " + customerSpaceStr);
                 continue;
             }
-
             MultiTenantContext.setTenant(tenant);
             if (!runningCustomerSpaceSet.contains(customerSpaceStr) && isCronExpressionSatisfied(customerSpaceStr)
                     && isNewDataGenerated(customerSpaceStr)) {
-                ApplicationId appId = intentAlertWorkflowSubmitter.submit(customerSpaceStr,
-                        new WorkflowPidWrapper(-1L));
+                ApplicationId appId = cdlProxy.generateIntentAlert(customerSpaceStr);
                 log.info("start generateIntentEmailAlertWorkflow applicationId : {} , customerSpace {}",
                         appId.toString(), customerSpaceStr);
             }

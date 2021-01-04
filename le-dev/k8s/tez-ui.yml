@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: le-tez-ui
+  labels:
+    app: le-tez-ui
+spec:
+  containers:
+    - name: redis
+      image: latticeengines/tez-ui
+      imagePullPolicy: Never
+      ports:
+        - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: le-tez-ui-lb
+  labels:
+    app: le-tez-ui
+spec:
+  selector:
+    app: le-tez-ui
+  ports:
+    - name: client
+      port: 8001
+      targetPort: 8080
+      protocol: TCP
+  type: LoadBalancer

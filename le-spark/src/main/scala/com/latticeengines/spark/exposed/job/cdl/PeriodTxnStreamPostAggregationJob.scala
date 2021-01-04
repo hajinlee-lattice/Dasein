@@ -3,7 +3,7 @@ package com.latticeengines.spark.exposed.job.cdl
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.cdl.PeriodTxnStreamPostAggregationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
+import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils, TransactionUtils}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types._
@@ -14,23 +14,23 @@ class PeriodTxnStreamPostAggregationJob extends AbstractSparkJob[PeriodTxnStream
   override def runJob(spark: SparkSession, lattice: LatticeContext[PeriodTxnStreamPostAggregationConfig]): Unit = {
     val analyticStream: DataFrame = lattice.input.head
 
-    val result: DataFrame = fillPeriodGaps(spark, analyticStream)
+    val periods: Seq[Int] = analyticStream.select(InterfaceName.PeriodId.name).distinct.rdd.map(r => r(0).asInstanceOf[Int]).collect
+    val allPeriodsBetween = periods.min.to(periods.max)
+    val missingPeriods: Seq[Int] = allPeriodsBetween.diff(periods)
+
     setPartitionTargets(0, Seq(InterfaceName.PeriodId.name), lattice)
-    lattice.output = result :: Nil
+    lattice.output = fillPeriodGaps(spark, analyticStream, missingPeriods) :: Nil
+    lattice.outputStr = serializeJson(missingPeriods)
   }
 
 
-  def fillPeriodGaps(spark: SparkSession, df: DataFrame): DataFrame = {
-    val periods: Seq[Int] = df.select(InterfaceName.PeriodId.name).distinct.rdd.map(r => r(0).asInstanceOf[Int]).collect
-    val allPeriodsBetween = periods.min.to(periods.max)
-
-    val missingPeriods: Seq[Int] = allPeriodsBetween.diff(periods)
+  def fillPeriodGaps(spark: SparkSession, rawPeriodStream: DataFrame, missingPeriods: Seq[Int]): DataFrame = {
     if (missingPeriods.isEmpty) {
-      return df
+      return rawPeriodStream
     }
-    val valueMap: Map[String, Any] = df.first().getValuesMap(df.columns)
-    val missingRows: DataFrame = getMissingRows(spark, allPeriodsBetween diff periods, valueMap)
-    MergeUtils.concat2(df, missingRows).repartition(200, col(InterfaceName.PeriodId.name))
+    val valueMap: Map[String, Any] = rawPeriodStream.first().getValuesMap(rawPeriodStream.columns)
+    val missingRows: DataFrame = getMissingRows(spark, missingPeriods, valueMap)
+    MergeUtils.concat2(TransactionUtils.castMetricsColType(rawPeriodStream), missingRows).repartition(200, col(InterfaceName.PeriodId.name))
   }
 
   def getMissingRows(spark: SparkSession, periods: Seq[Int], valueMap: Map[String, Any]): DataFrame = {

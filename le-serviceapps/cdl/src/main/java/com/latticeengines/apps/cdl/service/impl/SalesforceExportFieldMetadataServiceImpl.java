@@ -29,7 +29,6 @@ public class SalesforceExportFieldMetadataServiceImpl extends ExportFieldMetadat
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling SalesforceExportFieldMetadataService for channel " + channel.getId());
-
         return enrichDefaultFieldsMetadata(customerSpace, channel);
     }
 

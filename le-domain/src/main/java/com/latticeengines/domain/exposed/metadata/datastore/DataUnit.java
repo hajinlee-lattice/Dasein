@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.metadata.datastore;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -50,10 +51,13 @@ public abstract class DataUnit {
     private List<Role> roles;
 
     @JsonProperty("DataTemplateId")
-    private String DataTemplateId;
+    private String dataTemplateId;
 
     @JsonProperty("retentionPolicy")
     private String retentionPolicy;
+
+    @JsonProperty("updated")
+    private Date updated;
 
     public abstract StorageType getStorageType();
 
@@ -106,11 +110,11 @@ public abstract class DataUnit {
     }
 
     public String getDataTemplateId() {
-        return DataTemplateId;
+        return dataTemplateId;
     }
 
     public void setDataTemplateId(String dataTemplateId) {
-        DataTemplateId = dataTemplateId;
+        this.dataTemplateId = dataTemplateId;
     }
 
     public List<Pair<String, String>> getTypedPartitionKeys() {
@@ -129,8 +133,16 @@ public abstract class DataUnit {
         this.retentionPolicy = retentionPolicy;
     }
 
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
     public enum StorageType {
-        Dynamo, Hdfs, Redshift, S3, Presto, Athena, Unknown;
+        Dynamo, Hdfs, Redshift, S3,ElasticSearch, Presto, Athena, Unknown;
 
         @JsonCreator
         public static StorageType safeValueOf(String string) {

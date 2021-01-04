@@ -1,4 +1,4 @@
-package com.latticeengines.admin.controller;
+package com.latticeengines.admin.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,14 +7,19 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
+import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.cdl.CDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.datacloud.DataCloudComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -29,7 +34,7 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.security.service.IDaaSService;
 
-public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
+public class CreateTenantServiceTestNG extends AdminFunctionalTestNGBase {
 
     @Inject
     private TenantService tenantService;
@@ -40,21 +45,48 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
     @Inject
     private IDaaSService iDaaSService;
 
-    @Test(groups = "deployment", enabled = false)
-    public void testCreateTenant() {
-        String fullTenantId = "LETest" + System.currentTimeMillis();
-        String url = getRestHostPort() + String.format("/admin/tenants/%s/V2?contractId=%s", fullTenantId, fullTenantId);
+    private String TENANT_ID;
 
+    @Override
+    @BeforeClass(groups = { "functional" })
+    public void setup() throws Exception {
+        if (cleanZK) {
+            cleanupZK();
+        }
+
+        Assert.assertNotNull(CamilleEnvironment.getPodId());
+    }
+
+    @BeforeMethod(groups = { "functional" })
+    public void init() {
+        TENANT_ID = "LETest" + System.currentTimeMillis();
+    }
+
+    @AfterMethod(groups = { "functional" })
+    public void cleanup() {
+        try {
+            deleteTenant(TENANT_ID, TENANT_ID);
+        } catch (Exception ignore) {
+            // tenant does not exist
+        }
+    }
+
+    @Override
+    @AfterClass(groups = { "functional" })
+    public void tearDown() {
+    }
+
+    @Test(groups = "functional", enabled = false)
+    public void testCreateTenant() {
         TenantProperties tenantProperties = new TenantProperties();
         tenantProperties.description = "A test tenant for new create api";
-        tenantProperties.displayName = fullTenantId;
+        tenantProperties.displayName = TENANT_ID;
         TenantInfo tenantInfo = new TenantInfo(tenantProperties);
 
         CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
         spaceProperties.description = tenantProperties.description;
         spaceProperties.displayName = tenantProperties.displayName;
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties,
-                "{\"Dante\":true}");
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, "{\"Dante\":true}");
 
         SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
         spaceConfiguration.setProducts(Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG));
@@ -75,8 +107,7 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
                 .getDefaultServiceConfig(DataCloudComponent.componentName);
         dataCloudConfig.setRootPath("/" + DataCloudComponent.componentName);
 
-        SerializableDocumentDirectory cdlConfig = serviceService
-                .getDefaultServiceConfig(CDLComponent.componentName);
+        SerializableDocumentDirectory cdlConfig = serviceService.getDefaultServiceConfig(CDLComponent.componentName);
         cdlConfig.setRootPath("/" + CDLComponent.componentName);
 
         // Combine configurations
@@ -86,23 +117,17 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         configDirs.add(cdlConfig);
 
         TenantRegistration reg = new TenantRegistration();
-        reg.setContractInfo(new ContractInfo(new ContractProperties(fullTenantId, "")));
+        reg.setContractInfo(new ContractInfo(new ContractProperties(TENANT_ID, "")));
         reg.setTenantInfo(tenantInfo);
         reg.setSpaceInfo(spaceInfo);
         reg.setSpaceConfig(spaceConfiguration);
         reg.setConfigDirectories(configDirs);
 
-        Boolean result = restTemplate.postForObject(url, reg, Boolean.class);
-
-        Assert.assertNotNull(result);
-        Assert.assertTrue(result);
+        Assert.assertTrue(tenantService.createTenantV2(TENANT_ID, TENANT_ID, reg, ADTesterUsername));
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "functional", enabled = false)
     public void testVboRequest() {
-        String fullTenantId = "LETest" + System.currentTimeMillis();
-        String url = getRestHostPort() + "/admin/tenants/vboadmin";
-
         VboRequest req = new VboRequest();
         VboRequest.Product pro = new VboRequest.Product();
         VboRequest.User internalUser = constructVBOUser("testDCP@lattice-engines.com");
@@ -112,25 +137,21 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         req.setProduct(pro);
         VboRequest.Subscriber sub = new VboRequest.Subscriber();
         sub.setLanguage("Chinese");
-        sub.setName(fullTenantId);
+        sub.setName(TENANT_ID);
         sub.setSubscriberNumber(String.valueOf(System.currentTimeMillis()));
         req.setSubscriber(sub);
 
-        Assert.assertFalse(verifyUserExists(internalUser.getEmailAddress()));
-        Assert.assertFalse(verifyUserExists(externalUser.getEmailAddress()));
-        VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);
+        verifyUserExists(internalUser.getEmailAddress());
+        verifyUserExists(externalUser.getEmailAddress());
+        VboResponse result = tenantService.createVboTenant(req, ADTesterUsername, null, null, null);
 
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getStatus(), "success");
 
-        waitForTenantInstallation(fullTenantId, fullTenantId);
+        waitForTenantInstallation(TENANT_ID, TENANT_ID);
 
-        Assert.assertTrue(verifyUserExists(internalUser.getEmailAddress()));
-        Assert.assertTrue(verifyUserExists(externalUser.getEmailAddress()));
-        try {
-            deleteTenant(fullTenantId, fullTenantId);
-        } catch (Exception ignore) {
-        }
+        verifyUserExists(internalUser.getEmailAddress());
+        verifyUserExists(externalUser.getEmailAddress());
     }
 
     private VboRequest.User constructVBOUser(String email) {
@@ -145,7 +166,7 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         return user;
     }
 
-    private Boolean verifyUserExists(String email) {
-        return iDaaSService.getIDaaSUser(email) != null;
+    private void verifyUserExists(String email) {
+        Assert.assertNotNull(iDaaSService.getIDaaSUser(email));
     }
 }

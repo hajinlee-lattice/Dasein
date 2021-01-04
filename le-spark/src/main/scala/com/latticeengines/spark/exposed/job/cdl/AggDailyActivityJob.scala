@@ -24,6 +24,8 @@ import scala.collection.JavaConverters._
 
 class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
 
+  val partitionKey: String = StreamDateId.name
+
   override def runJob(spark: SparkSession, lattice: LatticeContext[AggDailyActivityConfig]): Unit = {
     val inputMetadata = lattice.config.inputMetadata.getMetadata
     var output: Seq[DataFrame] = Seq()
@@ -69,11 +71,11 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     })
     outputMetadata.setMetadata(detailsMap)
     for (index <- output.indices) {
-      setPartitionTargets(index, Seq(StreamDateId.name), lattice)
+      setPartitionTargets(index, Seq(partitionKey), lattice)
     }
     val result = {
-      if (BooleanUtils.isTrue(lattice.config.repartition)) {
-        output.map(_.repartition(200, col(StreamDateId.name)))
+      if (BooleanUtils.isNotFalse(lattice.config.repartition)) {
+        output.map(_.repartition(200, col(partitionKey)))
       } else {
         output
       }

@@ -3,6 +3,7 @@
   "Nodes": [
     { "Node": "EnrichAttributesMaxNumber", "Data": {"Type": "number", "Required": true}},
     { "Node": "WorkflowJobQuotaLimit", "Data": {"Type": "number", "Required": false}},
+    { "Node":  "OtherIdQuotaLimit", "Data":  {"Type":  "number", "Required":  false}},
     { "Node": "DataCloudLicense",
       "Children" : [
         { "Node": "MaxEnrichAttributes", "Data": {"Type": "number", "Required": false}},

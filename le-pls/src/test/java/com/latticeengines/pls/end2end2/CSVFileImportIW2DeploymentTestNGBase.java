@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -33,10 +32,11 @@ import com.latticeengines.pls.service.DataMappingService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-public abstract class CSVFileImportDeploymentIW2TestNGBase extends CDLDeploymentTestNGBase {
+public abstract class CSVFileImportIW2DeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
     protected static final String SOURCE_FILE_LOCAL_PATH = "com/latticeengines/pls/end2end/cdlCSVImport/";
     protected static final String SOURCE = "File";
@@ -75,7 +75,10 @@ public abstract class CSVFileImportDeploymentIW2TestNGBase extends CDLDeployment
     @Inject
     protected CDLService cdlService;
 
-    @Autowired
+    @Inject
+    protected CDLProxy cdlProxy;
+
+    @Inject
     protected Configuration yarnConfiguration;
 
     protected SourceFile baseAccountFile;
@@ -213,5 +216,15 @@ public abstract class CSVFileImportDeploymentIW2TestNGBase extends CDLDeployment
         Assert.assertEquals(detail.getIgnoredRows(), ignored);
         Assert.assertEquals(detail.getProcessedRecords(), processed);
 
+    }
+
+    protected void createDefaultImportSystem() {
+        S3ImportSystem importSystem = new S3ImportSystem();
+        importSystem.setPriority(1);
+        importSystem.setName(DEFAULT_SYSTEM);
+        importSystem.setDisplayName(DEFAULT_SYSTEM);
+        importSystem.setSystemType(S3ImportSystem.SystemType.Other);
+        importSystem.setTenant(mainTestTenant);
+        cdlProxy.createS3ImportSystem(customerSpace, importSystem);
     }
 }

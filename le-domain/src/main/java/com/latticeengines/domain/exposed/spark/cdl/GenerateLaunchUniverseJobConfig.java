@@ -22,19 +22,23 @@ public class GenerateLaunchUniverseJobConfig extends SparkJobConfig {
     @JsonProperty("ContactsData")
     private DataUnit contactsData;
 
+    @JsonProperty("ContactAccountRatioThreshold")
+    private Long contactAccountRatioThreshold;
+
     public GenerateLaunchUniverseJobConfig() {
     }
 
     public GenerateLaunchUniverseJobConfig(String workSpace,
             Long maxContactsPerAccount, Long maxEntitiesToLaunch,
             String contactsPerAccountSortAttribute, String contactsPerAccountSortDirection,
-            DataUnit contactsData) {
+            DataUnit contactsData, Long contactAccountRatioThreshold) {
         this.setWorkspace(workSpace);
         this.maxContactsPerAccount = maxContactsPerAccount;
         this.maxEntitiesToLaunch = maxEntitiesToLaunch;
         this.contactsPerAccountSortAttribute = contactsPerAccountSortAttribute;
         this.contactsPerAccountSortDirection = contactsPerAccountSortDirection;
         this.contactsData = contactsData;
+        this.contactAccountRatioThreshold = contactAccountRatioThreshold;
     }
 
     @Override
@@ -83,4 +87,11 @@ public class GenerateLaunchUniverseJobConfig extends SparkJobConfig {
         this.contactsData = contactsData;
     }
 
+    public Long getContactAccountRatioThreshold() {
+        return contactAccountRatioThreshold;
+    }
+
+    public void setContactAccountRatioThreshold(Long contactAccountRatioThreshold) {
+        this.contactAccountRatioThreshold = contactAccountRatioThreshold;
+    }
 }

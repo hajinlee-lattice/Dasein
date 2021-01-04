@@ -40,16 +40,16 @@ if [[ -n "${STACK_PROFILE}" ]]; then
         CONSUL_SERVER="internal-consul-1214146536.us-east-1.elb.amazonaws.com:8500"
         LE_STACK=${STACK}
         cp ../le-config/src/main/python/update_ministack.py .
-        python update_ministack.py -e ${LE_ENVIRONMENT} -s ${LE_STACK} -c ${CONSUL_SERVER} -p ${STACK_PROFILE}
+        python3 update_ministack.py -e ${LE_ENVIRONMENT} -s ${LE_STACK} -c ${CONSUL_SERVER} -p ${STACK_PROFILE}
     fi
     sed -i "s/LE_STACK=.*/LE_STACK=${LE_STACK}/" ${STACK_PROFILE}
-    python replace_token.py ${dist}/conf ${STACK_PROFILE}
+    python3 replace_token.py ${dist}/conf ${STACK_PROFILE}
 fi
 if [[ -n "${DR_STACK_PROFILE}" ]] && [[ -f "${DR_STACK_PROFILE}" ]]; then
     mkdir -p ${dist}/conf_dr
     cp ../le-config/conf/env/prodcluster_dr/latticeengines.properties ${dist}/conf_dr
     sed -i "s/LE_STACK=.*/LE_STACK=c/" ${DR_STACK_PROFILE}
-    python replace_token.py ${dist}/conf_dr ${DR_STACK_PROFILE}
+    python3 replace_token.py ${dist}/conf_dr ${DR_STACK_PROFILE}
     cp ${dist}/conf_dr/latticeengines.properties ${dist}/conf/dr_latticeengines.properties
     ls -al ${dist}/conf/*.properties
 fi

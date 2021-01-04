@@ -187,10 +187,25 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         return metrics;
     }
 
+    private List<Map<String, Object>> getDeduplicateIntentData(DataPage data) {
+        Map<String, Map<String, Object>> modelIntentMap = new HashMap<String, Map<String, Object>>();
+        for (Map<String, Object> map : data.getData()) {
+            String model = (String) map.get(InterfaceName.Detail1.name());
+            if (modelIntentMap.containsKey(model)) {
+                Long latest = (Long) modelIntentMap.get(model).get(InterfaceName.EventTimestamp.name());
+                if (latest > (Long) map.get(InterfaceName.EventTimestamp.name())) {
+                    continue;
+                }
+            }
+            modelIntentMap.put(model, map);
+        }
+        return new ArrayList(modelIntentMap.values());
+    }
+
     private String getAccountIntent(DataPage data) {
         String message = messageNoDataSource;
         data = filterStreamData(data, new HashSet<>(Arrays.asList(AtlasStream.StreamType.DnbIntentData)));
-        for (Map<String, Object> map : data.getData()) {
+        for (Map<String, Object> map : getDeduplicateIntentData(data)) {
             String detail2 = (String) map.get(InterfaceName.Detail2.name());
             try {
                 message = STAGE_BUYING.equals(message) ? STAGE_BUYING

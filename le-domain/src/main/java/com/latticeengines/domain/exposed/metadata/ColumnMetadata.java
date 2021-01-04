@@ -113,7 +113,7 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("IsHiddenForRemodelingUI")
     private Boolean isHiddenForRemodelingUI;
     @JsonProperty("IsAdminDisabledForModel")
-    private Boolean isAdminDisabledForModel;
+    private Boolean isAdminDisabledForModel = true;
     /**
      * whether this attribute should be hidden in category tile in home page
      */

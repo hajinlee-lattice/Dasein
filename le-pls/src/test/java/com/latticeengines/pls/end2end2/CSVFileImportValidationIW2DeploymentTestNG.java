@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
-public class CSVFileImportValidationDeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
+public class CSVFileImportValidationIW2DeploymentTestNG extends CSVFileImportIW2DeploymentTestNGBase {
 
     // one line with empty ID, two line with illegal char
     private static final String ACCOUNT_SOURCE_FILE = "Account_With_Invalid_Char.csv";
@@ -77,6 +77,7 @@ public class CSVFileImportValidationDeploymentIW2TestNG extends CSVFileImportDep
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment", enabled = false)

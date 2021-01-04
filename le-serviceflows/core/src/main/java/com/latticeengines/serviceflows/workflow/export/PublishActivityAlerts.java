@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -41,7 +42,6 @@ import com.latticeengines.spark.exposed.job.cdl.PublishActivityAlertsJob;
 
 @Component("publishActivityAlerts")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-
 public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfiguration, PublishActivityAlertsJobConfig> {
     private static final Logger log = LoggerFactory.getLogger(PublishActivityAlerts.class);
 
@@ -74,7 +74,11 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
     @Override
     protected PublishActivityAlertsJobConfig configureJob(TimeLineSparkStepConfiguration stepConfiguration) {
         if (!account360Enabled()) {
-            log.info("Skip publishing Activity alerts table to dynamo. Account360 enabled = {}", account360Enabled());
+            log.info("Skip publishing Activity alerts table. Account360 enabled = {}", account360Enabled());
+            return null;
+        }
+        if (BooleanUtils.isTrue(getObjectFromContext(ACTIVITY_ALERT_PUBLISHED, Boolean.class))) {
+            log.info("In short-cut mode, skip publishing Activity alerts table");
             return null;
         }
 
@@ -148,6 +152,7 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-
+        log.info("Activity alert publication completed");
+        putObjectInContext(ACTIVITY_ALERT_PUBLISHED, true);
     }
 }

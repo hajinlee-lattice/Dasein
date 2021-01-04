@@ -5,7 +5,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
 
 import io.swagger.annotations.Api;
@@ -40,11 +42,10 @@ public class BISAccessTokenResource {
     @Inject
     private Oauth2RestApiProxy oauth2RestApiProxy;
 
-    @GetMapping
+    @PostMapping
     @ResponseBody
     @ApiOperation(value = "Get a one-time bis access token and email it to user")
-    public ResponseDocument<Boolean> getOneTimeTokenAndEmail(@RequestParam String username,
-            @RequestParam String tenantId) {
+    public ResponseDocument<Boolean> getOneTimeTokenAndEmail(@RequestHeader(value = Constants.USER_NAME) String username, @RequestParam String tenantId) {
         try {
             User user = userService.findByUsername(username);
             AccessLevel level = userService.getAccessLevel(tenantId, username);

@@ -84,8 +84,9 @@ public class AggDailyTransactionStep extends BaseProcessAnalyzeSparkStep<Process
             return analyticRawDaily;
         }
         config.setInput(Arrays.asList(analyticRawDaily, consolidatedProduct.toHdfsDataUnit(null)));
-        // TODO - do I need to create temp table for raw daily stream?
         SparkJobResult result = runSparkJob(DailyTxnStreamPostAggregationJob.class, config);
+        log.info("Filled in missing product bundle: {}", result.getOutput());
+        log.info("Analytic daily stream row count change: {} -> {}", analyticRawDaily.getCount(), result.getTargets().get(0).getCount());
         return result.getTargets().get(0);
     }
 

@@ -1,9 +1,11 @@
 from __future__ import print_function
 import argparse
 import base64
-import httplib
+import http.client
 import json
 import os
+import socket
+import sys
 
 NEW_SUFFIX=".new"
 HAPROXY_KEY="HAProxy"
@@ -50,7 +52,7 @@ def write_to_stack(server, environment, stack, key, value):
     _write_to_consul(server, key, value)
 
 def remove_stack(server, stack):
-    conn = httplib.HTTPConnection(server)
+    conn = http.client.HTTPConnection(server)
     conn.request("DELETE", "/v1/kv/%s?recurse" % stack)
     response = conn.getresponse()
     print(response.status, response.reason)
@@ -60,21 +62,25 @@ def read_from_stack(server, environment, stack, key):
     return _read_from_consul(server, key)
 
 def _write_to_consul(server, key, value):
-    conn = httplib.HTTPConnection(server)
+    conn = http.client.HTTPConnection(server)
     conn.request("PUT", "/v1/kv/%s" % key, value)
     response = conn.getresponse()
     print(response.status, response.reason)
 
 def _read_from_consul(server, key):
-    conn = httplib.HTTPConnection(server)
-    conn.request("GET", "/v1/kv/%s" % key)
+    conn = http.client.HTTPConnection(server)
+    try:
+        conn.request("GET", "/v1/kv/%s" % key)
+    except socket.gaierror as e:
+        print("ERROR: fail to read from consul server %s with this error: %s" % (server, e.strerror))
+        sys.exit(-1)
     response = conn.getresponse()
     print(response.status, response.reason)
     body = response.read()
     return base64.b64decode(json.loads(body)[0]["Value"])
 
 def _remove_from_consul(server, key):
-    conn = httplib.HTTPConnection(server)
+    conn = http.client.HTTPConnection(server)
     conn.request("DELETE", "/v1/kv/%s?recurse" % key)
     response = conn.getresponse()
     print(response.status, response.reason)

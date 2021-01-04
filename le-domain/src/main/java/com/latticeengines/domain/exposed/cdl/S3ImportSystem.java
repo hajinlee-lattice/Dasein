@@ -311,6 +311,16 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
                 return "Default_Salesforce_System";
             }
         },
+        Pardot {
+            @Override
+            public Collection<EntityType> getEntityTypes() {
+                return Collections.singletonList(EntityType.Leads);
+            }
+            @Override
+            public String getDefaultSystemName() {
+                return "Default_Pardot_System";
+            }
+        },
         Marketo {
             @Override
             public Collection<EntityType> getEntityTypes() {

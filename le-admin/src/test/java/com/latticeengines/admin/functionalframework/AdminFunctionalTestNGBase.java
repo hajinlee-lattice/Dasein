@@ -2,15 +2,15 @@ package com.latticeengines.admin.functionalframework;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -20,24 +20,28 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
+import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
-import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 
 public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AdminFunctionalTestNGBase.class);
     private static boolean ZKIsClean = false;
 
-    @Value("${admin.test.functional.api}")
-    protected String hostPort;
-
-    @Override
-    protected String getRestHostPort() {
-        return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
-    }
+    @Value("${admin.test.functional.cleanupZK}")
+    protected Boolean cleanZK;
 
     protected void cleanupZK() {
         if (ZKIsClean)
@@ -120,11 +124,13 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
                                                 + " does not have a fully valid TenantDocument.");
                                     }
                                 } catch (Exception e) {
-                                    log.warn("Found a bad tenant: " + contractId + "-" + tenantId + ". Deleting it ...");
+                                    log.warn(
+                                            "Found a bad tenant: " + contractId + "-" + tenantId + ". Deleting it ...");
                                     try {
                                         TenantLifecycleManager.delete(contractId, tenantId);
                                     } catch (Exception e2) {
-                                        log.debug("Tenant {} in contract {} has already been removed.", tenantId, contractId);
+                                        log.debug("Tenant {} in contract {} has already been removed.", tenantId,
+                                                contractId);
                                     }
                                 }
 
@@ -155,11 +161,9 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        if (hostPort.contains("localhost")) {
+        if (cleanZK) {
             cleanupZK();
         }
-        loginAD();
-
         String podId = CamilleEnvironment.getPodId();
         Assert.assertNotNull(podId);
 
@@ -172,12 +176,47 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
             // tenant does not exist
         }
         createTenant(TestContractId, TestTenantId);
-
         LogManager.getLogger(TenantLifecycleManager.class).setLevel(originalLevel);
+    }
 
-        // setup magic rest template
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+    @Override
+    protected void createTenant(String contractId, String tenantId) {
+        CustomerSpaceProperties props = new CustomerSpaceProperties();
+        props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
+        props.displayName = tenantId + ": Tenant for testing";
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
+
+        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
+        TenantInfo tenantInfo = new TenantInfo(
+                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
+
+        SpaceConfiguration spaceConfig = tenantService.getDefaultSpaceConfig();
+
+        TenantRegistration reg = new TenantRegistration();
+        reg.setSpaceInfo(spaceInfo);
+        reg.setTenantInfo(tenantInfo);
+        reg.setContractInfo(contractInfo);
+        reg.setSpaceConfig(spaceConfig);
+
+        tenantService.createTenant(contractId, tenantId, reg, ADTesterUsername, null, null);
+    }
+
+    @Override
+    protected void bootstrap(String contractId, String tenantId, String serviceName) {
+        DocumentDirectory configDir = batonService.getDefaultConfiguration(serviceName);
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
+        Map<String, String> bootstrapProperties = sDir.flatten();
+        tenantService.bootstrap(contractId, tenantId, serviceName, bootstrapProperties);
+    }
+
+    @Override
+    protected String getRestHostPort() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected void deleteTenant(String contractId, String tenantId) {
+        tenantService.deleteTenant(ADTesterUsername, contractId, tenantId, true);
     }
 
     @AfterClass(groups = { "functional" })
@@ -189,4 +228,50 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
         }
     }
 
+    @Override
+    protected BootstrapState waitUntilStateIsNotInitial(String contractId, String tenantId, String serviceName) {
+        return waitUntilStateIsNotInitial(contractId, tenantId, serviceName, 100);
+    }
+
+    @Override
+    protected BootstrapState waitUntilStateIsNotInitial(String contractId, String tenantId, String serviceName,
+            int numOfRetries) {
+        BootstrapState state;
+        do {
+            numOfRetries--;
+            try {
+                Thread.sleep(2000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Waiting for component state update interrupted", e);
+            }
+            state = tenantService.getTenantServiceState(contractId, tenantId, serviceName);
+        } while (state != null && state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
+        return state;
+    }
+
+    @Override
+    protected void waitForTenantInstallation(String tenantId, String contractId) {
+        long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10L);
+        BootstrapState state = BootstrapState.createInitialState();
+        while (!BootstrapState.State.OK.equals(state.state) && !BootstrapState.State.ERROR.equals(state.state)
+                && System.currentTimeMillis() <= timeout) {
+            try {
+                TenantDocument tenantDoc = tenantService.getTenant(contractId, tenantId);
+                BootstrapState newState = tenantDoc.getBootstrapState();
+                log.info("BootstrapState from tenant console: " + (newState == null ? null : newState.state));
+                state = newState == null ? state : newState;
+                if (BootstrapState.State.OK.equals(state.state) || BootstrapState.State.ERROR.equals(state.state)) {
+                    return;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to query tenant installation state", e);
+            } finally {
+                try {
+                    Thread.sleep(5000L);
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        }
+    }
 }

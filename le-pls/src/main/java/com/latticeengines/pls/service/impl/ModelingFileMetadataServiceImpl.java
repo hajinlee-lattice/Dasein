@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -546,6 +548,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             limit = appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
             validateFieldSize(fieldValidationResult, customerSpace, entity, generatedTemplate, limit, enableEntityMatch, enableEntityMatchGA);
         }
+        int otherIdLimit =
+                appTenantConfigService.getOtherIdQuotaLimit(MultiTenantContext.getShortTenantId());
+        validateOtherIdSize(fieldValidationResult, fieldMappingDocument, otherIdLimit);
         Table finalTemplate = mergeTable(templateTable, generatedTemplate);
         // compare type, require flag between template and standard schema
         checkTemplateTable(finalTemplate, entity, withoutId, enableEntityMatch || enableEntityMatchGA,
@@ -708,7 +713,26 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         attributes = attributes.stream().filter(name -> !inactiveNames.contains(name)).collect(Collectors.toSet());
         int fieldSize = attributes.size();
-        ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit);
+        ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, limit, entity);
+    }
+
+    private void validateOtherIdSize(FieldValidationResult fieldValidationResult,
+                                     FieldMappingDocument fieldMappingDocument, int otherIdLimit) {
+        Map<CDLExternalSystemType, Integer> sizeMap = new HashMap<>();
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getCdlExternalSystemType() != null) {
+                sizeMap.putIfAbsent(fieldMapping.getCdlExternalSystemType(), 0);
+                sizeMap.put(fieldMapping.getCdlExternalSystemType(),
+                        sizeMap.get(fieldMapping.getCdlExternalSystemType()) + 1);
+            }
+        }
+        if (MapUtils.isNotEmpty(sizeMap)) {
+            for (Map.Entry<CDLExternalSystemType, Integer> entry : sizeMap.entrySet()) {
+                CDLExternalSystemType type = entry.getKey();
+                Integer fieldSize = entry.getValue();
+                ValidateFileHeaderUtils.exceedQuotaFieldSize(fieldValidationResult, fieldSize, otherIdLimit, type.name());
+            }
+        }
     }
 
     private void crosscheckDataType(CustomerSpace customerSpace, String entity, String source, Table metaTable,

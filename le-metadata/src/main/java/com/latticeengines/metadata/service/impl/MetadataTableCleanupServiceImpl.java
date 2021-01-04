@@ -1,7 +1,9 @@
 package com.latticeengines.metadata.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -15,8 +17,10 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
+import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.metadata.service.MetadataTableCleanupService;
 
@@ -28,6 +32,9 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
     @Inject
     private MetadataService metadataService;
 
+    @Inject
+    private DataUnitService dataUnitService;
+
     @Value("${metadata.table.cleanup.size}")
     private int maxCleanupSize;
 
@@ -35,19 +42,30 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
 
     private int searchCount = 20;
 
-    private int lastIndex;
+    private int lastIndexMetaData;
+
+    private int lastIndexDataUnit;
+
+    private Map<String, DataUnit> tableNameToDataUnit;
 
     @Override
     public Boolean cleanup() {
-        log.info("Metadata table cleanup task started.");
+        cleanpTables("metadata", lastIndexMetaData);
+        cleanpTables("dataunit", lastIndexDataUnit);
+        return true;
+    }
+
+    private void cleanpTables(String tableType, int lastIndex) {
+        log.info(tableType + " cleanup task started for.");
         List<Table> tablesToDelete = new ArrayList<>();
+        tableNameToDataUnit = new HashMap<>();
         // only query 50000 records per clean up job
         int count = 0;
         int preLastIndex = lastIndex;
         try (PerformanceTimer timer =
                      new PerformanceTimer("Metadata table cleanup task at step find tables to delete")) {
             while (count < searchCount) {
-                List<Table> tables = metadataService.findAllWithExpiredRetentionPolicy(lastIndex, batchSize);
+                List<Table> tables = getAllWithExpiredRetentionPolicyTables(tableType, lastIndex);
                 int index = 0;
                 for (Table table : tables) {
                     index++;
@@ -79,7 +97,7 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
         try (PerformanceTimer timer = new PerformanceTimer("Metadata table cleanup task at step delete tables")) {
             if (CollectionUtils.isNotEmpty(tablesToDelete)) {
                 tablesToDelete.forEach(table -> {
-                    cleanupTable(table);
+                    cleanupTable(tableType, table);
                 });
                 if (lastIndex >= tablesToDelete.size()) {
                     lastIndex -= tablesToDelete.size();
@@ -91,10 +109,79 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
                 log.info(String.format("No tables needs to clean up after scan %d records and scan index is %d.", batchSize * searchCount, lastIndex));
             }
         }
-        return true;
+        updateLastIndex(tableType, lastIndex);
     }
 
-    private void cleanupTable(Table table) {
+    private void cleanupTable(String tableType, Table table) {
+        switch (tableType) {
+            case "metadata":
+                cleanupMetaDataTable(table);
+                break;
+            case "dataunit":
+                cleanupDataUnit(tableNameToDataUnit.get(table.getName()));
+                break;
+            default:
+                log.info("Unknown tableType to cleanup :" + tableType);
+        }
+    }
+
+    private List<Table> getAllWithExpiredRetentionPolicyTables(String tableType, int lastIndex) {
+        List<Table> tables = new ArrayList<>();
+        switch (tableType) {
+            case "metadata":
+                tables = metadataService.findAllWithExpiredRetentionPolicy(lastIndex, batchSize);
+                break;
+            case "dataunit":
+                tables = getDataUnitTables(lastIndex);
+                break;
+            default:
+                log.info("Unknown tableType to cleanup :" + tableType);
+        }
+        return tables;
+    }
+
+    private void updateLastIndex(String tableType, int lastIndex) {
+        switch (tableType) {
+            case "metadata":
+                lastIndexMetaData = lastIndex;
+                break;
+            case "dataunit":
+                lastIndexDataUnit = lastIndex;
+                break;
+            default:
+                log.info("Unknown tableType to cleanup :" + tableType);
+        }
+    }
+
+    private List<Table> getDataUnitTables(int lastindex) {
+        int pageIndex = lastindex/batchSize;
+        List<Table>tables = new ArrayList<>();
+        List<DataUnit> dataUnits = dataUnitService.findAllDataUnitEntitiesWithExpiredRetentionPolicy(pageIndex, batchSize);
+        if (CollectionUtils.isNotEmpty(dataUnits)) {
+            dataUnits.forEach(dataUnit -> {
+                Table table = new Table();
+                table.setName(dataUnit.getTenant() + "_" + dataUnit.getStorageType().name() + "_" + dataUnit.getName());
+                table.setUpdated(dataUnit.getUpdated());
+                table.setRetentionPolicy(dataUnit.getRetentionPolicy());
+                tables.add(table);
+                tableNameToDataUnit.put(table.getName(), dataUnit);
+            });
+        }
+        return tables;
+    }
+
+    private void cleanupDataUnit(DataUnit dataUnit) {
+        if (dataUnit == null)
+            return;
+        try {
+            dataUnitService.delete(dataUnit);
+        } catch (Exception ex) {
+            log.error(String.format("Could not cleanup dataunit for tenant: %s, table name %s and type %s",
+                    dataUnit.getTenant(), dataUnit.getName(), dataUnit.getDataFormat(), ex.getMessage()));
+        }
+    }
+
+    private void cleanupMetaDataTable(Table table) {
         Tenant tenant = table.getTenant();
         try {
             MultiTenantContext.setTenant(tenant);

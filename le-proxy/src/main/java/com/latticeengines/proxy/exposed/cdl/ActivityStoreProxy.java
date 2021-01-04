@@ -103,6 +103,17 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         return get("get_dimension_metadata", url, Map.class);
     }
 
+    @SuppressWarnings("unchecked")
+    public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
+                                                                            String signature, boolean withStreamName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata?withStreamName" +
+                        "={withStreamName}", shortenCustomerSpace(customerSpace), withStreamName);
+        if (StringUtils.isNotBlank(signature)) {
+            url += "&signature=" + signature;
+        }
+        return get("get_dimension_metadata", url, Map.class);
+    }
+
     public Map<String, DimensionMetadata> getDimensionMetadataInStream(@NotNull String customerSpace,
             @NotNull String streamName, String signature) {
         String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata/streams/{streamName}",

@@ -29,10 +29,10 @@ public class LivyServerManager {
     private Boolean useEmr;
 
     @Inject
-    private LivyServerManager manager;
+    private EMRCacheService emrCacheService;
 
     @Inject
-    private EMRCacheService emrCacheService;
+    private LivyServerManager manager;
 
     @Value("${hadoop.consul.url}")
     private String consul;
@@ -51,18 +51,24 @@ public class LivyServerManager {
     private Queue<String> serverQueue = new ConcurrentLinkedQueue<>();
 
     public String getLivyHost() {
-        return Boolean.TRUE.equals(useEmr) ? manager.getNextLivyServerUrl(emrClusterName) : "http://localhost:8998";
+        return Boolean.TRUE.equals(useEmr) ? manager.getLivyServerUrl(emrClusterName) : "http://localhost:8998";
     }
 
-    private String getNextLivyServerUrl(String emrClusterName) {
+    private String getLivyServerUrl(String emrClusterName) {
+        if (!isExternalLivyExists(emrClusterName)) {
+            log.info("No external livy server configured for this EMR, use the EMR livy server");
+            return emrCacheService.getLivyUrl();
+        }
+
+        // If livy server queue is empty, reload it
         if (serverQueue.size() == 0) {
-            // Reload the server queue. Newly added server will also be loaded here
+            // Note that newly added server will be loaded here, if any
             if (!populateServerQueue(emrClusterName)) {
-                // If no external livy server, return the EMR internal livy server
-                return emrCacheService.getLivyUrl();
+                throw new RuntimeException("Reload livy server queue failed");
             }
         }
 
+        // Loop through the livy server queue to find an available livy server
         while (serverQueue.size() != 0) {
             String nextServerUrl = serverQueue.poll();
 
@@ -74,19 +80,18 @@ public class LivyServerManager {
             }
         }
 
-        // No external livy server available, fall back to the EMR internal livy server
-        log.warn("Can't find any available external livy server, fall back to EMR internal livy server...");
-        return emrCacheService.getLivyUrl();
+        // No external livy server available, throw exception
+        throw new RuntimeException("Can't find a good livy server to use...");
+    }
+
+    private boolean isExternalLivyExists(String emrClusterName) {
+        String consulKey = "emr/" + emrClusterName + "/LivyServerIps";
+
+        return ConsulUtils.isKeyExists(consul, consulKey);
     }
 
     private synchronized boolean populateServerQueue(String emrClusterName) {
         String consulKey = "emr/" + emrClusterName + "/LivyServerIps";
-
-        // First check if the key even exists in consul KV store;
-        // If not, return right away
-        if (!ConsulUtils.isKeyExists(consul, consulKey)) {
-            return false;
-        }
 
         String ipStr = ConsulUtils.getValueFromConsul(consul, consulKey);
         if (StringUtils.isBlank(ipStr)) {
