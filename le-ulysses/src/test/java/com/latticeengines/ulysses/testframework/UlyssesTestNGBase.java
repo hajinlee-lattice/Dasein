@@ -11,21 +11,13 @@ import org.testng.annotations.Listeners;
 
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.latticeengines.aws.dynamo.DynamoService;
-import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-ulysses-context.xml" })
 public class UlyssesTestNGBase extends AbstractTestNGSpringContextTests {
-
-    @Inject
-    protected FabricMessageService messageService;
-
-    @Inject
-    protected FabricDataService dataService;
 
     @Inject
     protected DynamoService dynamoService;

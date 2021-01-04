@@ -38,7 +38,6 @@ import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datafabric.entitymanager.GenericTableEntityMgr;
 import com.latticeengines.datafabric.entitymanager.impl.GenericTableEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -76,9 +75,6 @@ public class CDLLookupServiceImpl implements CDLLookupService {
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private FabricMessageService messageService;
 
     @Inject
     private FabricDataService dataService;
@@ -612,7 +608,7 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     }
 
     private synchronized void registerTableEntityMgr(String signature) {
-        GenericTableEntityMgr tableEntityMgr = new GenericTableEntityMgrImpl(messageService, dataService, signature);
+        GenericTableEntityMgr tableEntityMgr = new GenericTableEntityMgrImpl(dataService, signature);
         dynamoDataStoreMap.putIfAbsent(signature, tableEntityMgr);
         log.info("Registered a GenericTableEntityMgr using signature " + signature);
     }

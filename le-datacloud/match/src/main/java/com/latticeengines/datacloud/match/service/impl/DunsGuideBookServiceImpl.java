@@ -25,7 +25,6 @@ import com.latticeengines.datacloud.match.entitymgr.DunsGuideBookEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.impl.DunsGuideBookEntityMgrImpl;
 import com.latticeengines.datacloud.match.exposed.service.DunsGuideBookService;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 
@@ -35,9 +34,6 @@ public class DunsGuideBookServiceImpl implements DunsGuideBookService {
     private static final Logger log = LoggerFactory.getLogger(DunsGuideBookServiceImpl.class);
 
     private Map<String, DunsGuideBookEntityMgr> entityMgrMap = new ConcurrentHashMap<>(); // key is DataCloudVersion#getVersion
-
-    @Inject
-    private FabricMessageService messageService;
 
     @Inject
     private FabricDataService dataService;
@@ -122,7 +118,7 @@ public class DunsGuideBookServiceImpl implements DunsGuideBookService {
         if (mgr == null) {
             String fullVersion = getFullDataCloudVersion(version);
             log.info("Use {} as full version of DunsGuideBook for {}", fullVersion, version);
-            mgr = new DunsGuideBookEntityMgrImpl(messageService, dataService, fullVersion);
+            mgr = new DunsGuideBookEntityMgrImpl(dataService, fullVersion);
             mgr.init();
             entityMgrMap.put(version, mgr);
         }
