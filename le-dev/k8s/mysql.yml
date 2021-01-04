@@ -44,3 +44,4 @@ spec:
       port: 3306
       protocol: TCP
   type: LoadBalancer
+ 
