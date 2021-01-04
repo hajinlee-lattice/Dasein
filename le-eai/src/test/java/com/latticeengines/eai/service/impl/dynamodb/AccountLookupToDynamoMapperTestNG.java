@@ -54,6 +54,9 @@ import com.latticeengines.eai.dynamodb.runtime.AccountLookupToDynamoJob;
 import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
 import com.latticeengines.eai.service.ExportService;
 
+/**
+ * This test requires a local Dynamo running at port 8000
+ */
 public class AccountLookupToDynamoMapperTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AccountLookupToDynamoMapperTestNG.class);

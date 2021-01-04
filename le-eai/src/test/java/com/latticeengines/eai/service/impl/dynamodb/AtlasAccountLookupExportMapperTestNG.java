@@ -57,6 +57,9 @@ import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNG
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
+/**
+ * This test requires a local Dynamo running at port 8000
+ */
 public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AtlasAccountLookupExportMapperTestNG.class);

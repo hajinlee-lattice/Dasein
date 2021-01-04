@@ -56,3 +56,18 @@ spec:
   resources:
     requests:
       storage: 6Gi
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: le-dynamo-data
+  labels:
+    app: lattice
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
