@@ -62,7 +62,7 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
     public void sendUserUsageEvent(VboUserSeatUsageEvent usageEvent) {
         refreshToken();
 
-        String splunkMsg = "Exception in usage event: ";
+        String logPrefix = "Exception in usage event: ";
         String logMsg = "Sending VBO User Seat Usage Event for user " + usageEvent.getEmailAddress();
         Tracer tracer = GlobalTracer.get();
         Span span = tracer.activeSpan();
@@ -76,10 +76,10 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
                     response.getStatusCodeValue(), usageEvent.getSubscriberID(), response.getBody());
             // logging to splunk in case API call fails
             if (response.getStatusCodeValue() != 202 || response.getBody() != null)
-                responseMsg = splunkMsg + responseMsg;
+                responseMsg = logPrefix + responseMsg;
             log.info(responseMsg);
         } catch (Exception e) {
-            log.error(splunkMsg + String.format("Failed to post %s usage event for subscriber %s with email %s:",
+            log.error(logPrefix + String.format("Failed to post %s usage event for subscriber %s with email %s:",
                     usageEvent.getFeatureURI(), usageEvent.getSubscriberID(),
                     usageEvent.getEmailAddress()), e);
             throw e;
@@ -110,12 +110,12 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
     }
 
     private JsonNode getNodeFromList(JsonNode node, String listField, String key, String value) {
-      if (node != null && node.has(listField) && node.get(listField).size() > 0) {
+        if (node != null && node.has(listField) && node.get(listField).size() > 0) {
             for (JsonNode n : node.get(listField)) {
                 if (n.get(key).asText().equals(value)) return n;
             }
         }
-      log.info(String.format("Unable to get field %s from list %s", value, listField));
-      return null;
+        log.info(String.format("Unable to get field %s from list %s", value, listField));
+        return null;
     }
 }

@@ -213,7 +213,7 @@ public class UserResource {
                     tenant.getId()));
             if (usageEvent != null)
                 usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
-            if (!batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+            if (!isDCPTenant) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                     emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,
                             !tenantService.getTenantEmailFlag(tenant.getId()));
@@ -365,8 +365,7 @@ public class UserResource {
                         targetLevel.name(), username, tenantId));
                 if (usageEvent != null)
                     usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
-                if (newUser && user != null
-                        && !batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+                if (newUser && user != null && !isDCPTenant) {
                     userSpan.log("Sending email");
                     if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                         emailService.sendExistingUserEmail(tenant, user, apiPublicUrl,
@@ -382,7 +381,7 @@ public class UserResource {
                 document.setErrors(Collections.singletonList("Cannot update users in another tenant."));
                 return document;
             }
-            if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+            if (newUser && isDCPTenant) {
                 IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
                 if (idaasUser == null) {
                     LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
