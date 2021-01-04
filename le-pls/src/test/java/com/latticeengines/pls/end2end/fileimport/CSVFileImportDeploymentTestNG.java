@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,7 +45,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
-import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -67,7 +65,6 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
-import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
@@ -82,8 +79,6 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
-    @Inject
-    private EaiJobDetailProxy eaiJobDetailProxy;
 
     @BeforeClass(groups = "deployment.import.group1")
     public void setup() throws Exception {
@@ -676,56 +671,4 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertTrue(submitError, "There should be error when submit wrong field mapping jobs.");
     }
 
-    @Test(groups = "deployment.import.group1")
-    public void testEraseByNull() {
-        SourceFile accountFile = uploadSourceFile(ACCOUNT_SOURCE_FILE_WITH_NULL, ENTITY_ACCOUNT);
-        Assert.assertNotNull(accountFile);
-        startCDLImport(accountFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
-        accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                getFeedTypeByEntity(DEFAULT_SYSTEM, ENTITY_ACCOUNT), ENTITY_ACCOUNT);
-        Table sourceTable = metadataProxy.getTable(customerSpace, accountFile.getTableName());
-        Table accountTemplate = accountDataFeedTask.getImportTemplate();
-        Assert.assertEquals(accountTemplate.getAttributes().size(), sourceTable.getAttributes().size());
-
-        try {
-            String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts", PathBuilder
-                    .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
-                    .toString(), SourceType.FILE.getName());
-            Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
-            String avroFileName = accountFile.getName().substring(0, accountFile.getName().lastIndexOf("."));
-            List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath,
-                    file -> !file.isDirectory() && file.getPath().toString().contains(avroFileName)
-                            && file.getPath().getName().endsWith("avro"));
-            Assert.assertEquals(avroFiles.size(), 1);
-            String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
-            long rowCount = AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
-            Assert.assertEquals(rowCount, 25);
-            Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
-            Assert.assertEquals(schema.getFields().size(), 14);
-            String accountIdentifier = accountDataFeedTask.getUniqueId();
-            EaiImportJobDetail accountDetail = eaiJobDetailProxy
-                    .getImportJobDetailByCollectionIdentifier(accountIdentifier);
-            List<String> pathList = accountDetail.getPathDetail();
-            Assert.assertEquals(pathList.size(), 1);
-            String avroPath = pathList.get(0);
-            avroPath = avroPath.substring(avroPath.indexOf("/Pods/"));
-            AvroUtils.AvroFilesIterator iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroPath);
-            // test erase column value
-            int eraseLineCount = 0;
-            Set<String> nullIdSet = new HashSet<>(Arrays.asList("0012400001DOG4xAAH", "0012400001DOBLuAAP"));
-            while (iterator.hasNext()) {
-                GenericRecord record = iterator.next();
-                if (nullIdSet.contains(record.get(InterfaceName.CustomerAccountId.name()))) {
-                    Assert.assertNull(record.get(InterfaceName.Website.name()));
-                    Assert.assertEquals(record.get("Erase_" + InterfaceName.Website), "true");
-                    eraseLineCount++;
-                } else {
-                    Assert.assertEquals(record.get("Erase_" + InterfaceName.Website), "false");
-                }
-            }
-            Assert.assertEquals(eraseLineCount, nullIdSet.size());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
 }

@@ -245,7 +245,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         String avroFileName = getFileName(avroFile, ".avro", index);
         try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
             dataFileWriter.create(schema, new File(avroFileName));
-
             try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(getFileName("error", ".csv", index)),
                     LECSVFormat.format.withHeader((String[]) null))) {
                 ConvertCSVToAvro convertCSVToAvro = new ConvertCSVToAvro(csvFilePrinter, dataFileWriter);
