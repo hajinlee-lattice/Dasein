@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.DataUnitService;
 
@@ -112,7 +113,8 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
         retry.execute(context -> {
             List<DataUnit> found = dataUnitService.findAllDataUnitEntitiesWithExpiredRetentionPolicy(0, 5);
             Assert.assertTrue(CollectionUtils.isNotEmpty(found));
-            Assert.assertTrue(found.get(0) instanceof DynamoDataUnit);
+            Assert.assertNotNull(found.get(0).getRetentionPolicy());
+            Assert.assertNotEquals(found.get(0).getRetentionPolicy(), RetentionPolicyUtil.NEVER_EXPIRE_POLICY);
             return true;
         });
 
