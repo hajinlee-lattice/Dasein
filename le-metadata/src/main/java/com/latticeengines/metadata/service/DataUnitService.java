@@ -2,6 +2,7 @@ package com.latticeengines.metadata.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 
 public interface DataUnitService {
@@ -33,4 +34,6 @@ public interface DataUnitService {
     List<DataUnit> findAllByDataTemplateIdAndRole(String dataTemplateId, DataUnit.Role role);
 
     List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize);
+
+    AthenaDataUnit registerAthenaDataUnit(String dataUnitName);
 }

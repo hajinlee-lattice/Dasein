@@ -9,12 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
 import com.latticeengines.metadata.service.DataUnitRuntimeServiceRegistry;
 import com.latticeengines.metadata.service.DataUnitService;
+import com.latticeengines.prestodb.exposed.service.AthenaService;
 
 @Service("dataUnitService")
 public class DataUnitServiceImpl implements DataUnitService {
@@ -23,6 +27,9 @@ public class DataUnitServiceImpl implements DataUnitService {
 
     @Inject
     private DataUnitEntityMgr entityMgr;
+
+    @Inject
+    private AthenaService athenaService;
 
     @Override
     public DataUnit createOrUpdateByNameAndStorageType(DataUnit dataUnit) {
@@ -53,6 +60,7 @@ public class DataUnitServiceImpl implements DataUnitService {
         String tenantId = MultiTenantContext.getShortTenantId();
         return entityMgr.findByDataTemplateIdAndRoleFromReader(tenantId, dataTemplateId, role);
     }
+
     @Override
     public void deleteByNameAndStorageType(String name, DataUnit.StorageType storageType) {
         String tenantId = MultiTenantContext.getShortTenantId();
@@ -147,6 +155,21 @@ public class DataUnitServiceImpl implements DataUnitService {
     @Override
     public List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize) {
         return entityMgr.findAllDataUnitEntitiesWithExpiredRetentionPolicy(pageIndex, pageSize);
+    }
+
+    @Override
+    public AthenaDataUnit registerAthenaDataUnit(String dataUnitName) {
+        // find athena data unit
+        AthenaDataUnit oldDataUnit = (AthenaDataUnit) findByNameTypeFromReader(dataUnitName, DataUnit.StorageType.Athena);
+        if (oldDataUnit != null && athenaService.tableExists(oldDataUnit.getAthenaTable())) {
+            log.info("Already found a athena data unit named {} : {}", dataUnitName, oldDataUnit.getAthenaTable());
+            return oldDataUnit;
+        }
+        // find s3 data unit
+        S3DataUnit s3DataUnit = (S3DataUnit) findByNameTypeFromReader(dataUnitName, DataUnit.StorageType.S3);
+        Preconditions.checkNotNull(s3DataUnit, "Cannot find s3 data unit named " + dataUnitName);
+        AthenaDataUnit athenaDataUnit = athenaService.saveDataUnit(s3DataUnit);
+        return (AthenaDataUnit) createOrUpdateByNameAndStorageType(athenaDataUnit);
     }
 
 }
