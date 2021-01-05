@@ -8,12 +8,9 @@
     </groups>
     <test name="FunctionalTestGroup3">
         <packages>
-            <package name="com.latticeengines.spark.*">
-                <exclude name="com.latticeengines.spark.exposed.job.cdl"/>
-                <exclude name="com.latticeengines.spark.exposed.job.cm"/>
-                <exclude name="com.latticeengines.spark.exposed.job.common"/>
-                <exclude name="com.latticeengines.spark.exposed.job.dcp"/>
-            </package>
+            <package name="com.latticeengines.spark.exposed.job.cm"/>
+            <package name="com.latticeengines.spark.exposed.job.common"/>
+            <package name="com.latticeengines.spark.exposed.job.dcp"/>
         </packages>
     </test>
 </suite>

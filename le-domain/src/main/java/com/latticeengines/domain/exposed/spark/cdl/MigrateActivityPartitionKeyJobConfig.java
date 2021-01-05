@@ -10,7 +10,7 @@ public class MigrateActivityPartitionKeyJobConfig extends SparkJobConfig {
 
     @JsonProperty
     // streamId -> [legacy partition keys] same order as input tables
-    public ActivityStoreSparkIOMetadata inputMetadata;
+    public SparkIOMetadataWrapper inputMetadata;
 
     @Override
     public String getName() {

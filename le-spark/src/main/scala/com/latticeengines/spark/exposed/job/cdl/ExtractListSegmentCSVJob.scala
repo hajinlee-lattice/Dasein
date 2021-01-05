@@ -1,7 +1,8 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.domain.exposed.metadata.{InterfaceName, UserDefinedType}
 import com.latticeengines.domain.exposed.metadata.template.{CSVAdaptor, ImportFieldMapping}
+import com.latticeengines.domain.exposed.metadata.{InterfaceName, UserDefinedType}
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ExtractListSegmentCSVConfiguration
 import com.latticeengines.domain.exposed.spark.cdl.ExtractListSegmentCSVConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.functions.{col, lit, udf, when}
@@ -38,12 +39,12 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     importCSVDf = importCSVDf.select(columnsExist map col: _*)
     val outputSchema = StructType(structFields)
     val transformedInput = spark.createDataFrame(importCSVDf.rdd, outputSchema)
-    finalDfs += generateEntityDf(transformedInput, accountAttributes)
-    finalDfs += generateEntityDf(transformedInput, contactAttributes)
+    finalDfs += generateEntityDf(true, transformedInput, accountAttributes)
+    finalDfs += generateEntityDf(false, transformedInput, contactAttributes)
     lattice.output = finalDfs.toList
   }
 
-  private def generateEntityDf(input: DataFrame, attributes: Seq[String]): DataFrame = {
+  private def generateEntityDf(distinct: Boolean, input: DataFrame, attributes: Seq[String]): DataFrame = {
     val columnsExist: ListBuffer[String] = ListBuffer()
     val columnsNotExist: ListBuffer[String] = ListBuffer()
     attributes.foreach { attribute =>
@@ -56,19 +57,22 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     var result = input.select(columnsExist map col: _*)
     columnsNotExist.map(accountColumn => result = result.withColumn(accountColumn, lit(null).cast(StringType)))
     val columns = result.columns
-    val contactNameFunc: (String, String) => String = (firstname, lastname) => {
-      firstname + " " + lastname
+    val contactNameFunc: (String, String) => String = (firstName, lastName) => {
+      firstName + " " + lastName
     }
     val contactNameUdf = udf(contactNameFunc)
     if (!columns.contains(InterfaceName.PhoneNumber.name())) {
       for (field <- columns) {
-        if (field.equalsIgnoreCase("Direct_Phone")) {
+        if (field.equalsIgnoreCase(ExtractListSegmentCSVConfiguration.Direct_Phone)) {
           result = result.withColumnRenamed(field, InterfaceName.PhoneNumber.name)
         } else if (field.equalsIgnoreCase("ContactName")) {
           result = result.withColumn(field, when(col("FirstName").isNotNull,
             contactNameUdf(col("FirstName"), col("LastName"))).otherwise(lit(null).cast(StringType)))
         }
       }
+    }
+    if (distinct) {
+      result = result.dropDuplicates(InterfaceName.AccountId.name())
     }
     result
   }

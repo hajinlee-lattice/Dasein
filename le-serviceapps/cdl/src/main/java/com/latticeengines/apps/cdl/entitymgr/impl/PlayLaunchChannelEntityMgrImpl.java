@@ -134,6 +134,14 @@ public class PlayLaunchChannelEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunchChannel findChannelAndPlayById(String channelId) {
+        PlayLaunchChannel channel = readerRepository.findById(channelId);
+        Hibernate.initialize(channel.getPlay());
+        return channel;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PlayLaunchChannel findById(String channelId, boolean useWriterRepo) {
         if (useWriterRepo) {
             return writerRepository.findById(channelId);
@@ -172,6 +180,9 @@ public class PlayLaunchChannelEntityMgrImpl
         if (playLaunchChannel.getMaxEntitiesToLaunch() == null || playLaunchChannel.getMaxEntitiesToLaunch() < 0) {
             playLaunchChannel.setMaxEntitiesToLaunch(null);
         }
+        if (playLaunchChannel.getMaxContactsPerAccount() == null || playLaunchChannel.getMaxContactsPerAccount() < 0) {
+            playLaunchChannel.setMaxContactsPerAccount(null);
+        }
         playLaunchChannel.setLookupIdMap(lookupIdMap);
         playLaunchChannel.setId(playLaunchChannel.generateChannelId());
         playLaunchChannelDao.create(playLaunchChannel);
@@ -194,7 +205,11 @@ public class PlayLaunchChannelEntityMgrImpl
         }
 
         if (updatedChannel.getMaxContactsPerAccount() != null) {
-            existingPlayLaunchChannel.setMaxContactsPerAccount(updatedChannel.getMaxContactsPerAccount());
+            if (updatedChannel.getMaxContactsPerAccount() < 0) {
+                existingPlayLaunchChannel.setMaxContactsPerAccount(null);
+            } else {
+                existingPlayLaunchChannel.setMaxContactsPerAccount(updatedChannel.getMaxContactsPerAccount());
+            }
         }
 
         if (updatedChannel.getLaunchType() != null) {

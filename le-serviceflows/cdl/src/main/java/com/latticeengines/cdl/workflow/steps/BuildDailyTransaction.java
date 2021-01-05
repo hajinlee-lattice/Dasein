@@ -23,11 +23,10 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig;
-import com.latticeengines.spark.exposed.job.cdl.TransformTxnStreamJob;
+import com.latticeengines.spark.exposed.job.cdl.BuildDailyTransactionJob;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -73,8 +72,8 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
             throw new IllegalStateException("No retain types found in context");
         }
         log.info("Retaining transactions of product type: {}", retainTypes);
-        buildTransactionBatchStore(dailyTxnStream, retainTypes); // ConsolidatedDaily, partitioned by txnDayPeriod
-        buildTransactionServingStore(dailyTxnStream, retainTypes); // Aggregated, no partition
+        buildTransactionBatchStore(dailyTxnStream, retainTypes); // ConsolidatedDaily, partitioned and repartitioned by txnDayPeriod
+        buildTransactionServingStore(dailyTxnStream, retainTypes); // Aggregated, no partition, repartitioned by txnDayPeriod
     }
 
     private void buildTransactionBatchStore(Map<String, Table> dailyTxnStream, List<String> retainTypes) {
@@ -86,7 +85,7 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
             dataCollectionProxy.upsertTable(customerSpaceStr, tableName,
                     TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
         } else {
-            SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
+            SparkJobResult result = runSparkJob(BuildDailyTransactionJob.class,
                     getSparkConfig(txnDayPeriod, txnDayPeriod, dailyTxnStream, retainTypes));
             saveBatchStore(result.getTargets().get(0));
         }
@@ -111,7 +110,7 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
                     inactive);
             exportTableRoleToRedshift(dailyTxnServingStoreTable, TableRoleInCollection.AggregatedTransaction);
         } else {
-            SparkJobResult result = runSparkJob(TransformTxnStreamJob.class,
+            SparkJobResult result = runSparkJob(BuildDailyTransactionJob.class,
                     getSparkConfig(null, txnDayPeriod, dailyTxnStream, retainTypes));
             saveServingStore(result.getTargets().get(0));
         }
@@ -136,7 +135,7 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
         config.targetColumns = STANDARD_FIELDS;
         config.partitionKey = partitionKey;
         config.repartitionKey = repartitionKey;
-        config.retainTypes = retainAllTypes(retainTypes) ? Collections.emptyList() : retainTypes;
+        config.retainTypes = retainTypes;
 
         List<DataUnit> inputs = new ArrayList<>();
         retainTypes.forEach(type -> {
@@ -157,9 +156,5 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
         map.put(quantity, totalQuantity);
         map.put(rowCount, txnCount);
         return map;
-    }
-
-    private boolean retainAllTypes(List<String> retainTypes) {
-        return retainTypes.contains(ProductType.Spending.name()) && retainTypes.contains(ProductType.Analytic.name());
     }
 }

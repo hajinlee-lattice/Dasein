@@ -33,9 +33,9 @@ import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputat
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 import com.latticeengines.spark.util.DeriveAttrsUtils;
 
@@ -124,7 +124,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void test() {
         String input = appendWebVisitInputData();
-        String accountBatchStore = appendAccountBatchStore();
+        String accountBatchStore = appendAccountServingStore();
         ActivityMetricsGroup group = setupWebVisitMetricsGroupConfig();
         DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
         config.activityMetricsGroups = Collections.singletonList(group);
@@ -134,7 +134,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.currentVersionStamp = CURRENT_VERSION;
         WEB_ACTIVITY_ATTR_COUNT = calculateWebActivityAttrsCount(config.streamMetadataMap, group) + 1; // +1 entity Id column
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountBatchStore), getWorkspace());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         verify(result, Collections.singletonList(this::verifyWebVisitMetrics));
     }
@@ -142,7 +142,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCountLast() {
         String input = appendOpportunityInput();
-        String accountBatchStore = appendAccountBatchStore();
+        String accountServingStore = appendAccountServingStore();
         ActivityMetricsGroup group = setupOpportunityGroupConfig();
         DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
         config.activityMetricsGroups = Collections.singletonList(group);
@@ -151,8 +151,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.streamMetadataMap = constructOpportunityStreamMetadata();
         config.currentVersionStamp = CURRENT_VERSION;
         OPPORTUNITY_ATTR_COUNT = calculateOpportunityAttrsCount(config.streamMetadataMap, group) + 1;
-        SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountBatchStore), getWorkspace());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountServingStore), getWorkspace());
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         verify(result, Collections.singletonList(this::verifyOpportunityMetrics));
     }
@@ -160,8 +160,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testContactStream() {
         String input = appendMarketingInput();
-        String accountBatchStore = appendAccountBatchStore();
-        String contactBatchStore = appendContactBatchStore();
+        String accountBatchStore = appendAccountServingStore();
+        String contactBatchStore = appendContactServingStore();
         ActivityMetricsGroup group = setupMarketingGroupConfig();
         DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
         config.activityMetricsGroups = Collections.singletonList(group);
@@ -171,14 +171,14 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.currentVersionStamp = CURRENT_VERSION;
         MARKETING_ATTR_COUNT = calculateMarketingAttrsCount(config.streamMetadataMap, group) + 1;
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, Arrays.asList(input, accountBatchStore, contactBatchStore), getWorkspace());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         verify(result, Collections.singletonList(this::verifyMarketingMetrics));
     }
 
     @Test(groups = "functional")
     public void testIntentStream() {
-        List<String> inputs = Arrays.asList(appendIntentInput(), appendAccountBatchStore());
+        List<String> inputs = Arrays.asList(appendIntentInput(), appendAccountServingStore());
         DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
         config.activityMetricsGroups = Arrays.asList(setupHasIntentGroup(), setupHasIntentByTimeRangeGroup());
         config.inputMetadata = constructInputMetadata(INTENT_STREAM, Collections.singletonList(BusinessEntity.Account));
@@ -191,7 +191,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testDoubleMapping() {
-        List<String> inputs = Arrays.asList(appendBuyingScoreInput(), appendAccountBatchStore());
+        List<String> inputs = Arrays.asList(appendBuyingScoreInput(), appendAccountServingStore());
         DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
         config.activityMetricsGroups = Collections.singletonList(setupBuyingScoreGroup());
         config.inputMetadata = constructInputMetadata(INTENT_STREAM, Collections.singletonList(BusinessEntity.Account));
@@ -216,25 +216,25 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 * group.getActivityTimeRange().getParamSet().size();
     }
 
-    private ActivityStoreSparkIOMetadata constructInputMetadata(AtlasStream stream, List<BusinessEntity> batchStoreEntities) {
-        ActivityStoreSparkIOMetadata metadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
+    private SparkIOMetadataWrapper constructInputMetadata(AtlasStream stream, List<BusinessEntity> batchStoreEntities) {
+        SparkIOMetadataWrapper metadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> partitions = new HashMap<>();
 
         // add period stores details
-        Details details = new Details();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(new ArrayList<>(TIMEFILTER_PERIODS));
-        detailsMap.put(stream.getStreamId(), details);
+        partitions.put(stream.getStreamId(), details);
 
         // add batch store details
         batchStoreEntities.forEach(entity -> {
-            Details batchStoreDetails = new Details();
-            batchStoreDetails.setStartIdx(detailsMap.size());
-            detailsMap.put(entity.name(), batchStoreDetails);
+            Partition servingStorePartition = new Partition();
+            servingStorePartition.setStartIdx(partitions.size());
+            partitions.put(entity.name(), servingStorePartition);
         });
 
 
-        metadata.setMetadata(detailsMap);
+        metadata.setMetadata(partitions);
         return metadata;
     }
 
@@ -416,8 +416,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         return uploadHdfsDataUnit(data, fields);
     }
 
-    private String appendAccountBatchStore() {
-        List<Pair<String, Class<?>>> accountBatchStoreField = Collections.singletonList( //
+    private String appendAccountServingStore() {
+        List<Pair<String, Class<?>>> accountFields = Collections.singletonList( //
                 Pair.of(AccountId, String.class)
         );
 
@@ -428,11 +428,11 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"missingAccount"}, // add one account missing from activity input data
                 {ANONYMOUS}
         };
-        return uploadHdfsDataUnit(data, accountBatchStoreField);
+        return uploadHdfsDataUnit(data, accountFields);
     }
 
-    private String appendContactBatchStore() {
-        List<Pair<String, Class<?>>> contactBatchStoreField = Arrays.asList( //
+    private String appendContactServingStore() {
+        List<Pair<String, Class<?>>> contactFields = Arrays.asList( //
                 Pair.of(AccountId, String.class),
                 Pair.of(ContactId, String.class)
         );
@@ -444,7 +444,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc3", "c4"},
                 {ANONYMOUS, "c999"} // orphan contact
         };
-        return uploadHdfsDataUnit(data, contactBatchStoreField);
+        return uploadHdfsDataUnit(data, contactFields);
     }
 
     private ActivityMetricsGroup setupWebVisitMetricsGroupConfig() {

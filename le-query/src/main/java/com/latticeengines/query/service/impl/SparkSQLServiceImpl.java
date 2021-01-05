@@ -82,6 +82,9 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     @Value("${dataflowapi.spark.min.executors}")
     private int minExecutors;
 
+    @Value("${dataflowapi.spark.driver.sql.maxResultSize}")
+    private String sparkMaxResultSize;
+
     @Override
     public LivySession initializeLivySession(AttributeRepository attrRepo, Map<String, String> hdfsPathMap, //
                                              int scalingFactor, String storageLevel, String secondaryJobName) {
@@ -365,7 +368,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         // others
         conf.put("spark.sql.autoBroadcastJoinThreshold", "-1");
         conf.put("spark.sql.crossJoin.enabled", "true");
-        conf.put("spark.driver.maxResultSize", "4g");
+        conf.put("spark.driver.maxResultSize", sparkMaxResultSize);
         conf.put("spark.jars.packages", "commons-io:commons-io:2.6");
         return conf;
     }

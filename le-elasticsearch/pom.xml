@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>4.35.0-SNAPSHOT</version>
+        <version>4.36.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
@@ -36,6 +36,11 @@
         <version>${project.version}</version>
         <classifier>tests</classifier>
         <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-monitor</artifactId>
+        <version>${project.version}</version>
     </dependency>
     <dependency>
         <groupId>org.elasticsearch.client</groupId>

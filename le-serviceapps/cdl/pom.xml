@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-serviceapps</artifactId>
-        <version>4.35.0-SNAPSHOT</version>
+        <version>4.36.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -118,6 +118,12 @@
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
             <version>${quartz.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-elasticsearch</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

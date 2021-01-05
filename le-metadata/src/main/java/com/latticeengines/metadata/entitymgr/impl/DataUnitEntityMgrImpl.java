@@ -13,6 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -236,6 +237,13 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     @Override
+    public List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize) {
+        List<DataUnitEntity> entities = readerRepository.findAllDataUnitEntitiesWithExpiredRetentionPolicy(
+                RetentionPolicyUtil.NEVER_EXPIRE_POLICY, PageRequest.of(pageIndex, pageSize));
+        return convertList(entities, false);
+    }
+
+    @Override
     public DataUnit findByNameTypeFromReader(String tenantId, String name, DataUnit.StorageType storageType) {
         DataUnitEntity entity = readerRepository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (entity != null) {
@@ -287,6 +295,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         if (dataUnit instanceof RedshiftDataUnit) {
             setRedshiftPartition((RedshiftDataUnit) dataUnit);
         }
+        dataUnit.setUpdated(entity.getLastModifiedDate());
         return dataUnit;
     }
 

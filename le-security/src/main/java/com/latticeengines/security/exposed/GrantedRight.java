@@ -290,7 +290,11 @@ public enum GrantedRight implements GrantedAuthority {
     EDIT_PLS_TEAMS {
         @Override
         public String getAuthority() { return "Edit_PLS_Teams"; }
+    },
+    VIEW_ACCOUNT_360 {
+        public String getAuthority() { return "View_Account_360";}
     }; //
+
 
     private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();
 

@@ -362,12 +362,22 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         return this.detail.getTimelineVersionMap();
     }
 
-    @JsonProperty("timeline_rebuild_flag")
+    @JsonProperty("entityWithESVersionMap")
+    public void setEntityWithESVersionMap(Map<String, String> entityWithESVersionMap) {
+        this.detail.setEntityWithESVersionMap(entityWithESVersionMap);
+    }
+
+    @JsonProperty("entityWithESVersionMap")
+    public Map<String, String> getEntityWithESVersionMap() {
+        return this.detail.getEntityWithESVersionMap();
+    }
+
+    @JsonProperty("timelineRebuildFlag")
     public void setTimelineRebuildFlag(Boolean timelineRebuildFlag) {
         this.detail.setTimelineRebuildFlag(timelineRebuildFlag);
     }
 
-    @JsonProperty("timeline_rebuild_flag")
+    @JsonProperty("timelineRebuildFlag")
     public Boolean getTimelineRebuildFlag() {
         return this.detail.isTimelineRebuildFlag();
     }
@@ -450,5 +460,15 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     @JsonProperty("EvaluationDateMap")
     public void setEvaluationDateMap(Map<String, Long> evaluationDateMap) {
         this.detail.setEvaluationDateMap(evaluationDateMap);
+    }
+
+    @JsonProperty("spendingAnalysisPublished")
+    public Boolean getSpendingAnalysisPublished() {
+        return this.detail.getSpendingAnalysisPublished();
+    }
+
+    @JsonProperty("spendingAnalysisPublished")
+    public void setSpendingAnalysisPublished(Boolean spendingAnalysisPublished) {
+        this.detail.setSpendingAnalysisPublished(spendingAnalysisPublished);
     }
 }

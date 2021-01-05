@@ -48,8 +48,8 @@ import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeU
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -78,6 +78,7 @@ public class AggActivityStreamToDaily
     @Inject
     private MetadataProxy metadataProxy;
 
+    private boolean isRematchPA;
     private boolean shortCutMode = false;
     private DataCollection.Version inactive;
     private final Set<String> streamsIncrUpdated = new HashSet<>();
@@ -92,6 +93,7 @@ public class AggActivityStreamToDaily
         }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         catalogsWithImports = getCatalogsWithNewImports();
+        isRematchPA = Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class));
         Map<String, String> rawStreamTablesAfterDelete = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
         streamsPerformedDelete = MapUtils.isEmpty(rawStreamTablesAfterDelete) ? Collections.emptySet() : rawStreamTablesAfterDelete.keySet();
         Map<String, String> dailyTableNames = getMapObjectFromContext(AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, String.class, String.class);
@@ -120,6 +122,9 @@ public class AggActivityStreamToDaily
             dataCollectionProxy.upsertTablesWithSignatures(configuration.getCustomer(), dailyTableNames, AggregatedActivityStream, inactive);
             return null;
         } else {
+            if (isRematchPA) {
+                log.info("PA is performing rematch, rebuilding all streams");
+            }
             Long paTimestamp = getLongValueFromContext(PA_TIMESTAMP);
             Map<String, String> dailyStoreActiveBatchNames = getActiveDailyStoreTableNames(new ArrayList<>(streams.keySet()));
             // set dimensions
@@ -164,8 +169,8 @@ public class AggActivityStreamToDaily
 
             // set input
             List<DataUnit> units = new ArrayList<>();
-            ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-            Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+            SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+            Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
             rawStreamTableNames.forEach((streamId, table) -> {
                 if (streamsToRelink.contains(streamId)) {
                     return;
@@ -173,7 +178,7 @@ public class AggActivityStreamToDaily
                 Preconditions.checkArgument(CollectionUtils.size(table.getExtracts()) == 1,
                         String.format("Table %s should only have one extract, got %d", table.getName(),
                                 CollectionUtils.size(table.getExtracts())));
-                ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+                SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
                 details.setStartIdx(units.size());
                 if (config.incrementalStreams.contains(streamId)) {
                     Table importDelta = rawStreamDeltaTables.get(streamId);
@@ -247,7 +252,8 @@ public class AggActivityStreamToDaily
     }
 
     private boolean shouldIncrUpdate(AtlasStream stream) {
-        return !configuration.isShouldRebuild() && !streamsPerformedDelete.contains(stream.getStreamId())
+        return !isRematchPA && !configuration.isShouldRebuild()
+                && !streamsPerformedDelete.contains(stream.getStreamId())
                 && noCatalogHasImport(stream);
     }
 
@@ -261,7 +267,7 @@ public class AggActivityStreamToDaily
         if (shortCutMode) {
             return;
         }
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
 
         Map<String, HdfsDataUnit> dailyAggUnits = new HashMap<>();
         Map<String, HdfsDataUnit> dailyDeltaUnits = new HashMap<>();

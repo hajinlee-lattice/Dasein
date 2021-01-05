@@ -43,7 +43,8 @@ public class DependencyGraphEntityMgrAspect {
     @Inject
     private CDLDependenciesToGraphAction cdlGraphAction;
 
-    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.SegmentEntityMgrImpl.createSegment(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.SegmentEntityMgrImpl.createSegment(..)) " +
+            "|| execution(* com.latticeengines.apps.cdl.entitymgr.impl.SegmentEntityMgrImpl.createListSegment(..))")
     public void createSegment(JoinPoint joinPoint) throws Exception {
         if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof MetadataSegment) {
             MetadataSegment metadataSegment = (MetadataSegment) joinPoint.getArgs()[0];
@@ -66,7 +67,8 @@ public class DependencyGraphEntityMgrAspect {
         }
     }
 
-    @Around("execution(* com.latticeengines.apps.cdl.entitymgr.impl.SegmentEntityMgrImpl.updateSegment(..))")
+    @Around("execution(* com.latticeengines.apps.cdl.entitymgr.impl.SegmentEntityMgrImpl.updateSegment(..)) " +
+            "|| execution(* com.latticeengines.apps.cdl.entitymgr.impl.SegmentEntityMgrImpl.updateListSegment(..))")
     public MetadataSegment updateSegment(ProceedingJoinPoint joinPoint) throws Throwable {
         if (joinPoint.getArgs().length > 1 && joinPoint.getArgs()[0] instanceof MetadataSegment
                 && joinPoint.getArgs()[1] instanceof MetadataSegment) {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -265,6 +266,11 @@ public class DecisionGraph implements HasPid, Serializable {
 
             Node thatNode = (Node) that;
             return this.getName().equals(thatNode.getName());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.getName());
         }
     }
 

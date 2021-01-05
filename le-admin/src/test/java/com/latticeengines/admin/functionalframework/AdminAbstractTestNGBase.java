@@ -66,14 +66,14 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
 
     private static final Logger log = LoggerFactory.getLogger(AdminAbstractTestNGBase.class);
 
-    private static final String ADTesterUsername = "testuser1";
+    protected static final String ADTesterUsername = "testuser1";
     private static final String ADTesterPassword = "Lattice1";
     protected static BatonService batonService;
     protected static final FeatureFlagDefinition FLAG_DEFINITION = newFlagDefinition();
     protected static final String FLAG_ID = "TestFlag";
 
     @Inject
-    private TenantService tenantService;
+    protected TenantService tenantService;
 
     @Value("${admin.test.contract}")
     protected String TestContractId;

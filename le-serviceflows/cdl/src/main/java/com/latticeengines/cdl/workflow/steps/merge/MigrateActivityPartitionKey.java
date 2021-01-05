@@ -35,8 +35,8 @@ import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.MigrateActivityPartitionKeyJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -85,11 +85,11 @@ public class MigrateActivityPartitionKey extends RunSparkJob<ActivityStreamSpark
         activeDailyStores = dataCollectionProxy
                 .getTableNamesWithSignatures(customerSpace.toString(), AggregatedActivityStream, active,
                         streamsWithActiveTable.stream().map(AtlasStream::getStreamId).collect(Collectors.toList()));
-        ActivityStoreSparkIOMetadata inputMetadataWrapper = new ActivityStoreSparkIOMetadata();
-        Map<String, ActivityStoreSparkIOMetadata.Details> inputMetadata = new HashMap<>();
+        SparkIOMetadataWrapper inputMetadataWrapper = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> inputMetadata = new HashMap<>();
         List<DataUnit> inputs = new ArrayList<>();
         streamsWithActiveTable.forEach(stream -> {
-            ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+            SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
             details.setStartIdx(inputs.size());
             details.setLabels(Arrays.asList(legacyStreamDateIdPartitionKey, legacyStreamDateIdPartitionKey)); // both tables use the same partition key
             inputMetadata.put(stream.getStreamId(), details);
@@ -115,7 +115,7 @@ public class MigrateActivityPartitionKey extends RunSparkJob<ActivityStreamSpark
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        Map<String, ActivityStoreSparkIOMetadata.Details> outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
+        Map<String, SparkIOMetadataWrapper.Partition> outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class).getMetadata();
         Map<String, String> migratedRawStreamTables = new HashMap<>();
         Map<String, String> migratedDailyStoreTables = new HashMap<>();
         String version = HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID()));

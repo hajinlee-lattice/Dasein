@@ -6,7 +6,9 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -33,6 +35,7 @@ import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -58,7 +61,12 @@ public class ModelingFileUploadResourceDeploymentTestNG extends PlsDeploymentTes
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName();
+        String flagEntityMatch = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(featureFlag, true);
+        flags.put(flagEntityMatch, false);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%s", tenantId));
     }

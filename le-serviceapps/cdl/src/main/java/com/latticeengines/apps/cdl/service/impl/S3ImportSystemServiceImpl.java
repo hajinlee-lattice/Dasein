@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -177,6 +178,11 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             throw new LedpException(LedpCode.LEDP_40062, new String[] {String.valueOf(currentSystems.size()),
                     String.valueOf(systemList.size())});
         }
+        Set<Integer> allPriorities = systemList.stream().map(S3ImportSystem::getPriority).collect(Collectors.toSet());
+        if (CollectionUtils.size(allPriorities) != CollectionUtils.size(systemList)) {
+            throw new LedpException(LedpCode.LEDP_40064, new String[] {"There's duplicate priorities in system list!"});
+        }
+
         Map<String, S3ImportSystem> systemMap = systemList.stream()
                 .collect(Collectors.toMap(S3ImportSystem::getName, system -> system));
         for (S3ImportSystem importSystem : currentSystems) {

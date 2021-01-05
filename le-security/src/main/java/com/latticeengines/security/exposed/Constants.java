@@ -12,4 +12,5 @@ public final class Constants {
     public static final String TENANT_ID = "TenantId";
     public static final String LATTICE_SECRET_KEY_HEADERNAME = "Lattice-Secret-Key";
     public static final String SET_TEMP_PASS = "setTempPass";
+    public static final String USER_NAME = "username";
 }

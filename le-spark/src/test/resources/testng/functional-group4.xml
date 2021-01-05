@@ -1,0 +1,19 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="SparkFunctionalTestGroup4">
+    <groups>
+        <run>
+            <include name="functional"/>
+        </run>
+    </groups>
+    <test name="FunctionalTestGroup4">
+        <packages>
+            <package name="com.latticeengines.spark.*">
+                <exclude name="com.latticeengines.spark.exposed.job.cdl"/>
+                <exclude name="com.latticeengines.spark.exposed.job.cm"/>
+                <exclude name="com.latticeengines.spark.exposed.job.common"/>
+                <exclude name="com.latticeengines.spark.exposed.job.dcp"/>
+            </package>
+        </packages>
+    </test>
+</suite>

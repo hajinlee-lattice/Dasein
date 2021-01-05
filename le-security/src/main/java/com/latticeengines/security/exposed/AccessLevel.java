@@ -22,6 +22,35 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.EDIT_DCP_PROJECTS, //
             GrantedRight.EDIT_PLS_TEAMS //
     )), //
+    SALES(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_CAMPAIGNS, //
+            GrantedRight.EDIT_PLS_CAMPAIGNS, //
+            GrantedRight.VIEW_PLS_DATA, //
+            GrantedRight.EDIT_PLS_DATA, //
+            GrantedRight.VIEW_PLS_MODELS, //
+            GrantedRight.EDIT_PLS_MODELS, //
+            GrantedRight.VIEW_PLS_CONFIGURATIONS, //
+            GrantedRight.EDIT_PLS_CONFIGURATIONS, //
+            GrantedRight.VIEW_PLS_JOBS, //
+            GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS, //
+            GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS_SIMPLIFIED, //
+            GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
+            GrantedRight.VIEW_PLS_QUOTAS, //
+            GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL, //
+            GrantedRight.VIEW_PLS_CDL_DATA, //
+            GrantedRight.VIEW_PLS_PLAYS, //
+            GrantedRight.EDIT_PLS_PLAYS, //
+            GrantedRight.CREATE_PLS_PLAYS, //
+            GrantedRight.VIEW_PLS_RATING_ENGINES, //
+            GrantedRight.EDIT_PLS_RATING_ENGINES, //
+            GrantedRight.CREATE_PLS_RATING_ENGINES, //
+            GrantedRight.VIEW_PLS_REMODEL, //
+            GrantedRight.EDIT_PLS_REFINE_CLONE, //
+            GrantedRight.VIEW_S3_CREDENTIAL, //
+            GrantedRight.VIEW_ACCOUNT_360
+    )), //
     EXTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_CAMPAIGNS, //
             GrantedRight.EDIT_PLS_CAMPAIGNS, //
@@ -48,7 +77,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
-            GrantedRight.VIEW_S3_CREDENTIAL
+            GrantedRight.VIEW_S3_CREDENTIAL, //
+            GrantedRight.VIEW_ACCOUNT_360
     ) //
     ), //
     EXTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -90,7 +120,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SSO_CONFIG, //
             GrantedRight.VIEW_DCP_PROJECTS, //
             GrantedRight.EDIT_DCP_PROJECTS, //
-            GrantedRight.EDIT_PLS_TEAMS //
+            GrantedRight.EDIT_PLS_TEAMS, //
+            GrantedRight.VIEW_ACCOUNT_360
     ) //
     ), //
     INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -122,7 +153,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.EDIT_PLS_RATING_ENGINES, //
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
-            GrantedRight.VIEW_PLS_SPEC
+            GrantedRight.VIEW_PLS_SPEC, //
+            GrantedRight.VIEW_ACCOUNT_360
     ) //
     ), //
     INTERNAL_ANALYST(Arrays.asList(
@@ -177,7 +209,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SPEC, //
             GrantedRight.VIEW_DCP_PROJECTS, //
             GrantedRight.EDIT_DCP_PROJECTS, //
-            GrantedRight.EDIT_PLS_TEAMS //
+            GrantedRight.EDIT_PLS_TEAMS, //
+            GrantedRight.VIEW_ACCOUNT_360
     )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -224,7 +257,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SPEC, //
             GrantedRight.VIEW_DCP_PROJECTS, //
             GrantedRight.EDIT_DCP_PROJECTS, //
-            GrantedRight.EDIT_PLS_TEAMS
+            GrantedRight.EDIT_PLS_TEAMS, //
+            GrantedRight.VIEW_ACCOUNT_360
     )); //
 
     private List<GrantedRight> grantedRights;

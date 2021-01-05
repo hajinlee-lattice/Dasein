@@ -29,6 +29,7 @@ public class ExportDeltaArtifactsToS3 extends BaseImportExportS3<ExportDeltaArti
 
     @Override
     public void buildRequests(List<ImportExportRequest> requests) {
+
         addTableDirs(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class), requests);
         addTableDirs(getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class), requests);
         addTableDirs(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class), requests);

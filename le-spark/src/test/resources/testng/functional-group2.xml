@@ -9,9 +9,6 @@
     <test name="FunctionalTestGroup2">
         <packages>
             <package name="com.latticeengines.spark.exposed.job.cdl"/>
-            <package name="com.latticeengines.spark.exposed.job.cm"/>
-            <package name="com.latticeengines.spark.exposed.job.common"/>
-            <package name="com.latticeengines.spark.exposed.job.dcp"/>
         </packages>
         <classes>
             <class name="com.latticeengines.spark.exposed.job.cdl.PeriodStoresGeneratorTestNG">
@@ -39,27 +36,7 @@
                     <exclude name=".*"/>
                 </methods>
             </class>
-            <class name="com.latticeengines.spark.exposed.job.cdl.TransformTxnStreamJobTestNG">
-                <methods>
-                    <exclude name=".*"/>
-                </methods>
-            </class>
             <class name="com.latticeengines.spark.exposed.job.cdl.PublishActivityAlertsJobTestNG">
-                <methods>
-                    <exclude name=".*"/>
-                </methods>
-            </class>
-            <class name="com.latticeengines.spark.exposed.job.cdl.DeltaCampaignLaunchTestNG">
-                <methods>
-                    <exclude name=".*"/>
-                </methods>
-            </class>
-            <class name="com.latticeengines.spark.exposed.job.cdl.MetricsGroupGeneratorTestNG">
-                <methods>
-                    <exclude name=".*"/>
-                </methods>
-            </class>
-            <class name="com.latticeengines.spark.exposed.job.cdl.ValidateProductTestNG">
                 <methods>
                     <exclude name=".*"/>
                 </methods>

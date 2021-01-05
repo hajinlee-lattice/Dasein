@@ -293,6 +293,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "primaryaddr_addrlocality_name", //
                 "primaryaddr_addrregion_abbreviatedname", //
                 "primaryaddr_continentalregion_name", //
+//                "dnbassessment_marketingriskclass_desc", //
                 "primaryaddr_isregisteredaddr", //
                 "primaryaddr_language_desc", //
                 "primaryaddr_language_code", //
@@ -314,6 +315,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 "numberofemployees_employeefiguresdate", //
                 "registeredname", //
                 "primaryname", //
+//                "dnbassessment_marketingriskclass_code", //
                 "duns_number", //
                 "countryisoalpha2code" //
         ));
@@ -462,8 +464,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         System.out.println("rejectedPath=" + rejectedPath);
         Assert.assertTrue(s3Service.objectExist(bucket, acceptedPath));
         Assert.assertTrue(s3Service.objectExist(bucket, rejectedPath));
-        verifyCsvContent(bucket, acceptedPath);
-        verifyCsvContent(bucket, rejectedPath);
+        verifyCsvContent(bucket, acceptedPath, false);
+        verifyCsvContent(bucket, rejectedPath, true);
 
         if (containsProcessingErrors) {
             verifyProcessingErrors(bucket, acceptedPath, false);
@@ -472,12 +474,12 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                     upload.getUploadConfig().getUploadMatchResultErrored());
             System.out.println("processing_errors=" + processingErrorsPath);
             Assert.assertTrue(s3Service.objectExist(bucket, processingErrorsPath));
-            verifyCsvContent(bucket, processingErrorsPath);
+            verifyCsvContent(bucket, processingErrorsPath, true);
             verifyProcessingErrors(bucket, processingErrorsPath, true);
         }
     }
 
-    private void verifyCsvContent(String bucket, String path) {
+    private void verifyCsvContent(String bucket, String path, boolean containsProcessingErrors) {
         InputStream is = s3Service.readObjectAsStream(bucket, path);
         InputStreamReader reader = new InputStreamReader(is);
         try (CSVReader csvReader = new CSVReader(reader)) {
@@ -498,7 +500,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             while (nextRecord != null && (count++) < 100) {
                 if (count == 1) {
                     headers.addAll(Arrays.asList(nextRecord));
-                    verifyOutputHeaders(headers);
+                    verifyOutputHeaders(headers, containsProcessingErrors);
                     idIdx = headers.indexOf("Customer ID");
                     nameIdx = headers.indexOf("Company Name");
                     dunsIdx = headers.indexOf("Matched D-U-N-S Number");
@@ -507,11 +509,13 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                     mtIdx = headers.indexOf("Match Type");
                     mceIdx = headers.indexOf("Processing Error Type");
                     mcecIdx = headers.indexOf("Processing Error Code");
-                    mceiIdx = headers.indexOf("Processing Error Details");
                     Assert.assertTrue(idIdx < dunsIdx);
                     Assert.assertTrue(dunsIdx < ccIdx);
-                    Assert.assertTrue(mceIdx < mcecIdx);
-                    Assert.assertTrue(mcecIdx < mceiIdx);
+                    Assert.assertEquals(containsProcessingErrors, mceIdx != -1);
+                    if (containsProcessingErrors) {
+                        Assert.assertEquals(headers.get(mceIdx + 1), "Processing Error Code");
+                        Assert.assertEquals(headers.get(mceIdx + 2), "Processing Error Details");
+                    }
                 } else {
                     String customerId = nextRecord[idIdx];
                     String matchType = nextRecord[mtIdx];
@@ -582,12 +586,12 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
             while (nextRecord != null && (count++) < 100) {
                 if (count == 1) {
                     headers.addAll(Arrays.asList(nextRecord));
-                    verifyOutputHeaders(headers);
+                    verifyOutputHeaders(headers, shouldContainErrors);
                     mceIdx = headers.indexOf("Processing Error Type");
                     mcecIdx = headers.indexOf("Processing Error Code");
-                } else {
-                    Assert.assertEquals(StringUtils.isNotEmpty(nextRecord[mceIdx]), shouldContainErrors);
-                    Assert.assertEquals(StringUtils.isNotEmpty(nextRecord[mcecIdx]), shouldContainErrors);
+                } else if (shouldContainErrors) {
+                    Assert.assertTrue(StringUtils.isNotEmpty(nextRecord[mceIdx]));
+                    Assert.assertTrue(StringUtils.isNotEmpty(nextRecord[mcecIdx]));
                 }
 
                 nextRecord = csvReader.readNext();
@@ -597,7 +601,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         }
     }
 
-    private void verifyOutputHeaders(List<String> headers) {
+    private void verifyOutputHeaders(List<String> headers, boolean containsProcessingErrors) {
         System.out.println(headers);
 
         String[] expectedHeaders = {
@@ -620,16 +624,16 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
             // verify match/candidate column order
             int start = headers.indexOf("Matched D-U-N-S Number");
-            Assert.assertEquals(start, 15);
+            Assert.assertEquals(start, containsProcessingErrors ? 18 : 15);
             Assert.assertEquals(headers.subList(start, start + MATCH_COLUMNS.size()), MATCH_COLUMNS);
 
             // verify base info column order
             start = headers.indexOf("D-U-N-S Number");
-            Assert.assertEquals(start, 24);
+            Assert.assertEquals(start, containsProcessingErrors ? 27 : 24);
             Assert.assertEquals(headers.subList(start, start + BASE_COLUMNS.size()), BASE_COLUMNS);
         }
 
-        MatchCoreErrorConstants.CSV_HEADER_MAP.values().forEach(errorHeader -> Assert.assertTrue(headers.contains(errorHeader)));
+        MatchCoreErrorConstants.CSV_HEADER_MAP.values().forEach(errorHeader -> Assert.assertEquals(headers.contains(errorHeader), containsProcessingErrors));
     }
 
     private void verifyDownload(UploadDetails upload) {

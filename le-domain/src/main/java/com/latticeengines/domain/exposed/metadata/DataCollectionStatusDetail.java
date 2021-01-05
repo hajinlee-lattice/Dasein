@@ -108,14 +108,21 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("activityPartitionKeyMigrated")
     private boolean activityPartitionKeyMigrated = false;
 
-    @JsonProperty("timeline_rebuild_flag")
+    @JsonProperty("timelineRebuildFlag")
     private Boolean timelineRebuildFlag;
+
+    //key: BusinessEntity.name() -> value: elasticsearchVersion
+    @JsonProperty("entityWithESVersionMap")
+    private Map<String, String> entityWithESVersionMap;
 
     @JsonProperty("ActivityAlertVersion")
     private String activityAlertVersion;
 
     @JsonProperty("IntentAlertVersion")
     private String intentAlertVersion;
+
+    @JsonProperty("spendingAnalysisPublished")
+    private Boolean spendingAnalysisPublished;
 
     /*-
      * general key -> epoch timestamp map where some data/metric/stat is calculated
@@ -333,6 +340,14 @@ public class DataCollectionStatusDetail implements Serializable {
         this.timelineRebuildFlag = timelineRebuildFlag;
     }
 
+    public Map<String, String> getEntityWithESVersionMap() {
+        return entityWithESVersionMap;
+    }
+
+    public void setEntityWithESVersionMap(Map<String, String> entityWithESVersionMap) {
+        this.entityWithESVersionMap = entityWithESVersionMap;
+    }
+
     public String getActivityAlertVersion() {
         return activityAlertVersion;
     }
@@ -363,5 +378,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setEvaluationDateMap(Map<String, Long> evaluationDateMap) {
         this.evaluationDateMap = evaluationDateMap;
+    }
+
+    public Boolean getSpendingAnalysisPublished() {
+        return spendingAnalysisPublished;
+    }
+
+    public void setSpendingAnalysisPublished(Boolean spendingAnalysisPublished) {
+        this.spendingAnalysisPublished = spendingAnalysisPublished;
     }
 }

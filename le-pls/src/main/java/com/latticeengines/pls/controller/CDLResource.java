@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.latticeengines.app.exposed.download.TemplateFileHttpDownloader;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -70,7 +71,6 @@ import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
-import com.latticeengines.pls.download.TemplateFileHttpDownloader;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SystemStatusService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
@@ -431,7 +431,20 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         try {
-            cdlService.createS3ImportSystem(customerSpace.toString(), systemDisplayName, systemType, primary);
+            String systemName = cdlService.createS3ImportSystem(customerSpace.toString(), systemDisplayName, systemType,
+                    primary);
+            switch (systemType) {
+                case Salesforce:
+                    cdlService.createDefaultOpportunityTemplate(customerSpace.toString(), systemName);
+                    break;
+                case Marketo:
+                case Eloqua:
+                case Pardot:
+                    cdlService.createDefaultMarketingTemplate(customerSpace.toString(), systemName, systemType.toString());
+                    break;
+                default:
+                    break;
+            }
             UIAction uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                     String.format(createS3ImportSystemMsg, systemDisplayName));
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);

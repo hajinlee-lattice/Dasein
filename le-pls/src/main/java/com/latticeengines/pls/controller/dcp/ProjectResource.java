@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,7 +65,10 @@ public class ProjectResource {
         try {
             return projectService.createProject(customerSpace.toString(), projectRequest, MultiTenantContext.getEmailAddress());
         } catch (LedpException e) {
-            log.error("Failed to create project: " + e.getMessage());
+            log.error(String.format(
+                    "Failed to create project %s for user %s: %s",
+                    projectRequest.getDisplayName(), MultiTenantContext.getEmailAddress(), e.getMessage()));
+            log.error(ExceptionUtils.getStackTrace(e));
             UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());
@@ -88,6 +92,7 @@ public class ProjectResource {
             return projectService.getAllProjects(customerSpace.toString(), includeSources, includeArchived, pageIndex, pageSize);
         } catch (LedpException e) {
             log.error("Failed to get all projects: " + e.getMessage());
+            log.error(ExceptionUtils.getStackTrace(e));
             UIAction action = UIActionUtils.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());

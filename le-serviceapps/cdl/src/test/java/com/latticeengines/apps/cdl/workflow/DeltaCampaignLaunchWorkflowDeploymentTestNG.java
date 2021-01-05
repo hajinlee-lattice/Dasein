@@ -95,8 +95,9 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
 
     private DropBoxSummary dropboxSummary;
 
-    private static final List<String> LIVERAMP_COL_NAME = Arrays
-            .asList(LiveRampCampaignLaunchInitStep.RECORD_ID_DISPLAY_NAME);
+    private static final List<String> LIVERAMP_COL_NAME = Arrays.asList(LiveRampCampaignLaunchInitStep.RECORD_ID_DISPLAY_NAME);
+    private String addLiveRampContacts = "AddLiveRampContacts";
+    private String removeLiveRampContacts = "RemoveLiveRampContacts";
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
@@ -104,8 +105,9 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         Mockito.doReturn(false).when(deltaCampaignWorkflowSubmitter).enableExternalLaunch(any(), any());
         testPlayCreationHelper.setupTenantAndData();
         moveAvroFilesToHDFS();
-        String addContactsTable = setupLiveRampTable("/tmp/addLiveRampResult", "AddLiveRampContacts");
-        String removeContactsTable = setupLiveRampTable("/tmp/removeLiveRampResult", "RemoveLiveRampContacts");
+        uploadAvrosToS3();
+        String addContactsTable = setupLiveRampTable("/tmp/addLiveRampResult", addLiveRampContacts);
+        String removeContactsTable = setupLiveRampTable("/tmp/removeLiveRampResult", removeLiveRampContacts);
         testPerformancePlayChannelConfig = new TestPlayChannelConfig.Builder()
                 .destinationSystemType(CDLExternalSystemType.FILE_SYSTEM).destinationSystemName(
                         CDLExternalSystemName.AWS_S3).destinationSystemId("AWS_S3_" + System.currentTimeMillis())
@@ -134,6 +136,11 @@ public class DeltaCampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFram
         defaultPlayLaunch = testPlayCreationHelper.getPlayLaunch();
         defaultPlayLaunch.setPlay(defaultPlay);
         testPlayCreationHelper.removeExistingTenant(testBed.getMainTestTenant().getId());
+    }
+
+    private void uploadAvrosToS3() {
+        testPlayCreationHelper.uploadAvroToS3("campaign/liveramp/addLiverampBlock.avro", addLiveRampContacts);
+        testPlayCreationHelper.uploadAvroToS3("campaign/liveramp/removeLiverampBlock.avro", removeLiveRampContacts);
     }
 
     @Override

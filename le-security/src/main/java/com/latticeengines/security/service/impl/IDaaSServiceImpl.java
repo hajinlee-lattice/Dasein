@@ -4,8 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -26,20 +24,14 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -51,7 +43,6 @@ import com.latticeengines.domain.exposed.dcp.idaas.InvitationLinkResponse;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
-import com.latticeengines.domain.exposed.dcp.vbo.VboCallback;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -61,26 +52,19 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.security.service.AuthorizationServiceBase;
 import com.latticeengines.security.service.IDaaSService;
 import com.latticeengines.security.util.LoginUtils;
 
 @Service("iDaasService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class IDaaSServiceImpl implements IDaaSService {
+public class IDaaSServiceImpl extends AuthorizationServiceBase implements IDaaSService {
 
     private static final Logger log = LoggerFactory.getLogger(IDaaSServiceImpl.class);
 
     public static final String DCP_PRODUCT = "DnB Connect";
     public static final String DCP_ROLE = "DNB_CONNECT_ACCESS";
     private static final int MAX_RETRIES = 3;
-
-    private final RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-    private final LoadingCache<String, String> tokenCache = Caffeine.newBuilder() //
-            .maximumSize(10) //
-            .expireAfterWrite(30, TimeUnit.MINUTES) //
-            .build(this::refreshOAuthTokens);
-
-    private volatile String tokenInUse;
 
     @Inject
     private IDaaSServiceImpl _self;
@@ -100,11 +84,10 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Value("${remote.idaas.api.url}")
     private String apiUrl;
 
-    @Value("${remote.idaas.client.id}")
-    private String clientId;
-
-    @Value("${remote.idaas.client.secret.encrypted}")
-    private String clientSecret;
+    @Override
+    protected String refreshOAuthTokens(String cacheKey) {
+        return _self.getTokenFromIDaaS(clientId);
+    }
 
     @Override
     public LoginDocument login(Credentials credentials) {
@@ -410,23 +393,6 @@ public class IDaaSServiceImpl implements IDaaSService {
         return response;
     }
 
-    @Override
-    public void callbackWithAuth(String url, VboCallback responseBody) {
-        refreshToken();
-        log.info("Sending callback to " + url);
-        log.info(responseBody.toString());
-        String traceId = responseBody.customerCreation.transactionDetail.ackRefId;
-
-        try {
-            ResponseEntity<String> response = restTemplate.postForEntity(URI.create(url), responseBody, String.class);
-            log.info("Callback {} finished with response code {}", traceId, response.getStatusCodeValue());
-            log.info("Callback {} response body: {}", traceId, response.getBody());
-        } catch (Exception e) {
-            log.error(traceId + " Exception in callback:" + e.toString());
-            throw e;
-        }
-    }
-
     @Cacheable(cacheNames = CacheName.Constants.IDaaSSubscriberDetailsCacheName, //
             key ="T(java.lang.String).format(\"%s|idaas-subscriberDetails\", #subscriberNumber)", //
             unless="#result == null")
@@ -475,56 +441,6 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     private boolean hasAccessToApp(IDaaSUser user) {
         return user.getApplications().contains(DCP_PRODUCT) || user.getRoles().contains(DCP_ROLE);
-    }
-
-    private String refreshOAuthTokens(String cacheKey) {
-        return _self.getTokenFromIDaaS(clientId);
-    }
-
-    @Cacheable(cacheNames = CacheName.Constants.IDaaSTokenCacheName, key = "T(java.lang.String).format(\"%s|idaas-token\", #clientId)", unless = "#result == null")
-    public String getTokenFromIDaaS(String clientId) {
-        Map<String, String> payload = ImmutableMap.of("grant_type", "client_credentials");
-        RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-        String headerValue = String.format("client_id:%s,client_secret:%s", clientId, clientSecret);
-        ClientHttpRequestInterceptor interceptor = new AuthorizationHeaderHttpRequestInterceptor(headerValue);
-        restTemplate.setInterceptors(Collections.singletonList(interceptor));
-        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(MAX_RETRIES);
-        JsonNode jsonNode = retryTemplate.execute(ctx -> {
-            try (PerformanceTimer timer = new PerformanceTimer("Get OAuth2 token from IDaaS.")) {
-                ResponseEntity<JsonNode> response = restTemplate.postForEntity(oauthTokenUri(), payload,
-                        JsonNode.class);
-                JsonNode body = response.getBody();
-                if (body != null) {
-                    return body;
-                } else {
-                    throw new RuntimeException("Get empty response from oauth request.");
-                }
-            }
-        });
-        return jsonNode.get("access_token").asText();
-    }
-
-    private void refreshToken() {
-        String token = tokenCache.get("token");
-        Preconditions.checkNotNull(token, "oauth token cannot be null");
-        if (!token.equals(tokenInUse)) {
-            synchronized (this) {
-                if (!token.equals(tokenInUse)) {
-                    tokenInUse = token;
-                    String headerValue = "Bearer " + tokenInUse;
-                    ClientHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(
-                            headerValue);
-                    List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
-                    interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
-                    interceptors.add(authHeader);
-                    restTemplate.setInterceptors(interceptors);
-                }
-            }
-        }
-    }
-
-    private URI oauthTokenUri() {
-        return URI.create(apiUrl + "/oauth2/v3/token");
     }
 
     private URI authenticateUri() {

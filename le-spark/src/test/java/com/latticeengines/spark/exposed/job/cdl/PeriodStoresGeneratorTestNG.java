@@ -26,9 +26,9 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper;
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 import com.latticeengines.spark.util.DeriveAttrsUtils;
 
@@ -107,7 +107,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.inputMetadata = createInputMetadata();
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
         Assert.assertNotNull(result.getOutput());
-        ActivityStoreSparkIOMetadata metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper metadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertNotNull(metadata);
         Assert.assertNotNull(metadata.getMetadata().get(STREAM_ID));
         Assert.assertEquals(metadata.getMetadata().get(STREAM_ID).getLabels(), PERIODS);
@@ -122,7 +122,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.streams = Collections.singletonList(setupStreamWithReducer());
         config.inputMetadata = createInputMetadata();
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
-        ActivityStoreSparkIOMetadata metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        SparkIOMetadataWrapper metadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
         Assert.assertNotNull(metadata);
         verify(result, Collections.singletonList(this::verifyReduced));
     }
@@ -134,9 +134,9 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.evaluationDate = EVAL_DATE;
         config.streams = Collections.singletonList(INCREMENTAL_STREAM);
         config.incrementalStreams.add(STREAM_ID);
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
-        Details details = new Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> detailsMap = new HashMap<>();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(SINGLE_PERIOD);
         detailsMap.put(STREAM_ID, details);
@@ -154,9 +154,9 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.streams = Collections.singletonList(INCREMENTAL_STREAM);
         config.incrementalStreams.add(STREAM_ID);
         config.streamsWithNoBatch.add(STREAM_ID);
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
-        Details details = new Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> detailsMap = new HashMap<>();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(Collections.emptyList());
         detailsMap.put(STREAM_ID, details);
@@ -173,9 +173,9 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.evaluationDate = EVAL_DATE;
         config.streams = Collections.singletonList(setupStreamWithReducer());
         config.incrementalStreams.add(STREAM_ID);
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
-        Details details = new Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> detailsMap = new HashMap<>();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(SINGLE_PERIOD);
         detailsMap.put(STREAM_ID, details);
@@ -190,9 +190,9 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
         config.evaluationDate = EVAL_DATE;
         config.streams = Collections.singletonList(setupIntentActivityStream());
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
-        Details details = new Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> detailsMap = new HashMap<>();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(SINGLE_PERIOD);
         detailsMap.put(STREAM_ID, details);
@@ -208,9 +208,9 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.evaluationDate = EVAL_DATE;
         config.streams = Collections.singletonList(setupIntentActivityStream());
         config.incrementalStreams.add(STREAM_ID);
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
-        Details details = new Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> detailsMap = new HashMap<>();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(SINGLE_PERIOD);
         detailsMap.put(STREAM_ID, details);
@@ -225,9 +225,9 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
         config.evaluationDate = EVAL_DATE;
         config.streams = Collections.singletonList(setupBuyingScoreStream());
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
-        Details details = new Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> detailsMap = new HashMap<>();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(SINGLE_PERIOD);
         detailsMap.put(STREAM_ID, details);
@@ -243,9 +243,9 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.evaluationDate = EVAL_DATE;
         config.streams = Collections.singletonList(setupBuyingScoreStream());
         config.incrementalStreams.add(STREAM_ID);
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> detailsMap = new HashMap<>();
-        Details details = new Details();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> detailsMap = new HashMap<>();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(SINGLE_PERIOD);
         detailsMap.put(STREAM_ID, details);
@@ -260,9 +260,9 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
         config.evaluationDate = EVAL_DATE;
         config.streams = Collections.singletonList(setupTransactionStream());
-        ActivityStoreSparkIOMetadata inputMetadataWrapper = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> inputMetadata = new HashMap<>();
-        Details details = new Details();
+        SparkIOMetadataWrapper inputMetadataWrapper = new SparkIOMetadataWrapper();
+        Map<String, Partition> inputMetadata = new HashMap<>();
+        Partition details = new Partition();
         details.setStartIdx(0);
         details.setLabels(PERIODS);
         inputMetadata.put(STREAM_ID, details);
@@ -425,10 +425,10 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         return uploadHdfsDataUnit(data, fields);
     }
 
-    private ActivityStoreSparkIOMetadata createInputMetadata() {
-        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        Map<String, Details> metadata = new HashMap<>();
-        Details details = new Details();
+    private SparkIOMetadataWrapper createInputMetadata() {
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, Partition> metadata = new HashMap<>();
+        Partition details = new Partition();
         details.setStartIdx(0);
         metadata.put(STREAM_ID, details);
         inputMetadata.setMetadata(metadata);

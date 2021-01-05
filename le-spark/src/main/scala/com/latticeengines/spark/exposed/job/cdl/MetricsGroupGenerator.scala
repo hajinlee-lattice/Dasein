@@ -12,8 +12,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{FALSE, NULL, ZERO}
 import com.latticeengines.domain.exposed.query.{BusinessEntity, TimeFilter}
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar
-import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
-import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DeriveActivityMetricGroupJobConfig}
+import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition
+import com.latticeengines.domain.exposed.spark.cdl.{DeriveActivityMetricGroupJobConfig, SparkIOMetadataWrapper}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeriveAttrsUtils
@@ -30,13 +30,13 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   private val TMPLKEY_GROUPID = "GroupId"
   private val TMPLKEY_ROLLUP_DIM_IDs = "RollupDimIds"
   private val TMPLKEY_TIMERANGE = "TimeRange"
-  private val ACCOUNT_BATCH_STORE = BusinessEntity.Account.name
-  private val CONTACT_BATCH_STORE = BusinessEntity.Contact.name
+  private val ACCOUNT_STORE_KEY = BusinessEntity.Account.name
+  private val CONTACT_STORE_KEY = BusinessEntity.Contact.name
 
-  private var hasAccountBatchStore: Boolean = false
-  private var hasContactBatchStore: Boolean = false
-  private var accountBatchStoreTable: DataFrame = _
-  private var contactBatchStoreTable: DataFrame = _
+  private var hasAccountStore: Boolean = false
+  private var hasContactStore: Boolean = false
+  private var accountStoreTable: DataFrame = _
+  private var contactStoreTable: DataFrame = _
   private var currentVersion: Long = _
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[DeriveActivityMetricGroupJobConfig]): Unit = {
@@ -47,29 +47,29 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val input: Seq[DataFrame] = lattice.input
     val groups: Seq[ActivityMetricsGroup] = config.activityMetricsGroups.toSeq
     val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(groups, calendar), evaluationDate)
-    val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
+    val inputMetadata: SparkIOMetadataWrapper = config.inputMetadata
     val streamMetadata = config.streamMetadataMap
     currentVersion = config.currentVersionStamp
-    hasAccountBatchStore = inputMetadata.getMetadata.contains(ACCOUNT_BATCH_STORE)
-    hasContactBatchStore = inputMetadata.getMetadata.contains(CONTACT_BATCH_STORE)
+    hasAccountStore = inputMetadata.getMetadata.contains(ACCOUNT_STORE_KEY)
+    hasContactStore = inputMetadata.getMetadata.contains(CONTACT_STORE_KEY)
 
     var aggregatedPeriodStores: Seq[DataFrame] = input.map(df => DeriveAttrsUtils.dropPartitionColumns(df))
 
     // exclude account and contact batch store
-    if (hasAccountBatchStore && hasContactBatchStore) {
+    if (hasAccountStore && hasContactStore) {
       aggregatedPeriodStores = aggregatedPeriodStores.dropRight(2)
-    } else if (hasAccountBatchStore || hasContactBatchStore) {
+    } else if (hasAccountStore || hasContactStore) {
       aggregatedPeriodStores = aggregatedPeriodStores.dropRight(1)
     }
-    if (hasAccountBatchStore) {
-      accountBatchStoreTable = input.get(inputMetadata.getMetadata.get(ACCOUNT_BATCH_STORE).getStartIdx)
+    if (hasAccountStore) {
+      accountStoreTable = input.get(inputMetadata.getMetadata.get(ACCOUNT_STORE_KEY).getStartIdx)
     }
-    if (hasContactBatchStore) {
-      contactBatchStoreTable = input.get(inputMetadata.getMetadata.get(CONTACT_BATCH_STORE).getStartIdx)
+    if (hasContactStore) {
+      contactStoreTable = input.get(inputMetadata.getMetadata.get(CONTACT_STORE_KEY).getStartIdx)
     }
 
-    val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
-    val detailsMap = new util.HashMap[String, Details]() // groupId -> details
+    val outputMetadata: SparkIOMetadataWrapper = new SparkIOMetadataWrapper()
+    val detailsMap = new util.HashMap[String, Partition]() // groupId -> details
     var metrics: Seq[DataFrame] = Seq()
     for (group: ActivityMetricsGroup <- groups) {
       val dimensionMetadataMap = streamMetadata.get(group.getStream.getStreamId)
@@ -92,7 +92,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
                                evaluationDate: String,
                                aggregatedPeriodStores: Seq[DataFrame],
                                translator: TimeFilterTranslator,
-                               periodStoresMetadata: ActivityStoreSparkIOMetadata.Details,
+                               periodStoresMetadata: Partition,
                                dimensionMetadataMap: util.Map[String, DimensionMetadata]): DataFrame = {
     // construct period map: period -> idx
     var offsetMap: Map[String, Int] = Map()
@@ -232,8 +232,8 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     )
   }
 
-  def setDetails(index: Int): Details = {
-    val details = new Details()
+  def setDetails(index: Int): Partition = {
+    val details = new Partition()
     details.setStartIdx(index)
     details
   }
@@ -242,8 +242,8 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     // remove entities not in batch store, append entities missing from batch store
     val entityIdCol: String = DeriveAttrsUtils.getEntityIdColumnNameFromEntity(entity)
     val batchStore = entity match {
-      case BusinessEntity.Account => accountBatchStoreTable
-      case BusinessEntity.Contact => contactBatchStoreTable
+      case BusinessEntity.Account => accountStoreTable
+      case BusinessEntity.Contact => contactStoreTable
       case _ => throw new UnsupportedOperationException(s"entity $entity is not supported for activity store")
     }
     df.join(cleanBatchStore(batchStore, entity), Seq(entityIdCol), "right")
@@ -264,8 +264,8 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
 
   def missingBatchStore(entity: BusinessEntity): Boolean = {
     entity match {
-      case BusinessEntity.Account => !hasAccountBatchStore
-      case BusinessEntity.Contact => !hasContactBatchStore
+      case BusinessEntity.Account => !hasAccountStore
+      case BusinessEntity.Contact => !hasContactStore
       case _ => throw new UnsupportedOperationException(s"$entity should not have batch store check")
     }
   }
@@ -273,6 +273,6 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   def preprocessContactStream(df: DataFrame): DataFrame = {
     val accountIdCol = InterfaceName.AccountId.name
     val contactIdCol = InterfaceName.ContactId.name
-    df.drop(accountIdCol).join(contactBatchStoreTable.select(accountIdCol, contactIdCol), Seq(contactIdCol), "inner")
+    df.drop(accountIdCol).join(contactStoreTable.select(accountIdCol, contactIdCol), Seq(contactIdCol), "inner")
   }
 }

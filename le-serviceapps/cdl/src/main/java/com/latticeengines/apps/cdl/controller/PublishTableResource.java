@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.workflow.PublishTableRoleToESWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.PublishTableRoleWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.PublishVIDataWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cdl.PublishTableRoleRequest;
 import com.latticeengines.domain.exposed.cdl.PublishVIDataRequest;
+import com.latticeengines.domain.exposed.elasticsearch.PublishESRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +30,8 @@ public class PublishTableResource {
     private PublishTableRoleWorkflowSubmitter workflowSubmitter;
     @Inject
     private PublishVIDataWorkflowSubmitter publishVIDataWorkflowSubmitter;
+    @Inject
+    private PublishTableRoleToESWorkflowSubmitter esWorkflowSubmitter;
 
     @PostMapping("/dynamo")
     @ApiOperation(value = "publish dynamo table")
@@ -37,6 +41,19 @@ public class PublishTableResource {
             ApplicationId appId = workflowSubmitter.submitPublishDynamo(customerSpace, //
                     request.getTableRoles(), request.getVersion(),
                     new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping("/es")
+    @ApiOperation(value = "publish elasticsearch table")
+    public ResponseDocument<String> publishES(@PathVariable String customerSpace, //
+                                                  @RequestBody PublishESRequest request) {
+        try {
+            ApplicationId appId = esWorkflowSubmitter.submitPublishES(customerSpace, //
+                    request, new WorkflowPidWrapper(-1L));
             return ResponseDocument.successResponse(appId.toString());
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);

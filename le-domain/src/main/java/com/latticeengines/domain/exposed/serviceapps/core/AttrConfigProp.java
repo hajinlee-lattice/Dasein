@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceapps.core;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -67,4 +68,10 @@ public class AttrConfigProp<T extends Serializable> implements Serializable {
                 && (customValue == obj.getCustomValue()
                         || (customValue != null && (customValue.equals(obj.getCustomValue()))));
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(allowCustomization, systemValue, customValue);
+    }
+
 }

@@ -1,5 +1,8 @@
 package com.latticeengines.security.controller;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +32,8 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
+import com.latticeengines.domain.exposed.dcp.vbo.VboUserSeatUsageEvent;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -39,11 +44,14 @@ import com.latticeengines.domain.exposed.exception.UIActionUtils;
 import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
+import com.latticeengines.domain.exposed.pls.UserUpdateResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.monitor.tracing.TracingTags;
+import com.latticeengines.monitor.util.TracingUtils;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -51,7 +59,13 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.VboService;
 
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -82,6 +96,12 @@ public class UserResource {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private IDaaSService iDaaSService;
+
+    @Inject
+    private VboService vboService;
 
     @GetMapping("")
     @ResponseBody
@@ -148,45 +168,73 @@ public class UserResource {
             return response;
         }
 
-        RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
-        String tempPass = result.getPassword();
-        if (!Boolean.TRUE.equals(setTempPass)) {
-            result.setPassword(null);
-        }
-        response.setResult(result);
-        if (!result.isValid()) {
-            if (!result.isValidEmail()) {
-                httpResponse.setStatus(400);
-                response.setErrors(Collections.singletonList(result.getErrMsg()));
+        Tracer tracer = GlobalTracer.get();
+        Span userSpan = null;
+        try (Scope scope = startUserSpan(loginUsername, System.currentTimeMillis())) {
+            userSpan = tracer.activeSpan();
+            String traceId = userSpan.context().toTraceId();
+
+            VboUserSeatUsageEvent usageEvent = null;
+
+            if (!EmailUtils.isInternalUser(user.getEmail())) {
+                usageEvent = new VboUserSeatUsageEvent();
+                usageEvent.setEmailAddress(loginUser.getEmail());
+                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                usageEvent.setPOAEID(traceId);
+                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                usageEvent.setLUID(loginUser.getPid());
             }
-            return response;
-        }
-        LOGGER.info(String.format("%s registered %s as a new user in tenant %s", loginUsername, user.getUsername(),
-                tenant.getId()));
-        if (!batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-            if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,
-                        !tenantService.getTenantEmailFlag(tenant.getId()));
-                tenantService.updateTenantEmailFlag(tenant.getId(), true);
-            } else {
-                emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
+          
+            RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
+            if (usageEvent != null)
+                usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+            String tempPass = result.getPassword();
+            if (!Boolean.TRUE.equals(setTempPass)) {
+                result.setPassword(null);
             }
-        } else {
-            IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
-            if (idaasUser == null) {
-                LOGGER.error(
-                        String.format("Failed to create IDaaS user for %s at level %s.", loginUsername, loginLevel));
-                String title = "Failed to create IDaaS User.";
-                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
-                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
-                throw UIActionException.fromAction(action);
-            } else {
-                String welcomeUrl = dcpPublicUrl;
-                if (idaasUser.getInvitationLink() != null) {
-                    welcomeUrl = idaasUser.getInvitationLink();
+            response.setResult(result);
+            if (!result.isValid()) {
+                if (!result.isValidEmail()) {
+                    httpResponse.setStatus(400);
+                    response.setErrors(Collections.singletonList(result.getErrMsg()));
                 }
-                emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
+                return response;
             }
+            LOGGER.info(String.format("%s registered %s as a new user in tenant %s", loginUsername, user.getUsername(),
+                    tenant.getId()));
+            if (!batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+                if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
+                    emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,
+                            !tenantService.getTenantEmailFlag(tenant.getId()));
+                    tenantService.updateTenantEmailFlag(tenant.getId(), true);
+                } else {
+                    emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
+                }
+            } else {
+                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
+                if (idaasUser == null) {
+                    LOGGER.error(
+                            String.format("Failed to create IDaaS user for %s at level %s.", loginUsername, loginLevel));
+                    String title = "Failed to create IDaaS User.";
+                    userSpan.log(title);
+                    UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
+                    UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                    throw UIActionException.fromAction(action);
+                } else {
+                    String welcomeUrl = dcpPublicUrl;
+                    if (idaasUser.getInvitationLink() != null) {
+                        welcomeUrl = idaasUser.getInvitationLink();
+                    }
+                    emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
+                }
+
+                if (usageEvent != null) {
+                    populateWithSubscriberDetails(usageEvent);
+                    vboService.sendUserUsageEvent(usageEvent);
+                }
+            }
+        } finally {
+            TracingUtils.finish(userSpan);
         }
         response.setSuccess(true);
         return response;
@@ -230,8 +278,9 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Update users")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public SimpleBooleanResponse update(@PathVariable String username, @RequestBody UserUpdateData data,
-            HttpServletRequest request, HttpServletResponse response) {
+    public ResponseDocument<UserUpdateResponse> update(@PathVariable String username, @RequestBody UserUpdateData data,
+                                                       HttpServletRequest request, HttpServletResponse response) {
+        ResponseDocument<UserUpdateResponse> document = new ResponseDocument();
         username = userService.getURLSafeUsername(username).toLowerCase();
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
@@ -240,62 +289,97 @@ public class UserResource {
         User user = userService.findByUsername(username);
         boolean newUser = !userService.inTenant(tenantId, username);
         // update access level
-        if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
-            // using access level if it is provided
-            String loginUsername = loginUser.getUsername();
-            AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
-            AccessLevel targetLevel = AccessLevel.valueOf(data.getAccessLevel());
-            if (!userService.isSuperior(loginLevel, targetLevel)) {
-                response.setStatus(403);
-                return SimpleBooleanResponse.failedResponse(
-                        Collections.singletonList("Cannot update to a level higher than that of the login user."));
+
+        Tracer tracer = GlobalTracer.get();
+        Span userSpan = null;
+        try (Scope scope = startUserSpan(username, System.currentTimeMillis())) {
+            userSpan = tracer.activeSpan();
+            String traceId = userSpan.context().toTraceId();
+
+            UserUpdateResponse updateResponse = new UserUpdateResponse();
+            updateResponse.setTraceId(traceId);
+            document.setResult(updateResponse);
+
+            VboUserSeatUsageEvent usageEvent = null;
+            if (newUser && !EmailUtils.isInternalUser(user.getEmail())) {
+                usageEvent = new VboUserSeatUsageEvent();
+                usageEvent.setEmailAddress(loginUser.getEmail());
+                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                usageEvent.setPOAEID(traceId);
+                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                usageEvent.setLUID(loginUser.getPid());
             }
 
-            if ((AccessLevel.SUPER_ADMIN.equals(targetLevel) || AccessLevel.INTERNAL_ADMIN.equals(targetLevel))
-                    && !EmailUtils.isInternalUser(user.getEmail())) {
-                response.setStatus(500);
-                return SimpleBooleanResponse.failedResponse(Collections.singletonList(
-                        "Cannot assign internal admin access level to users with external email addresses."));
-            }
+            if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
+                // using access level if it is provided
+                String loginUsername = loginUser.getUsername();
+                AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
+                AccessLevel targetLevel = AccessLevel.valueOf(data.getAccessLevel());
+                if (!userService.isSuperior(loginLevel, targetLevel)) {
+                    response.setStatus(403);
+                    document.setErrors(Collections.singletonList("Cannot update to a level higher than that of the login user."));
+                    return document;
+                }
 
-            userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
-                    false, !newUser, data.getUserTeams());
-            LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
-                    targetLevel.name(), username, tenantId));
-            if (newUser && user != null
-                    && !batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-                if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                    emailService.sendExistingUserEmail(tenant, user, apiPublicUrl,
-                            !tenantService.getTenantEmailFlag(tenant.getId()));
-                    tenantService.updateTenantEmailFlag(tenant.getId(), true);
+                if ((AccessLevel.SUPER_ADMIN.equals(targetLevel) || AccessLevel.INTERNAL_ADMIN.equals(targetLevel))
+                        && !EmailUtils.isInternalUser(user.getEmail())) {
+                    response.setStatus(500);
+                    document.setErrors(Collections.singletonList(
+                            "Cannot assign internal admin access level to users with external email addresses."));
+                    return document;
+                }
+
+                userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
+                        false, !newUser, data.getUserTeams());
+                LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
+                        targetLevel.name(), username, tenantId));
+                if (newUser && user != null
+                        && !batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+                    userSpan.log("Sending email");
+                    if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
+                        emailService.sendExistingUserEmail(tenant, user, apiPublicUrl,
+                                !tenantService.getTenantEmailFlag(tenant.getId()));
+                        tenantService.updateTenantEmailFlag(tenant.getId(), true);
+                    } else {
+                        emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
+                    }
+                  
+                    if (usageEvent != null)
+                        usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+                }
+            }
+            // update other information
+            if (!userService.inTenant(tenantId, username)) {
+                document.setErrors(Collections.singletonList("Cannot update users in another tenant."));
+                return document;
+            }
+            if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+                IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
+                if (idaasUser == null) {
+                    LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
+                            loginUser.getUsername(), loginUser.getAccessLevel(), tenantId));
+                    String title = "Failed to create IDaaS User.";
+                    UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
+                    UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
+                    throw UIActionException.fromAction(action);
                 } else {
-                    emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
+                    String welcomeUrl = dcpPublicUrl;
+                    if (idaasUser.getInvitationLink() != null) {
+                        welcomeUrl = idaasUser.getInvitationLink();
+                    }
+                    emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
+                }
+
+                if (usageEvent != null) {
+                    populateWithSubscriberDetails(usageEvent);
+                    vboService.sendUserUsageEvent(usageEvent);
                 }
             }
+        } finally {
+            TracingUtils.finish(userSpan);
         }
-        // update other information
-        if (!userService.inTenant(tenantId, username)) {
-            return SimpleBooleanResponse
-                    .failedResponse(Collections.singletonList("Cannot update users in another tenant."));
-        }
-        if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-            IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
-            if (idaasUser == null) {
-                LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
-                        loginUser.getUsername(), loginUser.getAccessLevel(), tenantId));
-                String title = "Failed to create IDaaS User.";
-                UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
-                UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
-                throw UIActionException.fromAction(action);
-            } else {
-                String welcomeUrl = dcpPublicUrl;
-                if (idaasUser.getInvitationLink() != null) {
-                    welcomeUrl = idaasUser.getInvitationLink();
-                }
-                emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
-            }
-        }
-        return SimpleBooleanResponse.successResponse();
+        document.setSuccess(true);
+        return document;
     }
 
     @DeleteMapping("/{username:.+}")
@@ -338,6 +422,27 @@ public class UserResource {
     private void checkUser(User user) {
         if (user == null) {
             throw new LedpException(LedpCode.LEDP_18221);
+        }
+    }
+
+    private Scope startUserSpan(String username, long startTimeStamp) {
+        Tracer tracer = GlobalTracer.get();
+        Span span = tracer.buildSpan("Handling User " + username)
+                .withTag(TracingTags.User.USERNAME, username)
+                .withStartTimestamp(startTimeStamp)
+                .start();
+        return tracer.activateSpan(span);
+    }
+
+    private void populateWithSubscriberDetails(VboUserSeatUsageEvent usageEvent) {
+        SubscriberDetails details = iDaaSService.getSubscriberDetails(usageEvent.getSubscriberID());
+        if (details != null) {
+            if (details.getAddress() != null) {
+                usageEvent.setSubscriberCountry(details.getAddress().getCountryCode());
+                usageEvent.setSubjectCountry(details.getAddress().getCountryCode());
+            }
+            usageEvent.setContractTermStartDate(details.getEffectiveDate());
+            usageEvent.setContractTermEndDate(details.getExpirationDate());
         }
     }
 }

@@ -61,7 +61,15 @@ public final class WorkflowJobUtils {
     private static final int DEFAULT_WORKFLOW_JOB_QUOTA_LIMIT = 1000;
     private static final String WORKFLOW_JOB_QUOTA_LIMIT = "WorkflowJobQuotaLimit";
     private static final String PUBLISH_RECOMMENDATION_FOR_S3_LAUNCH = "PublishRecommendationsForS3Launch";
+    private static final String CONTACT_ACCOUNT_RATIO_THRESHOLD = "ContactAccountRatioThreshold";
+    private static final Long DEFAULT_CONTACT_ACCOUNT_RATIO_THRESHOLD = 100000L;
     private static final String CDL = "CDL";
+    private static final String CONTACTS_PER_ACCOUNT_SORT = "/ContactsPerAccountSort";
+    private static final String ATTRIBUTE = "/Attribute";
+    private static final String DIRECTION = "/Direction";
+    private static final String CDL_UPDATED_TIME = "CDLUpdatedTime";
+    private static final String DESC = "DESC";
+
     private static ObjectMapper om = new ObjectMapper();
 
     private static Date getMigrateThreshold() {
@@ -339,4 +347,31 @@ public final class WorkflowJobUtils {
         return publishRecommendationsForS3Launch;
     }
 
+    public static Long getContactAccountRatioThresholdFromZK(CustomerSpace customerSpace) {
+        Long contactAccountRatioThreshold = DEFAULT_CONTACT_ACCOUNT_RATIO_THRESHOLD;
+        try {
+            String contactAccountRatioThresholdStr = getValueFromZK(customerSpace, PathConstants.CDL, CONTACT_ACCOUNT_RATIO_THRESHOLD);
+            if (StringUtils.isNotEmpty(contactAccountRatioThresholdStr)) {
+                contactAccountRatioThreshold = Long.valueOf(contactAccountRatioThresholdStr);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get count of workflow job quota limit from ZK for " + customerSpace.getTenantId(), e);
+        }
+        return contactAccountRatioThreshold;
+    }
+
+    public static List<String> getSortConfigFromZK(CustomerSpace customerSpace) {
+        List<String> sortConfig = new ArrayList<>();
+        String sortAttr = CDL_UPDATED_TIME;
+        String sortDir = DESC;
+        try {
+            sortAttr = getValueFromZK(customerSpace, CDL, CONTACTS_PER_ACCOUNT_SORT + ATTRIBUTE);
+            sortDir = getValueFromZK(customerSpace, CDL, CONTACTS_PER_ACCOUNT_SORT + DIRECTION);
+        } catch (Exception e) {
+            log.warn("Tenant sort config found but unable to read: ", e);
+        }
+        sortConfig.add(sortAttr);
+        sortConfig.add(sortDir);
+        return sortConfig;
+    }
 }

@@ -13,6 +13,9 @@ public class ProcessTransactionStepConfiguration extends BaseProcessEntityStepCo
     @JsonProperty("entity_match_ga_only")
     private boolean entityMatchGAOnly;
 
+    @JsonProperty("apsRollingPeriod")
+    private String apsRollingPeriod;
+
     @Override
     public BusinessEntity getMainEntity() {
         return BusinessEntity.Transaction;
@@ -32,5 +35,13 @@ public class ProcessTransactionStepConfiguration extends BaseProcessEntityStepCo
 
     public void setEntityMatchGAOnly(boolean entityMatchGAOnly) {
         this.entityMatchGAOnly = entityMatchGAOnly;
+    }
+
+    public String getApsRollingPeriod() {
+        return apsRollingPeriod;
+    }
+
+    public void setApsRollingPeriod(String apsRollingPeriod) {
+        this.apsRollingPeriod = apsRollingPeriod;
     }
 }

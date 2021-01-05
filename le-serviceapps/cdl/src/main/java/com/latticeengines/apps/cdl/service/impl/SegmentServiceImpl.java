@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +42,7 @@ import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
 import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
@@ -190,7 +192,7 @@ public class SegmentServiceImpl implements SegmentService {
         if (segment == null) {
             return false;
         }
-        segmentEntityMgr.delete(segment, true, hardDelete);
+        segmentEntityMgr.delete(segment, false, hardDelete);
         return true;
     }
 
@@ -277,9 +279,11 @@ public class SegmentServiceImpl implements SegmentService {
             List<MetadataSegment> segments = getSegments();
             if (CollectionUtils.isNotEmpty(segments)) {
                 segments.forEach(segment -> {
-                    MetadataSegment segmentCopy = segment.getDeepCopy();
-                    segmentCopy.setCountsOutdated(true);
-                    segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+                    if (!SegmentUtils.hasListSegment(segment)) {
+                        MetadataSegment segmentCopy = segment.getDeepCopy();
+                        segmentCopy.setCountsOutdated(true);
+                        segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+                    }
                 });
             }
             UpdateSegmentCountResponse response = updateSegmentsCounts();
@@ -361,14 +365,16 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     private Map<BusinessEntity, Long> updateSegmentCounts(MetadataSegment segment) {
-        // use a deep copy to avoid changing restriction format to break UI
-        MetadataSegment segmentCopy = segment.getDeepCopy();
-        Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
-        counts.forEach(segmentCopy::setEntityCount);
-        log.info("Updating counts for segment " + segment.getName() + " (" + segment.getDisplayName() + ")" //
-                + " to " + JsonUtils.serialize(segmentCopy.getEntityCounts()));
-        segmentCopy.setCountsOutdated(false);
-        segment = segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+        if (!MetadataSegment.SegmentType.List.equals(segment.getType())) {
+            // use a deep copy to avoid changing restriction format to break UI
+            MetadataSegment segmentCopy = segment.getDeepCopy();
+            Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
+            counts.forEach(segmentCopy::setEntityCount);
+            log.info("Updating counts for segment " + segment.getName() + " (" + segment.getDisplayName() + ")" //
+                    + " to " + JsonUtils.serialize(segmentCopy.getEntityCounts()));
+            segmentCopy.setCountsOutdated(false);
+            segment = segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+        }
         return segment.getEntityCounts();
     }
 
@@ -536,7 +542,37 @@ public class SegmentServiceImpl implements SegmentService {
             }
             return templateId;
         } else {
-            throw new RuntimeException("List segment does not exists");
+            throw new LedpException(LedpCode.LEDP_00002, new RuntimeException("List segment does not exists"));
+        }
+    }
+
+    private BusinessEntity getBusinessEntity(List<BusinessEntity> entities) {
+        BusinessEntity entity;
+        if (entities.contains(BusinessEntity.Account)) {
+            entity = BusinessEntity.Account;
+        } else if (entities.contains(BusinessEntity.Contact)) {
+            entity = BusinessEntity.Contact;
+        } else {
+            throw new LedpException(LedpCode.LEDP_00002, new RuntimeException("List segment can only support account or contact entity."));
+        }
+        return entity;
+    }
+
+    @Override
+    public Map<String, ColumnMetadata> getListSegmentMetadataMap(String segmentName, List<BusinessEntity> entities) {
+        MetadataSegment segment = segmentEntityMgr.findByName(segmentName, true);
+        if (SegmentUtils.hasListSegment(segment)) {
+            ListSegment listSegment = segment.getListSegment();
+            BusinessEntity entity = getBusinessEntity(entities);
+            String templateId = listSegment.getTemplateId(entity.name());
+            if (StringUtils.isNotEmpty(templateId)) {
+                return dataTemplateService.getTemplateMetadata(templateId, entity);
+            } else {
+                return Collections.emptyMap();
+            }
+        } else {
+            log.info("can't find list segment info for segment {}.", segmentName);
+            throw new LedpException(LedpCode.LEDP_00002, new RuntimeException("List segment does not exists"));
         }
     }
 }

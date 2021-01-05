@@ -108,8 +108,12 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         String featureFlag = LatticeFeatureFlag.LATTICE_INSIGHTS.getName();
+        String flagEntityMatchGA = LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName();
+        String flagEntityMatch = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
         Map<String, Boolean> flags = new HashMap<>();
         flags.put(featureFlag, true);
+        flags.put(flagEntityMatchGA, true);
+        flags.put(flagEntityMatch, false);
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         tenant = testBed.getMainTestTenant();
         testBed.loginAndAttach(TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN),

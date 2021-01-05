@@ -185,6 +185,7 @@ public class ActivityMetricDecorator implements Decorator {
                     cm.getShouldDeprecate());
         }
         renderFundamentalType(cm, group);
+        overwriteColumnSelection(cm, group);
 
         switch (cm.getEntity()) {
         case WebVisitProfile:
@@ -199,10 +200,21 @@ public class ActivityMetricDecorator implements Decorator {
             String activityType = ActivityStoreUtils.getDimensionValueAsString(params,
                     InterfaceName.ActivityTypeId.name(), InterfaceName.ActivityType.name(), tenant);
             ActivityStoreUtils.setColumnMetadataUIProperties(cm, timeRange, activityType);
+            break;
+        case CustomIntent:
             // do nothing atm
             break;
         default:
             log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());
+        }
+    }
+
+    private void overwriteColumnSelection(ColumnMetadata cm, ActivityMetricsGroup group) {
+        if (MapUtils.isNotEmpty(group.getCsOverwrite())) {
+            group.getCsOverwrite().getOrDefault(ActivityMetricsGroup.ColumnSelectionStatus.ENABLE, Collections.emptySet())
+                    .forEach(cm::enableGroup);
+            group.getCsOverwrite().getOrDefault(ActivityMetricsGroup.ColumnSelectionStatus.DISABLE, Collections.emptySet())
+                    .forEach(cm::disableGroup);
         }
     }
 
