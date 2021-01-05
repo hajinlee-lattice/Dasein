@@ -71,9 +71,17 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
 
         ResponseDocument<String> result = validateEnrichmentTemplate(enrichmentTemplate);
         if (result.isSuccess()) {
-            enrichmentTemplateEntityMgr.create(enrichmentTemplate);
-            enrichmentLayout.setTemplateId(enrichmentTemplate.getTemplateId());
-            enrichmentLayoutEntityMgr.update(enrichmentLayout);
+            try {
+                enrichmentTemplateEntityMgr.create(enrichmentTemplate);
+                enrichmentLayout.setTemplateId(enrichmentTemplate.getTemplateId());
+                enrichmentLayoutEntityMgr.update(enrichmentLayout);
+            } catch (Exception exception) {
+                result = new ResponseDocument<>();
+                List<String> errors = new ArrayList<>();
+                errors.add(String.format("Error creating enrichment template %s, error message %s",
+                        enrichmentTemplate.getTemplateId(), exception.getMessage()));
+                result.setErrors(errors);
+            }
         }
         return result;
     }
@@ -109,12 +117,18 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
     private ResponseDocument<String> validateDataRecordType(EnrichmentTemplate enrichmentTemplate,
             Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> map) {
         List<String> errors = new ArrayList<>();
+        // Get set of blockIds/levels that the tenant must have for the template to be
+        // valid
         Collection<String> blocksContainingElements = primeMetadataProxy
                 .getBlocksContainingElements(enrichmentTemplate.getElements());
+
+        // Get list of dataBlocks available for hte dataRecordType in this tenant.
+        // This is used to determine if the required blocks are present.
         DataRecordType dataRecordType = enrichmentTemplate.getRecordType();
         List<DataBlockEntitlementContainer.Block> dataBlockList = map.get(dataRecordType);
 
         if (dataBlockList != null) {
+            // Build a set of authorized data blocks and levels
             Set<String> authorizedElements = new HashSet<>();
             for (DataBlockEntitlementContainer.Block block : dataBlockList) {
                 for (DataBlockLevel level : block.getDataBlockLevels()) {
@@ -123,9 +137,13 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
                 }
             }
 
+            // Iterate through blocks and levels the the template needs, and make sure they
+            // are available for the tenant
             for (String neededElement : blocksContainingElements) {
+                // Trim out version number to standardize element format
                 String checkingString = neededElement.substring(0, neededElement.lastIndexOf("_"));
                 if (!authorizedElements.contains(checkingString)) {
+                    // Unauthorized element, template is not valid.
                     String err = String.format(
                             "Enrichment template is not valid, element %s is not authorized for subscriber number %s.",
                             neededElement, enrichmentTemplate.getTenant().getSubscriberNumber());
@@ -146,13 +164,16 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
 
     private ResponseDocument<String> validateDomain(EnrichmentTemplate enrichmentTemplate,
             DataBlockEntitlementContainer dataBlockEntitlementContainer) {
+        // Get list of domains for this tenant
         List<DataBlockEntitlementContainer.Domain> domains = dataBlockEntitlementContainer.getDomains();
 
+        // Check that EnrichmentTemplate domain is in list of tenant domains
         for (DataBlockEntitlementContainer.Domain domain : domains) {
             if (domain.getDomain() == enrichmentTemplate.getDomain()) {
                 return validateDataRecordType(enrichmentTemplate, domain.getRecordTypes());
             }
         }
+        // If it wasn't, template is not valid.
         ResponseDocument<String> response = new ResponseDocument<>();
         response.setErrors(Collections.singletonList(
                 String.format("Enrichment template is not valid. %s domain is not valid domain for this user.",

@@ -16,8 +16,8 @@ public class EnrichmentTemplateProxy extends MicroserviceRestApiProxy implements
     private static final String PREFIX = "/customerspaces/{customerSpace}/enrichmenttemplate";
 
     public ResponseDocument<String> createEnrichmentTemplate(String customerSpace, String layoutId, String templateName) {
-        String baseUrl = PREFIX + "/{layoutId}/{templateName}";
+        String baseUrl = PREFIX + "/{layoutId}";
         String url = constructUrl(baseUrl, customerSpace, layoutId, templateName);
-        return post("Create an EnrichmentTemplate from Layout", url, null, ResponseDocument.class);
+        return post("Create an EnrichmentTemplate from Layout", url, templateName, ResponseDocument.class);
     }
 }

@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,10 +23,11 @@ public class EnrichmentTemplateResource {
     @Inject
     private EnrichmentTemplateService enrichmentTemplateService;
 
-    @PostMapping("/{layoutId}/{templateName}")
+    @PostMapping("/{layoutId}")
     @ResponseBody
     @ApiOperation(value = "Create an EnrichmentTemplate from Layout")
-    public ResponseDocument<String> create(@PathVariable String layoutId, @PathVariable String templateName) {
+    public ResponseDocument<String> create(@PathVariable String layoutId,
+            @RequestParam(value = "templateName") String templateName) {
         return enrichmentTemplateService.create(layoutId, templateName);
     }
 }

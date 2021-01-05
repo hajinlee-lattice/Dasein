@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,11 +29,11 @@ public class EnrichmentTemplateResource {
     @Inject
     private EnrichmentTemplateService enrichmentTemplateService;
 
-    @PostMapping
+    @PostMapping("/layout/{layoutId}")
     @ResponseBody
     @ApiOperation("Create enrichment template")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public ResponseDocument<String> createTemplate(@RequestParam(value = "layoutId") String layoutId,
+    public ResponseDocument<String> createTemplate(@PathVariable String layoutId,
             @RequestParam(value = "templateName") String templateName) {
         return enrichmentTemplateService.createEnrichmentTemplate(MultiTenantContext.getShortTenantId(), layoutId,
                 templateName);

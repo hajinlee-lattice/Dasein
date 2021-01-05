@@ -32,6 +32,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
+import net.bytebuddy.implementation.bind.annotation.Default;
+
 @Entity
 @Table(name = "DCP_ENRICHMENT_TEMPLATE", uniqueConstraints = {
         @UniqueConstraint(name = "UX_LAYOUT_TEMPLATE_ID", columnNames = { "TEMPLATE_ID" })
@@ -91,6 +93,20 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
     @JsonProperty("tenant")
     private Tenant tenant;
 
+    public EnrichmentTemplate() {
+        this.templateId = NamingUtils.uuid("Template");
+    }
+
+    public EnrichmentTemplate(EnrichmentLayout enrichmentLayout) {
+        this.templateId = NamingUtils.uuid("Template");
+        this.domain = enrichmentLayout.getDomain();
+        this.recordType = enrichmentLayout.getRecordType();
+        this.elements = enrichmentLayout.getElements();
+        this.createTime = enrichmentLayout.getCreated();
+        this.updateTime = enrichmentLayout.getUpdated();
+        this.createdBy = enrichmentLayout.getCreatedBy();
+    }
+
     @Override
     public Long getPid() { return pid; }
 
@@ -131,19 +147,5 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
 
     public void setTemplateName(String templateName) {
         this.templateName = templateName;
-    }
-
-    public EnrichmentTemplate() {
-        this.templateId = NamingUtils.uuid("Template");
-    }
-
-    public EnrichmentTemplate(EnrichmentLayout enrichmentLayout) {
-        this.templateId = NamingUtils.uuid("Template");
-        this.domain = enrichmentLayout.getDomain();
-        this.recordType = enrichmentLayout.getRecordType();
-        this.elements = enrichmentLayout.getElements();
-        this.createTime = enrichmentLayout.getCreated();
-        this.updateTime = enrichmentLayout.getUpdated();
-        this.createdBy = enrichmentLayout.getCreatedBy();
     }
 }
