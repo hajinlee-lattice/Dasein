@@ -45,15 +45,14 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
     private static final Logger log = LoggerFactory.getLogger(ProcessActivityStoreDeploymentTestNG.class);
 
-    private static final String SKIP_WEB_VISIT = "SKIP_WEB_VISIT";
-    private static final String SKIP_OPPORTUNITY = "SKIP_OPPORTUNITY";
-    private static final String SKIP_MARKETING = "SKIP_MARKETING";
-    private static final String SKIP_INTENT = "SKIP_INTENT";
+    private static final String WEB_VISIT = "WEB_VISIT";
+    private static final String OPPORTUNITY = "OPPORTUNITY";
+    private static final String MARKETING = "MARKETING";
+    private static final String INTENT = "INTENT";
     private static final String WEBSITE_SYSTEM = "Default_Website_System";
     private static final String OPPORTUNITY_SYSTEM = "Default_Opportunity_System";
     private static final String INTENT_SYSTEM = "Default_DnbIntent_System";
     private static final String MARKETO_SYSTEM = "Default_Marketo_System";
-    private static final String ELOQUA_SYSTEM = "Default_Eloqua_System";
     protected static final Instant CURRENT_PA_TIME = LocalDate.of(2017, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
     @Inject
@@ -77,29 +76,37 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
     @Test(groups = "end2end")
     protected void test() throws Exception {
+        Map<String, Boolean> runCases = new HashMap<>();
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        // TODO - simplify skipping logic
-        if (!Boolean.parseBoolean(System.getenv(SKIP_WEB_VISIT))) {
-            setupWebVisit();
+        if (isLocalEnvironment()) {
+            runCases.put(WEB_VISIT, false);
+            runCases.put(OPPORTUNITY, false);
+            runCases.put(MARKETING, false);
+            runCases.put(INTENT, true);
         } else {
-            log.warn("Skip web visit setup. {}={}", SKIP_WEB_VISIT, System.getenv(SKIP_WEB_VISIT));
+            // run all cases
+            runCases.put(WEB_VISIT, true);
+            runCases.put(OPPORTUNITY, true);
+            runCases.put(MARKETING, true);
+            runCases.put(INTENT, true);
         }
-        if (!Boolean.parseBoolean(System.getenv(SKIP_OPPORTUNITY))) {
+        if (runCases.get(WEB_VISIT)) {
+            log.info("setup web visit");
+            setupWebVisit();
+        }
+        if (runCases.get(OPPORTUNITY)) {
+            log.info("setup opportunity");
             // FIXME enable opportunity data again after test data is updated to the new
             // schema
             // setupOpportunityTemplates();
-        } else {
-            log.info("Skip opportunity setup. {}={}", SKIP_OPPORTUNITY, System.getenv(SKIP_OPPORTUNITY));
         }
-        if (!Boolean.parseBoolean(System.getenv(SKIP_MARKETING))) {
+        if (runCases.get(MARKETING)) {
+            log.info("setup marketing");
             setupMarketingTemplates();
-        } else {
-            log.info("Skip marketing setup. {}={}", SKIP_MARKETING, System.getenv(SKIP_MARKETING));
         }
-        if (!Boolean.parseBoolean(System.getenv(SKIP_INTENT))) {
+        if (runCases.get(INTENT)) {
+            log.info("setup intent");
             setupDnBIntentProfile();
-        } else {
-            log.info("Skip buying score setup. {}={}", SKIP_INTENT, System.getenv(SKIP_INTENT));
         }
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
 //        setupTimeline();

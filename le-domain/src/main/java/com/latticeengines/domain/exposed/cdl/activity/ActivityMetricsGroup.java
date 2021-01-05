@@ -1,6 +1,11 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -27,6 +32,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -136,6 +142,11 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
     @Type(type = "json")
     @Column(name = "CATEGORIZATION", columnDefinition = "'JSON'")
     private CategorizeValConfig categorizeValConfig;
+
+    @JsonProperty("CSOverwrite")
+    @Type(type = "json")
+    @Column(name = "CSOverwrite", columnDefinition = "'JSON'")
+    private Map<ColumnSelectionStatus, Set<ColumnSelection.Predefined>> csOverwrite;
 
     @Override
     public Long getPid() {
@@ -291,5 +302,36 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
 
     public void setCategorizeValConfig(CategorizeValConfig categorizeValConfig) {
         this.categorizeValConfig = categorizeValConfig;
+    }
+
+    public Map<ColumnSelectionStatus, Set<ColumnSelection.Predefined>> getCsOverwrite() {
+        return csOverwrite;
+    }
+
+    public void setCsOverwrite(Map<ColumnSelectionStatus, Set<ColumnSelection.Predefined>> csOverwrite) {
+        this.csOverwrite = csOverwrite;
+    }
+
+    public void enable(Collection<ColumnSelection.Predefined> groups) {
+        if (csOverwrite == null) {
+            csOverwrite = new HashMap<>();
+        }
+        addToOverwrite(ColumnSelectionStatus.ENABLE, groups);
+    }
+
+    public void disable(Collection<ColumnSelection.Predefined> groups) {
+        if (csOverwrite == null) {
+            csOverwrite = new HashMap<>();
+        }
+        addToOverwrite(ColumnSelectionStatus.DISABLE, groups);
+    }
+
+    private void addToOverwrite(ColumnSelectionStatus status, Collection<ColumnSelection.Predefined> groups) {
+        csOverwrite.putIfAbsent(status, new HashSet<>());
+        csOverwrite.get(status).addAll(groups);
+    }
+
+    public enum ColumnSelectionStatus {
+        ENABLE, DISABLE
     }
 }
