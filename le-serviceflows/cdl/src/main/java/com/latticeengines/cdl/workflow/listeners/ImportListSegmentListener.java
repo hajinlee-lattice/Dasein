@@ -11,16 +11,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ImportListSegmentWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("importListSegmentListener")
 public class ImportListSegmentListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(ImportListSegmentListener.class);
-
-    @Inject
-    private MetadataProxy metadataProxy;
 
     @Inject
     private DataUnitProxy dataUnitProxy;
@@ -34,7 +30,7 @@ public class ImportListSegmentListener extends LEJobListener {
         String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
         String accountDataUnitName = getStringValueFromContext(jobExecution, ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME);
         log.info(String.format("Tenant id is %s, account data unit name is %s.", tenantId, accountDataUnitName));
-        metadataProxy.registerAthenaDataUnit(tenantId, accountDataUnitName);
+        dataUnitProxy.registerAthenaDataUnit(tenantId, accountDataUnitName);
         String preAthenaDataUnitName = getStringValueFromContext(jobExecution, ImportListSegmentWorkflowConfiguration.PREVIOUS_ACCOUNT_ATHENA_UNIT_NAME);
         if (StringUtils.isNotEmpty(preAthenaDataUnitName)) {
             log.info(String.format("will delete athena data unit with name %s", preAthenaDataUnitName));

@@ -2,6 +2,7 @@ package com.latticeengines.proxy.exposed.metadata;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 
 public interface DataUnitProxy {
@@ -23,5 +24,7 @@ public interface DataUnitProxy {
     Boolean delete(String customerSpace, String name, DataUnit.StorageType type);
 
     void updateSignature(String customerSpace, DataUnit dataUnit, String signature);
+
+    AthenaDataUnit registerAthenaDataUnit(String customerSpace, String name);
 
 }

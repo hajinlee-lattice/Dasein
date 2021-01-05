@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.service.DataUnitService;
 
@@ -87,6 +88,11 @@ public class DataUnitResource {
                 return Collections.emptyList();
             }
         }
+    }
+
+    @PostMapping("/name/{name}/athena-unit")
+    public AthenaDataUnit registerAthenaDataUnit(@PathVariable String name) {
+        return dataUnitService.registerAthenaDataUnit(name);
     }
 
 }
