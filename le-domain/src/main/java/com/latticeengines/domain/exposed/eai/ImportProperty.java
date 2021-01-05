@@ -43,5 +43,6 @@ public class ImportProperty extends BaseProperty {
     public static final String IMPORT_VALIDATORS = "importValidators";
     public static final String IMPORT_SANITIZERS = "importSanitizers";
     public static final String DEFAULT_COLUMN_MAP = "defaultColumnMap";
+    public static final String ENABLE_ERASE_BY_NULL = "eraseByNullEnable";
     public static final String[] ERROR_HEADER = new String[] { "LineNumber", "Id", "ErrorMessage" };
 }

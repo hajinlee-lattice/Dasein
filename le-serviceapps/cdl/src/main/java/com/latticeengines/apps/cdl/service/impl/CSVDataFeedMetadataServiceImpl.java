@@ -19,12 +19,15 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -40,6 +43,9 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private BatonService batonService;
 
     protected CSVDataFeedMetadataServiceImpl() {
         super(SourceType.FILE.getName());
@@ -166,6 +172,9 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     public String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier) {
         CSVToHdfsConfiguration csvmportConfig = ((CSVImportConfig) importConfig).getCsvToHdfsConfiguration();
         csvmportConfig.setJobIdentifier(jobIdentifier);
+        boolean enableImportEraseByNull = batonService.isEnabled(getCustomerSpace(importConfig),
+                LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL);
+        csvmportConfig.setProperty(ImportProperty.ENABLE_ERASE_BY_NULL, String.valueOf(enableImportEraseByNull));
         return JsonUtils.serialize(csvmportConfig);
     }
 
