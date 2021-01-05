@@ -223,9 +223,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 }
                 List<String> histories = new ArrayList<>();
                 matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
-                log.info("Firehose delivery stream " + deliveryStreamName + " publishing MatchHistory");
                 firehoseService.sendBatch(deliveryStreamName, histories);
-                log.info("Done: Firehose delivery stream " + deliveryStreamName + " publishing MatchHistory");
             } catch (Exception ex) {
                 log.warn("Failed to publish match history! error=" + ex.getMessage());
             }
