@@ -91,7 +91,7 @@ public class DataUnitResource {
     }
 
     @PostMapping("/name/{name}/athena-unit")
-    public AthenaDataUnit registerAthenaDataUnit(@PathVariable String name) {
+    public AthenaDataUnit registerAthenaDataUnit(@PathVariable String customerSpace, @PathVariable String name) {
         return dataUnitService.registerAthenaDataUnit(name);
     }
 
