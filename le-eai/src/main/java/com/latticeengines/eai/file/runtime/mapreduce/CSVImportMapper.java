@@ -471,8 +471,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     boolean isNullString(String inputStr) {
-        if (StringUtils.isEmpty(inputStr))
+        if (StringUtils.isEmpty(inputStr)) {
             return false;
+        }
         return VAL_NULL.equalsIgnoreCase(inputStr.trim());
     }
 
