@@ -76,6 +76,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
     private Play play;
     private PlayLaunch playLaunch1;
     private PlayLaunch playLaunch2;
+    private PlayLaunch playLaunchWithOrg1;
 
     private String org1 = "org1_" + CURRENT_TIME_MILLIS;
     private String org2 = "org2_" + CURRENT_TIME_MILLIS;
@@ -143,6 +144,12 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
                 "SFDC_ACC2", org2, CDLExternalSystemType.CRM, CDLExternalSystemName.Salesforce, CREATED_BY, CREATED_BY,
                 lookupIdMapMarketo);
         playLaunchService.create(playLaunch2);
+
+        playLaunchWithOrg1 = createPlayLaunch(play, NamingUtils.randomSuffix("pl", 16), LaunchState.Launching,
+                bucketsToLaunch,
+                "SFDC_ACC3", org1, CDLExternalSystemType.CRM, CDLExternalSystemName.Salesforce, CREATED_BY, CREATED_BY,
+                lookupIdMapMarketo);
+        playLaunchService.create(playLaunchWithOrg1);
     }
 
     private void cleanupPlayLaunches() {
@@ -246,6 +253,8 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         testAudienceSizeUpdateMessage(workflowRequestId, playLaunch1);
 
         testDestinationAccountCreationMessage(workflowRequestId, playLaunch1);
+        List<PlayLaunch> playLaunches = playLaunchService.findByDestinationOrgId(changedOrgId);
+        Assert.assertEquals(playLaunches.size(), 2);
 
         List<DataIntegrationStatusMessage> messages = dataIntegrationStatusMessageEntityMgr
                 .getAllStatusMessages(statusMonitor.getPid());
@@ -366,8 +375,8 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(updateStatusMonitorMessage));
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(testPlayLaunch.getId(), true);
-        Assert.assertEquals(changedOrgId, playLaunch.getDestinationOrgId());
-        Assert.assertEquals(changedOrgId, playLaunch.getPlayLaunchChannel().getLookupIdMap().getOrgId());
+        Assert.assertEquals(playLaunch.getDestinationOrgId(), changedOrgId);
+        Assert.assertEquals(playLaunch.getPlayLaunchChannel().getLookupIdMap().getOrgId(), changedOrgId);
     }
 
     private PlayLaunch createPlayLaunch(Play play, String launchId, LaunchState launchState, Set<RatingBucketName> bucketToLaunch,
