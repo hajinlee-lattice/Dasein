@@ -12,6 +12,7 @@ public class ImportListSegmentWorkflowConfiguration extends BaseCDLWorkflowConfi
     public static final String IMPORT_DATA_UNIT_NAME = "IMPORT_DATA_UNIT_NAME";
     public static final String ACCOUNT_DATA_UNIT_NAME = "ACCOUNT_DATA_UNIT_NAME";
     public static final String CONTACT_DATA_UNIT_NAME = "CONTACT_DATA_UNIT_NAME";
+    public static final String PREVIOUS_ACCOUNT_ATHENA_UNIT_NAME = "PREVIOUS_ATHENA_UNIT_NAME";
 
     public ImportListSegmentWorkflowConfiguration() {
     }

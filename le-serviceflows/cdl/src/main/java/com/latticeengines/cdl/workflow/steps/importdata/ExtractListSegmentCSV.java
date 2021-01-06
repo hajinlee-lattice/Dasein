@@ -189,6 +189,14 @@ public class ExtractListSegmentCSV
         String tenantId = customerSpace.getTenantId();
         CreateDataTemplateRequest request = createRequest(entity.name(), getSchema(hdfsDataUnit, entity, fieldMap));
         String templateId = segmentProxy.createOrUpdateDataTemplate(tenantId, configuration.getSegmentName(), request);
+        if (BusinessEntity.Account.equals(entity)) {
+            S3DataUnit preMasterDataUnit = (S3DataUnit) dataUnitProxy.getByDataTemplateIdAndRole(tenantId, templateId, DataUnit.Role.Master);
+            if (preMasterDataUnit != null) {
+                String name = preMasterDataUnit.getName();
+                log.info("previous account athena data unit name is " + name);
+                putStringValueInContext(ImportListSegmentWorkflowConfiguration.PREVIOUS_ACCOUNT_ATHENA_UNIT_NAME, name);
+            }
+        }
         S3DataUnit s3DataUnit = toS3DataUnit(hdfsDataUnit, entity, templateId,
                 Lists.newArrayList(DataUnit.Role.Master, DataUnit.Role.Snapshot));
         dataUnitProxy.create(tenantId, s3DataUnit);

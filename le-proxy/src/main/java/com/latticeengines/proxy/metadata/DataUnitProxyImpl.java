@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
@@ -73,6 +74,16 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
     }
 
     @Override
+    public Boolean delete(String customerSpace, String name, DataUnit.StorageType type) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit/delete/name/{name}", shortenCustomerSpace(customerSpace), name);
+        if (type != null) {
+            url += "?type=" + type.name();
+        }
+        delete("delete data unit by name and type", url);
+        return true;
+    }
+
+    @Override
     public void updateSignature(String customerSpace, DataUnit dataUnit, String signature) {
         String url = constructUrl("/customerspaces/{customerSpace}/dataunit/updateSignature?signature={signature}",
                 shortenCustomerSpace(customerSpace), signature);
@@ -86,5 +97,11 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
         }
         List<?> list = get("get data units", url, List.class);
         return JsonUtils.convertList(list, DataUnit.class);
+    }
+
+    @Override
+    public AthenaDataUnit registerAthenaDataUnit(String customerSpace, String name) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit/name/{name}/athena-unit", customerSpace, name);
+        return post("register athena data unit", url, null, AthenaDataUnit.class);
     }
 }
