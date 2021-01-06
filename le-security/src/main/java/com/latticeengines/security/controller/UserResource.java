@@ -173,6 +173,7 @@ public class UserResource {
         try (Scope scope = startUserSpan(loginUsername, System.currentTimeMillis())) {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
+            userSpan.log("Start - Register User");
 
             VboUserSeatUsageEvent usageEvent = null;
 
@@ -295,6 +296,7 @@ public class UserResource {
         try (Scope scope = startUserSpan(username, System.currentTimeMillis())) {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
+            userSpan.log("Start - Update User");
 
             UserUpdateResponse updateResponse = new UserUpdateResponse();
             updateResponse.setTraceId(traceId);
