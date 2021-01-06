@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DataOperationService;
 import com.latticeengines.domain.exposed.cdl.DataOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.DataOperationRequest;
 import com.latticeengines.domain.exposed.metadata.DataOperation;
 
 import io.swagger.annotations.Api;
@@ -49,5 +50,13 @@ public class DataOperationResource {
     public DataOperation findDataOperationByDropPath(@PathVariable String customerSpace,
                        @RequestParam("dropPath") String dropPath) {
         return dataOperationService.findDataOperationByDropPath(customerSpace, dropPath);
+    }
+
+    @PostMapping("/submitJob")
+    @ResponseBody
+    @ApiOperation(value = "submit data operation job")
+    public String submitJob(@PathVariable String customerSpace,
+                         @RequestBody DataOperationRequest dataOperationRequest) {
+        return dataOperationService.submitJob(customerSpace, dataOperationRequest);
     }
 }
