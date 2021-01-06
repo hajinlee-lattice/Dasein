@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = PrestoDataUnit.class, name = "Presto"), //
         @JsonSubTypes.Type(value = AthenaDataUnit.class, name = "Athena"), //
         @JsonSubTypes.Type(value = HdfsDataUnit.class, name = "Hdfs"), //
+        @JsonSubTypes.Type(value = ElasticSearchDataUnit.class, name = "ElasticSearch")
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)

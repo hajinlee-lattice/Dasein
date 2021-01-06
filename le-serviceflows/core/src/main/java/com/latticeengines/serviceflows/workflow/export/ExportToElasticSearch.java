@@ -1,6 +1,5 @@
 package com.latticeengines.serviceflows.workflow.export;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +35,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToElastic
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ExportToElasticSearchJobConfig;
 import com.latticeengines.elasticsearch.Service.ElasticSearchService;
+import com.latticeengines.elasticsearch.util.ElasticSearchUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
@@ -99,9 +99,9 @@ public class ExportToElasticSearch extends RunSparkJob<ExportToElasticSearchStep
             dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
                     activeVersion);
         }
-        entityWithESVersionMap = new HashMap<>(MapUtils.emptyIfNull(dcStatus.getTimelineVersionMap()));
+        entityWithESVersionMap = new HashMap<>(MapUtils.emptyIfNull(dcStatus.getEntityToESVersionMap()));
         createIndex(tableRoleInCollectionListMap, configuration.getEsConfig(), configuration.getCustomer(), lookupIds);
-        dcStatus.setEntityWithESVersionMap(entityWithESVersionMap);
+        dcStatus.setEntityToESVersionMap(entityWithESVersionMap);
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
         List<DataUnit> inputs = new ArrayList<>();
         ExportToElasticSearchJobConfig jobConfig = new ExportToElasticSearchJobConfig();
@@ -139,10 +139,10 @@ public class ExportToElasticSearch extends RunSparkJob<ExportToElasticSearchStep
         if (MapUtils.isEmpty(tableRoleInCollectionListMap)) {
             return;
         }
-        String newVersion = generateNewVersion();
+        String newVersion = ElasticSearchUtils.generateNewVersion();
         log.info("tableRoleInCollectionListMap = {}", tableRoleInCollectionListMap);
         tableRoleInCollectionListMap.keySet().forEach(role -> {
-            String entityKey = getEntityFromTableRole(role);
+            String entityKey = ElasticSearchUtils.getEntityFromTableRole(role);
             log.info("Create index for EsEntityType = {}, role = {}", entityKey, role);
             if (entityKey != null) {
                 String idxName = String
@@ -159,10 +159,6 @@ public class ExportToElasticSearch extends RunSparkJob<ExportToElasticSearchStep
         });
     }
 
-    private String generateNewVersion() {
-        return String.valueOf(Instant.now().toEpochMilli());
-    }
-
     private DataCollection.Version getInactiveVersion(String customerSpace, String originalTenant,
                                                       DataCollection.Version activeVersion) {
         if (originalTenant == null || customerSpace.equalsIgnoreCase(originalTenant)) {
@@ -171,16 +167,4 @@ public class ExportToElasticSearch extends RunSparkJob<ExportToElasticSearchStep
         return dataCollectionProxy.getInactiveVersion(originalTenant);
     }
 
-    private String getEntityFromTableRole(TableRoleInCollection tableRoleInCollection) {
-        if (tableRoleInCollection.name().contains("Account")) {
-            return BusinessEntity.Account.name();
-        }
-        if (tableRoleInCollection.name().contains("Contact")) {
-            return BusinessEntity.Contact.name();
-        }
-        if (TableRoleInCollection.TimelineProfile.equals(tableRoleInCollection)) {
-            return TableRoleInCollection.TimelineProfile.name();
-        }
-        return null;
-    }
 }

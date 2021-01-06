@@ -161,6 +161,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String TIMELINE_RAWTABLES_GOING_TO_DYNAMO = "TIMELINE_RAWTABLES_GOING_TO_DYNAMO";
     public static final String ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO = "ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
+    public static final String TABLES_GOING_TO_ES = "TABLES_GOING_TO_ES";
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     public static final String RATING_MODELS = "RATING_MODELS";
@@ -329,6 +330,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SPENDING_ANALYSIS_PERIOD_TABLE_NAME = "SPENDING_ANALYSIS_PERIOD_TABLE_NAME";
     protected static final String TIMELINE_MASTER_TABLE_NAME = "TIMELINE_MASTER_TABLE_NAME";
     protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
+    protected static final String TIMELINE_REBUILD = "TIMELINE_REBUILD";
     protected static final String JOURNEY_STAGE_TABLE_NAME = "JOURNEY_STAGE_TABLE_NAME";
     protected static final String ACTIVITY_ALERT_GENERATED = "ALERT_GENERATED";
     protected static final String ACTIVITY_ALERT_PUBLISHED = "ALERT_PUBLISHED";

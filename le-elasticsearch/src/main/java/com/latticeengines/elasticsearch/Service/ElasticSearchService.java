@@ -18,6 +18,14 @@ public interface ElasticSearchService {
     boolean createAccountIndexWithLookupIds(String indexName, ElasticSearchConfig esConfig,
                                             List<String> lookupIds);
 
+    boolean checkFieldExist(String indexName, String fieldName);
+
+    boolean updateIndexMapping(String indexName, String fieldName);
+
+    boolean deleteIndex(String indexName);
+
+    boolean indexExists(String indexName);
+
     Map<String, Object> searchByAccountId(String indexName, String lookupIdValue);
 
     Map<String, Object> searchByLookupId(String indexName, String lookupIdKey, String lookupIdValue);

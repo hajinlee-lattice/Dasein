@@ -104,7 +104,9 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_ACXIOM, //
                 LatticeFeatureFlag.ENABLE_IMPORT_V2, //
                 LatticeFeatureFlag.SSVI_REPORT,
-                LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL
+                LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL,
+                LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH, //
+                LatticeFeatureFlag.Query_From_ELASTICSEARCH
         );
 
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
@@ -140,7 +142,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_ACXIOM, //
                 LatticeFeatureFlag.ENABLE_IMPORT_V2,
                 LatticeFeatureFlag.SSVI_REPORT,
-                LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL);
+                LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL,
+                LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH,
+                LatticeFeatureFlag.Query_From_ELASTICSEARCH);
+
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);

@@ -122,7 +122,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = GenerateIntentEmailAlertWorkflowConfiguration.class, name =
                 GenerateIntentEmailAlertWorkflowConfiguration.NAME),
         @Type(value = PublishVIDataWorkflowConfiguration.class, name = "PublishVIDataWorkflowConfiguration"),
-        @Type(value = GenerateVisitReportWorkflowConfiguration.class, name = "GenerateVisitReportWorkflowConfiguration")
+        @Type(value = GenerateVisitReportWorkflowConfiguration.class, name =
+                "GenerateVisitReportWorkflowConfiguration"),
+        @Type(value = PublishTableToElasticSearchWorkflowConfiguration.class, name = "PublishTableToElasticSearchWorkflowConfiguration")
 })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 

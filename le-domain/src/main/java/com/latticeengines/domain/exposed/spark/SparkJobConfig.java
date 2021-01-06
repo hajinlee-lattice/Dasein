@@ -68,6 +68,7 @@ import com.latticeengines.domain.exposed.spark.cdl.PeriodTxnStreamPostAggregatio
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJobConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.PublishVIDataJobConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
@@ -208,7 +209,9 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = DailyTxnStreamPostAggregationConfig.class, name = DailyTxnStreamPostAggregationConfig.NAME), //
         @JsonSubTypes.Type(value = PeriodTxnStreamPostAggregationConfig.class, name =
                 PeriodTxnStreamPostAggregationConfig.NAME), //
-        @JsonSubTypes.Type(value = EnrichWebVisitJobConfig.class, name = EnrichWebVisitJobConfig.NAME) //
+        @JsonSubTypes.Type(value = EnrichWebVisitJobConfig.class, name = EnrichWebVisitJobConfig.NAME), //
+        @JsonSubTypes.Type(value = PublishTableToElasticSearchJobConfiguration.class, name =
+                PublishTableToElasticSearchJobConfiguration.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
 

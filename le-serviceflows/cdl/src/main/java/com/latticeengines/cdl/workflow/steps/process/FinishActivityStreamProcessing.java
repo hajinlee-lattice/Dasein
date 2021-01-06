@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.ENABLE_ACCOUNT360;
+import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH;
 
 import java.util.Map;
 
@@ -20,11 +21,15 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ElasticSearchExportConfig;
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -54,6 +59,7 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
     @Override
     public void execute() {
         publishTimelineDiffTablesToDynamo();
+        publishToElasticSearch();
         registerDataUnits();
     }
 
@@ -78,6 +84,31 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
         });
     }
 
+    void publishToElasticSearch() {
+        boolean publishToES = elasticSearchEnabled();
+        if (!publishToES) {
+            log.info("skip publishing to elastic search as false publish to elastic search in {}",
+                    configuration.getCustomerSpace());
+            return ;
+        }
+        DataUnit unit = dataUnitProxy.getByNameAndType(configuration.getCustomerSpace().toString(),
+                TableRoleInCollection.TimelineProfile.name(), DataUnit.StorageType.ElasticSearch);
+        boolean rebuild = getObjectFromContext(TIMELINE_REBUILD, Boolean.class);
+        boolean fromFullTimeMap = unit == null || rebuild;
+        Map<String, String> timelineTableNames = fromFullTimeMap ?
+                getMapObjectFromContext(TIMELINE_MASTER_TABLE_NAME, String.class, String.class) :
+                getMapObjectFromContext(TIMELINE_DIFF_TABLE_NAME, String.class, String.class);
+
+        // get time line version
+        String streamId =  TimeLineStoreUtils.contructTimelineId(configuration.getCustomerSpace().toString(),
+                TimeLineStoreUtils.ACCOUNT360_TIMELINE_NAME);
+        String tableName = timelineTableNames.get(streamId);
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        Map<String, String> timelineVersion = status.getTimelineVersionMap();
+        String version = timelineVersion.get(streamId);
+        exportToES(tableName, version);
+    }
+
     private void exportToDynamo(String tableName) {
         String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
         DynamoExportConfig config = new DynamoExportConfig();
@@ -86,6 +117,14 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
         config.setPartitionKey(PARTITION_KEY_NAME);
         config.setSortKey(SORT_KEY_NAME);
         addToListInContext(TIMELINE_RAWTABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+    }
+
+    private void exportToES(String tableName, String version) {
+        ElasticSearchExportConfig config = new ElasticSearchExportConfig();
+        config.setTableName(tableName);
+        config.setTableRoleInCollection(TableRoleInCollection.TimelineProfile);
+        config.setSignature(version);
+        addToListInContext(TABLES_GOING_TO_ES, config, ElasticSearchExportConfig.class);
     }
 
     private void registerDataUnits() {
@@ -118,5 +157,9 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
 
     private boolean shouldPublishTimelineToDynamo() {
         return !skipPublishDynamo && account360Enabled();
+    }
+
+    private boolean elasticSearchEnabled() {
+        return batonService.isEnabled(configuration.getCustomerSpace(), PUBLISH_TO_ELASTICSEARCH);
     }
 }

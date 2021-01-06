@@ -67,7 +67,8 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = PublishTableRoleStepConfiguration.class, name = "PublishTableRoleStepConfiguration"),
         @Type(value = ImportSourceStepConfiguration.class, name = "ImportSourceStepConfiguration"),
         @Type(value = PublishActivityAlertsStepConfiguration.class, name = "PublishActivityAlertsJobConfig"),
-        @Type(value = ImportDeltaArtifactsFromS3Configuration.class, name = "ImportDeltaArtifactsFromS3Configuration") })
+        @Type(value = ImportDeltaArtifactsFromS3Configuration.class, name = "ImportDeltaArtifactsFromS3Configuration"),
+        @Type(value = PublishToElasticSearchConfiguration.class, name = "PublishToElasticSearchConfiguration")})
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 
     private String podId;
