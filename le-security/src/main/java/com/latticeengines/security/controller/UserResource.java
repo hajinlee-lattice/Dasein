@@ -185,17 +185,6 @@ public class UserResource {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
 
-            VboUserSeatUsageEvent usageEvent = null;
-
-            if (!EmailUtils.isInternalUser(user.getEmail())) {
-                usageEvent = new VboUserSeatUsageEvent();
-                usageEvent.setEmailAddress(loginUser.getEmail());
-                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
-                usageEvent.setPOAEID(traceId);
-                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
-                usageEvent.setLUID(loginUser.getPid());
-            }
-
             RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
             String tempPass = result.getPassword();
             if (!Boolean.TRUE.equals(setTempPass)) {
@@ -211,8 +200,6 @@ public class UserResource {
             }
             LOGGER.info(String.format("%s registered %s as a new user in tenant %s", loginUsername, user.getUsername(),
                     tenant.getId()));
-            if (usageEvent != null)
-                usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
             if (!isDCPTenant) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                     emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,
@@ -238,7 +225,14 @@ public class UserResource {
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
                 }
-                if (usageEvent != null) {
+                if (!EmailUtils.isInternalUser(user.getEmail())) {
+                    VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
+                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+                    usageEvent.setEmailAddress(loginUser.getEmail());
+                    usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                    usageEvent.setPOAEID(traceId);
+                    usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                    usageEvent.setLUID(loginUser.getPid());
                     populateWithSubscriberDetails(usageEvent);
                     try {
                         vboService.sendUserUsageEvent(usageEvent);
@@ -316,16 +310,6 @@ public class UserResource {
             updateResponse.setTraceId(traceId);
             document.setResult(updateResponse);
 
-            VboUserSeatUsageEvent usageEvent = null;
-            if (newUser && !EmailUtils.isInternalUser(user.getEmail())) {
-                usageEvent = new VboUserSeatUsageEvent();
-                usageEvent.setEmailAddress(loginUser.getEmail());
-                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
-                usageEvent.setPOAEID(traceId);
-                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
-                usageEvent.setLUID(loginUser.getPid());
-            }
-
             if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
                 // using access level if it is provided
                 String loginUsername = loginUser.getUsername();
@@ -363,8 +347,6 @@ public class UserResource {
                 }
                 LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                         targetLevel.name(), username, tenantId));
-                if (usageEvent != null)
-                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                 if (newUser && user != null && !isDCPTenant) {
                     userSpan.log("Sending email");
                     if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
@@ -397,7 +379,14 @@ public class UserResource {
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
                 }
-                if (usageEvent != null) {
+                if (user != null && !EmailUtils.isInternalUser(user.getEmail())) {
+                    VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
+                    usageEvent.setEmailAddress(loginUser.getEmail());
+                    usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                    usageEvent.setPOAEID(traceId);
+                    usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                    usageEvent.setLUID(loginUser.getPid());
+                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                     populateWithSubscriberDetails(usageEvent);
                     try {
                         vboService.sendUserUsageEvent(usageEvent);
@@ -483,7 +472,7 @@ public class UserResource {
     private boolean hasAvailableSeats(String subscriberNumber) {
         JsonNode meter = vboService.getSubscriberMeter(subscriberNumber);
         if (meter == null || !meter.has("limit") || !meter.has("current_usage")) {
-            LOGGER.warn("Unable to retrieve meter for subscriber: " + subscriberNumber);
+            LOGGER.error("Unable to retrieve seat count meter for subscriber: " + subscriberNumber);
             return false;
         }
         if (meter.get("current_usage") == null)

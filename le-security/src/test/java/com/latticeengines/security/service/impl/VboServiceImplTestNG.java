@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.web.client.HttpClientErrorException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -61,23 +62,17 @@ public class VboServiceImplTestNG extends AbstractTestNGSpringContextTests {
         // valid STCT (increment) request
         VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
         populateUsageEvent(usageEvent);
-        try {
-            vboService.sendUserUsageEvent(usageEvent);
-            Thread.sleep(3000);
-            int updatedUsage = vboService.getSubscriberMeter(TEST_SUBSCRIBER_NUMBER).get("current_usage").asInt();
-            Assert.assertEquals(updatedUsage, currentUsage + 1);
-        } catch (Exception e) {
-            Assert.fail("Failed to increment seat count.");
-        }
+        vboService.sendUserUsageEvent(usageEvent);
+        try {Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+        int updatedUsage = vboService.getSubscriberMeter(TEST_SUBSCRIBER_NUMBER).get("current_usage").asInt();
+        Assert.assertEquals(updatedUsage, currentUsage + 1);
 
         // bad STCT request
         usageEvent.setSubscriberID(null);
         try {
             vboService.sendUserUsageEvent(usageEvent);
             Assert.fail("Usage event request succeeded, but should have failed.");
-        } catch (Exception e){
-            System.out.println("Usage event request failed as expected.");
-        }
+        } catch (HttpClientErrorException.NotAcceptable ignored) { }
     }
 
     private void populateUsageEvent(VboUserSeatUsageEvent usageEvent) {
