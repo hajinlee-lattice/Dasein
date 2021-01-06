@@ -7,12 +7,7 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 @Component("tableTypeHolder")
 public class TableTypeHolder {
 
-    private ThreadLocal<TableType> tableTypeThreadLocal = new ThreadLocal<TableType>() {
-        @Override
-        protected TableType initialValue() {
-            return TableType.DATATABLE;
-        }
-    };
+    private ThreadLocal<TableType> tableTypeThreadLocal = ThreadLocal.withInitial(() -> TableType.DATATABLE);
     
     public void setTableType(TableType tableType) {
         tableTypeThreadLocal.set(tableType);

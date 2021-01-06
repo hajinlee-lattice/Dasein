@@ -181,6 +181,10 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             if (MapUtils.isNotEmpty(config.getDefaultColumnMap())) {
                 context.setProperty(ImportProperty.DEFAULT_COLUMN_MAP, JsonUtils.serialize(config.getDefaultColumnMap()));
             }
+            if (config.getProperties().containsKey(ImportProperty.ENABLE_ERASE_BY_NULL)) {
+                context.setProperty(ImportProperty.ENABLE_ERASE_BY_NULL,
+                        config.getProperty(ImportProperty.ENABLE_ERASE_BY_NULL));
+            }
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
 
             if (dataFeedTask == null) {
