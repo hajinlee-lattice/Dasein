@@ -1,15 +1,18 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 
-public class CSVDataFeedMetadataServiceImplUnitTestNG {
+public class CSVDataFeedMetadataServiceImplUnitTestNG extends CDLFunctionalTestNGBase {
 
     private CSVImportConfig csvImportConfig;
 
@@ -29,6 +32,7 @@ public class CSVDataFeedMetadataServiceImplUnitTestNG {
 
     private String JOB_IDENTIFIER = "jobIdentifier";
 
+    @Inject
     private CSVDataFeedMetadataServiceImpl csvDataFeedMetadataServiceImpl;
 
     @BeforeTest(groups = "unit")
@@ -45,7 +49,6 @@ public class CSVDataFeedMetadataServiceImplUnitTestNG {
         csvImportFileInfo.setReportFileDisplayName(FILE_DISPLAY_NAME);
         csvImportFileInfo.setFileUploadInitiator(INITIATOR);
         csvImportConfig.setCsvToHdfsConfiguration(importConfig);
-        csvDataFeedMetadataServiceImpl = new CSVDataFeedMetadataServiceImpl();
     }
 
     @Test(groups = "unit")
