@@ -96,7 +96,7 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
             if (StringUtils.isBlank(config.getTableName()) ||
                     StringUtils.isBlank(config.getSignature()) ||
                     config.getTableRoleInCollection() == null) {
-                log.info("table name, signature, table role must be provides, skip processing this config {} in " +
+                log.info("table name, signature, table role must be provided, skip processing this config {} in " +
                                 "customer {}", JsonUtils.serialize(config), customerSpace);
                 continue;
             }
@@ -128,12 +128,25 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
         // register data unit, currently one tenant has 3 data unit
         // identical with index
         for (ElasticSearchExportConfig config : configs) {
-            ElasticSearchDataUnit dataUnit = new ElasticSearchDataUnit();
             TableRoleInCollection role = config.getTableRoleInCollection();
-            dataUnit.setName(ElasticSearchUtils.getEntityFromTableRole(role));
-            dataUnit.setTableRole(role);
-            dataUnit.setSignature(config.getSignature());
-            dataUnitProxy.create(customerSpace.toString(), dataUnit);
+            if (StringUtils.isBlank(config.getTableName()) ||
+                    StringUtils.isBlank(config.getSignature()) ||
+                    config.getTableRoleInCollection() == null) {
+                log.info("table name, signature, table role must be provided, skip processing this config {} in " +
+                        "customer {}", JsonUtils.serialize(config), customerSpace);
+                continue;
+            }
+            String tableName = ElasticSearchUtils.getEntityFromTableRole(role);
+            ElasticSearchDataUnit unit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), tableName,
+                    DataUnit.StorageType.ElasticSearch);
+            if (unit == null || !config.getSignature().equals(unit.getSignature())) {
+                log.info("elastic search data unit will be updated to {}", config.getSignature());
+                ElasticSearchDataUnit dataUnit = new ElasticSearchDataUnit();
+                dataUnit.setName(tableName);
+                dataUnit.setTableRole(role);
+                dataUnit.setSignature(config.getSignature());
+                dataUnitProxy.create(customerSpace.toString(), dataUnit);
+            }
         }
 
     }

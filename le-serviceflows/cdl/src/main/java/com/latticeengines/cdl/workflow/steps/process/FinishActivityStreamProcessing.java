@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,8 +60,8 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
     @Override
     public void execute() {
         publishTimelineDiffTablesToDynamo();
-        publishToElasticSearch();
         registerDataUnits();
+        publishToElasticSearch();
     }
 
     public void publishTimelineDiffTablesToDynamo() {
@@ -104,9 +105,14 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
                 TimeLineStoreUtils.ACCOUNT360_TIMELINE_NAME);
         String tableName = timelineTableNames.get(streamId);
         DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        Map<String, String> timelineVersion = status.getTimelineVersionMap();
+        Map<String, String> timelineVersion = MapUtils.emptyIfNull(status.getTimelineVersionMap());
         String version = timelineVersion.get(streamId);
-        exportToES(tableName, version);
+        if (StringUtils.isNotBlank(tableName) && StringUtils.isNotBlank(version)) {
+            log.info("table name {}, version {}", tableName, version);
+            exportToES(tableName, version);
+        } else {
+            log.info("empty table name or version");
+        }
     }
 
     private void exportToDynamo(String tableName) {

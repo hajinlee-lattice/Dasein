@@ -12,6 +12,7 @@ import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
 import com.latticeengines.domain.exposed.elasticsearch.PublishTableToESRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PublishTableToElasticSearchWorkflowConfiguration;
@@ -38,6 +39,7 @@ public class PublishTableToElasticSearchWorkflowSubmitter extends WorkflowSubmit
         setElasticSearchConfigForEmpty(request);
         PublishTableToElasticSearchWorkflowConfiguration configuration =
                 new PublishTableToElasticSearchWorkflowConfiguration.Builder()
+                        .customer(CustomerSpace.parse(customerSpace))
                         .signature(request.getSignature())
                         .exportConfigs(request.getExportConfigs())
                         .esConfigs(request.getEsConfig())

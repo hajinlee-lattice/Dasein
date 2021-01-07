@@ -1,5 +1,6 @@
 package com.latticeengines.spark.util
 
+import com.latticeengines.common.exposed.util.CipherUtils
 import com.latticeengines.domain.exposed.metadata.{InterfaceName, TableRoleInCollection}
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn
 import org.apache.spark.sql.DataFrame
@@ -25,7 +26,10 @@ private [spark] object ElasticSearchUtils {
     }): _*)
   }
 
-  def getBaseConfig(host: String, port: String): Map[String, String] = {
+  def getBaseConfig(host: String, port: String, user: String, password: String, encryptionKey: String, salt: String)
+  : Map[String, String] = {
+    val passwd : String = CipherUtils.decrypt(password, encryptionKey, salt);
+    println(s"password after decryption $passwd")
     Map(
       "es.write.operation" -> "upsert",
       "es.nodes.wan.only" -> "true",
@@ -34,8 +38,8 @@ private [spark] object ElasticSearchUtils {
       //      "es.batch.size.bytes" -> "10mb",
       "es.nodes" -> host,
       "es.port" -> port,
-      "es.net.http.auth.user" -> "root",
-      "es.net.http.auth.pass" -> "9Nc-CX$?",
+      "es.net.http.auth.user" -> user,
+      "es.net.http.auth.pass" -> passwd,
       "es.net.ssl" -> "true")
   }
 

@@ -10,10 +10,10 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepCon
 public class PublishTableToElasticSearchStepConfiguration extends SparkJobStepConfiguration {
 
 
-    @JsonProperty("exportConfigs")
+    @JsonProperty("export_configs")
     private List<ElasticSearchExportConfig> exportConfigs;
 
-    @JsonProperty("esConfigs")
+    @JsonProperty("es_configs")
     private ElasticSearchConfig esConfigs;
 
     @JsonProperty("signature")

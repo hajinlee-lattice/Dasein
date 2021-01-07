@@ -1,0 +1,150 @@
+{
+  "name": "QA_CDL_EntityMatch_jhao_Account360_42_Contact360_TimelineProfile_2020_12_09_08_16_49_UTC",
+  "display_name": "topLevelRecord",
+  "attributes": [
+    {
+      "name": "Id",
+      "display_name": "Id",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "EventTimestamp",
+      "display_name": "EventTimestamp",
+      "nullable": false,
+      "physical_data_type": "long",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "AccountId",
+      "display_name": "AccountId",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "ContactId",
+      "display_name": "ContactId",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "EventType",
+      "display_name": "EventType",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "StreamType",
+      "display_name": "StreamType",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "Detail1",
+      "display_name": "Detail1",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "Detail2",
+      "display_name": "Detail2",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "Source",
+      "display_name": "Source",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "ContactName",
+      "display_name": "ContactName",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "Title",
+      "display_name": "Title",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "PartitionKey",
+      "display_name": "PartitionKey",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    },
+    {
+      "name": "SortKey",
+      "display_name": "SortKey",
+      "nullable": false,
+      "physical_data_type": "string",
+      "enum_values": "",
+      "properties": {},
+      "validatorWrappers": []
+    }
+  ],
+  "level_hierarchies": [],
+  "extracts": [
+    {
+      "name": "extract",
+      "path": "/Pods/QA/Contracts/QA_CDL_EntityMatch_jhao_Account360_42/Tenants/QA_CDL_EntityMatch_jhao_Account360_42/Spaces/Production/Data/Tables/QA_CDL_EntityMatch_jhao_Account360_42_Contact360_TimelineProfile_2020_12_09_08_16_49_UTC/*.avro",
+      "extraction_ts": 1607501780766,
+      "processed_records": 18
+    }
+  ],
+  "primary_key": null,
+  "last_modified_key": null,
+  "interpretation": null,
+  "marked_for_purge": false,
+  "data_rules": [],
+  "storage_mechanism": {
+    "hdfsStorage": {
+      "name": "HDFS",
+      "table_name": "QA_CDL_EntityMatch_jhao_Account360_42_Contact360_TimelineProfile_2020_12_09_08_16_49_UTC"
+    }
+  },
+  "namespace": null,
+  "count": null,
+  "updatedby": null,
+  "created": 1607501810000,
+  "updated": 1607503730000,
+  "retentionPolicy": "KEEP_FOREVER",
+  "extracts_directory": "/Pods/QA/Contracts/QA_CDL_EntityMatch_jhao_Account360_42/Tenants/QA_CDL_EntityMatch_jhao_Account360_42/Spaces/Production/Data/Tables/QA_CDL_EntityMatch_jhao_Account360_42_Contact360_TimelineProfile_2020_12_09_08_16_49_UTC"
+}

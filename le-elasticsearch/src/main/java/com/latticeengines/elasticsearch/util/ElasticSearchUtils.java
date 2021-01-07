@@ -194,6 +194,10 @@ public final class ElasticSearchUtils {
             log.info("field {} exists in the index {}", fieldName, indexName);
             return ;
         }
+        if (TimelineProfile.name().equals(fieldName)) {
+            log.info("no column for timeline profile");
+            return ;
+        }
         log.info("set field name {} for index {}", fieldName, indexName);
         PutMappingRequest request = new PutMappingRequest(indexName);
         XContentBuilder builder = XContentFactory.jsonBuilder().startObject()

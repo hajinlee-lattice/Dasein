@@ -3,6 +3,7 @@ package com.latticeengines.spark.exposed.job.cdl
 import com.latticeengines.common.exposed.util.{CipherUtils, JsonUtils}
 import com.latticeengines.domain.exposed.camille.CustomerSpace
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection._
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJobConfiguration
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -12,6 +13,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.elasticsearch.spark._
 import org.elasticsearch.spark.sql._
 
+import scala.util.control.Breaks._
 import scala.collection.JavaConverters._
 
 class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElasticSearchJobConfiguration]{
@@ -25,19 +27,28 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
     val keys = indexToRole.keys.toSeq
     val customerSpace = config.getWorkspace
     val esConfigs = config.getEsConfigs
-    val baseConfig = getBaseConfig(esConfigs.getEsHost, esConfigs.getEsPort)
+    val baseConfig = getBaseConfig(esConfigs.getEsHost, esConfigs.getEsPort, esConfigs.getEsUser, esConfigs
+      .getEsPassword, esConfigs.getEncryptionKey, esConfigs.getSalt)
 
     for (key <- keys) {
-      val table : DataFrame = inputs(key)
-      val signature = indexToSignature(key)
-      val role = indexToRole(key)
-      val (entity, docIdCol) = getEntityAndDocIdFromRole(role)
-      val indexName = ElasticSearchUtils.constructIndexName(CustomerSpace.shortenCustomerSpace(customerSpace), entity,
-        signature)
-      if (role.eq(TableRoleInCollection.TimelineProfile))
-        table.saveToEs(indexName, baseConfig + ("es.mapping.id" -> sortKey))
-      else
-        saveToESWithMeta(table, indexName, role, docIdCol, baseConfig, true)
+      breakable {
+        val table: DataFrame = inputs(key)
+        val signature = indexToSignature(key)
+        val role = indexToRole(key)
+        val (entity, docIdCol) = getEntityAndDocIdFromRole(role)
+
+        if (entity == null || docIdCol == null) {
+          logSpark(s"entity or doc id column is not provided $role")
+          break
+        }
+
+        val indexName = ElasticSearchUtils.constructIndexName(CustomerSpace.shortenCustomerSpace(customerSpace), entity,
+          signature)
+        if (role == TableRoleInCollection.TimelineProfile)
+          table.saveToEs(indexName, baseConfig + ("es.mapping.id" -> sortKey))
+        else
+          saveToESWithMeta(table, indexName, role, docIdCol, baseConfig, true)
+      }
     }
   }
 
@@ -58,14 +69,24 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
   }
 
   def getEntityAndDocIdFromRole(role : TableRoleInCollection) : (String, String) = {
-    if (role.name().contains("Account")) {
-      (BusinessEntity.Account.name(), accountId)
-    } else if (role.name().contains("Contact")) {
-      (BusinessEntity.Contact.name(), contactId)
-    } else if(TableRoleInCollection.TimelineProfile.eq(role)) {
-      (TableRoleInCollection.TimelineProfile.name(), sortKey)
-    } else {
-      (null, null)
+    role match {
+      case AccountLookup |
+           ConsolidatedAccount |
+           CalculatedCuratedAccountAttribute |
+           CalculatedPurchaseHistory |
+           PivotedRating |
+           WebVisitProfile |
+           OpportunityProfile |
+           AccountMarketingActivityProfile |
+           CustomIntentProfile =>
+        (BusinessEntity.Account.name, accountId)
+      case ConsolidatedContact |
+           CalculatedCuratedContact =>
+        (BusinessEntity.Contact.name, contactId)
+      case TimelineProfile =>
+        (TimelineProfile.name, sortKey)
+      case _ =>
+        (null, null)
     }
   }
 

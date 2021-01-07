@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
 import com.latticeengines.domain.exposed.elasticsearch.PublishTableToESRequest;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ElasticSearchExportConfig;
@@ -87,7 +88,8 @@ public class PublishToElasticSearch extends BaseWorkflowStep<PublishToElasticSea
         request.setExportConfigs(configs);
         request.setEsConfig(generateCDLElasticSearchConfig());
 
-        publishTableProxy.publishTableToES(configuration.getCustomerSpace().toString(), request);
+        String appId = publishTableProxy.publishTableToES(configuration.getCustomerSpace().toString(), request);
+        log.info("appId is {}", appId);
     }
 
 
@@ -104,7 +106,12 @@ public class PublishToElasticSearch extends BaseWorkflowStep<PublishToElasticSea
         elasticSearchConfig.setEsHost(esHost);
         elasticSearchConfig.setEsPort(esPorts);
         elasticSearchConfig.setEsUser(user);
-        elasticSearchConfig.setEsPassword(password);
+        String encryptionKey = CipherUtils.generateKey();
+        elasticSearchConfig.setEncryptionKey(encryptionKey);
+        String saltHint = CipherUtils.generateKey();
+        elasticSearchConfig.setSalt(saltHint);
+        elasticSearchConfig.setEsPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
+        log.info("password is {}, encrypted password {}", password, elasticSearchConfig.getEsPassword());
         elasticSearchConfig.setHttpScheme(esHttpScheme);
         return elasticSearchConfig;
     }

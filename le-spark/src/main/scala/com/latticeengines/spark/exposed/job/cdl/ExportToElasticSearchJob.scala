@@ -29,7 +29,8 @@ class ExportToElasticSearchJob extends AbstractSparkJob[ExportToElasticSearchJob
       } else {
         null
       }
-    val baseConfig = getBaseConfig(esConfig.getEsHost, esConfig.getEsPort)
+    val baseConfig = getBaseConfig(esConfig.getEsHost, esConfig.getEsPort, esConfig.getEsUser, esConfig
+      .getEsPassword, esConfig.getEncryptionKey, esConfig.getSalt)
 
     var accountDf: DataFrame = null
     var contactDf: DataFrame = null
