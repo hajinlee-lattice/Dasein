@@ -110,6 +110,7 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
     private boolean readyForRollup;
 
     @Column(name = "ROLLUP_STATUS", nullable = false)
+    @Enumerated(EnumType.STRING)
     private RollupStatus rollupStatus = RollupStatus.READY;
 
     @Override

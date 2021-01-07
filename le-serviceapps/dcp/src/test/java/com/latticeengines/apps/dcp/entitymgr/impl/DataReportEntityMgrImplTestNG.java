@@ -57,6 +57,8 @@ public class DataReportEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
         geoDistributionReport.setGeographicalDistributionList(Collections.singletonList(geographicalItem));
         record.setGeoDistributionReport(geoDistributionReport);
 
+        record.setTenant(mainTestTenant);
+        record.setLevel(DataReportRecord.Level.Tenant);
         record.setOwnerId("Upload_pjqloe5t");
         record.setReadyForRollup(Boolean.TRUE);
         record.setRollupStatus(DataReportRecord.RollupStatus.READY);
@@ -64,7 +66,18 @@ public class DataReportEntityMgrImplTestNG extends DCPFunctionalTestNGBase {
 
         List<DataReportRecord> all = dataReportEntityMgr.findAll();
         log.info(String.format("Found %d DataReportRecord objects", all.size()));
-        Assert.assertEquals(all.size(), -1, "Expected DataReportRecords");
-        Assert.fail("Test not finished.");
+        Assert.assertEquals(all.size(), 1, "Expected DataReportRecords");
+        long notReadyDataRecords = all.stream().filter( rec -> rec.getRollupStatus() != DataReportRecord.RollupStatus.READY ).count();
+        Assert.assertEquals(notReadyDataRecords, 0, "Expected all records to be in READY status");  // check if any records are in a not READY status
+
+        String ownerId = record.getOwnerId();
+        DataReportRecord preLaunchedRecord = dataReportEntityMgr.findDataReportRecord(DataReportRecord.Level.Tenant, ownerId);
+        Assert.assertNotNull(preLaunchedRecord);
+        Assert.assertEquals(preLaunchedRecord.getRollupStatus(), DataReportRecord.RollupStatus.READY);
+        dataReportEntityMgr.updateDataReportRollupStatus(DataReportRecord.RollupStatus.SUBMITTED, DataReportRecord.Level.Tenant, ownerId);
+        DataReportRecord launchedRecord = dataReportEntityMgr.findDataReportRecord(DataReportRecord.Level.Tenant, ownerId);
+        Assert.assertNotNull(launchedRecord);
+        Assert.assertEquals(launchedRecord.getRollupStatus(), DataReportRecord.RollupStatus.SUBMITTED);
+
     }
 }

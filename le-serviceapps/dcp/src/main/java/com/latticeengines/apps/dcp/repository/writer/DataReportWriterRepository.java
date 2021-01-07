@@ -95,6 +95,6 @@ public interface DataReportWriterRepository extends DataReportRepository {
 
     @Transactional(transactionManager = "jpaTransactionManager")
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE DataReportRecord d SET d.rollupStatus = ?2 WHERE d.ownerId = ?3 AND d.level = ?2")
+    @Query("UPDATE DataReportRecord d SET d.rollupStatus = ?1 WHERE d.ownerId = ?3 AND d.level = ?2")
     int updateDataReportRollupStatus (DataReportRecord.RollupStatus status, DataReportRecord.Level level, String ownerId);
 }

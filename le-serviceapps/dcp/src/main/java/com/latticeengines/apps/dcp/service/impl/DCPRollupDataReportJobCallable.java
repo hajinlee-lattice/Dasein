@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReportMode;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.serviceflows.dcp.DCPDataReportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
@@ -33,6 +34,7 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
 
     private static final Logger log = LoggerFactory.getLogger(DCPRollupDataReportJobCallable.class);
 
+    // Run rollup every 16 hours
     private static final long TIME_PERIOD = TimeUnit.HOURS.toMillis(16L);
 
     private static final int LIMIT = 4;
@@ -62,13 +64,13 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
         log.info("begin to rollup tenant level data report");
         int pageIndex = 0;
         // check currently running dcp rollup workflow number
-        List<Job> jobs = workflowProxy.getJobs(null, Collections.singletonList("dcpDataReportWorkflow"),
+        List<Job> jobs = workflowProxy.getJobs(null, Collections.singletonList(DCPDataReportWorkflowConfiguration.WORKFLOW_NAME),
                 Arrays.asList(JobStatus.RUNNING.getName(), JobStatus.PENDING.getName(), JobStatus.ENQUEUED.getName(),
                         JobStatus.READY.getName()),
                 false);
         int number = CollectionUtils.size(jobs);
         if (number > LIMIT) {
-            log.info("the number of current running dcpDataReportWorkflow are {}", number);
+            log.info("the number of current running dcpDataReportWorkflow jobs is {} which is > than the limit {}", number, LIMIT);
             return null;
         }
 
@@ -91,12 +93,13 @@ public class DCPRollupDataReportJobCallable implements Callable<Boolean> {
                         log.info("disable rollup for tenant {}", ownerId);
                         continue;
                     }
-                    if (currentTime - refreshDate.getTime() > TIME_PERIOD) {
+                    if (currentTime - refreshDate.getTime() > TIME_PERIOD) {  // Is the time since last rollup > TIME_PERIOD?
                         DCPReportRequest request = new DCPReportRequest();
                         request.setRootId(ownerId);
                         request.setLevel(DataReportRecord.Level.Tenant);
                         request.setMode(DataReportMode.RECOMPUTE_TREE);
                         ApplicationId appId = dataReportProxy.rollupDataReport(CustomerSpace.parse(ownerId).toString(), request);
+                        dataReportEntityMgr.updateDataReportRollupStatus(DataReportRecord.RollupStatus.SUBMITTED, DataReportRecord.Level.Tenant, ownerId);
                         log.info("ownerId {}, refresh time {}, current time {}, the appId {}", ownerId, refreshDate,
                                 currentTime, appId);
                         number++;

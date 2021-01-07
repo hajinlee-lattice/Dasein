@@ -23,7 +23,7 @@ public class DataReportListener extends LEJobListener {
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
-        log.info("Before job execution, set status to GENERATING");
+        log.info("Before job execution, set status to RUNNING");
         String customerSpace = jobExecution.getJobParameters().getString("CustomerSpace");
         dataReportProxy.updateRollupStatus(customerSpace, DataReportRecord.RollupStatus.RUNNING);
     }
