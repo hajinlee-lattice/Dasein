@@ -52,7 +52,7 @@ public class VboServiceImplTestNG extends AbstractTestNGSpringContextTests {
     }
 
     @Test(groups = "functional")
-    public void testSendUserUsageEvent() {
+    public void testSendUserUsageEvent() throws InterruptedException {
         // retrieve meter value
         JsonNode meter = vboService.getSubscriberMeter(TEST_SUBSCRIBER_NUMBER);
         Assert.assertNotNull(meter);
@@ -63,7 +63,7 @@ public class VboServiceImplTestNG extends AbstractTestNGSpringContextTests {
         VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
         populateUsageEvent(usageEvent);
         vboService.sendUserUsageEvent(usageEvent);
-        try {Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+        Thread.sleep(3000);
         int updatedUsage = vboService.getSubscriberMeter(TEST_SUBSCRIBER_NUMBER).get("current_usage").asInt();
         Assert.assertEquals(updatedUsage, currentUsage + 1);
 
