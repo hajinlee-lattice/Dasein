@@ -16,4 +16,6 @@ public interface ExternalSystemAuthenticationEntityMgr {
 
     List<ExternalSystemAuthentication> findAuthentications();
 
+    List<ExternalSystemAuthentication> findAuthenticationsByTrayAuthId(String trayAuthId);
+
 }

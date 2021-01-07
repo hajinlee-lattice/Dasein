@@ -19,4 +19,5 @@ public interface DataIntegrationStatusMonitoringService {
 
     List<DataIntegrationStatusMonitor> getAllStatusesByEntityNameAndIds(String tenantId, String entityName, List<String> entityIds);
 
+    void createAuthenticationStatuses(List<DataIntegrationStatusMonitorMessage> statuses);
 }
