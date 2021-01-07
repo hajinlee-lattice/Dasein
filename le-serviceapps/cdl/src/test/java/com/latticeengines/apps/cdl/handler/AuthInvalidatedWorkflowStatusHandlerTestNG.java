@@ -56,8 +56,6 @@ public class AuthInvalidatedWorkflowStatusHandlerTestNG extends StatusHandlerTes
                 lookupIdMappingService, externalSystemAuthenticationService);
         handler.handleAuthenticationState(statusMessage);
 
-        //trayService.getTrayUserToken("9a6ce3a7-f4a3-48fc-a016-7d905c989a72");
-
         RetryTemplate retry = RetryUtils.getRetryTemplate(5, //
                 Collections.singleton(AssertionError.class), null);
 
