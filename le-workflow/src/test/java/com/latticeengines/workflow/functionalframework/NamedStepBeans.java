@@ -26,5 +26,9 @@ public class NamedStepBeans {
         return new NamedStep("D");
     }
 
+    @Bean
+    public NamedStep stepSkippedOnMissingConfig() {
+        return new NamedStep("SkippedOnMissingConfig", true);
+    }
 
 }
