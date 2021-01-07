@@ -35,7 +35,6 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     private void testGetBlocks() {
         List<DataBlock> blocks = primeMetadataService.getDataBlocks();
-        // System.out.println(JsonUtils.pprint(blocks));
 
         Assert.assertEquals(blocks.size(), 18);
         DataBlock compInfoBlock = blocks.stream() //
@@ -47,7 +46,6 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     private void testGetDataBlockMetadata() {
         DataBlockMetadataContainer container = primeMetadataService.getDataBlockMetadata();
-        // System.out.println(JsonUtils.serialize(container));
         Assert.assertNotNull(container);
         Assert.assertTrue(container.getBlocks().containsKey(BLOCK_BASE_INFO));
         Assert.assertTrue(container.getBlocks().containsKey(BLOCK_ENTITY_RESOLUTION));
