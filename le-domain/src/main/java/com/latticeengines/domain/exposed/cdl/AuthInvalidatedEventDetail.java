@@ -8,14 +8,11 @@ public class AuthInvalidatedEventDetail extends EventDetail {
         super("AuthInvalidated");
     }
 
-    @JsonProperty("tray_auth_id")
+    @JsonProperty("tray_authentication_id")
     private String trayAuthenticationId;
 
     @JsonProperty("tray_user_id")
     private String trayUserId;
-
-    @JsonProperty("env_name")
-    private String envName;
 
     public String getTrayAuthenticationId() {
         return trayAuthenticationId;
@@ -33,11 +30,4 @@ public class AuthInvalidatedEventDetail extends EventDetail {
         this.trayUserId = trayUserId;
     }
 
-    public String getEnvName() {
-        return envName;
-    }
-
-    public void setEnvName(String envName) {
-        this.envName = envName;
-    }
 }
