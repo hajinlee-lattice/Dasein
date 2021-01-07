@@ -106,7 +106,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @PreDestroy
     public void destroy() {
         if (isMatchHistoryEnabled) {
-            ThreadPoolUtils.shutdownAndAwaitTermination(publishExecutor, 30);
+            log.info("Shutting down match history executors");
+            ThreadPoolUtils.awaitTermination(publishExecutor, 60);
+            log.info("Completed shutting match history executors");
         }
     }
 
