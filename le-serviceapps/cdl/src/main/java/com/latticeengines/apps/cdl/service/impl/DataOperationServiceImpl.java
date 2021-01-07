@@ -108,7 +108,7 @@ public class DataOperationServiceImpl implements DataOperationService {
                 DeleteRequest request = new DeleteRequest();
                 request.setIdEntity(deleteOperationConfiguration.getEntity());
                 request.setFilename(sourceFile.getName());
-                request.setHardDelete(deleteOperationConfiguration.getDeleteType().equals(DataDeleteOperationConfiguration.DeleteType.HARD));
+                request.setHardDelete(DataDeleteOperationConfiguration.DeleteType.HARD.equals(deleteOperationConfiguration.getDeleteType()));
                 customerSpace = CustomerSpace.parse(customerSpace).toString();
                 ApplicationId applicationId = cdlDataCleanupService.registerDeleteData(customerSpace, request);
                 return applicationId.toString();
