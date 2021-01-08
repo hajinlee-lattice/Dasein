@@ -82,7 +82,7 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
     @Value("${qa.end2end.test.testdata.dir}")
     protected String qaTestDataPath;
 
-    @BeforeClass(groups = { "qaend2end" })
+    @BeforeClass(alwaysRun = true)
     public void init() {
         checkBasicInfo();
         setupTestEnvironment(mainTenant);
@@ -95,13 +95,13 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
         Assert.assertTrue(StringUtils.isNotEmpty(mainTenant), "Main tenant is required");
     }
 
-    @AfterClass(groups = { "qaend2end" })
+    @AfterClass(alwaysRun = true)
     public void tearDown() {
         logout();
     }
 
     protected void setupTestEnvironment(String existingTenant) {
-        System.out.println("Existing tenant: " + existingTenant);
+        log.info("Existing tenant: " + existingTenant);
         testBed.useExistingQATenantAsMain(existingTenant);
         mainTestTenant = testBed.getMainTestTenant();
         mainCustomerSpace = mainTestTenant.getId();
