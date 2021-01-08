@@ -416,24 +416,12 @@ public class UserResource {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
         String safeUsername = userService.getURLSafeUsername(username).toLowerCase();
-        User user = userService.findByUsername(safeUsername);
 
         Tracer tracer = GlobalTracer.get();
         Span userSpan = null;
         try (Scope scope = startUserSpan(username, System.currentTimeMillis())) {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
-
-            VboUserSeatUsageEvent usageEvent = null;
-            if (!EmailUtils.isInternalUser(user.getEmail())
-                    && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
-                usageEvent = new VboUserSeatUsageEvent();
-                usageEvent.setEmailAddress(loginUser.getEmail());
-                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
-                usageEvent.setPOAEID(traceId);
-                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCTDEC);
-                usageEvent.setLUID(loginUser.getPid());
-            }
 
             if (userService.inTenant(tenantId, safeUsername)) {
                 String loginUsername = loginUser.getUsername();
@@ -442,11 +430,19 @@ public class UserResource {
                 if (!userService.isSuperior(loginLevel, targetLevel)) {
                     response.setStatus(403);
                     return SimpleBooleanResponse.failedResponse(Collections.singletonList(String
-                            .format("Could not delete a %s user using a %s user.", targetLevel.name(), loginLevel.name())));
+                            .format("Could not delete a %s user using a %s user due to inferior access level.",
+                                    targetLevel.name(), loginLevel.name())));
                 }
                 userService.deleteUser(tenantId, safeUsername, true);
                 LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, safeUsername, tenantId));
-                if (usageEvent != null) {
+                if (!EmailUtils.isInternalUser(safeUsername)
+                        && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+                    VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
+                    usageEvent.setEmailAddress(loginUser.getEmail());
+                    usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                    usageEvent.setPOAEID(traceId);
+                    usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STDEC);
+                    usageEvent.setLUID(loginUser.getPid());
                     usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                     populateWithSubscriberDetails(usageEvent);
                     try {

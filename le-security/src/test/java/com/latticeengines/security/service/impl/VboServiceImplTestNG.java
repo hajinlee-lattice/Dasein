@@ -25,7 +25,7 @@ import com.latticeengines.security.service.VboService;
 public class VboServiceImplTestNG extends AbstractTestNGSpringContextTests {
     private static final String TEST_SUBSCRIBER_NUMBER = "500118856";
     private static final String TEST_SUBSCRIBER_EMAIL = "testDCP1@outlook.com";
-    private static final String TEST_SUBSCRIBER_NO_DNBCONNECT = "202007225";
+    private static final String TEST_SUBSCRIBER_NO_DNBCONNECT = "123456789";
     private static final Date CURRENT_DATE = new Date();
 
     @Inject
@@ -75,15 +75,12 @@ public class VboServiceImplTestNG extends AbstractTestNGSpringContextTests {
         } catch (HttpClientErrorException.NotAcceptable ignored) { }
 
         // valid STCTDEC (decrement) request
-        usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCTDEC);
-        try {
-            vboService.sendUserUsageEvent(usageEvent);
-            Thread.sleep(3000);
-            updatedUsage = vboService.getSubscriberMeter(TEST_SUBSCRIBER_NUMBER).get("current_usage").asInt();
-            Assert.assertEquals(updatedUsage, currentUsage);
-        } catch (Exception e) {
-            Assert.fail("Failed to decrement seat count.");
-        }
+        usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STDEC);
+        usageEvent.setSubscriberID(TEST_SUBSCRIBER_NUMBER);
+        vboService.sendUserUsageEvent(usageEvent);
+        Thread.sleep(3000);
+        updatedUsage = vboService.getSubscriberMeter(TEST_SUBSCRIBER_NUMBER).get("current_usage").asInt();
+        Assert.assertEquals(updatedUsage, currentUsage);
     }
 
     private void populateUsageEvent(VboUserSeatUsageEvent usageEvent) {
