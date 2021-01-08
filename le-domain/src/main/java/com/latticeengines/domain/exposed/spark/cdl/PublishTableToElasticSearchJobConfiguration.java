@@ -19,6 +19,9 @@ public class PublishTableToElasticSearchJobConfiguration extends SparkJobConfig 
     @JsonProperty("ESConfigs")
     private ElasticSearchConfig esConfigs;
 
+    @JsonProperty("CustomerSpace")
+    private String customerSpace;
+
     @Override
     public String getName() {
         return NAME;
@@ -53,4 +56,11 @@ public class PublishTableToElasticSearchJobConfiguration extends SparkJobConfig 
         this.esConfigs = esConfigs;
     }
 
+    public String getCustomerSpace() {
+        return customerSpace;
+    }
+
+    public void setCustomerSpace(String customerSpace) {
+        this.customerSpace = customerSpace;
+    }
 }

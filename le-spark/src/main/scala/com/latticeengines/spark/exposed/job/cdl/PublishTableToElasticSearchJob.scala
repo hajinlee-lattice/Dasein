@@ -25,7 +25,7 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
     val indexToRole = config.getIndexToRole.asScala
     val indexToSignature = config.getIndexToSignature.asScala
     val keys = indexToRole.keys.toSeq
-    val customerSpace = config.getWorkspace
+    val customerSpace = config.getCustomerSpace
     val esConfigs = config.getEsConfigs
     val baseConfig = getBaseConfig(esConfigs.getEsHost, esConfigs.getEsPort, esConfigs.getEsUser, esConfigs
       .getEsPassword, esConfigs.getEncryptionKey, esConfigs.getSalt)

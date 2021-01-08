@@ -120,6 +120,8 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
         config.setInput(units);
         config.setIndexToRole(indexToRole);
         config.setIndexToSignature(indexToSignature);
+        config.setEsConfigs(configuration.getEsConfigs());
+        config.setCustomerSpace(customerSpace.toString());
         return config;
     }
 

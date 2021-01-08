@@ -98,22 +98,26 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         boolean exists = elasticSearchService.indexExists(indexName);
         Assert.assertTrue(exists);
 
+        elasticSearchService.deleteIndex(indexName);
+        exists = elasticSearchService.indexExists(indexName);
+        Assert.assertFalse(exists);
+
     }
 
     private String setupTables() throws IOException {
-        Table dunsCountTable = JsonUtils
+        Table esTable = JsonUtils
                 .deserialize(IOUtils.toString(ClassLoader.getSystemResourceAsStream(
                         "end2end/role/timelineprofile.json"), "UTF-8"), Table.class);
-        String dunsCountTableName = NamingUtils.timestamp("dunsCount");
-        dunsCountTable.setName(dunsCountTableName);
-        Extract extract = dunsCountTable.getExtracts().get(0);
+        String esTableName = NamingUtils.timestamp("es");
+        esTable.setName(esTableName);
+        Extract extract = esTable.getExtracts().get(0);
         extract.setPath(PathBuilder
                 .buildDataTablePath(CamilleEnvironment.getPodId(),
                         CustomerSpace.parse(mainCustomerSpace))
-                .append(dunsCountTableName).toString()
+                .append(esTableName).toString()
                 + "/*.avro");
-        dunsCountTable.setExtracts(Collections.singletonList(extract));
-        metadataProxy.createTable(mainCustomerSpace, dunsCountTableName, dunsCountTable);
+        esTable.setExtracts(Collections.singletonList(extract));
+        metadataProxy.createTable(mainCustomerSpace, esTableName, esTable);
 
         String path = ClassLoader
                 .getSystemResource("end2end/role").getPath();
@@ -122,8 +126,8 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
                 PathBuilder
                         .buildDataTablePath(CamilleEnvironment.getPodId(),
                                 CustomerSpace.parse(mainCustomerSpace))
-                        .append(dunsCountTableName).append("part1.avro").toString());
-        return dunsCountTableName;
+                        .append(esTableName).append("part1.avro").toString());
+        return esTableName;
     }
 
 
