@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
 import com.latticeengines.domain.exposed.cdl.DataOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.DataOperationRequest;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ListSegmentImportRequest;
@@ -864,5 +865,12 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         String baseUrl = "/customerspaces/{customerSpace}/dataoperation?dropPath=" + dropPath;
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
         return get("Find Data Operation By Drop Path", url, DataOperation.class);
+    }
+
+    public ApplicationId submitDataOperationJob(String customerSpace, DataOperationRequest dataOperationRequest) {
+        String baseUrl = "/customerspaces/{customerSpace}/dataoperation/submitJob";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
+        String appIdStr = post("Submit Data Operation Job", url, dataOperationRequest, String.class);
+        return ApplicationIdUtils.toApplicationIdObj(appIdStr);
     }
 }

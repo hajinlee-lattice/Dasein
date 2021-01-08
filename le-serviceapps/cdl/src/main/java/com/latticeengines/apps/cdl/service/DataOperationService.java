@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.DataOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.DataOperationRequest;
 import com.latticeengines.domain.exposed.metadata.DataOperation;
 
 public interface DataOperationService {
@@ -16,4 +17,6 @@ public interface DataOperationService {
     DataOperation findDataOperationByDropPath(String customerSpace, String dropPath);
 
     void deleteDataOperation(String customerSpace, DataOperation dataOperation);
+
+    String submitJob(String customerSpace, DataOperationRequest dataOperationRequest);
 }
