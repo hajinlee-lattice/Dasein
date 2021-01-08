@@ -332,7 +332,7 @@ public class UserResource {
                 }
 
                 if (newUser && isDCPTenant && tenant.getTenantType() == TenantType.CUSTOMER
-                        && !EmailUtils.isInternalUser(user.getEmail())
+                        && !EmailUtils.isInternalUser(username)
                         && !hasAvailableSeats(tenant.getSubscriberNumber())) {
                     response.setStatus(403);
                     document.setErrors(Collections.
@@ -381,7 +381,7 @@ public class UserResource {
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
                 }
-                if (user != null && !EmailUtils.isInternalUser(user.getEmail())) {
+                if (!EmailUtils.isInternalUser(username)) {
                     VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
                     usageEvent.setEmailAddress(loginUser.getEmail());
                     usageEvent.setSubscriberID(tenant.getSubscriberNumber());
@@ -500,6 +500,11 @@ public class UserResource {
     }
 
     private boolean hasAvailableSeats(String subscriberNumber) {
+        // QA tenant case: null subscriber number
+        if (subscriberNumber == null) {
+            LOGGER.error("Unable to retrieve seat count meter: null subscriber number.");
+            return true;
+        }
         JsonNode meter = vboService.getSubscriberMeter(subscriberNumber);
         if (meter == null || !meter.has("limit") || !meter.has("current_usage")) {
             LOGGER.error("Unable to retrieve seat count meter for subscriber: " + subscriberNumber);
