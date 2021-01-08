@@ -33,7 +33,7 @@ def checkGroupElements( bidnameMap, result_elem ):
     if ( len(errorelement) > 0 ):
        print("ERROR: Some elements are not grouped together within its block")
     else:
-       print("SUCCESS: All elements are not grouped together within its block")
+       print("SUCCESS: All elements are grouped together within its block")
 
 # Get Data Block Elements of the Enrichment Layout given a source id
 def getLayoutDBE(): 
