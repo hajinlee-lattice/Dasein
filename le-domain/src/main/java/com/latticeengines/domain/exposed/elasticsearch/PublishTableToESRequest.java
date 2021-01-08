@@ -14,15 +14,15 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ElasticSearchEx
 public class PublishTableToESRequest {
 
 
-    @JsonProperty("exportConfigs")
+    @JsonProperty("ExportConfigs")
     private List<ElasticSearchExportConfig> exportConfigs;
 
-    @JsonProperty("esConfigs")
+    @JsonProperty("EsConfigs")
     private ElasticSearchConfig esConfig;
 
     // optional parameter, if specified, will use it instead of the
     // config in ElasticSearchExportConfig
-    @JsonProperty("signature")
+    @JsonProperty("Signature")
     private String signature;
 
 

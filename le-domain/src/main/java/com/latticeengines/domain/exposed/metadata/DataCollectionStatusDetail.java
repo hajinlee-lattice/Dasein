@@ -111,7 +111,7 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("timelineRebuildFlag")
     private Boolean timelineRebuildFlag;
 
-    // maybe retire as value is store in data unit too
+    // maybe retire as value has been stored in data unit
     //key: BusinessEntity.name() -> value: elasticsearchVersion
     @JsonProperty("entityToESVersionMap")
     private Map<String, String> entityToESVersionMap;

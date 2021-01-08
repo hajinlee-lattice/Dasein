@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
+package com.latticeengines.domain.exposed.serviceflows.cdl.steps.publish;
 
 import java.util.List;
 

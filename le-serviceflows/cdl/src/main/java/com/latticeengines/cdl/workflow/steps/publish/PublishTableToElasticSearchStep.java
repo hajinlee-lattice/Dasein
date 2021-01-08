@@ -1,6 +1,6 @@
-package com.latticeengines.cdl.workflow.steps;
+package com.latticeengines.cdl.workflow.steps.publish;
 
-import static com.latticeengines.cdl.workflow.steps.PublishTableToElasticSearchStep.BEAN_NAME;
+import static com.latticeengines.cdl.workflow.steps.publish.PublishTableToElasticSearchStep.BEAN_NAME;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.ElasticSearchDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.PublishTableToElasticSearchStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.publish.PublishTableToElasticSearchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ElasticSearchExportConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJobConfiguration;

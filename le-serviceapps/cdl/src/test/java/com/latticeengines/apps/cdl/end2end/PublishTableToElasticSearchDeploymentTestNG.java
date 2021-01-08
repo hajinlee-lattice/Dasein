@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import static com.latticeengines.apps.cdl.end2end.ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -9,7 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -18,10 +16,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
 import com.latticeengines.domain.exposed.elasticsearch.PublishTableToESRequest;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -57,7 +57,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
     public void setup() throws Exception {
         super.setup();
         // account/contact in check point, not time line profile
-        resumeCheckpoint(CHECK_POINT);
+        // resumeCheckpoint(CHECK_POINT);
     }
 
     @Test(groups = "end2end")
@@ -71,6 +71,15 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         config.setTableName(tableName);
         List<ElasticSearchExportConfig> configs = Collections.singletonList(config);
         request.setExportConfigs(configs);
+
+        ElasticSearchConfig esConfig = elasticSearchService.getDefaultElasticSearchConfig();
+        String encryptionKey = CipherUtils.generateKey();
+        String salt = CipherUtils.generateKey();
+        esConfig.setEncryptionKey(encryptionKey);
+        esConfig.setSalt(salt);
+        esConfig.setEsPassword(CipherUtils.encrypt(esConfig.getEsPassword(), encryptionKey, salt));
+
+        request.setEsConfig(esConfig);
 
         String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
 

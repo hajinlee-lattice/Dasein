@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineR
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.PublishToElasticSearchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CommitEntityMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -81,6 +82,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
         private ConvertBatchStoreToDataTableWorkflowConfiguration.Builder convertBatchStoreToDataTableWorkflowBuilder = new ConvertBatchStoreToDataTableWorkflowConfiguration.Builder();
         private LegacyDeleteWorkflowConfiguration.Builder legacyDeleteWorkFlowBuilder = new LegacyDeleteWorkflowConfiguration.Builder();
+        private PublishToElasticSearchConfiguration publishToElasticSearchConfiguration =
+                new PublishToElasticSearchConfiguration();
 
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
@@ -112,6 +115,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             apsGenerationStepConfiguration.setCustomer(customerSpace.getTenantId());
             importExportS3.setCustomerSpace(customerSpace);
+            publishToElasticSearchConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -125,6 +129,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             processTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             importExportS3.setMicroServiceHostPort(microServiceHostPort);
+            publishToElasticSearchConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -149,6 +154,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             importExportS3.setInternalResourceHostPort(internalResourceHostPort);
+            publishToElasticSearchConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -473,6 +479,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(awsPythonDataConfiguration);
             configuration.add(apsGenerationStepConfiguration);
             configuration.add(importExportS3);
+            configuration.add(publishToElasticSearchConfiguration);
             return configuration;
         }
     }
