@@ -69,7 +69,7 @@ public enum TableRoleInCollection {
     TimelineProfile, //
     AccountJourneyStage, //
     ActivityAlert, //
-    AccountMaster,
+    AccountMaster, //
     ConsolidatedWebVisit;
 
     static {
@@ -178,6 +178,7 @@ public enum TableRoleInCollection {
         PeriodStores.hasSignature = true;
         MetricsGroup.hasSignature = true;
         TimelineProfile.hasSignature = true;
+        ConsolidateWebVisit.hasSignature = true;
     }
 
     private static final Logger log = LoggerFactory.getLogger(TableRoleInCollection.class);
