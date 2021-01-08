@@ -155,4 +155,10 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
         log.info("Activity alert publication completed");
         putObjectInContext(ACTIVITY_ALERT_PUBLISHED, true);
     }
+
+    @Override
+    public boolean skipOnMissingConfiguration() {
+        // for retrying old jobs from previous release
+        return true;
+    }
 }
