@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.pls.UserUpdateResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
@@ -171,7 +170,7 @@ public class UserResource {
             response.setErrors(Collections.singletonList("Cannot create a user with higher access level."));
             return response;
         }
-        if (isDCPTenant && tenant.getTenantType() == TenantType.CUSTOMER && !EmailUtils.isInternalUser(user.getEmail())
+        if (isDCPTenant && !EmailUtils.isInternalUser(user.getEmail())
                 && !hasAvailableSeats(tenant.getSubscriberNumber())) {
             httpResponse.setStatus(403);
             response.setErrors(Collections
@@ -296,7 +295,13 @@ public class UserResource {
         String tenantId = tenant.getId();
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
+        // Assumes the UI first calls `register`. If the user exists, it calls `update`. User shouldn't be null.
         User user = userService.findByUsername(username);
+        if (user == null) {
+            response.setStatus(500);
+            document.setErrors(Collections.singletonList("Cannot update a non-existing user."));
+            return document;
+        }
         boolean newUser = !userService.inTenant(tenantId, username);
         boolean isDCPTenant = batonService.hasProduct(CustomerSpace.parse(tenantId), LatticeProduct.DCP);
         // update access level
@@ -331,8 +336,7 @@ public class UserResource {
                     return document;
                 }
 
-                if (newUser && isDCPTenant && tenant.getTenantType() == TenantType.CUSTOMER
-                        && !EmailUtils.isInternalUser(username)
+                if (newUser && isDCPTenant && !EmailUtils.isInternalUser(username)
                         && !hasAvailableSeats(tenant.getSubscriberNumber())) {
                     response.setStatus(403);
                     document.setErrors(Collections.
@@ -500,9 +504,9 @@ public class UserResource {
     }
 
     private boolean hasAvailableSeats(String subscriberNumber) {
-        // QA tenant case: null subscriber number
-        if (subscriberNumber == null) {
-            LOGGER.error("Unable to retrieve seat count meter: null subscriber number.");
+        if (subscriberNumber == null || !hasDnBConnectEntitlement(subscriberNumber)) {
+            String msg = (subscriberNumber == null) ? "null subscriber number." : "missing D&B Connect entitlement.";
+            LOGGER.error("Unable to retrieve seat count meter: " + msg);
             return true;
         }
         JsonNode meter = vboService.getSubscriberMeter(subscriberNumber);
@@ -514,5 +518,13 @@ public class UserResource {
             LOGGER.info("Null current_usage in meter for subscriber: " + subscriberNumber);
         int current_usage = (meter.get("current_usage") == null) ? 0 : meter.get("current_usage").asInt();
         return current_usage < meter.get("limit").asInt();
+    }
+
+    private boolean hasDnBConnectEntitlement(String subscriberNumber) {
+        SubscriberDetails details = iDaaSService.getSubscriberDetails(subscriberNumber);
+        if (details != null && details.getProducts() != null) {
+            return details.getProducts().contains("D&B Connect");
+        }
+        return false;
     }
 }
