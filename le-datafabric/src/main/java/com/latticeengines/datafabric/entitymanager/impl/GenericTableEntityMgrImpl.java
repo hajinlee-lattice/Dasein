@@ -75,7 +75,6 @@ public class GenericTableEntityMgrImpl implements GenericTableEntityMgr {
         if (CollectionUtils.isNotEmpty(ids)) {
             List<GenericTableEntity> entities = internalEntityMgr.batchFindByKey(ids);
             entities.forEach(entity -> {
-                System.out.println(JsonUtils.serialize(entity));
                 if (entity == null) {
                     results.add(null);
                 } else {
