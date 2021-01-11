@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.LatticeFieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 
 public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
@@ -169,26 +170,28 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
                 assertTemplateMappingHeaders(mapping);
             } else {
                 String[] fields = mapping.split(",");
-                log.info("field0: " + fields[0] + ", field1 " + fields[1] + "field2 " + fields[2] + "field3 " + fields[3] +
-                        "field4 " + fields[4]);
                 if (fields[3].equals("ContactId")) {
                     Assert.assertEquals(fields[0], CUSTOM);
                     Assert.assertEquals(fields[2], "ID");
                     Assert.assertEquals(fields[4], UserDefinedType.TEXT.name());
                 } else if (fields[3].equals("CustomerContactId")) {
                     Assert.assertEquals(fields[0], STANDARD);
+                    Assert.assertEquals(fields[1], LatticeFieldCategory.Other.name());
                     Assert.assertEquals(fields[2], "ID");
                     Assert.assertEquals(fields[4], UserDefinedType.TEXT.name());
                 } else if (fields[3].equals("ContactName")) {
                     Assert.assertEquals(fields[0], STANDARD);
+                    Assert.assertEquals(fields[1], LatticeFieldCategory.Other.name());
                     Assert.assertEquals(fields[2], "Name");
                     Assert.assertEquals(fields[4], UserDefinedType.TEXT.name());
                 } else if (fields[3].equals("CreatedDate")) {
                     Assert.assertEquals(fields[0], STANDARD);
+                    Assert.assertEquals(fields[1], LatticeFieldCategory.Other.name());
                     Assert.assertEquals(fields[2], "Created Date");
                     Assert.assertEquals(fields[4], "MM/DD/YYYY 00:00:00 12H");
                 } else if (fields[3].equals("LastModifiedDate")) {
                     Assert.assertEquals(fields[0], STANDARD);
+                    Assert.assertEquals(fields[1], LatticeFieldCategory.Other.name());
                     Assert.assertEquals(fields[2], UNMAPPED);
                     Assert.assertEquals(fields[4], UserDefinedType.DATE.name());
                 }
@@ -319,7 +322,6 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
     }
 
     private void verifyAccountMapping(String field0, String field1, String field2, String field3, String field4) {
-        log.info("field0: " + field0 + ", field1 " + field1 + "field2 " + field2 + "field3 " + field3 + "field4 " + field4);
         if ("AccountId".equals(field3)) {
             Assert.assertEquals(field0, STANDARD);
 //            Assert.assertEquals(field1, LatticeFieldCategory.MatchField.name());
@@ -327,12 +329,12 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
             Assert.assertEquals(field4, UserDefinedType.TEXT.name());
         } else if ("CustomerAccountId".equals(field3)) {
             Assert.assertEquals(field0, STANDARD);
-//            Assert.assertEquals(field1, LatticeFieldCategory.Other.name());
+            Assert.assertEquals(field1, LatticeFieldCategory.Other.name());
             Assert.assertEquals(field2, "ID");
             Assert.assertEquals(field4, UserDefinedType.TEXT.name());
         } else if ("Type".equals(field3)) {
             Assert.assertEquals(field0, STANDARD);
-//            Assert.assertEquals(field1, LatticeFieldCategory.Other.name());
+            Assert.assertEquals(field1, LatticeFieldCategory.Other.name());
             Assert.assertEquals(field2, "Type");
             Assert.assertEquals(field4, UserDefinedType.TEXT.name());
         } else if ("user_TestDate1".equalsIgnoreCase(field3)) {
