@@ -94,12 +94,19 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
         }
         DataUnit unit = dataUnitProxy.getByNameAndType(configuration.getCustomerSpace().toString(),
                 TableRoleInCollection.TimelineProfile.name(), DataUnit.StorageType.ElasticSearch);
-        boolean rebuild = getObjectFromContext(TIMELINE_REBUILD, Boolean.class);
-        boolean fromFullTimeMap = unit == null || rebuild;
+        Boolean rebuild = getObjectFromContext(TIMELINE_REBUILD, Boolean.class);
+        boolean isNull = unit == null;
+        boolean isRebuild = Boolean.TRUE.equals(rebuild);
+        log.info("data unit is null: {}, rebuild {}", isNull, isRebuild);
+        boolean fromFullTimeMap = isNull | isRebuild;
         Map<String, String> timelineTableNames = fromFullTimeMap ?
                 getMapObjectFromContext(TIMELINE_MASTER_TABLE_NAME, String.class, String.class) :
                 getMapObjectFromContext(TIMELINE_DIFF_TABLE_NAME, String.class, String.class);
 
+        if (MapUtils.isEmpty(timelineTableNames)) {
+            log.info("empty time line table map");
+            return ;
+        }
         // get time line version
         String streamId =  TimeLineStoreUtils.contructTimelineId(configuration.getCustomerSpace().toString(),
                 TimeLineStoreUtils.ACCOUNT360_TIMELINE_NAME);
