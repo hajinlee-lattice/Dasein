@@ -176,4 +176,10 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
         LookupIdMap existingLookupIdMap = lookupIdMappingRepository.findById(id);
         getDao().delete(existingLookupIdMap);
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public LookupIdMap getLookupIdMapByExtSysAuth(String externalSystemAuthId) {
+        return lookupIdMappingRepository.findByExternalSystemAuthentication(externalSystemAuthId);
+    }
 }

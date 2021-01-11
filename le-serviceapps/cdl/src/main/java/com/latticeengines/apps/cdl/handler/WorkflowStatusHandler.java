@@ -49,4 +49,10 @@ public interface WorkflowStatusHandler {
         playLaunchChannelService.updateCurrentLaunchedAccountUniverseWithPrevious(channel);
         playLaunchChannelService.updateCurrentLaunchedContactUniverseWithPrevious(channel);
     }
+
+    default void handleAuthenticationState(DataIntegrationStatusMonitorMessage status) {
+        if (status == null) {
+            throw new LedpException(LedpCode.LEDP_40047, new String[] { "null" });
+        }
+    };
 }
