@@ -32,6 +32,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.dynamo.DynamoItemService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datafabric.entitymanager.GenericTableEntityMgr;
@@ -90,6 +91,9 @@ public class CDLLookupServiceImpl implements CDLLookupService {
 
     @Inject
     private ElasticSearchService elasticSearchService;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("${eai.export.dynamo.accountlookup.signature}")
     private String accountLookupSignature;
@@ -202,6 +206,20 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     }
 
     @Override
+    public List<String> lookupInternalAccountIds(String customerSpace, DataCollection.Version version, String lookupIdKey,
+                                            List<String> lookupIdValues) {
+        if (CollectionUtils.isEmpty(lookupIdValues)) {
+            return Collections.emptyList();
+        }
+        DynamoDataUnit lookupDataUnit = accountLookupDUCache.get(customerSpace);
+        if (lookupDataUnit == null) {
+            log.info("lookupDataUnit is null, returun orginal lookup values.");
+            return lookupIdValues;
+        }
+        return getInternalAccountIds(lookupDataUnit, lookupIdKey, lookupIdValues);
+    }
+
+    @Override
     public boolean clearAccountLookupDUCache() {
         accountLookupDUCache.invalidateAll();
         return true;
@@ -236,13 +254,8 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             String tenantId = lookupDataUnit.getTenant();
             Integer version = lookupDataUnit.getVersion();
             String tableName = String.format(ACCOUNT_LOOKUP_TABLE_FORMAT, signature);
-            List<String> keys = new ArrayList<>();
-            if (StringUtils.isNotBlank(lookupIdKey)) {
-                keys.add(constructAccountLookupKey(tenantId, version, lookupIdKey, lookupIdValue));
-            }
-            if (!InterfaceName.AccountId.name().equalsIgnoreCase(lookupIdKey)) {
-                keys.add(constructAccountLookupKey(tenantId, version, InterfaceName.AccountId.name(), lookupIdValue));
-            }
+            boolean entityMatchEnable = batonService.isEntityMatchEnabled(CustomerSpace.parse(tenantId));
+            List<String> keys = getKeys(tenantId, version, lookupIdKey, lookupIdValue, entityMatchEnable);
             List<PrimaryKey> searchKeys = keys.stream()
                     .map(key -> new PrimaryKey(InterfaceName.AtlasLookupKey.name(), key)).collect(Collectors.toList());
             Map<String, Item> records = dynamoItemService.batchGet(tableName, searchKeys).stream()
@@ -255,6 +268,56 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             }
         }
         return null;
+    }
+
+    private List<String> getKeys(String tenantId, Integer version, String lookupIdKey, String lookupIdValue, boolean entityMatchEnable) {
+        List<String> keys = new ArrayList<>();
+        if (StringUtils.isNotBlank(lookupIdKey)) {
+            keys.add(constructAccountLookupKey(tenantId, version, lookupIdKey, lookupIdValue));
+        }
+        if (entityMatchEnable && !InterfaceName.CustomerAccountId.name().equalsIgnoreCase(lookupIdKey)) {
+            keys.add(constructAccountLookupKey(tenantId, version, InterfaceName.CustomerAccountId.name(), lookupIdValue));
+        }
+        if (!InterfaceName.AccountId.name().equalsIgnoreCase(lookupIdKey)) {
+            keys.add(constructAccountLookupKey(tenantId, version, InterfaceName.AccountId.name(), lookupIdValue));
+        }
+        return keys;
+    }
+
+    private List<String> getInternalAccountIds(DynamoDataUnit lookupDataUnit, String lookupIdKey, List<String> rawLookupIdValues) {
+        if (lookupDataUnit != null) {
+            String signature = extractAccountLookupSignature(lookupDataUnit);
+            String tenantId = lookupDataUnit.getTenant();
+            Integer version = lookupDataUnit.getVersion();
+            String tableName = String.format(ACCOUNT_LOOKUP_TABLE_FORMAT, signature);
+            Map<String, List<PrimaryKey>> searchKeys = new HashMap<>();
+            boolean entityMatchEnable = batonService.isEntityMatchEnabled(CustomerSpace.parse(tenantId));
+            for (String rawLookupIdValue : rawLookupIdValues) {
+                String lookupIdValue = rawLookupIdValue.toLowerCase();
+                List<String> keys = getKeys(tenantId, version, lookupIdKey, lookupIdValue, entityMatchEnable);
+                searchKeys.put(rawLookupIdValue, keys.stream().map(key -> new PrimaryKey(InterfaceName.AtlasLookupKey.name(), key)).collect(Collectors.toList()));
+            }
+            Map<String, Item> records = dynamoItemService.batchGet(tableName,
+                    searchKeys.values().stream().flatMap(List::stream).collect(Collectors.toList())).stream()
+                    .filter(record -> BooleanUtils.isNotTrue(record.getBoolean(LOOKUP_DELETED)))
+                    .map(record -> Pair.of(record.getString(InterfaceName.AtlasLookupKey.name()), record))
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            return rawLookupIdValues.stream().map(rawLookupIdValue -> getInternalIdValue(rawLookupIdValue, searchKeys, records)).collect(Collectors.toList());
+        } else {
+            log.info("lookupDataUnit is null when query internal account id.");
+            return rawLookupIdValues;
+        }
+    }
+
+    private String getInternalIdValue(String rawLookupValue, Map<String, List<PrimaryKey>> searchKeys, Map<String, Item> records) {
+        List<PrimaryKey> keys = searchKeys.get(rawLookupValue);
+        List<Item> validRecords =
+                keys.stream().map(key -> records.get(key.getComponents().iterator().next().getValue())).filter(Objects::nonNull).collect(Collectors.toList());
+        if (validRecords.size() >= 1) { // find first added to search key
+            return validRecords.get(0).getString(InterfaceName.AccountId.name());
+        } else {
+            return rawLookupValue;
+        }
     }
 
     private String legacyLookupInternalAccountId(String customerSpace, DataCollection.Version version, String lookupIdKey,
