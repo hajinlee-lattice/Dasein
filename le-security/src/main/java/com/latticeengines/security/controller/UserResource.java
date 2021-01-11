@@ -298,7 +298,7 @@ public class UserResource {
         // Assumes the UI first calls `register`. If the user exists, it calls `update`. User shouldn't be null.
         User user = userService.findByUsername(username);
         if (user == null) {
-            response.setStatus(500);
+            response.setStatus(403);
             document.setErrors(Collections.singletonList("Cannot update a non-existing user."));
             return document;
         }
