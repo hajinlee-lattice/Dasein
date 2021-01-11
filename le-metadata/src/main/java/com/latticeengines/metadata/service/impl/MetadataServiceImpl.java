@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.PrestoDataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -353,19 +352,7 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public AthenaDataUnit registerAthenaDataUnit(CustomerSpace customerSpace, String tableName) {
         if (TableType.DATATABLE.equals(tableTypeHolder.getTableType())) {
-            // find athena data unit
-            AthenaDataUnit oldDataUnit = (AthenaDataUnit) //
-                    dataUnitService.findByNameTypeFromReader(tableName, DataUnit.StorageType.Athena);
-            if (oldDataUnit != null && athenaService.tableExists(oldDataUnit.getAthenaTable())) {
-                log.info("Already found a athena data unit named {} : {}", tableName, oldDataUnit.getAthenaTable());
-                return oldDataUnit;
-            }
-            // find s3 data unit
-            S3DataUnit s3DataUnit = (S3DataUnit) //
-                    dataUnitService.findByNameTypeFromReader(tableName, DataUnit.StorageType.S3);
-            Preconditions.checkNotNull(s3DataUnit, "Cannot find s3 data unit named " + tableName);
-            AthenaDataUnit athenaDataUnit = athenaService.saveDataUnit(s3DataUnit);
-            return (AthenaDataUnit) dataUnitService.createOrUpdateByNameAndStorageType(athenaDataUnit);
+            return dataUnitService.registerAthenaDataUnit(tableName);
         } else {
             throw new IllegalStateException("Can only register data table to presto");
         }

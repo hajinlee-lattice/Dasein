@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 
-public class CSVFileImportAddLatticeFieldDeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
+public class CSVFileImportAddLatticeFieldIW2DeploymentTestNG extends CSVFileImportIW2DeploymentTestNGBase {
 
     private static final String CONTACT_DATE_FILE = "Contact_Date.csv";
 
@@ -32,6 +32,7 @@ public class CSVFileImportAddLatticeFieldDeploymentIW2TestNG extends CSVFileImpo
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment")

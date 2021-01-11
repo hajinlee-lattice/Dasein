@@ -127,8 +127,9 @@ public class ActivityStoreResource {
     @ApiOperation("Retrieve all dimension metadata with target signature and tenant")
     public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata( //
             @PathVariable(value = "customerSpace") String customerSpace,
-            @RequestParam(value = "signature", required = false) String signature) {
-        return activityStoreService.getDimensionMetadata(customerSpace, signature);
+            @RequestParam(value = "signature", required = false) String signature,
+            @RequestParam(value = "withStreamName", defaultValue = "true", required = false) boolean withStreamName) {
+        return activityStoreService.getDimensionMetadata(customerSpace, signature, withStreamName);
     }
 
     @GetMapping("/dimensionMetadata/streams/{streamName}")

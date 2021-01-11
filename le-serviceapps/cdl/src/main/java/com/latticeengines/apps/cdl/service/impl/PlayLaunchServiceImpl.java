@@ -122,6 +122,11 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
+    public List<PlayLaunch> findByDestinationOrgId(String destinationOrgId) {
+        return playLaunchEntityMgr.findByDestinationOrgId(destinationOrgId);
+    }
+
+    @Override
     public PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> launchStates) {
         return playLaunchEntityMgr.findLatestByPlayId(playId, launchStates);
     }

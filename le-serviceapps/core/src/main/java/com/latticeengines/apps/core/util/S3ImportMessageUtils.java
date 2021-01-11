@@ -24,6 +24,7 @@ public final class S3ImportMessageUtils {
     private static final Pattern ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Templates/(.*)");
     private static final Pattern LEGACY_ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/([a-zA-Z0-9_]+)/Templates/(.*)");
     private static final Pattern LIST_SEGMENT_PATTERN = Pattern.compile("datavision_segment/([a-zA-Z0-9_]+)/([a-zA-Z0-9_]+)/(.*)");
+    private static final Pattern DATA_OPERATION_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Data_Operation/(.*)");
 
     public static final List<String> validImportFileTypes = Lists.newArrayList(".csv", ".gzip", ".gz", ".tar", ".tar.gz", ".zip");
 
@@ -41,6 +42,8 @@ public final class S3ImportMessageUtils {
                 return S3ImportMessageType.Atlas;
             } else if (LIST_SEGMENT_PATTERN.matcher(key).find()) {
                 return S3ImportMessageType.LISTSEGMENT;
+            } else if (DATA_OPERATION_PATTERN.matcher(key).find()) {
+                return S3ImportMessageType.DATAOPERATION;
             }
             else {
                 return S3ImportMessageType.UNDEFINED;
@@ -57,6 +60,7 @@ public final class S3ImportMessageUtils {
                 break;
             case DCP:
             case LISTSEGMENT:
+            case DATAOPERATION:
                 break;
             default:
                 skip = true;
@@ -156,6 +160,14 @@ public final class S3ImportMessageUtils {
         String segmentName = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.LISTSEGMENT,
                 S3ImportMessageUtils.KeyPart.SEGMENT_NAME);
         return tenantId + "_" + segmentName;
+    }
+
+    public static String getDropPathFromMessage(S3ImportMessage message) {
+        String key = message.getKey();
+        if (StringUtils.isEmpty(key)) {
+            return StringUtils.EMPTY;
+        }
+        return message.getBucket() + "/" + key.substring(0, key.lastIndexOf("/") + 1);
     }
 
     public enum KeyPart {

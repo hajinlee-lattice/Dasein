@@ -27,6 +27,9 @@ public class DynamicWorkflow extends AbstractWorkflow<DynamicWorkflowConfigurati
     @Resource(name = "stepD")
     private NamedStep stepD;
 
+    @Resource(name = "stepSkippedOnMissingConfig")
+    private NamedStep stepSkippedOnMissingConfig;
+
     @Inject
     private DynamicSubWorkflowA subWorkflowA;
 
@@ -45,6 +48,7 @@ public class DynamicWorkflow extends AbstractWorkflow<DynamicWorkflowConfigurati
                 .next(stepC) //
                 .next(subWorkflowB) //
                 .next(stepD) //
+                .next(stepSkippedOnMissingConfig) //
                 .choreographer(choreographer) //
                 .build();
     }

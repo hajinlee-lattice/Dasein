@@ -66,6 +66,10 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             context.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
             context.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
             context.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
+            if (config.getProperty(ImportProperty.ENABLE_ERASE_BY_NULL) != null) {
+                context.setProperty(ImportProperty.ENABLE_ERASE_BY_NULL,
+                        config.getProperty(ImportProperty.ENABLE_ERASE_BY_NULL));
+            }
             if (config.getBusinessEntity() != null &&
                     (config.getBusinessEntity().equals(BusinessEntity.Transaction)
                             || config.getBusinessEntity().equals(BusinessEntity.Product))) {

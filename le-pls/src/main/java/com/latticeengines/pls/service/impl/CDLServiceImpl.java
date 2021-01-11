@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.latticeengines.app.exposed.download.TemplateFileHttpDownloader;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -92,7 +93,6 @@ import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.pls.download.TemplateFileHttpDownloader;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
@@ -652,7 +652,7 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public void createS3ImportSystem(String customerSpace, String systemDisplayName,
+    public String createS3ImportSystem(String customerSpace, String systemDisplayName,
             S3ImportSystem.SystemType systemType, Boolean primary) {
         S3ImportSystem s3ImportSystem = new S3ImportSystem();
         String systemName = AvroUtils.getAvroFriendlyString(systemDisplayName);
@@ -663,8 +663,23 @@ public class CDLServiceImpl implements CDLService {
         if (Boolean.TRUE.equals(primary)) {
             s3ImportSystem.setPriority(1);
         }
+        switch (systemType) {
+            case Salesforce:
+                 String accountSystemId = s3ImportSystem.generateAccountSystemId();
+                 s3ImportSystem.setAccountSystemId(accountSystemId);
+                break;
+            case Marketo:
+            case Eloqua:
+            case Pardot:
+                String contactSystemId = s3ImportSystem.generateContactSystemId();
+                s3ImportSystem.setContactSystemId(contactSystemId);
+                break;
+            default:
+                break;
+        }
         cdlProxy.createS3ImportSystem(customerSpace, s3ImportSystem);
         dropBoxProxy.createTemplateFolder(customerSpace, systemName, null, null);
+        return systemName;
     }
 
     @Override

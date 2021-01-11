@@ -2,7 +2,10 @@ package com.latticeengines.metadata.repository.document;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.query.Param;
 
 import com.latticeengines.documentdb.entity.DataUnitEntity;
 import com.latticeengines.documentdb.repository.MultiTenantDocumentRepository;
@@ -24,4 +27,7 @@ public interface DataUnitRepository extends MultiTenantDocumentRepository<DataUn
     List<DataUnitEntity> findByTenantIdAndDataTemplateId(String tenantId, String dataTemplateId);
 
     List<DataUnitEntity> findByTenantIdAndDataTemplateIdOrderByCreatedDate(String tenantId, String dataTemplateId);
+
+    @Query("SELECT m FROM DataUnitEntity m WHERE JSON_EXTRACT(document, '$.retentionPolicy') is not null AND JSON_EXTRACT(document, '$.retentionPolicy') != :noExpirePolicy")
+    List<DataUnitEntity> findAllDataUnitEntitiesWithExpiredRetentionPolicy(@Param("noExpirePolicy") String noExpirePolicy, Pageable pageable);
 }

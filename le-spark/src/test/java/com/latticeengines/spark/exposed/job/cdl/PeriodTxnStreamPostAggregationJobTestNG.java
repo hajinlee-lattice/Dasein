@@ -2,8 +2,10 @@ package com.latticeengines.spark.exposed.job.cdl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -41,12 +44,21 @@ public class PeriodTxnStreamPostAggregationJobTestNG extends SparkJobFunctionalT
 
     private static final int minPeriod = 10;
     private static final int maxPeriod = 20;
+    private static final Set<Integer> missingPeriods = new HashSet<>();
+
+    static {
+        for (int i = minPeriod + 1; i < maxPeriod; i++) {
+            missingPeriods.add(i);
+        }
+    }
 
     @Test(groups = "functional")
     private void test() {
         SparkJobResult result = runSparkJob(PeriodTxnStreamPostAggregationJob.class,
                 new PeriodTxnStreamPostAggregationConfig(), Collections.singletonList(setupAnalyticMonthPeriod()),
                 getWorkspace());
+        log.info("Filled missing periods: {}", result.getOutput());
+        Assert.assertEquals(missingPeriods, JsonUtils.deserialize(result.getOutput(), Set.class));
         verify(result, Collections.singletonList(this::verifyRecordCount));
     }
 
@@ -55,6 +67,9 @@ public class PeriodTxnStreamPostAggregationJobTestNG extends SparkJobFunctionalT
         SparkJobResult result = runSparkJob(PeriodTxnStreamPostAggregationJob.class,
                 new PeriodTxnStreamPostAggregationConfig(), Collections.singletonList(setupAnalyticMonthPeriodWithWrongColumn()),
                 getWorkspace());
+        log.info("Filled missing periods: {}", result.getOutput());
+        Assert.assertEquals(missingPeriods, JsonUtils.deserialize(result.getOutput(), Set.class));
+        verify(result, Collections.singletonList(this::verifyRecordCount));
     }
 
     private String setupAnalyticMonthPeriod() {

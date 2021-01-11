@@ -133,6 +133,8 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         props.put("eai.import.aws.region", awsRegion);
         props.put("eai.import.aws.access.key", CipherUtils.encrypt(awsAccessKey));
         props.put("eai.import.aws.secret.key", CipherUtils.encrypt(awsSecretKey));
+        props.put("eai.import.erase.by.null",
+                ctx.getProperty(ImportProperty.ENABLE_ERASE_BY_NULL, String.class, "false"));
         props.put(MapReduceProperty.INPUT.name(), hdfsFileToImport);
         List<String> cacheFiles;
         try {
@@ -182,7 +184,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             if (attrMetadata != null && attr.getSourceLogicalDataType() == null) {
                 attr.setSourceLogicalDataType(attrMetadata.getDataType());
             } else if (attrMetadata == null) {
-                throw new LedpException(LedpCode.LEDP_17002, new String[]{attr.getName()});
+                throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
             }
         }
         if (table.getAttribute(InterfaceName.InternalId.name()) == null) {

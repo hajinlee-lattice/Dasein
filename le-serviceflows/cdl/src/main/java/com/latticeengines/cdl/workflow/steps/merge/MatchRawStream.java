@@ -232,7 +232,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
         String newAccTableName = NamingUtils
                 .timestamp(String.format(RAWSTREAM_NEW_ACC_TABLE_PERFIX_FORMAT, stream.getStreamId()));
         String matchConfig;
-        MatchInput baseMatchInput = getBaseMatchInput(true);
+        MatchInput baseMatchInput = getBaseMatchInput();
         if (isRematchMode) {
             setRematchVersions(baseMatchInput);
         }

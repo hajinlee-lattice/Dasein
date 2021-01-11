@@ -23,6 +23,8 @@ import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
+import com.latticeengines.domain.exposed.cdl.DataOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.DataOperationRequest;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.ListSegmentImportRequest;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.DataOperation;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.validator.SimpleValueFilter;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -848,6 +851,26 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         String baseUrl = "/customerspaces/{customerSpace}/segments/importListSegment";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
         String appIdStr = post("Start import listsegment", url, request, String.class);
+        return ApplicationIdUtils.toApplicationIdObj(appIdStr);
+    }
+
+    public String createDataOperation(String customerSpace, DataOperation.OperationType operationType,
+                                             DataOperationConfiguration dataOperationConfiguration) {
+        String baseUrl = "/customerspaces/{customerSpace}/dataoperation?operationType=" + operationType.name();
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), operationType.name());
+        return post("Create Data Operation", url, dataOperationConfiguration, String.class);
+    }
+
+    public DataOperation findDataOperationByDropPath(String customerSpace, String dropPath) {
+        String baseUrl = "/customerspaces/{customerSpace}/dataoperation?dropPath=" + dropPath;
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
+        return get("Find Data Operation By Drop Path", url, DataOperation.class);
+    }
+
+    public ApplicationId submitDataOperationJob(String customerSpace, DataOperationRequest dataOperationRequest) {
+        String baseUrl = "/customerspaces/{customerSpace}/dataoperation/submitJob";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
+        String appIdStr = post("Submit Data Operation Job", url, dataOperationRequest, String.class);
         return ApplicationIdUtils.toApplicationIdObj(appIdStr);
     }
 }

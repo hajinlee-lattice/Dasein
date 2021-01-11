@@ -60,6 +60,9 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
     @Resource(name = "stepD")
     private NamedStep stepD;
 
+    @Resource(name = "stepSkippedOnMissingConfig")
+    private NamedStep stepSkippedOnMissingConfig;
+
     private WorkflowConfiguration workflowConfig;
 
     private String customerSpace;
@@ -145,6 +148,9 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
             case 8:
             case 9:
                 Assert.assertEquals(stepName, stepD.getStepName());
+                break;
+            case 10:
+                Assert.assertEquals(stepName, stepSkippedOnMissingConfig.getStepName());
                 break;
             default:
                 Assert.fail("There should not be a " + stepSeq + "-th step");

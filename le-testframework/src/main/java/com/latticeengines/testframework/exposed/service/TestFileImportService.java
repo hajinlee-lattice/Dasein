@@ -2,6 +2,8 @@ package com.latticeengines.testframework.exposed.service;
 
 import java.util.List;
 
+import org.springframework.core.io.Resource;
+
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -15,6 +17,9 @@ public interface TestFileImportService {
 
     SourceFile uploadFile(String filePath, EntityType entity);
 
+    SourceFile uploadDeleteFile(String csvFileName, String schemaInterpretation, String cleanupOperationType,
+            Resource source);
+
     FieldMappingDocument getFieldMappings(String sourceFileName, EntityType entity, SourceType source, String feedType);
 
     void saveFieldMappingDocument(String displayName, FieldMappingDocument fieldMappingDocument, EntityType entity,
@@ -27,4 +32,8 @@ public interface TestFileImportService {
 
     void upsertTemplateByAutoMapping(String filePath, String templateName, String feedType, EntityType entity,
             boolean importData, S3ImportTemplateDisplay template);
+
+    void doDefaultTemplateOneOffImport(String filePath, EntityType entity);
+
+    void doOneOffImport(String filePath, String systemName, EntityType entity);
 }

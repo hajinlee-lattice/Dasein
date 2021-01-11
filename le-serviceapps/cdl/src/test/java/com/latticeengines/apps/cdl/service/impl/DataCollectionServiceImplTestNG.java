@@ -1,9 +1,15 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -11,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -24,6 +31,8 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DataCollectionServiceImplTestNG.class);
 
     @Inject
     private DataCollectionService dataCollectionService;
@@ -129,6 +138,28 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(artifact);
     }
 
+    @Test(groups = "functional", priority = 6)
+    private void testUpsertTablesWithSignature() {
+        String signature = "sig";
+        String table1 = "upsert_with_sig_table_1";
+        String table2 = "upsert_with_sig_table_2";
+        DataCollection.Version version = DataCollection.Version.Blue;
+        TableRoleInCollection role = TableRoleInCollection.ConsolidatedActivityStream;
+        createTable(table1);
+        createTable(table2);
+
+        // upsert table 1 to specified role and verify it's linked properly
+        Map<String, String> tables = new HashMap<>();
+        tables.put(signature, table1);
+        dataCollectionService.upsertTables(mainCustomerSpace, collectionName, tables, role, version);
+        verifyLinkedTable(signature, table1, role, version);
+
+        // upsert table 2 to the same role/signature
+        tables.put(signature, table2);
+        dataCollectionService.upsertTables(mainCustomerSpace, collectionName, tables, role, version);
+        verifyLinkedTable(signature, table2, role, version);
+    }
+
     @Test(groups = "functional")
     public void testDiagnostic() {
         ImportTemplateDiagnostic diagnostic = dataCollectionService.diagnostic(mainCustomerSpace, dataCollectionTable.getPid());
@@ -138,6 +169,23 @@ public class DataCollectionServiceImplTestNG extends CDLFunctionalTestNGBase {
                 || diagnostic.getWarnings().get(1).contains("user_Att2"));
         Assert.assertTrue(diagnostic.getWarnings().get(0).contains("NumberOfEmployees")
                 || diagnostic.getWarnings().get(1).contains("NumberOfEmployees"));
+    }
+
+    private void verifyLinkedTable(String signature, String tableName, TableRoleInCollection role,
+            DataCollection.Version version) {
+        RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(5, Collections.singleton(AssertionError.class), null);
+        retryTemplate.execute(ctx -> {
+            Map<String, String> tablesInCollection = dataCollectionService.getTableNamesWithSignatures(
+                    mainCustomerSpace, collectionName, role, version, Collections.singleton(signature));
+            Assert.assertNotNull(tablesInCollection);
+            Assert.assertTrue(tablesInCollection.containsKey(signature),
+                    String.format("DataCollection %s should contain signature %s for table role %s", collectionName,
+                            signature, role.name()));
+            Assert.assertEquals(tablesInCollection.get(signature), tableName,
+                    String.format("DataCollection %s link to the incorrect table for signature %s, table role %s",
+                            collectionName, signature, role.name()));
+            return null;
+        });
     }
 
     private Table getTable() {

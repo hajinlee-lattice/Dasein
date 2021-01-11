@@ -1,6 +1,8 @@
 package com.latticeengines.pls.end2end2;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.springframework.web.client.RestTemplate;
@@ -10,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -26,7 +29,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 
-public class CSVFileImportDateFormatDeploymentIW2TestNG extends CSVFileImportDeploymentIW2TestNGBase {
+public class CSVFileImportDateFormatIW2DeploymentTestNG extends CSVFileImportIW2DeploymentTestNGBase {
     private static final String CONTACT_DATE_FILE = "Contact_Date.csv";
 
     private static final String CUSTOM = "Custom";
@@ -36,7 +39,10 @@ public class CSVFileImportDateFormatDeploymentIW2TestNG extends CSVFileImportDep
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        flags.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         restTemplate = testBed.getRestTemplate();
@@ -138,23 +144,23 @@ public class CSVFileImportDateFormatDeploymentIW2TestNG extends CSVFileImportDep
                 assertTemplateMappingHeaders(mapping);
             } else {
                 String[] fields = mapping.split(",");
-                if (fields[2].equals("ContactId")) {
+                if ("ContactId".equals(fields[2])) {
                     Assert.assertEquals(fields[0], CUSTOM);
                     //Assert.assertEquals(fields[1], "ID");
                     Assert.assertEquals(fields[3], UserDefinedType.TEXT.name());
-                } else if (fields[2].equals("CustomerContactId")) {
+                } else if ("CustomerContactId".equals(fields[2])) {
                     Assert.assertEquals(fields[0], STANDARD);
                     //Assert.assertEquals(fields[1], "ID");
                     Assert.assertEquals(fields[3], UserDefinedType.TEXT.name());
-                } else if (fields[2].equals("ContactName")) {
+                } else if ("ContactName".equals(fields[2])) {
                     Assert.assertEquals(fields[0], STANDARD);
                    // Assert.assertEquals(fields[1], "Name");
                     Assert.assertEquals(fields[3], UserDefinedType.TEXT.name());
-                } else if (fields[2].equals("CreatedDate")) {
+                } else if ("CreatedDate".equals(fields[2])) {
                     Assert.assertEquals(fields[0], STANDARD);
                     Assert.assertEquals(fields[1], "Created Date");
                     Assert.assertEquals(fields[3], "MM/DD/YYYY 00:00:00 12H");
-                } else if (fields[2].equals("LastModifiedDate")) {
+                } else if ("LastModifiedDate".equals(fields[2])) {
                     Assert.assertEquals(fields[0], STANDARD);
                     Assert.assertEquals(fields[1], UNMAPPED);
                     Assert.assertEquals(fields[3], UserDefinedType.DATE.name());
@@ -169,7 +175,7 @@ public class CSVFileImportDateFormatDeploymentIW2TestNG extends CSVFileImportDep
         Assert.assertEquals(fields.length, 4);
         Assert.assertEquals(fields[0], "Field Type");
         Assert.assertEquals(fields[1], "Your Field Name");
-        Assert.assertEquals(fields[2], "Lattice Field Name");
+        Assert.assertEquals(fields[2], "Standard Field Name");
         Assert.assertEquals(fields[3], "Data Type");
     }
 

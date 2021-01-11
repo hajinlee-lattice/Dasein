@@ -13,6 +13,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,8 @@ import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 
 @Service("enrichmentLayoutService")
 public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements EnrichmentLayoutService {
+
+    private static final Logger log = LoggerFactory.getLogger(EnrichmentLayoutServiceImpl.class);
 
     @Inject
     private EnrichmentLayoutEntityMgr enrichmentLayoutEntityMgr;
@@ -157,16 +161,24 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
                 || enrichmentLayout.getRecordType() == null || enrichmentLayout.getTenant() == null) {
             List<String> errors = new ArrayList<>();
             if (enrichmentLayout.getSourceId() == null) {
-                errors.add("Required field SourceId is null");
+                String msg = "Required field SourceId is null";
+                errors.add(msg);
+                log.warn(msg);
             }
             if (enrichmentLayout.getDomain() == null) {
-                errors.add("Required field Domain is null");
+                String msg = "Required field Domain is null";
+                errors.add(msg);
+                log.warn(msg);
             }
             if (enrichmentLayout.getRecordType() == null) {
-                errors.add("Required field RecordType is null");
+                String msg = "Required field RecordType is null";
+                errors.add(msg);
+                log.warn(msg);
             }
             if (enrichmentLayout.getTenant() == null) {
-                errors.add("Required field tenantId is null");
+                String msg = "Required field tenantId is null";
+                errors.add(msg);
+                log.warn(msg);
             }
             result = new ResponseDocument<>();
             result.setErrors(errors);
@@ -204,7 +216,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
     }
 
     private ResponseDocument<String> validateDataRecordType(EnrichmentLayout enrichmentLayout,
-            Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> map) {
+            Map<DataRecordType, List<DataBlockEntitlementContainer.Block>> allowedBlockList) {
 
         List<String> errors = new ArrayList<>();
 
@@ -216,7 +228,7 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
         // Get a list of the datablocks available for the dataRecordType in this tenant.
         // This is used to determine if the required blocks are present.
         DataRecordType dataRecordType = enrichmentLayout.getRecordType();
-        List<DataBlockEntitlementContainer.Block> dataBlockList = map.get(dataRecordType);
+        List<DataBlockEntitlementContainer.Block> dataBlockList = allowedBlockList.get(dataRecordType);
         if (dataBlockList != null) { // build a set of authorized data blocks and levels
             Set<String> authorizedElements = new HashSet<>();
             for (DataBlockEntitlementContainer.Block block : dataBlockList) {
@@ -235,12 +247,14 @@ public class EnrichmentLayoutServiceImpl extends ServiceCommonImpl implements En
                     String err = String.format(
                             "EnrichmentLayout is not valid, element %s is not authorized for subscriber number %s.",
                             neededElement, enrichmentLayout.getTenant().getSubscriberNumber());
+                    log.warn(String.format("%s Needed block %s, blocks auth for Tenant %s", err, neededElement, String.join(",", authorizedElements)));
                     errors.add(err);
                 }
             }
         } else {
-            errors.add(String.format("Data Record Type %s does not contain any data blocks.", dataRecordType.name()));
-
+            String msg = String.format("Data Record Type %s does not contain any data blocks.", dataRecordType.name());
+            errors.add(msg);
+            log.warn(msg);
         }
         if (errors.isEmpty()) {
             return ResponseDocument.successResponse("");

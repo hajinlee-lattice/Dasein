@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
@@ -36,53 +37,40 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
         log.info("Calling S3ExportFieldMetadataService for channel " + channel.getId());
         S3ChannelConfig channelConfig = (S3ChannelConfig) channel.getChannelConfig();
         AudienceType channelAudienceType = channelConfig.getAudienceType();
-
+        Play play = channel.getPlay();
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
-                Arrays.asList(BusinessEntity.Account), channelConfig.getAttributeSetName());
-
+                Arrays.asList(BusinessEntity.Account), channelConfig.getAttributeSetName(), play);
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
-                Arrays.asList(BusinessEntity.Contact), channelConfig.getAttributeSetName());
-
-        Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
-                channel);
-
-        List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(
-                CDLExternalSystemName.AWS_S3,
-                accountAttributesMap,
-                contactAttributesMap, defaultFieldsAttributesToServingStoreAttributesRemap,
-                channelConfig.getAudienceType());
-
-        if (channelConfig.isIncludeExportAttributes()) {
+                Arrays.asList(BusinessEntity.Contact), channelConfig.getAttributeSetName(), play);
+        Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = getDefaultFieldsAttrToServingStoreAttrRemap(channel);
+        List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.AWS_S3,
+                accountAttributesMap, contactAttributesMap, defaultFieldsAttributesToServingStoreAttributesRemap, channelAudienceType);
+        if (channelConfig.isIncludeExportAttributes() && !Play.TapType.ListSegment.equals(play.getTapType())) {
             includeExportAttributes(customerSpace, channelConfig, accountAttributesMap, contactAttributesMap,
-                    exportColumnMetadataList,
-                    channelAudienceType);
+                    exportColumnMetadataList, channelAudienceType);
         }
-
         return exportColumnMetadataList;
     }
 
     @Override
     protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();
-
         String accountId = channel.getLookupIdMap().getAccountId();
         log.info("S3 accountId " + accountId);
         if (!StringUtils.isEmpty(accountId)) {
             remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, accountId);
         }
-
         String contactId = channel.getLookupIdMap().getContactId();
         log.info("S3 contactId " + contactId);
         if (!StringUtils.isEmpty(contactId)) {
             remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, contactId);
         }
-
         return remappingMap;
     }
 
     private void includeExportAttributes(String customerSpace, S3ChannelConfig channelConfig,
-            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
-            List<ColumnMetadata> exportColumnMetadataList, AudienceType channelAudienceType) {
+                                         Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
+                                         List<ColumnMetadata> exportColumnMetadataList, AudienceType channelAudienceType) {
         if (channelAudienceType == AudienceType.CONTACTS) {
             exportColumnMetadataList.addAll(contactAttributesMap.values());
             List<BusinessEntity> contactEntities = BusinessEntity.EXPORT_CONTACT_ENTITIES.stream().filter(entity -> !BusinessEntity.Contact.equals(entity)).collect(Collectors.toList());

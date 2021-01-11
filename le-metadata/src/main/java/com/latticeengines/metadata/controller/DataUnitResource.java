@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.service.DataUnitService;
 
@@ -41,6 +43,12 @@ public class DataUnitResource {
     @PutMapping("/delete")
     public Boolean delete(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
         return dataUnitService.delete(dataUnit);
+    }
+
+    @DeleteMapping("/delete/name/{name}")
+    public Boolean deleteByNameAndType(@PathVariable String customerSpace, @PathVariable String name,
+                                       @RequestParam(name = "type") DataUnit.StorageType storageType) {
+        return dataUnitService.delete(name, storageType);
     }
 
     @PostMapping("/updateSignature")
@@ -80,6 +88,11 @@ public class DataUnitResource {
                 return Collections.emptyList();
             }
         }
+    }
+
+    @PostMapping("/name/{name}/athena-unit")
+    public AthenaDataUnit registerAthenaDataUnit(@PathVariable String customerSpace, @PathVariable String name) {
+        return dataUnitService.registerAthenaDataUnit(name);
     }
 
 }

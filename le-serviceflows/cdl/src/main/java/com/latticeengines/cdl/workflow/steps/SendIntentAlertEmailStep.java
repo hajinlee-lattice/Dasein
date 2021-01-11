@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
@@ -80,14 +81,17 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace();
-        // send email
-        List<String> recipients = subscriptionService.getEmailsByTenantId(customerSpace.toString());
-        if (CollectionUtils.isEmpty(recipients)) {
-            return;
-        }
         Map<String, Object> params = getEmailParams();
-        Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
-        emailService.sendDnbIntentAlertEmail(tenant, recipients, subject, params);
+        if (MapUtils.isNotEmpty(params)) {
+            List<String> recipients = subscriptionService.getEmailsByTenantId(customerSpace.toString());
+            if (CollectionUtils.isEmpty(recipients)) {
+                return;
+            }
+            Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
+            emailService.sendDnbIntentAlertEmail(tenant, recipients, subject, params);
+        } else {
+            log.info("No intent alert email sent for customer {}.", customerSpace.toString());
+        }
         // Set IntentAlertVersion in data collection status table
         String intentAlertVersion = updateIntentAlertVersion();
         log.info("Done with sending intent alert email, update intent alert version to {}", intentAlertVersion);
@@ -115,9 +119,13 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
         params.put("top_industries", getTopListFromMap(industryCountMap));
         params.put("top_locations", getTopListFromMap(locationCountMap));
         params.put("model_pairs", getModelPairFromMap(modelMap));
-        params.put("attachment", getAttachment());
+        byte[] attachment = getAttachment();
+        params.put("attachment", attachment);
         params.put("attachment_name",
                 String.format("intent_data_%s_%s.csv", startDay.toString("yyyyMMdd"), endDay.toString("yyyyMMdd")));
+        if (MapUtils.isEmpty(modelMap) && attachment == null) {
+            return null;
+        }
         return params;
     }
 
@@ -247,11 +255,13 @@ public class SendIntentAlertEmailStep extends BaseWorkflowStep<SendIntentAlertEm
     }
 
     private void updatePercentage(List<IntentAlertEmailInfo.TopItem> list) {
-        double max = Collections.max(list, Comparator.comparing(IntentAlertEmailInfo.TopItem::getNumIntents))
-                .getNumIntents();
-        for (IntentAlertEmailInfo.TopItem item : list) {
-            item.setBuyPercentage(item.getNumBuy() / max);
-            item.setResearchPercentage(item.getNumResearch() / max);
+        if (CollectionUtils.isNotEmpty(list)) {
+            double max = Collections.max(list, Comparator.comparing(IntentAlertEmailInfo.TopItem::getNumIntents))
+                    .getNumIntents();
+            for (IntentAlertEmailInfo.TopItem item : list) {
+                item.setBuyPercentage(item.getNumBuy() / max);
+                item.setResearchPercentage(item.getNumResearch() / max);
+            }
         }
     }
 

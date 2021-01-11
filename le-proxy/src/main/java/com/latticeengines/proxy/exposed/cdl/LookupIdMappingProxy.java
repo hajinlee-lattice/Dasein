@@ -62,26 +62,31 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
 
     public LookupIdMap registerExternalSystem(String customerSpace, LookupIdMap lookupIdMap) {
         String url = constructUrl(URL_PREFIX + "/register", shortenCustomerSpace(customerSpace));
+        log.info("url is " + url);
         return post("registerExternalSystem", url, lookupIdMap, LookupIdMap.class);
     }
 
     public void deregisterExternalSystem(String customerSpace, LookupIdMap lookupIdMap) {
         String url = constructUrl(URL_PREFIX + "/deregister", shortenCustomerSpace(customerSpace));
+        log.info("url is " + url);
         put("deregisterExternalSystem", url, lookupIdMap);
     }
 
     public LookupIdMap getLookupIdMap(String customerSpace, String id) {
         String url = constructUrl(URL_PREFIX + "/config/{id}", shortenCustomerSpace(customerSpace), id);
+        log.info("url is GET:" + url);
         return get("getLookupIdMap", url, LookupIdMap.class);
     }
 
     public LookupIdMap updateLookupIdMap(String customerSpace, String id, LookupIdMap lookupIdMap) {
         String url = constructUrl(URL_PREFIX + "/config/{id}", shortenCustomerSpace(customerSpace), id);
+        log.info("url is PUT:" + url);
         return put("updateLookupIdMap", url, lookupIdMap, LookupIdMap.class);
     }
 
     public void deleteLookupIdMap(String customerSpace, String id) {
         String url = constructUrl(URL_PREFIX + "/config/{id}", shortenCustomerSpace(customerSpace), id);
+        log.info("url is DELETE:" + url);
         delete("getLookupIdMap", url);
     }
 
@@ -89,11 +94,13 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
         String url = constructUrl(URL_PREFIX + "/delete-connection/{lookupIdMapId}",
                 shortenCustomerSpace(customerSpace),
                 lookupIdMapId);
+        log.info("url is " + url);
         put("connection", url, settings, TraySettings.class);
     }
 
     public String publishAccountLookup(@NotNull String customerSpace, String targetSignature) {
         String url = constructUrl(URL_PREFIX + "/publishAccountLookup", shortenCustomerSpace(customerSpace));
+        log.info("url is " + url);
         return post("publishAccountLookup", url, targetSignature, String.class);
     }
 

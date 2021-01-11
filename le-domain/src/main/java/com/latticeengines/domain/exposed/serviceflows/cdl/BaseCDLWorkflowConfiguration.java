@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ContactImports
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.ConvertBatchStoreToImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.MigrateDynamoWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.PublishDynamoWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.PublishElasticSearchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.TransactionImportsMigrateWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ConvertBatchStoreToDataTableWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.CuratedAttributesWorkflowConfiguration;
@@ -110,6 +111,10 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = CampaignDeltaCalculationWorkflowConfiguration.class, name = "CampaignDeltaCalculationWorkflowConfiguration"),
         @Type(value = PublishDynamoWorkflowConfiguration.class, name = "PublishDynamoWorkflowConfiguration"),
         @Type(value = MigrateDynamoWorkflowConfiguration.class, name = "MigrateDynamoWorkflowConfiguration"),
+        @Type(value = PublishAccountLookupWorkflowConfiguration.class, name =
+                PublishAccountLookupWorkflowConfiguration.NAME),
+        @Type(value = PublishElasticSearchWorkflowConfiguration.class, name =
+                "PublishElasticSearchWorkflowConfiguration"),
         @Type(value = PublishAccountLookupWorkflowConfiguration.class, name = PublishAccountLookupWorkflowConfiguration.NAME),
         @Type(value = GenerateIntentEmailAlertWorkflowConfiguration.class, name = GenerateIntentEmailAlertWorkflowConfiguration.NAME),
         @Type(value = ImportListSegmentWorkflowConfiguration.class, name = "ImportListSegmentWorkflowConfiguration"),

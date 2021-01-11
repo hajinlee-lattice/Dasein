@@ -59,8 +59,10 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
     }
   }
   
-  private def upsertSystemBatch(lhsDf: DataFrame, rhsDf: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
+  private def upsertSystemBatch(origLhsDf: DataFrame, origRhsDf: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
              overwriteByNull: Boolean, templateName: String, templates: List[String]): DataFrame = {
+    var lhsDf = origLhsDf.repartition(joinKeys map col: _*)
+    var rhsDf = origRhsDf.repartition(joinKeys map col: _*)
     var merged = 
       if (templateName != null) addTemplatePrefix(lhsDf, templateName, joinKeys) else lhsDf
     for (i <- 0 to templates.length-1) {

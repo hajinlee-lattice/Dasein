@@ -68,6 +68,10 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         return false;
     }
 
+    public boolean skipOnMissingConfiguration() {
+        return false;
+    }
+
     public void setConfiguration(T configuration) {
         this.configuration = configuration;
         log.info("Configuration instance {} set for {}", configuration, configurationClass.getName());

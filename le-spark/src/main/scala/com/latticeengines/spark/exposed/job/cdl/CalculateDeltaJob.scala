@@ -1,7 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.sql.functions.{col, concat, lit, when}
@@ -12,15 +11,17 @@ class CalculateDeltaJob extends AbstractSparkJob[CalculateDeltaJobConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[CalculateDeltaJobConfig]): Unit = {
     val config: CalculateDeltaJobConfig = lattice.config
-    val newData = loadHdfsUnit(spark, config.getNewData.asInstanceOf[HdfsDataUnit])
-    val oldData = if (config.getOldData != null) loadHdfsUnit(spark, config.getOldData.asInstanceOf[HdfsDataUnit]) else spark.createDataFrame(spark.sparkContext.emptyRDD[Row], newData.schema)
+    var oldData = lattice.input(0)
+    val newData = lattice.input(1)
+    if (oldData.rdd.isEmpty) {
+      oldData = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], newData.schema)
+    }
     val newDFAlias = "newDfAlias"
     val oldDFAlias = "oldDFAlias"
     val compositeKey = "account_contact"
     val accountId = InterfaceName.AccountId.name()
-    val contactId = InterfaceName.ContactId.name()
     val isAccountEntity = config.getIsAccountEntity
-    var accountAndContactNums = new Array[Long](2)
+    val accountAndContactNums = new Array[Long](2)
 
     logSpark("OldData schema is as follows:")
     oldData.printSchema

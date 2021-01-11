@@ -124,6 +124,10 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
             segmentDao.delete(segment);
         } else {
             segmentDao.deleteByName(segment.getName(), false);
+            if (SegmentUtils.hasListSegment(segment)) {
+                ListSegment listSegment = segment.getListSegment();
+                listSegmentEntityMgr.delete(listSegment);
+            }
         }
     }
 

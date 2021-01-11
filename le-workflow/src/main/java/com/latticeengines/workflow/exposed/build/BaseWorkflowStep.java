@@ -234,6 +234,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String PREVIOUS_ACCOUNTS_UNIVERSE = "PREVIOUS_ACCOUNTS_UNIVERSE";
     protected static final String PREVIOUS_CONTACTS_UNIVERSE = "PREVIOUS_CONTACTS_UNIVERSE";
     protected static final String FULL_LAUNCH_UNIVERSE = "FULL_LAUNCH_UNIVERSE";
+    protected static final String ACCOUNTS_DATA_UNIT = "ACCOUNTS_DATA_UNIT";
+    protected static final String CONTACTS_DATA_UNIT = "CONTACTS_DATA_UNIT";
     public static final String DELTA_TABLE_COUNTS = "DELTA_TABLE_COUNTS";
     protected static final String RECOMMENDATION_ACCOUNT_DISPLAY_NAMES = "RECOMMENDATION_ACCOUNT_DISPLAY_NAMES";
     public static final String RECOMMENDATION_CONTACT_DISPLAY_NAMES = "RECOMMENDATION_CONTACT_DISPLAY_NAMES";
@@ -397,6 +399,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String TIMELINE_EXPORT_ACCOUNTLIST = "TIMELINE_EXPORT_ACCOUNTLIST";
     public static final String TIMELINE_EXPORT_TABLES = "TIMELINE_EXPORT_TABLES";
     public static final String TIMELINE_EXPORT_FILES = "TIMELINE_EXPORT_FILES";
+
+    public static final String TABLEROLES_GOING_TO_ES = "TABLEROLES_GOING_TO_ES";
 
     // tables to be carried over in restarted PA
     protected static final Set<String> TABLE_NAMES_FOR_PA_RETRY = Sets.newHashSet( //
