@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,8 +33,7 @@ public class EnrichmentTemplateResource {
     @ResponseBody
     @ApiOperation("Create enrichment template")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public ResponseDocument<String> createTemplate(@PathVariable String layoutId,
-            @RequestParam(value = "templateName") String templateName) {
+    public ResponseDocument<String> createTemplate(@PathVariable String layoutId, @RequestBody String templateName) {
         return enrichmentTemplateService.createEnrichmentTemplate(MultiTenantContext.getShortTenantId(), layoutId,
                 templateName);
     }
