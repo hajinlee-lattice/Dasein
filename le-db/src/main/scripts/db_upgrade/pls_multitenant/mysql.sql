@@ -36,6 +36,9 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `PLS_MultiTenant`.`ACTIVITY_METRIC_GROUP`
               ADD COLUMN `CSOverwrite` JSON NULL DEFAULT NULL;
 
+      ALTER TABLE `PLS_MultiTenant`.`EXPORT_FIELD_METADATA_DEFAULTS`
+              ADD `FORCE_POPULATE` bit not null;
+      
   END //
 -- ##############################################################
 
