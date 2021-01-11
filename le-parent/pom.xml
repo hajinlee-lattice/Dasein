@@ -68,9 +68,8 @@
         <javax.ws.version>2.3.0</javax.ws.version> <!-- compile on java 11 -->
 
         <!-- dependencies with rigid version interlock, hard to upgrade -->
-        <hadoop.version>2.8.5</hadoop.version>
+        <hadoop.version>2.10.1</hadoop.version>
         <mortbay.jetty.version>6.1.26.hwx</mortbay.jetty.version>
-        <!--<spring.data.hdp.version>2.4.0.RELEASE-hdp23</spring.data.hdp.version> &lt;!&ndash; need ledp3 classifier &ndash;&gt;-->
         <spring.data.hdp.version>2.5.0.RELEASE</spring.data.hdp.version>
         <tez.version>0.9.1</tez.version>
         <netty.version>3.6.2.Final</netty.version> <!-- for hadoop 2.8.5 -->
