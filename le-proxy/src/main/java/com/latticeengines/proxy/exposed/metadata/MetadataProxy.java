@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
@@ -459,5 +460,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public void setEnableTempTables(boolean enableTempTables) {
         ENABLE_TEMP_TABLES = enableTempTables;
         log.info("({}) Switch enableTempTables to {}", System.identityHashCode(this), ENABLE_TEMP_TABLES);
+    }
+
+    public AthenaDataUnit registerAthenaDataUnit(String customerSpace, String tableName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/athena-unit", customerSpace, tableName);
+        return post("register athena data unit", url, null, AthenaDataUnit.class);
     }
 }

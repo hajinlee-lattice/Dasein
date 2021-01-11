@@ -60,6 +60,10 @@ CREATE PROCEDURE `UpdateSchema`()
         ADD CONSTRAINT `FK_DCPENRICHMENTTEMPLATE_FKTEMPLATEID_ENCRICHMENTTEMPLATE`
           FOREIGN KEY (`TEMPLATE_ID`) REFERENCES `DCP_ENRICHMENT_TEMPLATE` (`TEMPLATE_ID`) ON DELETE CASCADE ;
 
+      ALTER TABLE `PLS_MultiTenant`.`EXPORT_FIELD_METADATA_DEFAULTS`
+              ADD `FORCE_POPULATE` bit not null;
+      
+
   END //
 -- ##############################################################
 

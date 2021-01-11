@@ -13,8 +13,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,6 +31,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.firehose.FirehoseService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
@@ -87,8 +90,26 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @Inject
     private FirehoseService firehoseService;
 
+    private ExecutorService publishExecutor;
+
+    @Value("${datacloud.yarn.fetchonly.num.threads}")
+    private int publishThreadPool;
+
     @PostConstruct
     public void init() {
+        if (isMatchHistoryEnabled) {
+            log.info("MatchHistory is enabled.");
+            publishExecutor = ThreadPoolUtils.getFixedSizeThreadPool("bulk-match-publish", publishThreadPool);
+        }
+    }
+
+    @PreDestroy
+    public void destroy() {
+        if (isMatchHistoryEnabled) {
+            log.info("Shutting down match history executors");
+            ThreadPoolUtils.awaitTermination(publishExecutor, 60);
+            log.info("Completed shutting match history executors");
+        }
     }
 
     @MatchStep
@@ -189,24 +210,28 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     }
 
     private void publishMatchHistory(List<MatchHistory> matchHistories) {
-        if (!isMatchHistoryEnabled) {
-            log.debug("MatchHistory not enabled, returning.");
-            return;
-        }
         if (CollectionUtils.isEmpty(matchHistories)) {
             return;
         }
-        for (MatchHistory matchHistory : matchHistories) {
-            GenericRecordRequest recordRequest = new GenericRecordRequest();
-            recordRequest.setId(UUID.randomUUID().toString());
-            matchHistory.setId(recordRequest.getId());
-            recordRequest.setStores(Collections.singletonList(FabricStoreEnum.S3))
-                    .setRepositories(Collections.singletonList(FABRIC_MATCH_HISTORY)).setBatchId(FABRIC_MATCH_HISTORY);
-        }
-        List<String> histories = new ArrayList<>();
-        matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
-        log.debug("Firehose delivery stream " + deliveryStreamName + " publishing MatchHistory");
-        firehoseService.sendBatch(deliveryStreamName, histories);
+        Runnable runnable = () -> {
+            try {
+                for (MatchHistory matchHistory : matchHistories) {
+                    GenericRecordRequest recordRequest = new GenericRecordRequest();
+                    recordRequest.setId(UUID.randomUUID().toString());
+                    matchHistory.setId(recordRequest.getId());
+                    recordRequest.setStores(Collections.singletonList(FabricStoreEnum.S3))
+                            .setRepositories(Collections.singletonList(FABRIC_MATCH_HISTORY))
+                            .setBatchId(FABRIC_MATCH_HISTORY);
+                }
+                List<String> histories = new ArrayList<>();
+                matchHistories.forEach(e -> histories.add(JsonUtils.serialize(e)));
+                firehoseService.sendBatch(deliveryStreamName, histories);
+            } catch (Exception ex) {
+                log.warn("Failed to publish match history! error=" + ex.getMessage());
+            }
+        };
+        publishExecutor.execute(runnable);
+
     }
 
     @VisibleForTesting

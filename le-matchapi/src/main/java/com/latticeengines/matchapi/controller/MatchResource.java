@@ -262,7 +262,19 @@ public class MatchResource {
                 request.getCustomerSpace(), //
                 request.getDataCollectionVersion(), //
                 request.getLookupId(), //
-                request.getLookupIdVal() //
+                request.getLookupIdVals().get(0) //
+        );
+    }
+
+    @PostMapping("/cdllookup/accountids")
+    @ResponseBody
+    @ApiOperation(value = "Looking for AccountIds using given LookupId")
+    public List<String> lookupInternalAccountIds(@RequestBody InternalAccountIdLookupRequest request) {
+        return cdlLookupService.lookupInternalAccountIds( //
+                request.getCustomerSpace(), //
+                request.getDataCollectionVersion(), //
+                request.getLookupId(), //
+                request.getLookupIdVals() //
         );
     }
 

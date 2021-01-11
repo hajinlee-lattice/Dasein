@@ -138,7 +138,6 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         Assert.assertEquals(cm1.getSubcategory(), "Page 123");
         Assert.assertEquals(cm1.getSecondarySubCategoryDisplayName(), PATTERN);
         Assert.assertEquals(cm1.getFilterTags(), Arrays.asList("wi_8_w", FilterOptions.Option.ANY_VALUE, "8 weeks"));
-        System.out.println(":::" + cm1.isHiddenInCategoryTile());
         Assert.assertTrue(BooleanUtils.isNotTrue(cm1.isHiddenInCategoryTile()));
         Assert.assertEquals(cm1.getFundamentalType(), FundamentalType.NUMERIC);
 

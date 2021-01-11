@@ -222,6 +222,26 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         return query.list();
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
+    public List<PlayLaunch> findByDestinationOrgId(String destinationOrgId) {
+        if (destinationOrgId == null) {
+            return null;
+        }
+
+        Session session = getSessionFactory().getCurrentSession();
+        Class<PlayLaunch> entityClz = getEntityClass();
+
+        String queryStr = String.format(" FROM %s "//
+                + " WHERE destination_org_id = :destinationOrgId ", //
+                entityClz.getSimpleName());
+
+        Query query = session.createQuery(queryStr);
+        query.setParameter("destinationOrgId", destinationOrgId);
+
+        return query.list();
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public List<PlayLaunch> findByState(LaunchState state) {

@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = AudienceEventDetail.class, name = "AudienceSizeUpdate"),
         @JsonSubTypes.Type(value = FailedEventDetail.class, name = "Failed"),
         @JsonSubTypes.Type(value = InitiatedEventDetail.class, name = "Initiated"),
-        @JsonSubTypes.Type(value = AccountEventDetail.class, name = "DestinationAccountCreation") })
+        @JsonSubTypes.Type(value = AccountEventDetail.class, name = "DestinationAccountCreation"),
+        @JsonSubTypes.Type(value = AuthInvalidatedEventDetail.class, name = "AuthInvalidated") })
 public abstract class EventDetail {
 
     private String type;

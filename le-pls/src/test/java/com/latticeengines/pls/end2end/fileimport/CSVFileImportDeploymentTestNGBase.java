@@ -59,6 +59,7 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
 
     protected static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
     protected static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
+    protected static final String ACCOUNT_SOURCE_FILE_WITH_NULL = "Small_Account_With_Null.csv";
 
     private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
 

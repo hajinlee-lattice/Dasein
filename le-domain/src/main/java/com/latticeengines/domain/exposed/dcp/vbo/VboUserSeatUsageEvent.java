@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude
 public class VboUserSeatUsageEvent {
 
-    public enum FeatureURI { STCT, STCTDEC }
+    public enum FeatureURI { STCT, STDEC }
     @JsonProperty
     private final Object GUID = null;
     @JsonProperty
@@ -68,49 +68,55 @@ public class VboUserSeatUsageEvent {
 
     @JsonProperty
     private String subscriberCountry;
+
     @JsonProperty
     private String subjectCountry;
+
     @JsonProperty
     private Date contractTermStartDate;
+
     @JsonProperty
     private Date contractTermEndDate;
 
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
-    }
-    public void setLUID(Long LUID) {
-        this.LUID = LUID;
-    }
-    public void setPOAEID(String POAEID) {
-        this.POAEID = POAEID;
-    }
-    public void setSubscriberID(String subscriberID) {
-        this.subscriberID = subscriberID;
-    }
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
-    }
-    public void setFeatureURI(FeatureURI featureURI) {
-        this.featureURI = featureURI;
-    }
-    public void setSubscriberCountry(String subscriberCountry) {
-        this.subscriberCountry = subscriberCountry;
-    }
-    public void setSubjectCountry(String subjectCountry) {
-        this.subjectCountry = subjectCountry;
-    }
+    public String getEmailAddress() { return emailAddress; }
+
+    public void setEmailAddress(String emailAddress) { this.emailAddress = emailAddress; }
+
+    public Long getLUID() { return LUID; }
+
+    public void setLUID(Long LUID) { this.LUID = LUID; }
+
+    public String getPOAEID() { return POAEID; }
+
+    public void setPOAEID(String POAEID) { this.POAEID = POAEID; }
+
+    public String getSubscriberID() { return subscriberID; }
+
+    public void setSubscriberID(String subscriberID) { this.subscriberID = subscriberID; }
+
+    public String getTimeStamp() { return timeStamp; }
+
+    public void setTimeStamp(String timeStamp) { this.timeStamp = timeStamp; }
+
+    public FeatureURI getFeatureURI() { return featureURI; }
+
+    public void setFeatureURI(FeatureURI featureURI) { this.featureURI = featureURI; }
+
+    public String getSubscriberCountry() { return subscriberCountry; }
+
+    public void setSubscriberCountry(String subscriberCountry) { this.subscriberCountry = subscriberCountry; }
+
+    public String getSubjectCountry() { return subjectCountry; }
+
+    public void setSubjectCountry(String subjectCountry) { this.subjectCountry = subjectCountry; }
+
+    public Date getContractTermStartDate() { return contractTermStartDate; }
+
     public void setContractTermStartDate(Date contractTermStartDate) {
         this.contractTermStartDate = contractTermStartDate;
     }
-    public void setContractTermEndDate(Date contractTermEndDate) {
-        this.contractTermEndDate = contractTermEndDate;
-    }
 
-    public String getEmailAddress() {
-        return emailAddress;
-    }
+    public Date getContractTermEndDate() { return contractTermEndDate; }
 
-    public String getSubscriberID() {
-        return subscriberID;
-    }
+    public void setContractTermEndDate(Date contractTermEndDate) { this.contractTermEndDate = contractTermEndDate; }
 }

@@ -43,6 +43,14 @@ public class DataIntegrationMonitoringResource {
         return dataIntegrationMonitoringService.createOrUpdateStatuses(statuses);
     }
 
+    @PostMapping("/authentications")
+    @ApiOperation(value = "Create data integration authentication status.")
+    @NoCustomerSpace
+    public void createAuthenticationStatuses(
+            @RequestBody List<DataIntegrationStatusMonitorMessage> statuses) {
+        dataIntegrationMonitoringService.createAuthenticationStatuses(statuses);
+    }
+
     @GetMapping("/{workflowRequestId}")
     @ApiOperation(value = "Get status of data integration workflow.")
     @NoCustomerSpace

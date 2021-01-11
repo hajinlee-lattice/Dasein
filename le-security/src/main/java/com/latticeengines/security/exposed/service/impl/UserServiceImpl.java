@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
@@ -21,7 +22,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
@@ -288,6 +288,7 @@ public class UserServiceImpl implements UserService {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {
                 LOGGER.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
+                LOGGER.warn(ExceptionUtils.getStackTrace(e));
                 return true;
             }
         }
@@ -341,6 +342,7 @@ public class UserServiceImpl implements UserService {
                     globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(userTeamIds, false);
                 }
 
+                /*
                 if (span != null)
                     span.log(ImmutableMap.of(
                             "Operation", "Grant access",
@@ -348,6 +350,7 @@ public class UserServiceImpl implements UserService {
                             "Tenant", tenantId,
                             "Right", accessLevel.name()
                     ));
+                 */
 
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
                         createdByUser, expirationDate, globalAuthTeams);
@@ -369,6 +372,7 @@ public class UserServiceImpl implements UserService {
                 return result;
             } catch (Exception e) {
                 logErrorToSpanAndConsole(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username), span);
+                LOGGER.error(ExceptionUtils.getStackTrace(e));
                 return true;
             }
         }
@@ -398,6 +402,7 @@ public class UserServiceImpl implements UserService {
         Tracer tracer = GlobalTracer.get();
         Span span = tracer.activeSpan();
 
+        /*
         if (span != null) {
             ImmutableMap.Builder<Object, Object> builder = new ImmutableMap.Builder<>()
                     .put("Operation", "Revoke access")
@@ -409,12 +414,14 @@ public class UserServiceImpl implements UserService {
 
             span.log(builder.build().toString());
         }
+         */
         try {
             AccessLevel level = AccessLevel.valueOf(right);
             success = globalUserManagementService.revokeRight(level.name(), tenantId, username);
         } catch (Exception e) {
             logErrorToSpanAndConsole(
                     String.format("Error resigning access level %s from user %s.", right, username), span);
+            LOGGER.error(ExceptionUtils.getStackTrace(e));
         }
         return success;
     }

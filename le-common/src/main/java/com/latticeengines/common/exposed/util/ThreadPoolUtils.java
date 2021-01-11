@@ -229,6 +229,10 @@ public final class ThreadPoolUtils {
 
     public static void shutdownAndAwaitTermination(ExecutorService pool, long threadPoolTimeoutMin) {
         pool.shutdown(); // Disable new tasks from being submitted
+        awaitTermination(pool, threadPoolTimeoutMin);
+    }
+
+    public static void awaitTermination(ExecutorService pool, long threadPoolTimeoutMin) {
         try {
             // Wait a while for existing tasks to terminate
             if (!pool.awaitTermination(threadPoolTimeoutMin, TimeUnit.MINUTES)) {

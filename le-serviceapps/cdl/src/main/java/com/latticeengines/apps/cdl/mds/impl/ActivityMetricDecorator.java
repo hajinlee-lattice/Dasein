@@ -165,13 +165,15 @@ public class ActivityMetricDecorator implements Decorator {
 
         String groupId = tokens.get(0);
         if (!groupCache.containsKey(groupId)) {
-            groupCache.put(groupId, activityMetricsGroupEntityMgr.findByGroupId(groupId));
+            ActivityMetricsGroup group = activityMetricsGroupEntityMgr.findByGroupId(groupId);
+            if (group == null) {
+                cm.disableGroup(Segment);
+                return;
+            }
+            groupCache.put(groupId, group);
         }
         ActivityMetricsGroup group = groupCache.get(groupId);
-        if (group == null) {
-            throw new IllegalArgumentException(String.format("Cannot find the am group %s specified in attribute %s", //
-                    groupId, attrName));
-        }
+
 
         String[] rollupDimVals = tokens.get(1).split("_");
         String timeRange = tokens.get(2);

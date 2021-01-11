@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -143,6 +145,7 @@ public class UserResource {
         uRegTenant.setUserRegistration(userReg);
         uRegTenant.setTenant(tenant.getId());
         User user = userReg.getUser();
+        boolean isDCPTenant = batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP);
 
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
@@ -167,27 +170,22 @@ public class UserResource {
             response.setErrors(Collections.singletonList("Cannot create a user with higher access level."));
             return response;
         }
+        if (isDCPTenant && !EmailUtils.isInternalUser(user.getEmail())
+                && !hasAvailableSeats(tenant.getSubscriberNumber())) {
+            httpResponse.setStatus(403);
+            response.setErrors(Collections
+                    .singletonList(String.format("User seat limit for tenant %s has been reached.", tenant.getId())));
+            return response;
+        }
 
         Tracer tracer = GlobalTracer.get();
         Span userSpan = null;
         try (Scope scope = startUserSpan(loginUsername, System.currentTimeMillis())) {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
+            userSpan.log("Start - Register User");
 
-            VboUserSeatUsageEvent usageEvent = null;
-
-            if (!EmailUtils.isInternalUser(user.getEmail())) {
-                usageEvent = new VboUserSeatUsageEvent();
-                usageEvent.setEmailAddress(loginUser.getEmail());
-                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
-                usageEvent.setPOAEID(traceId);
-                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
-                usageEvent.setLUID(loginUser.getPid());
-            }
-          
             RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
-            if (usageEvent != null)
-                usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
             String tempPass = result.getPassword();
             if (!Boolean.TRUE.equals(setTempPass)) {
                 result.setPassword(null);
@@ -202,7 +200,7 @@ public class UserResource {
             }
             LOGGER.info(String.format("%s registered %s as a new user in tenant %s", loginUsername, user.getUsername(),
                     tenant.getId()));
-            if (!batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+            if (!isDCPTenant) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                     emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,
                             !tenantService.getTenantEmailFlag(tenant.getId()));
@@ -227,10 +225,21 @@ public class UserResource {
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
                 }
-
-                if (usageEvent != null) {
+                if (!EmailUtils.isInternalUser(user.getEmail())) {
+                    VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
+                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+                    usageEvent.setEmailAddress(loginUser.getEmail());
+                    usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                    usageEvent.setPOAEID(traceId);
+                    usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                    usageEvent.setLUID(loginUser.getPid());
                     populateWithSubscriberDetails(usageEvent);
-                    vboService.sendUserUsageEvent(usageEvent);
+                    try {
+                        vboService.sendUserUsageEvent(usageEvent);
+                    } catch (Exception e) {
+                        LOGGER.error("Exception in usage event: " + e.toString());
+                        LOGGER.error("Exception in usage event: " + ExceptionUtils.getStackTrace(e));
+                    }
                 }
             }
         } finally {
@@ -286,8 +295,15 @@ public class UserResource {
         String tenantId = tenant.getId();
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
+        // Assumes the UI first calls `register`. If the user exists, it calls `update`. User shouldn't be null.
         User user = userService.findByUsername(username);
+        if (user == null) {
+            response.setStatus(403);
+            document.setErrors(Collections.singletonList("Cannot update a non-existing user."));
+            return document;
+        }
         boolean newUser = !userService.inTenant(tenantId, username);
+        boolean isDCPTenant = batonService.hasProduct(CustomerSpace.parse(tenantId), LatticeProduct.DCP);
         // update access level
 
         Tracer tracer = GlobalTracer.get();
@@ -295,20 +311,11 @@ public class UserResource {
         try (Scope scope = startUserSpan(username, System.currentTimeMillis())) {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
+            userSpan.log("Start - Update User");
 
             UserUpdateResponse updateResponse = new UserUpdateResponse();
             updateResponse.setTraceId(traceId);
             document.setResult(updateResponse);
-
-            VboUserSeatUsageEvent usageEvent = null;
-            if (newUser && !EmailUtils.isInternalUser(user.getEmail())) {
-                usageEvent = new VboUserSeatUsageEvent();
-                usageEvent.setEmailAddress(loginUser.getEmail());
-                usageEvent.setSubscriberID(tenant.getSubscriberNumber());
-                usageEvent.setPOAEID(traceId);
-                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
-                usageEvent.setLUID(loginUser.getPid());
-            }
 
             if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
                 // using access level if it is provided
@@ -329,12 +336,24 @@ public class UserResource {
                     return document;
                 }
 
-                userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
-                        false, !newUser, data.getUserTeams());
+                if (newUser && isDCPTenant && !EmailUtils.isInternalUser(username)
+                        && !hasAvailableSeats(tenant.getSubscriberNumber())) {
+                    response.setStatus(403);
+                    document.setErrors(Collections.
+                            singletonList(String.format("User seat limit for tenant %s has been reached.", tenantId)));
+                    return document;
+                }
+
+                boolean result = userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername,
+                        data.getExpirationDate(), false, !newUser, data.getUserTeams());
+                if (!result) {
+                    response.setStatus(500);
+                    document.setErrors(Collections.singletonList("Failed to assign access level to user."));
+                    return document;
+                }
                 LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                         targetLevel.name(), username, tenantId));
-                if (newUser && user != null
-                        && !batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+                if (newUser && user != null && !isDCPTenant) {
                     userSpan.log("Sending email");
                     if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                         emailService.sendExistingUserEmail(tenant, user, apiPublicUrl,
@@ -343,9 +362,6 @@ public class UserResource {
                     } else {
                         emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
                     }
-                  
-                    if (usageEvent != null)
-                        usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                 }
             }
             // update other information
@@ -353,7 +369,7 @@ public class UserResource {
                 document.setErrors(Collections.singletonList("Cannot update users in another tenant."));
                 return document;
             }
-            if (newUser && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+            if (newUser && isDCPTenant) {
                 IDaaSUser idaasUser = userService.createIDaaSUser(user, tenant.getSubscriberNumber());
                 if (idaasUser == null) {
                     LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
@@ -369,10 +385,21 @@ public class UserResource {
                     }
                     emailService.sendDCPWelcomeEmail(user, tenant.getName(), welcomeUrl);
                 }
-
-                if (usageEvent != null) {
+                if (!EmailUtils.isInternalUser(username)) {
+                    VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
+                    usageEvent.setEmailAddress(loginUser.getEmail());
+                    usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                    usageEvent.setPOAEID(traceId);
+                    usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+                    usageEvent.setLUID(loginUser.getPid());
+                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
                     populateWithSubscriberDetails(usageEvent);
-                    vboService.sendUserUsageEvent(usageEvent);
+                    try {
+                        vboService.sendUserUsageEvent(usageEvent);
+                    } catch (Exception e) {
+                        LOGGER.error("Exception in usage event: " + e.toString());
+                        LOGGER.error("Exception in usage event: " + ExceptionUtils.getStackTrace(e));
+                    }
                 }
             }
         } finally {
@@ -393,21 +420,49 @@ public class UserResource {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
         String safeUsername = userService.getURLSafeUsername(username).toLowerCase();
-        if (userService.inTenant(tenantId, safeUsername)) {
-            String loginUsername = loginUser.getUsername();
-            AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
-            AccessLevel targetLevel = userService.getAccessLevel(tenantId, safeUsername);
-            if (!userService.isSuperior(loginLevel, targetLevel)) {
-                response.setStatus(403);
-                return SimpleBooleanResponse.failedResponse(Collections.singletonList(String
-                        .format("Could not delete a %s user using a %s user.", targetLevel.name(), loginLevel.name())));
+
+        Tracer tracer = GlobalTracer.get();
+        Span userSpan = null;
+        try (Scope scope = startUserSpan(username, System.currentTimeMillis())) {
+            userSpan = tracer.activeSpan();
+            String traceId = userSpan.context().toTraceId();
+
+            if (userService.inTenant(tenantId, safeUsername)) {
+                String loginUsername = loginUser.getUsername();
+                AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
+                AccessLevel targetLevel = userService.getAccessLevel(tenantId, safeUsername);
+                if (!userService.isSuperior(loginLevel, targetLevel)) {
+                    response.setStatus(403);
+                    return SimpleBooleanResponse.failedResponse(Collections.singletonList(String
+                            .format("Could not delete a %s user using a %s user due to inferior access level.",
+                                    targetLevel.name(), loginLevel.name())));
+                }
+                userService.deleteUser(tenantId, safeUsername, true);
+                LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, safeUsername, tenantId));
+                if (!EmailUtils.isInternalUser(safeUsername)
+                        && batonService.hasProduct(CustomerSpace.parse(tenant.getId()), LatticeProduct.DCP)) {
+                    VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
+                    usageEvent.setEmailAddress(loginUser.getEmail());
+                    usageEvent.setSubscriberID(tenant.getSubscriberNumber());
+                    usageEvent.setPOAEID(traceId);
+                    usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STDEC);
+                    usageEvent.setLUID(loginUser.getPid());
+                    usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+                    populateWithSubscriberDetails(usageEvent);
+                    try {
+                        vboService.sendUserUsageEvent(usageEvent);
+                    } catch (Exception e) {
+                        LOGGER.error("Exception in usage event: " + e.toString());
+                        LOGGER.error("Exception in usage event: " + ExceptionUtils.getStackTrace(e));
+                    }
+                }
+                return SimpleBooleanResponse.successResponse();
+            } else {
+                return SimpleBooleanResponse.failedResponse(
+                        Collections.singletonList("Could not delete a user that is not in the current tenant"));
             }
-            userService.deleteUser(tenantId, safeUsername, true);
-            LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, safeUsername, tenantId));
-            return SimpleBooleanResponse.successResponse();
-        } else {
-            return SimpleBooleanResponse.failedResponse(
-                    Collections.singletonList("Could not delete a user that is not in the current tenant"));
+        } finally {
+            TracingUtils.finish(userSpan);
         }
     }
 
@@ -443,6 +498,33 @@ public class UserResource {
             }
             usageEvent.setContractTermStartDate(details.getEffectiveDate());
             usageEvent.setContractTermEndDate(details.getExpirationDate());
+        } else {
+            LOGGER.info("Failed to retrieve subscriber details from IDaaS for sub id: " + usageEvent.getSubscriberID());
         }
+    }
+
+    private boolean hasAvailableSeats(String subscriberNumber) {
+        if (subscriberNumber == null || !hasDnBConnectEntitlement(subscriberNumber)) {
+            String msg = (subscriberNumber == null) ? "null subscriber number." : "missing D&B Connect entitlement.";
+            LOGGER.error("Unable to retrieve seat count meter: " + msg);
+            return true;
+        }
+        JsonNode meter = vboService.getSubscriberMeter(subscriberNumber);
+        if (meter == null || !meter.has("limit") || !meter.has("current_usage")) {
+            LOGGER.error("Unable to retrieve seat count meter for subscriber: " + subscriberNumber);
+            return false;
+        }
+        if (meter.get("current_usage") == null)
+            LOGGER.info("Null current_usage in meter for subscriber: " + subscriberNumber);
+        int current_usage = (meter.get("current_usage") == null) ? 0 : meter.get("current_usage").asInt();
+        return current_usage < meter.get("limit").asInt();
+    }
+
+    private boolean hasDnBConnectEntitlement(String subscriberNumber) {
+        SubscriberDetails details = iDaaSService.getSubscriberDetails(subscriberNumber);
+        if (details != null && details.getProducts() != null) {
+            return details.getProducts().contains("D&B Connect");
+        }
+        return false;
     }
 }
