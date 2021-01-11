@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -37,8 +38,8 @@ public class MockBrokerInstanceServiceImpl implements MockBrokerInstanceService 
         }
         if (mockBrokerInstance == null) {
             mockBrokerInstance = new MockBrokerInstance();
+            mockBrokerInstance.setSourceId(UUID.randomUUID().toString());
         }
-        mockBrokerInstance.setSourceId(sourceId);
         mockBrokerInstance.setTenant(MultiTenantContext.getTenant());
         mockBrokerInstance.setDisplayName(existingMockBrokerInstance.getDisplayName());
         if (MapUtils.isNotEmpty(existingMockBrokerInstance.getSelectedFields())) {
