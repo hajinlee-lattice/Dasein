@@ -293,30 +293,22 @@ public class PlayLaunchChannelEntityMgrImpl
             }
         }
         if (StringUtils.isNotBlank(updatedChannel.getCurrentLaunchedAccountUniverseTable())) {
-            Table table = tableEntityMgr.findByName(updatedChannel.getCurrentLaunchedAccountUniverseTable(), false,
-                    false);
-            if (table != null) {
-                existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(table.getName());
-                existingPlayLaunchChannel.setResetDeltaCalculationData(false);
-            } else {
-                throw new LedpException(LedpCode.LEDP_32000,
-                        new String[] { "Failed to update channel: " + updatedChannel.getId()
-                                + " since no account universe table found by Id: "
-                                + updatedChannel.getCurrentLaunchedAccountUniverseTable() });
-            }
+            String tableName = retrieveLaunchUniverseTable(updatedChannel.getCurrentLaunchedAccountUniverseTable(),
+                    updatedChannel.getId());
+
+            existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(tableName);
+            existingPlayLaunchChannel.setResetDeltaCalculationData(false);
+        } else {
+            existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(null);
         }
         if (StringUtils.isNotBlank(updatedChannel.getCurrentLaunchedContactUniverseTable())) {
-            Table table = tableEntityMgr.findByName(updatedChannel.getCurrentLaunchedContactUniverseTable(), false,
-                    false);
-            if (table != null) {
-                existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(table.getName());
-                existingPlayLaunchChannel.setResetDeltaCalculationData(false);
-            } else {
-                throw new LedpException(LedpCode.LEDP_32000,
-                        new String[] { "Failed to update channel: " + updatedChannel.getId()
-                                + " since no contact universe table found by Id: "
-                                + updatedChannel.getCurrentLaunchedAccountUniverseTable() });
-            }
+            String tableName = retrieveLaunchUniverseTable(updatedChannel.getCurrentLaunchedContactUniverseTable(),
+                    updatedChannel.getId());
+
+            existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(tableName);
+            existingPlayLaunchChannel.setResetDeltaCalculationData(false);
+        } else {
+            existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(null);
         }
 
         existingPlayLaunchChannel.setUpdatedBy(updatedChannel.getUpdatedBy());
@@ -381,6 +373,18 @@ public class PlayLaunchChannelEntityMgrImpl
                     new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
                             systemName.getDisplayName() });
         }
+    }
+
+    private String retrieveLaunchUniverseTable(String tableName, String channelId) {
+        Table table = tableEntityMgr.findByName(tableName, false, false);
+        if (table == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Failed to update channel: "
+                            + channelId
+                            + " since no previous contact universe table found by Id: "
+                            + tableName });
+        }
+        return table.getName();
     }
 
 }
