@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude
 public class VboUserSeatUsageEvent {
 
-    public enum FeatureURI { STCT, STCTDEC }
+    public enum FeatureURI { STCT, STDEC }
     @JsonProperty
     private final Object GUID = null;
     @JsonProperty
