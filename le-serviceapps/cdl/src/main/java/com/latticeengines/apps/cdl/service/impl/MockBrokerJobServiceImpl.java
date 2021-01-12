@@ -96,25 +96,34 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
             File csvFile = new File(fileDir + subDir, fileName);
             List<String> fieldNames = mockBrokerInstance.getSelectedFields().get(entity.name());
             if (CollectionUtils.isEmpty(fieldNames)) {
+                log.info(String.format("Empty selected fields for entity %s, skip generating CSV file.", entity.name()));
                 continue;
             }
-            try (CSVWriter csvWriter = createCSVWritter(new FileWriter(csvFile))) {
-                csvWriter.writeNext(fieldNames.toArray(new String[0]));
-                List<String[]> records = new ArrayList<>();
-                for (int i = 0; i < recordSize; i++) {
-                    if (i > 0 && i % batchSize == 0) {
-                        csvWriter.writeAll(records);
-                        csvWriter.flush();
-                        records = new ArrayList<>();
+            try {
+                boolean successCreated = true;
+                try (CSVWriter csvWriter = createCSVWritter(new FileWriter(csvFile))) {
+                    csvWriter.writeNext(fieldNames.toArray(new String[0]));
+                    List<String[]> records = new ArrayList<>();
+                    for (int i = 0; i < recordSize; i++) {
+                        if (i > 0 && i % batchSize == 0) {
+                            csvWriter.writeAll(records);
+                            csvWriter.flush();
+                            records = new ArrayList<>();
+                        }
+                        records.add(generateRecord(entity, fieldNames));
                     }
-                    records.add(generateRecord(entity, fieldNames));
+                    csvWriter.writeAll(records);
+                } catch (IOException e) {
+                    successCreated = false;
+                    log.error("Error happened when create csv file: ", e);
                 }
-                csvWriter.writeAll(records);
-            } catch (IOException e) {
-                log.error("Error happened when create csv file: ", e);
+                if (successCreated) {
+                    s3Service.uploadLocalFile(dataStageBucket, key, csvFile, true);
+                }
+            } finally {
+
+                FileUtils.deleteQuietly(csvFile);
             }
-            s3Service.uploadLocalFile(dataStageBucket, key, csvFile, true);
-            FileUtils.deleteQuietly(csvFile);
         }
     }
 
@@ -123,6 +132,15 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
             accountIds.remove(0);
         }
         accountIds.add(accountId);
+    }
+
+    private String getRandomPhoneNumber() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(random.nextInt(10));
+        buffer.append(random.nextInt(10));
+        buffer.append(random.nextInt(10));
+        buffer.append(random.nextInt(10));
+        return buffer.toString();
     }
 
     private String[] generateRecord(BusinessEntity entity, List<String> fieldNames) {
@@ -163,7 +181,7 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
                     record[index] = "United States";
                     break;
                 case "PhoneNumber":
-                    record[index] = "+1 (608) 395-2900";
+                    record[index] = "+1 (608) 395-" + getRandomPhoneNumber();
                     break;
                 case "Industry":
                     record[index] = "Business Services";
@@ -172,7 +190,7 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
                     record[index] = "www.microstrategy.com";
                     break;
                 case "Email":
-                    record[index] = "";
+                    record[index] = "testuser@lattice-engines.com";
                     break;
                 case "FirstName":
                     record[index] = "testF";
