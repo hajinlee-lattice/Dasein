@@ -195,11 +195,15 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
                 newMARecord("a11", "c5", 0L), //
                 newMARecord("a11", "c6", 6L), //
 
-                // a12 has contacts but no MA => a12 won't have Active Contacts and Web Visits alert
+                // a12 has contacts but no MA => a12 won't have Active Contacts and Web Visits
+                // alert
                 newTimelineContactRecord("a12", "c1", "Manager", WebVisit, "Page group 1",
                         "Data Management product, Business Intelligence"), //
                 newTimelineContactRecord("a12", "c2", "Software Engineer", WebVisit, "Page group 2", "AI products"), //
                 newTimelineContactRecord("a13", "c1", "QA", WebVisit, "Page group 2", "AI products"), //
+                newTimelineContactRecord("a13", "c1", "QA", WebVisit, "Page group 3", "DB products"), //
+                newTimelineContactRecord("a13", "c2", "Product Manager", WebVisit, "Page group 4",
+                        "Marketing products"), //
                 // a13 has contacts and MA => a13 has Active Contacts and Web Visits alert
                 newMARecord("a13", "c3", 2L), //
         };

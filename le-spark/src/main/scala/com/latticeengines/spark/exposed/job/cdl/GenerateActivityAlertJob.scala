@@ -320,6 +320,8 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
     timelineDf
       .filter(col(accountId).isNotNull.and(col(accountId).notEqual(anonymousId)))
       .filter(col(contactId).isNotNull.and(col(contactId).notEqual(anonymousId)))
+      .select(col(accountId), col(contactId), col(title))
+      .distinct()
       .groupBy(accountId)
       .agg(countDistinct(contactId).as(activeContacts), concatTitles(col(title)).as(titles), count(col(title)).as(titleCnt))
   }
