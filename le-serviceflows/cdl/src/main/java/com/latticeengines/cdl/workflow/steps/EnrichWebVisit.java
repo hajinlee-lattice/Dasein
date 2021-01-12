@@ -21,9 +21,14 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
+import com.latticeengines.cdl.workflow.steps.process.GenerateTimeLine;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -46,9 +51,14 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.EnrichWebVisitJob;
 
+@Component(EnrichWebVisit.BEAN_NAME)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Lazy
 public class EnrichWebVisit extends RunSparkJob<EnrichWebVisitSparkStepConfiguration, EnrichWebVisitJobConfig> {
 
     private static Logger log = LoggerFactory.getLogger(EnrichWebVisit.class);
+
+    static final String BEAN_NAME = "enrichWebVisit";
 
     private static final TypeReference<Map<String, Map<String, DimensionMetadata>>> METADATA_MAP_TYPE = new TypeReference<Map<String, Map<String, DimensionMetadata>>>() {
     };
@@ -149,7 +159,7 @@ public class EnrichWebVisit extends RunSparkJob<EnrichWebVisitSparkStepConfigura
             tableNames.put(streamId, tableName);
             tables.put(streamId, table);
             exportToS3(table);
-            dataUnitProxy.registerAthenaDataUnit(configuration.getCustomer().toString(), tableName);
+            dataUnitProxy.registerAthenaDataUnit(configuration.getCustomer(), tableName);
         });
         tableNames.putAll(relinkedTables);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), tableNames,
@@ -232,7 +242,7 @@ public class EnrichWebVisit extends RunSparkJob<EnrichWebVisitSparkStepConfigura
         return tables;
     }
 
-    private Map<String, String> getSelectedAttributes() {
+    private static Map<String, String> getSelectedAttributes() {
         Map<String, String> selectedAttributes = new HashMap<>();
         selectedAttributes.put("AccountId", "account_id");
         selectedAttributes.put("WebVisitDate", "visit_date");
