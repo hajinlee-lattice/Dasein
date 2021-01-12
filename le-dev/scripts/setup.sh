@@ -25,6 +25,11 @@ echo "You are using this java: ${JAVA_HOME}"
 source "${WSHOME}/le-dev/scripts/check_aws_creds_expiration.sh"
 check_aws_creds_expiration
 
+if [[ ! -d "/var/log/ledp" ]]; then
+  sudo mkdir -p /var/log/ledp
+  sudo chmod 777 /var/log/ledp
+fi
+
 # Expand aliases
 echo "Expanding aliases."
 shopt -s expand_aliases
