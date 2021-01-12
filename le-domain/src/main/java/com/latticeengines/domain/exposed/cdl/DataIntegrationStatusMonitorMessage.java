@@ -58,7 +58,7 @@ public class DataIntegrationStatusMonitorMessage {
             @Type(value = AudienceEventDetail.class, name = "AudienceSizeUpdate"),
             @Type(value = FailedEventDetail.class, name = "Failed"),
             @Type(value = InitiatedEventDetail.class, name = "Initiated"),
-            @Type(value = InitiatedEventDetail.class, name = "AuthInvalidated") })
+            @Type(value = AuthInvalidatedEventDetail.class, name = "AuthInvalidated") })
     private EventDetail eventDetail;
 
     public String getTenantName() {
