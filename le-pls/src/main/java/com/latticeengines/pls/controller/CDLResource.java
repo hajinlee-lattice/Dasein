@@ -741,36 +741,9 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         try {
-            DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, source, templateDisplay);
-            boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
-            EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
-            Table standardTable;
-            BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
-            if (entityType != null && templateDisplay.getS3ImportSystem() != null) {
-                standardTable = SchemaRepository.instance().getSchema(templateDisplay.getS3ImportSystem().getSystemType(),
-                        entityType, enableEntityMatch, batonService.onlyEntityMatchGAEnabled(customerSpace));
-            } else {
-                standardTable = SchemaRepository.instance().getSchema(
-                        entity, true, false, enableEntityMatch,
-                        batonService.onlyEntityMatchGAEnabled(customerSpace));
-            }
-            Table templateTable = dataFeedTask.getImportTemplate();
-            //map display name then get file content
-            Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entityType);
-            Map<String, String> standardNameMapping =
-                    standardTable.getAttributes()
-                            .stream()
-                            .collect(Collectors.toMap(Attribute::getName, Attribute::getDisplayName));
-            List<S3ImportSystem> systemList = cdlService.getAllS3ImportSystem(customerSpace.toString());
-            Set<String> matchingNames = SchemaRepository.instance().matchingAttributes(entity, enableEntityMatch)
-                    .stream().map(Attribute::getName).collect(Collectors.toSet());
-            Set<String> systemIds =
-                    updateUniqueAndMatchIdField(cdlService.getTemplatePreview(customerSpace.toString(), templateTable
-                            , standardTable, matchingNames), systemList, entityType, templateDisplay.getS3ImportSystem());
-            templateTable.getAttributes().forEach(attribute -> attribute.setSourceAttrName(attribute.getSourceAttrName() == null ? attribute.getDisplayName() : attribute.getSourceAttrName()));
-            updateTableDisplayName(templateTable, nameMapping, standardNameMapping, systemIds);
-            updateTableDisplayName(standardTable, nameMapping, standardNameMapping, systemIds);
-            String fileContent = cdlService.getTemplateMappingContent(templateTable, standardTable);
+            // get template preview, then render the csv
+            List<TemplateFieldPreview> previews = getTemplatePreview(source, templateDisplay);
+            String fileContent = cdlService.getTemplateMappingContent(previews);
             DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
             String dateString = dateFormat.format(new Date());
             // generate file name with feed type and date
@@ -783,18 +756,6 @@ public class CDLResource {
             log.error("Download template csv Failed: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
         }
-    }
-
-    private void updateTableDisplayName(Table table, Map<String, String> nameMapping, Map<String, String> standardNameMapping, Set<String> systemIds) {
-        table.getAttributes().forEach(attribute -> {
-            if (nameMapping.containsKey(attribute.getName())) {
-                attribute.setDisplayName(nameMapping.get(attribute.getName()));
-            } else if (standardNameMapping.containsKey(attribute.getName())) {
-                attribute.setDisplayName(standardNameMapping.get(attribute.getName()));
-            } else if (!systemIds.contains(attribute.getName())) {
-                attribute.setDisplayName(attribute.getSourceAttrName() == null ? attribute.getDisplayName() : attribute.getSourceAttrName());
-            }
-        });
     }
 
     @PostMapping("/s3import/template/create/webvisit")
