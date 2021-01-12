@@ -180,7 +180,7 @@ public class UserResource {
 
         Tracer tracer = GlobalTracer.get();
         Span userSpan = null;
-        try (Scope scope = startUserSpan(loginUsername, System.currentTimeMillis())) {
+        try (Scope scope = startUserSpan(loginUsername, tenant.getId(), "Register User")) {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
             userSpan.log("Start - Register User");
@@ -308,7 +308,7 @@ public class UserResource {
 
         Tracer tracer = GlobalTracer.get();
         Span userSpan = null;
-        try (Scope scope = startUserSpan(username, System.currentTimeMillis())) {
+        try (Scope scope = startUserSpan(username, tenantId, "Update User")) {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
             userSpan.log("Start - Update User");
@@ -423,7 +423,7 @@ public class UserResource {
 
         Tracer tracer = GlobalTracer.get();
         Span userSpan = null;
-        try (Scope scope = startUserSpan(username, System.currentTimeMillis())) {
+        try (Scope scope = startUserSpan(username, tenantId, "Delete User")) {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
 
@@ -480,11 +480,12 @@ public class UserResource {
         }
     }
 
-    private Scope startUserSpan(String username, long startTimeStamp) {
+    private Scope startUserSpan(String username, String tenantId, String operation) {
         Tracer tracer = GlobalTracer.get();
-        Span span = tracer.buildSpan("Handling User " + username)
+        Span span = tracer.buildSpan(operation)
                 .withTag(TracingTags.User.USERNAME, username)
-                .withStartTimestamp(startTimeStamp)
+                .withTag(TracingTags.TENANT_ID, tenantId)
+                .withStartTimestamp(System.currentTimeMillis() * 1000)
                 .start();
         return tracer.activateSpan(span);
     }
