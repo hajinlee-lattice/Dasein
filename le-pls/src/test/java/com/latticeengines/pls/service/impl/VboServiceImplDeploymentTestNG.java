@@ -59,19 +59,19 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
         MultiTenantContext.setTenant(mainTestTenant);
-        deleteUserByRestCall(INTERNAL_USER_EMAIL);
-        deleteUserByRestCall(EXTERNAL_USER_EMAIL);
+        userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
+        userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
     }
 
     @AfterClass(groups = { "deployment" })
     public void tearDown() {
-        deleteUserByRestCall(INTERNAL_USER_EMAIL);
-        deleteUserByRestCall(EXTERNAL_USER_EMAIL);
+        userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
+        userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
     }
 
     @Test(groups = "deployment")
     public void testRegisterInternalEmail() throws InterruptedException {
-        deleteUserByRestCall(INTERNAL_USER_EMAIL);
+        userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
         String[] subscriberNumbers = {SUBSCRIBER_NUMBER_OPEN, SUBSCRIBER_NUMBER_FULL};
         for (String sn : subscriberNumbers) {
             switchSubscriber(sn);
@@ -87,7 +87,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testRegisterExternalEmail() throws InterruptedException {
         // subscriber with open seats: assert success, meter change
-        deleteUserByRestCall(EXTERNAL_USER_EMAIL);
+        userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
         switchSubscriber(SUBSCRIBER_NUMBER_OPEN);
         register(EXTERNAL_USER_EMAIL, true);
         delete(EXTERNAL_USER_EMAIL, true);
@@ -100,7 +100,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testUpdateInternalEmail() throws InterruptedException {
-        deleteUserByRestCall(INTERNAL_USER_EMAIL);
+        userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
         String[] subscriberNumbers = {SUBSCRIBER_NUMBER_OPEN, SUBSCRIBER_NUMBER_FULL};
         for (String sn : subscriberNumbers) {
             switchSubscriber(sn);
@@ -116,7 +116,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testUpdateExternalEmail() throws InterruptedException {
         // subscriber with open seats, new external user: assert success, meter change
-        deleteUserByRestCall(EXTERNAL_USER_EMAIL);
+        userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
         switchSubscriber(SUBSCRIBER_NUMBER_OPEN);
         userService.createUser(EXTERNAL_USER_EMAIL, getUserReg(EXTERNAL_USER_EMAIL));
         update(EXTERNAL_USER_EMAIL, true, AccessLevel.EXTERNAL_USER, true);
@@ -131,8 +131,6 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         update(EXTERNAL_USER_EMAIL, false, AccessLevel.EXTERNAL_USER, true);
         delete(EXTERNAL_USER_EMAIL, false);
         userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
-
-        // TODO: external user and seats full but user is already existing: expect successful update, no meter change
     }
 
     private void switchSubscriber(String subscriberNumber) {
@@ -148,13 +146,12 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             ResponseDocument<RegistrationResult> response = ResponseDocument.
                     generateFromJSON(json, RegistrationResult.class);
             assertNotNull(response);
-            log.error(response.toString());
             assertEquals(response.isSuccess(), expectSuccess);
         } catch (RuntimeException e) {
             // allow expected 403 for user seat count limit
             if (expectSuccess)
                 throw e;
-            assertEquals(e.getMessage(), FORBIDDEN_MSG);
+            assertTrue(e.getMessage().startsWith(FORBIDDEN_MSG));
         }
         Thread.sleep(3000);
         int currCount = getSeatCount();
@@ -196,7 +193,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             // allow expected 403 for user seat count limit
             if (expectSuccess)
                 throw e;
-            assertEquals(e.getMessage(), FORBIDDEN_MSG);
+            assertTrue(e.getMessage().startsWith(FORBIDDEN_MSG));
         }
         Thread.sleep(3000);
         int currCount = getSeatCount();
