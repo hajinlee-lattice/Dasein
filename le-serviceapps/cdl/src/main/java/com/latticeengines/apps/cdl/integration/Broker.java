@@ -12,7 +12,7 @@ public interface Broker {
 
     void start();
 
-    List<BusinessEntity> listDocumentTypes();
+    List<String> listDocumentTypes();
 
     List<ColumnMetadata> describeDocumentType(BusinessEntity entity);
 

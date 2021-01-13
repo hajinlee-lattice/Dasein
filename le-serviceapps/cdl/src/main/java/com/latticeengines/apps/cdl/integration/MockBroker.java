@@ -75,8 +75,8 @@ public class MockBroker extends BaseBroker {
     }
 
     @Override
-    public List<BusinessEntity> listDocumentTypes() {
-        return Lists.newArrayList(BusinessEntity.Account, BusinessEntity.Contact);
+    public List<String> listDocumentTypes() {
+        return Lists.newArrayList(BusinessEntity.Account.name(), BusinessEntity.Contact.name());
     }
 
     @Override

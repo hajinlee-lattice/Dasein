@@ -34,7 +34,7 @@ public class InboundConnectionResource {
 
     @PostMapping("/listdocumenttypes")
     @ApiOperation(value = "list document type for a broker")
-    public List<BusinessEntity> listDocumentTypes(@PathVariable String customerSpace, @RequestBody BrokerReference brokerReference) {
+    public List<String> listDocumentTypes(@PathVariable String customerSpace, @RequestBody BrokerReference brokerReference) {
         return inboundConnectionService.listDocumentTypes(brokerReference);
     }
 

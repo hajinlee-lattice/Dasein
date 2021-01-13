@@ -36,10 +36,10 @@ public class BrokerFactoryImpl implements BrokerFactory {
                     brokerReference.setConnectionType(brokerSetupInfo.getConnectionType());
                     return brokerReference;
                 default:
-                    return null;
+                    throw new RuntimeException("Inbound connection type is wrong, can't setup broker.");
             }
         } else {
-            return null;
+            throw new RuntimeException("Inbound connection type is empty, can't setup broker.");
         }
     }
 
