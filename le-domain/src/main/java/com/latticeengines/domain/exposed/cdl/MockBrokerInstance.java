@@ -62,10 +62,19 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
     @JsonProperty("displayName")
     private String displayName;
 
+    @Column(name = "DATA_STREAM_ID")
+    @JsonProperty("dataStreamId")
+    private String dataStreamId;
+
     @JsonProperty("selectedFields")
     @Column(name = "SELECTED_FIELDS", columnDefinition = "'JSON'")
     @Type(type = "json")
     private Map<String, List<String>> selectedFields = new HashMap<>();
+
+    @JsonProperty("ingestionScheduler")
+    @Column(name = "INGESTION_SCHEDULER", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private IngestionScheduler ingestionScheduler;
 
     @Temporal(TIMESTAMP)
     @JsonProperty("created")
@@ -76,6 +85,10 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
     @JsonProperty("updated")
     @Column(name = "UPDATED", nullable = false)
     private Date updated;
+
+    @JsonProperty("active")
+    @Column(name = "ACTIVE", nullable = false)
+    private boolean active;
 
     @Override
     public Long getPid() {
@@ -139,5 +152,29 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
 
     public void setSelectedFields(Map<String, List<String>> selectedFields) {
         this.selectedFields = selectedFields;
+    }
+
+    public String getDataStreamId() {
+        return dataStreamId;
+    }
+
+    public void setDataStreamId(String dataStreamId) {
+        this.dataStreamId = dataStreamId;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public IngestionScheduler getIngestionScheduler() {
+        return ingestionScheduler;
+    }
+
+    public void setIngestionScheduler(IngestionScheduler ingestionScheduler) {
+        this.ingestionScheduler = ingestionScheduler;
     }
 }

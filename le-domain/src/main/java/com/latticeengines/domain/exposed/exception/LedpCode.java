@@ -919,7 +919,8 @@ public enum LedpCode {
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //
     LEDP_41002("PeriodId field {0} is null for record {1}."), //
-    LEDP_41003("Fail to shutdown batch write executor properly"),
+    LEDP_41003("Fail to shutdown batch write executor properly"), //
+    LEDP_41004("Start time or schedule parameters is not valid"), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."), //
