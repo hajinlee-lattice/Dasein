@@ -414,11 +414,12 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private void testLDCAttrs() {
         testLDCFirmographics();
-        // testLDCCovid19();
+        testLDCCovid19();
         testLDCOnlinePresence();
         testLDCWebsiteProfile();
         testLDCIntent();
         testLDCTechProfile();
+        // testDNBTechProfile();
         testLDCWebsiteKeywords();
     }
 
@@ -458,13 +459,13 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             if (skipVerifyDeprecatedLDCAttrs(config)) {
                 return true;
             }
-            AttrState initialState = AttrState.Active;
+            AttrState initialState = AttrState.Inactive;
             boolean[] flags = new boolean[] { true, // life cycle change
                     true, true, // segment
                     false, true, // export
                     true, true, // tp
                     false, true, // cp
-                    true, true // model
+                    false, false // model
             };
             initialState = overwrite11Flags(flags, initialState, config.getAttrName());
             String partition = getLDCPartition(config.getAttrName());
@@ -523,6 +524,23 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             initialState = overwrite11Flags(flags, initialState, config.getAttrName());
             String partition = getLDCPartition(config.getAttrName());
             verifyFlags(config, Category.INTENT, partition, initialState, flags);
+            return true;
+        });
+    }
+
+    private void testDNBTechProfile() {
+        checkAndVerifyCategory(Category.DNB_TECHNOLOGY_PROFILE, (config) -> {
+            AttrState initialState = AttrState.Inactive;
+            boolean[] flags = new boolean[] { true, // life cycle change
+                    true, true, // segment
+                    true, true, // export
+                    true, true, // tp
+                    false, true, // cp
+                    false, false // model
+            };
+            initialState = overwrite11Flags(flags, initialState, config.getAttrName());
+            String partition = getLDCPartition(config.getAttrName());
+            verifyFlags(config, Category.DNB_TECHNOLOGY_PROFILE, partition, initialState, flags);
             return true;
         });
     }
