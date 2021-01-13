@@ -69,6 +69,10 @@ public final class WorkflowJobUtils {
     private static final String DIRECTION = "/Direction";
     private static final String CDL_UPDATED_TIME = "CDLUpdatedTime";
     private static final String DESC = "DESC";
+    private static final String LATTICE = "Lattice";
+    private static final String OUTREACH_TASK_SETTINGS = "/OutreachTaskSettings";
+    private static final String OWNER_PRIORITY = "/OwnerPriority";
+    private static final String DEFAULT_OWNER = "/DefaultOwner";
 
     private static ObjectMapper om = new ObjectMapper();
 
@@ -373,5 +377,20 @@ public final class WorkflowJobUtils {
         sortConfig.add(sortAttr);
         sortConfig.add(sortDir);
         return sortConfig;
+    }
+
+    public static List<String> getOutreachTaskSettingsFromZK(CustomerSpace customerSpace) {
+        List<String> taskSettings = new ArrayList<>();
+        String ownerPriority = LATTICE;
+        String defaultOwner = "";
+        try {
+            ownerPriority = getValueFromZK(customerSpace, CDL, OUTREACH_TASK_SETTINGS + OWNER_PRIORITY);
+            defaultOwner = getValueFromZK(customerSpace, CDL, OUTREACH_TASK_SETTINGS + DEFAULT_OWNER);
+        } catch (Exception e) {
+            log.warn("Tenant Outreach Task Settings found but unable to read: ", e);
+        }
+        taskSettings.add(ownerPriority);
+        taskSettings.add(defaultOwner);
+        return taskSettings;
     }
 }
