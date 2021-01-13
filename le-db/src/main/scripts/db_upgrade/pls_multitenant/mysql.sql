@@ -38,6 +38,22 @@ CREATE PROCEDURE `UpdateSchema`()
 
       ALTER TABLE `PLS_MultiTenant`.`EXPORT_FIELD_METADATA_DEFAULTS`
               ADD `FORCE_POPULATE` bit not null;
+
+      CREATE TABLE `MOCK_BROKER_INSTANCE`
+          (
+              `PID` BIGINT NOT NULL auto_increment,
+              `CREATED` DATETIME NOT NULL,
+              `DISPLAY_NAME` VARCHAR(255) NOT NULL,
+              `SELECTED_FIELDS` JSON DEFAULT NULL,
+              `SOURCE_ID` VARCHAR(255) NOT NULL,
+              `UPDATED` DATETIME NOT NULL,
+              `FK_TENANT_ID` BIGINT, PRIMARY KEY (`PID`)
+          ) engine = InnoDB;
+
+      ALTER TABLE `MOCK_BROKER_INSTANCE`
+          ADD CONSTRAINT `FK_MOCKBROKERINSTANCE_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`)
+              REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
+      ALTER TABLE `MOCK_BROKER_INSTANCE` ADD CONSTRAINT `UKgtyktm5yt7nblklq189u638fy` UNIQUE (`SOURCE_ID`, `FK_TENANT_ID`);
       
   END //
 -- ##############################################################

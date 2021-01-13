@@ -9,6 +9,7 @@ import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.CampaignLaunchSchedulingService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
 import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
+import com.latticeengines.apps.cdl.service.MockBrokerJobService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.tray.service.TrayTestTimeoutService;
@@ -26,6 +27,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
     private EntityStateCorrectionService entityStateCorrectionService;
     private CampaignLaunchSchedulingService campaignLaunchSchedulingService;
     private TrayTestTimeoutService trayTestTimeoutService;
+    private MockBrokerJobService mockBrokerInstanceJobService;
     private String jobArguments;
 
     public CDLQuartzJobCallable(Builder builder) {
@@ -37,6 +39,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         this.entityStateCorrectionService = builder.entityStateCorrectionService;
         this.campaignLaunchSchedulingService = builder.campaignLaunchSchedulingService;
         this.trayTestTimeoutService = builder.trayTestTimeoutService;
+        this.mockBrokerInstanceJobService = builder.mockBrokerInstanceJobService;
         this.jobArguments = builder.jobArguments;
     }
 
@@ -44,20 +47,22 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
     public Boolean call() {
         log.info(String.format("Calling with job type: %s", cdlJobType.name()));
         switch (cdlJobType) {
-        case DFEXECUTIONCLEANUP:
-            return dataFeedExecutionCleanupService.removeStuckExecution(jobArguments);
-        case REDSHIFTCLEANUP:
-            return redShiftCleanupService.removeTempListTables() && redShiftCleanupService.removeUnusedTables();
-        case IMPORT:
-            return s3ImportService.submitImportJob();
-        case ENTITYSTATECORRECTION:
-            return entityStateCorrectionService.execute();
-        case CAMPAIGNLAUNCHSCHEDULER:
-            return campaignLaunchSchedulingService.kickoffScheduledCampaigns();
-        case TRAYTESTTIMEOUT:
-            return trayTestTimeoutService.execute();
-        default:
-            return cdlJobService.submitJob(cdlJobType, jobArguments);
+            case DFEXECUTIONCLEANUP:
+                return dataFeedExecutionCleanupService.removeStuckExecution(jobArguments);
+            case REDSHIFTCLEANUP:
+                return redShiftCleanupService.removeTempListTables() && redShiftCleanupService.removeUnusedTables();
+            case IMPORT:
+                return s3ImportService.submitImportJob();
+            case ENTITYSTATECORRECTION:
+                return entityStateCorrectionService.execute();
+            case CAMPAIGNLAUNCHSCHEDULER:
+                return campaignLaunchSchedulingService.kickoffScheduledCampaigns();
+            case TRAYTESTTIMEOUT:
+                return trayTestTimeoutService.execute();
+            case MOCK_BROKER:
+                return mockBrokerInstanceJobService.generateMockFiles();
+            default:
+                return cdlJobService.submitJob(cdlJobType, jobArguments);
         }
     }
 
@@ -71,7 +76,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         private EntityStateCorrectionService entityStateCorrectionService;
         private CampaignLaunchSchedulingService campaignLaunchSchedulingService;
         private TrayTestTimeoutService trayTestTimeoutService;
-
+        private MockBrokerJobService mockBrokerInstanceJobService;
         private String jobArguments;
 
         public Builder() {
@@ -121,6 +126,11 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
 
         public Builder jobArguments(String jobArguments) {
             this.jobArguments = jobArguments;
+            return this;
+        }
+
+        public Builder mockBrokerInstanceJobService(MockBrokerJobService mockBrokerInstanceJobService) {
+            this.mockBrokerInstanceJobService = mockBrokerInstanceJobService;
             return this;
         }
     }
