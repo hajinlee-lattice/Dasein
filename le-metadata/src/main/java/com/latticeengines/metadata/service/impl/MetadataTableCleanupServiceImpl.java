@@ -50,12 +50,12 @@ public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupServ
 
     @Override
     public Boolean cleanup() {
-        cleanpTables("metadata", lastIndexMetaData);
-        cleanpTables("dataunit", lastIndexDataUnit);
+        cleanupTables("metadata", lastIndexMetaData);
+        cleanupTables("dataunit", lastIndexDataUnit);
         return true;
     }
 
-    private void cleanpTables(String tableType, int lastIndex) {
+    private void cleanupTables(String tableType, int lastIndex) {
         log.info(tableType + " cleanup task started for.");
         List<Table> tablesToDelete = new ArrayList<>();
         tableNameToDataUnit = new HashMap<>();
