@@ -15,7 +15,6 @@ import com.latticeengines.apps.cdl.service.InboundConnectionService;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerSetupInfo;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("inboundConnectionService")
 public class InboundConnectionServiceImpl implements InboundConnectionService {
@@ -36,7 +35,7 @@ public class InboundConnectionServiceImpl implements InboundConnectionService {
     }
 
     @Override
-    public List<BusinessEntity> listDocumentTypes(BrokerReference brokerReference) {
+    public List<String> listDocumentTypes(BrokerReference brokerReference) {
         Broker broker = brokerFactory.getBroker(brokerReference);
         if (broker != null) {
             return broker.listDocumentTypes();
@@ -46,10 +45,10 @@ public class InboundConnectionServiceImpl implements InboundConnectionService {
     }
 
     @Override
-    public List<ColumnMetadata> describeDocumentType(BrokerReference brokerReference, BusinessEntity entity) {
+    public List<ColumnMetadata> describeDocumentType(BrokerReference brokerReference, String documentType) {
         Broker broker = brokerFactory.getBroker(brokerReference);
         if (broker != null) {
-            return broker.describeDocumentType(entity);
+            return broker.describeDocumentType(documentType);
         } else {
             return Collections.emptyList();
         }

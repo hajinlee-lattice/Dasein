@@ -1,10 +1,12 @@
 package com.latticeengines.apps.cdl.integration;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -80,8 +82,9 @@ public class MockBroker extends BaseBroker {
     }
 
     @Override
-    public List<ColumnMetadata> describeDocumentType(BusinessEntity entity) {
-        if (entity != null) {
+    public List<ColumnMetadata> describeDocumentType(String documentType) {
+        if (StringUtils.isNotEmpty(documentType)) {
+            BusinessEntity entity = BusinessEntity.valueOf(documentType);
             switch (entity) {
                 case Account:
                     return accountAttributes.stream().map(attr -> {
@@ -103,7 +106,7 @@ public class MockBroker extends BaseBroker {
                     break;
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
 }

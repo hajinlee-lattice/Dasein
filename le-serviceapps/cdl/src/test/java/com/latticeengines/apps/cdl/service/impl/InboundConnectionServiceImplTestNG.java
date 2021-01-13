@@ -66,11 +66,11 @@ public class InboundConnectionServiceImplTestNG extends CDLFunctionalTestNGBase 
         Assert.assertTrue(broker instanceof MockBroker);
         String sourceId = brokerReference.getSourceId();
         Assert.assertNotNull(sourceId);
-        List<BusinessEntity> entities = broker.listDocumentTypes();
-        Assert.assertTrue(entities.contains(BusinessEntity.Account));
-        Assert.assertTrue(entities.contains(BusinessEntity.Contact));
-        Assert.assertEquals(broker.describeDocumentType(BusinessEntity.Account).size(), 8);
-        Assert.assertEquals(broker.describeDocumentType(BusinessEntity.Contact).size(), 6);
+        List<String> entities = broker.listDocumentTypes();
+        Assert.assertTrue(entities.contains(BusinessEntity.Account.name()));
+        Assert.assertTrue(entities.contains(BusinessEntity.Contact.name()));
+        Assert.assertEquals(broker.describeDocumentType(BusinessEntity.Account.name()).size(), 8);
+        Assert.assertEquals(broker.describeDocumentType(BusinessEntity.Contact.name()).size(), 6);
         broker.start();
         String cronExpression = "0 0/10 * * * ?";
         long startTime = System.currentTimeMillis();

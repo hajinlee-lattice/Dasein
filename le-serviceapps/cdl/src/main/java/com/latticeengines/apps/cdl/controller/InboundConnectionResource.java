@@ -17,7 +17,6 @@ import com.latticeengines.apps.cdl.service.InboundConnectionService;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerSetupInfo;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -46,8 +45,8 @@ public class InboundConnectionResource {
 
     @PostMapping("/desdocumenttype")
     @ApiOperation(value = "get schema for a broker with certain entity")
-    public List<ColumnMetadata> describeDocumentType(@PathVariable String customerSpace,
-                                                     @RequestParam(value = "entity") BusinessEntity entity, @RequestBody BrokerReference brokerReference) {
-        return inboundConnectionService.describeDocumentType(brokerReference, entity);
+    public List<ColumnMetadata> describeDocumentType(@PathVariable String customerSpace, @RequestParam(value = "documentType") String documentType,
+                                                     @RequestBody BrokerReference brokerReference) {
+        return inboundConnectionService.describeDocumentType(brokerReference, documentType);
     }
 }

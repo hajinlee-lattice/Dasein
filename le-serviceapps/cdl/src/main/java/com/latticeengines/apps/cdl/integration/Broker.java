@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface Broker {
 
@@ -14,7 +13,7 @@ public interface Broker {
 
     List<String> listDocumentTypes();
 
-    List<ColumnMetadata> describeDocumentType(BusinessEntity entity);
+    List<ColumnMetadata> describeDocumentType(String documentType);
 
     void schedule(IngestionScheduler scheduler);
 }
