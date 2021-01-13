@@ -62,7 +62,8 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
 
     private static Logger log = LoggerFactory.getLogger(LegacyDeleteByUploadStep.class);
 
-    private static int prepareStep, cleanupStep, collectMasterStep, collectStep, mergeStep, lastCleanupStep;
+    private static int prepareStep, cleanupStep, collectMasterStep, collectStep, mergeStep,
+    partitionStep, lastPartitionStep;
 
     private static final String CLEANUP_TABLE_PREFIX = "DeleteByFile";
 
@@ -116,7 +117,8 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
 
     private List<TransformationStepConfig> generateSteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
-        cleanupStep = -1;
+        partitionStep = -1;
+        lastPartitionStep = -1;
         try {
             /*
              * type=BYUPLOAD_MINDATE transaction legacyDeleteAction
@@ -130,6 +132,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                 cleanupStep = 2;
                 collectMasterStep = 3;
                 collectStep = 5;
+                partitionStep = 6;
 
                 TransformationStepConfig merge = mergeDelete(canMergeActions, InterfaceName.TransactionDayPeriod.name());
                 TransformationStepConfig prepare = addTrxDate(null);
@@ -160,7 +163,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                     if (legacyDeleteByUploadActionConfiguration == null || legacyDeleteByUploadActionConfiguration.getCleanupOperationType() == null) {
                         continue;
                     }
-                    lastCleanupStep = cleanupStep;
+                    lastPartitionStep = partitionStep;
                     steps.add(addTrxDate(legacyDeleteByUploadActionConfiguration));
                     prepareStep = steps.size() - 1;
                     steps.add(cleanup(legacyDeleteByUploadActionConfiguration.getCleanupOperationType()));
@@ -171,6 +174,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                     steps.add(collectDays());
                     collectStep = steps.size() - 1;
                     steps.add(partitionDaily());
+                    partitionStep = steps.size() - 1;
                 }
             }
             return steps;
@@ -225,14 +229,14 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
 
         List<String> sourceNames = new ArrayList<>();
         Map<String, SourceTable> sourceTables = new HashMap<>();
-        if (lastCleanupStep == -1) {
+        if (lastPartitionStep == -1) {
             sourceNames.add(masterTable.getName());
             SourceTable sourceTable = new SourceTable(masterTable.getName(), customerSpace);
             sourceTables.put(masterTable.getName(), sourceTable);
             step.setBaseSources(sourceNames);
             step.setBaseTables(sourceTables);
         } else {
-            step.setInputSteps(Collections.singletonList(lastCleanupStep));
+            step.setInputSteps(Collections.singletonList(lastPartitionStep));
         }
 
         PeriodCollectorConfig config = new PeriodCollectorConfig();
@@ -248,7 +252,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(collectMasterStep);
 
-        if (lastCleanupStep == -1) {
+        if (lastPartitionStep == -1) {
             String tableSourceName = "MasterTable";
             String sourceTableName = masterTable.getName();
             SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
@@ -258,7 +262,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
             baseTables.put(tableSourceName, sourceTable);
             step.setBaseTables(baseTables);
         } else {
-            inputSteps.add(lastCleanupStep);
+            inputSteps.add(lastPartitionStep);
         }
         step.setInputSteps(inputSteps);
         PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
@@ -274,7 +278,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         inputSteps.add(collectStep);
         inputSteps.add(cleanupStep);
 
-        if (lastCleanupStep == -1) {
+        if (lastPartitionStep == -1) {
             String tableSourceName = "RawTransaction";
             String sourceTableName = masterTable.getName();
             SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
@@ -284,7 +288,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
             baseTables.put(tableSourceName, sourceTable);
             step.setBaseTables(baseTables);
         } else {
-           inputSteps.add(lastCleanupStep);
+           inputSteps.add(lastPartitionStep);
         }
         step.setInputSteps(inputSteps);
 
@@ -300,7 +304,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(prepareStep);
 
-        if (lastCleanupStep == -1) {
+        if (lastPartitionStep == -1) {
             List<String> sourceNames = new ArrayList<>();
             Map<String, SourceTable> baseTables = new HashMap<>();
             String masterName = masterTable.getName();
@@ -311,7 +315,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
             step.setBaseSources(sourceNames);
             step.setBaseTables(baseTables);
         } else {
-            inputSteps.add(lastCleanupStep);
+            inputSteps.add(lastPartitionStep);
         }
         step.setInputSteps(inputSteps);
 
