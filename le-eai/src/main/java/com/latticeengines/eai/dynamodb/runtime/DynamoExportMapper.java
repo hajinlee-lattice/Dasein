@@ -39,7 +39,7 @@ import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
 public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DynamoExportMapper.class);
-    private static final int BUFFER_SIZE = 25;
+    private static final int BUFFER_SIZE = 100; // FIXME - change back to 25 if any impact
 
     private String recordType;
     private String repo;
