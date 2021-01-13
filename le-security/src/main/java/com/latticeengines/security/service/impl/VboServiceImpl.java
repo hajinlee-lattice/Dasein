@@ -66,12 +66,8 @@ public class VboServiceImpl extends AuthorizationServiceBase implements VboServi
         String logMsg = "Sending VBO User Seat Usage Event for user " + usageEvent.getEmailAddress();
         Tracer tracer = GlobalTracer.get();
         Span span = tracer.activeSpan();
-        if (span != null) {
+        if (span != null)
             span.log(logMsg);
-            log.info(span.context().toTraceId());
-        } else {
-            log.info("Null span");
-        }
         log.info(logMsg);
 
         try {
