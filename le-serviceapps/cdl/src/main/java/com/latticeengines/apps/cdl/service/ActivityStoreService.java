@@ -168,4 +168,6 @@ public interface ActivityStoreService {
     List<AtlasStream> getStreams(@NotNull String customerSpace);
 
     List<AtlasStream> getStreamsByStreamType(@NotNull String customerSpace, AtlasStream.StreamType streamType);
+
+    Map<AtlasStream.StreamType, List<String>> getStreamTypeToStreamNamesMap(@NotNull String customerSpace);
 }
