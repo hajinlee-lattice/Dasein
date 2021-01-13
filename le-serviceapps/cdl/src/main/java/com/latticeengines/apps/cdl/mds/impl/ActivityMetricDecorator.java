@@ -151,11 +151,9 @@ public class ActivityMetricDecorator implements Decorator {
         String groupId = tokens.get(0);
         if (!groupCache.containsKey(groupId)) {
             ActivityMetricsGroup group = activityMetricsGroupEntityMgr.findByGroupId(groupId);
-            if (group == null) {
-                cm.disableGroup(Segment);
-                return;
+            if (group != null) {
+                groupCache.put(groupId, group);
             }
-            groupCache.put(groupId, group);
         }
         ActivityMetricsGroup group = groupCache.get(groupId);
 
@@ -170,6 +168,10 @@ public class ActivityMetricDecorator implements Decorator {
         } else {
             log.debug("Attribute {} is deprecated (shouldDeprecate={}), skip rendering", cm.getAttrName(),
                     cm.getShouldDeprecate());
+            cm.disableGroup(Segment);
+            if (group == null) { // no need to proceed if no such group
+                return;
+            }
         }
         renderFundamentalType(cm, group);
         overwriteColumnSelection(cm, group);
@@ -179,7 +181,7 @@ public class ActivityMetricDecorator implements Decorator {
         switch (entity) {
         case WebVisitProfile:
             String pathPtn = ActivityStoreUtils.getDimensionValueAsString(params, InterfaceName.PathPatternId.name(),
-                    InterfaceName.PathPattern.name(), group.getTenant());
+                    InterfaceName.PathPattern.name(), tenant);
             ActivityStoreUtils.setColumnMetadataUIProperties(cm, timeRange, pathPtn);
             if (StringUtils.isBlank(pathPtn)) {
                 log.warn("Failed to retrieve path pattern for attribute {} in group {} for tenant {}", cm.getAttrName(),
