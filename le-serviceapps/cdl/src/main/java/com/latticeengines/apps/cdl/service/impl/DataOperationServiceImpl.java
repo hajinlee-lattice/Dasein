@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataOperationEntityMgr;
 import com.latticeengines.apps.cdl.service.DataOperationService;
 import com.latticeengines.apps.core.service.DropBoxService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DataDeleteOperationConfiguration;
@@ -20,10 +21,13 @@ import com.latticeengines.domain.exposed.cdl.DataOperationRequest;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.metadata.DataOperation;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("dataOperationService")
 public class DataOperationServiceImpl implements DataOperationService {
@@ -45,6 +49,12 @@ public class DataOperationServiceImpl implements DataOperationService {
 
     @Inject
     private CDLDataCleanupServiceImpl cdlDataCleanupService;
+
+    @Inject
+    private BatonService batonService;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @Override
     public String createDataOperation(String customerSpace, DataOperation.OperationType operationType, DataOperationConfiguration configuration) {
@@ -102,6 +112,7 @@ public class DataOperationServiceImpl implements DataOperationService {
             fileProperty.setFilePath(dataOperationRequest.getS3Bucket() + "/" + key);
             fileProperty.setDirectory(false);
             SourceFile sourceFile = sourceFileProxy.createSourceFileFromS3(customerSpace, fileProperty, dataOperation.getConfiguration().getEntity().name());
+            resolveMetadata(customerSpace, sourceFile);
             DataOperationConfiguration configuration = dataOperation.getConfiguration();
             if (configuration instanceof DataDeleteOperationConfiguration) {
                 DataDeleteOperationConfiguration deleteOperationConfiguration = (DataDeleteOperationConfiguration) configuration;
@@ -109,6 +120,7 @@ public class DataOperationServiceImpl implements DataOperationService {
                 request.setIdEntity(deleteOperationConfiguration.getEntity());
                 request.setFilename(sourceFile.getName());
                 request.setHardDelete(DataDeleteOperationConfiguration.DeleteType.HARD.equals(deleteOperationConfiguration.getDeleteType()));
+                request.setIdSystem(dataOperation.getConfiguration().getSystemName());
                 customerSpace = CustomerSpace.parse(customerSpace).toString();
                 ApplicationId applicationId = cdlDataCleanupService.registerDeleteData(customerSpace, request);
                 return applicationId.toString();
@@ -119,5 +131,16 @@ public class DataOperationServiceImpl implements DataOperationService {
             log.error("error:", e);
             return e.getMessage();
         }
+    }
+
+    private void resolveMetadata(String customerSpace, SourceFile sourceFile) {
+        log.info("Resolving metadata for modeling ...");
+        Table table = SchemaRepository.instance().getSchema(sourceFile.getSchemaInterpretation(), false,
+                batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)),
+                batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(customerSpace)));
+        table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
+        metadataProxy.createTable(customerSpace, table.getName(), table);
+        sourceFile.setTableName(table.getName());
+        sourceFileProxy.update(customerSpace, sourceFile);
     }
 }
