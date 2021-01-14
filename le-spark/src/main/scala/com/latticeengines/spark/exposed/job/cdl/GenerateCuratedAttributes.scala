@@ -5,6 +5,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName.{CDLUpdatedTime,
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
+import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{LongType, StringType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -23,6 +24,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
     val specialJoinKeys = config.joinKeys.asScala
     val templateSystemMap = config.templateSystemMap.asScala
     val templateTypeMap = config.templateTypeMap.asScala
+    val templateSysTypeMap = config.templateSystemTypeMap.asScala
     val masterDf = lattice.input(config.masterTableIdx)
 
     // calculation
@@ -41,7 +43,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
         val srcJoinKey = specialJoinKeys.getOrElse(args._1, config.joinKey)
         val df = modifyJoinKey(lattice.input(args._1), config.joinKey, srcJoinKey)
         MergeUtils.merge2(
-          accDf, mergeAttr(df, args._2, templateSystemMap, templateTypeMap).select(config.joinKey, toTargetAttrs(args._2): _*),
+          accDf, mergeAttr(df, args._2, templateSystemMap, templateTypeMap, templateSysTypeMap).select(config.joinKey, toTargetAttrs(args._2): _*),
           Seq(config.joinKey), Set(), overwriteByNull = false)
       }
       optLastActivityDf match {
@@ -50,7 +52,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
           val inputIdx = attrsToMerge.head._1
           val srcJoinKey = specialJoinKeys.getOrElse(inputIdx, config.joinKey)
           val df = mergeAttr(modifyJoinKey(lattice.input(inputIdx), config.joinKey, srcJoinKey),
-            attrsToMerge.head._2, templateSystemMap, templateTypeMap)
+            attrsToMerge.head._2, templateSystemMap, templateTypeMap, templateSysTypeMap)
             .select(config.joinKey, toTargetAttrs(attrsToMerge.head._2): _*)
           attrsToMerge.tail.foldLeft(df)(mergeFn(_, _))
       }
@@ -84,7 +86,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
         // tgtAttr will be the prefix, create two attrs (EntityCreatedSource and EntityCreatedType)
         val createdSrcAttr = tgtAttr + InterfaceName.EntityCreatedSource.name
         val createdTypeAttr = tgtAttr + InterfaceName.EntityCreatedType.name
-        Seq(createdSrcAttr, createdTypeAttr)
+        Seq(createdSrcAttr, createdTypeAttr, InterfaceName.EntityCreatedSystemType.name)
       } else {
         Seq(tgtAttr)
       }
@@ -101,10 +103,11 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
     }
   }
 
-  private def mergeAttr(df: DataFrame, attrs: mutable.Map[String, String],
-                        templateSystemMap: mutable.Map[String, String], templateTypeMap: mutable.Map[String, String]): DataFrame = {
+  private def mergeAttr(df: DataFrame, attrs: mutable.Map[String, String], templateSystemMap: mutable.Map[String, String],
+                        templateTypeMap: mutable.Map[String, String], templateSysTypeMap: mutable.Map[String, String]): DataFrame = {
     val mapTemplateToSystem = udf((s: String) => templateSystemMap.getOrElse(s, null))
     val mapTemplateToEntityType = udf((s: String) => templateTypeMap.getOrElse(s, null))
+    val mapTemplateToSystemType = udf((s: String) => templateSysTypeMap.getOrElse(s, null))
     attrs.foldLeft(df)((accDf, args) => {
       val tgtAttr = args._2
       val srcAttr = args._1
@@ -116,22 +119,12 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
         // tgtAttr will be the prefix, create two attrs (EntityCreatedSource and EntityCreatedType)
         val createdSrcAttr = tgtAttr + InterfaceName.EntityCreatedSource.name
         val createdTypeAttr = tgtAttr + InterfaceName.EntityCreatedType.name
+        val createdSystemTypeAttr = InterfaceName.EntityCreatedSystemType.name
 
         var createdDf = accDf
-        if (!cols.contains(createdSrcAttr)) {
-          if (cols.contains(srcAttr)) {
-            createdDf = createdDf.withColumn(createdSrcAttr, mapTemplateToSystem(createdDf.col(srcAttr)))
-          } else {
-            createdDf = createdDf.withColumn(createdSrcAttr, lit(null).cast(StringType))
-          }
-        }
-        if (!cols.contains(createdTypeAttr)) {
-          if (cols.contains(srcAttr)) {
-            createdDf = createdDf.withColumn(createdTypeAttr, mapTemplateToEntityType(createdDf.col(srcAttr)))
-          } else {
-            createdDf = createdDf.withColumn(createdTypeAttr, lit(null).cast(StringType))
-          }
-        }
+        createdDf = populateAttrFromSource(createdDf, createdSrcAttr, srcAttr, mapTemplateToSystem, cols)
+        createdDf = populateAttrFromSource(createdDf, createdTypeAttr, srcAttr, mapTemplateToEntityType, cols)
+        createdDf = populateAttrFromSource(createdDf, createdSystemTypeAttr, srcAttr, mapTemplateToSystemType, cols)
         createdDf
       } else if (!cols.contains(srcAttr)) {
         // TODO pass in tgt attribute type, use attr name to support time field for now
@@ -144,6 +137,18 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
         accDf.withColumn(tgtAttr, accDf.col(srcAttr))
       }
     })
+  }
+
+  private def populateAttrFromSource(df: DataFrame, attr: String, srcAttr: String, mapper: UserDefinedFunction, cols: Seq[String]): DataFrame = {
+    if (!cols.contains(attr)) {
+      if (cols.contains(srcAttr)) {
+        df.withColumn(attr, mapper(df.col(srcAttr)))
+      } else {
+        df.withColumn(attr, lit(null).cast(StringType))
+      }
+    } else {
+      df
+    }
   }
 
   private def mergeLastActivityDate(lastActivityDf: DataFrame, masterDf: DataFrame, joinKey: String, additionalColumns: List[String]): DataFrame = {

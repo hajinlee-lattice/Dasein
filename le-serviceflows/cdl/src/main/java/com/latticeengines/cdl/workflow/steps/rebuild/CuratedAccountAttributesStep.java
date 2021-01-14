@@ -41,6 +41,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.util.CuratedAttributeUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.NumberOfContactsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
@@ -256,6 +257,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         Map<String, DataFeedTask> templateFeedTaskMap = dataFeedProxy
                 .getTemplateToDataFeedTaskMap(customerSpace.toString());
         config.templateSystemMap = CuratedAttributeUtils.templateSourceMap(templateSystemMap, systemMap);
+        config.templateSystemTypeMap = CuratedAttributeUtils.templateSystemTypeMap(templateSystemMap, systemMap);
         config.templateTypeMap = CuratedAttributeUtils.templateEntityTypeMap(templateFeedTaskMap);
         config.attrsToMerge.put(inputIdx, CuratedAttributeUtils.attrsMergeFromMasterStore(MASTER_STORE_ENTITY));
         inputIdx++;

@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.BaseCalcStatsStep;
+import com.latticeengines.domain.exposed.cdl.util.CuratedAttributeUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
