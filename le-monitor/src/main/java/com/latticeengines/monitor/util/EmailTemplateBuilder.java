@@ -46,6 +46,13 @@ public class EmailTemplateBuilder {
         return this;
     }
 
+    /**
+     * Create a Multipart message object with it's content set to text/html.
+     *
+     * Don't attach anything to it.
+     * @return
+     * @throws MessagingException
+     */
     public Multipart buildRawMultipart() throws MessagingException {
         Multipart mp = new MimeMultipart();
         MimeBodyPart htmlPart = new MimeBodyPart();
@@ -54,6 +61,13 @@ public class EmailTemplateBuilder {
         return mp;
     }
 
+    /**
+     * Create a Multipart message object with content set to text/html and
+     * attach 
+     * @return
+     * @throws MessagingException
+     * @throws IOException
+     */
     public Multipart buildMultipart() throws MessagingException, IOException {
         Multipart mp = buildRawMultipart();
         appendImagesToMultipart(mp);
@@ -61,10 +75,7 @@ public class EmailTemplateBuilder {
     }
 
     public Multipart buildMultipartWithoutWelcomeHeader() throws MessagingException, IOException {
-        Multipart mp = new MimeMultipart();
-        MimeBodyPart htmlPart = new MimeBodyPart();
-        htmlPart.setContent(htmlTemplate, "text/html");
-        mp.addBodyPart(htmlPart);
+        Multipart mp = buildRawMultipart();
         MimeBodyPart logoPart = new MimeBodyPart();
         DataSource fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("com/latticeengines/monitor/email_header_with_logo.png"), "image/png");
