@@ -139,6 +139,10 @@ public class DataBlock {
         public DataBlockLevel getLevel() {
             return level;
         }
+
+        public List<Element> getElements() {
+            return elements;
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -175,6 +179,18 @@ public class DataBlock {
             this.description = primeColumn.getDescription();
             this.dataType = primeColumn.getJavaClass();
             this.example = primeColumn.getExample();
+        }
+
+        public String getElementId() {
+            return this.elementId;
+        }
+
+        public String getDescription() {
+            return this.description;
+        }
+
+        public String getDataType() {
+            return dataType;
         }
     }
 
