@@ -505,27 +505,19 @@ public class UserResource {
     }
 
     private boolean hasAvailableSeats(String subscriberNumber) {
-        if (subscriberNumber == null || !hasDnBConnectEntitlement(subscriberNumber)) {
-            String msg = (subscriberNumber == null) ? "null subscriber number." : "missing D&B Connect entitlement.";
-            LOGGER.error("Unable to retrieve seat count meter: " + msg);
+        if (subscriberNumber == null) {
+            LOGGER.error("Unable to retrieve seat count meter: null subscriber number.");
             return true;
         }
         JsonNode meter = vboService.getSubscriberMeter(subscriberNumber);
         if (meter == null || !meter.has("limit") || !meter.has("current_usage")) {
-            LOGGER.error("Unable to retrieve seat count meter for subscriber: " + subscriberNumber);
-            return false;
+            LOGGER.error("Unable to retrieve seat count meter for subscriber " +  subscriberNumber +
+                    ": missing D&B Connect entitlement.");
+            return true;
         }
         if (meter.get("current_usage") == null)
             LOGGER.info("Null current_usage in meter for subscriber: " + subscriberNumber);
         int current_usage = (meter.get("current_usage") == null) ? 0 : meter.get("current_usage").asInt();
         return current_usage < meter.get("limit").asInt();
-    }
-
-    private boolean hasDnBConnectEntitlement(String subscriberNumber) {
-        SubscriberDetails details = iDaaSService.getSubscriberDetails(subscriberNumber);
-        if (details != null && details.getProducts() != null) {
-            return details.getProducts().contains("D&B Connect");
-        }
-        return false;
     }
 }
