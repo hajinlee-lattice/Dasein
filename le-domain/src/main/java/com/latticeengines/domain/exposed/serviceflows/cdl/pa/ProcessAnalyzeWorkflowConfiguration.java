@@ -377,7 +377,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder skipDynamoExport(boolean skipDynamoExport) {
             exportToDynamo.setSkipStep(skipDynamoExport);
             exportTimelineRawTableToDynamo.setSkipStep(skipDynamoExport);
-//            atlasAccountLookupExportStepConfiguration.setSkipStep(skipDynamoExport);
+            // atlasAccountLookupExportStepConfiguration.setSkipStep(skipDynamoExport);
             return this;
         }
 
@@ -443,6 +443,12 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder eraseByNullEnabled(boolean eraseByNullEnabled) {
+            processAccountWorkflowBuilder.eraseByNullEnabled(eraseByNullEnabled);
+            processContactWorkflowBuilder.eraseByNullEnabled(eraseByNullEnabled);
+            return this;
+        }
+
         public Builder isSSVITenant(boolean isSSVITenant) {
             processStepConfiguration.setSSVITenant(isSSVITenant);
             return this;
@@ -452,7 +458,6 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processStepConfiguration.setCDLTenant(isCDLTenant);
             return this;
         }
-
 
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),

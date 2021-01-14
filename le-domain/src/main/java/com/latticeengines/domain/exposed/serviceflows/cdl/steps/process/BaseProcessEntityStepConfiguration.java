@@ -38,6 +38,9 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
     @JsonProperty("entity_match_enabled")
     private boolean entityMatchEnabled;
 
+    @JsonProperty("erase_by_null_enabled")
+    private boolean eraseByNullEnabled;
+
     @JsonProperty("system_ids")
     private Map<String, List<String>> systemIdMap; // entity -> List<ID> used for matching
 
@@ -95,5 +98,13 @@ public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStep
 
     public void setEntityMatchConfiguration(EntityMatchConfiguration entityMatchConfiguration) {
         this.entityMatchConfiguration = entityMatchConfiguration;
+    }
+
+    public boolean isEraseByNullEnabled() {
+        return eraseByNullEnabled;
+    }
+
+    public void setEraseByNullEnabled(boolean eraseByNullEnabled) {
+        this.eraseByNullEnabled = eraseByNullEnabled;
     }
 }

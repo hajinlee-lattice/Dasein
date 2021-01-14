@@ -97,6 +97,17 @@ public final class FeatureFlagUtils {
         }
     }
 
+    public static boolean isImportEraseByNullEnabled(FeatureFlagValueMap flags) {
+        try {
+            return flags.containsKey(LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL.getName())
+                    && Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL.getName()));
+        } catch (Exception e) {
+            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL.getName() + " feature flag!",
+                    e);
+            return true;
+        }
+    }
+
     @SuppressWarnings("deprecation")
     public static boolean isFuzzyMatchEnabled(FeatureFlagValueMap flags) {
         return flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())

@@ -348,6 +348,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         UpsertConfig config = getUpsertConfig(true, true);
         config.setAddInputSystemBatch(true);
         config.setBatchTemplateName(batchTemplateName);
+        config.setEraseByNullEnabled(configuration.isEraseByNullEnabled());
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }

@@ -80,6 +80,11 @@ public class ProcessContactWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder eraseByNullEnabled(boolean eraseByNullEnabled) {
+            processContactStepConfiguration.setEraseByNullEnabled(eraseByNullEnabled);
+            return this;
+        }
+
         public ProcessContactWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processContactWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

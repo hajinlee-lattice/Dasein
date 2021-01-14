@@ -32,6 +32,9 @@ public class UpsertConfig extends SparkJobConfig {
     @JsonProperty("ExcludeAttrs")
     private List<String> excludeAttrs;
 
+    @JsonProperty("EraseByNullEnabled")
+    private boolean eraseByNullEnabled;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -39,7 +42,7 @@ public class UpsertConfig extends SparkJobConfig {
     }
 
     public static UpsertConfig joinBy(String joinKey) {
-        UpsertConfig config =  new UpsertConfig();
+        UpsertConfig config = new UpsertConfig();
         config.setJoinKey(joinKey);
         return config;
     }
@@ -99,4 +102,13 @@ public class UpsertConfig extends SparkJobConfig {
     public void setExcludeAttrs(List<String> excludeAttrs) {
         this.excludeAttrs = excludeAttrs;
     }
+
+    public boolean isEraseByNullEnabled() {
+        return eraseByNullEnabled;
+    }
+
+    public void setEraseByNullEnabled(boolean eraseByNullEnabled) {
+        this.eraseByNullEnabled = eraseByNullEnabled;
+    }
+
 }
