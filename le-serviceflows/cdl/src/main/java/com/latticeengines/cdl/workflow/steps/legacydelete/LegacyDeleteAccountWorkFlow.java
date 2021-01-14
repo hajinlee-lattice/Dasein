@@ -21,12 +21,16 @@ public class LegacyDeleteAccountWorkFlow extends AbstractWorkflow<LegacyDeleteAc
     private MergeDeleteStep mergeDeleteStep;
 
     @Inject
+    private LegacyDeleteSystemBatchByUpload legacyDeleteSystemBatchByUpload;
+
+    @Inject
     private LegacyDeleteByUpload legacyDeleteByUpload;
 
     @Override
     public Workflow defineWorkflow(LegacyDeleteAccountWorkFlowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(mergeDeleteStep)
+                .next(legacyDeleteSystemBatchByUpload)
                 .next(legacyDeleteByUpload)
                 .build();
     }

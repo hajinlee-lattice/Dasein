@@ -20,12 +20,16 @@ public class LegacyDeleteContactWorkFlow extends AbstractWorkflow<LegacyDeleteCo
     private MergeDeleteStep mergeDeleteStep;
 
     @Inject
+    private LegacyDeleteSystemBatchByUpload legacyDeleteSystemBatchByUpload;
+
+    @Inject
     private LegacyDeleteByUpload legacyDeleteByUpload;
 
     @Override
     public Workflow defineWorkflow(LegacyDeleteContactWorkFlowConfiguratiion workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(mergeDeleteStep)
+                .next(legacyDeleteSystemBatchByUpload)
                 .next(legacyDeleteByUpload)
                 .build();
     }

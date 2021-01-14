@@ -118,7 +118,7 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
                 throw new IllegalStateException("cannot clean up all batchStore with no import, PA failed");
             }
             log.info("Result table is empty, remove " + batchStore.name() + " from data collection!");
-            dataCollectionProxy.resetTable(tenantId, batchStore);
+            dataCollectionProxy.unlinkTables(tenantId, batchStore, inactive);
             return;
         }
         metadataProxy.createTable(tenantId, cleanupTableName, cleanupTable);
