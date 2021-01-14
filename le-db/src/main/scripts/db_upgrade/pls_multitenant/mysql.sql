@@ -43,9 +43,12 @@ CREATE PROCEDURE `UpdateSchema`()
           (
               `PID` BIGINT NOT NULL auto_increment,
               `CREATED` DATETIME NOT NULL,
+              `ACTIVE` BIT NOT NULL,
               `DISPLAY_NAME` VARCHAR(255) NOT NULL,
               `SELECTED_FIELDS` JSON DEFAULT NULL,
+              `INGESTION_SCHEDULER` JSON,
               `SOURCE_ID` VARCHAR(255) NOT NULL,
+              `DATA_STREAM_ID` VARCHAR(255),
               `UPDATED` DATETIME NOT NULL,
               `FK_TENANT_ID` BIGINT, PRIMARY KEY (`PID`)
           ) engine = InnoDB;
