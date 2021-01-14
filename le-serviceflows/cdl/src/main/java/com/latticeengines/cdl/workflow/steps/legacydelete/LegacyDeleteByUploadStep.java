@@ -14,7 +14,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -23,7 +22,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -40,8 +41,6 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.LegacyDeleteByUploadActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -50,9 +49,10 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
+import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component(LegacyDeleteByUploadStep.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -62,8 +62,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
 
     private static Logger log = LoggerFactory.getLogger(LegacyDeleteByUploadStep.class);
 
-    private static int prepareStep, cleanupStep, collectMasterStep, collectStep, mergeStep,
-    partitionStep, lastPartitionStep;
+    private static int prepareStep, cleanupStep, collectMasterStep, collectStep, mergeStep, lastcollectStep;
 
     private static final String CLEANUP_TABLE_PREFIX = "DeleteByFile";
 
@@ -71,6 +70,9 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
 
     @Inject
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    private EMREnvService emrEnvService;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -85,11 +87,15 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
 
     private List<Action> otherActions;//except type=BYUPLOAD_MINDATE transaction actions
 
+    private DataCollection.Version active;
+    private DataCollection.Version inactive;
+
     private void intializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         batchStore = configuration.getEntity().equals(BusinessEntity.Transaction)
                 ? ConsolidatedRawTransaction : configuration.getEntity().getBatchStore();
-        masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore);
+        clonePeriodStore(batchStore);
+        masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, inactive);
         initialData();
     }
 
@@ -117,8 +123,8 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
 
     private List<TransformationStepConfig> generateSteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
-        partitionStep = -1;
-        lastPartitionStep = -1;
+        collectStep = -1;
+        lastcollectStep = -1;
         try {
             /*
              * type=BYUPLOAD_MINDATE transaction legacyDeleteAction
@@ -132,7 +138,6 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                 cleanupStep = 2;
                 collectMasterStep = 3;
                 collectStep = 5;
-                partitionStep = 6;
 
                 TransformationStepConfig merge = mergeDelete(canMergeActions, InterfaceName.TransactionDayPeriod.name());
                 TransformationStepConfig prepare = addTrxDate(null);
@@ -163,7 +168,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                     if (legacyDeleteByUploadActionConfiguration == null || legacyDeleteByUploadActionConfiguration.getCleanupOperationType() == null) {
                         continue;
                     }
-                    lastPartitionStep = partitionStep;
+                    lastcollectStep = collectStep;
                     steps.add(addTrxDate(legacyDeleteByUploadActionConfiguration));
                     prepareStep = steps.size() - 1;
                     steps.add(cleanup(legacyDeleteByUploadActionConfiguration.getCleanupOperationType()));
@@ -174,7 +179,6 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                     steps.add(collectDays());
                     collectStep = steps.size() - 1;
                     steps.add(partitionDaily());
-                    partitionStep = steps.size() - 1;
                 }
             }
             return steps;
@@ -229,14 +233,14 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
 
         List<String> sourceNames = new ArrayList<>();
         Map<String, SourceTable> sourceTables = new HashMap<>();
-        if (lastPartitionStep == -1) {
+        if (lastcollectStep == -1) {
             sourceNames.add(masterTable.getName());
             SourceTable sourceTable = new SourceTable(masterTable.getName(), customerSpace);
             sourceTables.put(masterTable.getName(), sourceTable);
             step.setBaseSources(sourceNames);
             step.setBaseTables(sourceTables);
         } else {
-            step.setInputSteps(Collections.singletonList(lastPartitionStep));
+            step.setInputSteps(Collections.singletonList(lastcollectStep));
         }
 
         PeriodCollectorConfig config = new PeriodCollectorConfig();
@@ -252,7 +256,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(collectMasterStep);
 
-        if (lastPartitionStep == -1) {
+        if (lastcollectStep == -1) {
             String tableSourceName = "MasterTable";
             String sourceTableName = masterTable.getName();
             SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
@@ -262,7 +266,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
             baseTables.put(tableSourceName, sourceTable);
             step.setBaseTables(baseTables);
         } else {
-            inputSteps.add(lastPartitionStep);
+            inputSteps.add(lastcollectStep);
         }
         step.setInputSteps(inputSteps);
         PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
@@ -278,7 +282,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         inputSteps.add(collectStep);
         inputSteps.add(cleanupStep);
 
-        if (lastPartitionStep == -1) {
+        if (lastcollectStep == -1) {
             String tableSourceName = "RawTransaction";
             String sourceTableName = masterTable.getName();
             SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
@@ -288,7 +292,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
             baseTables.put(tableSourceName, sourceTable);
             step.setBaseTables(baseTables);
         } else {
-           inputSteps.add(lastPartitionStep);
+           inputSteps.add(lastcollectStep);
         }
         step.setInputSteps(inputSteps);
 
@@ -304,7 +308,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(prepareStep);
 
-        if (lastPartitionStep == -1) {
+        if (lastcollectStep == -1) {
             List<String> sourceNames = new ArrayList<>();
             Map<String, SourceTable> baseTables = new HashMap<>();
             String masterName = masterTable.getName();
@@ -315,7 +319,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
             step.setBaseSources(sourceNames);
             step.setBaseTables(baseTables);
         } else {
-            inputSteps.add(lastPartitionStep);
+            inputSteps.add(lastcollectStep);
         }
         step.setInputSteps(inputSteps);
 
@@ -440,5 +444,18 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
             lines += AvroUtils.count(yarnConfiguration, path);
         }
         return lines;
+    }
+
+    private void clonePeriodStore(TableRoleInCollection role) {
+        active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
+        String cloneName = NamingUtils.timestamp(role.name());
+        String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        queue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
+        Table inactiveTable = TableCloneUtils //
+                .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
+        metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
+        dataCollectionProxy.upsertTable(customerSpace.toString(), cloneName, role, inactive);
     }
 }
