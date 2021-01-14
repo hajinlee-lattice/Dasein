@@ -6,7 +6,9 @@ import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.{col, lit, struct, udf}
 import org.apache.spark.sql.types.{DoubleType, StringType}
 
-private[spark] object TransactionUtils {
+private[spark] object TransactionSparkUtils {
+
+  val DEFAULT_TXN_TYPE = "Purchase"
 
   def renameFieldsAndAddPeriodName(df: DataFrame, renameMapping: Map[String, String], periodName: String): DataFrame = {
     renameMapping.foldLeft(df) { (df, entry) =>
