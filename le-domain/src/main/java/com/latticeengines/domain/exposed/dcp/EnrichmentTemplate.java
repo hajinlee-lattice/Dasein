@@ -32,12 +32,9 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-import net.bytebuddy.implementation.bind.annotation.Default;
-
 @Entity
 @Table(name = "DCP_ENRICHMENT_TEMPLATE", uniqueConstraints = {
-        @UniqueConstraint(name = "UX_LAYOUT_TEMPLATE_ID", columnNames = { "TEMPLATE_ID" })
-})
+        @UniqueConstraint(name = "UX_LAYOUT_TEMPLATE_ID", columnNames = { "TEMPLATE_ID" }) })
 public class EnrichmentTemplate implements HasPid, HasTenant {
 
     @Id
@@ -108,18 +105,28 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
     }
 
     @Override
-    public Long getPid() { return pid; }
+    public Long getPid() {
+        return pid;
+    }
 
     @Override
-    public void setPid(Long pid) { this.pid = pid; }
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
 
     @Override
-    public Tenant getTenant() { return tenant; }
+    public Tenant getTenant() {
+        return tenant;
+    }
 
     @Override
-    public void setTenant(Tenant tenant) { this.tenant = tenant; }
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
 
-    public String getTemplateName() { return this.templateName; }
+    public String getTemplateName() {
+        return this.templateName;
+    }
 
     public String getTemplateId() {
         return templateId;

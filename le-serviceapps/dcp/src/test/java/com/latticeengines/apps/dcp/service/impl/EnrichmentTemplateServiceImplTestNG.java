@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
-import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase {
@@ -40,7 +39,7 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
         tenantService.updateTenant(mainTestTenant);
     }
 
-    private String getRandomSourceId () {
+    private String getRandomSourceId() {
         return String.format(sourceIdTemplate, RandomStringUtils.randomAlphanumeric(6));
     }
 
@@ -51,7 +50,7 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
         String tenantId = "PropDataService.PropDataService.Production";
         String rndSrcId = getRandomSourceId();
         List<String> elementList = Arrays.asList("primaryname", "duns_number", //
-                "dnbassessment_decisionheadqtr_duns","dnbassessment_decisionheadqtr_decisionpowerscore");
+                "dnbassessment_decisionheadqtr_duns", "dnbassessment_decisionheadqtr_decisionpowerscore");
 
         EnrichmentLayout layout = new EnrichmentLayout();
         layout.setLayoutId(layoutId);
