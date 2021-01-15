@@ -1,6 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.common.exposed.util.{CipherUtils, JsonUtils}
+import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.camille.CustomerSpace
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection._
@@ -12,9 +12,10 @@ import com.latticeengines.spark.util.ElasticSearchUtils._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.elasticsearch.spark._
 import org.elasticsearch.spark.sql._
+import org.xerial.snappy.Snappy
 
-import scala.util.control.Breaks._
 import scala.collection.JavaConverters._
+import scala.util.control.Breaks._
 
 class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElasticSearchJobConfiguration]{
 
@@ -66,11 +67,11 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
                      baseConfig : Map[String, String], compressed : Boolean) : Unit = {
     val cols = table.columns
     implicit val encoder = org.apache.spark.sql.Encoders.kryo[(String, scala.collection.immutable.Map[String, Map[String, String]])]
-    implicit val encoder2 = org.apache.spark.sql.Encoders.kryo[(String, String)]
+    implicit val encoder2 = org.apache.spark.sql.Encoders.kryo[(String, Array[Byte])]
 
     if (compressed)
       table.map(row  => (row.getAs[String](docIdCol),
-        CipherUtils.encrypt(JsonUtils.serialize(Map(role.toString -> row.getValuesMap[String](cols))))
+        Snappy.compress(JsonUtils.serialize(Map(role.toString -> row.getValuesMap[String](cols))))
         )).rdd.saveToEsWithMeta(indexName, baseConfig)
     else
       table.map(row  => (row.getAs[String](docIdCol), Map(role.toString -> row.getValuesMap[String](cols))))
