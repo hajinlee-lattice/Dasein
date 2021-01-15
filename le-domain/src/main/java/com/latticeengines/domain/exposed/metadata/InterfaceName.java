@@ -134,7 +134,7 @@ public enum InterfaceName {
     TimeRanges, // [start time,end time] tuple
 
     // These values are for Curated Attributes.
-    NumberOfContacts, EntityLastUpdatedDate, EntityCreatedDate, EntityCreatedSource, EntityCreatedType,
+    NumberOfContacts, EntityLastUpdatedDate, EntityCreatedDate, EntityCreatedSource, EntityCreatedType, EntityCreatedSystemType,
 
     // CDL External
     SalesforceSandboxAccountID, SalesforceSandboxContactID, MarketoAccountID, EloquaAccountID,

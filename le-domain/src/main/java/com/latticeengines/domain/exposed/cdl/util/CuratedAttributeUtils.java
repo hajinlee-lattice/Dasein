@@ -1,10 +1,11 @@
-package com.latticeengines.cdl.workflow.steps.rebuild;
+package com.latticeengines.domain.exposed.cdl.util;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTemplate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLUpdatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedSource;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedSystemType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityLastUpdatedDate;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,7 +45,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
-import com.latticeengines.spark.exposed.job.cdl.GenerateCuratedAttributes;
 
 public final class CuratedAttributeUtils {
 
@@ -88,8 +89,7 @@ public final class CuratedAttributeUtils {
     }
 
     /**
-     * Configure {@link GenerateCuratedAttributes} to copy attributes from existing
-     * curated attribute table
+     * Configure job to copy attributes from existing curated attribute table
      *
      * @param config
      *            target job config to configure
@@ -197,27 +197,34 @@ public final class CuratedAttributeUtils {
      */
     public static Map<String, String> templateSourceMap(@NotNull Map<String, String> templateSystemMap,
             @NotNull Map<String, S3ImportSystem> systemMap) {
-        Map<String, String> templateValues = new HashMap<>();
-        if (MapUtils.isEmpty(templateSystemMap)) {
-            return templateValues;
-        }
-
-        templateSystemMap.forEach((tmpl, systemName) -> {
-            if (!systemMap.containsKey(systemName)) {
-                log.warn("System {} for template {} does not exist in system map", systemName, tmpl);
-                return;
+        return templateSystemAttrMap(templateSystemMap, systemMap, "system display name", (system) -> {
+            if (system == null || system.getSystemType() == null) {
+                return null;
             }
 
-            String systemDisplayName = systemMap.get(systemName).getDisplayName();
-            if (StringUtils.isNotBlank(systemDisplayName)) {
-                templateValues.put(tmpl, systemDisplayName.trim());
-            } else {
-                log.warn("Template {} has blank system display name ({})", tmpl, systemDisplayName);
-            }
+            return system.getDisplayName();
         });
+    }
 
-        log.info("template -> source map = {}", templateValues);
-        return templateValues;
+    /**
+     * generate template name -> system type map
+     *
+     * @param templateSystemMap
+     *            template name -> system name map
+     * @param systemMap
+     *            system name -> system reference map
+     * @return non null map
+     */
+    public static Map<String, String> templateSystemTypeMap(@NotNull Map<String, String> templateSystemMap,
+            @NotNull Map<String, S3ImportSystem> systemMap) {
+        return templateSystemAttrMap(templateSystemMap, systemMap, "system type", (system) -> {
+            if (system == null || system.getSystemType() == null) {
+                return null;
+            }
+
+            S3ImportSystem.SystemType type = system.getSystemType();
+            return type == null ? null : type.name();
+        });
     }
 
     /**
@@ -266,6 +273,10 @@ public final class CuratedAttributeUtils {
                 attr.setSubcategory(null);
                 attr.setDisplayName(ENTITY_CREATED_ENTITY_TYPE_DISPLAY_NAME);
                 attr.setDescription(String.format(ENTITY_CREATED_ENTITY_TYPE_DESC_FMT, entity.toLowerCase()));
+            } else if (EntityCreatedSystemType.name().equals(attr.getName())) {
+                attr.setCategory(category);
+                attr.setSubcategory(null);
+                // TODO add display name & description if we want to expose this attribute
             } else {
                 enrichSystemAttributes(attr, entity, category, templateSystemMap, systemMap, templateTypeMap);
             }
@@ -289,6 +300,17 @@ public final class CuratedAttributeUtils {
         ProfileParameters.Attribute createdSourceAttr = new ProfileParameters.Attribute(
                 formatEntityAttribute(entity.name(), EntityCreatedSource.name()), null, null, sysNameBkt);
 
+        List<String> systemTypes = Arrays //
+                .stream(S3ImportSystem.SystemType.values()) //
+                .map(Enum::name) //
+                .collect(Collectors.toList());
+        CategoricalBucket sysTypeBkt = new CategoricalBucket();
+        sysTypeBkt.setCategories(systemTypes);
+        // not prefixing now because SchemaRepository requires InterfaceName and there's
+        // no plan to expose this yet
+        ProfileParameters.Attribute createdSystemTypeAttr = new ProfileParameters.Attribute(
+                EntityCreatedSystemType.name(), null, null, sysTypeBkt);
+
         // created type (all subtype + BusinessEntity + EntityType.WebVisit for legacy
         // reason)
         List<String> entityTypes = Arrays //
@@ -303,17 +325,17 @@ public final class CuratedAttributeUtils {
         typeBkt.setCategories(entityTypes);
         ProfileParameters.Attribute createdTypeAttr = new ProfileParameters.Attribute(
                 formatEntityAttribute(entity.name(), EntityCreatedType.name()), null, null, typeBkt);
-        return Arrays.asList(createdSourceAttr, createdTypeAttr);
+        return Arrays.asList(createdSourceAttr, createdTypeAttr, createdSystemTypeAttr);
+    }
+
+    public static String formatEntityAttribute(@NotNull String entity, @NotNull String attributeName) {
+        // prefix attr name with entity to prevent conflict
+        return String.format(ENTITY_ATTR_PREFIX_FORMAT, entity) + attributeName;
     }
 
     private static String formatSystemEntityAttribute(@NotNull String template, @NotNull String entity,
             @NotNull String attributeName) {
         return formatSystemAttribute(template, formatEntityAttribute(entity, attributeName));
-    }
-
-    private static String formatEntityAttribute(@NotNull String entity, @NotNull String attributeName) {
-        // prefix attr name with entity to prevent conflict
-        return String.format(ENTITY_ATTR_PREFIX_FORMAT, entity) + attributeName;
     }
 
     private static String formatSystemAttribute(@NotNull String template, @NotNull String attributeName) {
@@ -337,6 +359,32 @@ public final class CuratedAttributeUtils {
         } else {
             return StringUtils.isBlank(entity) ? null : entity;
         }
+    }
+
+    public static Map<String, String> templateSystemAttrMap(@NotNull Map<String, String> templateSystemMap,
+            @NotNull Map<String, S3ImportSystem> systemMap, @NotNull String attrName,
+            @NotNull Function<S3ImportSystem, String> attrExtractor) {
+        Map<String, String> templateValues = new HashMap<>();
+        if (MapUtils.isEmpty(templateSystemMap)) {
+            return templateValues;
+        }
+
+        templateSystemMap.forEach((tmpl, systemName) -> {
+            if (!systemMap.containsKey(systemName)) {
+                log.warn("System {} for template {} does not exist in system map", systemName, tmpl);
+                return;
+            }
+
+            String attrVal = attrExtractor.apply(systemMap.get(systemName));
+            if (StringUtils.isNotBlank(attrVal)) {
+                templateValues.put(tmpl, attrVal.trim());
+            } else {
+                log.warn("Template {} has blank {}", tmpl, attrName);
+            }
+        });
+
+        log.info("template -> system attr {} map = {}", attrName, templateValues);
+        return templateValues;
     }
 
     private static void enrichSystemAttributes(@NotNull Attribute attribute, @NotNull String entity,
