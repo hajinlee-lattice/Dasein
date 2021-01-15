@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import io.micrometer.core.instrument.util.StringUtils;
 
 @Component("dataOperationService")
 public class DataOperationServiceImpl implements DataOperationService {
@@ -37,6 +38,8 @@ public class DataOperationServiceImpl implements DataOperationService {
     private static final String FULL_PATH_PATTERN = "%s/%s/%s";
 
     private static final String DATA_OPERATION_PATH_PATTERN = "Data_Operation/%s_By_%s_%s/";
+
+    private static final String DEFAULTSYSTEM = "DefaultSystem";
 
     @Inject
     private DataOperationEntityMgr dataOperationEntityMgr;
@@ -82,8 +85,9 @@ public class DataOperationServiceImpl implements DataOperationService {
     private String generateDropPath(DataOperation dataOperation) {
         String idColumn = BusinessEntity.Account.equals(dataOperation.getConfiguration().getEntity()) ? InterfaceName.AccountId.name()
                 : InterfaceName.ContactId.name();
-        return String.format(DATA_OPERATION_PATH_PATTERN, dataOperation.getOperationType(),
-                dataOperation.getConfiguration().getSystemName(), idColumn);
+        String systemName = StringUtils.isEmpty(dataOperation.getConfiguration().getSystemName()) ? DEFAULTSYSTEM
+                : dataOperation.getConfiguration().getSystemName();
+        return String.format(DATA_OPERATION_PATH_PATTERN, dataOperation.getOperationType(), systemName, idColumn);
     }
 
     @Override

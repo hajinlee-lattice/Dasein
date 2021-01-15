@@ -145,7 +145,6 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
         }
         DataDeleteOperationConfiguration configuration = new DataDeleteOperationConfiguration();
         configuration.setEntity(idEntity);
-        configuration.setSystemName("DefaultSystem");
         configuration.setDeleteType(DataDeleteOperationConfiguration.DeleteType.SOFT);
         String dropPath = cdlProxy.createDataOperation(customerSpace, DataOperation.OperationType.DELETE,configuration);
         Assert.assertNotNull(dropPath);
