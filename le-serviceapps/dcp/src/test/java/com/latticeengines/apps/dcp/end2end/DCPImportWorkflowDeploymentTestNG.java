@@ -618,13 +618,13 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertFalse(headers.contains("__Matched_Name__")); // debug column
         if (headers.contains("D-U-N-S Number")) { // the accepted csv
             Assert.assertTrue(headers.contains("Registered Name")); // in enrichment layout
-            Assert.assertTrue(headers.contains("Primary Address Region Abreviated Name")); // in enrichment layout
+            Assert.assertTrue(headers.contains("Primary Address Region Abreviated Name"),"Header should contain 'Primary Address Region Abreviated Name'."); // in enrichment layout (The spelling of Abreviated comes from the D+ dataDictionary)
             Assert.assertFalse(headers.contains("Primary Address Region Name")); // not in enrichment layout
             Assert.assertTrue(headers.contains("Matched D-U-N-S Number"));
 
             // verify match/candidate column order
             int start = headers.indexOf("Matched D-U-N-S Number");
-            Assert.assertEquals(start, containsProcessingErrors ? 18 : 15);
+            Assert.assertEquals(start, containsProcessingErrors ? 18 : 15, "'Matched D-U-N-S Number' header is in the wrong position.  Headers are " + headers);
             Assert.assertEquals(headers.subList(start, start + MATCH_COLUMNS.size()), MATCH_COLUMNS);
 
             // verify base info column order
