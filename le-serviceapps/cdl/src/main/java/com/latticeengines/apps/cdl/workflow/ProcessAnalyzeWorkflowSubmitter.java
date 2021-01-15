@@ -59,6 +59,7 @@ import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -327,7 +328,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     /*-
      * table names in current active version for stream
      */
-    private Map<String, String> getActiveActivityStreamTables(@NotNull String customerSpace,
+    private Map<String, String>  getActiveActivityStreamTables(@NotNull String customerSpace,
             List<AtlasStream> streams) {
         return getActiveTables(customerSpace, ActivityStream, streams, AtlasStream::getStreamId,
                 ConsolidatedActivityStream);
@@ -832,6 +833,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .setConvertServiceConfig(needConvertBatchStoreMap)
                 .activeTimelineList(timeLineList)
                 .templateToSystemTypeMap(templateToSystemTypeMap)
+                .isSSVITenant(isSSVITenant(tenant.getId()))
+                .isCDLTenant(isCDLTenant(tenant.getId()))
                 .build();
     }
 
@@ -1297,5 +1300,23 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             }
         });
         return entitySet;
+    }
+
+    private boolean isSSVITenant(@NotNull String tenantId) {
+        try {
+            return batonService.hasModule(CustomerSpace.parse(tenantId), LatticeModule.SSVI);
+        } catch (Exception e) {
+            log.error("Failed to verify whether {} is a SSVI tenant. error = {}", tenantId, e);
+            return false;
+        }
+    }
+
+    private boolean isCDLTenant(@NotNull String tenantId) {
+        try {
+            return batonService.hasModule(CustomerSpace.parse(tenantId), LatticeModule.CDL);
+        } catch (Exception e) {
+            log.error("Failed to verify whether {} is a CDL tenant. error = {}", tenantId, e);
+            return false;
+        }
     }
 }

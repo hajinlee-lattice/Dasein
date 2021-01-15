@@ -170,6 +170,16 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             putLongValueInContext(NEW_RECORD_CUT_OFF_TIME, System.currentTimeMillis());
         }
 
+        if(!hasKeyInContext(IS_SSVI_TENANT)) {
+            boolean isSSVITenant = Boolean.TRUE.equals(configuration.isSSVITenant());
+            putObjectInContext(IS_SSVI_TENANT, isSSVITenant);
+        }
+
+        if(!hasKeyInContext(IS_CDL_TENANT)) {
+            boolean isCDLTenant = Boolean.TRUE.equals(configuration.isSSVITenant());
+            putObjectInContext(IS_CDL_TENANT, isCDLTenant);
+        }
+
         // entityMatchVersion is using to bumpVersion when we Rematch
         // entityMatch tenant.
         EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace.toString(),

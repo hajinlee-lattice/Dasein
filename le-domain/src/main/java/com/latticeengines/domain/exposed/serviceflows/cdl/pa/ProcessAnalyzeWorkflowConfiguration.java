@@ -82,6 +82,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ConvertBatchStoreToDataTableWorkflowConfiguration.Builder convertBatchStoreToDataTableWorkflowBuilder = new ConvertBatchStoreToDataTableWorkflowConfiguration.Builder();
         private LegacyDeleteWorkflowConfiguration.Builder legacyDeleteWorkFlowBuilder = new LegacyDeleteWorkflowConfiguration.Builder();
 
+
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
             return this;
@@ -435,6 +436,17 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.templateToSystemTypeMap(templateToSystemTypeMap);
             return this;
         }
+
+        public Builder isSSVITenant(boolean isSSVITenant) {
+            processStepConfiguration.setSSVITenant(isSSVITenant);
+            return this;
+        }
+
+        public Builder isCDLTenant(boolean isCDLTenant) {
+            processStepConfiguration.setCDLTenant(isCDLTenant);
+            return this;
+        }
+
 
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
