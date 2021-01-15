@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DataDeleteOperationConfiguration;
@@ -89,6 +91,8 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
         resumeCheckpoint(ProcessTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT);
         log.info("Setup Complete!");
         customerSpace = CustomerSpace.parse(mainCustomerSpace).getTenantId();
+        retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
     }
 
     @Test(groups = "end2end")
