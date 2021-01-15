@@ -147,7 +147,12 @@ public enum Category {
         } else if (nameMap.containsKey(name)) {
             return nameMap.get(name);
         } else {
-            throw new IllegalArgumentException("Cannot find a Category with name " + name);
+            String categoryName = name.replaceAll(" ", "_").toUpperCase();
+            if (values.contains(categoryName)) {
+                return valueOf(categoryName);
+            } else {
+                throw new IllegalArgumentException("Cannot find a Category with name " + name);
+            }
         }
     }
 
