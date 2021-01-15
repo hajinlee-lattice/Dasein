@@ -124,6 +124,7 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-elasticsearch</artifactId>
             <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
