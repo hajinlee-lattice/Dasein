@@ -20,7 +20,9 @@ public interface ElasticSearchService {
 
     boolean checkFieldExist(String indexName, String fieldName);
 
-    boolean updateIndexMapping(String indexName, String fieldName);
+    Map<String, Object> getSourceMapping(String indexName);
+
+    boolean updateIndexMapping(String indexName, String fieldName, String type);
 
     boolean deleteIndex(String indexName);
 

@@ -114,21 +114,22 @@ public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQuerySe
         }
 
         // query from elastic search if feature flag is enabled and data unit is not null
-        ElasticSearchDataUnit dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
-                TableRoleInCollection.TimelineProfile.name(), DataUnit.StorageType.ElasticSearch);
 
-        if (dataUnit != null && batonService.isEnabled(CustomerSpace.parse(customerSpace),
-                LatticeFeatureFlag.Query_From_ELASTICSEARCH)) {
-            log.info("{} query form elastic search.", customerSpace);
-            String signature = dataUnit.getSignature();
-            String name = dataUnit.getName();
-            String indexName = ElasticSearchUtils.constructIndexName(customerSpace, name, signature);
-            List<Map<String, Object>> result = elasticSearchService.searchTimelineByEntityIdAndDateRange(indexName,
-                    activityTimelineQuery.getMainEntity().toString(), activityTimelineQuery.getEntityId(),
-                    activityTimelineQuery.getStartTimeStamp().toEpochMilli(),
-                    activityTimelineQuery.getEndTimeStamp().toEpochMilli());
-            return new DataPage(result);
+        boolean isEnabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH);
+        ElasticSearchDataUnit dataUnit;
 
+        if (isEnabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+                TableRoleInCollection.TimelineProfile.name(), DataUnit.StorageType.ElasticSearch)) != null) {
+                log.info("{} query form elastic search.", customerSpace);
+                String signature = dataUnit.getSignature();
+                String name = dataUnit.getName();
+                String indexName = ElasticSearchUtils.constructIndexName(customerSpace, name, signature);
+                List<Map<String, Object>> result = elasticSearchService.searchTimelineByEntityIdAndDateRange(indexName,
+                        activityTimelineQuery.getMainEntity().toString(), activityTimelineQuery.getEntityId(),
+                        activityTimelineQuery.getStartTimeStamp().toEpochMilli(),
+                        activityTimelineQuery.getEndTimeStamp().toEpochMilli());
+                return new DataPage(result);
         } else {
             // [ startTime, endTime ], need to + 1 because it is doing string comparison and
             // there is a suffix after timestamp

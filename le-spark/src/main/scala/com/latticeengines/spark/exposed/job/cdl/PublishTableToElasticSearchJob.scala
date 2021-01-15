@@ -35,17 +35,27 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
         val table: DataFrame = inputs(key)
         val signature = indexToSignature(key)
         val role = indexToRole(key)
-        val (entity, docIdCol) = getEntityAndDocIdFromRole(role)
+        val entity = com.latticeengines.elasticsearch.util.ElasticSearchUtils.getEntityFromTableRole(role)
+        val docIdCol = if (BusinessEntity.Account.name().eq(entity)) {
+          accountId
+        } else if (BusinessEntity.Contact.name().eq(entity)) {
+          contactId
+        } else if (TimelineProfile.name().eq(entity)) {
+          sortKey
+        } else {
+          null
+        }
 
         if (entity == null || docIdCol == null) {
           logSpark(s"entity or doc id column is not provided $role")
           break
         }
 
+
         val indexName = ElasticSearchUtils.constructIndexName(CustomerSpace.shortenCustomerSpace(customerSpace), entity,
           signature)
         if (role == TableRoleInCollection.TimelineProfile)
-          table.saveToEs(indexName, baseConfig + ("es.mapping.id" -> sortKey))
+          table.saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
         else
           saveToESWithMeta(table, indexName, role, docIdCol, baseConfig, true)
       }
@@ -66,28 +76,6 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
       table.map(row  => (row.getAs[String](docIdCol), Map(role.toString -> row.getValuesMap[String](cols))))
         .rdd.saveToEsWithMeta(indexName, baseConfig)
 
-  }
-
-  def getEntityAndDocIdFromRole(role : TableRoleInCollection) : (String, String) = {
-    role match {
-      case AccountLookup |
-           ConsolidatedAccount |
-           CalculatedCuratedAccountAttribute |
-           CalculatedPurchaseHistory |
-           PivotedRating |
-           WebVisitProfile |
-           OpportunityProfile |
-           AccountMarketingActivityProfile |
-           CustomIntentProfile =>
-        (BusinessEntity.Account.name, accountId)
-      case ConsolidatedContact |
-           CalculatedCuratedContact =>
-        (BusinessEntity.Contact.name, contactId)
-      case TimelineProfile =>
-        (TimelineProfile.name, sortKey)
-      case _ =>
-        (null, null)
-    }
   }
 
 }

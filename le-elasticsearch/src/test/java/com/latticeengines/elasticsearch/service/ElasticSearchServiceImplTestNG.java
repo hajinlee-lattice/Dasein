@@ -2,11 +2,17 @@ package com.latticeengines.elasticsearch.service;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 
+import java.util.Collections;
+import java.util.Map;
+
 import javax.inject.Inject;
 
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.elasticsearch.Service.ElasticSearchService;
 import com.latticeengines.elasticsearch.framework.ElasticSearchFunctionalTestNGBase;
@@ -27,23 +33,53 @@ public class ElasticSearchServiceImplTestNG extends ElasticSearchFunctionalTestN
         boolean value = elasticSearchService.createIndex(indexName, TableRoleInCollection.TimelineProfile.name());
         Assert.assertTrue(value);
 
-        boolean exists = elasticSearchService.checkFieldExist(indexName, ContactId.name());
-        Assert.assertTrue(exists);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(2, Collections.singleton(AssertionError.class), null);
+        retry.execute(context ->{
+            boolean exists = elasticSearchService.checkFieldExist(indexName, ContactId.name());
+            Assert.assertTrue(exists);
+            return true;
+        });
 
-        elasticSearchService.updateIndexMapping(indexName, TableRoleInCollection.AccountLookup.name());
+        retry.execute(context -> {
+            Map<String, Object> mappings = elasticSearchService.getSourceMapping(indexName);
+            verifyField(mappings, "AccountId", "keyword");
+            verifyField(mappings, "ContactId", "keyword");
+            verifyField(mappings, "EventTimestamp", "date");
+            return true;
+        });
 
-        exists = elasticSearchService.checkFieldExist(indexName, TableRoleInCollection.AccountLookup.name());
-        Assert.assertTrue(exists);
+        elasticSearchService.updateIndexMapping(indexName, TableRoleInCollection.AccountLookup.name(), "nested");
 
+        retry.execute(context -> {
+            boolean exists = elasticSearchService.checkFieldExist(indexName,
+                    TableRoleInCollection.AccountLookup.name());
+            Assert.assertTrue(exists);
+            return true;
+        });
 
-        exists = elasticSearchService.checkFieldExist(indexName, ContactId.name());
-        Assert.assertTrue(exists);
+        retry.execute(context ->{
+            boolean exists = elasticSearchService.checkFieldExist(indexName, ContactId.name());
+            Assert.assertTrue(exists);
+            return true;
+
+        });
+
 
         elasticSearchService.deleteIndex(indexName);
-        exists = elasticSearchService.indexExists(indexName);
-        Assert.assertFalse(exists);
+        retry.execute(context -> {
+            boolean exists = elasticSearchService.indexExists(indexName);
+            Assert.assertFalse(exists);
+            return true;
+        });
+
 
     }
 
+    private void verifyField(Map<String, Object> mappings, String field, String type) {
+        Map<?, ?> val = (Map<?, ?>)mappings.get(field);
+        Assert.assertNotNull(val);
+        Map<String, String> accountMap = JsonUtils.convertMap(val, String.class, String.class);
+        Assert.assertEquals(accountMap.get("type"), type);
+    }
 
 }

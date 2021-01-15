@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.publish;
 
 import static com.latticeengines.cdl.workflow.steps.publish.PublishTableToElasticSearchStep.BEAN_NAME;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountLookup;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -145,7 +147,6 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
                 log.info("elastic search data unit will be updated to {}", config.getSignature());
                 ElasticSearchDataUnit dataUnit = new ElasticSearchDataUnit();
                 dataUnit.setName(tableName);
-                dataUnit.setTableRole(role);
                 dataUnit.setSignature(config.getSignature());
                 dataUnitProxy.create(customerSpace.toString(), dataUnit);
             }
@@ -175,8 +176,15 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
         }
 
         log.info("update mapping for index {} with new column {} if needed", idxName, role);
-        elasticSearchService.updateIndexMapping(idxName, role.name());
-
+        if (TimelineProfile.name().equals(role.name())) {
+            log.info("no column for timeline profile");
+        } else if (AccountLookup.name().equals(role.name())) {
+            log.info("set nested to fieldName {}", role.name());
+            elasticSearchService.updateIndexMapping(idxName, role.name(), "nested");
+        } else {
+            log.info("set binary to fieldName {}", role.name());
+            elasticSearchService.updateIndexMapping(idxName, role.name(), "nested");
+        }
         return true;
     }
 

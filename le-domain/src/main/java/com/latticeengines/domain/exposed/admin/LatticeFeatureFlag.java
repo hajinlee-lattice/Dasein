@@ -51,7 +51,7 @@ public enum LatticeFeatureFlag {
     SSVI_REPORT("SSVIReport", "SSVIReport"), //
     ENABLE_IMPORT_ERASE_BY_NULL("EnableImportEraseByNull", "enable using null in import to erase the previous value"),
     PUBLISH_TO_ELASTICSEARCH("PublishToElasticSearch", "Publish To Elastic Search"), //
-    Query_From_ELASTICSEARCH("QueryFromElasticSearch", "Query From Elastic Search"), //
+    QUERY_FROM_ELASTICSEARCH("QueryFromElasticSearch", "Query From Elastic Search"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

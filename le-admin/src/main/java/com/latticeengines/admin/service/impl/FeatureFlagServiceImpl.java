@@ -170,7 +170,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.SSVI_REPORT, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.Query_From_ELASTICSEARCH, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH, cg).setDefaultValue(false);
 
         // DCP & CG
         Collection<LatticeProduct> dcpCg = Arrays.asList(LatticeProduct.CG, LatticeProduct.DCP);

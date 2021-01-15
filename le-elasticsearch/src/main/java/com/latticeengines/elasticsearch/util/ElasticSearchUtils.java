@@ -3,7 +3,6 @@ package com.latticeengines.elasticsearch.util;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitDate;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountLookup;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.EventDate;
@@ -162,6 +161,25 @@ public final class ElasticSearchUtils {
         if (!indexExists(client, indexName)) {
             return false;
         }
+        Map<String, Object> map = getSourceMapping(client, indexName);
+        if (map != null) {
+            return map.containsKey(fieldName);
+        }
+        return false;
+    }
+
+    /**
+     * return the source mapping in index
+     * @param client
+     * @param indexName
+     * @return
+     * @throws IOException
+     */
+    public static Map<String, Object> getSourceMapping(RestHighLevelClient client,
+                                                       String indexName) throws IOException{
+        if (!indexExists(client, indexName)) {
+            return null;
+        }
         GetMappingsRequest request = new GetMappingsRequest();
         request.indices(indexName);
         GetMappingsResponse response = client.indices().getMapping(request, RequestOptions.DEFAULT);
@@ -172,13 +190,12 @@ public final class ElasticSearchUtils {
             if (source != null) {
                 Object sourceMap = source.get(PROPERTIES);
                 if (sourceMap != null) {
-                    Map<String, Object> map = JsonUtils.convertMap(JsonUtils.convertValue(sourceMap, Map.class),
-                            String.class, Object.class);
-                    return map.containsKey(fieldName);
+                    return JsonUtils.convertMap(JsonUtils.convertValue(sourceMap, Map.class), String.class,
+                            Object.class);
                 }
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -188,33 +205,23 @@ public final class ElasticSearchUtils {
      * @param fieldName
      * @throws IOException
      */
-    public static void updateIndexMapping(RestHighLevelClient client, String indexName,
-                                  String fieldName) throws IOException {
+    public static boolean updateIndexMapping(RestHighLevelClient client, String indexName,
+                                  String fieldName, String type) throws IOException {
         if (checkFieldExist(client, indexName, fieldName)) {
             log.info("field {} exists in the index {}", fieldName, indexName);
-            return ;
+            return false;
         }
-        if (TimelineProfile.name().equals(fieldName)) {
-            log.info("no column for timeline profile");
-            return ;
-        }
-        log.info("set field name {} for index {}", fieldName, indexName);
+        log.info("set field name {} with type {} for index {}", fieldName, indexName, type);
         PutMappingRequest request = new PutMappingRequest(indexName);
         XContentBuilder builder = XContentFactory.jsonBuilder().startObject()
                 .startObject(PROPERTIES)
-                .startObject(fieldName);
-        if (AccountLookup.name().equals(fieldName)) {
-            log.info("set nested to fieldName {}", fieldName);
-            builder.field("type", "nested");
-        } else {
-            log.info("set binary to fieldName {}", fieldName);
-            builder.field("type", "binary");
-        }
-
-        builder.endObject().endObject().endObject();
+                .startObject(fieldName)
+                .field("type", type)
+        .endObject().endObject().endObject();
         request.source(builder);
 
         client.indices().putMapping(request, RequestOptions.DEFAULT);
+        return true;
     }
 
     /**
@@ -223,13 +230,14 @@ public final class ElasticSearchUtils {
      * @param indexName
      * @throws IOException
      */
-    public static void deleteIndex(RestHighLevelClient client, String indexName) throws IOException {
+    public static boolean deleteIndex(RestHighLevelClient client, String indexName) throws IOException {
         if (!indexExists(client, indexName)) {
             log.info("index {} doesn't exist", indexName);
-            return ;
+            return false;
         }
         DeleteIndexRequest request = new DeleteIndexRequest(indexName);
         client.indices().delete(request, RequestOptions.DEFAULT);
+        return true;
     }
 
     public static XContentBuilder initIndexMapping(String entityType, boolean dynamic) throws IOException {

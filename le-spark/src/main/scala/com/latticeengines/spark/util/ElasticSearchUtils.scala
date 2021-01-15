@@ -29,7 +29,6 @@ private [spark] object ElasticSearchUtils {
   def getBaseConfig(host: String, port: String, user: String, password: String, encryptionKey: String, salt: String)
   : Map[String, String] = {
     val passwd : String = CipherUtils.decrypt(password, encryptionKey, salt);
-    println(s"password after decryption $passwd")
     Map(
       "es.write.operation" -> "upsert",
       "es.nodes.wan.only" -> "true",

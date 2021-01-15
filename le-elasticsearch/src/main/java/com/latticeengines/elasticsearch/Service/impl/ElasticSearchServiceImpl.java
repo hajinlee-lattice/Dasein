@@ -169,11 +169,21 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
     }
 
     @Override
-    public boolean updateIndexMapping(String indexName, String fieldName) {
+    public Map<String, Object> getSourceMapping(String indexName) {
+        try {
+            return ElasticSearchUtils.getSourceMapping(client, indexName);
+        } catch (IOException e) {
+            log.error("error web get source mapping", e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean updateIndexMapping(String indexName, String fieldName, String type) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
         try {
             retry.execute(context -> {
-                ElasticSearchUtils.updateIndexMapping(client, indexName, fieldName);
+                ElasticSearchUtils.updateIndexMapping(client, indexName, fieldName, type);
                 return 0;
             });
         } catch (IOException e) {

@@ -98,7 +98,7 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
         boolean isNull = unit == null;
         boolean isRebuild = Boolean.TRUE.equals(rebuild);
         log.info("data unit is null: {}, rebuild {}", isNull, isRebuild);
-        boolean fromFullTimeMap = isNull | isRebuild;
+        boolean fromFullTimeMap = isNull || isRebuild;
         Map<String, String> timelineTableNames = fromFullTimeMap ?
                 getMapObjectFromContext(TIMELINE_MASTER_TABLE_NAME, String.class, String.class) :
                 getMapObjectFromContext(TIMELINE_DIFF_TABLE_NAME, String.class, String.class);

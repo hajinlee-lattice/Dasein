@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.end2end;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -63,24 +64,8 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
     @Test(groups = "end2end")
     public void testTimelineProfile() throws Exception {
 
-        String tableName = setupTables();
-        PublishTableToESRequest request = new PublishTableToESRequest();
-        ElasticSearchExportConfig config = new ElasticSearchExportConfig();
-        config.setSignature(ElasticSearchUtils.generateNewVersion());
-        config.setTableRoleInCollection(TableRoleInCollection.TimelineProfile);
-        config.setTableName(tableName);
-        List<ElasticSearchExportConfig> configs = Collections.singletonList(config);
-        request.setExportConfigs(configs);
 
-        ElasticSearchConfig esConfig = elasticSearchService.getDefaultElasticSearchConfig();
-        String encryptionKey = CipherUtils.generateKey();
-        String salt = CipherUtils.generateKey();
-        esConfig.setEncryptionKey(encryptionKey);
-        esConfig.setSalt(salt);
-        esConfig.setEsPassword(CipherUtils.encrypt(esConfig.getEsPassword(), encryptionKey, salt));
-
-        request.setEsConfig(esConfig);
-
+        PublishTableToESRequest request = generateRequest(TableRoleInCollection.TimelineProfile);
         String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
 
         JobStatus status = waitForWorkflowStatus(appId, false);
@@ -89,7 +74,6 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
                 TableRoleInCollection.TimelineProfile.name(),
                 DataUnit.StorageType.ElasticSearch);
         Assert.assertNotNull(unit);
-        Assert.assertEquals(unit.getTableRole(), TableRoleInCollection.TimelineProfile);
         Assert.assertTrue(StringUtils.isNotBlank(unit.getSignature()));
         String entity = ElasticSearchUtils.getEntityFromTableRole(TableRoleInCollection.TimelineProfile);
         String signature = unit.getSignature();
@@ -102,6 +86,40 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         exists = elasticSearchService.indexExists(indexName);
         Assert.assertFalse(exists);
 
+        // get field mapping from index and assert field exists
+        Map<String, Object> mappings = elasticSearchService.getSourceMapping(indexName);
+        verifyField(mappings, "AccountId", "keyword");
+        verifyField(mappings, "ContactId", "keyword");
+        verifyField(mappings, "EventTimestamp", "date");
+
+    }
+
+    private void verifyField(Map<String, Object> mappings, String field, String type) {
+        Map<?, ?> val = (Map<?, ?>)mappings.get(field);
+        Assert.assertNotNull(val);
+        Map<String, String> accountMap = JsonUtils.convertMap(val, String.class, String.class);
+        Assert.assertEquals(accountMap.get("type"), type);
+    }
+
+    private PublishTableToESRequest generateRequest(TableRoleInCollection role) throws IOException {
+        String tableName = setupTables();
+        PublishTableToESRequest request = new PublishTableToESRequest();
+        ElasticSearchExportConfig config = new ElasticSearchExportConfig();
+        config.setSignature(ElasticSearchUtils.generateNewVersion());
+        config.setTableRoleInCollection(role);
+        config.setTableName(tableName);
+        List<ElasticSearchExportConfig> configs = Collections.singletonList(config);
+        request.setExportConfigs(configs);
+
+        ElasticSearchConfig esConfig = elasticSearchService.getDefaultElasticSearchConfig();
+        String encryptionKey = CipherUtils.generateKey();
+        String salt = CipherUtils.generateKey();
+        esConfig.setEncryptionKey(encryptionKey);
+        esConfig.setSalt(salt);
+        esConfig.setEsPassword(CipherUtils.encrypt(esConfig.getEsPassword(), encryptionKey, salt));
+
+        request.setEsConfig(esConfig);
+        return request;
     }
 
     private String setupTables() throws IOException {
