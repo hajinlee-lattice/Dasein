@@ -72,7 +72,7 @@ public class ImportDeltaCalculationResultsFromS3
         CDLExternalSystemName systemName = playLaunch.getDestinationSysName();
         boolean launchToDb = CDLExternalSystemName.Salesforce.equals(systemName) || CDLExternalSystemName.Eloqua.equals(systemName);
         boolean isLiveRampLaunch = channelConfig instanceof LiveRampChannelConfig;
-        boolean isOutreachTaskLaunch = isOutreachTaskLaunch(channelConfig);
+        boolean hasOutreachTaskDescription = hasOutreachTaskDescription(channelConfig);
 
         if (isLiveRampLaunch) {
             if (StringUtils.isNotEmpty(addContacts)) {
@@ -141,7 +141,7 @@ public class ImportDeltaCalculationResultsFromS3
             throw new RuntimeException(audienceType + " not supported.");
         }
 
-        if (isOutreachTaskLaunch) {
+        if (hasOutreachTaskDescription) {
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE,
                     Boolean.toString(true));
         }
@@ -155,10 +155,11 @@ public class ImportDeltaCalculationResultsFromS3
         return tableNames;
     }
 
-    private boolean isOutreachTaskLaunch(ChannelConfig channelConfig) {
+    protected boolean hasOutreachTaskDescription(ChannelConfig channelConfig) {
         if (channelConfig instanceof OutreachChannelConfig) {
             OutreachChannelConfig outreachConfig = (OutreachChannelConfig) channelConfig;
-            return outreachConfig.getLaunchBaseType() == LaunchBaseType.TASK;
+            String taskDescription = outreachConfig.getTaskDescription();
+            return outreachConfig.getLaunchBaseType() == LaunchBaseType.TASK && !StringUtils.isEmpty(taskDescription);
         } else {
             return false;
         }
