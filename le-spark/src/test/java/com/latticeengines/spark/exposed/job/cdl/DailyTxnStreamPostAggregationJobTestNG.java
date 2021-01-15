@@ -52,7 +52,7 @@ public class DailyTxnStreamPostAggregationJobTestNG extends SparkJobFunctionalTe
 
     private static final Set<String> MISSING_BUNDLES = ImmutableSet.of(BUNDLE_NAME_2, BUNDLE_NAME_4);
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     private void test() {
         DailyTxnStreamPostAggregationConfig config = new DailyTxnStreamPostAggregationConfig();
         List<String> inputs = Arrays.asList(setupDailyStream(), setupProduct());

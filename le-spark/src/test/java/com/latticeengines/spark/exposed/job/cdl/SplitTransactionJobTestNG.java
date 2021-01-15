@@ -35,6 +35,7 @@ public class SplitTransactionJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final String contactId = InterfaceName.ContactId.name();
     private static final String txnId = InterfaceName.TransactionId.name();
     private static final String txnTime = InterfaceName.TransactionTime.name();
+    private static final String txnType = InterfaceName.TransactionType.name();
     private static final String streamDate = InterfaceName.__StreamDate.name();
     private static final String streamDateId = InterfaceName.StreamDateId.name();
 
@@ -42,7 +43,7 @@ public class SplitTransactionJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final String analytic = ProductType.Analytic.name();
     private static final String bundle = ProductType.Bundle.name();
 
-    private static final List<String> OUTPUT_FIELDS = Arrays.asList(txnId, accountId, contactId, productId, txnTime, streamDate, productType); // streamDateId used for partition
+    private static final List<String> OUTPUT_FIELDS = Arrays.asList(txnId, txnType, accountId, contactId, productId, txnTime, streamDate, productType); // streamDateId used for partition
     private static final String DAY_1 = "2019-07-01";
     private static final String DAY_2 = "2019-07-02";
     private static final long DAY_1_EPOCH = 1561964400000L;
@@ -74,7 +75,61 @@ public class SplitTransactionJobTestNG extends SparkJobFunctionalTestNGBase {
         verify(result, Collections.singletonList(this::verifyAnalytic));
     }
 
+    @Test(groups = "functional")
+    private void testNoTxnType() {
+        List<String> inputs = Collections.singletonList(prepareTransactionTableWIthNoTxnType());
+        SplitTransactionConfig config = new SplitTransactionConfig();
+        SparkJobResult result = runSparkJob(SplitTransactionJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
+        Assert.assertEquals(outputMetadata.getMetadata().size(), 2);
+        verify(result, Arrays.asList(this::verifyAnalytic, this::verifySpending));
+    }
+
+    @Test(groups = "functional")
+    private void testNullTxnType() {
+        List<String> inputs = Collections.singletonList(prepareTransactionTableWithNullTxnType());
+        SplitTransactionConfig config = new SplitTransactionConfig();
+        SparkJobResult result = runSparkJob(SplitTransactionJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
+        Assert.assertEquals(outputMetadata.getMetadata().size(), 2);
+        verify(result, Arrays.asList(this::verifyAnalytic, this::verifySpending));
+    }
+
+    @Test(groups = "functional")
+    private void testAllNullTxnType() {
+        List<String> inputs = Collections.singletonList(prepareTransactionTableWIthAllNullTxnType());
+        SplitTransactionConfig config = new SplitTransactionConfig();
+        SparkJobResult result = runSparkJob(SplitTransactionJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
+        Assert.assertEquals(outputMetadata.getMetadata().size(), 2);
+        verify(result, Arrays.asList(this::verifyAnalytic, this::verifySpending));
+    }
+
     private String prepareTransactionTable() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList(
+                Pair.of(txnId, String.class),
+                Pair.of(txnType, String.class),
+                Pair.of(accountId, String.class),
+                Pair.of(contactId, String.class),
+                Pair.of(productId, String.class),
+                Pair.of(txnTime, Long.class),
+                Pair.of(productType, String.class)
+        );
+        Object[][] data = new Object[][]{
+                {"t1", "Purchase", "a1", "c1", "p1", DAY_1_EPOCH, spending},
+                {"t2", "Purchase", "a1", "c1", "p2", DAY_2_EPOCH, analytic},
+                {"t3", "Purchase", "a1", "c2", "p2", DAY_2_EPOCH, analytic},
+                {"t4", "Purchase", "a2", "c3", "p3", DAY_1_EPOCH, spending},
+                {"t5", "Purchase", "a2", "c4", "p3", DAY_1_EPOCH, spending},
+                {"t6", "Purchase", "a2", "c5", "p4", DAY_2_EPOCH, bundle}
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String prepareTransactionTableWIthNoTxnType() {
         List<Pair<String, Class<?>>> fields = Arrays.asList(
                 Pair.of(txnId, String.class),
                 Pair.of(accountId, String.class),
@@ -94,11 +149,53 @@ public class SplitTransactionJobTestNG extends SparkJobFunctionalTestNGBase {
         return uploadHdfsDataUnit(data, fields);
     }
 
+    private String prepareTransactionTableWithNullTxnType() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList(
+                Pair.of(txnId, String.class),
+                Pair.of(txnType, String.class),
+                Pair.of(accountId, String.class),
+                Pair.of(contactId, String.class),
+                Pair.of(productId, String.class),
+                Pair.of(txnTime, Long.class),
+                Pair.of(productType, String.class)
+        );
+        Object[][] data = new Object[][]{
+                {"t1", "Purchase", "a1", "c1", "p1", DAY_1_EPOCH, spending},
+                {"t2", null, "a1", "c1", "p2", DAY_2_EPOCH, analytic},
+                {"t3", "Purchase", "a1", "c2", "p2", DAY_2_EPOCH, analytic},
+                {"t4", "Purchase", "a2", "c3", "p3", DAY_1_EPOCH, spending},
+                {"t5", null, "a2", "c4", "p3", DAY_1_EPOCH, spending},
+                {"t6", "Purchase", "a2", "c5", "p4", DAY_2_EPOCH, bundle}
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String prepareTransactionTableWIthAllNullTxnType() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList(
+                Pair.of(txnId, String.class),
+                Pair.of(txnType, String.class),
+                Pair.of(accountId, String.class),
+                Pair.of(contactId, String.class),
+                Pair.of(productId, String.class),
+                Pair.of(txnTime, Long.class),
+                Pair.of(productType, String.class)
+        );
+        Object[][] data = new Object[][]{
+                {"t1", null, "a1", "c1", "p1", DAY_1_EPOCH, spending},
+                {"t2", null, "a1", "c1", "p2", DAY_2_EPOCH, analytic},
+                {"t3", null, "a1", "c2", "p2", DAY_2_EPOCH, analytic},
+                {"t4", null, "a2", "c3", "p3", DAY_1_EPOCH, spending},
+                {"t5", null, "a2", "c4", "p3", DAY_1_EPOCH, spending},
+                {"t6", null, "a2", "c5", "p4", DAY_2_EPOCH, bundle}
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
     private Boolean verifySpending(HdfsDataUnit df) {
         Object[][] expectedResult = new Object[][] {
-                {"t1", "a1", "c1", "p1", DAY_1_EPOCH, DAY_1, spending},
-                {"t4", "a2", "c3", "p3", DAY_1_EPOCH, DAY_1, spending},
-                {"t5", "a2", "c4", "p3", DAY_1_EPOCH, DAY_1, spending}
+                {"t1", "Purchase", "a1", "c1", "p1", DAY_1_EPOCH, DAY_1, spending},
+                {"t4", "Purchase", "a2", "c3", "p3", DAY_1_EPOCH, DAY_1, spending},
+                {"t5", "Purchase", "a2", "c4", "p3", DAY_1_EPOCH, DAY_1, spending}
         };
         Map<String, List<Pair<String, String>>> expectedMap = constructExpectedMap(OUTPUT_FIELDS, expectedResult);
         Iterator<GenericRecord> iterator = verifyAndReadTarget(df);
@@ -112,8 +209,8 @@ public class SplitTransactionJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifyAnalytic(HdfsDataUnit df) {
         Object[][] expectedResult = new Object[][] {
-                {"t2", "a1", "c1", "p2", DAY_2_EPOCH, DAY_2, analytic},
-                {"t3", "a1", "c2", "p2", DAY_2_EPOCH, DAY_2, analytic}
+                {"t2", "Purchase", "a1", "c1", "p2", DAY_2_EPOCH, DAY_2, analytic},
+                {"t3", "Purchase", "a1", "c2", "p2", DAY_2_EPOCH, DAY_2, analytic}
         };
         Map<String, List<Pair<String, String>>> expectedMap = constructExpectedMap(OUTPUT_FIELDS, expectedResult);
         Iterator<GenericRecord> iterator = verifyAndReadTarget(df);

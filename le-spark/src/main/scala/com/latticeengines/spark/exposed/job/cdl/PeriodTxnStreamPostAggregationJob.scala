@@ -3,7 +3,7 @@ package com.latticeengines.spark.exposed.job.cdl
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.cdl.PeriodTxnStreamPostAggregationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils, TransactionUtils}
+import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils, TransactionSparkUtils}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types._
@@ -30,7 +30,7 @@ class PeriodTxnStreamPostAggregationJob extends AbstractSparkJob[PeriodTxnStream
     }
     val valueMap: Map[String, Any] = rawPeriodStream.first().getValuesMap(rawPeriodStream.columns)
     val missingRows: DataFrame = getMissingRows(spark, missingPeriods, valueMap)
-    MergeUtils.concat2(TransactionUtils.castMetricsColType(rawPeriodStream), missingRows).repartition(200, col(InterfaceName.PeriodId.name))
+    MergeUtils.concat2(TransactionSparkUtils.castMetricsColType(rawPeriodStream), missingRows).repartition(200, col(InterfaceName.PeriodId.name))
   }
 
   def getMissingRows(spark: SparkSession, periods: Seq[Int], valueMap: Map[String, Any]): DataFrame = {

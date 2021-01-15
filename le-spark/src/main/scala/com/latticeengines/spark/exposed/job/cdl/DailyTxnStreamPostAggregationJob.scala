@@ -4,7 +4,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType
 import com.latticeengines.domain.exposed.spark.cdl.DailyTxnStreamPostAggregationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils, TransactionUtils}
+import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils, TransactionSparkUtils}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions.{col, first}
 import org.apache.spark.sql.types.{DoubleType, IntegerType, LongType, StringType, StructField, StructType}
@@ -79,6 +79,6 @@ class DailyTxnStreamPostAggregationJob extends AbstractSparkJob[DailyTxnStreamPo
       )
     })
     val data: RDD[Row] = spark.sparkContext.parallelize(rows.map(Row(_: _*)))
-    MergeUtils.concat2(TransactionUtils.castMetricsColType(rawDailyStream), spark.createDataFrame(data, schema)).repartition(200, col(streamDateId))
+    MergeUtils.concat2(TransactionSparkUtils.castMetricsColType(rawDailyStream), spark.createDataFrame(data, schema)).repartition(200, col(streamDateId))
   }
 }
