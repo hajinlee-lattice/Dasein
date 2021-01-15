@@ -39,7 +39,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.LegacyDeleteJob;
 
-@Component(LegacyDeleteByUpload.BEAN_NAME)
+@Component(LegacyDeleteSystemBatchByUpload.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Lazy
 public class LegacyDeleteSystemBatchByUpload extends RunSparkJob<LegacyDeleteSparkStepConfiguration, LegacyDeleteJobConfig> {
