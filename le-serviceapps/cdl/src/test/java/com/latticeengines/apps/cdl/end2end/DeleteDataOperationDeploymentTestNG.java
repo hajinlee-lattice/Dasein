@@ -23,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -67,6 +68,8 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
 
     @Inject
     S3Service s3Service;
+
+    private RetryTemplate retry;
 
     private String customerSpace;
 
@@ -143,6 +146,15 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
         String dropPath = cdlProxy.createDataOperation(customerSpace, DataOperation.OperationType.DELETE,configuration);
         Assert.assertNotNull(dropPath);
         System.out.println(dropPath);
+
+        retry.execute(context -> {
+            DataOperation dataOperation = cdlProxy.findDataOperationByDropPath(customerSpace, dropPath);
+            Assert.assertNotNull(dataOperation);
+            Assert.assertEquals(dataOperation.getDropPath(), dropPath);
+            Assert.assertEquals(((DataDeleteOperationConfiguration)dataOperation.getConfiguration()).getDeleteType(),
+                    DataDeleteOperationConfiguration.DeleteType.SOFT);
+            return true;
+        });
 
         File tmpFile = generateCsv("id", ids);
         s3Service.uploadLocalFile(s3Bucket, dropPath + fileName, tmpFile, true);
