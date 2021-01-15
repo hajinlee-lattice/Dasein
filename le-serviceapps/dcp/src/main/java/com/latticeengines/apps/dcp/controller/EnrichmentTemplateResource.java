@@ -37,10 +37,9 @@ public class EnrichmentTemplateResource {
             ResponseDocument<String> result = enrichmentTemplateService.create(layoutId, templateName);
             return result;
         } catch (LedpException exception) {
-            String stackTrace = ExceptionUtils.getStackTrace(exception);
-            log.error(String.format(
-                    "Failed to create enrichment template from layout %s:\n%s", layoutId, stackTrace
-            ));
+            log.error(String.format("Failed to create enrichment template from existing layout %s: %s", layoutId,
+                    exception.getMessage()));
+            log.error(ExceptionUtils.getStackTrace(exception));
             return ResponseDocument.failedResponse(exception);
         }
     }

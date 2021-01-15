@@ -77,7 +77,7 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
         } else {
             // There shouldn't be an instance of result not being successful and errors
             // being empty.
-            throw new LedpException(LedpCode.LEDP_60016, new String[] { result.getErrors().get(0) });
+            throw new LedpException(LedpCode.LEDP_60016, new String[] { String.join("\n", result.getErrors()) });
         }
     }
 
@@ -192,8 +192,8 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
                             enrichmentTemplate.getDomain().name())));
         } else {
             response = new ResponseDocument<>();
-            response.setErrors(
-                    Collections.singletonList(String.format("Could not get tenant %s entitlements", tenantId)));
+            response.setErrors(Collections.singletonList(String.format(
+                    "Could not validate entitlements while creating enrichment template for tenant %s", tenantId)));
         }
         return response;
     }
