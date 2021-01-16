@@ -4,9 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,13 +31,5 @@ public class VIDashboardResource {
     public DashboardResponse getDashboardList() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return dashboardService.getDashboardList(customerSpace.toString());
-    }
-
-    @PostMapping("/createDashboard")
-    @ResponseBody
-    @ApiOperation("create dashboards")
-    public void createDashboard(@RequestParam("esIndexName") String esIndexName) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        dashboardService.create(customerSpace.toString(), esIndexName);
     }
 }
