@@ -288,8 +288,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         matchOutput.setResult(result);
         when(mockedMatchProxy.matchRealTime(any(MatchInput.class))).thenReturn(matchOutput);
         if (CollectionUtils.isNotEmpty(accountIds)) {
-            when(mockedMatchProxyWithMatchedResult.lookupInternalAccountIds(Mockito.anyString(), Mockito.anyString(),
-                    Mockito.anyList(), Mockito.any())).thenReturn(accountIds);
+            when(mockedMatchProxyWithMatchedResult.lookupInternalAccountIds(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(accountIds);
         }
     }
 
