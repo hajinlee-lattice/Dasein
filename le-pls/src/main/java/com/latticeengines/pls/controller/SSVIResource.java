@@ -16,11 +16,11 @@ import com.latticeengines.pls.service.vidashboard.DashboardService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "VI dashboard resource", description = "REST resource for action")
+@Api(value = "Self Service Visitor Intelligence APIs")
 @RestController
-@RequestMapping("/vidashboards")
+@RequestMapping("/ssvi")
 @PreAuthorize("hasRole('View_PLS_Data')")
-public class VIDashboardResource {
+public class SSVIResource {
 
     @Inject
     private DashboardService dashboardService;
