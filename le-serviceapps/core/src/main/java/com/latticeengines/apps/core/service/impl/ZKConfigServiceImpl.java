@@ -13,10 +13,12 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
+import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -27,6 +29,10 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     private static final String ACTIVE_MODEL_QUOTA = "ActiveModelQuotaLimit";
     private static final String CAMPAIGN_LAUNCH_END_POINT_URL = "CampaignLaunchEndPointUrl";
     private static final String DCP_DISABLE_ROLLUP = "DisableRollup";
+
+    private static final String PLS = "PLS";
+    private static final String STACK = "Stack";
+    private static final String TriggerName = "TriggerName";
 
     @Inject
     private BatonService batonService;
@@ -146,20 +152,20 @@ public class ZKConfigServiceImpl implements ZKConfigService {
                     componentName);
             Path entityDataQuotaPath = null;
             switch (businessEntity) {
-            case Account:
-                entityDataQuotaPath = path.append("AccountQuotaLimit");
-                break;
-            case Contact:
-                entityDataQuotaPath = path.append("ContactQuotaLimit");
-                break;
-            case Product:
-                entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
-                break;
-            case Transaction:
-                entityDataQuotaPath = path.append("TransactionQuotaLimit");
-                break;
-            default:
-                break;
+                case Account:
+                    entityDataQuotaPath = path.append("AccountQuotaLimit");
+                    break;
+                case Contact:
+                    entityDataQuotaPath = path.append("ContactQuotaLimit");
+                    break;
+                case Product:
+                    entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
+                    break;
+                case Transaction:
+                    entityDataQuotaPath = path.append("TransactionQuotaLimit");
+                    break;
+                default:
+                    break;
             }
             Camille camille = CamilleEnvironment.getCamille();
             if (entityDataQuotaPath != null && camille.exists(entityDataQuotaPath)) {
@@ -179,14 +185,14 @@ public class ZKConfigServiceImpl implements ZKConfigService {
                     componentName);
             Path entityDataQuotaPath = null;
             switch (type) {
-            case Analytic:
-                entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
-                break;
-            case Spending:
-                entityDataQuotaPath = path.append("ProductSKUsQuotaLimit");
-                break;
-            default:
-                break;
+                case Analytic:
+                    entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
+                    break;
+                case Spending:
+                    entityDataQuotaPath = path.append("ProductSKUsQuotaLimit");
+                    break;
+                default:
+                    break;
             }
             Camille camille = CamilleEnvironment.getCamille();
             if (entityDataQuotaPath != null && camille.exists(entityDataQuotaPath)) {
@@ -212,6 +218,41 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             log.info("failed to get rollup flag from zk {} ", customerSpace);
         }
         return rollupReport;
+    }
+
+    @Override
+    public String getStack(CustomerSpace customerSpace) {
+        String stack = "";
+        try {
+            stack = getValueFromZK(customerSpace, PathConstants.CDL, STACK);
+        } catch (Exception e) {
+            log.warn("Failed to get stack name from ZK for " + customerSpace.getTenantId(), e);
+        }
+        return stack;
+    }
+
+    @Override
+    public S3ImportMessageType getTriggerName(CustomerSpace customerSpace) {
+        S3ImportMessageType messageType = S3ImportMessageType.UNDEFINED;
+        try {
+            String value = getValueFromZK(customerSpace, PathConstants.CDL, TriggerName);
+            if (StringUtils.isNotEmpty(value)) {
+                messageType = S3ImportMessageType.fromName(value);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get trigger name from ZK for " + customerSpace.getTenantId(), e);
+        }
+        return messageType;
+    }
+
+    private String getValueFromZK(CustomerSpace customerSpace, String componentName, String pathToAppend) throws Exception {
+        String value = null;
+        Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace, componentName).append(pathToAppend);
+        Camille camille = CamilleEnvironment.getCamille();
+        if (camille.exists(path)) {
+            value = camille.get(path).getData();
+        }
+        return value;
     }
 
 }

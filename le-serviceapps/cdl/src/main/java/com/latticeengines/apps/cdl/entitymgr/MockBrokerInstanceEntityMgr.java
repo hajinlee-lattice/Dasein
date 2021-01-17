@@ -11,4 +11,6 @@ public interface MockBrokerInstanceEntityMgr extends BaseEntityMgrRepository<Moc
 
     List<MockBrokerInstance> getAllInstance(int maxRow);
 
+    List<MockBrokerInstance> getAllValidInstance();
+
 }

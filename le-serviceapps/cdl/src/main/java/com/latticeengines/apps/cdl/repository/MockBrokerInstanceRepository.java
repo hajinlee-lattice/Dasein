@@ -14,6 +14,8 @@ public interface MockBrokerInstanceRepository extends BaseJpaRepository<MockBrok
     @Query(value = "select * from MOCK_BROKER_INSTANCE order by PID desc limit :maxRow", nativeQuery = true)
     List<MockBrokerInstance> findAllWithLimit(@Param("maxRow") int maxRow);
 
+    List<MockBrokerInstance> getAllValidInstance();
+
     MockBrokerInstance findByTenantAndSourceId(@Param("tenant") Tenant tenant, @Param("sourceId") String sourceId);
 
 }

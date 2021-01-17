@@ -2,9 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -53,13 +51,8 @@ public class InboundConnectionServiceImplTestNG extends CDLFunctionalTestNGBase 
     public void testBrokerFactory() {
         BrokerSetupInfo brokerSetupInfo = new BrokerSetupInfo();
         brokerSetupInfo.setConnectionType(InboundConnectionType.Mock);
-        Map<String, List<String>> selectedFields = new HashMap<>();
-        selectedFields.put(BusinessEntity.Account.name(), new ArrayList<>());
-        selectedFields.put(BusinessEntity.Contact.name(), new ArrayList<>());
-        selectedFields.get(BusinessEntity.Account.name()).addAll(Lists.newArrayList(InterfaceName.AccountId.name(),
-                InterfaceName.City.name(), InterfaceName.PhoneNumber.name()));
-        selectedFields.get(BusinessEntity.Contact.name()).addAll(Lists.newArrayList(InterfaceName.AccountId.name(),
-                InterfaceName.ContactId.name(), InterfaceName.Email.name(), InterfaceName.FirstName.name()));
+        List<String> selectedFields = new ArrayList<>();
+        selectedFields.addAll(Lists.newArrayList(InterfaceName.AccountId.name(), InterfaceName.City.name(), InterfaceName.PhoneNumber.name()));
         brokerSetupInfo.setSelectedFields(selectedFields);
         BrokerReference brokerReference = inboundConnectionService.setUpBroker(brokerSetupInfo);
         Broker broker = inboundConnectionService.getBroker(brokerReference);
@@ -81,9 +74,8 @@ public class InboundConnectionServiceImplTestNG extends CDLFunctionalTestNGBase 
         retry.execute(context -> {
             MockBrokerInstance mockBrokerInstance = mockBrokerInstanceService.findBySourceId(sourceId);
             Assert.assertNotNull(mockBrokerInstance);
-            Map<String, List<String>> selectedFields2 = mockBrokerInstance.getSelectedFields();
-            Assert.assertEquals(selectedFields2.get(BusinessEntity.Account.name()).size(), 3);
-            Assert.assertEquals(selectedFields2.get(BusinessEntity.Contact.name()).size(), 4);
+            List<String> selectedFields2 = mockBrokerInstance.getSelectedFields();
+            Assert.assertEquals(selectedFields2.size(), 3);
             Assert.assertTrue(mockBrokerInstance.getActive());
             IngestionScheduler savedScheduler = mockBrokerInstance.getIngestionScheduler();
             Assert.assertNotNull(savedScheduler);

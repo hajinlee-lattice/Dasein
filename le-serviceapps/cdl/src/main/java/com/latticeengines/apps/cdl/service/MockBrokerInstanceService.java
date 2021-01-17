@@ -8,6 +8,8 @@ public interface MockBrokerInstanceService {
 
     List<MockBrokerInstance> getAllInstance(int maxRow);
 
+    List<MockBrokerInstance> getAllValidInstance();
+
     MockBrokerInstance createOrUpdate(MockBrokerInstance mockBrokerInstance);
 
     MockBrokerInstance findBySourceId(String sourceId);

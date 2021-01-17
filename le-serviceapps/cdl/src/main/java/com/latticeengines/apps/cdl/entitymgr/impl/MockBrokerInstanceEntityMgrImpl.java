@@ -38,6 +38,11 @@ public class MockBrokerInstanceEntityMgrImpl extends JpaEntityMgrRepositoryImpl<
     }
 
     @Override
+    public List<MockBrokerInstance> getAllValidInstance() {
+        return readerRepository.getAllValidInstance();
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public MockBrokerInstance findBySourceId(String sourceId) {
         Tenant tenant = MultiTenantContext.getTenant();

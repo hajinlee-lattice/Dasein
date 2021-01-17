@@ -141,6 +141,23 @@
         }
       ]
     },
-    { "Node": "ContactAccountRatioThreshold", "Data": {"Type": "number", "Required": false}}
+    { "Node": "ContactAccountRatioThreshold", "Data": {"Type": "number", "Required": false}},
+    {
+      "Node": "Stack",
+      "Data": {
+        "Type": "string",
+        "Required": false
+      }
+    },
+    {
+      "Node": "TriggerName",
+      "Data": {
+        "Type": "options",
+        "Options": [
+          "Undefined",
+          "Inbound Connector"
+        ]
+      }
+    }
   ]
 }

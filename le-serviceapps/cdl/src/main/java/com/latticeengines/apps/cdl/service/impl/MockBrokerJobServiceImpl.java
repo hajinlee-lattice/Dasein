@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
 import com.latticeengines.apps.cdl.service.MockBrokerInstanceService;
 import com.latticeengines.apps.cdl.service.MockBrokerJobService;
 import com.latticeengines.aws.s3.S3Service;
@@ -51,6 +50,7 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
     private int batchSize = 200;
 
     private List<String> accountIds = new ArrayList<>();
+    private List<String> contactIds = new ArrayList<>();
     private Random random = new Random(System.currentTimeMillis());
 
     private static CSVWriter createCSVWritter(FileWriter writer) {
@@ -85,53 +85,53 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
         Tenant tenant = mockBrokerInstance.getTenant();
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
         String tenantId = space.getTenantId();
-        List<BusinessEntity> entities = Lists.newArrayList(BusinessEntity.Account, BusinessEntity.Contact);
-        for (BusinessEntity entity : entities) {
-            log.info(String.format("Generate mock file for entity %s with source id %s.", entity.name(), mockBrokerInstance.getSourceId()));
-            String fileName = entity + "_" + UUID.randomUUID().toString() + ".csv";
-            String separator = HdfsToS3PathBuilder.PATH_SEPARATOR;
-            String subDir = tenantId + separator + sourceId + separator + entity.name();
-            String key = prefix + subDir + separator + fileName;
-            createTmpDir(fileDir + subDir);
-            File csvFile = new File(fileDir + subDir, fileName);
-            List<String> fieldNames = mockBrokerInstance.getSelectedFields().get(entity.name());
-            if (CollectionUtils.isEmpty(fieldNames)) {
-                log.info(String.format("Empty selected fields for entity %s, skip generating CSV file.", entity.name()));
-                continue;
-            }
-            try {
-                boolean successCreated = true;
-                try (CSVWriter csvWriter = createCSVWritter(new FileWriter(csvFile))) {
-                    csvWriter.writeNext(fieldNames.toArray(new String[0]));
-                    List<String[]> records = new ArrayList<>();
-                    for (int i = 0; i < recordSize; i++) {
-                        if (i > 0 && i % batchSize == 0) {
-                            csvWriter.writeAll(records);
-                            csvWriter.flush();
-                            records = new ArrayList<>();
-                        }
-                        records.add(generateRecord(entity, fieldNames));
-                    }
-                    csvWriter.writeAll(records);
-                } catch (IOException e) {
-                    successCreated = false;
-                    log.error("Error happened when create csv file: ", e);
-                }
-                if (successCreated) {
-                    s3Service.uploadLocalFile(dataStageBucket, key, csvFile, true);
-                }
-            } finally {
-
-                FileUtils.deleteQuietly(csvFile);
-            }
+        String documentType = mockBrokerInstance.getDocumentType();
+        log.info(String.format("Generate mock file for documentType %s with source id %s.", documentType, mockBrokerInstance.getSourceId()));
+        String fileName = documentType + "_" + UUID.randomUUID().toString() + ".csv";
+        String separator = HdfsToS3PathBuilder.PATH_SEPARATOR;
+        String subDir = tenantId + separator + sourceId + separator + documentType;
+        String key = prefix + subDir + separator + fileName;
+        createTmpDir(fileDir + subDir);
+        File csvFile = new File(fileDir + subDir, fileName);
+        List<String> fieldNames = mockBrokerInstance.getSelectedFields();
+        if (CollectionUtils.isEmpty(fieldNames)) {
+            log.info(String.format("Empty selected fields for documentType %s, skip generating CSV file.", documentType));
+            return;
         }
+        try {
+            BusinessEntity entity = BusinessEntity.valueOf(documentType);
+            boolean successCreated = true;
+            try (CSVWriter csvWriter = createCSVWritter(new FileWriter(csvFile))) {
+                csvWriter.writeNext(fieldNames.toArray(new String[0]));
+                List<String[]> records = new ArrayList<>();
+                for (int i = 0; i < recordSize; i++) {
+                    if (i > 0 && i % batchSize == 0) {
+                        csvWriter.writeAll(records);
+                        csvWriter.flush();
+                        records = new ArrayList<>();
+                    }
+                    records.add(generateRecord(entity, fieldNames));
+                }
+                csvWriter.writeAll(records);
+            } catch (IOException e) {
+                successCreated = false;
+                log.error("Error happened when create csv file: ", e);
+            }
+            if (successCreated) {
+                s3Service.uploadLocalFile(dataStageBucket, key, csvFile, true);
+            }
+        } finally {
+
+            FileUtils.deleteQuietly(csvFile);
+        }
+
     }
 
-    private void addAccountId(String accountId) {
-        if (accountIds.size() > recordSize) {
-            accountIds.remove(0);
+    private void addId(List<String> idList, String id) {
+        if (idList.size() > recordSize) {
+            idList.remove(0);
         }
-        accountIds.add(accountId);
+        idList.add(id);
     }
 
     private String getRandomPhoneNumber() {
@@ -151,7 +151,7 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
                 case "AccountId":
                     switch (entity) {
                         case Contact:
-                            record[index] = accountIds.get(random.nextInt(accountIds.size()));
+                            record[index] = UUID.randomUUID().toString();
                             break;
                         default:
                             String accountId;
@@ -163,13 +163,23 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
                                 accountId = UUID.randomUUID().toString();
                                 record[index] = accountId;
                                 accountIds.add(accountId);
-                                addAccountId(accountId);
+                                addId(accountIds, accountId);
                             }
                             break;
                     }
                     break;
                 case "ContactId":
-                    record[index] = UUID.randomUUID().toString();
+                    String contactId;
+                    boolean usedPrevious = random.nextBoolean();
+                    if (usedPrevious && CollectionUtils.isNotEmpty(contactIds)) {
+                        contactId = contactIds.get(random.nextInt(contactIds.size()));
+                        record[index] = contactId;
+                    } else {
+                        contactId = UUID.randomUUID().toString();
+                        record[index] = contactId;
+                        contactIds.add(contactId);
+                        addId(contactIds, contactId);
+                    }
                     break;
                 case "CompanyName":
                     record[index] = "IBM Corporation";

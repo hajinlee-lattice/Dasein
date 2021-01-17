@@ -53,4 +53,9 @@ public class InboundConnectionServiceImpl implements InboundConnectionService {
             return Collections.emptyList();
         }
     }
+
+    @Override
+    public void submitMockBrokerAggregationWorkflow() {
+
+    }
 }
