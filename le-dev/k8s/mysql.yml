@@ -11,8 +11,9 @@ spec:
       claimName: le-mysql-data
   - name: my-cnf
     hostPath:
-      # brew install gettext
-      path: /Users/songyi/Projects/ledp/le-dev/mysql/my.cnf
+      # kubectl does not support variable substitution
+      # link ${WSHOME}/le-dev/mysql to /etc/ledp/mysql
+      path: /etc/ledp/mysql/my.cnf
   containers:
     - name: mysql
       image: latticeengines/mysql
@@ -44,4 +45,3 @@ spec:
       port: 3306
       protocol: TCP
   type: LoadBalancer
- 
