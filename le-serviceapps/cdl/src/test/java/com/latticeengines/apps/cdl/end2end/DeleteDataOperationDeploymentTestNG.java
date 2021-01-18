@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.end2end;
 
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
-import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -108,25 +107,26 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
         String accountTableName = dataCollectionProxy.getTableName(customerSpace,
                 TableRoleInCollection.ConsolidatedAccount);
         Table accountTable = metadataProxy.getTableSummary(customerSpace, accountTableName);
-        String contactTableName = dataCollectionProxy.getTableName(customerSpace,
-                TableRoleInCollection.ConsolidatedContact);
-        Table contactTable = metadataProxy.getTableSummary(customerSpace, contactTableName);
+//        String contactTableName = dataCollectionProxy.getTableName(customerSpace,
+//                TableRoleInCollection.ConsolidatedContact);
+//        Table contactTable = metadataProxy.getTableSummary(customerSpace, contactTableName);
 
         Iterable<GenericRecord> accountItr = iterateRecords(accountTable);
-        Iterable<GenericRecord> contactItr = iterateRecords(contactTable);
+//        Iterable<GenericRecord> contactItr = iterateRecords(contactTable);
 
-        for (GenericRecord record : contactItr) {
-            String accountId = record.get(InterfaceName.AccountId.name()).toString();
-            String contactId = record.get(InterfaceName.ContactId.name()).toString();
-            contactIdsForAll.add(contactId);
-            if (contactIdsForAll.size() >= 10) {
-                break;
-            }
-        }
+//        for (GenericRecord record : contactItr) {
+//            String contactId = record.get(InterfaceName.ContactId.name()).toString();
+//            contactIdsForAll.add(contactId);
+//            System.out.println("contactId:" + contactId);
+//            if (contactIdsForAll.size() >= 10) {
+//                break;
+//            }
+//        }
 
         for (GenericRecord record : accountItr) {
-            String id = record.get(InterfaceName.AccountId.name()).toString();
-            accountIdsForAll.add(id);
+            String accountId = record.get(InterfaceName.AccountId.name()).toString();
+            accountIdsForAll.add(accountId);
+            System.out.println("accountId:" + accountId);
             if (accountIdsForAll.size() >= 20) {
                 break;
             }
@@ -135,7 +135,7 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
 
     private void triggerDataOperations() throws Exception {
         triggerDataOperation("account_all.csv", accountIdsForAll, Account);
-        triggerDataOperation("contact_all.csv", contactIdsForAll, Contact);
+        //triggerDataOperation("contact_all.csv", contactIdsForAll, Contact);
     }
 
     private void triggerDataOperation(String fileName, Collection<String> ids, BusinessEntity idEntity) throws Exception {
@@ -219,22 +219,22 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
             Assert.assertFalse(accountIdsToDelete.contains(accountId), "Should not contain id " + accountId);
         }
 
-        accountIdsToDelete = new HashSet<>(accountIdsForAll);
-        Set<String> contactIdsToDelete = new HashSet<>(contactIdsForAll);
-        table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedContact);
-        for (GenericRecord record : iterateRecords(table)) {
-            String accountId = record.get(InterfaceName.AccountId.name()).toString();
-            String contactId = record.get(InterfaceName.ContactId.name()).toString();
-            Assert.assertFalse(accountIdsToDelete.contains(accountId), "Should not contain account id " + accountId);
-            Assert.assertFalse(contactIdsToDelete.contains(contactId), "Should not contain contact id " + accountId);
-        }
-
-        accountIdsToDelete = new HashSet<>(accountIdsForAll);
-        table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
-        for (GenericRecord record : iterateRecords(table)) {
-            String contactId = record.get(InterfaceName.AccountId.name()).toString();
-            Assert.assertFalse(accountIdsToDelete.contains(contactId), "Should not contain id " + contactId);
-        }
+//        accountIdsToDelete = new HashSet<>(accountIdsForAll);
+//        Set<String> contactIdsToDelete = new HashSet<>(contactIdsForAll);
+//        table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedContact);
+//        for (GenericRecord record : iterateRecords(table)) {
+//            String accountId = record.get(InterfaceName.AccountId.name()).toString();
+//            String contactId = record.get(InterfaceName.ContactId.name()).toString();
+//            Assert.assertFalse(accountIdsToDelete.contains(accountId), "Should not contain account id " + accountId);
+//            Assert.assertFalse(contactIdsToDelete.contains(contactId), "Should not contain contact id " + accountId);
+//        }
+//
+//        accountIdsToDelete = new HashSet<>(accountIdsForAll);
+//        table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
+//        for (GenericRecord record : iterateRecords(table)) {
+//            String contactId = record.get(InterfaceName.AccountId.name()).toString();
+//            Assert.assertFalse(accountIdsToDelete.contains(contactId), "Should not contain id " + contactId);
+//        }
     }
 
     private Iterable<GenericRecord> iterateRecords(Table table) {
