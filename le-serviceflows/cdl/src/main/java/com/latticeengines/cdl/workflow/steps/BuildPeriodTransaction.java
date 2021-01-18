@@ -95,10 +95,18 @@ public class BuildPeriodTransaction extends BaseProcessAnalyzeSparkStep<ProcessT
         }
         log.info("Found product type streams from earlier step: {}", retainTypes);
 
+        cleanupInactiveVersion();
         buildConsolidatedPeriodTransaction(periodTransactionTables, retainTypes); // repartitioned by PeriodId
         buildAggregatedPeriodTransaction(periodTransactionTables, retainTypes); // repartitioned by PeriodId
 
         setTransactionRebuiltFlag();
+    }
+
+    private void cleanupInactiveVersion() {
+        // cleanup tables cloned by updateTransaction
+        log.info("cleanup tables cloned by updateTransaction");
+        dataCollectionProxy.unlinkTables(customerSpaceStr, TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+        dataCollectionProxy.unlinkTables(customerSpaceStr, TableRoleInCollection.AggregatedPeriodTransaction, inactive);
     }
 
     private void buildConsolidatedPeriodTransaction(Map<String, Table> periodTransactionTables,

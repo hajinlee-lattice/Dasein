@@ -72,8 +72,15 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
             throw new IllegalStateException("No retain types found in context");
         }
         log.info("Retaining transactions of product type: {}", retainTypes);
+        cleanupInactiveVersion();
         buildTransactionBatchStore(dailyTxnStream, retainTypes); // ConsolidatedDaily, partitioned and repartitioned by txnDayPeriod
         buildTransactionServingStore(dailyTxnStream, retainTypes); // Aggregated, no partition, repartitioned by txnDayPeriod
+    }
+
+    private void cleanupInactiveVersion() {
+        log.info("cleanup tables cloned by updateTransaction");
+        dataCollectionProxy.unlinkTables(customerSpaceStr, TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
+        dataCollectionProxy.unlinkTables(customerSpaceStr, TableRoleInCollection.AggregatedTransaction, inactive);
     }
 
     private void buildTransactionBatchStore(Map<String, Table> dailyTxnStream, List<String> retainTypes) {
