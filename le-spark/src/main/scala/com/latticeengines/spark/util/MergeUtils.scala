@@ -117,12 +117,15 @@ private[spark] object MergeUtils {
 
   // return true if the attribute's corresponding Erase attribute exist and is true
   private def hasEraseByNull(eraseByNull: Boolean, attr: String, row: Row, colPosMap: Map[String, Int]): Boolean = {
-    val insertPos = attr.lastIndexOf(templateSeperator)
-    if (insertPos > -1) {
-      val eraseAttr = attr.patch(insertPos + templateSeperator.length, erasePrefix, 0)
-      eraseByNull && row.get(colPosMap(eraseAttr)) != null && row.get(colPosMap(eraseAttr)).asInstanceOf[Boolean]
+    if (!eraseByNull) {
+      eraseByNull
     } else {
-      false
+      var eraseAttr = erasePrefix + attr
+      val insertPos = attr.indexOf(templateSeperator)
+      if (insertPos > -1) {
+        eraseAttr = attr.patch(insertPos + templateSeperator.length, erasePrefix, 0)
+      }
+      colPosMap(eraseAttr) !=null && row.get(colPosMap(eraseAttr)) != null && row.get(colPosMap(eraseAttr)).asInstanceOf[Boolean]
     }
   }
 
@@ -136,8 +139,7 @@ private[spark] object MergeUtils {
   }
 
   private def isEraseColumn(col: String): Boolean = {
-    val colArr = col.split(templateSeperator)
-    colArr(colArr.length - 1).startsWith(erasePrefix)
+    col.startsWith(erasePrefix) || col.contains(templateSeperator + erasePrefix)
   }
 
   def concat2(lhs: DataFrame, rhs: DataFrame): DataFrame = {

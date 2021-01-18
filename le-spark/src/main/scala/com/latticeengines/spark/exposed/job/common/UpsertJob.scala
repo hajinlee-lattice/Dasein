@@ -49,7 +49,7 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
 
       var merged =
         if (!config.isAddInputSystemBatch) {
-          MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull = overwriteByNull)
+          MergeUtils.mergeWithEraseByNull(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull = overwriteByNull , eraseByNull = eraseByNull)
         } else {
           val templates = rhsDf.select(templateColumn).as[String].collect.toSet.toList
           upsertSystemBatch(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull, config.getBatchTemplateName, templates, eraseByNull)
@@ -60,7 +60,7 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
       lattice.output = merged :: Nil
     }
   }
-  
+
   private def upsertSystemBatch(origLhsDf: DataFrame, origRhsDf: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
              overwriteByNull: Boolean, templateName: String, templates: List[String], eraseByNull: Boolean): DataFrame = {
     var lhsDf = origLhsDf.repartition(joinKeys map col: _*)

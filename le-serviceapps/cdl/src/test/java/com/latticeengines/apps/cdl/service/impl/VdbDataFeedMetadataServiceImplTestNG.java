@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -130,7 +131,9 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
     @Test(groups = "functional")
     public void testGetConnectorConfig() {
         String jobIdentifier = "Vdb_Metadata_Functional_Test";
-        String connectorConfig = vdbDataFeedMetadataService.getConnectorConfig(testVdbMetadata, jobIdentifier);
+        DataFeedTask dataFeedTask = new DataFeedTask();
+        dataFeedTask.setUniqueId(jobIdentifier);
+        String connectorConfig = vdbDataFeedMetadataService.getConnectorConfig(testVdbMetadata, dataFeedTask);
         Assert.assertNotNull(connectorConfig);
         VdbConnectorConfiguration vdbConnectorConfiguration = JsonUtils.deserialize(connectorConfig,
                 VdbConnectorConfiguration.class);

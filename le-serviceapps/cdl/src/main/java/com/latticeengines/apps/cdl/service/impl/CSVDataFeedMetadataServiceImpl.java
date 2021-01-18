@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -169,10 +170,14 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier) {
+    public String getConnectorConfig(CDLImportConfig importConfig, DataFeedTask dataFeedTask) {
         CSVToHdfsConfiguration csvmportConfig = ((CSVImportConfig) importConfig).getCsvToHdfsConfiguration();
+        String jobIdentifier = dataFeedTask.getUniqueId();
         csvmportConfig.setJobIdentifier(jobIdentifier);
-        boolean enableImportEraseByNull = batonService.isEnabled(getCustomerSpace(importConfig),
+        String entity = dataFeedTask.getEntity();
+        boolean enableImportEraseByNull = (BusinessEntity.Account.name().equals(entity)
+                || BusinessEntity.Contact.name().equals(entity))
+                && batonService.isEnabled(getCustomerSpace(importConfig),
                 LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL);
         csvmportConfig.setProperty(ImportProperty.ENABLE_ERASE_BY_NULL, String.valueOf(enableImportEraseByNull));
         return JsonUtils.serialize(csvmportConfig);
