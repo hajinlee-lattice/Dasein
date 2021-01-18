@@ -21,6 +21,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.apps.cdl.testframework.CDLQATestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
@@ -54,7 +55,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     private String defaultAccountFileName = "Account_Default.csv";
     private String otherAccountFileName = "Account_Other.csv";
 
-    private String contactFileName = "Contacts_Default.csv";
+    private String defaultContactFileName = "Contacts_Default.csv";
 
     private String intentFileName = "Intent_Activity_delete.csv";
     private static final String INTENT_TEMPLATE_PATH = "%s/dropfolder/%s/Templates/Default_DnbIntent_System_DnbIntentData";
@@ -107,9 +108,11 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
         testFileImportService.doOneOffImport(otherAccountFilePath, OTHER_SYSTEM_NAME, EntityType.Accounts);
 
         log.info("Importing contact data...");
-        String contactFilePath = activityStoreTestDataPath + File.separator + contactFileName;
-        testFileImportService.doDefaultTemplateOneOffImport(contactFilePath, EntityType.Contacts);
-        testFileImportService.doOneOffImport(contactFilePath, OTHER_SYSTEM_NAME, EntityType.Contacts);
+        String defaultContactFilePath = activityStoreTestDataPath + File.separator + defaultContactFileName;
+        testFileImportService.doDefaultTemplateOneOffImport(defaultContactFilePath, EntityType.Contacts);
+        // String otherContactFilePath = activityStoreTestDataPath + File.separator +
+        // otherContactFileName;
+        testFileImportService.doOneOffImport(defaultContactFilePath, OTHER_SYSTEM_NAME, EntityType.Contacts);
 
         log.info("Importing DnbIntent data...");
         String intentFilePath = activityStoreTestDataPath + File.separator + intentFileName;
@@ -137,8 +140,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
         // run PA
         log.info("Starting PA for file import...");
         ProcessAnalyzeRequest processAnalyzeRequest = new ProcessAnalyzeRequest();
-        processAnalyzeRequest.setFullRematch(true);
-        processAnalyzeRequest.setRebuildEntities(Collections.singleton(BusinessEntity.ActivityStream));
+        processAnalyzeRequest.setRebuildEntities(ImmutableSet.of(BusinessEntity.ActivityStream));
         testJobService.processAnalyze(mainTestTenant, true, processAnalyzeRequest);
     }
 
@@ -332,7 +334,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end" }, description = "Test hard delete for accounts which have activity store data", dependsOnMethods = {
+            "qa-activitystore-end2end-pending" }, description = "Test hard delete for accounts which have activity store data", dependsOnMethods = {
                     "testAccountRematchCorrectness", "testContactRematchCorrectness",
                     "testCustomIntentRematchCorrectness", "testOpportunityRematchCorrectness",
                     "testWebVisitRematchCorrectness", "testMarketingRematchCorrectness" })
@@ -350,7 +352,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end" }, description = "Account correctness check after account hard delete tests", dependsOnMethods = {
+            "qa-activitystore-end2end-pending" }, description = "Account correctness check after account hard delete tests", dependsOnMethods = {
                     "testAccountHardDelete" })
     public void testAccountHardDeleteCorrectness() throws TimeoutException {
         List<Map<String, Object>> allAccounts = queryAccountRecords();
@@ -358,7 +360,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end" }, description = "Contact correctness check for account hard delete tests", dependsOnMethods = {
+            "qa-activitystore-end2end-pending" }, description = "Contact correctness check for account hard delete tests", dependsOnMethods = {
                     "testAccountHardDelete" })
     public void testContactHardDeleteCorrectness() throws TimeoutException {
         List<Map<String, Object>> allContacts = queryContactRecords();
@@ -366,7 +368,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end" }, description = "CustomIntent correctness check for account hard delete tests", dependsOnMethods = {
+            "qa-activitystore-end2end-pending" }, description = "CustomIntent correctness check for account hard delete tests", dependsOnMethods = {
                     "testAccountHardDelete" })
     public void testCustomIntentHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryCustomIntentRecords();
@@ -374,7 +376,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end" }, description = "Opportunity correctness check for account hard delete tests", dependsOnMethods = {
+            "qa-activitystore-end2end-pending" }, description = "Opportunity correctness check for account hard delete tests", dependsOnMethods = {
                     "testAccountHardDelete" })
     public void testOpportunityHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryOpportunityRecords();
@@ -382,7 +384,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end" }, description = "WebVisit correctness check for account hard delete tests", dependsOnMethods = {
+            "qa-activitystore-end2end-pending" }, description = "WebVisit correctness check for account hard delete tests", dependsOnMethods = {
                     "testAccountHardDelete" })
     public void testWebVisitHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryWebVisitRecords();
@@ -390,7 +392,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end" }, description = "Marketing Activity correctness check for account hard delete tests", dependsOnMethods = {
+            "qa-activitystore-end2end-pending" }, description = "Marketing Activity correctness check for account hard delete tests", dependsOnMethods = {
                     "testAccountHardDelete" })
     public void testMarketingHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryAccountMarketingRecords();
