@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -25,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.FileProperty;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
@@ -115,7 +118,10 @@ public class DataOperationServiceImpl implements DataOperationService {
             fileProperty.setFileName(fileName);
             fileProperty.setFilePath(dataOperationRequest.getS3Bucket() + "/" + key);
             fileProperty.setDirectory(false);
-            SourceFile sourceFile = sourceFileProxy.createSourceFileFromS3(customerSpace, fileProperty, dataOperation.getConfiguration().getEntity().name());
+            SchemaInterpretation schema = Account.equals(dataOperation.getConfiguration().getEntity()) ? SchemaInterpretation.DeleteByAccountTemplate
+                    : SchemaInterpretation.DeleteByContactTemplate;
+            SourceFile sourceFile = sourceFileProxy.createSourceFileFromS3(customerSpace, fileProperty, dataOperation.getConfiguration().getEntity().name(),
+                    schema.name());
             resolveMetadata(customerSpace, sourceFile);
             DataOperationConfiguration configuration = dataOperation.getConfiguration();
             if (configuration instanceof DataDeleteOperationConfiguration) {

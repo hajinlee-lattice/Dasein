@@ -92,10 +92,11 @@ public class SourceFileResource {
     @PostMapping("/fromS3")
     @ApiOperation(value = "Get file inputStream from s3")
     public ResponseDocument<SourceFile> createSourceFileFromS3(@PathVariable String customerSpace,
-                                                              @RequestParam(value = "entity") String entity,
-                                                              @RequestBody FileProperty fileProperty) {
+                                                               @RequestParam(value = "entity") String entity,
+                                                               @RequestParam(value = "schema") String schema,
+                                                               @RequestBody FileProperty fileProperty) {
         try {
-            SourceFile sourceFile = sourceFileService.createSourceFileFromS3(customerSpace, fileProperty, entity);
+            SourceFile sourceFile = sourceFileService.createSourceFileFromS3(customerSpace, fileProperty, entity, schema);
             return ResponseDocument.successResponse(sourceFile);
         }catch (Exception e) {
             return ResponseDocument.failedResponse(e);
