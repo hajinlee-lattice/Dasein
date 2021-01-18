@@ -25,7 +25,6 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[EnrichWebVisitJobConfig]): Unit = {
     val config: EnrichWebVisitJobConfig = lattice.config
-    val needRebuild: Boolean = config.needRebuild
     val catalogTable: DataFrame = lattice.input(config.catalogInputIdx)
     val selectedAttributes = config.selectedAttributes.asScala
 
@@ -35,29 +34,24 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
     var matchedTable: DataFrame = null
     if (config.matchedWebVisitInputIdx != null) {
       matchedTable = lattice.input(config.matchedWebVisitInputIdx)
-
-      matchedTable = populateProductPatternNames(matchedTable, pathPatternMap, WebVisitPageUrl.name, "UrlCategories",
-        lattice)
       if (config.latticeAccountTableIdx != null) {
         val latticeAccountTable: DataFrame = lattice.input(config.latticeAccountTableIdx)
         matchedTable = matchedTable.join(latticeAccountTable, Seq(AccountId.name), "left")
       }
+
       matchedTable = selectedAttributes.foldLeft(matchedTable) {
         case (df, (columnName, displayName)) => addAllNullsIfMissingAndRename(df, columnName, displayName)
       }
       matchedTable = matchedTable.select(selectedAttributes.values.toList.map(columnName =>
         matchedTable.col(columnName)): _*)
-      matchedTable = parseUtmCodes(matchedTable)
     }
     if (config.masterInputIdx != null) {
-      var masterTable: DataFrame = lattice.input(config.masterInputIdx)
-      if (needRebuild) {
-        masterTable = masterTable.drop("page_groups")
-        masterTable = populateProductPatternNames(masterTable, pathPatternMap, "page_url","page_groups", lattice)
-        masterTable = parseUtmCodes(masterTable)
-      }
+      val masterTable: DataFrame = lattice.input(config.masterInputIdx)
       matchedTable = merge(masterTable, matchedTable)
     }
+    matchedTable = matchedTable.drop("page_groups")
+    matchedTable = populateProductPatternNames(matchedTable, pathPatternMap, "page_url","page_groups", lattice)
+    matchedTable = parseUtmCodes(matchedTable)
     lattice.output = matchedTable :: Nil
   }
 

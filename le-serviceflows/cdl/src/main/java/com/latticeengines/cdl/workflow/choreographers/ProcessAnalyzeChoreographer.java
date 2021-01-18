@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.GenerateVisitReportWorkflow;
 import com.latticeengines.cdl.workflow.MatchEntityWorkflow;
 import com.latticeengines.cdl.workflow.ProcessAccountWorkflow;
@@ -119,9 +118,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     @Inject
     private YarnConfiguration yarnConfiguration;
-
-    @Inject
-    private BatonService batonService;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {

@@ -833,8 +833,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .setConvertServiceConfig(needConvertBatchStoreMap)
                 .activeTimelineList(timeLineList)
                 .templateToSystemTypeMap(templateToSystemTypeMap)
-                .isSSVITenant(isSSVITenant(tenant.getId()))
-                .isCDLTenant(isCDLTenant(tenant.getId()))
+                .isSSVITenant(judgeTenantType(tenant.getId(), LatticeModule.SSVI))
+                .isCDLTenant(judgeTenantType(tenant.getId(), LatticeModule.CDL))
                 .build();
     }
 
@@ -1302,20 +1302,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         return entitySet;
     }
 
-    private boolean isSSVITenant(@NotNull String tenantId) {
+    private boolean judgeTenantType(@NotNull String tenantId, LatticeModule latticeModule) {
         try {
-            return batonService.hasModule(CustomerSpace.parse(tenantId), LatticeModule.SSVI);
+            return batonService.hasModule(CustomerSpace.parse(tenantId), latticeModule);
         } catch (Exception e) {
-            log.error("Failed to verify whether {} is a SSVI tenant. error = {}", tenantId, e);
-            return false;
-        }
-    }
-
-    private boolean isCDLTenant(@NotNull String tenantId) {
-        try {
-            return batonService.hasModule(CustomerSpace.parse(tenantId), LatticeModule.CDL);
-        } catch (Exception e) {
-            log.error("Failed to verify whether {} is a CDL tenant. error = {}", tenantId, e);
+            log.error("Failed to verify whether {} is a {}} tenant. error = {}", tenantId, latticeModule, e);
             return false;
         }
     }

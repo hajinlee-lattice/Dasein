@@ -23,10 +23,6 @@ public class EnrichWebVisitJobConfig extends SparkJobConfig implements Serializa
     @JsonProperty
     public Integer catalogInputIdx;
 
-    //this flag will be used only tenant(SSVI on, cdl off).
-    @JsonProperty
-    public boolean needRebuild = false;
-
     @JsonProperty
     public Map<String,String> selectedAttributes;
 
