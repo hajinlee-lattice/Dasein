@@ -154,8 +154,13 @@ public class LivyServerManager {
                 if (state.equalsIgnoreCase("killed") || state.equalsIgnoreCase("dead")
                         || state.equalsIgnoreCase("success")) {
                     int sessionId = json.get("id").asInt();
-                    restTemplate.delete(url + sessionId);
-                    total--;
+                    try {
+                        restTemplate.delete(url + sessionId);
+                        total--;
+                    } catch (Exception e) {
+                        // Do nothing, suppress the exceptions coming from delete
+                        // as some sessions might already cleaned up by livy during deletion
+                    }
                 }
             }
             // If remaining sessions already exceed upper limit, return false
