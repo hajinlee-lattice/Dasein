@@ -114,15 +114,21 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalWebsiteKeywordAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.websiteKeywordLimit);
         Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForWebsiteKeyword);
-        Assert.assertEquals(categoryOverview.getDisplayName(), Category.WEBSITE_KEYWORDS.getName());
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.DNB_TECHNOLOGY_PROFILE.getName());
 
         categoryOverview = result.get(3);
+        Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalWebsiteKeywordAttrs);
+        Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.websiteKeywordLimit);
+        Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForWebsiteKeyword);
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.WEBSITE_KEYWORDS.getName());
+
+        categoryOverview = result.get(4);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalAccountAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.accountLimit);
         Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForAccount);
         Assert.assertEquals(categoryOverview.getDisplayName(), Category.ACCOUNT_ATTRIBUTES.getName());
 
-        categoryOverview = result.get(4);
+        categoryOverview = result.get(5);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalContactAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.contactLimit);
         Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForContact);
