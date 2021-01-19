@@ -51,6 +51,8 @@ public enum LatticeFeatureFlag {
     SSVI_REPORT("SSVIReport", "SSVIReport"), //
     ENABLE_IMPORT_ERASE_BY_NULL("EnableImportEraseByNull", "enable using null in import to erase the previous value"),
 
+    DCP_ENRICHMENT_LIBRARY("EnrichmentLibrary", "Enable Enrichment Library features"),
+
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
     @Deprecated
