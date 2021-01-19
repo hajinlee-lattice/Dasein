@@ -168,10 +168,6 @@ public class ActivityMetricDecorator implements Decorator {
         } else {
             log.debug("Attribute {} is deprecated (shouldDeprecate={}), skip rendering", cm.getAttrName(),
                     cm.getShouldDeprecate());
-            cm.disableGroup(Segment);
-            if (group == null) { // no need to proceed if no such group
-                return;
-            }
         }
         renderFundamentalType(cm, group);
         overwriteColumnSelection(cm, group);
