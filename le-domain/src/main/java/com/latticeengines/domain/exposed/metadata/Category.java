@@ -92,9 +92,7 @@ public enum Category {
     },
     DNBINTENTDATA_PROFILE("D&B Intent", 21), //
     COVID_19("COVID-19", 22), //
-    DNB_TECHNOLOGY_PROFILE("DnB Technology Profile", 23); //
-
-
+    DNB_TECHNOLOGY_PROFILE("D&B Technology Profile", 23); //
 
     public static final String SUB_CAT_OTHER = "Other";
     public static final String SUB_CAT_ACCOUNT_IDS = "System Account IDs";
