@@ -76,7 +76,7 @@ public class InboundConnectionServiceImplTestNG extends CDLFunctionalTestNGBase 
             Assert.assertNotNull(mockBrokerInstance);
             List<String> selectedFields2 = mockBrokerInstance.getSelectedFields();
             Assert.assertEquals(selectedFields2.size(), 3);
-            Assert.assertTrue(mockBrokerInstance.getActive());
+            Assert.assertFalse(mockBrokerInstance.getActive());
             IngestionScheduler savedScheduler = mockBrokerInstance.getIngestionScheduler();
             Assert.assertNotNull(savedScheduler);
             Assert.assertEquals(savedScheduler.getCronExpression(), cronExpression);

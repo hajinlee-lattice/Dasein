@@ -75,6 +75,7 @@ CREATE PROCEDURE `UpdateSchema`()
               `SELECTED_FIELDS` JSON,
               `SOURCE_ID` VARCHAR(255) NOT NULL,
               `UPDATED` DATETIME NOT NULL,
+              `NEXT_SCHEDULED_TIME` DATETIME,
               `FK_TENANT_ID` BIGINT, PRIMARY KEY (`PID`)
           ) engine = InnoDB;
 
