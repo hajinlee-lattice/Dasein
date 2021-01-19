@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ConvertBatchStoreTo
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.CuratedAttributesWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateVisitReportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.MatchEntityWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAccountWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessActivityStreamWorkflowConfiguration;
@@ -120,7 +121,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = ImportListSegmentWorkflowConfiguration.class, name = "ImportListSegmentWorkflowConfiguration"),
         @Type(value = GenerateIntentEmailAlertWorkflowConfiguration.class, name =
                 GenerateIntentEmailAlertWorkflowConfiguration.NAME),
-        @Type(value = PublishVIDataWorkflowConfiguration.class, name = "PublishVIDataWorkflowConfiguration")
+        @Type(value = PublishVIDataWorkflowConfiguration.class, name = "PublishVIDataWorkflowConfiguration"),
+        @Type(value = GenerateVisitReportWorkflowConfiguration.class, name = "GenerateVisitReportWorkflowConfiguration")
 })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 

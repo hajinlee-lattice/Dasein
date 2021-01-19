@@ -399,6 +399,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String TIMELINE_EXPORT_ACCOUNTLIST = "TIMELINE_EXPORT_ACCOUNTLIST";
     public static final String TIMELINE_EXPORT_TABLES = "TIMELINE_EXPORT_TABLES";
     public static final String TIMELINE_EXPORT_FILES = "TIMELINE_EXPORT_FILES";
+    public static final String IS_SSVI_TENANT = "IS_SSVI_TENANT";
+    public static final String IS_CDL_TENANT = "IS_CDL_TENANT";
+    public static final String SSVI_MATCH_STREAM_TARGETTABLE = "SSVI_MATCH_STREAM_TARGETTABLE";
+    public static final String SSVI_WEBVISIT_RAW_TABLES = "SSVI_WEBVISIT_RAW_TABLES";
 
     public static final String TABLEROLES_GOING_TO_ES = "TABLEROLES_GOING_TO_ES";
 
@@ -498,7 +502,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACTIVITY_METRICS_CATEGORIES, //
             ACTIVITY_ALERT_GENERATED, //
             ACTIVITY_ALERT_PUBLISHED, //
-            RETAIN_PRODUCT_TYPE);
+            RETAIN_PRODUCT_TYPE,
+            IS_SSVI_TENANT,
+            IS_CDL_TENANT);
 
     @Autowired
     protected Configuration yarnConfiguration;
