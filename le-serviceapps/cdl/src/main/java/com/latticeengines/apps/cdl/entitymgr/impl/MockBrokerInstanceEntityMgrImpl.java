@@ -39,7 +39,7 @@ public class MockBrokerInstanceEntityMgrImpl extends JpaEntityMgrRepositoryImpl<
 
     @Override
     public List<MockBrokerInstance> getAllValidInstance() {
-        return readerRepository.getAllValidInstance();
+        return readerRepository.findByNextScheduledTime();
     }
 
     @Override
