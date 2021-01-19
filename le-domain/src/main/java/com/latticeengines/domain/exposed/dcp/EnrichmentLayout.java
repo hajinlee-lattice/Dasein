@@ -91,8 +91,7 @@ public class EnrichmentLayout implements HasPid, HasTenant {
     @Type(type = "json")
     private List<String> elements;
 
-    @JoinColumn(name = "TEMPLATE_ID")
-    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    @Column(name = "TEMPLATE_ID")
     @JsonProperty("templateId")
     private String templateId;
 
