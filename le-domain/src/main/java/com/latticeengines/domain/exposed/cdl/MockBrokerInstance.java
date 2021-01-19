@@ -93,6 +93,11 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
     @Column(name = "ACTIVE", nullable = false)
     private boolean active;
 
+    @Temporal(TIMESTAMP)
+    @Column(name = "NEXT_SCHEDULED_TIME")
+    @JsonProperty("nextScheduledTime")
+    private Date nextScheduledTime;
+
     @Override
     public Long getPid() {
         return pid;
@@ -187,5 +192,14 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
 
     public void setDocumentType(String documentType) {
         this.documentType = documentType;
+    }
+
+
+    public Date getNextScheduledTime() {
+        return nextScheduledTime;
+    }
+
+    public void setNextScheduledTime(Date nextScheduledTime) {
+        this.nextScheduledTime = nextScheduledTime;
     }
 }
