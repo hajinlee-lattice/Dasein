@@ -30,6 +30,7 @@ public class EMRScalingRunnable implements Runnable {
     private static final int MAX_SCALE_IN_ATTEMPTS = 3;
     private static final int MAX_SCALE_OUT_ATTEMPTS = 5;
     private static final long SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT = TimeUnit.MINUTES.toMillis(40);
+    private static final long SCALE_IN_COOL_DOWN_AFTER_SCALING_IN = TimeUnit.MINUTES.toMillis(30);
     private static final long SLOW_DECOMMISSION_THRESHOLD = TimeUnit.MINUTES.toMillis(10);
 
     private static final ConcurrentMap<String, ScaleCounter> scalingCounterMap = new ConcurrentHashMap<>();
@@ -229,30 +230,39 @@ public class EMRScalingRunnable implements Runnable {
     }
 
     private void attemptScaleIn(int running, int requested, int target) {
-        getScaleCounter().resetScaleOutCounter();
-
-        Pair<Integer, Integer> pair = getScaleCounter().incrementScaleInCounter(target);
+        ScaleCounter counter = getScaleCounter();
+        counter.resetScaleOutCounter();
+        Pair<Integer, Integer> pair = counter.incrementScaleInCounter(target);
         int scaleInTarget = pair.getLeft();
         int attempts = pair.getValue();
         int idle = getYarnTracker().getIdleTaskNodes();
         log.info(String.format(
                 "Would like to scale in %s, attempt=%d, running=%d, requested=%d, target=%d, scaleInTarget=%d, idle=%d", //
                 emrCluster, attempts, running, requested, target, scaleInTarget, idle));
-        if (getScaleCounter().getLatestScaleOutTime() + SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT //
+        if (counter.getLatestScaleOutTime() + SCALE_IN_COOL_DOWN_AFTER_SCALING_OUT //
                 > System.currentTimeMillis()) {
-            log.info("Still in cool down period, won't attempt to scale in.");
+            log.info("Still in post scaling out cool down period, won't attempt to scale in.");
         } else if (running > requested) {
             log.info("Still in the process of scaling in, won't attempt to scale in again.");
         } else if (idle == 0) {
             log.info("There is no idle task nodes, won't attempt to scale in.");
         } else if (getYarnTracker().hasSpecialBlockingApps()) {
             log.info("There are special blocking apps running, won't attempt to scale in");
+        } else if (counter.getLatestScaleInTime() + SCALE_IN_COOL_DOWN_AFTER_SCALING_IN //
+                > System.currentTimeMillis()) {
+            String latestAppId = getYarnTracker().getLatestApplicationId();
+            if (!latestAppId.equals(counter.getLastAppIdWhenScaleIn())) {
+                log.info("Found new appId=" + latestAppId //
+                        + ", Still in post scaling in cool down period, won't attempt to scale in.");
+            }
         } else if (attempts >= MAX_SCALE_IN_ATTEMPTS) {
             int nodesToTerminate = Math.min(idle, MAX_SCALE_IN_SIZE);
             scaleInTarget = Math.max(requested - nodesToTerminate, scaleInTarget);
             log.info("Going to scale in " + emrCluster + " from " + requested + " to " + scaleInTarget);
             scale(scaleInTarget);
-            getScaleCounter().clearScaleInCounter(scaleInTarget);
+            counter.clearScaleInCounter(scaleInTarget);
+            counter.setLatestScaleInTime(System.currentTimeMillis());
+            counter.setLastAppIdWhenScaleIn(getYarnTracker().getLatestApplicationId());
         }
     }
 
