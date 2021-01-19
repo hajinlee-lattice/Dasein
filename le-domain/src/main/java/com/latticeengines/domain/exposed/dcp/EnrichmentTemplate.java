@@ -155,4 +155,16 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
     public void setTemplateName(String templateName) {
         this.templateName = templateName;
     }
+
+    public void setDomain(DataDomain domain) {
+        this.domain = domain;
+    }
+
+    public void setElements(List<String> elements) {
+        this.elements = elements;
+    }
+
+    public void setRecordType(DataRecordType recordType) {
+        this.recordType = recordType;
+    }
 }
