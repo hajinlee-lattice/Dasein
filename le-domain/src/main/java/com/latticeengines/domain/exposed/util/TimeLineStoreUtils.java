@@ -90,8 +90,11 @@ public final class TimeLineStoreUtils {
                     new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Constant)
                             .withMappingValue("Opportunity Update").build());
             timelineStandardMapping.put(TimelineStandardColumn.Detail1.getColumnName(),
+                new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute)
+                        .withMappingValue(InterfaceName.StageName.name()).build());
+            timelineStandardMapping.put(TimelineStandardColumn.Detail2.getColumnName(),
                     new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute)
-                            .withMappingValue(InterfaceName.StageName.name()).build());
+                            .withMappingValue(InterfaceName.OpportunityId.name()).build());
             break;
         case MarketingActivity:
             timelineStandardMapping.put(TimelineStandardColumn.EventDate.getColumnName(),
