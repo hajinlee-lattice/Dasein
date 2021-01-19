@@ -50,6 +50,11 @@ public class ActivationLimitValidator extends AttrValidator {
         // are not empty after render method
         List<AttrConfig> userSelectedActiveConfigs = LimitValidatorUtils.returnPropertyConfigs(userProvidedAttrConfigs,
                 ColumnMetadataKey.State, AttrState.Active);
+
+        // add the attribute user activate before it was deprecated
+        userSelectedActiveConfigs.addAll(LimitValidatorUtils.returnPropertyConfigs(userProvidedAttrConfigs,
+                ColumnMetadataKey.State, AttrState.Deprecated));
+
         List<AttrConfig> userSelectedInactiveConfigs = LimitValidatorUtils
                 .returnPropertyConfigs(userProvidedAttrConfigs, ColumnMetadataKey.State, AttrState.Inactive);
 
