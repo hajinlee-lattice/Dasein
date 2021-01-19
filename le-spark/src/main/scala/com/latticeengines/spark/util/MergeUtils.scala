@@ -125,7 +125,7 @@ private[spark] object MergeUtils {
       if (insertPos > -1) {
         eraseAttr = attr.patch(insertPos + templateSeperator.length, erasePrefix, 0)
       }
-      colPosMap(eraseAttr) !=null && row.get(colPosMap(eraseAttr)) != null && row.get(colPosMap(eraseAttr)).asInstanceOf[Boolean]
+      colPosMap.contains(eraseAttr) && row.get(colPosMap(eraseAttr)) != null && row.get(colPosMap(eraseAttr)).asInstanceOf[Boolean]
     }
   }
 

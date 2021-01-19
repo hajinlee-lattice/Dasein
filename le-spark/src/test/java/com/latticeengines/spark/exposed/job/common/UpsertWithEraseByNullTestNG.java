@@ -93,6 +93,7 @@ public class UpsertWithEraseByNullTestNG extends SparkJobFunctionalTestNGBase {
         return new UpsertResultVerifier() {
             @Override
             public void verifyRecord(GenericRecord record) {
+                Assert.assertEquals(record.getSchema().getFields().size(), 6);
                 int id = (int) record.get("Id");
                 String attr1 = record.get("Task_a__Attr1") == null ? null : record.get("Task_a__Attr1").toString();
                 Long attr2 = record.get("Task_a__Attr2") == null ? null : (long) record.get("Task_a__Attr2");
