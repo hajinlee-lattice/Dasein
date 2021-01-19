@@ -213,7 +213,7 @@ public class UserResource {
                 if (idaasUser == null) {
                     LOGGER.error(
                             String.format("Failed to create IDaaS user for %s at level %s.", loginUsername, loginLevel));
-                    String title = "Failed to create IDaaS User.";
+                    String title = "Failed to create IDaaS User. Trace ID: " + traceId;
                     userSpan.log(title);
                     UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
                     UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
@@ -311,7 +311,6 @@ public class UserResource {
         try (Scope scope = startUserSpan(username, tenantId, "Update User")) {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
-            userSpan.log("Start - Update User");
 
             UserUpdateResponse updateResponse = new UserUpdateResponse();
             updateResponse.setTraceId(traceId);
@@ -374,7 +373,7 @@ public class UserResource {
                 if (idaasUser == null) {
                     LOGGER.error(String.format("Failed to create IDaaS user for %s at level %s in tenant %s",
                             loginUser.getUsername(), loginUser.getAccessLevel(), tenantId));
-                    String title = "Failed to create IDaaS User.";
+                    String title = "Failed to create IDaaS User. Trace ID: " + traceId;
                     UIActionCode uiActionCode = UIActionCode.fromLedpCode(LedpCode.LEDP_18004);
                     UIAction action = UIActionUtils.generateUIError(title, View.Banner, uiActionCode);
                     throw UIActionException.fromAction(action);
@@ -413,8 +412,9 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Delete a user. The user must be in the tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public SimpleBooleanResponse deleteUser(@PathVariable String username, HttpServletRequest request,
+    public ResponseDocument<UserUpdateResponse> deleteUser(@PathVariable String username, HttpServletRequest request,
             HttpServletResponse response) {
+        ResponseDocument<UserUpdateResponse> document = new ResponseDocument();
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
@@ -427,15 +427,20 @@ public class UserResource {
             userSpan = tracer.activeSpan();
             String traceId = userSpan.context().toTraceId();
 
+            UserUpdateResponse updateResponse = new UserUpdateResponse();
+            updateResponse.setTraceId(traceId);
+            document.setResult(updateResponse);
+
             if (userService.inTenant(tenantId, safeUsername)) {
                 String loginUsername = loginUser.getUsername();
                 AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
                 AccessLevel targetLevel = userService.getAccessLevel(tenantId, safeUsername);
                 if (!userService.isSuperior(loginLevel, targetLevel)) {
                     response.setStatus(403);
-                    return SimpleBooleanResponse.failedResponse(Collections.singletonList(String
+                    document.setErrors(Collections.singletonList(String
                             .format("Could not delete a %s user using a %s user due to inferior access level.",
                                     targetLevel.name(), loginLevel.name())));
+                    return document;
                 }
                 userService.deleteUser(tenantId, safeUsername, true);
                 LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, safeUsername, tenantId));
@@ -456,10 +461,13 @@ public class UserResource {
                         LOGGER.error("Exception in usage event: " + ExceptionUtils.getStackTrace(e));
                     }
                 }
-                return SimpleBooleanResponse.successResponse();
+                document.setSuccess(true);
+                return document;
             } else {
-                return SimpleBooleanResponse.failedResponse(
+                document.setSuccess(false);
+                document.setErrors(
                         Collections.singletonList("Could not delete a user that is not in the current tenant"));
+                return document;
             }
         } finally {
             TracingUtils.finish(userSpan);

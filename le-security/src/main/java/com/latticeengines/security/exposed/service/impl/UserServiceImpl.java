@@ -22,6 +22,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
@@ -342,15 +343,13 @@ public class UserServiceImpl implements UserService {
                     globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(userTeamIds, false);
                 }
 
-                /*
-                if (span != null)
+                if (span != null && username != null && tenantId != null)
                     span.log(ImmutableMap.of(
                             "Operation", "Grant access",
                             "User", username,
                             "Tenant", tenantId,
                             "Right", accessLevel.name()
                     ));
-                 */
 
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
                         createdByUser, expirationDate, globalAuthTeams);
@@ -402,8 +401,7 @@ public class UserServiceImpl implements UserService {
         Tracer tracer = GlobalTracer.get();
         Span span = tracer.activeSpan();
 
-        /*
-        if (span != null) {
+        if (span != null && username != null && tenantId != null) {
             ImmutableMap.Builder<Object, Object> builder = new ImmutableMap.Builder<>()
                     .put("Operation", "Revoke access")
                     .put("User", username)
@@ -414,7 +412,6 @@ public class UserServiceImpl implements UserService {
 
             span.log(builder.build().toString());
         }
-         */
         try {
             AccessLevel level = AccessLevel.valueOf(right);
             success = globalUserManagementService.revokeRight(level.name(), tenantId, username);
