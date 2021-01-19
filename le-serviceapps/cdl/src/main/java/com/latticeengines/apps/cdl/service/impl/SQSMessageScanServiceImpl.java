@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.Closeable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -140,7 +141,7 @@ public class SQSMessageScanServiceImpl implements SQSMessageScanService {
                     StopWatch stopWatch = StopWatch.createStarted();
                     long totalTime = scanPeriod * 1000;
                     log.info(String.format("Instance with Ip %s in stack %s start to scan sqs message.", hostAddress, stackName));
-                    List<MockBrokerInstance> mockBrokerInstances = mockBrokerInstanceService.getAllValidInstance();
+                    List<MockBrokerInstance> mockBrokerInstances = mockBrokerInstanceService.getAllValidInstance(new Date());
                     if (CollectionUtils.isNotEmpty(mockBrokerInstances)) {
                         for (MockBrokerInstance mockBrokerInstance : mockBrokerInstances) {
                             Tenant tenant = mockBrokerInstance.getTenant();

@@ -52,6 +52,7 @@ public class MockBrokerInstanceServiceImplTestNG extends CDLFunctionalTestNGBase
         scheduler.setCronExpression(cronExpression);
         scheduler.setStartTime(startTime);
         mockBrokerInstance.get().setIngestionScheduler(scheduler);
+        mockBrokerInstance.get().setActive(true);
         MockBrokerInstance mockBrokerInstance2 = mockBrokerInstanceService.createOrUpdate(mockBrokerInstance.get());
         String sourceId = mockBrokerInstance2.getSourceId();
         retry.execute(context -> {
@@ -65,6 +66,9 @@ public class MockBrokerInstanceServiceImplTestNG extends CDLFunctionalTestNGBase
             Assert.assertNotNull(savedScheduler);
             Assert.assertEquals(savedScheduler.getCronExpression(), cronExpression);
             Assert.assertEquals(savedScheduler.getStartTime(), startTime);
+            Assert.assertTrue(mockBrokerInstance.get().getActive());
+            List<MockBrokerInstance> instances = mockBrokerInstanceService.getAllInstance(5);
+            Assert.assertEquals(instances.size(), 1);
             return true;
         });
         String displayName1 = "mockBrokerInstance1";

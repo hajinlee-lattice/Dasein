@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+import com.latticeengines.apps.cdl.service.InboundConnectionService;
 import com.latticeengines.apps.cdl.service.MockBrokerInstanceService;
 import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
 import com.latticeengines.domain.exposed.cdl.MockBrokerInstance;
@@ -41,6 +42,9 @@ public class MockBroker extends BaseBroker {
     @Inject
     private MockBrokerInstanceService mockBrokerInstanceService;
 
+    @Inject
+    private InboundConnectionService inboundConnectionService;
+
     public MockBroker(BrokerReference brokerReference) {
         super(brokerReference);
     }
@@ -55,6 +59,9 @@ public class MockBroker extends BaseBroker {
         MockBrokerInstance mockBrokerInstance = mockBrokerInstanceService.findBySourceId(sourceId);
         if (mockBrokerInstance != null) {
             mockBrokerInstance.setIngestionScheduler(scheduler);
+            mockBrokerInstance.setActive(false);
+            mockBrokerInstance.setDataStreamId(null);
+            mockBrokerInstance.setNextScheduledTime(null);
             mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
         } else {
             log.info(String.format("Can'd find mock instance by id %s.", sourceId));

@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -38,8 +39,8 @@ public class MockBrokerInstanceEntityMgrImpl extends JpaEntityMgrRepositoryImpl<
     }
 
     @Override
-    public List<MockBrokerInstance> getAllValidInstance() {
-        return readerRepository.findByNextScheduledTime();
+    public List<MockBrokerInstance> getAllValidInstance(Date nextScheduledTime) {
+        return readerRepository.findByNextScheduledTime(nextScheduledTime);
     }
 
     @Override

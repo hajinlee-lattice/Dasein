@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,8 +37,8 @@ public class MockBrokerInstanceServiceImpl implements MockBrokerInstanceService 
     }
 
     @Override
-    public List<MockBrokerInstance> getAllValidInstance() {
-        return mockBrokerInstanceEntityMgr.getAllValidInstance();
+    public List<MockBrokerInstance> getAllValidInstance(Date nextScheduledTime) {
+        return mockBrokerInstanceEntityMgr.getAllValidInstance(nextScheduledTime);
     }
 
     @Override

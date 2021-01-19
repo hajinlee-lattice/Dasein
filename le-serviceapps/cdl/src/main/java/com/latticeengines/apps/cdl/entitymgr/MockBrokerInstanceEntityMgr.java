@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr;
 
+import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
@@ -11,6 +12,6 @@ public interface MockBrokerInstanceEntityMgr extends BaseEntityMgrRepository<Moc
 
     List<MockBrokerInstance> getAllInstance(int maxRow);
 
-    List<MockBrokerInstance> getAllValidInstance();
+    List<MockBrokerInstance> getAllValidInstance(Date nextScheduledTime);
 
 }
