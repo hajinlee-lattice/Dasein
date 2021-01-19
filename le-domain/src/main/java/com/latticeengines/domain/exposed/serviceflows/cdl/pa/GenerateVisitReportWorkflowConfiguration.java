@@ -6,6 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.EnrichWebVisitSparkStepConfiguration;
@@ -70,6 +71,11 @@ public class GenerateVisitReportWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder entityMatchConfiguration(EntityMatchConfiguration configuration) {
             processActivityStreamStepConfiguration.setEntityMatchConfiguration(configuration);
+            return this;
+        }
+
+        public Builder setCatalog(List<Catalog> catalogs) {
+            enrichWebVisitSparkStepConfiguration.setCatalogs(catalogs);
             return this;
         }
 

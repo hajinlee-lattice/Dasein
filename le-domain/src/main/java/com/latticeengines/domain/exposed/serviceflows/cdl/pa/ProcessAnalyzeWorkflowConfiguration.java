@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
@@ -467,6 +468,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder isCDLTenant(boolean isCDLTenant) {
             processStepConfiguration.setCDLTenant(isCDLTenant);
+            return this;
+        }
+
+        public Builder setCatalog(List<Catalog> catalogs) {
+            generateVisitReportWorkflowBuilder.setCatalog(catalogs);
             return this;
         }
 

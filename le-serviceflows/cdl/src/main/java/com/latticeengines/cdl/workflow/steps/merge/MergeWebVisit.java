@@ -4,26 +4,21 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreate
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidateWebVisit;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
-import static com.latticeengines.domain.exposed.query.BusinessEntity.ActivityStream;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.LatticeAccount;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -48,11 +43,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
+import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(MergeWebVisit.BEAN_NAME)
 @Lazy
@@ -84,19 +78,16 @@ public class MergeWebVisit extends BaseActivityStreamStep<ProcessActivityStreamS
             "LE_REVENUE_RANGE", "LE_IS_PRIMARY_DOMAIN", "LDC_Domain", "LDC_Name", "LDC_Country", "LDC_State",
             "LDC_City", "LE_DNB_TYPE");
 
-    // streamId -> set of column names
-    private final Map<String, Set<String>> streamImportColumnNames = new HashMap<>();
-    // streamId -> stream object
-    private Map<String, AtlasStream> webVisitStreamMap = new HashMap<>();
-    // streamId -> list({ tableName, original import file name })
+    //set of column names
+    private Set<String> webVisitImportColumnNames;
+    private AtlasStream webVisitStream;
+    //tableName, original import file name
     @JsonProperty("stream_imports")
-    private Map<String, List<ActivityImport>> webVisitImports = new HashMap<>();
-    // streamId -> table prefix of matched webVisit raw streams imports processed by
+    private List<ActivityImport> webVisitImports;
+    //table prefix of matched webVisit raw streams imports processed by
     // transformation request
-    private final Map<String, String> matchedTablePrefixes = new HashMap<>();
-    // streamId -> root operation uid used for bulk match
-    private final Map<String, String> matchRootOperationUids = new HashMap<>();
-    private final Map<String, String> webVisitBatchStoreTables = new HashMap<>();
+    private String matchedTablePrefix;
+    private String webVisitBatchStoreTable;
     private long currentTime;
 
     @Override
@@ -105,18 +96,21 @@ public class MergeWebVisit extends BaseActivityStreamStep<ProcessActivityStreamS
         currentTime = getCurrentTimestamp();
         log.info("Timestamp used as current time to build raw stream = {}", currentTime);
         log.info("IsRematch={}, isReplace={}", configuration.isRematchMode(), configuration.isReplaceMode());
-        getWebVisitStreamMap();
+        getWebVisitStream();
         buildWebVisitImportColumnNames();
     }
 
     @Override
     protected PipelineTransformationRequest getConsolidateRequest() {
+        if (Boolean.FALSE.equals(getObjectFromContext(IS_SSVI_TENANT, Boolean.class))) {
+            return null;
+        }
         if (Boolean.TRUE.equals(getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
             log.info("This is CDL Tenant, skip this step.");
             return null;
         }
 
-        if (MapUtils.isEmpty(webVisitImports) || MapUtils.isEmpty(webVisitStreamMap)) {
+        if (CollectionUtils.isEmpty(webVisitImports) || webVisitStream == null) {
             log.info("no import or atlasStream is null, will skip this step.");
             return null;
         }
@@ -131,23 +125,13 @@ public class MergeWebVisit extends BaseActivityStreamStep<ProcessActivityStreamS
          * 1. merge imports
          * 2. match against current universe
          */
-        Map<String, Integer> matchedImportTableIdx = webVisitImports.entrySet() //
-                .stream() //
-                .map(entry -> {
-                    String streamId = entry.getKey();
-                    List<String> importTables = entry.getValue() //
-                            .stream() //
-                            .map(ActivityImport::getTableName) //
-                            .collect(Collectors.toList());
-                    if (CollectionUtils.isEmpty(importTables)) {
-                        return null;
-                    }
-
-                    // add concat/match step
-                    return Pair.of(streamId, concatAndMatchStreamImports(streamId, importTables, steps));
-                }) //
-                .filter(Objects::nonNull) //
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        List<String> importTables = webVisitImports.stream() //
+                .map(ActivityImport::getTableName) //
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(importTables)) {
+            return null;
+        }
+        Integer matchedStepIdx = concatAndMatchStreamImports(webVisitStream.getStreamId(), importTables, steps);
 
         /*-
          * additional rematch steps:
@@ -155,29 +139,24 @@ public class MergeWebVisit extends BaseActivityStreamStep<ProcessActivityStreamS
          * 2. rematch against empty universe
          */
         if (configuration.isRematchMode()) {
-            log.info("Adding rematch steps, matchedImportTableIdx = {}", matchedImportTableIdx);
-            webVisitBatchStoreTables.putAll(getActiveWebVisitTables(configuration.getCustomerSpace().toString(),
-                    new ArrayList<>(webVisitStreamMap.values())));
-            putObjectInContext(SSVI_WEBVISIT_RAW_TABLES, webVisitBatchStoreTables);
-            webVisitStreamMap.forEach((streamId, stream) -> {
-                Integer matchedStepIdx = matchedImportTableIdx.get(streamId);
-                String activeTable = webVisitBatchStoreTables.get(streamId);
-                appendRawStream(steps, stream, currentTime, matchedStepIdx, activeTable,
-                        WEBVISIT_PRE_REMATCH_TABLE_PREFIX_FORMAT, DISCARD_ATTRS_IN_REMATCH).ifPresent(pair -> {
-                    int appendStepIdx = pair.getValue();
-                    // input table columns = [ import columns ] union [ active batch store columns ]
-                    Set<String> columns = new HashSet<>(
-                            streamImportColumnNames.getOrDefault(streamId, new HashSet<>()));
-                    if (activeTable != null) {
-                        columns.addAll(getTableColumnNames(activeTable));
-                    }
-                    addMatchStep(stream, columns, steps, appendStepIdx, true);
-                });
+            log.info("Adding rematch steps, matchedStepIdx = {}", matchedStepIdx);
+            webVisitBatchStoreTable = dataCollectionProxy.getTableName(configuration.getCustomerSpace().toString(),
+                    ConsolidateWebVisit, null);
+            putObjectInContext(SSVI_WEBVISIT_RAW_TABLE, webVisitBatchStoreTable);
+            appendRawStream(steps, webVisitStream, currentTime, matchedStepIdx, webVisitBatchStoreTable,
+                    WEBVISIT_PRE_REMATCH_TABLE_PREFIX_FORMAT, DISCARD_ATTRS_IN_REMATCH).ifPresent(pair -> {
+                int appendStepIdx = pair.getValue();
+                // input table columns = [ import columns ] union [ active batch store columns ]
+                Set<String> columns = new HashSet<>(webVisitImportColumnNames);
+                if (webVisitBatchStoreTable != null) {
+                    columns.addAll(getTableColumnNames(webVisitBatchStoreTable));
+                }
+                addMatchStep(webVisitStream, columns, steps, appendStepIdx, true);
             });
         }
 
         if (CollectionUtils.isEmpty(steps)) {
-            log.info("No existing/new webvisit found, skip MergeWebvisit step");
+            log.info("No existing/new webvisit found, skip MergeWebVisit step");
             return null;
         }
 
@@ -187,20 +166,20 @@ public class MergeWebVisit extends BaseActivityStreamStep<ProcessActivityStreamS
 
     @Override
     protected void onPostTransformationCompleted() {
-        Map<String, String> matchedTablenames = getFullTablenames(matchedTablePrefixes);
-        log.info("Matched raw stream tables, tables={}, pipelineVersion={}", matchedTablenames, pipelineVersion);
-        putObjectInContext(SSVI_MATCH_STREAM_TARGETTABLE, matchedTablenames);
+        String matchedTableName = getFullTableName(matchedTablePrefix);
+        log.info("Matched webVisit tables, tables={}, pipelineVersion={}", matchedTableName, pipelineVersion);
+        putObjectInContext(SSVI_MATCH_STREAM_TARGETTABLE, matchedTableName);
     }
 
-    private void getWebVisitStreamMap() {
+    private void getWebVisitStream() {
         if (MapUtils.isEmpty(configuration.getActivityStreamMap())) {
             return;
         }
         configuration.getActivityStreamMap().forEach((streamId, stream) -> {
             if (AtlasStream.StreamType.WebVisit.equals(stream.getStreamType())) {
-                webVisitStreamMap.put(streamId, stream);
+                webVisitStream = stream;
                 if (configuration.getStreamImports().get(streamId) != null) {
-                    webVisitImports.put(streamId, configuration.getStreamImports().get(streamId));
+                    webVisitImports = configuration.getStreamImports().get(streamId);
                 }
             }
         });
@@ -208,15 +187,13 @@ public class MergeWebVisit extends BaseActivityStreamStep<ProcessActivityStreamS
 
     private Integer concatAndMatchStreamImports(@NotNull String streamId, @NotNull List<String> importTables,
                                                 @NotNull List<TransformationStepConfig> steps) {
-        AtlasStream stream = webVisitStreamMap.get(streamId);
-        Set<String> importTableColumns = streamImportColumnNames.get(streamId);
-        Preconditions.checkNotNull(stream, String.format("Stream %s is not in config", stream));
-        Preconditions.checkArgument(CollectionUtils.isNotEmpty(stream.getMatchEntities()),
+        Preconditions.checkNotNull(webVisitStream, String.format("Stream %s is not in config", webVisitStream));
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(webVisitStream.getMatchEntities()),
                 String.format("Stream %s does not have match entities", streamId));
 
         // concat import
         steps.add(dedupAndConcatTables(null, false, importTables));
-        addMatchStep(stream, importTableColumns, steps, steps.size() - 1, false);
+        addMatchStep(webVisitStream, webVisitImportColumnNames, steps, steps.size() - 1, false);
         return steps.size() - 1;
     }
 
@@ -224,7 +201,8 @@ public class MergeWebVisit extends BaseActivityStreamStep<ProcessActivityStreamS
                               @NotNull List<TransformationStepConfig> steps, int matchInputTableIdx, boolean isRematchMode) {
         String tablePrefixFormat = isRematchMode ? WEBVISIT_REMATCHED_TABLE_PREFIX_FORMAT
                 : WEBVISIT_MATCHED_PREFIX_FORMAT;
-        String matchedTablePrefix = String.format(tablePrefixFormat, stream.getStreamId());
+        // record the final table prefix for webVisit stream
+        matchedTablePrefix = String.format(tablePrefixFormat, stream.getStreamId());
         String matchConfig;
         MatchInput baseMatchInput = getBaseMatchInput();
         // set stream type to source entity to get higher concurrency
@@ -233,14 +211,11 @@ public class MergeWebVisit extends BaseActivityStreamStep<ProcessActivityStreamS
             log.info("found custom entity match configuration = {}", configuration.getEntityMatchConfiguration());
             baseMatchInput.setEntityMatchConfiguration(configuration.getEntityMatchConfiguration());
         }
-
-        String uid = UUID.randomUUID().toString();
-        matchRootOperationUids.put(stream.getStreamId(), uid);
+        // streamId -> root operation uid used for bulk match
+        String matchRootOperationUid = UUID.randomUUID().toString();
         // match entity
         matchConfig = getAllocateIdMatchConfigForAccount(customerSpace.toString(), baseMatchInput,
-                importTableColumns, uid);
-        // record the final table prefix for webVisit stream
-        matchedTablePrefixes.put(stream.getStreamId(), matchedTablePrefix);
+                importTableColumns, matchRootOperationUid);
         steps.add(match(matchInputTableIdx, matchedTablePrefix, matchConfig));
     }
 
@@ -296,41 +271,20 @@ public class MergeWebVisit extends BaseActivityStreamStep<ProcessActivityStreamS
     }
 
     private void buildWebVisitImportColumnNames() {
-        if (MapUtils.isEmpty(webVisitImports)) {
+        if (CollectionUtils.isEmpty(webVisitImports)) {
             return;
         }
 
-        webVisitImports.forEach((streamId, imports) -> {
-            String[] importTables = imports.stream().map(ActivityImport::getTableName).toArray(String[]::new);
-            Set<String> columns = getTableColumnNames(importTables);
-            log.info("Stream {} has {} imports, {} total columns", streamId, imports.size(), columns.size());
-            streamImportColumnNames.put(streamId, columns);
-        });
+        String[] importTables = webVisitImports.stream().map(ActivityImport::getTableName).toArray(String[]::new);
+        Set<String> columns = getTableColumnNames(importTables);
+        log.info("WebVisit has {} imports, {} total columns", webVisitImports.size(), columns.size());
+        webVisitImportColumnNames.addAll(columns);
     }
 
-    /*-
-     * table names in current active version for WebVisit
-     */
-    private Map<String, String> getActiveWebVisitTables(@NotNull String customerSpace,
-                                                              List<AtlasStream> streams) {
-        return getActiveTables(customerSpace, ActivityStream, streams, AtlasStream::getStreamId,
-                ConsolidateWebVisit);
-    }
-
-    private <E> Map<String, String> getActiveTables(@NotNull String customerSpace, @NotNull BusinessEntity entity,
-                                                    List<E> activityStoreEntities, Function<E, String> getUniqueIdFn, TableRoleInCollection role) {
-        if (CollectionUtils.isEmpty(activityStoreEntities)) {
-            return Collections.emptyMap();
+    private String getFullTableName(String tablePrefix) {
+        if (StringUtils.isEmpty(tablePrefix)) {
+            return "";
         }
-
-        List<String> uniqueIds = activityStoreEntities.stream() //
-                .filter(Objects::nonNull) //
-                .map(getUniqueIdFn) //
-                .filter(StringUtils::isNotBlank) //
-                .collect(Collectors.toList());
-        Map<String, String> tables = dataCollectionProxy.getTableNamesWithSignatures(customerSpace, role, null,
-                uniqueIds);
-        log.info("Current {} tables for tenant {} are {}. StreamIds={}", entity, customerSpace, tables, uniqueIds);
-        return tables;
+        return TableUtils.getFullTableName(tablePrefix, pipelineVersion);
     }
 }

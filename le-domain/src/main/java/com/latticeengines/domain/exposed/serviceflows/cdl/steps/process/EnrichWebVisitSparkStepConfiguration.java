@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
 
 public class EnrichWebVisitSparkStepConfiguration extends SparkJobStepConfiguration {
@@ -19,6 +20,8 @@ public class EnrichWebVisitSparkStepConfiguration extends SparkJobStepConfigurat
     // streamId -> stream object
     @JsonProperty("activity_stream_map")
     private Map<String, AtlasStream> activityStreamMap;
+    @JsonProperty("catalogs")
+    private List<Catalog> catalogs;
     @JsonProperty("catalog_imports")
     private Map<String, List<ActivityImport>> catalogImports;
 
@@ -60,5 +63,13 @@ public class EnrichWebVisitSparkStepConfiguration extends SparkJobStepConfigurat
 
     public void setCatalogImports(Map<String, List<ActivityImport>> catalogImports) {
         this.catalogImports = catalogImports;
+    }
+
+    public List<Catalog> getCatalogs() {
+        return catalogs;
+    }
+
+    public void setCatalogs(List<Catalog> catalogs) {
+        this.catalogs = catalogs;
     }
 }

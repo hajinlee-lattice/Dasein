@@ -178,7 +178,6 @@ public enum TableRoleInCollection {
         PeriodStores.hasSignature = true;
         MetricsGroup.hasSignature = true;
         TimelineProfile.hasSignature = true;
-        ConsolidateWebVisit.hasSignature = true;
     }
 
     private static final Logger log = LoggerFactory.getLogger(TableRoleInCollection.class);
