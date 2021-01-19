@@ -190,7 +190,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
                 generateVisitReportWorkflow)) {
             return true;
         }
-        if (Boolean.FALSE.equals(step.getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
+        if (Boolean.TRUE.equals(step.getObjectFromContext(IS_SSVI_TENANT, Boolean.class)) && Boolean.FALSE.equals(step.getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
             return !isStartProcessingStep(step) && !isImportProcessAnalyzeFromS3(step) && !inWorkflow(seq,
                     processCatalogWorkflow) && !isExportProcessAnalyzeToS3(step) && !isFinishProcessing(step);
         }
