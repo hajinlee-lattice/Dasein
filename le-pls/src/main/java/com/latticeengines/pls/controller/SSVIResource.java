@@ -4,9 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,11 +16,11 @@ import com.latticeengines.pls.service.vidashboard.DashboardService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "VI dashboard resource", description = "REST resource for action")
+@Api(value = "Self Service Visitor Intelligence APIs")
 @RestController
-@RequestMapping("/vidashboards")
+@RequestMapping("/ssvi")
 @PreAuthorize("hasRole('View_PLS_Data')")
-public class VIDashboardResource {
+public class SSVIResource {
 
     @Inject
     private DashboardService dashboardService;
@@ -33,13 +31,5 @@ public class VIDashboardResource {
     public DashboardResponse getDashboardList() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return dashboardService.getDashboardList(customerSpace.toString());
-    }
-
-    @PostMapping("/createDashboard")
-    @ResponseBody
-    @ApiOperation("create dashboards")
-    public void createDashboard(@RequestParam("esIndexName") String esIndexName) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        dashboardService.create(customerSpace.toString(), esIndexName);
     }
 }
