@@ -145,7 +145,7 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
             return true;
         });
 
-        File tmpFile = generateCsv("id", ids);
+        File tmpFile = generateCsv("AccountId", ids);
         s3Service.uploadLocalFile(s3Bucket, dropPath + fileName, tmpFile, true);
 
         DataOperationRequest dataOperationRequest = new DataOperationRequest();
