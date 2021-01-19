@@ -19,6 +19,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -145,10 +146,10 @@ public class EnrichWebVisitJobTestNG extends SparkJobFunctionalTestNGBase {
             Object pageUrl = record.get("page_url");
             if (pageUrl != null) {
                 List<String> expectedPageGroups = expectedPageGroupsMap.get(pageUrl.toString());
-                Object pageGroups =record.get("page_groups");
-                List<String> pageGroupsList = Arrays.asList((String[])pageGroups);
+                String pageGroups =record.get("page_groups").toString();
+                List<String> pageGroupArr = Arrays.asList(pageGroups.split("\\|\\|"));
                 log.info("pageUrl is {}, pageGroups is {}.", pageUrl.toString(), pageGroups);
-                Assert.assertEquals(pageGroupsList, expectedPageGroups);
+                Assert.assertEquals(new HashSet<>(pageGroupArr), new HashSet<>(expectedPageGroups));
             }
             log.info("record is {}", record);
             counter.incrementAndGet();

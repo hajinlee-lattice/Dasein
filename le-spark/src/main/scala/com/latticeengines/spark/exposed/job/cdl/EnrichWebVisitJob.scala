@@ -101,7 +101,7 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
   : DataFrame = {
     val filterFn = udf((url: String)
     => {
-      pathPatternMap.filter(_._1.matcher(url).matches).values.toSeq
+      pathPatternMap.filter(_._1.matcher(url).matches).values.mkString("||")
     })
     logSpark("----- BEGIN SCRIPT OUTPUT -----")
     df.printSchema
