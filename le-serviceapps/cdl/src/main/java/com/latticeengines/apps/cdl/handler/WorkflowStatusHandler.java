@@ -46,8 +46,7 @@ public interface WorkflowStatusHandler {
 
     default void recoverLaunchUniverse(String launchId, PlayLaunchChannelService playLaunchChannelService, PlayLaunchService playLaunchService) {
         PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
-        playLaunchChannelService.updateCurrentLaunchedAccountUniverseWithPrevious(channel);
-        playLaunchChannelService.updateCurrentLaunchedContactUniverseWithPrevious(channel);
+        playLaunchChannelService.recoverLaunchUniverse(channel);
     }
 
     default void handleAuthenticationState(DataIntegrationStatusMonitorMessage status) {

@@ -199,7 +199,6 @@ public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionSe
 
     private void recoverLaunchUniverse(String launchId) {
         PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
-        playLaunchChannelService.updateCurrentLaunchedAccountUniverseWithPrevious(channel);
-        playLaunchChannelService.updateCurrentLaunchedContactUniverseWithPrevious(channel);
+        playLaunchChannelService.recoverLaunchUniverse(channel);
     }
 }

@@ -395,7 +395,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
-    public void testUpdateWithTables() {
+    public void testCannotUpdateCurrentTablesToNull() {
         PlayLaunchChannel retrieved = playLaunchChannelEntityMgr.findById(channel1.getId());
         Assert.assertNull(retrieved.getCurrentLaunchedAccountUniverseTable());
         Assert.assertNull(retrieved.getCurrentLaunchedContactUniverseTable());
@@ -439,7 +439,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         channel1.setCurrentLaunchedAccountUniverseTable(null);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
         Assert.assertNotNull(retrieved);
-        Assert.assertNull(retrieved.getCurrentLaunchedAccountUniverseTable());
+        Assert.assertEquals(retrieved.getCurrentLaunchedAccountUniverseTable(), tableName3);
         Assert.assertEquals(retrieved.getCurrentLaunchedContactUniverseTable(), tableName4);
         Assert.assertNull(retrieved.getPreviousLaunchedAccountUniverseTable());
         Assert.assertNull(retrieved.getPreviousLaunchedContactUniverseTable());
@@ -447,8 +447,8 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         channel1.setCurrentLaunchedContactUniverseTable(null);
         retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
         Assert.assertNotNull(retrieved);
-        Assert.assertNull(retrieved.getCurrentLaunchedAccountUniverseTable());
-        Assert.assertNull(retrieved.getCurrentLaunchedContactUniverseTable());
+        Assert.assertEquals(retrieved.getCurrentLaunchedAccountUniverseTable(), tableName3);
+        Assert.assertEquals(retrieved.getCurrentLaunchedContactUniverseTable(), tableName4);
         Assert.assertNull(retrieved.getPreviousLaunchedAccountUniverseTable());
         Assert.assertNull(retrieved.getPreviousLaunchedContactUniverseTable());
 
@@ -460,7 +460,7 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testUpdateWithTables" })
+    @Test(groups = "functional", dependsOnMethods = { "testCannotUpdateCurrentTablesToNull" })
     public void testDelete() {
         playLaunchChannelEntityMgr.deleteByChannelId(channel1.getId(), true);
         playLaunchChannelEntityMgr.deleteByChannelId(channel2.getId(), true);

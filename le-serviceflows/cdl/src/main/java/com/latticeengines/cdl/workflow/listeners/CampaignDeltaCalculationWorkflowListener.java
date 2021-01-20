@@ -34,8 +34,10 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
     private EmailProxy emailProxy;
 
     @Inject
-
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    private static final String PREVIOUS_ACCOUNTS_UNIVERSE = "PREVIOUS_ACCOUNTS_UNIVERSE";
+    private static final String PREVIOUS_CONTACTS_UNIVERSE = "PREVIOUS_CONTACTS_UNIVERSE";
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -69,15 +71,15 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
                 }
 
                 PlayLaunchChannel channel = playProxy.getChannelById(customerSpace, playId, channelId);
-                channel.setCurrentLaunchedAccountUniverseTable(
-                        getStringValueFromContext(jobExecution, "PREVIOUS_ACCOUNTS_UNIVERSE"));
-                channel.setCurrentLaunchedContactUniverseTable(
-                        getStringValueFromContext(jobExecution, "PREVIOUS_CONTACTS_UNIVERSE"));
+                channel.setPreviousLaunchedAccountUniverseTable(
+                        getStringValueFromContext(jobExecution, PREVIOUS_ACCOUNTS_UNIVERSE));
+                channel.setPreviousLaunchedContactUniverseTable(
+                        getStringValueFromContext(jobExecution, PREVIOUS_CONTACTS_UNIVERSE));
                 log.warn(String.format(
                         "Reverting the Launch universe to the launch universe prior to the current workflow AccountUniverseTable:%s ContactUniverseTable: %s ",
                         channel.getCurrentLaunchedAccountUniverseTable(),
                         channel.getCurrentLaunchedContactUniverseTable()));
-                playProxy.updatePlayLaunchChannel(customerSpace, playId, channelId, channel, false);
+                playProxy.recoverPlayLaunchChannelLaunchUniverse(customerSpace, playId, channelId, channel);
                 Play play = playProxy.getPlay(customerSpace, playId);
                 PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace, playId, launchId);
                 playLaunch.setPlay(play);

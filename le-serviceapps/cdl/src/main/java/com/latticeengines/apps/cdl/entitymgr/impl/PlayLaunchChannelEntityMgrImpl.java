@@ -298,8 +298,6 @@ public class PlayLaunchChannelEntityMgrImpl
 
             existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(tableName);
             existingPlayLaunchChannel.setResetDeltaCalculationData(false);
-        } else {
-            existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(null);
         }
         if (StringUtils.isNotBlank(updatedChannel.getCurrentLaunchedContactUniverseTable())) {
             String tableName = retrieveLaunchUniverseTable(updatedChannel.getCurrentLaunchedContactUniverseTable(),
@@ -307,8 +305,6 @@ public class PlayLaunchChannelEntityMgrImpl
 
             existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(tableName);
             existingPlayLaunchChannel.setResetDeltaCalculationData(false);
-        } else {
-            existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(null);
         }
 
         existingPlayLaunchChannel.setUpdatedBy(updatedChannel.getUpdatedBy());
@@ -342,6 +338,29 @@ public class PlayLaunchChannelEntityMgrImpl
             Hibernate.initialize(c.getPlay());
         });
         return channels;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public PlayLaunchChannel recoverLaunchUniverse(
+            PlayLaunchChannel retrievedChannel,
+            PlayLaunchChannel updatedChannel) {
+        String previousContactUniverse = updatedChannel.getPreviousLaunchedContactUniverseTable();
+        String previousAccountUniverse = updatedChannel.getPreviousLaunchedAccountUniverseTable();
+
+        if (previousContactUniverse != null) {
+            previousContactUniverse = retrieveLaunchUniverseTable(previousContactUniverse, updatedChannel.getId());
+        }
+
+        if (previousAccountUniverse != null) {
+            previousAccountUniverse = retrieveLaunchUniverseTable(previousAccountUniverse, updatedChannel.getId());
+        }
+
+        retrievedChannel.setCurrentLaunchedContactUniverseTable(previousContactUniverse);
+        retrievedChannel.setCurrentLaunchedAccountUniverseTable(previousAccountUniverse);
+
+        playLaunchChannelDao.update(retrievedChannel);
+        return retrievedChannel;
     }
 
     private boolean validateAlwaysOnExpiration(PlayLaunchChannel channel) {
@@ -381,7 +400,7 @@ public class PlayLaunchChannelEntityMgrImpl
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "Failed to update channel: "
                             + channelId
-                            + " since no previous contact universe table found by Id: "
+                            + " since no table found by Id: "
                             + tableName });
         }
         return table.getName();

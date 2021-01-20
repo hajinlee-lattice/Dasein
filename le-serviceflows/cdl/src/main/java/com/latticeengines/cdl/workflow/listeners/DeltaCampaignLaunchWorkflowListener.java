@@ -126,9 +126,7 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
         log.info("PlayLaunchChannel CurrentAccountUniverse before recovery: " + channel.getCurrentLaunchedAccountUniverseTable());
         log.info("PlayLaunchChannel CurrentContactUniverse before recovery: " + channel.getCurrentLaunchedContactUniverseTable());
 
-        channel.setCurrentLaunchedAccountUniverseTable(channel.getPreviousLaunchedAccountUniverseTable());
-        channel.setCurrentLaunchedContactUniverseTable(channel.getPreviousLaunchedContactUniverseTable());
-        playProxy.updatePlayLaunchChannel(customerSpace, playName, channelId, channel, false);
+        channel = playProxy.recoverPlayLaunchChannelLaunchUniverse(customerSpace, playName, channelId, channel);
 
         log.info("PlayLaunchChannel CurrentAccountUniverse after recovery: " + channel.getCurrentLaunchedAccountUniverseTable());
         log.info("PlayLaunchChannel CurrentContactUniverse after recovery: " + channel.getCurrentLaunchedContactUniverseTable());
