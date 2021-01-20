@@ -44,31 +44,31 @@ public class PublishToElasticSearch extends BaseWorkflowStep<PublishToElasticSea
     @Inject
     private RestHighLevelClient client;
 
-    @Value("${cdl.elasticsearch.shards}")
+    @Value("${elasticsearch.shards}")
     private int esShards;
 
-    @Value("${cdl.elasticsearch.replicas}")
+    @Value("${elasticsearch.replicas}")
     private int esReplicas;
 
-    @Value("${cdl.elasticsearch.refreshinterval}")
+    @Value("${elasticsearch.refreshinterval}")
     private String esRefreshInterval;
 
-    @Value("${cdl.elasticsearch.dynamic}")
+    @Value("${elasticsearch.dynamic}")
     private boolean esDynamic;
 
-    @Value("${cdl.elasticsearch.http.scheme}")
+    @Value("${elasticsearch.http.scheme}")
     private String esHttpScheme;
 
-    @Value("${cdl.elasticsearch.host}")
+    @Value("${elasticsearch.host}")
     private String esHost;
 
-    @Value("${cdl.elasticsearch.ports}")
+    @Value("${elasticsearch.ports}")
     private String esPorts;
 
-    @Value("${cdl.elasticsearch.user}")
+    @Value("${elasticsearch.user}")
     private String user;
 
-    @Value("${cdl.elasticsearch.pwd.encrypted}")
+    @Value("${elasticsearch.pwd.encrypted}")
     private String password;
 
     @Override
