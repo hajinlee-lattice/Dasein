@@ -1,10 +1,15 @@
 package com.latticeengines.apps.core.mds.impl;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.mds.AMMetadataStore;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -20,6 +25,9 @@ public class AMMetadataStoreImpl implements AMMetadataStore {
 
     private final ColumnMetadataProxy columnMetadataProxy;
     private static final Scheduler scheduler = Schedulers.newParallel("am-metadata");
+
+    @Inject
+    private BatonService batonService;
 
     @Inject
     public AMMetadataStoreImpl(ColumnMetadataProxy columnMetadataProxy) {
@@ -42,7 +50,16 @@ public class AMMetadataStoreImpl implements AMMetadataStore {
     }
 
     private Flux<ColumnMetadata> getRawFlux(String dcVersion) {
-        return Mono.fromCallable(() -> columnMetadataProxy.getAllColumns(dcVersion)).flatMapMany(Flux::fromIterable);
+        String tenantId = MultiTenantContext.getShortTenantId();
+        Set<String> expiredLicenses = batonService.getExpiredLicenses(tenantId);
+        if (expiredLicenses.isEmpty()) {
+            return Mono.fromCallable(() -> columnMetadataProxy.getAllColumns(dcVersion)).flatMapMany(Flux::fromIterable);
+        } else {
+            return Mono.fromCallable(() -> {
+                return columnMetadataProxy.getAllColumns(dcVersion).stream()
+                        .filter(cm -> !expiredLicenses.contains(cm.getDataLicense())).collect(Collectors.toList());
+            }).flatMapMany(Flux::fromIterable);
+        }
     }
 
 }
