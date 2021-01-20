@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit
 import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition
 import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.{MergeUtils, TransactionUtils}
+import com.latticeengines.spark.util.{MergeUtils, TransactionSparkUtils}
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -25,10 +25,10 @@ class BuildPeriodTransactionJob extends AbstractSparkJob[TransformTxnStreamConfi
       val periodName = partition._1
       val streams: Seq[DataFrame] = periodStreams.subList(partition._2.getStartIdx, partition._2.getStartIdx + partition._2.getLabels.size)
       val typeMerged: DataFrame = streams.reduce(MergeUtils.concat2)
-      TransactionUtils.renameFieldsAndAddPeriodName(typeMerged, renameMapping, periodName)
+      TransactionSparkUtils.renameFieldsAndAddPeriodName(typeMerged, renameMapping, periodName)
     }).reduce(MergeUtils.concat2)
 
-    val withCompositeKey: DataFrame = merged.withColumn(InterfaceName.__Composite_Key__.name, TransactionUtils.generateCompKey(compositeSrc))
+    val withCompositeKey: DataFrame = merged.withColumn(InterfaceName.__Composite_Key__.name, TransactionSparkUtils.generateCompKey(compositeSrc))
     val cleaned: DataFrame = withCompositeKey.select(targetCols.head, targetCols.tail: _*)
 
     val result: DataFrame = {

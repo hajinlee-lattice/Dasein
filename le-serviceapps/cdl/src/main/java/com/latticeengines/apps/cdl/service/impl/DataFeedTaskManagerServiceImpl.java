@@ -57,6 +57,7 @@ import com.latticeengines.domain.exposed.cdl.ImportTemplateDiagnostic;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
+import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -443,6 +444,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFilePath(backupPath);
         prepareImportConfig.setEmailInfo(emailInfo);
+        boolean enableImportEraseByNull = batonService.isEnabled(customerSpace,
+                LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL);
+        importConfig.setProperty(ImportProperty.ENABLE_ERASE_BY_NULL, String.valueOf(enableImportEraseByNull));
 
         try {
             checkImportWithWrongTemplate(customerSpace.toString(), dataFeedTask);

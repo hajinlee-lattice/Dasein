@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.handler;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -47,8 +49,20 @@ public class DestinationAccountCreationWorkflowStatusHandler implements Workflow
                         + "is not returning the playLaunch.");
                 return statusMonitor;
             }
-            playLaunch.setDestinationOrgId(eventDetail.getAccountId());
-            playLaunchService.update(playLaunch);
+
+            List<PlayLaunch> playLaunches = playLaunchService.findByDestinationOrgId(playLaunch.getDestinationOrgId());
+            if (playLaunches == null || playLaunches.size() == 0) {
+                log.error(
+                        "DataIntegrationStatusMonitor NOT updated: Dest Org ID "
+                                + playLaunch.getDestinationOrgId()
+                        + "is not returning the playLaunches.");
+                return statusMonitor;
+            }
+
+            for (PlayLaunch curPlayLaunch : playLaunches) {
+                curPlayLaunch.setDestinationOrgId(eventDetail.getAccountId());
+                playLaunchService.update(curPlayLaunch);
+            }
 
             PlayLaunchChannel playLaunchChannel = playLaunch.getPlayLaunchChannel();
             LookupIdMap lookupIdMap = playLaunchChannel.getLookupIdMap();

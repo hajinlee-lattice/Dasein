@@ -10,6 +10,7 @@ import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.CampaignLaunchSchedulingService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
 import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
+import com.latticeengines.apps.cdl.service.MockBrokerJobService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.service.impl.CDLQuartzJobCallable;
@@ -42,6 +43,9 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
     @Inject
     private TrayTestTimeoutService trayTestTimeoutService;
 
+    @Inject
+    private MockBrokerJobService mockBrokerInstanceJobService;
+
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         CDLQuartzJobCallable.Builder builder = new CDLQuartzJobCallable.Builder();
@@ -50,7 +54,7 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
                 .redshiftCleanupService(redShiftCleanupService).s3ImportService(s3ImportService)
                 .entityStateCorrectionService(entityStateCorrectionService)
                 .campaignLaunchSchedulingService(campaignLaunchSchedulingService).jobArguments(jobArguments)
-                .trayTestTimeoutService(trayTestTimeoutService);
+                .trayTestTimeoutService(trayTestTimeoutService).mockBrokerInstanceJobService(mockBrokerInstanceJobService);
         return new CDLQuartzJobCallable(builder);
     }
 

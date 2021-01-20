@@ -22,6 +22,8 @@ public interface PlayLaunchService {
 
     List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> launchStates);
 
+    List<PlayLaunch> findByDestinationOrgId(String destinationOrgId);
+
     PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> launchStates);
 
     PlayLaunch findLatestByPlayAndSysOrg(Long playId, String orgId);

@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.latticeengines.app.exposed.download.TemplateFileHttpDownloader;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -70,7 +71,6 @@ import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
-import com.latticeengines.pls.download.TemplateFileHttpDownloader;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.SystemStatusService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
@@ -431,7 +431,20 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         try {
-            cdlService.createS3ImportSystem(customerSpace.toString(), systemDisplayName, systemType, primary);
+            String systemName = cdlService.createS3ImportSystem(customerSpace.toString(), systemDisplayName, systemType,
+                    primary);
+            switch (systemType) {
+                case Salesforce:
+                    cdlService.createDefaultOpportunityTemplate(customerSpace.toString(), systemName);
+                    break;
+                case Marketo:
+                case Eloqua:
+                case Pardot:
+                    cdlService.createDefaultMarketingTemplate(customerSpace.toString(), systemName, systemType.toString());
+                    break;
+                default:
+                    break;
+            }
             UIAction uiAction = UIActionUtils.generateUIAction("", View.Banner, Status.Success,
                     String.format(createS3ImportSystemMsg, systemDisplayName));
             return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
@@ -728,36 +741,9 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         try {
-            DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, source, templateDisplay);
-            boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
-            EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
-            Table standardTable;
-            BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
-            if (entityType != null && templateDisplay.getS3ImportSystem() != null) {
-                standardTable = SchemaRepository.instance().getSchema(templateDisplay.getS3ImportSystem().getSystemType(),
-                        entityType, enableEntityMatch, batonService.onlyEntityMatchGAEnabled(customerSpace));
-            } else {
-                standardTable = SchemaRepository.instance().getSchema(
-                        entity, true, false, enableEntityMatch,
-                        batonService.onlyEntityMatchGAEnabled(customerSpace));
-            }
-            Table templateTable = dataFeedTask.getImportTemplate();
-            //map display name then get file content
-            Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entityType);
-            Map<String, String> standardNameMapping =
-                    standardTable.getAttributes()
-                            .stream()
-                            .collect(Collectors.toMap(Attribute::getName, Attribute::getDisplayName));
-            List<S3ImportSystem> systemList = cdlService.getAllS3ImportSystem(customerSpace.toString());
-            Set<String> matchingNames = SchemaRepository.instance().matchingAttributes(entity, enableEntityMatch)
-                    .stream().map(Attribute::getName).collect(Collectors.toSet());
-            Set<String> systemIds =
-                    updateUniqueAndMatchIdField(cdlService.getTemplatePreview(customerSpace.toString(), templateTable
-                            , standardTable, matchingNames), systemList, entityType, templateDisplay.getS3ImportSystem());
-            templateTable.getAttributes().forEach(attribute -> attribute.setSourceAttrName(attribute.getSourceAttrName() == null ? attribute.getDisplayName() : attribute.getSourceAttrName()));
-            updateTableDisplayName(templateTable, nameMapping, standardNameMapping, systemIds);
-            updateTableDisplayName(standardTable, nameMapping, standardNameMapping, systemIds);
-            String fileContent = cdlService.getTemplateMappingContent(templateTable, standardTable);
+            // get template preview, then render the csv
+            List<TemplateFieldPreview> previews = getTemplatePreview(source, templateDisplay);
+            String fileContent = cdlService.getTemplateMappingContent(previews);
             DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
             String dateString = dateFormat.format(new Date());
             // generate file name with feed type and date
@@ -770,18 +756,6 @@ public class CDLResource {
             log.error("Download template csv Failed: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
         }
-    }
-
-    private void updateTableDisplayName(Table table, Map<String, String> nameMapping, Map<String, String> standardNameMapping, Set<String> systemIds) {
-        table.getAttributes().forEach(attribute -> {
-            if (nameMapping.containsKey(attribute.getName())) {
-                attribute.setDisplayName(nameMapping.get(attribute.getName()));
-            } else if (standardNameMapping.containsKey(attribute.getName())) {
-                attribute.setDisplayName(standardNameMapping.get(attribute.getName()));
-            } else if (!systemIds.contains(attribute.getName())) {
-                attribute.setDisplayName(attribute.getSourceAttrName() == null ? attribute.getDisplayName() : attribute.getSourceAttrName());
-            }
-        });
     }
 
     @PostMapping("/s3import/template/create/webvisit")

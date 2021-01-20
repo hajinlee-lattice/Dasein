@@ -118,6 +118,29 @@
         }
       ]
     },
+    {
+      "Node": "OutreachTaskSettings",
+      "Children": [
+        {
+          "Node": "OwnerPriority",
+          "Data": {
+            "Type": "options",
+            "Required": false,
+            "Options": [
+              "Lattice",
+              "Outreach"
+            ]
+          }
+        },
+        {
+          "Node": "DefaultOwner",
+          "Data": {
+            "Type": "string",
+            "Required": false
+          }
+        }
+      ]
+    },
     { "Node": "ContactAccountRatioThreshold", "Data": {"Type": "number", "Required": false}}
   ]
 }

@@ -91,8 +91,8 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
-import com.latticeengines.domain.exposed.util.OpportunityUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -110,7 +110,6 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     private static final String ACCOUNT_FIELD_NAME = "AccountId";
     private static final List<String> CONTACT_FIELD_NAME = Arrays.asList("ContactId", "leadId", "LeadId", "prospect_id");
     private static final String DEFAULTSYSTEM = "DefaultSystem";
-    private static final String STREAM_NAME_FORMAT = "%s_%s";
 
     @Inject
     private S3ImportSystemService s3ImportSystemService;
@@ -420,7 +419,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask stageDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
         log.info("Stage dataFeedTask UniqueId is {}.", stageDataFeedTask.getUniqueId());
-        String opportunityAtlasStreamName = OpportunityUtils.getStreamName(systemName);
+        String opportunityAtlasStreamName = ActivityStoreUtils.getStreamName(systemName, EntityType.Opportunity);
         createOpportunityMetadata(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
         return true;
     }
@@ -440,7 +439,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask stageDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
         log.info("Stage dataFeedTask UniqueId is {}.", stageDataFeedTask.getUniqueId());
-        String opportunityAtlasStreamName = OpportunityUtils.getStreamName(systemName);
+        String opportunityAtlasStreamName = ActivityStoreUtils.getStreamName(systemName, entityType);
         createOpportunityMetadata(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
         return true;
     }
@@ -454,7 +453,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask marketingTypeDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
                 EntityType.MarketingActivityType, null);
         log.info("MarketingType dataFeedTask UniqueId is {}.", marketingTypeDataFeedTask.getUniqueId());
-        String marketingAtlasStreamName = String.format(STREAM_NAME_FORMAT, systemName, EntityType.MarketingActivity);
+        String marketingAtlasStreamName = ActivityStoreUtils.getStreamName(systemName, EntityType.MarketingActivity);
         createMarketingMetadata(customerSpace, marketingAtlasStreamName, marketingDataFeedTask, marketingTypeDataFeedTask);
         return true;
     }
@@ -473,7 +472,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask marketingTypeDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
                 EntityType.MarketingActivityType, null);
         log.info("MarketingType dataFeedTask UniqueId is {}.", marketingTypeDataFeedTask.getUniqueId());
-        String marketingAtlasStreamName = String.format(STREAM_NAME_FORMAT, systemName, EntityType.MarketingActivity);
+        String marketingAtlasStreamName = ActivityStoreUtils.getStreamName(systemName, EntityType.MarketingActivity);
         createMarketingMetadata(customerSpace, marketingAtlasStreamName, marketingDataFeedTask, marketingTypeDataFeedTask);
         return true;
     }
@@ -488,7 +487,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask intentDataTask = createDnbIntentDataTemplateOnly(customerSpace, importSystem.getName(),
                 entityType, null);
         log.info("DnbIntentData dataFeedTask unique Id is {}.", intentDataTask.getUniqueId());
-        String streamName = String.format(STREAM_NAME_FORMAT, importSystem.getName(), entityType);
+        String streamName = ActivityStoreUtils.getStreamName(importSystem.getName(), entityType);
         createDnbIntentMetadata(customerSpace, streamName, intentDataTask);
         return true;
     }
@@ -507,7 +506,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask intentDataTask = createDnbIntentDataTemplateOnly(customerSpace, importSystem.getName(),
                 entityType, simpleTemplateMetadata);
         log.info("DnbIntentData dataFeedTask unique Id is {}.", intentDataTask.getUniqueId());
-        String streamName = String.format(STREAM_NAME_FORMAT, importSystem.getName(), entityType);
+        String streamName = ActivityStoreUtils.getStreamName(importSystem.getName(), entityType);
         createDnbIntentMetadata(customerSpace, streamName, intentDataTask);
         return true;
     }

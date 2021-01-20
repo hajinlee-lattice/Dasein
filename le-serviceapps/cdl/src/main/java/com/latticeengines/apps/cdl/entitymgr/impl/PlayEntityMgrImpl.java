@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
@@ -134,8 +135,10 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
             if (segment.getListSegment() != null) {
                 play.setTapType(Play.TapType.ListSegment);
                 play.setTapId(segmentName);
-                play.setAccountTemplateId(listSegment.getDataTemplates().get(BusinessEntity.Account.name()));
-                play.setContactTemplateId(listSegment.getDataTemplates().get(BusinessEntity.Contact.name()));
+                if (MapUtils.isNotEmpty(listSegment.getDataTemplates())) {
+                    play.setAccountTemplateId(listSegment.getDataTemplates().get(BusinessEntity.Account.name()));
+                    play.setContactTemplateId(listSegment.getDataTemplates().get(BusinessEntity.Contact.name()));
+                }
             }
         }
         if (play.getName() == null) {

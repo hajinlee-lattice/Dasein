@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataService;
+import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -23,6 +24,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
+import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.Play.TapType;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -42,6 +45,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
     @Inject
     private ServingStoreService servingStoreService;
+
+    @Inject
+    private SegmentService segmentService;
 
     private static Map<CDLExternalSystemName, ExportFieldMetadataService> registry = new HashMap<>();
 
@@ -101,11 +107,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
      */
     protected List<ColumnMetadata> enrichExportFieldMappings(CDLExternalSystemName systemName, List<String> fieldNames,
                                                              Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
-
         List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMap(systemName);
         Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = new HashMap<>();
-
         fieldNames.forEach(fieldName -> {
             ExportFieldMetadataDefaults defaultField = defaultFieldsMetadataMap.get(fieldName);
             if (defaultField == null) {
@@ -127,12 +131,12 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
         Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
                 channel);
-
+        Play play = channel.getPlay();
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
-                Collections.singletonList(BusinessEntity.Account));
+                Collections.singletonList(BusinessEntity.Account), play);
 
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
-                Collections.singletonList(BusinessEntity.Contact));
+                Collections.singletonList(BusinessEntity.Contact), play);
 
         return enrichDefaultFieldsMetadata(systemName, accountAttributesMap, contactAttributesMap,
                 defaultFieldsAttrToServingStoreAttrRemap, audienceType);
@@ -144,9 +148,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
             Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
             Map<String, String> defaultFieldsAttrToServingStoreAttrRemap) {
-
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMap(systemName);
-
         return combineAttributeMapsWithDefaultFields(accountAttributesMap, contactAttributesMap,
                 defaultFieldsMetadataMap, defaultFieldsAttrToServingStoreAttrRemap);
     }
@@ -158,29 +160,21 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
             Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
             Map<String, String> defaultFieldsAttrToServingStoreAttrRemap, AudienceType audienceType) {
-
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMapForAudienceType(
                 systemName, audienceType);
-
         return combineAttributeMapsWithDefaultFields(accountAttributesMap, contactAttributesMap,
                 defaultFieldsMetadataMap, defaultFieldsAttrToServingStoreAttrRemap);
     }
 
-    protected List<ColumnMetadata> combineAttributeMapsWithDefaultFields(
-            Map<String, ColumnMetadata> accountAttributesMap,
-            Map<String, ColumnMetadata> contactAttributesMap,
-            Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap,
+    protected List<ColumnMetadata> combineAttributeMapsWithDefaultFields(Map<String, ColumnMetadata> accountAttributesMap,
+            Map<String, ColumnMetadata> contactAttributesMap, Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap,
             Map<String, String> defaultFieldsAttrToServingStoreAttrRemap) {
-
         List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
-
         defaultFieldsMetadataMap.values().forEach(defaultField -> {
             ColumnMetadata cm = getColumnMetadata(defaultField, accountAttributesMap, contactAttributesMap,
                     defaultFieldsAttrToServingStoreAttrRemap);
-
             exportColumnMetadataList.add(cm);
         });
-
         return exportColumnMetadataList;
     }
 
@@ -189,9 +183,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
      * ServingStore.attributeName)
      */
     protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(PlayLaunchChannel channel) {
-        Map<String, String> remappingMap = new HashMap<>();
-
-        return remappingMap;
+        return Collections.emptyMap();
     }
 
     protected ColumnMetadata getColumnMetadata(ExportFieldMetadataDefaults defaultField, Map<String, ColumnMetadata> accountAttributesMap,
@@ -205,9 +197,10 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
                 attrName = defaultFieldsAttrToServingStoreAttrRemap.get(defaultField.getAttrName());
             }
             if (accountAttributesMap.containsKey(attrName)) {
-                cm = accountAttributesMap.get(attrName);
-                cm.setDisplayName(defaultField.getDisplayName());
+                cm = retrieveServingStoreColumnMetadata(defaultField, attrName, accountAttributesMap);
                 accountAttributesMap.remove(attrName);
+            } else if (defaultField.getForcePopulateIfExportEnabled()) {
+                cm = constructForcePopulateColumnMetadata(defaultField);
             }
         } else if (defaultField.getStandardField() && defaultField.getEntity() == BusinessEntity.Contact) {
             if (defaultFieldsAttrToServingStoreAttrRemap.containsKey(defaultField.getAttrName())) {
@@ -215,17 +208,13 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             }
 
             if (contactAttributesMap.containsKey(attrName)) {
-                cm = contactAttributesMap.get(attrName);
-                cm.setDisplayName(defaultField.getDisplayName());
+                cm = retrieveServingStoreColumnMetadata(defaultField, attrName, contactAttributesMap);
                 contactAttributesMap.remove(attrName);
+            } else if (defaultField.getForcePopulateIfExportEnabled()) {
+                cm = constructForcePopulateColumnMetadata(defaultField);
             }
         }
-
         return cm;
-    }
-
-    protected Flux<ColumnMetadata> getServingMetadata(String customerSpace, List<BusinessEntity> entities) {
-        return getServingMetadata(customerSpace, entities, null);
     }
 
     protected Flux<ColumnMetadata> getServingMetadata(String customerSpace, List<BusinessEntity> entities, String attributeSetName) {
@@ -242,22 +231,37 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         return cms;
     }
 
-    protected Map<String, ColumnMetadata> getServingMetadataMap(String customerSpace, List<BusinessEntity> entities) {
-        return getServingMetadata(customerSpace, entities)
-                .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
-                .block();
+    protected Map<String, ColumnMetadata> getServingMetadataMap(String customerSpace, List<BusinessEntity> entities, Play play) {
+        return getServingMetadataMap(customerSpace, entities, null, play);
     }
 
-    protected Map<String, ColumnMetadata> getServingMetadataMap(String customerSpace, List<BusinessEntity> entities, String attributeSetName) {
-        return getServingMetadata(customerSpace, entities, attributeSetName)
-                .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
-                .block();
+    protected Map<String, ColumnMetadata> getServingMetadataMap(String customerSpace, List<BusinessEntity> entities, String attributeSetName, Play play) {
+        if (TapType.ListSegment.equals(play.getTapType())) {
+            return segmentService.getListSegmentMetadataMap(play.getTapId(), entities);
+        } else {
+            return getServingMetadata(customerSpace, entities, attributeSetName)
+                    .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm)).block();
+        }
     }
 
     protected ColumnMetadata constructCampaignDerivedColumnMetadata(ExportFieldMetadataDefaults defaultExportField) {
         ColumnMetadata cm = new ColumnMetadata(defaultExportField.getAttrName(), defaultExportField.getJavaClass());
         cm.setDisplayName(defaultExportField.getDisplayName());
         cm.setIsCampaignDerivedField(true);
+        cm.setEntity(defaultExportField.getEntity());
+        return cm;
+    }
+
+    protected ColumnMetadata retrieveServingStoreColumnMetadata(ExportFieldMetadataDefaults defaultExportField,
+            String attrNameForLookup, Map<String, ColumnMetadata> servingStoreEntityMap) {
+        ColumnMetadata cm = servingStoreEntityMap.get(attrNameForLookup);
+        cm.setDisplayName(defaultExportField.getDisplayName());
+        return cm;
+    }
+
+    protected ColumnMetadata constructForcePopulateColumnMetadata(ExportFieldMetadataDefaults defaultExportField) {
+        ColumnMetadata cm = new ColumnMetadata(defaultExportField.getAttrName(), defaultExportField.getJavaClass());
+        cm.setDisplayName(defaultExportField.getDisplayName());
         cm.setEntity(defaultExportField.getEntity());
         return cm;
     }

@@ -59,6 +59,7 @@ import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -327,7 +328,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     /*-
      * table names in current active version for stream
      */
-    private Map<String, String> getActiveActivityStreamTables(@NotNull String customerSpace,
+    private Map<String, String>  getActiveActivityStreamTables(@NotNull String customerSpace,
             List<AtlasStream> streams) {
         return getActiveTables(customerSpace, ActivityStream, streams, AtlasStream::getStreamId,
                 ConsolidatedActivityStream);
@@ -832,6 +833,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .setConvertServiceConfig(needConvertBatchStoreMap)
                 .activeTimelineList(timeLineList)
                 .templateToSystemTypeMap(templateToSystemTypeMap)
+                .isSSVITenant(judgeTenantType(tenant.getId(), LatticeModule.SSVI))
+                .isCDLTenant(judgeTenantType(tenant.getId(), LatticeModule.CDL))
                 .build();
     }
 
@@ -1297,5 +1300,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             }
         });
         return entitySet;
+    }
+
+    private boolean judgeTenantType(@NotNull String tenantId, LatticeModule latticeModule) {
+        try {
+            return batonService.hasModule(CustomerSpace.parse(tenantId), latticeModule);
+        } catch (Exception e) {
+            log.error("Failed to verify whether {} is a {}} tenant. error = {}", tenantId, latticeModule, e);
+            return false;
+        }
     }
 }

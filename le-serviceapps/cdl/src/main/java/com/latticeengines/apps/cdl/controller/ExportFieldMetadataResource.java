@@ -32,8 +32,8 @@ public class ExportFieldMetadataResource {
     @ResponseBody
     @ApiOperation(value = "Get export field metadata")
     public List<ColumnMetadata> getExportFieldMetadata(@PathVariable String customerSpace,
-            @RequestParam(value = "channelId", required = true) String playChannelId) {
-        PlayLaunchChannel channel = playLaunchChannelService.findById(playChannelId);
+            @RequestParam(value = "channelId") String playChannelId) {
+        PlayLaunchChannel channel = playLaunchChannelService.findChannelAndPlayById(playChannelId);
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
                 .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
         return fieldMetadataService.getExportEnabledFields(customerSpace, channel);

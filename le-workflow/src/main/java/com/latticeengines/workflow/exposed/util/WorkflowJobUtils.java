@@ -64,6 +64,16 @@ public final class WorkflowJobUtils {
     private static final String CONTACT_ACCOUNT_RATIO_THRESHOLD = "ContactAccountRatioThreshold";
     private static final Long DEFAULT_CONTACT_ACCOUNT_RATIO_THRESHOLD = 100000L;
     private static final String CDL = "CDL";
+    private static final String CONTACTS_PER_ACCOUNT_SORT = "/ContactsPerAccountSort";
+    private static final String ATTRIBUTE = "/Attribute";
+    private static final String DIRECTION = "/Direction";
+    private static final String CDL_UPDATED_TIME = "CDLUpdatedTime";
+    private static final String DESC = "DESC";
+    private static final String LATTICE = "Lattice";
+    private static final String OUTREACH_TASK_SETTINGS = "/OutreachTaskSettings";
+    private static final String OWNER_PRIORITY = "/OwnerPriority";
+    private static final String DEFAULT_OWNER = "/DefaultOwner";
+
     private static ObjectMapper om = new ObjectMapper();
 
     private static Date getMigrateThreshold() {
@@ -344,7 +354,7 @@ public final class WorkflowJobUtils {
     public static Long getContactAccountRatioThresholdFromZK(CustomerSpace customerSpace) {
         Long contactAccountRatioThreshold = DEFAULT_CONTACT_ACCOUNT_RATIO_THRESHOLD;
         try {
-            String contactAccountRatioThresholdStr = getValueFromZK(customerSpace, PathConstants.CDL, WORKFLOW_JOB_QUOTA_LIMIT);
+            String contactAccountRatioThresholdStr = getValueFromZK(customerSpace, PathConstants.CDL, CONTACT_ACCOUNT_RATIO_THRESHOLD);
             if (StringUtils.isNotEmpty(contactAccountRatioThresholdStr)) {
                 contactAccountRatioThreshold = Long.valueOf(contactAccountRatioThresholdStr);
             }
@@ -352,5 +362,35 @@ public final class WorkflowJobUtils {
             log.warn("Failed to get count of workflow job quota limit from ZK for " + customerSpace.getTenantId(), e);
         }
         return contactAccountRatioThreshold;
+    }
+
+    public static List<String> getSortConfigFromZK(CustomerSpace customerSpace) {
+        List<String> sortConfig = new ArrayList<>();
+        String sortAttr = CDL_UPDATED_TIME;
+        String sortDir = DESC;
+        try {
+            sortAttr = getValueFromZK(customerSpace, CDL, CONTACTS_PER_ACCOUNT_SORT + ATTRIBUTE);
+            sortDir = getValueFromZK(customerSpace, CDL, CONTACTS_PER_ACCOUNT_SORT + DIRECTION);
+        } catch (Exception e) {
+            log.warn("Tenant sort config found but unable to read: ", e);
+        }
+        sortConfig.add(sortAttr);
+        sortConfig.add(sortDir);
+        return sortConfig;
+    }
+
+    public static List<String> getOutreachTaskSettingsFromZK(CustomerSpace customerSpace) {
+        List<String> taskSettings = new ArrayList<>();
+        String ownerPriority = LATTICE;
+        String defaultOwner = "";
+        try {
+            ownerPriority = getValueFromZK(customerSpace, CDL, OUTREACH_TASK_SETTINGS + OWNER_PRIORITY);
+            defaultOwner = getValueFromZK(customerSpace, CDL, OUTREACH_TASK_SETTINGS + DEFAULT_OWNER);
+        } catch (Exception e) {
+            log.warn("Tenant Outreach Task Settings found but unable to read: ", e);
+        }
+        taskSettings.add(ownerPriority);
+        taskSettings.add(defaultOwner);
+        return taskSettings;
     }
 }

@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -211,21 +213,31 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @Override
     public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
             String signature) {
+        return getDimensionMetadata(customerSpace, signature, true);
+    }
+
+    @Override
+    public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
+                                                                            String signature, boolean withStreamName) {
         if (StringUtils.isBlank(signature)) {
             signature = getDimensionMetadataSignature(MultiTenantContext.getShortTenantId());
             if (StringUtils.isBlank(signature)) {
                 return Collections.emptyMap();
             }
         }
-        Map<String, String> streamNameMap = getStreamNameMap(customerSpace);
+        if (withStreamName) {
+            Map<String, String> streamNameMap = getStreamNameMap(customerSpace);
 
-        Map<String, Map<String, DimensionMetadata>> metadata = dimensionMetadataService.getMetadata(signature);
+            Map<String, Map<String, DimensionMetadata>> metadata = dimensionMetadataService.getMetadata(signature);
 
-        // from streamId to streamName as key
-        return metadata.entrySet().stream() //
-                .filter(entry -> streamNameMap.containsKey(entry.getKey())) //
-                .map(entry -> Pair.of(streamNameMap.get(entry.getKey()), entry.getValue())) //
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            // from streamId to streamName as key
+            return metadata.entrySet().stream() //
+                    .filter(entry -> streamNameMap.containsKey(entry.getKey())) //
+                    .map(entry -> Pair.of(streamNameMap.get(entry.getKey()), entry.getValue())) //
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        } else {
+            return dimensionMetadataService.getMetadata(signature);
+        }
     }
 
     @Override
@@ -277,6 +289,22 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         }
         return streams.stream()
                 .collect(Collectors.toMap(AtlasStream::getStreamId, AtlasStream::getName, (v1, v2) -> v1));
+    }
+
+    @Override
+    @WithCustomerSpace
+    public Map<AtlasStream.StreamType, List<String>> getStreamTypeToStreamNamesMap(String customerSpace) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        Map<AtlasStream.StreamType, List<String>> map = new HashMap<>();
+        Arrays.stream(AtlasStream.StreamType.values()).forEach(type -> {
+          List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(tenant, type);
+          if (CollectionUtils.isNotEmpty(streams)) {
+              map.put(type, streams.stream().map(AtlasStream::getName).collect(Collectors.toList()));
+          } else {
+              map.put(type, Collections.emptyList());
+          }
+        });
+        return map;
     }
 
     private String getStreamId(@NotNull String streamName) {

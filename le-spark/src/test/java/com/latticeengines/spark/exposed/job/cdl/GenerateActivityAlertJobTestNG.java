@@ -76,8 +76,8 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
 
         ActivityAlertJobConfig config = new ActivityAlertJobConfig();
         Arrays.asList( //
-                Alert.INC_WEB_ACTIVITY, Alert.ANONYMOUS_WEB_VISITS, Alert.RE_ENGAGED_ACTIVITY, //
-                Alert.HIGH_ENGAGEMENT_IN_ACCOUNT, Alert.KNOWN_WEB_VISITS, //
+                Alert.INC_WEB_ACTIVITY, Alert.ANONYMOUS_WEB_VISITS, //
+                Alert.RE_ENGAGED_ACTIVITY, Alert.HIGH_ENGAGEMENT_IN_ACCOUNT, //
                 Alert.ACTIVE_CONTACT_WEB_VISITS, Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES, //
                 Alert.RESEARCHING_INTENT_AROUND_PRODUCT_PAGES)
                 .forEach(alert -> config.alertNameToQualificationPeriodDays.put(alert, 10L));
@@ -195,13 +195,17 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
                 newMARecord("a11", "c5", 0L), //
                 newMARecord("a11", "c6", 6L), //
 
-                // Known contacts with titles and no MA => Active Contacts and Web Visits, show
-                // titles as well
+                // a12 has contacts but no MA => a12 won't have Active Contacts and Web Visits
+                // alert
                 newTimelineContactRecord("a12", "c1", "Manager", WebVisit, "Page group 1",
                         "Data Management product, Business Intelligence"), //
                 newTimelineContactRecord("a12", "c2", "Software Engineer", WebVisit, "Page group 2", "AI products"), //
                 newTimelineContactRecord("a13", "c1", "QA", WebVisit, "Page group 2", "AI products"), //
-                newMARecord("a13", "c3", 2L), // => this should go to KNOWN_WEB_VISITS since there is MA
+                newTimelineContactRecord("a13", "c1", "QA", WebVisit, "Page group 3", "DB products"), //
+                newTimelineContactRecord("a13", "c2", "Product Manager", WebVisit, "Page group 4",
+                        "Marketing products"), //
+                // a13 has contacts and MA => a13 has Active Contacts and Web Visits alert
+                newMARecord("a13", "c3", 2L), //
         };
         uploadHdfsDataUnit(timelineMasterData, TIMELINE_FIELDS);
 
@@ -240,13 +244,11 @@ public class GenerateActivityAlertJobTestNG extends SparkJobFunctionalTestNGBase
 
         counts.put(Pair.of("a11", Alert.HIGH_ENGAGEMENT_IN_ACCOUNT), 1);
 
-        counts.put(Pair.of("a8", Alert.KNOWN_WEB_VISITS), 1);
-        counts.put(Pair.of("a9", Alert.KNOWN_WEB_VISITS), 1);
-        counts.put(Pair.of("a10", Alert.KNOWN_WEB_VISITS), 1);
-        counts.put(Pair.of("a11", Alert.KNOWN_WEB_VISITS), 1);
-        counts.put(Pair.of("a13", Alert.KNOWN_WEB_VISITS), 1);
-
-        counts.put(Pair.of("a12", Alert.ACTIVE_CONTACT_WEB_VISITS), 1);
+        counts.put(Pair.of("a8", Alert.ACTIVE_CONTACT_WEB_VISITS), 1);
+        counts.put(Pair.of("a9", Alert.ACTIVE_CONTACT_WEB_VISITS), 1);
+        counts.put(Pair.of("a10", Alert.ACTIVE_CONTACT_WEB_VISITS), 1);
+        counts.put(Pair.of("a11", Alert.ACTIVE_CONTACT_WEB_VISITS), 1);
+        counts.put(Pair.of("a13", Alert.ACTIVE_CONTACT_WEB_VISITS), 1);
 
         counts.put(Pair.of("a3", Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES), 1);
         counts.put(Pair.of("a5", Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES), 1);

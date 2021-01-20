@@ -3,7 +3,6 @@ package com.latticeengines.spark.exposed.job.cdl
 import java.net.URLDecoder
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-
 import com.google.common.base.CaseFormat
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
 import com.latticeengines.domain.exposed.cdl.activity.{ActivityStoreConstants, EmptyStreamException}
@@ -12,7 +11,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName._
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
-import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.{BooleanUtils, StringUtils}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -24,6 +23,8 @@ import scala.collection.JavaConverters._
  */
 class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
 
+  val partitionKey: String = StreamDateId.name()
+
   override def runJob(spark: SparkSession, lattice: LatticeContext[AppendRawStreamConfig]): Unit = {
     // prepare input/vars
     val config: AppendRawStreamConfig = lattice.config
@@ -31,7 +32,7 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
     val hasMaster = config.masterInputIdx != null
     val discardAttrs = config.discardAttrs.asScala
     // partition by dateId
-    setPartitionTargets(0, Seq(StreamDateId.name()), lattice)
+    setPartitionTargets(0, Seq(partitionKey), lattice)
 
     // calculation
     var df: DataFrame = if (hasImport) {
@@ -81,7 +82,15 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
       throw new EmptyStreamException(StringUtils.defaultIfEmpty(config.streamName, ""), config.retentionDays, config.currentEpochMilli)
     }
 
-    lattice.output = df :: Nil
+    val output = {
+      if (BooleanUtils.isNotFalse(lattice.config.repartition)) {
+        df.repartition(200, col(partitionKey))
+      } else {
+        df
+      }
+    }
+
+    lattice.output = output :: Nil
   }
 
   // hard-code parsing utm code (from google analytics) on web visit url for now

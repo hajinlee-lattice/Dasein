@@ -1,6 +1,9 @@
 package com.latticeengines.apps.lp.provision.impl;
 
 import java.io.InputStream;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +19,7 @@ import javax.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +46,8 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
+import com.latticeengines.domain.exposed.dcp.idaas.SubscriberDetails;
+import com.latticeengines.domain.exposed.dcp.vbo.VboUserSeatUsageEvent;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -60,6 +66,7 @@ import com.latticeengines.security.exposed.service.TeamService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.VboService;
 
 import io.opentracing.References;
 import io.opentracing.Scope;
@@ -88,6 +95,9 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
     @Inject
     private IDaaSService iDaaSService;
+
+    @Inject
+    private VboService vboService;
 
     @Inject
     private TeamService teamService;
@@ -225,18 +235,23 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                         + "Tenant name possibly already exists.", tenant.getId()), e);
             }
         }
+
+        SubscriberDetails iDaaSDetails = null;
+        if (tenant.getSubscriberNumber() != null)
+            iDaaSDetails = iDaaSService.getSubscriberDetails(tenant.getSubscriberNumber());
+
         // wait for replication lag
         SleepUtils.sleep(500);
-        assignAccessLevelByEmails(userName, internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId(), null);
-        assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId(), iDaaSUsers);
-        assignAccessLevelByEmails(userName, externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId(), iDaaSUsers);
-        assignAccessLevelByEmails(userName, thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId(), null);
+        assignAccessLevelByEmails(userName, internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId(), null, null);
+        assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId(), iDaaSUsers, null);
+        assignAccessLevelByEmails(userName, externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId(), iDaaSUsers, iDaaSDetails);
+        assignAccessLevelByEmails(userName, thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId(), null, iDaaSDetails);
         MultiTenantContext.setTenant(tenant);
         teamService.createDefaultTeam();
     }
 
     private void assignAccessLevelByEmails(String userName, Collection<String> emails, AccessLevel accessLevel,
-                                           String tenantId, List<IDaaSUser> iDaaSUsers) {
+                                           String tenantId, List<IDaaSUser> iDaaSUsers, SubscriberDetails details) {
         Map<String, IDaaSUser> emailToIDaaSUser = iDaaSUsers == null ? new HashMap<>() :
                 iDaaSUsers.stream().collect(Collectors.toMap(IDaaSUser::getEmailAddress, Function.identity()));
         for (String email : emails) {
@@ -267,6 +282,32 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18028,
                         String.format("Assigning Access level to %s error.", email), e);
+            }
+
+            if (accessLevel == AccessLevel.EXTERNAL_ADMIN || accessLevel == AccessLevel.THIRD_PARTY_USER) {
+                VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
+
+                Tracer tracer = GlobalTracer.get();
+                Span span = tracer.activeSpan();
+                if (span != null)
+                    usageEvent.setPOAEID(span.context().toTraceId());
+                usageEvent.setTimeStamp(ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+                usageEvent.setFeatureURI(VboUserSeatUsageEvent.FeatureURI.STCT);
+
+                if (details != null) {
+                    usageEvent.setSubscriberID(details.getSubscriberNumber());
+                    usageEvent.setSubjectCountry(details.getAddress().getCountryCode());
+                    usageEvent.setSubscriberCountry(details.getAddress().getCountryCode());
+                    usageEvent.setContractTermStartDate(details.getEffectiveDate());
+                    usageEvent.setContractTermEndDate(details.getExpirationDate());
+                }
+
+                try {
+                    vboService.sendUserUsageEvent(usageEvent);
+                } catch (Exception e) {
+                    log.error("Could not send usage report: ", e);
+                    log.error("Failed usage report stack trace: " + ExceptionUtils.getStackTrace(e));
+                }
             }
         }
     }
@@ -429,6 +470,18 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                 }
             }
         }
+
+        Map<String, String> parentCtxMap = null;
+        try {
+            String contextStr = configDir.get("/TracingContext").getDocument().getData();
+            Map<?, ?> rawMap = JsonUtils.deserialize(contextStr, Map.class);
+            parentCtxMap = JsonUtils.convertMap(rawMap, String.class, String.class);
+        } catch (Exception e) {
+            log.warn("no tracing context node exist {}.", e.getMessage());
+        }
+        Tracer tracer = GlobalTracer.get();
+        SpanContext parentCtx = TracingUtils.getSpanContext(parentCtxMap);
+
         List<IDaaSUser> retrievedUsers = OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails, tenantName);
 
         // Update IDaaS users node with email sent times; to be stored in Camille
@@ -469,17 +522,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         } catch (Exception e) {
             log.info("no node exist {}.", e.getMessage());
         }
-        Map<String, String> parentCtxMap = null;
-        try {
-            String contextStr = configDir.get("/TracingContext").getDocument().getData();
-            Map<?, ?> rawMap = JsonUtils.deserialize(contextStr, Map.class);
-            parentCtxMap = JsonUtils.convertMap(rawMap, String.class, String.class);
-        } catch (Exception e) {
-            log.warn("no tracing context node exist {}.", e.getMessage());
-        }
         long start = System.currentTimeMillis() * 1000;
-        Tracer tracer = GlobalTracer.get();
-        SpanContext parentCtx = TracingUtils.getSpanContext(parentCtxMap);
         Span provisionSpan = null;
         try (Scope scope = startProvisionSpan(parentCtx, PLSTenantId, start)) {
             provisionSpan = tracer.activeSpan();

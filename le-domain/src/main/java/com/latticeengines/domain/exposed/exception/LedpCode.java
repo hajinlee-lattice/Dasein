@@ -919,7 +919,8 @@ public enum LedpCode {
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //
     LEDP_41002("PeriodId field {0} is null for record {1}."), //
-    LEDP_41003("Fail to shutdown batch write executor properly"),
+    LEDP_41003("Fail to shutdown batch write executor properly"), //
+    LEDP_41004("Start time or schedule parameters is not valid"), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."), //
@@ -939,6 +940,9 @@ public enum LedpCode {
     LEDP_60011("Match configuration is not entitled to use company entity resolution data block!"),
     LEDP_60012("Project is not entitled to data domain {0}."),
     LEDP_60013("Project is not entitled to record type {0} in data domain {1}."),
+    LEDP_60014("Could not find Enrichment Layout with layout ID {0}."),
+    LEDP_60015("Could not create Enrichment Template {0}: {1}"),
+    LEDP_60016("Could not validate Enrichment Template: {0}"),
 
     // le-serviceflows
     LEDP_70000("No Add or Delete file"),

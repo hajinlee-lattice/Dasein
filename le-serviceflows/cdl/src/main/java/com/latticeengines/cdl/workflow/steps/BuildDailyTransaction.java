@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.TransformTxnStreamConfig;
@@ -73,8 +72,15 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
             throw new IllegalStateException("No retain types found in context");
         }
         log.info("Retaining transactions of product type: {}", retainTypes);
+        cleanupInactiveVersion();
         buildTransactionBatchStore(dailyTxnStream, retainTypes); // ConsolidatedDaily, partitioned and repartitioned by txnDayPeriod
         buildTransactionServingStore(dailyTxnStream, retainTypes); // Aggregated, no partition, repartitioned by txnDayPeriod
+    }
+
+    private void cleanupInactiveVersion() {
+        log.info("cleanup tables cloned by updateTransaction");
+        dataCollectionProxy.unlinkTables(customerSpaceStr, TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
+        dataCollectionProxy.unlinkTables(customerSpaceStr, TableRoleInCollection.AggregatedTransaction, inactive);
     }
 
     private void buildTransactionBatchStore(Map<String, Table> dailyTxnStream, List<String> retainTypes) {
@@ -157,9 +163,5 @@ public class BuildDailyTransaction extends BaseProcessAnalyzeSparkStep<ProcessTr
         map.put(quantity, totalQuantity);
         map.put(rowCount, txnCount);
         return map;
-    }
-
-    private boolean retainAllTypes(List<String> retainTypes) {
-        return retainTypes.contains(ProductType.Spending.name()) && retainTypes.contains(ProductType.Analytic.name());
     }
 }

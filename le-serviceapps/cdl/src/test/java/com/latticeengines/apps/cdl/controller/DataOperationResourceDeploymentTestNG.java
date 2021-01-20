@@ -33,7 +33,7 @@ public class DataOperationResourceDeploymentTestNG extends CDLDeploymentTestNGBa
     }
 
     @Test(groups = "deployment-app")
-    public void testCrudDataOperation() {
+    public void testCrud() {
         String tenantId = mainTestTenant.getId();
         DataDeleteOperationConfiguration configuration = new DataDeleteOperationConfiguration();
         configuration.setEntity(BusinessEntity.Account);
@@ -49,6 +49,5 @@ public class DataOperationResourceDeploymentTestNG extends CDLDeploymentTestNGBa
                     DataDeleteOperationConfiguration.DeleteType.SOFT);
             return true;
         });
-
     }
 }

@@ -38,6 +38,9 @@ public class AppendRawStreamConfig extends SparkJobConfig {
     @JsonProperty
     public Set<String> discardAttrs = new HashSet<>();
 
+    @JsonProperty
+    public Boolean repartition;
+
     @Override
     public String getName() {
         return NAME;

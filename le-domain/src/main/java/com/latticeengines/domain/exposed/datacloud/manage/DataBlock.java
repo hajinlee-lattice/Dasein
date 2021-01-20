@@ -64,7 +64,7 @@ public class DataBlock {
             .put(Id.salesmarketinginsight, "Sales and Marketing Insights") //
             .put(Id.thirdpartyriskinsight, "Third-Party Risk Insights") //
             .put(Id.businessactivityinsight, "Business Activity Insights") //
-            .put(Id.derivedtradeinsight, "Derived Trade Insights") //  In the spreadsheet, in LDC_ManageDB.DataBlockElement, and IDaaS API this is abbreviated dtri
+            .put(Id.derivedtradeinsight, "Derived Trade Insights") //  In the spreadsheet, LDC_ManageDB.DataBlockElement, and IDaaS API this is abbreviated dtri
             .put(Id.externaldisruptioninsight, "External Disruption Insights") //
             .put(Id.inquiryinsight, "Inquiry Insights") //
             .put(Id.spendinsight, "Spend Insights") //
@@ -139,6 +139,10 @@ public class DataBlock {
         public DataBlockLevel getLevel() {
             return level;
         }
+
+        public List<Element> getElements() {
+            return elements;
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -175,6 +179,18 @@ public class DataBlock {
             this.description = primeColumn.getDescription();
             this.dataType = primeColumn.getJavaClass();
             this.example = primeColumn.getExample();
+        }
+
+        public String getElementId() {
+            return this.elementId;
+        }
+
+        public String getDescription() {
+            return this.description;
+        }
+
+        public String getDataType() {
+            return dataType;
         }
     }
 

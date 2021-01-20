@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.campaign.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -46,11 +45,6 @@ public class CampaignFrontEndQueryBuilder {
     private boolean isSuppressAccountsWithoutContacts;
     private boolean isSuppressContactsWithoutEmails;
     private boolean isSuppressAccountsWithoutWebsiteOrCompanyName;
-
-    private final List<String> accountLookups = Collections.singletonList(InterfaceName.AccountId.name());
-
-    private final List<String> contactLookups = Arrays.asList(InterfaceName.ContactId.name(),
-            InterfaceName.AccountId.name());
 
     public static class Builder {
 

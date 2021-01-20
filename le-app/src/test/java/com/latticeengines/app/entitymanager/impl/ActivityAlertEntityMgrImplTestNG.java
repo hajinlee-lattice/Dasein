@@ -5,6 +5,7 @@ import static org.testng.Assert.assertEquals;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.springframework.retry.support.RetryTemplate;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -20,6 +23,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.app.exposed.entitymanager.ActivityAlertEntityMgr;
 import com.latticeengines.app.exposed.repository.datadb.ActivityAlertRepository;
 import com.latticeengines.app.testframework.AppFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityStoreConstants;
 import com.latticeengines.domain.exposed.cdl.activity.AlertCategory;
@@ -36,11 +40,15 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     private ActivityAlertRepository activityAlertRepository;
 
     private List<ActivityAlert> alerts;
+    private Tenant t;
+
+    private RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(10, Collections.singleton(AssertionError.class),
+            null);
 
     @BeforeClass(groups = "functional")
     @Transactional
     public void setup() {
-        Tenant t = new Tenant();
+        t = new Tenant();
         t.setPid(-10L);
         MultiTenantContext.setTenant(t);
         alerts = generateAlerts(t);
@@ -48,10 +56,37 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void findByKey() {
+    public void testFindByKey() {
         List<ActivityAlert> records = activityAlertEntityMgr.findTopNAlertsByEntityId("12345", BusinessEntity.Account,
-                "version1", AlertCategory.PEOPLE, 3);
+                "version1", AlertCategory.PEOPLE, 6);
         assertEquals(records.size(), 2);
+
+        records = activityAlertEntityMgr.findTopNAlertsByEntityId("23456", BusinessEntity.Account, "version1",
+                AlertCategory.PRODUCTS, 6);
+        assertEquals(records.size(), 4);
+    }
+
+    @Test(groups = "manual", enabled = false)
+    public void testDeleteByDate() {
+        int deleted = activityAlertEntityMgr
+                .deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)), 1);
+        Assert.assertEquals(deleted, 1);
+        retryTemplate.execute(ctx -> {
+            List<ActivityAlert> recordsAfterDeletion = activityAlertEntityMgr.findTopNAlertsByEntityId("23456",
+                    BusinessEntity.Account, "version1", AlertCategory.PRODUCTS, 6);
+            assertEquals(recordsAfterDeletion.size(), 3);
+            return null;
+        });
+
+        deleted = activityAlertEntityMgr.deleteByExpireDateBefore(Date.from(Instant.now().minus(90, ChronoUnit.DAYS)),
+                1);
+        Assert.assertEquals(deleted, 1);
+        retryTemplate.execute(ctx -> {
+            List<ActivityAlert> recordsAfterDeletion = activityAlertEntityMgr.findTopNAlertsByEntityId("23456",
+                    BusinessEntity.Account, "version1", AlertCategory.PRODUCTS, 6);
+            assertEquals(recordsAfterDeletion.size(), 2);
+            return null;
+        });
     }
 
     private List<ActivityAlert> generateAlerts(Tenant t) {
@@ -125,11 +160,53 @@ public class ActivityAlertEntityMgrImplTestNG extends AppFunctionalTestNGBase {
 
         alerts.add(record);
 
+        // record 4
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
+        record.setEntityId("23456");
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(89, ChronoUnit.DAYS)));
+        record.setVersion("version1");
+        record.setCategory(AlertCategory.PRODUCTS);
+
+        alerts.add(record);
+
+        // record 5
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
+        record.setEntityId("23456");
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(91, ChronoUnit.DAYS)));
+        record.setVersion("version1");
+        record.setCategory(AlertCategory.PRODUCTS);
+
+        alerts.add(record);
+
+        // record6
+        record = new ActivityAlert();
+        record.setAlertName(ActivityStoreConstants.Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES);
+        record.setEntityId("23456");
+        record.setEntityType(BusinessEntity.Account);
+        record.setTenantId(t.getPid());
+        record.setCreationTimestamp(Date.from(Instant.now().minus(95, ChronoUnit.DAYS)));
+        record.setVersion("version1");
+        record.setCategory(AlertCategory.PRODUCTS);
+
+        alerts.add(record);
+
         return alerts;
     }
 
     @AfterClass(groups = "functional")
     public void teardown() {
         activityAlertRepository.deleteInBatch(alerts);
+        List<ActivityAlert> records = activityAlertEntityMgr.findTopNAlertsByEntityId("12345", BusinessEntity.Account,
+                "version1", AlertCategory.PEOPLE, 6);
+        assertEquals(records.size(), 0);
+        records = activityAlertEntityMgr.findTopNAlertsByEntityId("23456", BusinessEntity.Account, "version1",
+                AlertCategory.PRODUCTS, 6);
+        assertEquals(records.size(), 0);
     }
 }

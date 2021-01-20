@@ -96,11 +96,7 @@ public class CampaignDeltaCalculationWorkflowConfiguration extends BaseCDLWorkfl
 
         public CampaignDeltaCalculationWorkflowConfiguration.Builder tapType(Play.TapType tapType) {
             if (Play.TapType.ListSegment.equals(tapType)) {
-                importDeltaArtifactsFromS3Configuration.setSkipStep(true);
-                generateLaunchUniverseStepConfiguration.setSkipStep(true);
-                generateLaunchArtifactsStepConfiguration.setSkipStep(true);
                 generateLiveRampLaunchArtifactsStepConfiguration.setSkipStep(true);
-                exportDeltaArtifactsToS3StepConfiguration.setSkipStep(true);
             }
             return this;
         }

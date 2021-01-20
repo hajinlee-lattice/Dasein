@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.campaign;
 
+import static com.latticeengines.domain.exposed.pls.Play.TapType;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
 import java.util.ArrayList;
@@ -107,32 +108,29 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     @Value("${datacloud.manage.password.encrypted}")
     private String password;
 
+    private boolean baseOnOtherTapType;
+
     @Override
     public void execute() {
         GenerateLaunchArtifactsStepConfiguration config = getConfiguration();
-        CustomerSpace customerSpace = configuration.getCustomerSpace();
-
+        parseCustomerSpace(config);
         Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(), false, false);
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
                 config.getChannelId());
-
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "No Campaign found by ID: " + config.getPlayId() });
+                    new String[]{"No Campaign found by ID: " + config.getPlayId()});
         }
-
         if (channel == null) {
             throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "No Channel found by ID: " + config.getChannelId() });
+                    new String[]{"No Channel found by ID: " + config.getChannelId()});
         }
-
         PlayLaunch launch = null;
         if (StringUtils.isNotBlank(config.getLaunchId())) {
             launch = playProxy.getPlayLaunch(customerSpace.getTenantId(), config.getPlayId(), config.getLaunchId());
             channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace.getTenantId(), config.getPlayId(),
                     config.getLaunchId());
         }
-
         // check whether the step needs to be skipped
         if (shouldSkipStep(
                 launch == null ? channel.getChannelConfig().getAudienceType()
@@ -141,80 +139,111 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             log.info("No Delta Data found, skipping Launch Artifact generation");
             return;
         }
-
-        version = parseDataCollectionVersion(configuration);
-        attrRepo = parseAttrRepo(configuration);
-        evaluationDate = parseEvaluationDateStr(configuration);
-        boolean contactsDataExists = AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact);
-        if (!contactsDataExists) {
-            log.info("No Contact data found in the Attribute Repo");
-        }
-
-        ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
-        String accountLookupId = launch == null ? channel.getLookupIdMap().getAccountId()
-                : launch.getDestinationAccountId();
-        String contactLookupId = launch == null ? channel.getLookupIdMap().getContactId()
-                : launch.getDestinationContactId();
-
-        List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
-                channel.getId());
+        List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(), channel.getId());
         if (fieldMappingMetadata != null) {
             log.info("For tenant= " + config.getCustomerSpace().getTenantId() + ", playChannelId= " + channel.getId()
                     + ", the columnMetadata size is=" + fieldMappingMetadata.size());
         }
-
+        TapType tapType = play.getTapType();
+        baseOnOtherTapType = TapType.ListSegment.equals(tapType);
+        ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
+        HdfsDataUnit positiveDeltaDataUnit = getObjectFromContext(
+                getAddDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class);
+        HdfsDataUnit negativeDeltaDataUnit = getObjectFromContext(
+                getRemoveDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class);
+        String accountLookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
+        String contactLookupId = launch == null ? channel.getLookupIdMap().getContactId() : launch.getDestinationContactId();
         Set<Lookup> accountLookups = buildLookupsByEntity(BusinessEntity.Account, fieldMappingMetadata, channel);
         if (StringUtils.isNotBlank(accountLookupId)) {
             accountLookups.add(new AttributeLookup(BusinessEntity.Account, accountLookupId));
         }
-        accountLookups = addRatingLookups(play.getRatingEngine(), accountLookups);
-
         Set<Lookup> contactLookups = buildLookupsByEntity(BusinessEntity.Contact, fieldMappingMetadata, channel);
         if (StringUtils.isNotBlank(contactLookupId)) {
             contactLookups.add(new AttributeLookup(BusinessEntity.Contact, contactLookupId));
         }
-        log.info("Account Lookups: " + accountLookups.stream().map(Lookup::toString).collect(Collectors.joining(", ")));
-        log.info("Contact Lookups: " + contactLookups.stream().map(Lookup::toString).collect(Collectors.joining(", ")));
-
-        HdfsDataUnit positiveDeltaDataUnit = getObjectFromContext(
-                getAddDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT,
-                HdfsDataUnit.class);
-        HdfsDataUnit negativeDeltaDataUnit = getObjectFromContext(
-                getRemoveDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT,
-                HdfsDataUnit.class);
-
-        SparkJobResult sparkJobResult = executeSparkJob(play.getTargetSegment(), accountLookups, contactLookups,
-                positiveDeltaDataUnit, negativeDeltaDataUnit,
-                contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
-                contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName());
+        SparkJobResult sparkJobResult;
+        if (baseOnOtherTapType) {
+            sparkJobResult = runSparkJob(accountLookups, contactLookups, positiveDeltaDataUnit, negativeDeltaDataUnit,
+                    channelConfig.getAudienceType().asBusinessEntity(), channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName());
+        } else {
+            version = parseDataCollectionVersion(configuration);
+            attrRepo = parseAttrRepo(configuration);
+            evaluationDate = parseEvaluationDateStr(configuration);
+            boolean contactsDataExists = AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact);
+            if (!contactsDataExists) {
+                log.info("No Contact data found in the Attribute Repo");
+            }
+            accountLookups = addRatingLookups(play.getRatingEngine(), accountLookups);
+            log.info("Account Lookups: " + accountLookups.stream().map(Lookup::toString).collect(Collectors.joining(", ")));
+            log.info("Contact Lookups: " + contactLookups.stream().map(Lookup::toString).collect(Collectors.joining(", ")));
+            sparkJobResult = executeSparkJob(play.getTargetSegment(), accountLookups, contactLookups,
+                    positiveDeltaDataUnit, negativeDeltaDataUnit,
+                    contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
+                    contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName());
+        }
         processSparkJobResults(channelConfig.getAudienceType(), channelConfig.getSystemName(), sparkJobResult);
     }
 
-    private SparkJobResult executeSparkJob(MetadataSegment targetSegment, Set<Lookup> accountLookups,
-            Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit,
-            BusinessEntity mainEntity, boolean contactsDataExists, boolean suppressAccountsWithoutContacts, CDLExternalSystemName externalSystemName) {
-
+    private SparkJobResult runSparkJob(Set<Lookup> accountLookups, Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit,
+                                       BusinessEntity mainEntity, boolean suppressAccountsWithoutContacts, CDLExternalSystemName externalSystemName) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
                 log.warn("Previous failure:", ctx.getLastThrowable());
             }
+            HdfsDataUnit accountDataUnit = getObjectFromContext(ACCOUNTS_DATA_UNIT, HdfsDataUnit.class);
+            HdfsDataUnit contactDataUnit = getObjectFromContext(CONTACTS_DATA_UNIT, HdfsDataUnit.class);
+            GenerateLaunchArtifactsJobConfig config = getJobConfig(accountLookups, contactLookups, accountDataUnit, contactDataUnit,
+                    contactDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity, suppressAccountsWithoutContacts, externalSystemName);
+            log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
+            SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+            log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));
+            return result;
+        });
+    }
 
+    private GenerateLaunchArtifactsJobConfig getJobConfig(Set<Lookup> accountLookups, Set<Lookup> contactLookups, HdfsDataUnit accountDataUnit,
+                                                          HdfsDataUnit contactDataUnit, HdfsDataUnit targetContactsDataUnit,
+                                                          HdfsDataUnit negativeDeltaDataUnit, HdfsDataUnit positiveDeltaDataUnit, BusinessEntity mainEntity,
+                                                          boolean suppressAccountsWithoutContacts, CDLExternalSystemName externalSystemName) {
+        GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit, //
+                contactDataUnit, targetContactsDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, //
+                mainEntity, !suppressAccountsWithoutContacts, getRandomWorkspace(), externalSystemName);
+        config.setAccountAttributes(accountLookups.stream().map(lookup -> ((AttributeLookup)lookup).getAttribute()).collect(Collectors.toSet()));
+        config.setContactAttributes(contactLookups.stream().map(lookup -> ((AttributeLookup)lookup).getAttribute()).collect(Collectors.toSet()));
+        if (CDLExternalSystemName.AD_PLATFORMS.contains(externalSystemName)) {
+            String encryptionKey = CipherUtils.generateKey();
+            String saltHint = CipherUtils.generateKey();
+            config.setManageDbUrl(url);
+            config.setUser(user);
+            config.setEncryptionKey(encryptionKey);
+            config.setSaltHint(saltHint);
+            config.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
+        }
+        return config;
+    }
+
+    private SparkJobResult executeSparkJob(MetadataSegment targetSegment, Set<Lookup> accountLookups, Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit,
+                                           HdfsDataUnit negativeDeltaDataUnit, BusinessEntity mainEntity, boolean contactsDataExists, boolean suppressAccountsWithoutContacts,
+                                           CDLExternalSystemName externalSystemName) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(2);
+        return retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
+                log.warn("Previous failure:", ctx.getLastThrowable());
+            }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-
                 FrontEndQuery query = new FrontEndQuery();
                 query.setLookups(new ArrayList<>(accountLookups));
                 query.setMainEntity(BusinessEntity.Account);
                 HdfsDataUnit accountDataUnit = getEntityQueryData(query);
-
                 HdfsDataUnit contactDataUnit = null, targetContactsDataUnit = null;
                 if (contactsDataExists) {
                     query.setLookups(new ArrayList<>(contactLookups));
                     query.setMainEntity(BusinessEntity.Contact);
                     contactDataUnit = getEntityQueryData(query);
-
                     FrontEndQuery targetContactsQuery = FrontEndQuery.fromSegment(targetSegment);
                     targetContactsQuery.setLookups(new ArrayList<>(contactLookups));
                     targetContactsQuery.setMainEntity(BusinessEntity.Contact);
@@ -222,23 +251,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 } else {
                     log.info("Ignoring Contact lookups since no contact data found in the Attribute Repo");
                 }
-
-                GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit, //
-                        contactDataUnit, targetContactsDataUnit, //
-                        negativeDeltaDataUnit, positiveDeltaDataUnit, //
-                        mainEntity, !suppressAccountsWithoutContacts, //
-                        getRandomWorkspace(), externalSystemName);
-
-                if (CDLExternalSystemName.AD_PLATFORMS.contains(externalSystemName)) {
-                    String encryptionKey = CipherUtils.generateKey();
-                    String saltHint = CipherUtils.generateKey();
-                    config.setManageDbUrl(url);
-                    config.setUser(user);
-                    config.setEncryptionKey(encryptionKey);
-                    config.setSaltHint(saltHint);
-                    config.setPassword(CipherUtils.encrypt(password, encryptionKey, saltHint));
-                }
-
+                GenerateLaunchArtifactsJobConfig config = getJobConfig(accountLookups, contactLookups, accountDataUnit, contactDataUnit,
+                        targetContactsDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity, suppressAccountsWithoutContacts, externalSystemName);
                 log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
                 log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));
@@ -264,7 +278,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         long accumulativeContacts = getLongValueFromContext(PREVIOUS_ACCUMULATIVE_CONTACTS) != null
                 ? getLongValueFromContext(PREVIOUS_ACCUMULATIVE_CONTACTS)
                 : 0L;
-
         HdfsDataUnit addedAccountsDataUnit = sparkJobResult.getTargets().get(0);
         if (addedAccountsDataUnit != null && addedAccountsDataUnit.getCount() > 0) {
             accountsAdded = addedAccountsDataUnit.getCount();
@@ -274,7 +287,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         } else {
             log.info(String.format("No new Added %ss", AudienceType.ACCOUNTS.asBusinessEntity().name()));
         }
-
         HdfsDataUnit removedAccountsDataUnit = sparkJobResult.getTargets().get(1);
         if (removedAccountsDataUnit != null && removedAccountsDataUnit.getCount() > 0) {
             accountsDeleted = removedAccountsDataUnit.getCount();
@@ -284,7 +296,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         } else {
             log.info(String.format("No Removed %ss", AudienceType.ACCOUNTS.asBusinessEntity().name()));
         }
-
         HdfsDataUnit fullContactsDataUnit = sparkJobResult.getTargets().get(2);
         if (fullContactsDataUnit != null && fullContactsDataUnit.getCount() > 0) {
             fullContacts = fullContactsDataUnit.getCount();
@@ -293,7 +304,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         } else {
             log.info("No Full contacts");
         }
-
         if (audienceType == AudienceType.CONTACTS) {
             HdfsDataUnit addedContactsDataUnit = sparkJobResult.getTargets().get(3);
             if (addedContactsDataUnit != null && addedContactsDataUnit.getCount() > 0) {
@@ -320,7 +330,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 log.info(String.format("No new Removed %ss", audienceType.asBusinessEntity().name()));
             }
         }
-
         /*
          * PLS-15540 Accumulative Launched = Add - Delete + Previous
          * Accumulative Launched Suppressed = Selected - Accumulative Launched
@@ -349,8 +358,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
     }
 
-    private Set<Lookup> buildLookupsByEntity(BusinessEntity mainEntity, List<ColumnMetadata> fieldMappingMetadata,
-            PlayLaunchChannel playLaunchChannel) {
+    private Set<Lookup> buildLookupsByEntity(BusinessEntity mainEntity, List<ColumnMetadata> fieldMappingMetadata, PlayLaunchChannel playLaunchChannel) {
         Set<String> entityLookups = getBaseLookupFieldsByEntity(mainEntity, playLaunchChannel);
         return mergeWithExportFields(mainEntity, entityLookups, fieldMappingMetadata);
     }
@@ -372,7 +380,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     }
 
     private Set<Lookup> mergeWithExportFields(BusinessEntity mainEntity, Set<String> entityFields,
-            List<ColumnMetadata> fieldMappingMetadata) {
+                                              List<ColumnMetadata> fieldMappingMetadata) {
         if (CollectionUtils.isNotEmpty(fieldMappingMetadata)) {
             List<ColumnMetadata> unExportableFields = fieldMappingMetadata.stream()
                     .filter(cm -> !BusinessEntity.EXPORT_ACCOUNT_ENTITIES.contains(cm.getEntity())
@@ -383,7 +391,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                         + "following fields will be skipped!");
                 log.warn(Arrays.toString(unExportableFields.stream().map(ColumnMetadata::getAttrName).toArray()));
             }
-
             Set<Lookup> mergedLookups = fieldMappingMetadata.stream()
                     .filter(cm -> BusinessEntity.EXPORT_ACCOUNT_ENTITIES.contains(cm.getEntity())
                             || cm.getEntity() == BusinessEntity.Contact) //
@@ -392,9 +399,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     .filter(cm -> !entityFields.contains(cm.getAttrName())) //
                     .map(cm -> new AttributeLookup(cm.getEntity(), cm.getAttrName())) //
                     .collect(Collectors.toSet());
-
             entityFields.forEach(f -> mergedLookups.add(new AttributeLookup(mainEntity, f)));
-
             return mergedLookups;
         } else {
             return entityFields.stream().map(f -> new AttributeLookup(mainEntity, f)).collect(Collectors.toSet());
@@ -431,18 +436,19 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     InterfaceName.PhoneNumber.name(), //
                     InterfaceName.Title.name(), //
                     InterfaceName.Address_Street_1.name()));
-            /*
-             * PLS-16386 Add FirstName and LastName
-             */
-            String attributeSetName = getAttributeSetName(playLaunchChannel);
-            CustomerSpace cs = configuration.getCustomerSpace();
-            log.info("Trying to get the attrsUsage with {} for tenant {}.", attributeSetName, cs.getTenantId());
-
-            Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
-                    Predefined.Enrichment, attributeSetName, additionalContactAttr, null);
-            log.info("attrsUsage for firstName & lastName=" + map);
-            map.keySet().stream().filter(key -> map.get(key)).forEach(key -> set.add(key));
-            log.info("set=" + set);
+            if (!baseOnOtherTapType) {
+                /*
+                 * PLS-16386 Add FirstName and LastName
+                 */
+                String attributeSetName = getAttributeSetName(playLaunchChannel);
+                CustomerSpace cs = configuration.getCustomerSpace();
+                log.info("Trying to get the attrsUsage with {} for tenant {}.", attributeSetName, cs.getTenantId());
+                Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
+                        Predefined.Enrichment, attributeSetName, additionalContactAttr, null);
+                log.info("attrsUsage for firstName & lastName=" + map);
+                map.keySet().stream().filter(key -> map.get(key)).forEach(key -> set.add(key));
+                log.info("set=" + set);
+            }
             return set;
         default:
             throw new LedpException(LedpCode.LEDP_32001,
@@ -463,7 +469,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     boolean shouldSkipStep(AudienceType audienceType, CDLExternalSystemName externalSystemName) {
         Map<String, Long> counts = getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class);
         log.info("Counts: " + JsonUtils.serialize(counts));
-
         switch (externalSystemName) {
         case Salesforce:
         case Eloqua:
@@ -481,8 +486,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         case LinkedIn:
         case Outreach:
         case GoogleAds:
-            return MapUtils.isEmpty(counts) || //
-                    (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) <= 0L && //
+            return MapUtils.isEmpty(counts) || (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) <= 0L && //
                             counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) <= 0L);
         default:
             throw new LedpException(LedpCode.LEDP_32000,

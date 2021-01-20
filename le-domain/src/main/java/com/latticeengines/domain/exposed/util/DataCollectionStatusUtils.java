@@ -21,6 +21,7 @@ public final class DataCollectionStatusUtils {
         dateMap.put(Category.INTENT.getName(), timestamp);
         dateMap.put(Category.ONLINE_PRESENCE.getName(), timestamp);
         dateMap.put(Category.TECHNOLOGY_PROFILE.getName(), timestamp);
+        dateMap.put(Category.DNB_TECHNOLOGY_PROFILE.getName(), timestamp);
         dateMap.put(Category.WEBSITE_KEYWORDS.getName(), timestamp);
         dateMap.put(Category.WEBSITE_PROFILE.getName(), timestamp);
         dateMap.put(Category.ACCOUNT_ATTRIBUTES.getName(), timestamp);
@@ -45,6 +46,7 @@ public final class DataCollectionStatusUtils {
         dateMap.put(Category.INTENT.getName(), timestamp);
         dateMap.put(Category.ONLINE_PRESENCE.getName(), timestamp);
         dateMap.put(Category.TECHNOLOGY_PROFILE.getName(), timestamp);
+        dateMap.put(Category.DNB_TECHNOLOGY_PROFILE.getName(), timestamp);
         dateMap.put(Category.WEBSITE_KEYWORDS.getName(), timestamp);
         dateMap.put(Category.WEBSITE_PROFILE.getName(), timestamp);
         return status;

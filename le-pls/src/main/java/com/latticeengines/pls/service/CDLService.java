@@ -62,7 +62,7 @@ public interface CDLService {
      */
     List<FileProperty> getFileListForS3Path(String customerSpace, String s3Path, String filter);
 
-    void createS3ImportSystem(String customerSpace, String systemDisplayName, S3ImportSystem.SystemType systemType,
+    String createS3ImportSystem(String customerSpace, String systemDisplayName, S3ImportSystem.SystemType systemType,
                               Boolean primary);
 
     S3ImportSystem getS3ImportSystem(String customerSpace, String systemName);
@@ -81,7 +81,7 @@ public interface CDLService {
 
     boolean autoImport(String templateFileName);
 
-    String getTemplateMappingContent(Table templateTable, Table standardTable);
+    String getTemplateMappingContent(List<TemplateFieldPreview> previews);
 
     String getSystemNameFromFeedType(String feedType);
 

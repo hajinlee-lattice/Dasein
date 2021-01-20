@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -77,8 +79,6 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Override
     @BeforeClass(groups = "functional")
     public void setup() {
-        GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-
         Schema deltaAccountSchema = SchemaBuilder.record("Account").fields() //
                 .name("AccountId").type().stringType().noDefault()//
                 .endRecord();
@@ -191,37 +191,23 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
             log.error(e.getMessage());
         }
         super.setup();
+    }
 
-        // Spark repl setup
-        // val accountId = "AccountId"
-        //
-        // val contactId = "ContactId"
-        //
-        // val accountAlias = "account"
-        //
-        // val contactAlias = "contact"
-        //
-        // val accountsDf =
-        // spark.read.format("avro").load("/tmp/testGenerateLaunchArtifactsaccount.avro")
-        //
-        // val contactsDf =
-        // spark.read.format("avro").load("/tmp/testGenerateLaunchArtifactscontact.avro")
-        //
-        // val positiveDeltaDf =
-        // spark.read.format("avro").load("/tmp/testGenerateLaunchArtifactspositiveContacts.avro")
-        //
-        // val negativeDeltaDf =
-        // spark.read.format("avro").load("/tmp/testGenerateLaunchArtifactsnegativeContacts.avro")
+    private void putDataUnits(DataUnit accountDataUnit, DataUnit contactDataUnit, DataUnit targetSegmentsContactsDataUnit,
+                              DataUnit negativeDeltaDataUnit, DataUnit positiveDeltaDataUnit) {
+        Map<String, DataUnit> inputUnits = new HashMap<>();
+        inputUnits.put("Input0", accountDataUnit);
+        inputUnits.put("Input1", contactDataUnit);
+        inputUnits.put("Input2", targetSegmentsContactsDataUnit);
+        inputUnits.put("Input3", negativeDeltaDataUnit);
+        inputUnits.put("Input4", positiveDeltaDataUnit);
+        setInputUnits(inputUnits);
     }
 
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForAccountEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        config.setAccountsData(accountData);
-        config.setContactsData(contactData);
-        config.setTargetSegmentsContactsData(contactData);
-        config.setPositiveDelta(positiveAccounts);
-        config.setNegativeDelta(negativeAccounts);
+        putDataUnits(accountData, contactData, contactData, negativeAccounts, positiveAccounts);
         config.setMainEntity(BusinessEntity.Account);
         config.setWorkspace("testGenerateLaunchArtifactsForAccountEntity");
 
@@ -238,10 +224,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForAccountEntityWithoutContacts() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        config.setAccountsData(accountData);
-        config.setContactsData(null);
-        config.setPositiveDelta(positiveAccounts);
-        config.setNegativeDelta(negativeAccounts);
+        putDataUnits(accountData, null, null, negativeAccounts, positiveAccounts);
         config.setMainEntity(BusinessEntity.Account);
         config.setWorkspace("testGenerateLaunchArtifactsForAccountEntity");
 
@@ -258,11 +241,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForExtraNegativeAccountEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        config.setAccountsData(accountData);
-        config.setContactsData(contactData);
-        config.setTargetSegmentsContactsData(contactData);
-        config.setPositiveDelta(positiveAccounts);
-        config.setNegativeDelta(negativeExtraAccounts);
+        putDataUnits(accountData, contactData, contactData, negativeExtraAccounts, positiveAccounts);
         config.setMainEntity(BusinessEntity.Account);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
 
@@ -279,11 +258,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForContactEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        config.setAccountsData(accountData);
-        config.setContactsData(contactData);
-        config.setTargetSegmentsContactsData(contactData);
-        config.setPositiveDelta(positiveContacts);
-        config.setNegativeDelta(negativeContacts);
+        putDataUnits(accountData, contactData, contactData, negativeContacts, positiveContacts);
         config.setMainEntity(BusinessEntity.Contact);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
 
@@ -302,11 +277,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForExtraNegativeContactEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        config.setAccountsData(accountData);
-        config.setContactsData(contactData);
-        config.setTargetSegmentsContactsData(contactData);
-        config.setPositiveDelta(positiveContacts);
-        config.setNegativeDelta(negativeExtraContacts);
+        putDataUnits(accountData, contactData, contactData, negativeExtraContacts, positiveContacts);
         config.setMainEntity(BusinessEntity.Contact);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
 
@@ -325,10 +296,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForNullPositiveContacts() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        config.setAccountsData(accountData);
-        config.setContactsData(contactData);
-        config.setTargetSegmentsContactsData(contactData);
-        config.setPositiveDelta(nullPositiveContacts);
+        putDataUnits(accountData, contactData, contactData, null, nullPositiveContacts);
         config.setMainEntity(BusinessEntity.Contact);
         config.setIncludeAccountsWithoutContacts(true);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
@@ -348,10 +316,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsJobForContactCountyConversion() throws Exception {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        config.setAccountsData(accountData);
-        config.setContactsData(contactData);
-        config.setTargetSegmentsContactsData(contactData);
-        config.setPositiveDelta(positiveContacts);
+        putDataUnits(accountData, contactData, contactData, null, positiveContacts);
         config.setMainEntity(BusinessEntity.Contact);
         config.setWorkspace("testGenerateLaunchArtifactsJobForContactCountyConversion");
         config.setExternalSystemName(CDLExternalSystemName.GoogleAds);
@@ -372,9 +337,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsJobForAccountCountyConversion() throws Exception {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        config.setAccountsData(accountData);
-        config.setContactsData(contactData);
-        config.setPositiveDelta(positiveAccounts);
+        putDataUnits(accountData, contactData, null, null, positiveAccounts);
         config.setMainEntity(BusinessEntity.Account);
         config.setWorkspace("testGenerateLaunchArtifactsJobForAccountCountyConversion");
         config.setExternalSystemName(CDLExternalSystemName.LinkedIn);
@@ -400,10 +363,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsJobWithNoCountry() throws Exception {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        config.setAccountsData(accountData);
-        config.setContactsData(contactNoContactCountryData);
-        config.setTargetSegmentsContactsData(contactNoContactCountryData);
-        config.setPositiveDelta(positiveContacts);
+        putDataUnits(accountData, contactNoContactCountryData, contactNoContactCountryData, null, positiveContacts);
         config.setMainEntity(BusinessEntity.Contact);
         config.setWorkspace("testGenerateLaunchArtifactsJobWithNoCountry");
         config.setExternalSystemName(CDLExternalSystemName.GoogleAds);

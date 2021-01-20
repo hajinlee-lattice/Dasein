@@ -30,7 +30,7 @@ public enum Category {
     PRODUCT_SPEND("Product Spend Profile", 6), //
     INTENT("Intent", 7), //
     WEBSITE_PROFILE("Website Profile", 8), //
-    TECHNOLOGY_PROFILE("Technology Profile", 9), //
+    TECHNOLOGY_PROFILE("HG Technology Profile", 9), //
     ONLINE_PRESENCE("Online Presence", 10), //
     GROWTH_TRENDS("Growth Trends", 11), //
     WEBSITE_KEYWORDS("Website Keywords", 12), //
@@ -91,9 +91,8 @@ public enum Category {
         }
     },
     DNBINTENTDATA_PROFILE("D&B Intent", 21), //
-    COVID_19("COVID-19", 22); //
-
-
+    COVID_19("COVID-19", 22), //
+    DNB_TECHNOLOGY_PROFILE("D&B Technology Profile", 23); //
 
     public static final String SUB_CAT_OTHER = "Other";
     public static final String SUB_CAT_ACCOUNT_IDS = "System Account IDs";
@@ -101,7 +100,7 @@ public enum Category {
 
     private static Map<String, Category> nameMap;
     private static Set<String> values;
-    private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE,
+    private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE, DNB_TECHNOLOGY_PROFILE,
             WEBSITE_KEYWORDS, ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES, GROWTH_TRENDS, COVID_19);
     // used in following scenarios
     // 1. iteration metadata API called via remodeling UI
@@ -114,6 +113,7 @@ public enum Category {
             INTENT, //
             ONLINE_PRESENCE, //
             TECHNOLOGY_PROFILE, //
+            DNB_TECHNOLOGY_PROFILE, //
             WEBSITE_KEYWORDS, //
             WEBSITE_PROFILE, //
             AI_INSIGHTS //
@@ -145,7 +145,12 @@ public enum Category {
         } else if (nameMap.containsKey(name)) {
             return nameMap.get(name);
         } else {
-            throw new IllegalArgumentException("Cannot find a Category with name " + name);
+            String categoryName = name.replaceAll(" ", "_").toUpperCase();
+            if (values.contains(categoryName)) {
+                return valueOf(categoryName);
+            } else {
+                throw new IllegalArgumentException("Cannot find a Category with name " + name);
+            }
         }
     }
 

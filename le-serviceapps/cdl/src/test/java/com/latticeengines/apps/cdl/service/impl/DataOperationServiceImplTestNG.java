@@ -45,16 +45,18 @@ public class DataOperationServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(dropPath);
         System.out.println(dropPath);
 
+        retry.execute(context -> {
+            DataOperation dataOperation = dataOperationService.findDataOperationByDropPath(mainCustomerSpace, dropPath);
+            Assert.assertNotNull(dataOperation);
+            Assert.assertEquals(dataOperation.getDropPath(), dropPath);
+            Assert.assertEquals(((DataDeleteOperationConfiguration)dataOperation.getConfiguration()).getDeleteType(),
+                    DataDeleteOperationConfiguration.DeleteType.SOFT);
+            return true;
+        });
         List<DataOperation> dataOperations = dataOperationService.findAllDataOperation(mainCustomerSpace);
         Assert.assertNotNull(dataOperations);
         Assert.assertEquals(dataOperations.size(), 1);
         Assert.assertEquals(dataOperations.get(0).getDropPath(), dropPath);
-
-        DataOperation dataOperation = dataOperationService.findDataOperationByDropPath(mainCustomerSpace, dropPath);
-        Assert.assertNotNull(dataOperation);
-        Assert.assertEquals(dataOperation.getDropPath(), dropPath);
-        Assert.assertEquals(((DataDeleteOperationConfiguration)dataOperation.getConfiguration()).getDeleteType(),
-                DataDeleteOperationConfiguration.DeleteType.SOFT);
 
         dataOperationService.createDataOperation(mainCustomerSpace, DataOperation.OperationType.DELETE,configuration);
         dataOperations = dataOperationService.findAllDataOperation(mainCustomerSpace);

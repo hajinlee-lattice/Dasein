@@ -86,7 +86,7 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         CSVAdaptor csvAdaptor = listSegment.getCsvAdaptor();
         assertNotNull(csvAdaptor);
         assertNotNull(csvAdaptor.getImportFieldMappings());
-        assertEquals(csvAdaptor.getImportFieldMappings().size(), 41);
+        assertEquals(csvAdaptor.getImportFieldMappings().size(), 27);
         ImportFieldMapping importFieldMapping = csvAdaptor.getImportFieldMappings().get(0);
         assertEquals(importFieldMapping.getFieldName(), InterfaceName.CompanyName.name());
         assertEquals(importFieldMapping.getFieldType(), UserDefinedType.TEXT);

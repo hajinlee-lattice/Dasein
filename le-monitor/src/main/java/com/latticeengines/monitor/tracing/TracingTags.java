@@ -36,4 +36,9 @@ public final class TracingTags {
     public static class User {
         public static final String USERNAME = "user.username";
     }
+
+    public static class ElasticSearch {
+        public static final String NAMESPACE = "elasticsearch.namespace";
+        public static final String METHOD_PARAM = "elasticsearch.method_param";
+    }
 }

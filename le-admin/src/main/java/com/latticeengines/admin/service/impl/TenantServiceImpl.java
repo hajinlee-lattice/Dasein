@@ -104,6 +104,7 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.VboService;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -132,6 +133,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Inject
     private IDaaSService iDaaSService;
+
+    @Inject
+    private VboService vboService;
 
     @Inject
     private VboRequestLogService vboRequestLogService;
@@ -278,8 +282,7 @@ public class TenantServiceImpl implements TenantService {
 
                         vboRequestLogService.updateVboCallback(traceId, callback, System.currentTimeMillis());
 
-                        // VBO needs OAuth token/Authorization header
-                        iDaaSService.callbackWithAuth(callback.targetUrl, callback);
+                        vboService.sendProvisioningCallback(callback);
                     } else {
                         timeoutSemaphore.release();
                         // callback timed out: should we clean up tenant?
@@ -1052,7 +1055,7 @@ public class TenantServiceImpl implements TenantService {
                 if (!callback.timeout) {
                     callback.timeout = true;
                     log.info("Callback timed out: sending callback as-is");
-                    iDaaSService.callbackWithAuth(callback.targetUrl, callback);
+                    vboService.sendProvisioningCallback(callback);
 
                     vboRequestLogService.updateVboCallback(traceId, callback, System.currentTimeMillis());
                 }

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.LaunchBaseType;
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
@@ -47,20 +46,9 @@ public class ImportDeltaCalculationResultsFromS3
         log.info(String.format("Building requests for tenant=%s, playId=%s launchId=%s", customerSpace.getTenantId(),
                 playId, launchId));
         List<String> tables = getMetadataTableNames(customerSpace, playId, launchId);
-        Play play = playProxy.getPlay(customerSpace.getTenantId(), playId);
-        if (play == null) {
-            throw new RuntimeException("Can't find play by name " + playId + ".");
+        if (CollectionUtils.isEmpty(tables)) {
+            log.error(String.format("There is no metadata tables associated with tenant %s", customerSpace.getTenantId()));
         }
-        boolean baseOnOtherTapType = Play.TapType.ListSegment.equals(play.getTapType());
-        if (CollectionUtils.isNotEmpty(tables)) {
-            if (baseOnOtherTapType) {
-                log.info("Play {} is based on list segment and will read from s3 directly.", play.getName());
-            }
-        } else {
-            log.error(
-                    String.format("There is no metadata tables associated with tenant %s", customerSpace.getTenantId()));
-        }
-
     }
 
     protected List<String> getMetadataTableNames(CustomerSpace customerSpace, String playId, String launchId) {
@@ -84,7 +72,7 @@ public class ImportDeltaCalculationResultsFromS3
         CDLExternalSystemName systemName = playLaunch.getDestinationSysName();
         boolean launchToDb = CDLExternalSystemName.Salesforce.equals(systemName) || CDLExternalSystemName.Eloqua.equals(systemName);
         boolean isLiveRampLaunch = channelConfig instanceof LiveRampChannelConfig;
-        boolean isOutreachTaskLaunch = isOutreachTaskLaunch(channelConfig);
+        boolean hasOutreachTaskDescription = hasOutreachTaskDescription(channelConfig);
 
         if (isLiveRampLaunch) {
             if (StringUtils.isNotEmpty(addContacts)) {
@@ -153,7 +141,7 @@ public class ImportDeltaCalculationResultsFromS3
             throw new RuntimeException(audienceType + " not supported.");
         }
 
-        if (isOutreachTaskLaunch) {
+        if (hasOutreachTaskDescription) {
             putStringValueInContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE,
                     Boolean.toString(true));
         }
@@ -167,10 +155,11 @@ public class ImportDeltaCalculationResultsFromS3
         return tableNames;
     }
 
-    private boolean isOutreachTaskLaunch(ChannelConfig channelConfig) {
+    protected boolean hasOutreachTaskDescription(ChannelConfig channelConfig) {
         if (channelConfig instanceof OutreachChannelConfig) {
             OutreachChannelConfig outreachConfig = (OutreachChannelConfig) channelConfig;
-            return outreachConfig.getLaunchBaseType() == LaunchBaseType.TASK;
+            String taskDescription = outreachConfig.getTaskDescription();
+            return outreachConfig.getLaunchBaseType() == LaunchBaseType.TASK && !StringUtils.isEmpty(taskDescription);
         } else {
             return false;
         }

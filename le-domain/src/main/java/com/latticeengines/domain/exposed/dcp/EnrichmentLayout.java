@@ -91,6 +91,10 @@ public class EnrichmentLayout implements HasPid, HasTenant {
     @Type(type = "json")
     private List<String> elements;
 
+    @Column(name = "TEMPLATE_ID")
+    @JsonProperty("templateId")
+    private String templateId;
+
     @Override
     public Long getPid() {
         return pid;
@@ -183,4 +187,11 @@ public class EnrichmentLayout implements HasPid, HasTenant {
         this.elements = elements;
     }
 
+    public String getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(String templateId) {
+        this.templateId = templateId;
+    }
 }

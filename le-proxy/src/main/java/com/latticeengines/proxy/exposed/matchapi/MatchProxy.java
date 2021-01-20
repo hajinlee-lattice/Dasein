@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.matchapi;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -109,10 +110,22 @@ public class MatchProxy extends BaseRestApiProxy {
         InternalAccountIdLookupRequest request = new InternalAccountIdLookupRequest();
         request.setCustomerSpace(customerSpace);
         request.setLookupId(lookupId);
-        request.setLookupIdVal(lookupIdVal);
+        request.setLookupIdVals(Collections.singletonList(lookupIdVal));
         request.setDataCollectionVersion(version);
         return post("lookup_internal_account_id", url, request, String.class);
     }
+
+    public List<String> lookupInternalAccountIds(@NotNull String customerSpace, @NotNull String lookupId,
+                                          @NotNull List<String> lookupIdVals, DataCollection.Version version) {
+        String url = constructUrl("/cdllookup/accountids", customerSpace);
+        InternalAccountIdLookupRequest request = new InternalAccountIdLookupRequest();
+        request.setCustomerSpace(customerSpace);
+        request.setLookupId(lookupId);
+        request.setLookupIdVals(lookupIdVals);
+        request.setDataCollectionVersion(version);
+        return post("lookup_internal_account_id", url, request, List.class);
+    }
+
 
     public List<Map<String, Object>> lookupContacts(@NotNull String customerSpace, @NotNull String lookupId,
             @NotNull String lookupIdVal, String contactId, DataCollection.Version version) {

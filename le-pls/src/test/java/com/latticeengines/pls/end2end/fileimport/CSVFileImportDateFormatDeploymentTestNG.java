@@ -16,6 +16,7 @@ import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,17 +39,14 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.LatticeFieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
@@ -73,7 +71,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
     }
 
     @Test(groups = "deployment.import.group2")
-    public void testContactDate() {
+    public void testContactDate() throws IOException {
         baseContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_DATE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_DATE_FILE));
@@ -148,9 +146,21 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
             }
         }
 
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType);
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Contact, true, false, true, false);
-        String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
+
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        S3ImportTemplateDisplay templateDisplay = new S3ImportTemplateDisplay();
+        templateDisplay.setFeedType(feedType);
+        ObjectMapper mapper = new ObjectMapper();
+        String payload = mapper.writeValueAsString(templateDisplay);
+        HttpEntity<String> entity = new HttpEntity<>(payload, headers);
+        ResponseEntity<byte[]> response = restTemplate.exchange(
+                String.format("%s/pls/cdl/s3import/template/downloadcsv", getRestAPIHostPort()), HttpMethod.POST,
+                entity, byte[].class);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String fileContent = new String(response.getBody());
         Assert.assertNotNull(fileContent);
         String[] mappings = fileContent.split("\n");
         boolean firstLine = true;
@@ -160,26 +170,30 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
                 assertTemplateMappingHeaders(mapping);
             } else {
                 String[] fields = mapping.split(",");
-                if (fields[2].equals("ContactId")) {
+                if (fields[3].equals("ContactId")) {
                     Assert.assertEquals(fields[0], CUSTOM);
-                    Assert.assertEquals(fields[1], "ID");
-                    Assert.assertEquals(fields[3], UserDefinedType.TEXT.name());
-                } else if (fields[2].equals("CustomerContactId")) {
+                    Assert.assertEquals(fields[2], "ID");
+                    Assert.assertEquals(fields[4], UserDefinedType.TEXT.name());
+                } else if (fields[3].equals("CustomerContactId")) {
                     Assert.assertEquals(fields[0], STANDARD);
-                    Assert.assertEquals(fields[1], "ID");
-                    Assert.assertEquals(fields[3], UserDefinedType.TEXT.name());
-                } else if (fields[2].equals("ContactName")) {
+                    Assert.assertEquals(fields[1], LatticeFieldCategory.Other.name());
+                    Assert.assertEquals(fields[2], "ID");
+                    Assert.assertEquals(fields[4], UserDefinedType.TEXT.name());
+                } else if (fields[3].equals("ContactName")) {
                     Assert.assertEquals(fields[0], STANDARD);
-                    Assert.assertEquals(fields[1], "Name");
-                    Assert.assertEquals(fields[3], UserDefinedType.TEXT.name());
-                } else if (fields[2].equals("CreatedDate")) {
+                    Assert.assertEquals(fields[1], LatticeFieldCategory.Other.name());
+                    Assert.assertEquals(fields[2], "Name");
+                    Assert.assertEquals(fields[4], UserDefinedType.TEXT.name());
+                } else if (fields[3].equals("CreatedDate")) {
                     Assert.assertEquals(fields[0], STANDARD);
-                    Assert.assertEquals(fields[1], "Created Date");
-                    Assert.assertEquals(fields[3], "MM/DD/YYYY 00:00:00 12H");
-                } else if (fields[2].equals("LastModifiedDate")) {
+                    Assert.assertEquals(fields[1], LatticeFieldCategory.Other.name());
+                    Assert.assertEquals(fields[2], "Created Date");
+                    Assert.assertEquals(fields[4], "MM/DD/YYYY 00:00:00 12H");
+                } else if (fields[3].equals("LastModifiedDate")) {
                     Assert.assertEquals(fields[0], STANDARD);
-                    Assert.assertEquals(fields[1], UNMAPPED);
-                    Assert.assertEquals(fields[3], UserDefinedType.DATE.name());
+                    Assert.assertEquals(fields[1], LatticeFieldCategory.Other.name());
+                    Assert.assertEquals(fields[2], UNMAPPED);
+                    Assert.assertEquals(fields[4], UserDefinedType.DATE.name());
                 }
 
             }
@@ -188,11 +202,12 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
 
     private void assertTemplateMappingHeaders(String mapping) {
         String[] fields = mapping.split(",");
-        Assert.assertEquals(fields.length, 4);
+        Assert.assertEquals(fields.length, 5);
         Assert.assertEquals(fields[0], "Field Type");
-        Assert.assertEquals(fields[1], "Your Field Name");
-        Assert.assertEquals(fields[2], "Standard Field Name");
-        Assert.assertEquals(fields[3], "Data Type");
+        Assert.assertEquals(fields[1], "Category");
+        Assert.assertEquals(fields[2], "Your Field Name");
+        Assert.assertEquals(fields[3], "Standard Field Name");
+        Assert.assertEquals(fields[4], "Data Type");
     }
 
 
@@ -263,28 +278,13 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         }
 
         Assert.assertEquals(dfId, dfIdExtra);
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType);
-        Table standardTable = SchemaRepository.instance().getSchema(BusinessEntity.Account, true, false, true, false);
-        String fileContent = cdlService.getTemplateMappingContent(dataFeedTask.getImportTemplate(), standardTable);
 
-        Assert.assertNotNull(fileContent);
-        String[] mappings = fileContent.split("\n");
-        boolean firstLine = true;
-        for (String mapping : mappings) {
-            if (firstLine) {
-                firstLine = false;
-                assertTemplateMappingHeaders(mapping);
-            } else {
-                String[] fields = mapping.split(",");
-                verifyAccountMapping(fields[0], fields[1], fields[2], fields[3]);
-            }
-        }
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.ALL));
         headers.setContentType(MediaType.APPLICATION_JSON);
         S3ImportTemplateDisplay templateDisplay = new S3ImportTemplateDisplay();
-        templateDisplay.setFeedType("DefaultSystem_AccountData");
+        templateDisplay.setFeedType(feedType);
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(templateDisplay);
         HttpEntity<String> entity = new HttpEntity<>(payload, headers);
@@ -306,11 +306,12 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
             parser = new CSVParser(reader, format);
             Set<String> csvHeaders = parser.getHeaderMap().keySet();
             assertTrue(csvHeaders.contains("Field Type"));
+            assertTrue(csvHeaders.contains("Category"));
             assertTrue(csvHeaders.contains("Your Field Name"));
             assertTrue(csvHeaders.contains("Standard Field Name"));
             assertTrue(csvHeaders.contains("Data Type"));
             for (CSVRecord record : parser.getRecords()) {
-                verifyAccountMapping(record.get("Field Type"), record.get("Your Field Name"),
+                verifyAccountMapping(record.get("Field Type"), record.get("Category"), record.get("Your Field Name"),
                         record.get("Standard Field Name"), record.get("Data Type"));
             }
         } catch (Exception e) {
@@ -320,35 +321,41 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
         }
     }
 
-    private void verifyAccountMapping(String field0, String field1, String field2, String field3) {
-        if ("AccountId".equals(field2)) {
+    private void verifyAccountMapping(String field0, String field1, String field2, String field3, String field4) {
+        if ("AccountId".equals(field3)) {
             Assert.assertEquals(field0, STANDARD);
-            Assert.assertEquals(field1, "ID");
-            Assert.assertEquals(field3, UserDefinedType.TEXT.name());
-        } else if ("CustomerAccountId".equals(field2)) {
+//            Assert.assertEquals(field1, LatticeFieldCategory.MatchField.name());
+            Assert.assertEquals(field2, "ID");
+            Assert.assertEquals(field4, UserDefinedType.TEXT.name());
+        } else if ("CustomerAccountId".equals(field3)) {
             Assert.assertEquals(field0, STANDARD);
-            Assert.assertEquals(field1, "ID");
-            Assert.assertEquals(field3, UserDefinedType.TEXT.name());
-        } else if ("Type".equals(field2)) {
+            Assert.assertEquals(field1, LatticeFieldCategory.Other.name());
+            Assert.assertEquals(field2, "ID");
+            Assert.assertEquals(field4, UserDefinedType.TEXT.name());
+        } else if ("Type".equals(field3)) {
             Assert.assertEquals(field0, STANDARD);
-            Assert.assertEquals(field1, "Type");
-            Assert.assertEquals(field3, UserDefinedType.TEXT.name());
-        } else if ("user_TestDate1".equalsIgnoreCase(field2)) {
+            Assert.assertEquals(field1, LatticeFieldCategory.Other.name());
+            Assert.assertEquals(field2, "Type");
+            Assert.assertEquals(field4, UserDefinedType.TEXT.name());
+        } else if ("user_TestDate1".equalsIgnoreCase(field3)) {
             Assert.assertEquals(field0, CUSTOM);
-            Assert.assertEquals(field1, "TestDate1");
-            Assert.assertEquals(field3, "MM/DD/YYYY America/New_York");
-        } else if ("user_TestDate2".equalsIgnoreCase(field2)) {
+            Assert.assertTrue(StringUtils.isBlank(field1));
+            Assert.assertEquals(field2, "TestDate1");
+            Assert.assertEquals(field4, "MM/DD/YYYY America/New_York");
+        } else if ("user_TestDate2".equalsIgnoreCase(field3)) {
             Assert.assertEquals(field0, CUSTOM);
-            Assert.assertEquals(field1, "TestDate2");
-            Assert.assertEquals(field3, "MM.DD.YY 00:00:00 12H Asia/Shanghai");
-        } else if ("user_TestDate3".equalsIgnoreCase(field2)) {
+            Assert.assertTrue(StringUtils.isBlank(field1));
+            Assert.assertEquals(field2, "TestDate2");
+            Assert.assertEquals(field4, "MM.DD.YY 00:00:00 12H Asia/Shanghai");
+        } else if ("user_TestDate3".equalsIgnoreCase(field3)) {
             Assert.assertEquals(field0, CUSTOM);
-            Assert.assertEquals(field1, "TestDate3");
-            Assert.assertEquals(field3, "YYYY-MMM-DD 00:00 12H " + TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
-        } else if ("LastModifiedDate".equals(field2)) {
+            Assert.assertTrue(StringUtils.isBlank(field1));
+            Assert.assertEquals(field2, "TestDate3");
+            Assert.assertEquals(field4, "YYYY-MMM-DD 00:00 12H " + TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE);
+        } else if ("LastModifiedDate".equals(field3)) {
             Assert.assertEquals(field0, STANDARD);
-            Assert.assertEquals(field1, UNMAPPED);
-            Assert.assertEquals(field3, UserDefinedType.DATE.name());
+            Assert.assertEquals(field2, UNMAPPED);
+            Assert.assertEquals(field4, UserDefinedType.DATE.name());
         }
     }
 }

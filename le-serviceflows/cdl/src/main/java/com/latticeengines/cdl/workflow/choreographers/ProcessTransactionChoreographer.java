@@ -89,7 +89,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     private boolean isBusinessCalenderChanged = false;
     private boolean needRebuildForCustomerAccountId = false;
     private boolean entityMatchEnabled = false;
-    private boolean forceRebuildForNewSteps = true;
 
     @Override
     void checkManyUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -102,7 +101,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         checkEntityMatchEnabled(step);
         checkRebuildForCustomerAccountId(step);
         checkBusinessCalendarChanged(step);
-        checkShouldForceRebuildForNewSteps(step); // remove this after migrating update txn into new steps in rebuild
     }
 
     @Override
@@ -191,16 +189,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         }
     }
 
-    void checkShouldForceRebuildForNewSteps(AbstractStep<? extends BaseStepConfiguration> step) {
-        DataCollectionStatus status = step.getObjectFromContext(BaseWorkflowStep.CDL_COLLECTION_STATUS,
-                DataCollectionStatus.class);
-        Preconditions.checkNotNull(status, "DataCollectionStatus in context should not be null");
-        if (BooleanUtils.isFalse(status.getTransactionRebuiltWithNewSteps())) {
-            log.info("TransactionRebuiltWithNewSteps flag indicates tenant should go through update mode.");
-            forceRebuildForNewSteps = false;
-        }
-    }
-
     private void checkEntityMatchEnabled(AbstractStep<? extends BaseStepConfiguration> step) {
         ChoreographerContext context = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
         if (context != null && context.isEntityMatchEnabled()) {
@@ -271,9 +259,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         boolean should = super.shouldRebuild(step);
 
         log.info(String.format("Important flag to decide transaction rebuild: reset=%b, hasRawStore=%b, "
-                + "hasProducts=%b, productChoreographer.hasChange=%b, isBusinessCalendarChanged=%b, forceRebuildForNewSteps=%b",
-                reset, hasRawStore, hasProducts, productChoreographer.hasChange, isBusinessCalenderChanged,
-                forceRebuildForNewSteps));
+                + "hasProducts=%b, productChoreographer.hasChange=%b, isBusinessCalendarChanged=%b",
+                reset, hasRawStore, hasProducts, productChoreographer.hasChange, isBusinessCalenderChanged));
 
         if (reset) {
             return should;
@@ -289,9 +276,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             } else if (hasRawStore && needRebuildForCustomerAccountId) {
                 log.info("Transaction store has not been migrated off CustomerAccountId yet, need to rebuild {}",
                         mainEntity());
-                should = true;
-            } else if (hasRawStore && forceRebuildForNewSteps) {
-                log.info("Force rebuild transaction stores until new steps support update.");
                 should = true;
             }
         } else if (!hasProducts && !shouldSoftDelete(step)) {

@@ -244,6 +244,11 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         return populateExportFolder(lookupIdMappingEntityMgr.getLookupIdMap(orgId, externalSystemType));
     }
 
+    @Override
+    public LookupIdMap getLookupIdMapByExtSysAuth(String externalSystemAuthId) {
+        return lookupIdMappingEntityMgr.getLookupIdMapByExtSysAuth(externalSystemAuthId);
+    }
+
     private LookupIdMap findExistingLookupIdMap(LookupIdMap lookupIdMap) {
         CDLExternalSystemName externalSystemName = lookupIdMap.getExternalSystemName();
         List<LookupIdMap> foundList = lookupIdMappingEntityMgr.getLookupIdMapsByExtSysName(externalSystemName);

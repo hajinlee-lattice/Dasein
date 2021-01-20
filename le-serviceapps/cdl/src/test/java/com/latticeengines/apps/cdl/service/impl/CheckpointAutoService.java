@@ -653,6 +653,9 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                     newDataFeedTask.setImportTemplate(dataFeedTask.getImportTemplate());
                     newDataFeedTask.getImportTemplate().setName(templateName);
                 }
+                if (StringUtils.isNotBlank(dataFeedTask.getTaskUniqueName())) {
+                    newDataFeedTask.setTaskUniqueName(dataFeedTask.getTaskUniqueName());
+                }
                 newDataFeedTask.setStatus(dataFeedTask.getStatus());
                 newDataFeedTask.setEntity(dataFeedTask.getEntity());
                 newDataFeedTask.setFeedType(dataFeedTask.getFeedType());

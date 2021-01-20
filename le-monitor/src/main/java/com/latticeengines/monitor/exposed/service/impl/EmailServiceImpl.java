@@ -909,7 +909,7 @@ public class EmailServiceImpl implements EmailService {
                 builder.replaceToken("{{sourceDisplayName}}", uploadEmailInfo.getSourceDisplayName());
                 builder.replaceToken("{{projectDisplayName}}", uploadEmailInfo.getProjectDisplayName());
                 builder.replaceToken("{{url}}", dcpPublicUrl);
-                Multipart mp = builder.buildMultipart();
+                Multipart mp = builder.buildRawMultipart();
                 builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/dnb_connect.png",
                         "image/png", "dnb_connect_logo");
                 builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/avatar.png",
@@ -939,7 +939,7 @@ public class EmailServiceImpl implements EmailService {
                 builder.replaceToken("{{sourceDisplayName}}", uploadEmailInfo.getSourceDisplayName());
                 builder.replaceToken("{{projectDisplayName}}", uploadEmailInfo.getProjectDisplayName());
                 builder.replaceToken("{{url}}", dcpPublicUrl);
-                Multipart mp = builder.buildMultipart();
+                Multipart mp = builder.buildRawMultipart();
                 builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/dnb_connect.png",
                         "image/png", "dnb_connect_logo");
                 builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/avatar.png",
@@ -966,7 +966,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{tenantname}}", tenantName);
             builder.replaceToken("{{url}}", url);
-            Multipart multipart = builder.buildMultipart();
+            Multipart multipart = builder.buildRawMultipart();
             builder.addCustomImagesToMultipart(multipart, "com/latticeengines/monitor/dnb_connect.png",
                     "image/png", "dnb_connect_logo");
             builder.addCustomImagesToMultipart(multipart, "com/latticeengines/monitor/avatar.png",

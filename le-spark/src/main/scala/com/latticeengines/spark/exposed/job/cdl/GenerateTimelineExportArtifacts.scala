@@ -71,7 +71,6 @@ class GenerateTimelineExportArtifacts extends AbstractSparkJob[GenerateTimelineE
             .groupBy(AccountId.name, ContactId.name, StreamType.name, EventType.name, EventDate.name)
             .agg(sum(Count.name).as(Count.name))
         } else {
-          // TODO consider timezone and maybe consider other format
           timelineFilterTable = timelineFilterTable
             .withColumn(EventDate.name, getDateSecond(col(EventTimestamp.name), lit(timeZone)))
         }
