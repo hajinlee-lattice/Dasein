@@ -86,6 +86,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     @Override
     protected void checkBasicInfo() {
         super.checkBasicInfo();
+        downloadTestData();
         Assert.assertTrue(StringUtils.isNotEmpty(qaTestDataPath), "Test Data directory is required");
         activityStoreTestDataPath = qaTestDataPath + File.separator + "activitystore";
         log.info("Activity Store test data directory is " + activityStoreTestDataPath);
@@ -110,8 +111,6 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
         log.info("Importing contact data...");
         String defaultContactFilePath = activityStoreTestDataPath + File.separator + defaultContactFileName;
         testFileImportService.doDefaultTemplateOneOffImport(defaultContactFilePath, EntityType.Contacts);
-        // String otherContactFilePath = activityStoreTestDataPath + File.separator +
-        // otherContactFileName;
         testFileImportService.doOneOffImport(defaultContactFilePath, OTHER_SYSTEM_NAME, EntityType.Contacts);
 
         log.info("Importing DnbIntent data...");

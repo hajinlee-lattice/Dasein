@@ -106,7 +106,6 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
         Assert.assertTrue(StringUtils.isNotEmpty(userName), "Username is required");
         Assert.assertTrue(StringUtils.isNotEmpty(password), "Password is required");
         Assert.assertTrue(StringUtils.isNotEmpty(mainTenant), "Main tenant is required");
-        downloadTestData();
     }
 
     @AfterClass(alwaysRun = true)
