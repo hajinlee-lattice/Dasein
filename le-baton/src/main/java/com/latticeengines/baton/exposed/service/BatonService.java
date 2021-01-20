@@ -110,4 +110,8 @@ public interface BatonService {
     // FIXME: a hotfix for M36. ATT crisis
     boolean shouldSkipFuzzyMatchInPA(String tenantId);
 
+    int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense);
+
+    Set<String> getExpiredLicenses(String tenantId);
+
 }
