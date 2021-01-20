@@ -1,5 +1,10 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import static com.latticeengines.apps.cdl.end2end.ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
@@ -10,6 +15,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -37,6 +43,7 @@ import com.latticeengines.domain.exposed.elasticsearch.PublishTableToESRequest;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -52,6 +59,7 @@ import com.latticeengines.elasticsearch.util.ElasticSearchUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PublishTableProxy;
 import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.objectapi.ActivityProxy;
 
@@ -77,6 +85,9 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
     @Inject
     private ActivityProxy activityProxy;
 
+    @Inject
+    private MatchProxy matchProxy;
+
     @BeforeClass(groups = {"end2end"})
     @Override
     public void setup() throws Exception {
@@ -84,35 +95,20 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         featureFlagMap.putIfAbsent(LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH.getName(), true);
         super.setupEnd2EndTestEnvironment(featureFlagMap);
         // account/contact in check point, not time line profile
-        // resumeCheckpoint(CHECK_POINT);
+        resumeCheckpoint(CHECK_POINT);
     }
 
     @Test(groups = "end2end")
     public void testTimelineProfile() throws Exception {
 
-        PublishTableToESRequest request = generateRequest(TableRoleInCollection.TimelineProfile);
+        PublishTableToESRequest request = generateTimelineRequest(TableRoleInCollection.TimelineProfile);
         String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
         JobStatus status = waitForWorkflowStatus(appId, false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         // fake data for query
         prepareTimeline();
 
-        ElasticSearchDataUnit unit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(mainCustomerSpace,
-                TableRoleInCollection.TimelineProfile.name(),
-                DataUnit.StorageType.ElasticSearch);
-        Assert.assertNotNull(unit);
-        Assert.assertTrue(StringUtils.isNotBlank(unit.getSignature()));
-        String entity = ElasticSearchUtils.getEntityFromTableRole(TableRoleInCollection.TimelineProfile);
-        String signature = unit.getSignature();
-        String indexName = ElasticSearchUtils.constructIndexName(CustomerSpace.shortenCustomerSpace(mainCustomerSpace),
-                entity, signature);
-
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singleton(AssertionError.class), null);
-        retry.execute(context -> {
-            Assert.assertTrue(elasticSearchService.indexExists(indexName));
-            return true;
-        });
-
+        String indexName = getIndexName(TimelineProfile);
 
 
         // get field mapping from index and assert field exists
@@ -134,11 +130,69 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
 
         elasticSearchService.deleteIndex(indexName);
 
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singleton(AssertionError.class), null);
         retry.execute(context -> {
             Assert.assertFalse(elasticSearchService.indexExists(indexName));
             return true;
         });
 
+    }
+
+    @Test(groups = "end2end")
+    private void testPublishAccount() {
+
+        String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, ConsolidatedAccount);
+        PublishTableToESRequest request = generateRequest(ConsolidatedAccount, tableName);
+        String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
+        JobStatus status = waitForWorkflowStatus(appId, false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+
+        String indexName = getIndexName(ConsolidatedAccount);
+        String value = matchProxy.lookupInternalAccountId(mainCustomerSpace, InterfaceName.AccountId.name(), "898",
+                null);
+
+        Assert.assertTrue(StringUtils.isNotBlank(value));
+    }
+
+    @Test(groups = "end2end")
+    private void testPublishContact() {
+
+        String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, ConsolidatedContact);
+        PublishTableToESRequest request = generateRequest( ConsolidatedContact, tableName);
+        String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
+        JobStatus status = waitForWorkflowStatus(appId, false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+
+        String indexName = getIndexName( ConsolidatedContact);
+
+        List<Map<String, Object>> contacts = matchProxy.lookupContacts(mainCustomerSpace,
+                InterfaceName.AccountId.name(), "898", "",
+                null);
+
+        Assert.assertTrue(CollectionUtils.isNotEmpty(contacts));
+
+        contacts = matchProxy.lookupContacts(mainCustomerSpace,
+                InterfaceName.AccountId.name(), "898", "",
+                null);
+    }
+
+    private String getIndexName(TableRoleInCollection role) {
+        ElasticSearchDataUnit unit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(mainCustomerSpace,
+                role.name(),
+                DataUnit.StorageType.ElasticSearch);
+        Assert.assertNotNull(unit);
+        Assert.assertTrue(StringUtils.isNotBlank(unit.getSignature()));
+        String entity = ElasticSearchUtils.getEntityFromTableRole(role);
+        String signature = unit.getSignature();
+        String indexName = ElasticSearchUtils.constructIndexName(CustomerSpace.shortenCustomerSpace(mainCustomerSpace),
+                entity, signature);
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            Assert.assertTrue(elasticSearchService.indexExists(indexName));
+            return true;
+        });
+        return indexName;
     }
 
     private void verifyField(Map<String, Object> mappings, String field, String type) {
@@ -148,8 +202,12 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         Assert.assertEquals(accountMap.get("type"), type);
     }
 
-    private PublishTableToESRequest generateRequest(TableRoleInCollection role) throws IOException {
+    private PublishTableToESRequest generateTimelineRequest(TableRoleInCollection role) throws IOException {
         String tableName = setupTables();
+        return generateRequest(role, tableName);
+    }
+
+    private PublishTableToESRequest generateRequest(TableRoleInCollection role, String tableName) {
         PublishTableToESRequest request = new PublishTableToESRequest();
         ElasticSearchExportConfig config = new ElasticSearchExportConfig();
         config.setSignature(ElasticSearchUtils.generateNewVersion());

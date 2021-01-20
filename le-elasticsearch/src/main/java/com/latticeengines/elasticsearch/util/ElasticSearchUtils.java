@@ -3,7 +3,6 @@ package com.latticeengines.elasticsearch.util;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitDate;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.EventDate;
 
@@ -275,7 +274,7 @@ public final class ElasticSearchUtils {
         if (lookupIds != null) {
             for (String lookupId : lookupIds) {
                 accountBuilder //
-                        .startObject(BucketedAccount.name() + ":" + lookupId) //
+                        .startObject(lookupId) //
                         .field("type", "keyword") //
                         .endObject();
             }
@@ -393,7 +392,7 @@ public final class ElasticSearchUtils {
             SearchRequest searchRequest = new SearchRequest(indexName);
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             TermQueryBuilder queryBuilder = QueryBuilders.termQuery(
-                    TableRoleInCollection.BucketedAccount.ordinal() + ":" + lookupIdKey, lookupIdValue.toLowerCase());
+                    lookupIdKey, lookupIdValue.toLowerCase());
             searchSourceBuilder.query(queryBuilder);
             log.info("accountByLookup query is {}.", searchSourceBuilder);
             workflowSpan.log(String.format("indexName : %s, accountByLookup query : %s",
@@ -421,8 +420,7 @@ public final class ElasticSearchUtils {
             workflowSpan = tracer.activeSpan();
             SearchRequest request = new SearchRequest(indexName);
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-            TermQueryBuilder queryBuilder = QueryBuilders.termQuery(
-                    TableRoleInCollection.BucketedAccount.ordinal() + ":" + lookupIdKey, lookupIdValue.toLowerCase());
+            TermQueryBuilder queryBuilder = QueryBuilders.termQuery(lookupIdKey, lookupIdValue.toLowerCase());
             searchSourceBuilder.query(queryBuilder);
             searchSourceBuilder.fetchSource(false);
             searchSourceBuilder.fetchSource(AccountId.name(), null);

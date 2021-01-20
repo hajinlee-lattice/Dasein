@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,7 +17,6 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -32,22 +29,14 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportCon
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.spark.exposed.job.cdl.ReportChangeListJob;
 import com.latticeengines.spark.exposed.job.common.CreateChangeListJob;
-import com.latticeengines.spark.exposed.service.LivySessionService;
-import com.latticeengines.spark.exposed.service.SparkJobService;
 
 public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntityStepConfiguration>
         extends BaseProcessAnalyzeSparkStep<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseValidateReportBatchStore.class);
 
-    @Inject
-    private LivySessionService sessionService;
-
-    @Inject
-    private SparkJobService sparkJobService;
 
     protected BusinessEntity entity;
     private TableRoleInCollection role;
@@ -281,42 +270,12 @@ public abstract class BaseValidateReportBatchStore<T extends BaseProcessEntitySt
     }
 
     private void validate() {
-        if (batchStoreExists(role, inactive)) {
+        if (tableInRoleExists(role, inactive)) {
             totalRecords = countRawEntitiesInHdfs(role, inactive);
             if (totalRecords <= 0L) {
                 throw new LedpException(LedpCode.LEDP_18239, new String[] { entity.name() });
             }
         }
-    }
-
-    private boolean batchStoreExists(TableRoleInCollection tableRole, DataCollection.Version version) {
-        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, version);
-        if (StringUtils.isBlank(tableName)) {
-            return false;
-        }
-        Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
-        return table != null;
-    }
-
-    private long countRawEntitiesInHdfs(TableRoleInCollection tableRole, DataCollection.Version version) {
-        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, version);
-        if (StringUtils.isBlank(tableName)) {
-            return 0L;
-        }
-        Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
-        if (table == null) {
-            log.error("Cannot find table " + tableName);
-            return 0L;
-        }
-        Long count = table.getExtracts().get(0).getProcessedRecords();
-        if (count == null || count <= 0) {
-            String hdfsPath = table.getExtracts().get(0).getPath();
-            hdfsPath = PathUtils.toAvroGlob(hdfsPath);
-            log.info("Count records in HDFS " + hdfsPath);
-            count = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, hdfsPath);
-        }
-        log.info(String.format("Table role %s version %s has %d entities.", tableRole.name(), version.name(), count));
-        return count;
     }
 
 }

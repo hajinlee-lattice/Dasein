@@ -4,11 +4,12 @@ import com.latticeengines.domain.exposed.spark.common.ApplyChangeListConfig
 import com.latticeengines.domain.exposed.spark.common.ChangeListConstants._
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{ChangeListUtils, MergeUtils}
-import org.apache.spark.sql.functions.{col, first}
+import org.apache.spark.sql.functions.{col, first, lit}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class ApplyChangeListJob extends AbstractSparkJob[ApplyChangeListConfig] {
 
@@ -18,6 +19,9 @@ class ApplyChangeListJob extends AbstractSparkJob[ApplyChangeListConfig] {
     val changeListInputs = if (config.isHasSourceTbl) lattice.input.tail else lattice.input
     val joinKey = config.getJoinKey
     val includeAttrs: Seq[String] = if (config.getIncludeAttrs == null) Seq() else config.getIncludeAttrs.toSeq
+    val setDeletedToNull = config.isSetDeletedToNull
+    val attrsForbidToSet: Set[String] = if (config.getAttrsForbidToSet == null) Set() else config.getAttrsForbidToSet
+      .asScala.toSet
 
     val changeList = changeListInputs.reduce(_ union _)
     val allUpdates = changeList
@@ -38,13 +42,15 @@ class ApplyChangeListJob extends AbstractSparkJob[ApplyChangeListConfig] {
           .filter(col(RowId).isNull && col(ColumnId).isNotNull && col(Deleted) === true)
           .select(col(ColumnId)).distinct
         val deletedColumnNames = deletedColumnIds.collect.map(r => r.getString(0)).toSeq
-        mergeWithExisting(spark, source, deletedRowIds, deletedColumnNames, validUpdates, joinKey)
+        mergeWithExisting(spark, source, deletedRowIds, deletedColumnNames, validUpdates, joinKey, setDeletedToNull,
+          attrsForbidToSet)
     }
     lattice.output = result :: Nil
   }
 
   def mergeWithExisting(spark: SparkSession, source: DataFrame, deletedRowIds: DataFrame, deletedColumnNames: Seq[String],
-    updatedChangeList: DataFrame, joinKey: String): DataFrame = {
+    updatedChangeList: DataFrame, joinKey: String, setDeletedToNull: Boolean, attrsForbidToSet: Set[String]):
+  DataFrame = {
     var result = source
 
     if (deletedColumnNames.nonEmpty) {
@@ -54,7 +60,21 @@ class ApplyChangeListJob extends AbstractSparkJob[ApplyChangeListConfig] {
     if (deletedRowIds.count > 0) {
       result = MergeUtils.joinWithMarkers(result, deletedRowIds, Seq(joinKey), "left")
       val (fromMarker, toMarker) = MergeUtils.joinMarkers()
-      result = result.filter(col(toMarker).isNull)
+      if (setDeletedToNull) {
+        val filtered: DataFrame = result.filter(col(fromMarker).isNotNull && col(toMarker).isNotNull)
+        val cols = if (attrsForbidToSet.size() > 0) {
+          val setWithJoinKey = attrsForbidToSet + joinKey
+          filtered.columns.diff(setWithJoinKey.toSeq)
+        } else
+          filtered.columns.diff(joinKey)
+        val deletedRowsSetNull = cols.foldLeft(filtered : DataFrame)((filter, col) =>{
+          filter.withColumn(col, lit(null))
+        })
+        result = result.filter(col(toMarker).isNull) union deletedRowsSetNull
+      }
+      else
+        result = result.filter(col(toMarker).isNull)
+
       result = result.drop(fromMarker, toMarker)
     }
 
@@ -68,7 +88,7 @@ class ApplyChangeListJob extends AbstractSparkJob[ApplyChangeListConfig] {
   }
 
   def pivotChangeList(spark: SparkSession, changeList: DataFrame, joinKey: String): DataFrame = {
-    val dataTypes = changeList.select(DataType).collect().map(r => r.getString(0))
+    val dataTypes = changeList.select(DataType).distinct.collect().map(r => r.getString(0))
     dataTypes.foldLeft(null: DataFrame)((result, dType) => {
       val changeOfType = changeList //
         .filter(col(DataType) === dType).select(RowId, ColumnId, s"$From$dType", s"$To$dType")

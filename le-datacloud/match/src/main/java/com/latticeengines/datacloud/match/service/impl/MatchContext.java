@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.ElasticSearchDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 import scala.concurrent.Future;
@@ -35,6 +36,7 @@ public class MatchContext implements Fact, Dimension {
     private DynamoDataUnit accountLookupDataUnit; // lookupId -> accountId
     private List<DynamoDataUnit> customDataUnits;
     private MatchEngine matchEngine;
+    private ElasticSearchDataUnit elasticSearchDataUnit;
 
     // contextId should be unique for match context which has single record (not
     // for merged context)
@@ -162,6 +164,14 @@ public class MatchContext implements Fact, Dimension {
 
     public void setCustomDataUnits(List<DynamoDataUnit> customDataUnits) {
         this.customDataUnits = customDataUnits;
+    }
+
+    public ElasticSearchDataUnit getElasticSearchDataUnit() {
+        return elasticSearchDataUnit;
+    }
+
+    public void setElasticSearchDataUnit(ElasticSearchDataUnit elasticSearchDataUnit) {
+        this.elasticSearchDataUnit = elasticSearchDataUnit;
     }
 
     @JsonIgnore

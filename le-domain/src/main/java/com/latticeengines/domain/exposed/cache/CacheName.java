@@ -35,7 +35,8 @@ public enum CacheName {
     DnBRealTimeLookupCache(Constants.DnBRealTimeLookup), //
 
     LastActionTimeCache(Constants.LastActionTimeCacheName),//
-    PAFailCountCache(Constants.PAFailCountCacheName);//
+    PAFailCountCache(Constants.PAFailCountCacheName),//
+    DataUnitCache(Constants.DataUnitCacheName); //
 
     private String name;
 
@@ -102,6 +103,7 @@ public enum CacheName {
         public static final String LastActionTimeCacheName = "LastActionTimeCache";
         public static final String PAFailCountCacheName = "PAFailCountCache";
         public static final String DnBRealTimeLookup = "DnBRealTimeLookup";
+        public static final String DataUnitCacheName = "DataUnitCache";
     }
 
     public String getKeyForCache(String tenantId) {

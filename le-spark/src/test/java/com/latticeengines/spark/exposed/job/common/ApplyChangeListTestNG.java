@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -25,6 +26,7 @@ public class ApplyChangeListTestNG extends SparkJobFunctionalTestNGBase {
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(this::testMergeChangeList);
         runnables.add(this::testNewChangeList);
+        runnables.add(this::testSetDeletedToNull);
         ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
 
@@ -44,6 +46,18 @@ public class ApplyChangeListTestNG extends SparkJobFunctionalTestNGBase {
         SparkJobResult result = runSparkJob(ApplyChangeListJob.class, config, input,
                 String.format("/tmp/%s/%s/newChangeList", leStack, this.getClass().getSimpleName()));
         verify(result, Collections.singletonList(this::verifyNewChangeList));
+    }
+
+    private void testSetDeletedToNull() {
+        List<String> input = upload2Data();
+        ApplyChangeListConfig config = getConfigForChangeList();
+        config.setHasSourceTbl(true);
+        config.setSetDeletedToNull(true);
+        config.setAttrsForbidToSet(ImmutableSet.of("Id"));
+
+        SparkJobResult result = runSparkJob(ApplyChangeListJob.class, config, input,
+                String.format("/tmp/%s/%s/deletedRows", leStack, this.getClass().getSimpleName()));
+        verify(result, Collections.singletonList(this::verifySetDeletedToNull));
     }
 
     private List<String> upload1Data() {
@@ -195,6 +209,62 @@ public class ApplyChangeListTestNG extends SparkJobFunctionalTestNGBase {
             rows++;
         }
         Assert.assertEquals(rows, 4);
+        return true;
+    }
+
+    private Boolean verifySetDeletedToNull(HdfsDataUnit tgt) {
+        Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
+        int rows = 0;
+        for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
+            Assert.assertEquals(record.getSchema().getFields().size(), 7, record.toString());
+
+            Object id = record.get("Id");
+            String entityId = record.get("EntityId").toString();
+            String first = record.get("first") != null ? record.get("first").toString() : null;
+            String last = record.get("last") != null ? record.get("last").toString() : null;
+            String age = record.get("age") != null ? record.get("age").toString() : null;
+            String age2 = record.get("age2") != null ? record.get("age2").toString() : null;
+            switch (entityId) {
+                case "entityId1":
+                    Assert.assertEquals(id.toString(), "1");
+                    Assert.assertEquals(first, "john12", record.toString());
+                    Assert.assertEquals(last, "smith12", record.toString());
+                    Assert.assertEquals(age, "11", record.toString());
+                    Assert.assertNull(age2, record.toString());
+                    break;
+                case "entityId2":
+                    Assert.assertEquals(id.toString(), "2");
+                    Assert.assertNull(first, record.toString());
+                    Assert.assertEquals(last, "ann22", record.toString());
+                    Assert.assertEquals(age, "22", record.toString());
+                    Assert.assertNull(age2, record.toString());
+                    break;
+                case "entityId3":
+                    Assert.assertNull(id);
+                    Assert.assertNull(first, record.toString());
+                    Assert.assertNull(last, record.toString());
+                    Assert.assertEquals(age, "33", record.toString());
+                    Assert.assertNull(age2, record.toString());
+                    break;
+                case "entityId4":
+                    Assert.assertNull(id);
+                    Assert.assertNull(first, record.toString());
+                    Assert.assertNull(last, record.toString());
+                    Assert.assertNull(age, record.toString());
+                    Assert.assertEquals(age2, "44", record.toString());
+                    break;
+                case "entityId5":
+                    Assert.assertEquals(id.toString(), "2");
+                    Assert.assertNull(first, record.toString());
+                    Assert.assertNull(last, record.toString());
+                    Assert.assertNull(age, record.toString());
+                    Assert.assertNull(age2, record.toString());
+                    break;
+                default:
+            }
+            rows++;
+        }
+        Assert.assertEquals(rows, 5);
         return true;
     }
 }

@@ -70,9 +70,11 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.ElasticSearchDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.elasticsearch.util.ElasticSearchUtils;
 
 import scala.concurrent.Future;
 
@@ -169,10 +171,21 @@ public class FuzzyMatchHelper implements DbHelper {
             String lookupIdKey = record.getLookupIdKey();
             String lookupIdValue = record.getLookupIdValue();
             if (StringUtils.isNotBlank(lookupIdValue)) {
-                List<DynamoDataUnit> dynamoDataUnits = context.getCustomDataUnits();
-                DynamoDataUnit lookupDataUnit = context.getAccountLookupDataUnit();
-                Map<String, Object> customAccount = cdlLookupService.lookup(lookupDataUnit, dynamoDataUnits,
-                        lookupIdKey, lookupIdValue);
+                ElasticSearchDataUnit elasticSearchDataUnit = context.getElasticSearchDataUnit();
+                Map<String, Object> customAccount;
+                if (elasticSearchDataUnit != null) {
+                    String customerSpace = context.getInput().getTenant().getId();
+                    String signature = elasticSearchDataUnit.getSignature();
+                    String indexName = ElasticSearchUtils.constructIndexName(customerSpace,
+                            BusinessEntity.Account.name(),
+                            signature);
+                    customAccount = cdlLookupService.lookup(customerSpace, indexName, lookupIdKey, lookupIdValue);
+                } else {
+                    List<DynamoDataUnit> dynamoDataUnits = context.getCustomDataUnits();
+                    DynamoDataUnit lookupDataUnit = context.getAccountLookupDataUnit();
+                    customAccount =cdlLookupService.lookup(lookupDataUnit, dynamoDataUnits,
+                            lookupIdKey, lookupIdValue);
+                }
                 if (MapUtils.isNotEmpty(customAccount)) {
                     record.setMatched(true);
                     if (InterfaceName.AccountId.name().equals(record.getLookupIdKey())) {

@@ -32,6 +32,7 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), false);
+        featureFlagMap.put(LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
         checkpointService
                 .setPrecedingCheckpoints(Collections.singletonList(ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT));

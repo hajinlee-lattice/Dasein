@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
@@ -41,6 +42,7 @@ import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.datacloud.match.util.DirectPlusUtils;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -54,10 +56,13 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.ElasticSearchDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 
 public abstract class MatchPlannerBase implements MatchPlanner {
 
@@ -89,6 +94,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Inject
     private GenericMetadataService genericMetadataService;
+
+    @Inject
+    private BatonService batonService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
@@ -201,6 +212,15 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         columnSelection.setColumns(columns);
         context.setAccountLookupDataUnit(parseAccountLookupDataUnit(input));
         context.setCustomDataUnits(parseCustomDynamoDataUnits(input));
+        String customerSpace = input.getTenant().getId();
+        // set elastic search data unit
+        boolean enabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH);
+        ElasticSearchDataUnit elasticSearchDataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+                BusinessEntity.Account.name(), DataUnit.StorageType.ElasticSearch);
+        if (enabled) {
+            context.setElasticSearchDataUnit(elasticSearchDataUnit);
+        }
         return Pair.of(columnSelection, metadatas);
     }
 

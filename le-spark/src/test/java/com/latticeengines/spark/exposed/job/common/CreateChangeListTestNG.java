@@ -264,6 +264,7 @@ public class CreateChangeListTestNG extends SparkJobFunctionalTestNGBase {
             String toDouble = record.get(ToDouble) == null ? null : record.get(ToDouble).toString();
             String key = rowId + "-" + columnId;
             log.info("Key=" + key + " Record=" + record.toString());
+
             switch (key) {
             case "entityId1-first":
                 Assert.assertEquals(dataType, "String", record.toString());
@@ -291,6 +292,17 @@ public class CreateChangeListTestNG extends SparkJobFunctionalTestNGBase {
                 assertListNull(Arrays.asList(isDeleted, fromString, fromBoolean, toBoolean, fromInteger, toInteger,
                         fromBoolean, toBoolean, fromFloat, toFloat, fromDouble, toDouble), record);
                 break;
+
+                /*
+to
+            "id , column id,  first,   last,   age,  time"
+            { 1, "entityId1", "john", "smith", null, 1000001L }, //
+            { 2, "entityId2", null,   "ann",   18,   1000002L } //
+from
+            "id, column id,   first,   last  , salary, time"
+            { 1, "entityId1", "bill", null, 2000, 1000001L }, //
+            { 3, "entityId3", "mary2", "ann2", null, 1000003L } //
+*/
             case "entityId2-age":
                 Assert.assertEquals(dataType, "Integer", record.toString());
                 Assert.assertEquals(toInteger, "18", record.toString());

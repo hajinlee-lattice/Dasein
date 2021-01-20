@@ -38,6 +38,7 @@ import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datafabric.entitymanager.GenericTableEntityMgr;
 import com.latticeengines.datafabric.entitymanager.impl.GenericTableEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -46,10 +47,12 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.ElasticSearchDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.elasticsearch.Service.ElasticSearchService;
+import com.latticeengines.elasticsearch.util.ElasticSearchUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
@@ -194,11 +197,24 @@ public class CDLLookupServiceImpl implements CDLLookupService {
 
     @Override
     public String lookupInternalAccountId(@NotNull String customerSpace, DataCollection.Version version, String lookupIdKey, String lookupIdValue) {
-        DynamoDataUnit lookupDataUnit = accountLookupDUCache.get(customerSpace);
-        if (lookupDataUnit == null) {
-            return legacyLookupInternalAccountId(customerSpace, version, lookupIdKey, lookupIdValue);
+        boolean enabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH);
+        ElasticSearchDataUnit dataUnit;
+        if (enabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+                BusinessEntity.Account.name(),
+                DataUnit.StorageType.ElasticSearch)) != null) {
+            log.info("feature flag is enabled and data unit is null for {}", customerSpace);
+            String signature = dataUnit.getSignature();
+            String indexName = ElasticSearchUtils.constructIndexName(customerSpace, BusinessEntity.Contact.name(),
+                    signature);
+            return lookupInternalAccountIdByEs(customerSpace, indexName, lookupIdKey, lookupIdValue);
+        } else {
+            DynamoDataUnit lookupDataUnit = accountLookupDUCache.get(customerSpace);
+            if (lookupDataUnit == null) {
+                return legacyLookupInternalAccountId(customerSpace, version, lookupIdKey, lookupIdValue);
+            }
+            return getInternalAccountId(lookupDataUnit, lookupIdKey, lookupIdValue);
         }
-        return getInternalAccountId(lookupDataUnit, lookupIdKey, lookupIdValue);
     }
 
     @Override
@@ -352,6 +368,27 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     @Override
     public List<Map<String, Object>> lookupContactsByInternalAccountId(String customerSpace,
             DataCollection.Version version, String lookupIdKey, String lookupIdValue, String contactId) {
+        boolean enabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH);
+        ElasticSearchDataUnit dataUnit;
+        if (enabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace, BusinessEntity.Contact.name(),
+                DataUnit.StorageType.ElasticSearch)) != null) {
+            log.info("feature flag is enabled and data unit is null for {}", customerSpace);
+            String signature = dataUnit.getSignature();
+            String indexName = ElasticSearchUtils.constructIndexName(customerSpace, BusinessEntity.Contact.name(),
+                    signature);
+            ElasticSearchDataUnit accountDataUnit =
+                    (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+                            BusinessEntity.Account.name(), DataUnit.StorageType.ElasticSearch);
+            String accountIndexName = null;
+            if (accountDataUnit != null) {
+                accountIndexName = ElasticSearchUtils.constructIndexName(customerSpace, BusinessEntity.Account.name()
+                        , accountDataUnit.getSignature());
+            }
+            return lookupContactsByESInternalAccountId(customerSpace, indexName, accountIndexName, lookupIdKey,
+                    lookupIdValue,
+                    contactId);
+        }
         String internalAccountId = lookupInternalAccountId(customerSpace, version, lookupIdKey, lookupIdValue);
 
         if (StringUtils.isBlank(internalAccountId)) {

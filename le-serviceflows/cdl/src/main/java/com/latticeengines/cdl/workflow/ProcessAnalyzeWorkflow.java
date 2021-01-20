@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.choreographers.ProcessAnalyzeChoreographer;
 import com.latticeengines.cdl.workflow.listeners.ProcessAnalyzeListener;
+import com.latticeengines.cdl.workflow.steps.GenerateChangeTable;
 import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
@@ -119,6 +120,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private LegacyDeleteWorkFlow legacyDeleteWorkFlow;
 
     @Inject
+    private GenerateChangeTable generateChangeTable;
+
+    @Inject
     private PublishToElasticSearch publishToElasticSearch;
 
     @Override
@@ -149,6 +153,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(exportTimelineRawTableToDynamo) //
                 .next(publishActivityAlerts) //
                 .next(atlasAccountLookupExportWorkflow) //
+                .next(generateChangeTable) //
                 .next(publishToElasticSearch)
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //

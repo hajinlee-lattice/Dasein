@@ -44,6 +44,9 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
+import com.latticeengines.serviceflows.workflow.util.SparkUtils;
+import com.latticeengines.spark.exposed.service.LivySessionService;
+import com.latticeengines.spark.exposed.service.SparkJobService;
 
 // base PA step: spark enabled, has the concept of active, inactive version
 // and various frequently used PA methods
@@ -65,6 +68,12 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
 
     @Inject
     private CloneTableService cloneTableService;
+
+    @Inject
+    private LivySessionService sessionService;
+
+    @Inject
+    private SparkJobService sparkJobService;
 
     // The date that the Process/Analyze pipeline was run as a string.
     protected String evaluationDateStr = null;
@@ -177,7 +186,7 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
         if (changed && StringUtils.isNotBlank(changeListCtxKey)) {
             String tableName = getStringValueFromContext(changeListCtxKey);
             if (StringUtils.isNotBlank(tableName)) {
-                Table changeListTbl = metadataProxy.getTableSummary(customerSpaceStr, changeListCtxKey);
+                Table changeListTbl = metadataProxy.getTableSummary(customerSpaceStr, tableName);
                 if (changeListTbl != null) {
                     long cnt = changeListTbl.toHdfsDataUnit("ChangeList").getCount();
                     if (cnt <= 0) {
@@ -343,5 +352,35 @@ public abstract class BaseProcessAnalyzeSparkStep<T extends BaseProcessEntitySte
             log.warn("Found table {} in database but not in hdfs.", table.getName());
         }
         return result;
+    }
+
+    protected boolean tableInRoleExists(TableRoleInCollection tableRole, DataCollection.Version version) {
+        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, version);
+        if (StringUtils.isBlank(tableName)) {
+            return false;
+        }
+        Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
+        return table != null;
+    }
+
+    protected long countRawEntitiesInHdfs(TableRoleInCollection tableRole, DataCollection.Version version) {
+        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), tableRole, version);
+        if (StringUtils.isBlank(tableName)) {
+            return 0L;
+        }
+        Table table = metadataProxy.getTable(customerSpace.toString(), tableName);
+        if (table == null) {
+            log.error("Cannot find table " + tableName);
+            return 0L;
+        }
+        Long count = table.getExtracts().get(0).getProcessedRecords();
+        if (count == null || count <= 0) {
+            String hdfsPath = table.getExtracts().get(0).getPath();
+            hdfsPath = PathUtils.toAvroGlob(hdfsPath);
+            log.info("Count records in HDFS " + hdfsPath);
+            count = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, hdfsPath);
+        }
+        log.info(String.format("Table role %s version %s has %d entities.", tableRole.name(), version.name(), count));
+        return count;
     }
 }

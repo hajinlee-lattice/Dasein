@@ -5,9 +5,11 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -42,6 +44,8 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
     }
 
     @Override
+    @Cacheable(cacheNames = CacheName.Constants.DataUnitCacheName, key = "T(java.lang.String).format" +
+            "(\"%s|%s|%s|unit\", #customerSpace, #name, #type)", unless = "#result == null")
     public DataUnit getByNameAndType(String customerSpace, String name, DataUnit.StorageType type) {
         List<DataUnit> units = getDataUnits(customerSpace, name, type);
         if (CollectionUtils.isNotEmpty(units)) {

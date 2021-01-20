@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -170,7 +171,8 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
         // create or update index according to role
         if (BusinessEntity.Account.name().equals(entity)) {
             // TODO get columns from account look up
-            elasticSearchService.createAccountIndexWithLookupIds(idxName, esConfig, Collections.EMPTY_LIST);
+            elasticSearchService.createAccountIndexWithLookupIds(idxName, esConfig,
+                    Collections.singletonList(InterfaceName.AccountId.name()));
         } else {
             elasticSearchService.createIndexWithSettings(idxName, esConfig, entity);
         }
