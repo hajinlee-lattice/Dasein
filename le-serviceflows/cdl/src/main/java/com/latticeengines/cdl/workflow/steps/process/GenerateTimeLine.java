@@ -114,6 +114,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         activeTimelineMasterTableNames = MapUtils.emptyIfNull(dataCollectionProxy.getTableNamesWithSignatures(
                 customerSpace.toString(), TableRoleInCollection.TimelineProfile, active, null));
         checkRebuild();
+        putObjectInContext(TIMELINE_REBUILD, needRebuild);
         bumpVersion();
         dcStatus.setTimelineVersionMap(timelineVersionMap);
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);

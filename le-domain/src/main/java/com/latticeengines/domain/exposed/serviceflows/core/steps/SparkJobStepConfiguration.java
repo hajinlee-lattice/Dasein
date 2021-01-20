@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFl
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.TimeLineSparkStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.publish.PublishTableToElasticSearchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -36,7 +37,9 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @JsonSubTypes.Type(value = PublishVIDataStepConfiguration.class, name =
                 "PublishVIDataStepConfiguration"),
         @JsonSubTypes.Type(value = TimeLineSparkStepConfiguration.class, name = "TimeLineSparkStepConfiguration"), //
-        @JsonSubTypes.Type(value = ExportToElasticSearchStepConfiguration.class, name = "ExportToElasticSearchStepConfiguration") //
+        @JsonSubTypes.Type(value = ExportToElasticSearchStepConfiguration.class, name =
+                "ExportToElasticSearchStepConfiguration"), //
+        @JsonSubTypes.Type(value = PublishTableToElasticSearchStepConfiguration.class, name = "PublishTableToElasticSearchStepConfiguration")
 })
 public class SparkJobStepConfiguration extends BaseStepConfiguration {
 

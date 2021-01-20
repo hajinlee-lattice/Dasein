@@ -69,6 +69,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     public void setup() throws Exception {
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
 
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));

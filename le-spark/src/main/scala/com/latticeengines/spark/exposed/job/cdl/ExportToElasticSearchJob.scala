@@ -2,25 +2,19 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile
-import com.latticeengines.domain.exposed.metadata.{InterfaceName, TableRoleInCollection}
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.ExportToElasticSearchJobConfig
-import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
 import org.apache.spark.sql.functions.{collect_list, concat_ws}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.elasticsearch.spark.sql._
+import com.latticeengines.spark.util.ElasticSearchUtils._
 
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 
 class ExportToElasticSearchJob extends AbstractSparkJob[ExportToElasticSearchJobConfig] {
-
-  private val entityId = InterfaceName.EntityId.name
-  private val accountId = InterfaceName.AccountId.name
-  private val contactId = InterfaceName.ContactId.name
-  private val lookupKey = InterfaceName.AtlasLookupKey.name
-  private val recordId = TimelineStandardColumn.RecordId.getColumnName
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[ExportToElasticSearchJobConfig]): Unit = {
     //define var
@@ -35,18 +29,8 @@ class ExportToElasticSearchJob extends AbstractSparkJob[ExportToElasticSearchJob
       } else {
         null
       }
-
-    val baseConfig = Map(
-      "es.write.operation" -> "upsert",
-      "es.nodes.wan.only" -> "true",
-      "es.index.auto.create" -> "false",
-      "es.batch.write.refresh" -> "false",
-      //      "es.batch.size.bytes" -> "10mb",
-      "es.nodes" -> esConfig.getEsHost,
-      "es.port" -> esConfig.getEsPort,
-      "es.net.http.auth.user" -> "root",
-      "es.net.http.auth.pass" -> "9Nc-CX$?",
-      "es.net.ssl" -> "true")
+    val baseConfig = getBaseConfig(esConfig.getEsHost, esConfig.getEsPort, esConfig.getEsUser, esConfig
+      .getEsPassword, esConfig.getEncryptionKey, esConfig.getSalt)
 
     var accountDf: DataFrame = null
     var contactDf: DataFrame = null
@@ -113,15 +97,4 @@ class ExportToElasticSearchJob extends AbstractSparkJob[ExportToElasticSearchJob
     }
   }
 
-  private def addPrefix(df: DataFrame, prefix: String): DataFrame = {
-    val role = TableRoleInCollection.getByName(prefix).ordinal.toString
-    val cols = df.columns.toSeq
-    df.select(cols.map(c => {
-      if (c.equals(accountId) || c.equals(contactId) || c.equals(entityId)) {
-        df.col(c)
-      } else {
-        df.col(c).as(role + ":" + c)
-      }
-    }): _*)
-  }
 }

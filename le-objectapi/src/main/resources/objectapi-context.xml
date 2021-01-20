@@ -17,6 +17,7 @@
     <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:objectapi-aspects-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
+    <import resource="classpath:elasticsearch-context.xml" />
 
     <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
 

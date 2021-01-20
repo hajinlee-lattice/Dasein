@@ -27,6 +27,12 @@ public class ElasticSearchConfig implements Serializable {
     @JsonProperty("EsPassword")
     private String esPassword;
 
+    @JsonProperty("EncryptionKey")
+    private String encryptionKey;
+
+    @JsonProperty("Salt")
+    private String salt;
+
     public Integer getShards() {
         return shards;
     }
@@ -97,5 +103,21 @@ public class ElasticSearchConfig implements Serializable {
 
     public void setHttpScheme(String httpScheme) {
         this.httpScheme = httpScheme;
+    }
+
+    public String getEncryptionKey() {
+        return encryptionKey;
+    }
+
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
     }
 }

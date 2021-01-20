@@ -4,9 +4,11 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitDate;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.EventDate;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +16,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -27,7 +30,11 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetMappingsRequest;
+import org.elasticsearch.client.indices.GetMappingsResponse;
+import org.elasticsearch.client.indices.PutMappingRequest;
 import org.elasticsearch.cluster.health.ClusterIndexHealth;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -43,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -55,6 +63,8 @@ import io.opentracing.util.GlobalTracer;
 public final class ElasticSearchUtils {
 
     private static Logger log = LoggerFactory.getLogger(ElasticSearchUtils.class);
+
+    private static final String PROPERTIES = "properties";
 
     protected ElasticSearchUtils() {
         throw new UnsupportedOperationException();
@@ -73,7 +83,7 @@ public final class ElasticSearchUtils {
     }
 
     public static void createDocument(RestHighLevelClient client, String indexName, String docId, String jsonString) throws IOException {
-        if (!client.indices().exists(new GetIndexRequest(indexName), RequestOptions.DEFAULT)) {
+        if (!indexExists(client, indexName)) {
             return;
         }
         IndexRequest indexRequest = new IndexRequest(indexName, null, docId);
@@ -84,7 +94,7 @@ public final class ElasticSearchUtils {
     }
 
     public static void createDocuments(RestHighLevelClient client, String indexName, Map<String, String> docs) throws IOException {
-        if (!client.indices().exists(new GetIndexRequest(indexName), RequestOptions.DEFAULT) || MapUtils.isEmpty(docs)) {
+        if (!indexExists(client, indexName) || MapUtils.isEmpty(docs)) {
             log.error("index doesn't exists. or docs is empty. indexName is {}, docs: {}", indexName, docs);
             return;
         }
@@ -101,13 +111,24 @@ public final class ElasticSearchUtils {
 
     public static void createIndex(RestHighLevelClient client, String indexName, XContentBuilder builder) throws IOException {
         log.info("builder = {}", builder);
-        if (!client.indices().exists(new GetIndexRequest(indexName), RequestOptions.DEFAULT)) {
+        if (!indexExists(client, indexName)) {
             CreateIndexRequest request = new CreateIndexRequest(indexName);
             request.mapping(builder);
 
             CreateIndexResponse response = client.indices().create(request, RequestOptions.DEFAULT);
             log.info("Index {} created, response = {}", indexName, response);
         }
+    }
+
+    /**
+     * check one index exists
+     * @param client
+     * @param indexName
+     * @return
+     * @throws IOException
+     */
+    public static boolean indexExists(RestHighLevelClient client, String indexName) throws IOException {
+        return client.indices().exists(new GetIndexRequest(indexName), RequestOptions.DEFAULT);
     }
 
     public static void createIndexWithSettings(RestHighLevelClient client, String indexName,
@@ -127,11 +148,103 @@ public final class ElasticSearchUtils {
         }
     }
 
+
+    /**
+     * check one field name exists in the index
+     * @param client
+     * @param indexName
+     * @param fieldName
+     * @return
+     * @throws IOException
+     */
+    public static boolean checkFieldExist(RestHighLevelClient client, String indexName, String fieldName) throws IOException {
+        if (!indexExists(client, indexName)) {
+            return false;
+        }
+        Map<String, Object> map = getSourceMapping(client, indexName);
+        if (map != null) {
+            return map.containsKey(fieldName);
+        }
+        return false;
+    }
+
+    /**
+     * return the source mapping in index
+     * @param client
+     * @param indexName
+     * @return
+     * @throws IOException
+     */
+    public static Map<String, Object> getSourceMapping(RestHighLevelClient client,
+                                                       String indexName) throws IOException{
+        if (!indexExists(client, indexName)) {
+            return null;
+        }
+        GetMappingsRequest request = new GetMappingsRequest();
+        request.indices(indexName);
+        GetMappingsResponse response = client.indices().getMapping(request, RequestOptions.DEFAULT);
+        Map<String, MappingMetadata> mappings = response.mappings();
+        MappingMetadata metadata = mappings.get(indexName);
+        if (metadata != null) {
+            Map<String, Object> source = metadata.getSourceAsMap();
+            if (source != null) {
+                Object sourceMap = source.get(PROPERTIES);
+                if (sourceMap != null) {
+                    return JsonUtils.convertMap(JsonUtils.convertValue(sourceMap, Map.class), String.class,
+                            Object.class);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * update the mapping if the field name is not set in index
+     * @param client
+     * @param indexName
+     * @param fieldName
+     * @throws IOException
+     */
+    public static boolean updateIndexMapping(RestHighLevelClient client, String indexName,
+                                  String fieldName, String type) throws IOException {
+        if (checkFieldExist(client, indexName, fieldName)) {
+            log.info("field {} exists in the index {}", fieldName, indexName);
+            return false;
+        }
+        log.info("set field name {} with type {} for index {}", fieldName, indexName, type);
+        PutMappingRequest request = new PutMappingRequest(indexName);
+        XContentBuilder builder = XContentFactory.jsonBuilder().startObject()
+                .startObject(PROPERTIES)
+                .startObject(fieldName)
+                .field("type", type)
+        .endObject().endObject().endObject();
+        request.source(builder);
+
+        client.indices().putMapping(request, RequestOptions.DEFAULT);
+        return true;
+    }
+
+    /**
+     * delete one index
+     * @param client
+     * @param indexName
+     * @throws IOException
+     */
+    public static boolean deleteIndex(RestHighLevelClient client, String indexName) throws IOException {
+        if (!indexExists(client, indexName)) {
+            log.info("index {} doesn't exist", indexName);
+            return false;
+        }
+        DeleteIndexRequest request = new DeleteIndexRequest(indexName);
+        client.indices().delete(request, RequestOptions.DEFAULT);
+        return true;
+    }
+
     public static XContentBuilder initIndexMapping(String entityType, boolean dynamic) throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder() //
                 .startObject() //
                 .field("dynamic", dynamic) //
-                .startObject("properties");
+                .startObject(PROPERTIES);
         switch (entityType) {
             case "WebVisitProfile": return builder
                     .startObject(WebVisitDate.name())
@@ -157,7 +270,7 @@ public final class ElasticSearchUtils {
         XContentBuilder accountBuilder = XContentFactory.jsonBuilder() //
                 .startObject() //
                 .field("dynamic", dynamic) //
-                .startObject("properties");
+                .startObject(PROPERTIES);
 
         if (lookupIds != null) {
             for (String lookupId : lookupIds) {
@@ -346,5 +459,36 @@ public final class ElasticSearchUtils {
         if (span != null) {
             span.finish();
         }
+    }
+
+    public static String getEntityFromTableRole(TableRoleInCollection tableRoleInCollection) {
+        switch(tableRoleInCollection) {
+            case AccountLookup:
+            case ConsolidatedAccount:
+            case CalculatedCuratedAccountAttribute:
+            case CalculatedPurchaseHistory:
+            case PivotedRating:
+            case WebVisitProfile:
+            case OpportunityProfile:
+            case AccountMarketingActivityProfile:
+            case CustomIntentProfile:
+                return BusinessEntity.Account.name();
+            case ConsolidatedContact:
+            case CalculatedCuratedContact:
+                return BusinessEntity.Contact.name();
+            case TimelineProfile:
+                return TimelineProfile.name();
+            default:
+                return null;
+        }
+    }
+
+    public static String generateNewVersion() {
+        return String.valueOf(Instant.now().toEpochMilli());
+    }
+
+    public static String constructIndexName(String customerSpace, String entity, String signature) {
+        return String.format("%s_%s_%s", CustomerSpace.shortenCustomerSpace(customerSpace),
+                entity, signature).toLowerCase();
     }
 }

@@ -812,7 +812,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                         newMetricGroup.setRollupDimensions(activityMetricsGroup.getRollupDimensions());
                         newMetricGroup.setAggregation(activityMetricsGroup.getAggregation());
                         newMetricGroup.setEntity(activityMetricsGroup.getEntity());
-                        if (StringUtils.isNotBlank(activityMetricsGroup.getSecondarySubCategoryTmpl().getName())) {
+                        if (activityMetricsGroup.getSecondarySubCategoryTmpl() != null && StringUtils.isNotBlank(activityMetricsGroup.getSecondarySubCategoryTmpl().getName())) {
                             newMetricGroup.setSecondarySubCategoryTmpl(getTemplate(activityMetricsGroup.getSecondarySubCategoryTmpl().getName()));
                         }
                         newMetricGroup.setJavaClass(activityMetricsGroup.getJavaClass());

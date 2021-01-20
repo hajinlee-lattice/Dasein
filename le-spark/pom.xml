@@ -226,6 +226,11 @@
             </exclusions>
 <!--            <scope>provided</scope>-->
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-elasticsearch</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -37,6 +37,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 
     @Inject
     private RestHighLevelClient client;
+
     @Value("${elasticsearch.shards}")
     private int esShards;
     @Value("${elasticsearch.replicas}")
@@ -90,7 +91,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             log.error(String.format("Failed to create index %s, xContentBuilderType is %s", indexName, esEntityType), e);
             return false;
         }
-        return false;
+        return true;
     }
 
 
@@ -154,7 +155,67 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             log.error(String.format("Failed to create account index %s", indexName), e);
             return false;
         }
-        return false;
+        return true;
+    }
+
+    @Override
+    public boolean checkFieldExist(String indexName, String fieldName) {
+        try {
+            return ElasticSearchUtils.checkFieldExist(client, indexName, fieldName);
+        } catch (IOException e) {
+            log.error("error when check the mapping exist", e);
+            return false;
+        }
+    }
+
+    @Override
+    public Map<String, Object> getSourceMapping(String indexName) {
+        try {
+            return ElasticSearchUtils.getSourceMapping(client, indexName);
+        } catch (IOException e) {
+            log.error("error web get source mapping", e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean updateIndexMapping(String indexName, String fieldName, String type) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
+        try {
+            retry.execute(context -> {
+                ElasticSearchUtils.updateIndexMapping(client, indexName, fieldName, type);
+                return 0;
+            });
+        } catch (IOException e) {
+            log.error("failed to update mapping for index {}  field {}", indexName, fieldName, e);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean deleteIndex(String indexName) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
+        try {
+            retry.execute(context -> {
+                ElasticSearchUtils.deleteIndex(client, indexName);
+                return 0;
+            });
+        } catch(IOException e) {
+            log.error("failed to delete index {}", indexName);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean indexExists(String indexName) {
+        try {
+            return ElasticSearchUtils.indexExists(client, indexName);
+        } catch (IOException e) {
+            log.error("error occur when checking index {}", indexName);
+            return false;
+        }
     }
 
     @Override

@@ -143,6 +143,7 @@ public class AtlasAccountLookupExportWorkflow extends BaseExportToDynamo<AtlasAc
         DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         List<String> tableNames = configs.stream().map(DynamoExportConfig::getTableName).collect(Collectors.toList());
         status.setAccountLookupSource(tableNames);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
     }
 
     protected class AccountLookupExporter extends Exporter {
