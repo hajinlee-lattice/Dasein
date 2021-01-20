@@ -718,20 +718,7 @@ public class TenantServiceImpl implements TenantService {
             return response;
         }
 
-        // If a tenantType == TenantType.CUSTOMER tenant (the default) then check that the subscriber number is valid.
-        TenantType subscriberTenantType = vboRequest.getSubscriber().getTenantType();
-        if (subscriberTenantType == TenantType.CUSTOMER && !iDaaSService.doesSubscriberNumberExist(vboRequest)) {
-            String msg = String.format("The subscriber number [%s] is not valid, unable to create tenant.", subNumber);
-            log.error(msg);
-            VboResponse response = generateVBOResponse("failed", msg);
-            vboRequestLogService.createVboRequestLog(null, null, receiveTime, vboRequest, response);
-            return response;
-        }
-        else {
-            // If not a customer TenantType and subscriber number is null then use the default subscription number.
-            subNumber = (null != subNumber) ? subNumber : DEFAULT_SUBSCRIPTION_NUMBER;
-        }
-
+        // Construct tenant name from subscriber name
         String subName = vboRequest.getSubscriber().getName();
         String tenantName = constructTenantNameFromSubscriber(subName);
         if (StringUtils.isBlank(tenantName)) {
@@ -741,6 +728,23 @@ public class TenantServiceImpl implements TenantService {
             vboRequestLogService.createVboRequestLog(null, null, receiveTime, vboRequest, response);
             return response;
         }
+
+        // If a tenantType == TenantType.CUSTOMER tenant (the default) then check that the subscriber number is valid.
+        TenantType subscriberTenantType = vboRequest.getSubscriber().getTenantType();
+        boolean validSubscriberNumber = iDaaSService.doesSubscriberNumberExist(vboRequest);
+        if (subscriberTenantType == TenantType.CUSTOMER && !validSubscriberNumber) {
+            String msg = String.format("The subscriber number [%s] is not valid, unable to create tenant.", subNumber);
+            log.error(msg);
+            VboResponse response = generateVBOResponse("failed", msg);
+            vboRequestLogService.createVboRequestLog(null, null, receiveTime, vboRequest, response);
+            return response;
+        }
+        else if (subscriberTenantType != TenantType.CUSTOMER && !validSubscriberNumber) {
+            // If not a customer TenantType and subscriber number is invalid then use the default subscription number.
+            log.info("The subscriber number {} is not valid, using the default subscriber number for tenant {}", subNumber, tenantName);
+            subNumber = DEFAULT_SUBSCRIPTION_NUMBER;
+        }
+
         Tracer tracer = GlobalTracer.get();
         Span adminSpan = null;
         long start = System.currentTimeMillis() * 1000;
