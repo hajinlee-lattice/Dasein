@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -149,6 +150,10 @@ public enum Category {
             if (values.contains(categoryName)) {
                 return valueOf(categoryName);
             } else {
+                categoryName = StringEscapeUtils.unescapeHtml4(name);
+                if (nameMap.containsKey(categoryName)) {
+                    return nameMap.get(categoryName);
+                }
                 throw new IllegalArgumentException("Cannot find a Category with name " + name);
             }
         }
