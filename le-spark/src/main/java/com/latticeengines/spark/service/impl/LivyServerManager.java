@@ -160,6 +160,7 @@ public class LivyServerManager {
                     } catch (Exception e) {
                         // Do nothing, suppress the exceptions coming from delete
                         // as some sessions might already cleaned up by livy during deletion
+                        e.printStackTrace();
                     }
                 }
             }
