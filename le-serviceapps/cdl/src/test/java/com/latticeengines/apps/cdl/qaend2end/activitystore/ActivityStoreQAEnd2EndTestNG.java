@@ -53,24 +53,24 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     private static final String OTHER_SYSTEM_NAME = "OtherSystem";
 
-    private static final String defaultAccountFileName = "Account_Default.csv";
-    private static final String otherAccountFileName = "Account_Other.csv";
+    private static final String DEFAULT_ACCOUNT_FILE_NAME = "Account_Default.csv";
+    private static final String OTHER_ACCOUNT_FILE_NAME = "Account_Other.csv";
 
-    private static final String defaultContactFileName = "Contacts_Default.csv";
+    private static final String DEFAULT_CONTACT_FILE_NAME = "Contacts_Default.csv";
 
-    private static final String intentFileName = "Intent_Activity_delete.csv";
+    private static final String INTENT_FILE_NAME = "Intent_Activity_delete.csv";
     private static final String INTENT_TEMPLATE_PATH = "%s/dropfolder/%s/Templates/Default_DnbIntent_System_DnbIntentData";
 
-    private static final String webvisitFileName = "WebVisitData_delete.csv";
+    private static final String WEBVISIT_FILE_NAME = "WebVisitData_delete.csv";
     private static final String WEBVISIT_SYSTEM = "Default_Website_System";
 
-    private static final String opportunityFileName = "Opportunity_Data_delete.csv";
+    private static final String OPPORTUNITY_FILE_NAME = "Opportunity_Data_delete.csv";
 
-    private static final String marketingFileName = "Marketing_Activity_Data_Eloqua_delete.csv";
+    private static final String MARKETING_FILE_NAME = "Marketing_Activity_Data_Eloqua_delete.csv";
 
-    private static final String accountReimportFileName = "Account_Re-import.csv";
+    private static final String ACCOUNT_REIMPORT_FILE_NAME = "Account_Re-import.csv";
 
-    private static final String contactReimportFileName = "Contacts_Re-import.csv";
+    private static final String CONTACT_REIMPORT_FILE_NAME = "Contacts_Re-import.csv";
 
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
@@ -104,33 +104,33 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
         log.info("Starting file import...");
 
         log.info("Importing account data...");
-        String defaultAccountFilePath = activityStoreTestDataPath + File.separator + defaultAccountFileName;
+        String defaultAccountFilePath = activityStoreTestDataPath + File.separator + DEFAULT_ACCOUNT_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(defaultAccountFilePath, EntityType.Accounts);
-        String otherAccountFilePath = activityStoreTestDataPath + File.separator + otherAccountFileName;
+        String otherAccountFilePath = activityStoreTestDataPath + File.separator + OTHER_ACCOUNT_FILE_NAME;
         testFileImportService.doOneOffImport(otherAccountFilePath, OTHER_SYSTEM_NAME, EntityType.Accounts);
 
         log.info("Importing contact data...");
-        String defaultContactFilePath = activityStoreTestDataPath + File.separator + defaultContactFileName;
+        String defaultContactFilePath = activityStoreTestDataPath + File.separator + DEFAULT_CONTACT_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(defaultContactFilePath, EntityType.Contacts);
         testFileImportService.doOneOffImport(defaultContactFilePath, OTHER_SYSTEM_NAME, EntityType.Contacts);
 
         log.info("Importing DnbIntent data...");
-        String intentFilePath = activityStoreTestDataPath + File.separator + intentFileName;
+        String intentFilePath = activityStoreTestDataPath + File.separator + INTENT_FILE_NAME;
         File intentFile = new File(intentFilePath);
         String bucketName = getIntentS3BucketName();
         S3Utilities.uploadFileToS3(bucketName, intentFile);
 
         log.info("Importing Webvisit data...");
-        String webvisitFilePath = activityStoreTestDataPath + File.separator + webvisitFileName;
+        String webvisitFilePath = activityStoreTestDataPath + File.separator + WEBVISIT_FILE_NAME;
         testFileImportService.doOneOffImport(webvisitFilePath, WEBVISIT_SYSTEM, EntityType.WebVisit);
 
         log.info("Importing Opportunity data...");
-        String opportunityFilePath = activityStoreTestDataPath + File.separator + opportunityFileName;
+        String opportunityFilePath = activityStoreTestDataPath + File.separator + OPPORTUNITY_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(opportunityFilePath, EntityType.Opportunity);
         testFileImportService.doOneOffImport(opportunityFilePath, OTHER_SYSTEM_NAME, EntityType.Opportunity);
 
         log.info("Importing Marketing data...");
-        String marketingFilePath = activityStoreTestDataPath + File.separator + marketingFileName;
+        String marketingFilePath = activityStoreTestDataPath + File.separator + MARKETING_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(marketingFilePath, EntityType.MarketingActivity);
         testFileImportService.doOneOffImport(marketingFilePath, OTHER_SYSTEM_NAME, EntityType.MarketingActivity);
         // wait all file import actions are done
@@ -265,12 +265,12 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
             "testWebVisitSoftDeleteCorrectness", "testMarketingSoftDeleteCorrectness" })
     public void testActivityStoreRematch() throws TimeoutException {
         log.info("Importing deleted account data...");
-        String accountReimportFilePath = activityStoreTestDataPath + File.separator + accountReimportFileName;
+        String accountReimportFilePath = activityStoreTestDataPath + File.separator + ACCOUNT_REIMPORT_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(accountReimportFilePath, EntityType.Accounts);
         testFileImportService.doOneOffImport(accountReimportFilePath, OTHER_SYSTEM_NAME, EntityType.Accounts);
 
         log.info("Importing deleted contact data...");
-        String contactReimportFilePath = activityStoreTestDataPath + File.separator + contactReimportFileName;
+        String contactReimportFilePath = activityStoreTestDataPath + File.separator + CONTACT_REIMPORT_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(contactReimportFilePath, EntityType.Contacts);
         // wait all file import actions are done
         log.info("Waiting all file import actions are done...");
