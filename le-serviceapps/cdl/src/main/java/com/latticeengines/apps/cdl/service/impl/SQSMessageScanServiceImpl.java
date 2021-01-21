@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -13,7 +12,6 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.curator.framework.CuratorFramework;
@@ -79,12 +77,6 @@ public class SQSMessageScanServiceImpl implements SQSMessageScanService {
     public void initialize() {
         if (BeanFactoryEnvironment.Environment.WebApp.equals(BeanFactoryEnvironment.getEnvironment())) {
             log.info("SQSMessageScanService started.");
-            Map<String, String> stackInfo = plsHealthCheckProxy.getActiveStack();
-            if (MapUtils.isNotEmpty(stackInfo) && stackInfo.containsKey(CURRENT_STACK)) {
-                activeStackName = stackInfo.get(CURRENT_STACK);
-                isActiveStack = currentStack.equalsIgnoreCase(activeStackName);
-            }
-            log.info("activeStackName is {}, currentStack is {}, isActiveStack is {}.", activeStackName, currentStack, isActiveStack);
             String hostAddress = getHostAddress();
             CuratorFramework client = CamilleEnvironment.getCamille().getCuratorClient();
             String lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(),
@@ -168,7 +160,7 @@ public class SQSMessageScanServiceImpl implements SQSMessageScanService {
     }
 
     private boolean scheduleOnCurrentStack(String stackName, S3ImportMessageType messageType) {
-        boolean runOnActiveStack = StringUtils.isEmpty(stackName) || activeStackName.equalsIgnoreCase(stackName);
+        boolean runOnActiveStack = StringUtils.isEmpty(stackName) || stackName.equalsIgnoreCase(activeStackName);
         if (runOnActiveStack) {
             if (isActiveStack) {
                 return true;
