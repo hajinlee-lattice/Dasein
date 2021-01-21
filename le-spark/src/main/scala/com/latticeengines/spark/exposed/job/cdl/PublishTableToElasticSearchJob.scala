@@ -9,12 +9,13 @@ import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJo
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.ElasticSearchUtils
 import com.latticeengines.spark.util.ElasticSearchUtils._
-import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.elasticsearch.spark._
+import org.apache.spark.sql.functions.{col, map, udf}
+import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import org.elasticsearch.spark.sql._
 import org.xerial.snappy.Snappy
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.control.Breaks._
 
 class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElasticSearchJobConfiguration]{
@@ -65,18 +66,17 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
 
   def saveToESWithMeta(table : DataFrame, indexName : String, role : TableRoleInCollection, docIdCol : String,
                      baseConfig : Map[String, String], compressed : Boolean) : Unit = {
-    val cols = table.columns
-    implicit val encoder = org.apache.spark.sql.Encoders.kryo[(String, scala.collection.immutable.Map[String, Map[String, String]])]
-    implicit val encoder2 = org.apache.spark.sql.Encoders.kryo[(String, Array[Byte])]
 
+
+    val packUdf = udf((s:String) => Snappy.compress(JsonUtils.serialize(s)))
+    val columns = mutable.LinkedHashSet[Column]()
+    table.columns.foreach(column => columns.add(col(column)))
     if (compressed)
-      table.map(row  => (row.getAs[String](docIdCol),
-        Snappy.compress(JsonUtils.serialize(Map(role.toString -> row.getValuesMap[String](cols))))
-        )).rdd.saveToEsWithMeta(indexName, baseConfig)
+      table.withColumn(role.name(), packUdf(map(columns.toSeq : _*))).select(docIdCol, role.name())
+        .saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
     else
-      table.map(row  => (row.getAs[String](docIdCol), Map(role.toString -> row.getValuesMap[String](cols))))
-        .rdd.saveToEsWithMeta(indexName, baseConfig)
-
+      table.withColumn(role.name(), map(columns.toSeq : _*)).select(docIdCol, role.name())
+        .saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
   }
 
 }

@@ -1,6 +1,6 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import static com.latticeengines.apps.cdl.end2end.ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT;
+import static com.latticeengines.apps.cdl.end2end.ProcessTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
@@ -15,7 +15,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -175,6 +175,7 @@ public class FuzzyMatchHelper implements DbHelper {
                 Map<String, Object> customAccount;
                 if (elasticSearchDataUnit != null) {
                     String customerSpace = context.getInput().getTenant().getId();
+                    log.info("look up account from elastic search for {}", customerSpace);
                     String signature = elasticSearchDataUnit.getSignature();
                     String indexName = ElasticSearchUtils.constructIndexName(customerSpace,
                             BusinessEntity.Account.name(),

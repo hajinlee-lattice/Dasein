@@ -373,7 +373,7 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         ElasticSearchDataUnit dataUnit;
         if (enabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace, BusinessEntity.Contact.name(),
                 DataUnit.StorageType.ElasticSearch)) != null) {
-            log.info("feature flag is enabled and data unit is null for {}", customerSpace);
+            log.info("feature flag is enabled and data unit is not null for {}", customerSpace);
             String signature = dataUnit.getSignature();
             String indexName = ElasticSearchUtils.constructIndexName(customerSpace, BusinessEntity.Contact.name(),
                     signature);
