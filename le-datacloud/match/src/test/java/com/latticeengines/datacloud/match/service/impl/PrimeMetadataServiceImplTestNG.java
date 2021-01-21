@@ -14,6 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.service.PrimeMetadataService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlock;
@@ -192,8 +193,8 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     private void testEntityResolutionBlockElements() {
         List<DataBlock> blocks = primeMetadataService.getDataBlocks();
-        //System.out.println(JsonUtils.pprint(blocks));
-        Assert.assertEquals(blocks.size(), 18);
+        System.out.println(JsonUtils.pprint(blocks));
+        Assert.assertEquals(blocks.size(), 18, String.format("Incorrect num of data blocks.  Actual blocks %s", JsonUtils.pprint(getTestDataBlocks())));
         DataBlock entityResolutionBlock = blocks.stream() //
                 .filter(b -> "entityresolution".equals(b.getBlockId())).findFirst().orElse(null);
         Assert.assertNotNull(entityResolutionBlock);
