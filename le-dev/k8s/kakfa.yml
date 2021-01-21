@@ -96,8 +96,8 @@ spec:
     spec:
       initContainers:
         - name: init-wait-for-zk
-          image: alpine
-          command: [ "/bin/sh", "-c", "for i in {1..100}; do sleep 10; if dig kfk-zk-svc; then exit 0; fi; done; exit 1" ]
+          image: busybox
+          command: [ 'sh', '-c', "until nslookup kfk-zk-svc.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done" ]
       containers:
         - name: kfk-bkr
           image: bitnami/kafka:2.7.0
