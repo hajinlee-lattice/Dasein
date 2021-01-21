@@ -229,6 +229,13 @@ public abstract class SparkJobConfig implements Serializable {
     @JsonProperty("SpecialTargets")
     private Map<Integer, DataUnit.DataFormat> specialTargets;
 
+    @JsonProperty("Coalesce")
+    private boolean coalesce = false;
+
+    //if partition number over than this value, will cut 1/2 partition num
+    @JsonProperty("NumPartitionLimit")
+    private int numPartitionLimit;
+
     public abstract String getName();
 
     public int getNumTargets() {
@@ -278,4 +285,19 @@ public abstract class SparkJobConfig implements Serializable {
         }
     }
 
+    public boolean isCoalesce() {
+        return coalesce;
+    }
+
+    public void setCoalesce(boolean coalesce) {
+        this.coalesce = coalesce;
+    }
+
+    public int getNumPartitionLimit() {
+        return numPartitionLimit;
+    }
+
+    public void setNumPartitionLimit(int numPartitionLimit) {
+        this.numPartitionLimit = numPartitionLimit;
+    }
 }

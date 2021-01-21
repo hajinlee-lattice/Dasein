@@ -185,6 +185,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                 config.dimensionMetadataMap.entrySet().stream().filter(entry -> (configuration.getActivityStreamMap().get(entry.getKey()) != null && AtlasStream.StreamType.WebVisit.equals(configuration.getActivityStreamMap().get(entry.getKey()).getStreamType())))
                 .map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey,
                         Pair::getValue));
+        config.setCoalesce(true);
         return config;
     }
 

@@ -163,10 +163,14 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       throw new IllegalArgumentException(s"${targets.length} targets are declared " //
         + s"but ${output.length} outputs are generated!")
     }
+    val jobConfig: C = getConfig
     val results = targets.zip(output).par.map { t =>
       val tgt = t._1
       var df = t._2
       val path = tgt.getPath
+      if (jobConfig.isCoalesce) {
+        df = coalesceTgt(df, jobConfig.getNumPartitionLimit)
+      }
       if (tgt.isCoalesce) {
         df = df.coalesce(1)
       }
@@ -208,6 +212,17 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     } else {
       throw new RuntimeException(s"There's no Target $index")
     }
+  }
+
+  def coalesceTgt(df: DataFrame, numPartitionLimit: Int): DataFrame = {
+    var limit = numPartitionLimit
+    if (limit == 0) {
+      limit = 8
+    }
+    if (df.rdd.getNumPartitions >= limit) {
+      df.coalesce((limit + 1) / 2)
+    }
+    df
   }
 
   def runJob(spark: SparkSession, lattice: LatticeContext[C]): Unit
