@@ -12,6 +12,7 @@ import com.latticeengines.cdl.workflow.listeners.ProcessAnalyzeListener;
 import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
+import com.latticeengines.cdl.workflow.steps.process.FinishReportGenerationStep;
 import com.latticeengines.cdl.workflow.steps.process.GeneratePreScoringReport;
 import com.latticeengines.cdl.workflow.steps.process.GenerateProcessingReport;
 import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
@@ -72,6 +73,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
 
     @Inject
     private GenerateVisitReportWorkflow generateVisitReportWorkflow;
+
+    @Inject
+    private FinishReportGenerationStep finishReportGenerationStep;
 
     @Inject
     private ProcessRatingWorkflow processRatingWorkflow;
@@ -136,6 +140,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(processCatalogWorkflow) //
                 .next(processActivityStreamWorkflow) //
                 .next(generateVisitReportWorkflow)
+                .next(finishReportGenerationStep)
                 .next(apsGeneration) //
                 .next(curatedAttributesWorkflow) //
                 .next(combineStatistics) //

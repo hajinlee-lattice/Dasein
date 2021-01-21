@@ -25,11 +25,7 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[EnrichWebVisitJobConfig]): Unit = {
     val config: EnrichWebVisitJobConfig = lattice.config
-    val catalogTable: DataFrame = lattice.input(config.catalogInputIdx)
     val selectedAttributes = config.selectedAttributes.asScala
-
-    val pathPatternMap = catalogTable.select(PathPattern.name(), PathPatternName.name).rdd.map(row => ActivityStoreUtils.modifyPattern(row.getAs
-    (PathPattern.name()).toString).r.pattern -> row.getAs(PathPatternName.name()).toString).collectAsMap()
 
     var matchedTable: DataFrame = null
     if (config.matchedWebVisitInputIdx != null) {
@@ -49,8 +45,13 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
       val masterTable: DataFrame = lattice.input(config.masterInputIdx)
       matchedTable = merge(masterTable, matchedTable)
     }
-    matchedTable = matchedTable.drop("page_groups")
-    matchedTable = populateProductPatternNames(matchedTable, pathPatternMap, "page_url","page_groups", lattice)
+    if (config.catalogInputIdx != null) {
+      val catalogTable: DataFrame = lattice.input(config.catalogInputIdx)
+      val pathPatternMap = catalogTable.select(PathPattern.name(), PathPatternName.name).rdd.map(row => ActivityStoreUtils.modifyPattern(row.getAs
+      (PathPattern.name()).toString).r.pattern -> row.getAs(PathPatternName.name()).toString).collectAsMap()
+      matchedTable.drop("page_groups")
+      matchedTable = populateProductPatternNames(matchedTable, pathPatternMap, "page_url", "page_groups", lattice)
+    }
     matchedTable = parseUtmCodes(matchedTable)
     lattice.output = matchedTable :: Nil
   }

@@ -7,8 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.EnrichWebVisit;
-import com.latticeengines.cdl.workflow.steps.merge.MergeWebVisitWrapper;
+import com.latticeengines.cdl.workflow.steps.EnrichWebVisitWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateVisitReportWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -22,15 +21,12 @@ public class GenerateVisitReportWorkflow extends AbstractWorkflow<GenerateVisitR
     static final String WORKFLOW_NAME = "generateVisitReportWorkflow";
 
     @Inject
-    private MergeWebVisitWrapper mergeWebVisitWrapper;
-    @Inject
-    private EnrichWebVisit enrichWebVisit;
+    private EnrichWebVisitWrapper enrichWebVisitWrapper;
 
     @Override
     public Workflow defineWorkflow(GenerateVisitReportWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig) //
-                .next(mergeWebVisitWrapper) //
-                .next(enrichWebVisit)
+                .next(enrichWebVisitWrapper)
                 .build();
     }
 }

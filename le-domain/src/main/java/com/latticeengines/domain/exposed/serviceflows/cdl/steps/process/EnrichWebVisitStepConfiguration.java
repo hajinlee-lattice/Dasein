@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 
-public class EnrichWebVisitSparkStepConfiguration extends SparkJobStepConfiguration {
+public class EnrichWebVisitStepConfiguration extends BaseWrapperStepConfiguration {
 
     @JsonProperty("rematch_mode")
     private boolean isRematchMode;
@@ -24,6 +24,9 @@ public class EnrichWebVisitSparkStepConfiguration extends SparkJobStepConfigurat
     private List<Catalog> catalogs;
     @JsonProperty("catalog_imports")
     private Map<String, List<ActivityImport>> catalogImports;
+    // streamId -> list({ tableName, original import file name })
+    @JsonProperty("stream_imports")
+    private Map<String, List<ActivityImport>> streamImports;
 
     public boolean isRematchMode() {
         return isRematchMode;
@@ -71,5 +74,13 @@ public class EnrichWebVisitSparkStepConfiguration extends SparkJobStepConfigurat
 
     public void setCatalogs(List<Catalog> catalogs) {
         this.catalogs = catalogs;
+    }
+
+    public Map<String, List<ActivityImport>> getStreamImports() {
+        return streamImports;
+    }
+
+    public void setStreamImports(Map<String, List<ActivityImport>> streamImports) {
+        this.streamImports = streamImports;
     }
 }

@@ -403,7 +403,6 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processStepConfiguration.setEntityMatchConfiguration(configuration);
             processActivityStreamWorkflowBuilder.entityMatchConfiguration(configuration);
             matchEntityWorkflowBuilder.entityMatchConfiguration(configuration);
-            generateVisitReportWorkflowBuilder.entityMatchConfiguration(configuration);
             return this;
         }
 

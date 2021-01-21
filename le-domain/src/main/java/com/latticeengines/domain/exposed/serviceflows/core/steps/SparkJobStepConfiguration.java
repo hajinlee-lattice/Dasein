@@ -10,7 +10,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ExportTimelineSp
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.PublishVIDataStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.EnrichWebVisitSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.TimeLineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.publish.PublishTableToElasticSearchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
@@ -40,8 +39,6 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
                 "ExportToElasticSearchStepConfiguration"), //
         @JsonSubTypes.Type(value = PublishTableToElasticSearchStepConfiguration.class, name =
                 "PublishTableToElasticSearchStepConfiguration"),
-        @JsonSubTypes.Type(value = EnrichWebVisitSparkStepConfiguration.class, name =
-                "EnrichWebVisitSparkStepConfiguration") //
 })
 public class SparkJobStepConfiguration extends BaseStepConfiguration {
 

@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.Clea
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.RenameAndMatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ConvertBatchStoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.EnrichWebVisitStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.DeleteByUploadStepConfiguration;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -25,8 +26,9 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.DeleteBy
         @Type(value = CleanupByUploadWrapperConfiguration.class, name = "CleanupByUploadWrapperConfiguration"),
         @Type(value = LegacyDeleteByUploadStepConfiguration.class, name = "LegacyDeleteByUploadStepConfiguration"),
         @Type(value = DeleteByUploadStepConfiguration.class, name = "DeleteByUploadStepConfiguration"),
-        @Type(value = RenameAndMatchStepConfiguration.class, name = "RenameAndMatchStepConfiguration"),
         @Type(value = LegacyDeleteStepConfiguration.class, name = "LegacyDeleteStepConfiguration")})
+        @Type(value = EnrichWebVisitStepConfiguration.class, name = "EnrichWebVisitStepConfiguration"),
+        @Type(value = RenameAndMatchStepConfiguration.class, name = "RenameAndMatchStepConfiguration") })
 public class BaseWrapperStepConfiguration extends BaseStepConfiguration {
 
     @NotNull

@@ -30,6 +30,7 @@ public class FinishReportGenerationStep extends BaseWorkflowStep<ProcessStepConf
     @Override
     public void execute() {
         if (!configuration.isSSVITenant()) {
+            log.info("tenant isn't ssvi tenant, will skip this step.");
             return;
         }
         CustomerSpace customerSpace = configuration.getCustomerSpace();
@@ -41,6 +42,6 @@ public class FinishReportGenerationStep extends BaseWorkflowStep<ProcessStepConf
             cloneTableService.setRedshiftPartition(dcStatus.getRedshiftPartition());
         }
         cloneTableService.linkToInactiveTableWithSignature(TableRoleInCollection.ConsolidatedCatalog);
-        cloneTableService.linkInactiveTable(TableRoleInCollection.ConsolidateWebVisit);
+        cloneTableService.linkInactiveTable(TableRoleInCollection.ConsolidatedWebVisit);
     }
 }
