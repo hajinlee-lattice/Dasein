@@ -922,6 +922,9 @@ public enum LedpCode {
     LEDP_41003("Fail to shutdown batch write executor properly"), //
     LEDP_41004("Start time or schedule parameters is not valid"), //
 
+    // le-objectapi
+    LEDP_42001("Invalid PeriodName: {0}."), //
+
     // le-db
     LEDP_50000("Object {0} is not soft deletable."), //
 
