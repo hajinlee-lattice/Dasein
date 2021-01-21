@@ -420,12 +420,8 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     private List<Map<String, Object>> queryAccountRecords() {
         Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.BucketedAccount);
         List<Attribute> tbAttributes = table.getAttributes();
-        Attribute defaultSysAccountidAtt = tbAttributes.stream()
-                .filter(attribute -> attribute.getName().contains("DefaultSystem")).findFirst().orElse(null);
-        String defaultSysAccountidName = defaultSysAccountidAtt.getName().toLowerCase();
-        Attribute otherSysAccountidAtt = tbAttributes.stream()
-                .filter(attribute -> attribute.getName().contains(OTHER_SYSTEM_NAME)).findFirst().orElse(null);
-        String otherSysAccountidName = otherSysAccountidAtt.getName().toLowerCase();
+        String defaultSysAccountidName = getSystemAccountidColumnName(tbAttributes, "DefaultSystem");
+        String otherSysAccountidName = getSystemAccountidColumnName(tbAttributes, OTHER_SYSTEM_NAME);
 
         List<Map<String, Object>> entityRecords = getRecords(table,
                 String.format("accountid, companyname, %s as defaultsystem_accountid, %s as othersystem_accountid",
@@ -433,23 +429,29 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
         return entityRecords;
     }
 
+    private String getSystemAccountidColumnName(List<Attribute> tbAttributes, String systemName) {
+        Attribute sysAccountidAtt = tbAttributes.stream().filter(attribute -> attribute.getName().contains(systemName))
+                .findFirst().orElse(null);
+        return sysAccountidAtt.getName().toLowerCase();
+    }
+
     private List<Map<String, Object>> queryContactRecords() {
         Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.SortedContact);
         List<Attribute> tbAttributes = table.getAttributes();
-        Attribute defaultSysContactidAtt = tbAttributes.stream().filter(
-                attribute -> attribute.getName().contains("DefaultSystem") && attribute.getName().contains("ContactId"))
-                .findFirst().orElse(null);
-        String defaultSysContactidName = defaultSysContactidAtt.getName().toLowerCase();
-        Attribute otherSysContactidAtt = tbAttributes.stream()
-                .filter(attribute -> attribute.getName().contains(OTHER_SYSTEM_NAME)
-                        && attribute.getName().contains("ContactId"))
-                .findFirst().orElse(null);
-        String otherSysContactidName = otherSysContactidAtt.getName().toLowerCase();
+        String defaultSysContactidName = getSystemContactidColumnName(tbAttributes, "DefaultSystem");
+        String otherSysContactidName = getSystemContactidColumnName(tbAttributes, OTHER_SYSTEM_NAME);
 
         List<Map<String, Object>> entityRecords = getRecords(table,
                 String.format("contactid, %s as defaultsystem_contactid, %s as othersystem_contactid",
                         defaultSysContactidName, otherSysContactidName));
         return entityRecords;
+    }
+
+    private String getSystemContactidColumnName(List<Attribute> tbAttributes, String systemName) {
+        Attribute sysContactidAtt = tbAttributes.stream().filter(
+                attribute -> attribute.getName().contains(systemName) && attribute.getName().contains("ContactId"))
+                .findFirst().orElse(null);
+        return sysContactidAtt.getName().toLowerCase();
     }
 
     private String getLatticeAccountid(String defaultSystemAccountid) {
