@@ -19,6 +19,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableSet;
@@ -50,26 +51,26 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     private String activityStoreTestDataPath;
 
-    private static String OTHER_SYSTEM_NAME = "OtherSystem";
+    private static final String OTHER_SYSTEM_NAME = "OtherSystem";
 
-    private String defaultAccountFileName = "Account_Default.csv";
-    private String otherAccountFileName = "Account_Other.csv";
+    private static final String defaultAccountFileName = "Account_Default.csv";
+    private static final String otherAccountFileName = "Account_Other.csv";
 
-    private String defaultContactFileName = "Contacts_Default.csv";
+    private static final String defaultContactFileName = "Contacts_Default.csv";
 
-    private String intentFileName = "Intent_Activity_delete.csv";
+    private static final String intentFileName = "Intent_Activity_delete.csv";
     private static final String INTENT_TEMPLATE_PATH = "%s/dropfolder/%s/Templates/Default_DnbIntent_System_DnbIntentData";
 
-    private String webvisitFileName = "WebVisitData_delete.csv";
+    private static final String webvisitFileName = "WebVisitData_delete.csv";
     private static final String WEBVISIT_SYSTEM = "Default_Website_System";
 
-    private String opportunityFileName = "Opportunity_Data_delete.csv";
+    private static final String opportunityFileName = "Opportunity_Data_delete.csv";
 
-    private String marketingFileName = "Marketing_Activity_Data_Eloqua_delete.csv";
+    private static final String marketingFileName = "Marketing_Activity_Data_Eloqua_delete.csv";
 
-    private String accountReimportFileName = "Account_Re-import.csv";
+    private static final String accountReimportFileName = "Account_Re-import.csv";
 
-    private String contactReimportFileName = "Contacts_Re-import.csv";
+    private static final String contactReimportFileName = "Contacts_Re-import.csv";
 
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
@@ -83,9 +84,9 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     @Inject
     private PlsCDLSoftDeleteProxy plsCDLSoftDeleteProxy;
 
-    @Override
-    protected void checkBasicInfo() {
-        super.checkBasicInfo();
+    @BeforeClass(groups = "qa-activitystore-end2end")
+    public void init() {
+        super.init();
         downloadTestData();
         Assert.assertTrue(StringUtils.isNotEmpty(qaTestDataPath), "Test Data directory is required");
         activityStoreTestDataPath = qaTestDataPath + File.separator + "activitystore";
@@ -478,25 +479,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     private JSONArray queryCustomIntentRecords() {
-        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.CustomIntentProfile);
-        List<Attribute> tbAttributes = table.getAttributes();
-        Attribute accountidAtt = table.getAttribute(InterfaceName.AccountId.name());
-        tbAttributes.remove(accountidAtt);
-        List<Map<String, Object>> entityRecords = getRecords(table, null);
-        JSONArray resArray = new JSONArray();
-        for (Map<String, Object> record : entityRecords) {
-            JSONObject obj = new JSONObject();
-            JSONObject subObj = new JSONObject();
-            for (Attribute attribute : tbAttributes) {
-                subObj.put(attribute.getDisplayName(), record.get(attribute.getName()));
-            }
-            String accountName = getAccountAttributeValue("accountid", record.get(accountidAtt.getName()).toString(),
-                    "companyname");
-            obj.put(accountName, subObj);
-            resArray.put(obj);
-        }
-        System.out.println(resArray.toString(4));
-        return resArray;
+        return buildAccountLevelResult(TableRoleInCollection.CustomIntentProfile, false);
     }
 
     private JSONArray queryOpportunityRecords() {
@@ -519,36 +502,20 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
             obj.put(accountName, subObj);
             resArray.put(obj);
         }
-        System.out.println(resArray.toString(4));
+        log.debug(resArray.toString(4));
         return resArray;
     }
 
     private JSONArray queryWebVisitRecords() {
-        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.WebVisitProfile);
-        List<Attribute> tbAttributes = table.getAttributes();
-        Attribute accountidAtt = table.getAttribute(InterfaceName.AccountId.name());
-        tbAttributes.remove(accountidAtt);
-        List<Map<String, Object>> entityRecords = getRecords(table, null);
-        JSONArray resArray = new JSONArray();
-        for (Map<String, Object> record : entityRecords) {
-            JSONObject obj = new JSONObject();
-            JSONObject subObj = new JSONObject();
-            for (Attribute attribute : tbAttributes) {
-                subObj.put(attribute.getPropertyValue("Subcategory") + " - " + attribute.getDisplayName(),
-                        record.get(attribute.getName()));
-            }
-            String accountName = getAccountAttributeValue("accountid", record.get(accountidAtt.getName()).toString(),
-                    "companyname");
-            obj.put(accountName, subObj);
-            resArray.put(obj);
-        }
-        System.out.println(resArray.toString(4));
-        return resArray;
+        return buildAccountLevelResult(TableRoleInCollection.WebVisitProfile, true);
     }
 
     private JSONArray queryAccountMarketingRecords() {
-        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(),
-                TableRoleInCollection.AccountMarketingActivityProfile);
+        return buildAccountLevelResult(TableRoleInCollection.AccountMarketingActivityProfile, true);
+    }
+
+    private JSONArray buildAccountLevelResult(TableRoleInCollection tableRole, boolean needSubcategory) {
+        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), tableRole);
         List<Attribute> tbAttributes = table.getAttributes();
         Attribute accountidAtt = table.getAttribute(InterfaceName.AccountId.name());
         tbAttributes.remove(accountidAtt);
@@ -558,15 +525,19 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
             JSONObject obj = new JSONObject();
             JSONObject subObj = new JSONObject();
             for (Attribute attribute : tbAttributes) {
-                subObj.put(attribute.getPropertyValue("Subcategory") + " - " + attribute.getDisplayName(),
-                        record.get(attribute.getName()));
+                if (needSubcategory) {
+                    subObj.put(attribute.getPropertyValue("Subcategory") + " - " + attribute.getDisplayName(),
+                            record.get(attribute.getName()));
+                } else {
+                    subObj.put(attribute.getDisplayName(), record.get(attribute.getName()));
+                }
             }
             String accountName = getAccountAttributeValue("accountid", record.get(accountidAtt.getName()).toString(),
                     "companyname");
             obj.put(accountName, subObj);
             resArray.put(obj);
         }
-        System.out.println(resArray.toString(4));
+        log.debug(resArray.toString(4));
         return resArray;
     }
 
@@ -594,7 +565,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
             obj.put(contactName, subObj);
             resArray.put(obj);
         }
-        System.out.println(resArray.toString());
+        log.debug(resArray.toString());
         return resArray;
     }
 
