@@ -41,6 +41,7 @@ public class ActivityAlertsCleanupServiceImpl implements ActivityAlertsCleanupSe
                 .minusDays(DAYS_TO_KEEP_ACTIVITY_ALERT).toInstant());
         boolean shouldLoop = true;
         int deletedCount = 0;
+        log.info("Cleaning up starts for activity alerts expired");
         try {
             while (shouldLoop) {
                 int updatedCount = activityAlertEntityMgr.deleteByExpireDateBefore(expireDate, maxUpdateRows);
