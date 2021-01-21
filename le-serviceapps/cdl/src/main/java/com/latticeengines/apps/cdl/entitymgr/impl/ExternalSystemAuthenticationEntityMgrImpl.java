@@ -114,8 +114,8 @@ public class ExternalSystemAuthenticationEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly=true)
-    public List<ExternalSystemAuthentication> findAuthenticationsByTrayAuthId(String trayAuthId) {
-        return getReaderRepo().findAllByTrayAuthId(trayAuthId);
+    public List<ExternalSystemAuthentication> retrieveAuthenticationsByTrayAuthId(String trayAuthId) {
+        return getReaderRepo().retrieveAllByTrayAuthId(trayAuthId);
     }
 
 }
