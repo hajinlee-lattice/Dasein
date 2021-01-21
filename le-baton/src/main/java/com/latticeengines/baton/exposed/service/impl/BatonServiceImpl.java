@@ -63,6 +63,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.security.TenantType;
 
@@ -902,6 +903,48 @@ public class BatonServiceImpl implements BatonService {
             }
         }
         return licenses;
+    }
+
+    @Override
+    public int getMaxDataLicense(Category category, String tenantId) {
+        if (category.isPremium()) {
+            String lic = null;
+            switch (category) {
+            case INTENT:
+                lic = DataLicense.BOMBORA.getDataLicense();
+                break;
+            case TECHNOLOGY_PROFILE:
+                lic = DataLicense.HG.getDataLicense();
+                break;
+            case DNB_TECHNOLOGY_PROFILE:
+                lic = DataLicense.DMX.getDataLicense();
+                break;
+            case WEBSITE_KEYWORDS:
+                lic = DataLicense.WEBSITEKEYWORDS.getDataLicense();
+                break;
+            case ACCOUNT_ATTRIBUTES:
+                lic = DataLicense.ACCOUNT.getDataLicense();
+                break;
+            case CONTACT_ATTRIBUTES:
+                lic = DataLicense.CONTACT.getDataLicense();
+                break;
+            case GROWTH_TRENDS:
+                lic = DataLicense.GROWTHTRENDS.getDataLicense();
+                break;
+            case COVID_19:
+                lic = DataLicense.COVID19.getDataLicense();
+                break;
+            default:
+                log.warn("Unsupported" + category);
+                break;
+            }
+            try {
+                return getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, lic);
+            } catch (Exception e) {
+                log.warn("Failed to get max premium lead enrichment attrs from ZK for Category=" + category, e);
+            }
+        }
+        return -1;
     }
 }
 

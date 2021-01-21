@@ -12,7 +12,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
@@ -25,6 +27,7 @@ public class AttributePageProcessor {
     private static final String SPACE_DELIM = " ";
 
     private final ColumnMetadataProxy columnMetadataProxy;
+    private BatonService batonService;
     private final SelectedAttrEntityMgr selectedAttrEntityMgr;
     private final String attributeDisplayNameFilter;
     private final Category category;
@@ -36,9 +39,11 @@ public class AttributePageProcessor {
     private final AttributeCustomizationService attributeCustomizationService;
     private final boolean skipTenantLevelCustomization;
 
+
     public static class Builder {
         private SelectedAttrEntityMgr selectedAttrEntityMgr;
         private ColumnMetadataProxy columnMetadataProxy;
+        private BatonService batonService;
         private String attributeDisplayNameFilter;
         private Category category;
         private String subcategory;
@@ -56,6 +61,11 @@ public class AttributePageProcessor {
 
         public Builder columnMetadataProxy(ColumnMetadataProxy columnMetadataProxy) {
             this.columnMetadataProxy = columnMetadataProxy;
+            return this;
+        }
+
+        public Builder batonService(BatonService batonService) {
+            this.batonService = batonService;
             return this;
         }
 
@@ -100,7 +110,7 @@ public class AttributePageProcessor {
         }
 
         public AttributePageProcessor build() {
-            return new AttributePageProcessor(columnMetadataProxy, selectedAttrEntityMgr,
+            return new AttributePageProcessor(columnMetadataProxy, batonService, selectedAttrEntityMgr,
                     attributeCustomizationService, attributeDisplayNameFilter, category, subcategory,
                     onlySelectedAttributes, offset, max, considerInternalAttributes, skipTenantLevelCustomization);
         }
@@ -111,11 +121,12 @@ public class AttributePageProcessor {
         }
     }
 
-    private AttributePageProcessor(ColumnMetadataProxy columnMetadataProxy,
+    private AttributePageProcessor(ColumnMetadataProxy columnMetadataProxy, BatonService batonService,
             SelectedAttrEntityMgr selectedAttrEntityMgr, AttributeCustomizationService attributeCustomizationService,
             String attributeDisplayNameFilter, Category category, String subcategory, Boolean onlySelectedAttributes,
             Integer offset, Integer max, Boolean considerInternalAttributes, boolean skipTenantLevelCustomization) {
         this.columnMetadataProxy = columnMetadataProxy;
+        this.batonService = batonService;
         this.selectedAttrEntityMgr = selectedAttrEntityMgr;
         this.attributeCustomizationService = attributeCustomizationService;
         this.attributeDisplayNameFilter = attributeDisplayNameFilter;
@@ -130,6 +141,10 @@ public class AttributePageProcessor {
 
     public List<LeadEnrichmentAttribute> getPage() {
         List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Enrichment);
+        String tenantId = MultiTenantContext.getShortTenantId();
+        Set<String> expiredLicenses = batonService.getExpiredLicenses(tenantId);
+        allColumns = allColumns.stream().filter(cm -> !expiredLicenses.contains(cm.getDataLicense()))
+                .collect(Collectors.toList());
         List<SelectedAttribute> selectedAttributes = skipTenantLevelCustomization ? new ArrayList<>()
                 : selectedAttrEntityMgr.findAll();
         List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes,
