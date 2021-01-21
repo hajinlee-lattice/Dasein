@@ -167,4 +167,8 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
     public void setRecordType(DataRecordType recordType) {
         this.recordType = recordType;
     }
+
+    public Boolean getArchived() {
+        return archived;
+    }
 }

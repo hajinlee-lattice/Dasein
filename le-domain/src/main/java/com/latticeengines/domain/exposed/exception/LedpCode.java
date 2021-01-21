@@ -943,6 +943,7 @@ public enum LedpCode {
     LEDP_60014("Could not find Enrichment Layout with layout ID {0}."),
     LEDP_60015("Could not create Enrichment Template {0}: {1}"),
     LEDP_60016("Could not validate Enrichment Template: {0}"),
+    LEDP_60017("Error when getting Enrichment Templates: {0}"),
 
     // le-serviceflows
     LEDP_70000("No Add or Delete file"),

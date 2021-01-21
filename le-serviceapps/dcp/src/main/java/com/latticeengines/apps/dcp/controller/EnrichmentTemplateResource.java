@@ -1,5 +1,7 @@
 package com.latticeengines.apps.dcp.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
+import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
+import com.latticeengines.domain.exposed.dcp.ListEnrichmentTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
@@ -58,5 +62,13 @@ public class EnrichmentTemplateResource {
             log.error(ExceptionUtils.getStackTrace(exception));
             return ResponseDocument.failedResponse(exception);
         }
+    }
+
+    @PostMapping("/list")
+    @ResponseBody
+    @ApiOperation(value = "List Enrichment Templates")
+    public List<EnrichmentTemplateSummary> getEnrichmentTemplates(
+            @RequestBody ListEnrichmentTemplateRequest listEnrichmentTemplateRequest) {
+        return enrichmentTemplateService.getEnrichmentTemplates(listEnrichmentTemplateRequest);
     }
 }

@@ -6,11 +6,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.dcp.entitymgr.EnrichmentLayoutEntityMgr;
@@ -23,15 +25,18 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementCo
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
+import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
+import com.latticeengines.domain.exposed.dcp.ListEnrichmentTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 
 @Service("enrichmentTemplateService")
-public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService {
+public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements EnrichmentTemplateService {
 
     private static final Logger log = LoggerFactory.getLogger(EnrichmentTemplateServiceImpl.class);
+    private static final int MAX_PAGE_SIZE = 100;
 
     @Inject
     private EnrichmentTemplateEntityMgr enrichmentTemplateEntityMgr;
@@ -98,6 +103,40 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
         } else {
             throw new LedpException(LedpCode.LEDP_60016, new String[] { String.join("\n", result.getErrors()) });
         }
+    }
+
+    @Override
+    public List<EnrichmentTemplateSummary> getEnrichmentTemplates(
+            ListEnrichmentTemplateRequest listEnrichmentTemplateRequest) {
+        PageRequest pageRequest = getPageRequest(0, MAX_PAGE_SIZE);
+        try {
+            List<EnrichmentTemplate> templates = enrichmentTemplateEntityMgr.findAll(pageRequest);
+
+            templates = templates.stream().filter(et -> includeEnrichmentTemplate(listEnrichmentTemplateRequest, et))
+                    .collect(Collectors.toList());
+
+            return templates.stream().map(EnrichmentTemplateSummary::new).collect(Collectors.toList());
+        } catch (Exception exception) {
+            log.error(String.format("Error querying for enrichment templates: %s", exception.getMessage()));
+            throw new LedpException(LedpCode.LEDP_60017, new String[] { exception.getMessage() });
+        }
+    }
+
+    private boolean includeEnrichmentTemplate(ListEnrichmentTemplateRequest listEnrichmentTemplateRequest,
+            EnrichmentTemplate enrichmentTemplate) {
+        boolean matchesDomain = "ALL".equals(listEnrichmentTemplateRequest.getDomain())
+                || listEnrichmentTemplateRequest.getDomain() == enrichmentTemplate.getDomain().getDisplayName();
+
+        boolean matchesRecordType = "ALL".equals(listEnrichmentTemplateRequest.getRecordType())
+                || listEnrichmentTemplateRequest.getRecordType() == enrichmentTemplate.getRecordType().getDisplayName();
+
+        boolean matchesCreatedBy = "ALL".equals(listEnrichmentTemplateRequest.getCreatedBy())
+                || listEnrichmentTemplateRequest.getCreatedBy() == enrichmentTemplate.getCreatedBy();
+
+        boolean matchesArchived = listEnrichmentTemplateRequest.getIncludeArchived()
+                || !enrichmentTemplate.getArchived();
+
+        return (matchesDomain && matchesRecordType && matchesCreatedBy && matchesArchived);
     }
 
     private ResponseDocument<String> validateEnrichmentTemplate(EnrichmentTemplate enrichmentTemplate) {
