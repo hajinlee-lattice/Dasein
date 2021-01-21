@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMa
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.metadata.Category;
 
 public interface BatonService {
 
@@ -113,5 +114,7 @@ public interface BatonService {
     int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense);
 
     Set<String> getExpiredLicenses(String tenantId);
+
+    int getMaxDataLicense(Category category, String tenantId);
 
 }
