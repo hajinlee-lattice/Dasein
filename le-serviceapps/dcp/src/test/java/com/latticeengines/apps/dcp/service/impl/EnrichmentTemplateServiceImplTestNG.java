@@ -18,6 +18,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
+import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
+import com.latticeengines.domain.exposed.dcp.ListEnrichmentTemplateRequest;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase {
@@ -44,22 +46,28 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
         return String.format(sourceIdTemplate, RandomStringUtils.randomAlphanumeric(6));
     }
 
+    private EnrichmentLayout createLayout(DataDomain domain, DataRecordType recordType) {
+        EnrichmentLayout layout = new EnrichmentLayout();
+
+        String layoutId = RandomStringUtils.randomAlphanumeric(4);
+        String userEmail = "user@dnb.com";
+        String sourceId = getRandomSourceId();
+
+        layout.setLayoutId(layoutId);
+        layout.setCreatedBy(userEmail);
+        layout.setDomain(domain);
+        layout.setRecordType(recordType);
+        layout.setSourceId(sourceId);
+
+        return layout;
+    }
+
     @Test(groups = "functional")
     public void testCreateTemplateFromLayout() {
         String layoutId = RandomStringUtils.randomAlphanumeric(4);
-        String userEmail = "user@dnb.com";
         String tenantId = "PropDataService.PropDataService.Production";
-        String rndSrcId = getRandomSourceId();
-        List<String> elementList = Arrays.asList("primaryname", "duns_number", //
-                "dnbassessment_decisionheadqtr_duns", "dnbassessment_decisionheadqtr_decisionpowerscore");
 
-        EnrichmentLayout layout = new EnrichmentLayout();
-        layout.setLayoutId(layoutId);
-        layout.setCreatedBy(userEmail);
-        layout.setDomain(DataDomain.SalesMarketing);
-        layout.setRecordType(DataRecordType.Domain);
-        layout.setSourceId(rndSrcId);
-        layout.setElements(elementList);
+        EnrichmentLayout layout = createLayout(DataDomain.SalesMarketing, DataRecordType.Domain);
 
         ResponseDocument<String> createLayoutResult = enrichmentLayoutService.create(tenantId, layout);
 
@@ -87,5 +95,37 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
 
         Assert.assertNotNull(createTemplateResult);
         Assert.assertTrue(createTemplateResult.isSuccess(), "Enrichment Template is not valid");
+    }
+
+    @Test(groups = "functional")
+    public void testListTemplates() {
+        EnrichmentLayout layout1 = createLayout(DataDomain.Finance, DataRecordType.Analytical);
+        EnrichmentLayout layout2 = createLayout(DataDomain.SalesMarketing, DataRecordType.Domain);
+
+        ResponseDocument<String> createTemplateResult1 = enrichmentTemplateService.create(layout1.getLayoutId(),
+                "template1");
+
+        Assert.assertNotNull(createTemplateResult1);
+        Assert.assertTrue(createTemplateResult1.isSuccess(), "Enrichment Template is not valid");
+
+        ResponseDocument<String> createTemplateResult2 = enrichmentTemplateService.create(layout2.getLayoutId(),
+                "template2");
+
+        Assert.assertNotNull(createTemplateResult2);
+        Assert.assertTrue(createTemplateResult2.isSuccess(), "Enrichment Template is not valid");
+
+        List<EnrichmentTemplateSummary> summaries1 = enrichmentTemplateService
+                .getEnrichmentTemplates(new ListEnrichmentTemplateRequest(mainTestTenant.getId(),
+                        DataDomain.Finance.getDisplayName(), DataRecordType.Analytical.getDisplayName(), false, "ALL"));
+        Assert.assertEquals(summaries1.size(), 1);
+
+        List<EnrichmentTemplateSummary> summaries2 = enrichmentTemplateService.getEnrichmentTemplates(
+                new ListEnrichmentTemplateRequest(mainTestTenant.getId(), "ALL", "ALL", false, "testUser@dnb.com"));
+        Assert.assertEquals(summaries2.size(), 2);
+
+        List<EnrichmentTemplateSummary> summaries3 = enrichmentTemplateService
+                .getEnrichmentTemplates(new ListEnrichmentTemplateRequest(mainTestTenant.getId(),
+                        DataDomain.Compliance.getDisplayName(), "ALL", false, "ALL"));
+        Assert.assertEquals(summaries3.size(), 0);
     }
 }
