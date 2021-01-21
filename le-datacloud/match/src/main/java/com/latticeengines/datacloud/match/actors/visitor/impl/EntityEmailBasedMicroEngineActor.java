@@ -24,7 +24,7 @@ public class EntityEmailBasedMicroEngineActor extends EntityMicroEngineActorBase
 
     @Override
     protected boolean shouldProcess(@NotNull MatchTraveler traveler) {
-        return EntityMatchUtils.hasEmailAccountInfoOnly(traveler);
+        return !matchFoundInLookupMode(traveler) && EntityMatchUtils.hasEmailAccountInfoOnly(traveler);
     }
 
     @Override

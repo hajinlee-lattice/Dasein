@@ -35,7 +35,7 @@ public class EntityNamePhoneAIDBasedMicroEngineActor extends EntityMicroEngineAc
         // Account Domain match key because in Account match, there is
         // no concept of "Email", thus we can only detect how many
         // domain fields are mapped
-        return !(aid == null || DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(aid)) //
+        return !matchFoundInLookupMode(traveler) && !(aid == null || DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(aid)) //
                 && tuple.getName() != null && tuple.getPhoneNumber() != null
                 && !(tuple.getEmail() != null && accountTuple != null && accountTuple.hasDomainOnly()
                         && !accountTuple.isDomainFromMultiCandidates());

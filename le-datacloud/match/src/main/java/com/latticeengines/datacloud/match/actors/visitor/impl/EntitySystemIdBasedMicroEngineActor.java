@@ -21,7 +21,7 @@ public class EntitySystemIdBasedMicroEngineActor extends EntityMicroEngineActorB
     @Override
     protected boolean shouldProcess(@NotNull MatchTraveler traveler) {
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
-        return CollectionUtils.isNotEmpty(tuple.getSystemIds());
+        return !matchFoundInLookupMode(traveler) && CollectionUtils.isNotEmpty(tuple.getSystemIds());
     }
 
     @Override

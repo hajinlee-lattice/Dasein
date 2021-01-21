@@ -1,9 +1,11 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.time.Duration;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,6 +63,7 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     private volatile int maxAttempts;
     private volatile RetryTemplate retryTemplate;
     private volatile boolean isAllocateMode = false;
+    private volatile Map<String, Boolean> perEntityAllocationModes;
 
     @Lazy
     @Inject
@@ -148,13 +151,23 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     }
 
     @Override
+    public void setPerEntityAllocationModes(Map<String, Boolean> perEntityAllocationModes) {
+        this.perEntityAllocationModes = perEntityAllocationModes;
+    }
+
+    @Override
     public void setIsAllocateMode(boolean isAllocateMode) {
         this.isAllocateMode = isAllocateMode;
     }
 
     @Override
-    public boolean isAllocateMode() {
-        return isAllocateMode;
+    public boolean isAllocateMode(String entity) {
+        if (StringUtils.isBlank(entity) || perEntityAllocationModes == null) {
+            // no entity specified, return the global value
+            return isAllocateMode;
+        }
+        // default to global value if not set
+        return perEntityAllocationModes.getOrDefault(entity, isAllocateMode);
     }
 
     @Override

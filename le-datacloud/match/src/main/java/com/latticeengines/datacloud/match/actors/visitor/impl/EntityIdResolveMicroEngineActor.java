@@ -23,10 +23,12 @@ import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.framework.MatchGuideBook;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
 /**
- * Pick the entity found by the highest priority match key from a list of lookup results. Only works in lookup mode.
- * ({@link EntityMatchConfigurationService#isAllocateMode()} = false)
+ * Pick the entity found by the highest priority match key from a list of lookup
+ * results. Only works in lookup mode.
+ * ({@link EntityMatchConfigurationService#isAllocateMode(String)} = false)
  */
 @Component("entityIdResolveMicroEngineActor")
 @Scope("prototype")
@@ -66,17 +68,15 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
                 .flatMap(List::stream)
                 .filter(Objects::nonNull) // null in the list means no entity found by that lookup entry
                 .findFirst()
-                .orElse(null);
-        if (StringUtils.isNotBlank(entityId)) {
+                .orElse(returnAnonymousWhenUnmatched(matchTraveler) ? DataCloudConstants.ENTITY_ANONYMOUS_ID : null);
+        if (StringUtils.isNotBlank(entityId) && !DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(entityId)) {
             matchTraveler.setMatched(true);
             matchTraveler.setResult(entityId);
             traveler.debug(String.format(
                     "Resolve lookup results to EntityId=%s for Entity=%s", entityId, matchTraveler.getEntity()));
         } else {
-            if (entityId != null) {
-                // should never happen, lookup actor should return either null or non-blank entity ID
-                log.warn("Blank entity ID found in entity lookup results = {}",
-                        matchTraveler.getMatchLookupResults());
+            if (StringUtils.isNotBlank(entityId)) {
+                matchTraveler.setResult(entityId);
             }
             traveler.debug(String.format(
                     "No entity found in lookup results for Entity=%s", matchTraveler.getEntity()));
@@ -97,7 +97,7 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
     protected boolean accept(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         // in lookup mode and have lookup result
-        return !entityMatchConfigurationService.isAllocateMode()
+        return !entityMatchConfigurationService.isAllocateMode(matchTraveler.getEntity())
                 && CollectionUtils.isNotEmpty(matchTraveler.getMatchLookupResults());
     }
 
@@ -112,5 +112,12 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
     @Override
     protected boolean isValidMessageType(Object msg) {
         return msg instanceof MatchTraveler;
+    }
+
+    private boolean returnAnonymousWhenUnmatched(MatchTraveler traveler) {
+        if (traveler == null || traveler.getMatchInput() == null) {
+            return false;
+        }
+        return traveler.getMatchInput().isReturnAnonymousWhenUnmatched();
     }
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service;
 
 import java.time.Duration;
+import java.util.Map;
 
 import org.springframework.retry.support.RetryTemplate;
 
@@ -119,19 +120,29 @@ public interface EntityMatchConfigurationService {
     RetryTemplate getRetryTemplate(@NotNull EntityMatchEnvironment env);
 
     /**
-     * Setter for isAllocateMode flag. See {@link this#isAllocateMode()} for the flag's meaning.
+     * TODO comments
+     *
+     * @param perEntityAllocationModes
+     */
+    void setPerEntityAllocationModes(Map<String, Boolean> perEntityAllocationModes);
+
+    /**
+     * Setter for isAllocateMode flag. See {@link this#isAllocateMode(String)} for the flag's meaning.
      *
      * @param isAllocateMode input flag to be set
      */
     void setIsAllocateMode(boolean isAllocateMode);
 
     /**
-     * Return a flag to represent whether system is in allocate mode. True means we will allocate new entity ID and
-     * merge to existing entity. False means read only mode and will return no match in case of conflict.
+     * Return a flag to represent whether system is in allocate mode. True means we
+     * will allocate new entity ID and merge to existing entity. False means read
+     * only mode and will return no match in case of conflict.
      *
+     * @param entity
+     *            current entity that's being matched
      * @return current value of the flag
      */
-    boolean isAllocateMode();
+    boolean isAllocateMode(String entity);
 
     /**
      * Return a flag to indicate whether match should lazily copy seed/lookup from

@@ -21,17 +21,20 @@ public class EntityMatchConfiguration {
     private final Boolean lazyCopyToStaging;
     // entity -> set of field names to skip in match
     private final Map<String, Set<String>> skippedMatchFields;
+    private final Map<String, Map<String, Boolean>> allocationModes;
 
     @JsonCreator
     public EntityMatchConfiguration( //
             @JsonProperty("NumStagingShards") Integer numStagingShards, //
             @JsonProperty("StagingTableName") String stagingTableName, //
             @JsonProperty("LazyCopyToStaging") Boolean lazyCopyToStaging, //
-            @JsonProperty("SkippedMatchFields") Map<String, Set<String>> skippedMatchFields) {
+            @JsonProperty("SkippedMatchFields") Map<String, Set<String>> skippedMatchFields,
+            @JsonProperty("AllocationModes") Map<String, Map<String, Boolean>> allocationModes) {
         this.numStagingShards = numStagingShards;
         this.stagingTableName = stagingTableName;
         this.lazyCopyToStaging = lazyCopyToStaging;
         this.skippedMatchFields = skippedMatchFields;
+        this.allocationModes = allocationModes;
     }
 
     @JsonProperty("NumStagingShards")
@@ -54,11 +57,16 @@ public class EntityMatchConfiguration {
         return skippedMatchFields;
     }
 
+    @JsonProperty("AllocationModes")
+    public Map<String, Map<String, Boolean>> getAllocationModes() {
+        return allocationModes;
+    }
+
     @Override
     public String toString() {
         return "EntityMatchConfiguration{" + "numStagingShards=" + numStagingShards + ", stagingTableName='"
                 + stagingTableName + '\'' + ", lazyCopyToStaging=" + lazyCopyToStaging + ", skippedMatchFields="
-                + skippedMatchFields + '}';
+                + skippedMatchFields + ", allocationModes=" + allocationModes + '}';
     }
 
     // TODO refactor and move all configuration here
