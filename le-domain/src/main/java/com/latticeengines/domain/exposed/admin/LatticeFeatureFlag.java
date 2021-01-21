@@ -53,6 +53,8 @@ public enum LatticeFeatureFlag {
     PUBLISH_TO_ELASTICSEARCH("PublishToElasticSearch", "Publish To Elastic Search"), //
     QUERY_FROM_ELASTICSEARCH("QueryFromElasticSearch", "Query From Elastic Search"), //
 
+    DCP_ENRICHMENT_LIBRARY("EnrichmentLibrary", "Enable Enrichment Library features"),
+
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
     @Deprecated
