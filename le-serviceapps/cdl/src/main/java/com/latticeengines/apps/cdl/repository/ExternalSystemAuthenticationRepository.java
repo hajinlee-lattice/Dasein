@@ -21,5 +21,5 @@ public interface ExternalSystemAuthenticationRepository
     List<ExternalSystemAuthentication> findAllAuths();
 
     @Query(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_TRAY_AUTH_ID)
-    List<ExternalSystemAuthentication> findAllByTrayAuthId(@Param("trayAuthId")String trayAuthId);
+    List<ExternalSystemAuthentication> retrieveAllByTrayAuthId(@Param("trayAuthId")String trayAuthId);
 }

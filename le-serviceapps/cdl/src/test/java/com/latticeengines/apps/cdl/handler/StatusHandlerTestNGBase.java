@@ -110,6 +110,7 @@ public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
         lookupIdMap.setExternalSystemName(CDLExternalSystemName.Marketo);
         lookupIdMap.setOrgId(orgId);
         lookupIdMap.setOrgName(orgName);
+        lookupIdMap.setIsRegistered(true);
 
         log.info("Created LookupIdMap for " + lookupIdMap.getExternalSystemName().toString());
 
