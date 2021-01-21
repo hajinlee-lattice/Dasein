@@ -113,7 +113,6 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
         for (GenericRecord record : accountItr) {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
             accountIdsForAll.add(accountId);
-            System.out.println("accountId:" + accountId);
             if (accountIdsForAll.size() >= 20) {
                 break;
             }
@@ -134,7 +133,6 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
         configuration.setDeleteType(DataDeleteOperationConfiguration.DeleteType.SOFT);
         String dropPath = cdlProxy.createDataOperation(customerSpace, DataOperation.OperationType.DELETE,configuration);
         Assert.assertNotNull(dropPath);
-        System.out.println(dropPath);
 
         retry.execute(context -> {
             DataOperation dataOperation = cdlProxy.findDataOperationByDropPath(customerSpace, dropPath);

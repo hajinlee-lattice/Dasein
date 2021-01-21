@@ -174,7 +174,11 @@ public class SourceFileServiceImpl implements SourceFileService {
             SchemaInterpretation schemaInterpretation;
             //TODO: SchemaInterpretation cannot match all BusinessEntity, need fix later.
             try {
-                schemaInterpretation = SchemaInterpretation.getByName(schema);
+                if (schema != null) {
+                    schemaInterpretation = SchemaInterpretation.getByName(schema);
+                } else {
+                    schemaInterpretation = SchemaInterpretation.getByName(entity);
+                }
             } catch (IllegalArgumentException e) {
                 schemaInterpretation = null;
             }
