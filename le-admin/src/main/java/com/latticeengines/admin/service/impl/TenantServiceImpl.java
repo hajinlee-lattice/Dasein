@@ -766,15 +766,12 @@ public class TenantServiceImpl implements TenantService {
             FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
             FeatureFlagValueMap defaultValueMap = new FeatureFlagValueMap();
             definitionMap.forEach((flagId, flagDef) -> {
-                if (flagDef.getAvailableProducts() != null) {
-                    for (LatticeProduct product : flagDef.getAvailableProducts()) {
-                        if (productList.contains(product)) {
-                            boolean defaultVal = flagDef.getDefaultValue();
-                            defaultValueMap.put(flagId, defaultVal);
-                            break;
-                        }
-                    }
-                } else {
+                // Do not fix D&B Connect-specific flags to creation-time default; let it sync with current default
+                // Others should be fixed at this point
+                boolean fixNow = flagDef.getAvailableProducts() == null ||
+                                    (!flagDef.getAvailableProducts().equals(Collections.singleton(LatticeProduct.DCP)) &&
+                                        productList.stream().anyMatch(product -> flagDef.getAvailableProducts().contains(product)));
+                if (fixNow) {
                     boolean defaultVal = flagDef.getDefaultValue();
                     defaultValueMap.put(flagId, defaultVal);
                 }
