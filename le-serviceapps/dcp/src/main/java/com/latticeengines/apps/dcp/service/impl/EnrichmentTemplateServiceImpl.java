@@ -127,10 +127,10 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
     private boolean includeEnrichmentTemplate(ListEnrichmentTemplateRequest listEnrichmentTemplateRequest,
             EnrichmentTemplate enrichmentTemplate) {
         boolean matchesDomain = "ALL".equals(listEnrichmentTemplateRequest.getDomain())
-                || listEnrichmentTemplateRequest.getDomain() == enrichmentTemplate.getDomain().getDisplayName();
+                || listEnrichmentTemplateRequest.getDomain() == enrichmentTemplate.getDomain().name();
 
         boolean matchesRecordType = "ALL".equals(listEnrichmentTemplateRequest.getRecordType())
-                || listEnrichmentTemplateRequest.getRecordType() == enrichmentTemplate.getRecordType().getDisplayName();
+                || listEnrichmentTemplateRequest.getRecordType() == enrichmentTemplate.getRecordType().name();
 
         boolean matchesCreatedBy = "ALL".equals(listEnrichmentTemplateRequest.getCreatedBy())
                 || listEnrichmentTemplateRequest.getCreatedBy() == enrichmentTemplate.getCreatedBy();
