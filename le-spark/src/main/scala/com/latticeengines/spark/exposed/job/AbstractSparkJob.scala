@@ -168,8 +168,8 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       val tgt = t._1
       var df = t._2
       val path = tgt.getPath
-      if (jobConfig.isCoalesce) {
-        df = coalesceTgt(df, jobConfig.getNumPartitionLimit)
+      if (jobConfig.numPartitionLimit != null) {
+        df = coalesceTgt(df, jobConfig.numPartitionLimit)
       }
       if (tgt.isCoalesce) {
         df = df.coalesce(1)
@@ -215,12 +215,8 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   }
 
   def coalesceTgt(df: DataFrame, numPartitionLimit: Int): DataFrame = {
-    var limit = numPartitionLimit
-    if (limit == 0) {
-      limit = 8
-    }
-    if (df.rdd.getNumPartitions >= limit) {
-      df.coalesce((limit + 1) / 2)
+    if (df.rdd.getNumPartitions >= numPartitionLimit) {
+      df.coalesce((numPartitionLimit + 1) / 2)
     }
     df
   }

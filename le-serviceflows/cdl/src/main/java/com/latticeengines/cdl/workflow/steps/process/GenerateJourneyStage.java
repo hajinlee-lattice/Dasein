@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -61,6 +62,9 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Value("${cdl.job.partition.limit}")
+    private Integer numPartitionLimit;
 
     private TimeLine acc360Timeline;
     private List<JourneyStage> journeyStages;
@@ -133,6 +137,7 @@ public class GenerateJourneyStage extends RunSparkJob<TimeLineSparkStepConfigura
                 config.currentEpochMilli);
 
         config.setInput(inputs);
+        config.numPartitionLimit = numPartitionLimit;
         return config;
     }
 
