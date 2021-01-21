@@ -12,9 +12,11 @@ public class ListEnrichmentTemplateRequest {
 
     private String createdBy;
 
-    public ListEnrichmentTemplateRequest() {}
+    public ListEnrichmentTemplateRequest() {
+    }
 
-    public ListEnrichmentTemplateRequest(String tenantId, String domain, String recordType, Boolean includeArchived, String createdBy) {
+    public ListEnrichmentTemplateRequest(String tenantId, String domain, String recordType, Boolean includeArchived,
+            String createdBy) {
         this.tenantId = tenantId;
         this.domain = domain;
         this.recordType = recordType;
