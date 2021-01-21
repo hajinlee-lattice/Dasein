@@ -93,9 +93,23 @@
     {
       "Node": "OutreachTaskSettings",
       "Children": [
-        {"Node": "OwnerPriority", "Data": "Lattice"},
-        {"Node": "DefaultOwner", "Data": ""}
+        {
+          "Node": "OwnerPriority",
+          "Data": "Lattice"
+        },
+        {
+          "Node": "DefaultOwner",
+          "Data": ""
+        }
       ]
+    },
+    {
+      "Node": "Stack",
+      "Data": ""
+    },
+    {
+      "Node": "TriggerName",
+      "Data": "Undefined"
     }
   ]
 }

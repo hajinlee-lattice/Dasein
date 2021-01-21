@@ -3,10 +3,9 @@ package com.latticeengines.domain.exposed.cdl;
 import static javax.persistence.TemporalType.TIMESTAMP;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -62,19 +61,23 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
     @JsonProperty("displayName")
     private String displayName;
 
-    @Column(name = "DATA_STREAM_ID")
     @JsonProperty("dataStreamId")
+    @Column(name = "DATA_STREAM_ID")
     private String dataStreamId;
 
     @JsonProperty("selectedFields")
     @Column(name = "SELECTED_FIELDS", columnDefinition = "'JSON'")
     @Type(type = "json")
-    private Map<String, List<String>> selectedFields = new HashMap<>();
+    private List<String> selectedFields = new ArrayList<>();
 
     @JsonProperty("ingestionScheduler")
     @Column(name = "INGESTION_SCHEDULER", columnDefinition = "'JSON'")
     @Type(type = "json")
     private IngestionScheduler ingestionScheduler;
+
+    @JsonProperty("documentType")
+    @Column(name = "DOCUMENT_TYPE", nullable = false)
+    private String documentType;
 
     @Temporal(TIMESTAMP)
     @JsonProperty("created")
@@ -89,6 +92,11 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
     @JsonProperty("active")
     @Column(name = "ACTIVE", nullable = false)
     private boolean active;
+
+    @Temporal(TIMESTAMP)
+    @Column(name = "NEXT_SCHEDULED_TIME")
+    @JsonProperty("nextScheduledTime")
+    private Date nextScheduledTime;
 
     @Override
     public Long getPid() {
@@ -146,22 +154,6 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
         this.tenant = tenant;
     }
 
-    public Map<String, List<String>> getSelectedFields() {
-        return selectedFields;
-    }
-
-    public void setSelectedFields(Map<String, List<String>> selectedFields) {
-        this.selectedFields = selectedFields;
-    }
-
-    public String getDataStreamId() {
-        return dataStreamId;
-    }
-
-    public void setDataStreamId(String dataStreamId) {
-        this.dataStreamId = dataStreamId;
-    }
-
     public Boolean getActive() {
         return active;
     }
@@ -176,5 +168,38 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
 
     public void setIngestionScheduler(IngestionScheduler ingestionScheduler) {
         this.ingestionScheduler = ingestionScheduler;
+    }
+
+    public String getDataStreamId() {
+        return dataStreamId;
+    }
+
+    public void setDataStreamId(String dataStreamId) {
+        this.dataStreamId = dataStreamId;
+    }
+
+    public List<String> getSelectedFields() {
+        return selectedFields;
+    }
+
+    public void setSelectedFields(List<String> selectedFields) {
+        this.selectedFields = selectedFields;
+    }
+
+    public String getDocumentType() {
+        return documentType;
+    }
+
+    public void setDocumentType(String documentType) {
+        this.documentType = documentType;
+    }
+
+
+    public Date getNextScheduledTime() {
+        return nextScheduledTime;
+    }
+
+    public void setNextScheduledTime(Date nextScheduledTime) {
+        this.nextScheduledTime = nextScheduledTime;
     }
 }

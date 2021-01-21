@@ -1,11 +1,12 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,11 @@ public class MockBrokerInstanceServiceImpl implements MockBrokerInstanceService 
     }
 
     @Override
+    public List<MockBrokerInstance> getAllValidInstance(Date nextScheduledTime) {
+        return mockBrokerInstanceEntityMgr.getAllValidInstance(nextScheduledTime);
+    }
+
+    @Override
     public MockBrokerInstance createOrUpdate(MockBrokerInstance existingMockBrokerInstance) {
         validate(existingMockBrokerInstance);
         String sourceId = existingMockBrokerInstance.getSourceId();
@@ -46,6 +52,11 @@ public class MockBrokerInstanceServiceImpl implements MockBrokerInstanceService 
         if (mockBrokerInstance == null) {
             mockBrokerInstance = new MockBrokerInstance();
             mockBrokerInstance.setSourceId(UUID.randomUUID().toString());
+            if (StringUtils.isNotEmpty(existingMockBrokerInstance.getDocumentType())) {
+                mockBrokerInstance.setDocumentType(existingMockBrokerInstance.getDocumentType());
+            } else {
+                mockBrokerInstance.setDocumentType("Account");
+            }
         }
         mockBrokerInstance.setTenant(MultiTenantContext.getTenant());
         if (StringUtils.isNotEmpty(existingMockBrokerInstance.getDisplayName())) {
@@ -53,7 +64,7 @@ public class MockBrokerInstanceServiceImpl implements MockBrokerInstanceService 
         } else {
             mockBrokerInstance.setDisplayName(defaultDisplayName);
         }
-        if (MapUtils.isNotEmpty(existingMockBrokerInstance.getSelectedFields())) {
+        if (CollectionUtils.isNotEmpty(existingMockBrokerInstance.getSelectedFields())) {
             mockBrokerInstance.setSelectedFields(existingMockBrokerInstance.getSelectedFields());
         }
         if (existingMockBrokerInstance.getIngestionScheduler() != null) {

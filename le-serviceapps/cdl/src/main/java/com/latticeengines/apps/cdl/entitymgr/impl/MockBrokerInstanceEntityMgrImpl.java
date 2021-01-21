@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -35,6 +36,11 @@ public class MockBrokerInstanceEntityMgrImpl extends JpaEntityMgrRepositoryImpl<
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<MockBrokerInstance> getAllInstance(int maxRow) {
         return readerRepository.findAllWithLimit(maxRow);
+    }
+
+    @Override
+    public List<MockBrokerInstance> getAllValidInstance(Date nextScheduledTime) {
+        return readerRepository.findByNextScheduledTime(nextScheduledTime);
     }
 
     @Override

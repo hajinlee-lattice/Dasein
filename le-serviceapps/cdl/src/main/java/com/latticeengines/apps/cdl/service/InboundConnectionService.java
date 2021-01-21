@@ -16,4 +16,6 @@ public interface InboundConnectionService {
     List<String> listDocumentTypes(BrokerReference brokerReference);
 
     List<ColumnMetadata> describeDocumentType(BrokerReference brokerReference, String documentType);
+
+    void submitMockBrokerAggregationWorkflow();
 }

@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.integration;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,16 +18,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class BrokerSetupInfo {
 
     @JsonProperty("selectedFields")
-    private Map<String, List<String>> selectedFields;
+    private List<String> selectedFields;
 
     @JsonProperty("connectionType")
     private InboundConnectionType connectionType;
 
-    public Map<String, List<String>> getSelectedFields() {
+    public List<String> getSelectedFields() {
         return selectedFields;
     }
 
-    public void setSelectedFields(Map<String, List<String>> selectedFields) {
+    public void setSelectedFields(List<String> selectedFields) {
         this.selectedFields = selectedFields;
     }
 

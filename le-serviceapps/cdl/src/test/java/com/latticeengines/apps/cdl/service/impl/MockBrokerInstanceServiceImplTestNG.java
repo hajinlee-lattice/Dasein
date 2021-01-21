@@ -1,9 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -22,7 +20,6 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
 import com.latticeengines.domain.exposed.cdl.MockBrokerInstance;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class MockBrokerInstanceServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -45,32 +42,33 @@ public class MockBrokerInstanceServiceImplTestNG extends CDLFunctionalTestNGBase
         String displayName = "mockBrokerInstance";
         AtomicReference<MockBrokerInstance> mockBrokerInstance = new AtomicReference<>(new MockBrokerInstance());
         mockBrokerInstance.get().setDisplayName(displayName);
-        mockBrokerInstance.get().getSelectedFields().put(BusinessEntity.Account.name(), new ArrayList<>());
-        mockBrokerInstance.get().getSelectedFields().put(BusinessEntity.Contact.name(), new ArrayList<>());
-        mockBrokerInstance.get().getSelectedFields().get(BusinessEntity.Account.name()).addAll(Lists.newArrayList(InterfaceName.AccountId.name(),
+        mockBrokerInstance.get().getSelectedFields().addAll(Lists.newArrayList(InterfaceName.AccountId.name(),
                 InterfaceName.City.name(), InterfaceName.PhoneNumber.name()));
-        mockBrokerInstance.get().getSelectedFields().get(BusinessEntity.Contact.name()).addAll(Lists.newArrayList(InterfaceName.AccountId.name(),
-                InterfaceName.ContactId.name(), InterfaceName.Email.name(), InterfaceName.FirstName.name()));
+        mockBrokerInstance.get().setDocumentType("Account");
         String cronExpression = "0 0/10 * * * ?";
         long startTime = System.currentTimeMillis();
         IngestionScheduler scheduler = new IngestionScheduler();
+
         scheduler.setCronExpression(cronExpression);
         scheduler.setStartTime(startTime);
         mockBrokerInstance.get().setIngestionScheduler(scheduler);
+        mockBrokerInstance.get().setActive(true);
         MockBrokerInstance mockBrokerInstance2 = mockBrokerInstanceService.createOrUpdate(mockBrokerInstance.get());
         String sourceId = mockBrokerInstance2.getSourceId();
         retry.execute(context -> {
             mockBrokerInstance.set(mockBrokerInstanceService.findBySourceId(sourceId));
             Assert.assertNotNull(mockBrokerInstance.get());
             Assert.assertEquals(mockBrokerInstance.get().getDisplayName(), displayName);
-            Map<String, List<String>> selectedFields = mockBrokerInstance.get().getSelectedFields();
+            List<String> selectedFields = mockBrokerInstance.get().getSelectedFields();
             Assert.assertNotNull(selectedFields);
-            Assert.assertEquals(selectedFields.get(BusinessEntity.Account.name()).size(), 3);
-            Assert.assertEquals(selectedFields.get(BusinessEntity.Contact.name()).size(), 4);
+            Assert.assertEquals(selectedFields.size(), 3);
             IngestionScheduler savedScheduler = mockBrokerInstance.get().getIngestionScheduler();
             Assert.assertNotNull(savedScheduler);
             Assert.assertEquals(savedScheduler.getCronExpression(), cronExpression);
             Assert.assertEquals(savedScheduler.getStartTime(), startTime);
+            Assert.assertTrue(mockBrokerInstance.get().getActive());
+            List<MockBrokerInstance> instances = mockBrokerInstanceService.getAllInstance(5);
+            Assert.assertEquals(instances.size(), 1);
             return true;
         });
         String displayName1 = "mockBrokerInstance1";

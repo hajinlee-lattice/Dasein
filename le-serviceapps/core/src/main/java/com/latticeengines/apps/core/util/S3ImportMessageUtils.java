@@ -1,5 +1,6 @@
 package com.latticeengines.apps.core.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,13 +20,14 @@ public final class S3ImportMessageUtils {
 
     private static String FEED_TYPE_PATTERN = "%s_%s";
     private static final String PS_SHARE = "PS_SHARE";
+    public static final String ENTERPRISE_INTEGRATION = "enterprise_integration";
     // DCP key : dropfolder/{dropbox}/Projects/{ProjectId}/Sources/{SourceId}/drop/{fileName}
     private static final Pattern DCP_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Projects/([a-zA-Z0-9_]+)/Source[s]?/([a-zA-Z0-9_]+)/drop/(.*)");
     private static final Pattern ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Templates/(.*)");
     private static final Pattern LEGACY_ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/([a-zA-Z0-9_]+)/Templates/(.*)");
     private static final Pattern LIST_SEGMENT_PATTERN = Pattern.compile("datavision_segment/([a-zA-Z0-9_]+)/([a-zA-Z0-9_]+)/(.*)");
     private static final Pattern DATA_OPERATION_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Data_Operation/(.*)");
-
+    private static final Pattern ENTERPRISE_INTEGRATION_PATTERN = Pattern.compile(ENTERPRISE_INTEGRATION + "/([a-zA-Z0-9_]+)/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_]+)/(.*)");
     public static final List<String> validImportFileTypes = Lists.newArrayList(".csv", ".gzip", ".gz", ".tar", ".tar.gz", ".zip");
 
     public static S3ImportMessageType getMessageTypeFromKey(String key) {
@@ -44,6 +46,8 @@ public final class S3ImportMessageUtils {
                 return S3ImportMessageType.LISTSEGMENT;
             } else if (DATA_OPERATION_PATTERN.matcher(key).find()) {
                 return S3ImportMessageType.DATAOPERATION;
+            } else if (ENTERPRISE_INTEGRATION_PATTERN.matcher(key).find()) {
+                return S3ImportMessageType.INBOUND_CONNECTION;
             }
             else {
                 return S3ImportMessageType.UNDEFINED;
@@ -67,6 +71,37 @@ public final class S3ImportMessageUtils {
                 break;
         }
         return skip;
+    }
+
+    public static List<String> getKeyPartValues(String key, S3ImportMessageType messageType, List<KeyPart> keyParts) {
+        if (S3ImportMessageType.INBOUND_CONNECTION.equals(messageType)) {
+            Matcher matcher = ENTERPRISE_INTEGRATION_PATTERN.matcher(key);
+            boolean found = matcher.find();
+            List<String> result = new ArrayList<>();
+            for (KeyPart keyPart : keyParts) {
+                if (found) {
+                    switch (keyPart) {
+                        case TENANT_ID:
+                            result.add(matcher.group(1));
+                            break;
+                        case SOURCE_ID:
+                            result.add(matcher.group(2));
+                            break;
+                        case FILE_NAME:
+                            result.add(matcher.group(4));
+                            break;
+                        default:
+                            result.add(StringUtils.EMPTY);
+                            break;
+                    }
+                } else {
+                    result.add(StringUtils.EMPTY);
+                }
+            }
+            return result;
+        } else {
+            throw new NotImplementedException("Message type: " + messageType + " is not supported yet.");
+        }
     }
 
     public static String getKeyPart(String key, S3ImportMessageType messageType, KeyPart keyPart) {
