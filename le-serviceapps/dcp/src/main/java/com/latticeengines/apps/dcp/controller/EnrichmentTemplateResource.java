@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
@@ -38,6 +39,21 @@ public class EnrichmentTemplateResource {
             return result;
         } catch (LedpException exception) {
             log.error(String.format("Failed to create enrichment template from existing layout %s: %s", layoutId,
+                    exception.getMessage()));
+            log.error(ExceptionUtils.getStackTrace(exception));
+            return ResponseDocument.failedResponse(exception);
+        }
+    }
+
+    @PostMapping("/create-template")
+    @ResponseBody
+    @ApiOperation(value = "Create an Enrichment Template")
+    public ResponseDocument<String> create(@RequestBody EnrichmentTemplate template) {
+        try {
+            ResponseDocument<String> result = enrichmentTemplateService.create(template);
+            return result;
+        } catch (LedpException exception) {
+            log.error(String.format("Failed to create enrichment template: template ID %s", template.getTemplateId(),
                     exception.getMessage()));
             log.error(ExceptionUtils.getStackTrace(exception));
             return ResponseDocument.failedResponse(exception);

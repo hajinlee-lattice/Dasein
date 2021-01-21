@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
+import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase {
@@ -67,6 +68,22 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
         String templateName = "Test_Enrichment_Template";
 
         ResponseDocument<String> createTemplateResult = enrichmentTemplateService.create(layoutId, templateName);
+
+        Assert.assertNotNull(createTemplateResult);
+        Assert.assertTrue(createTemplateResult.isSuccess(), "Enrichment Template is not valid");
+    }
+
+    @Test(groups = "functional")
+    public void testCreateTemplate() {
+        EnrichmentTemplate template = new EnrichmentTemplate();
+        template.setDomain(DataDomain.SalesMarketing);
+        template.setRecordType(DataRecordType.Domain);
+
+        List<String> elements = Arrays.asList("primaryname", "duns_number");
+        template.setElements(elements);
+        template.setCreatedBy("testUser@dnb.com");
+
+        ResponseDocument<String> createTemplateResult = enrichmentTemplateService.create(template);
 
         Assert.assertNotNull(createTemplateResult);
         Assert.assertTrue(createTemplateResult.isSuccess(), "Enrichment Template is not valid");

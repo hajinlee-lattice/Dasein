@@ -75,8 +75,27 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
             }
             return result;
         } else {
-            // There shouldn't be an instance of result not being successful and errors
-            // being empty.
+            throw new LedpException(LedpCode.LEDP_60016, new String[] { String.join("\n", result.getErrors()) });
+        }
+    }
+
+    @Override
+    public ResponseDocument<String> create(EnrichmentTemplate enrichmentTemplate) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        enrichmentTemplate.setTenant(tenant);
+
+        ResponseDocument<String> result = validateEnrichmentTemplate(enrichmentTemplate);
+        if (result.isSuccess()) {
+            try {
+                enrichmentTemplateEntityMgr.create(enrichmentTemplate);
+            } catch (Exception exception) {
+                log.error(String.format("Error creating enrichment template %s, error message %s",
+                        enrichmentTemplate.getTemplateId(), exception.getMessage()));
+                throw new LedpException(LedpCode.LEDP_60015,
+                        new String[] { enrichmentTemplate.getTemplateId(), exception.getMessage() });
+            }
+            return result;
+        } else {
             throw new LedpException(LedpCode.LEDP_60016, new String[] { String.join("\n", result.getErrors()) });
         }
     }

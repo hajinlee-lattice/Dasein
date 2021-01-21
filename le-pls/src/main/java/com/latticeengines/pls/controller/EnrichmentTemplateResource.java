@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.Status;
 import com.latticeengines.domain.exposed.exception.UIAction;
@@ -43,10 +43,28 @@ public class EnrichmentTemplateResource {
     public ResponseDocument<String> createTemplate(@PathVariable String layoutId, @RequestBody String templateName) {
         try {
             ResponseDocument<String> createTemplateResponse = enrichmentTemplateService
-                    .createEnrichmentTemplate(MultiTenantContext.getShortTenantId(), layoutId, templateName);
+                    .createEnrichmentTemplate(layoutId, templateName);
             return createTemplateResponse;
         } catch (LedpException exception) {
             log.error(String.format("Failed to create enrichment template from existing layout %s: %s", layoutId,
+                    exception.getMessage()));
+            log.error(ExceptionUtils.getStackTrace(exception));
+            UIAction action = UIActionUtils.generateUIAction("", View.Banner, Status.Error, exception.getMessage());
+            throw new UIActionException(action, exception.getCode());
+        }
+    }
+
+    @PostMapping(value = "/create-template")
+    @ResponseBody
+    @ApiOperation("Create enrichment template")
+    @PreAuthorize("hasRole('Edit_DCP_Projects')")
+    public ResponseDocument<String> createTemplate(@RequestBody EnrichmentTemplate template) {
+        try {
+            ResponseDocument<String> createTemplateResponse = enrichmentTemplateService
+                    .createEnrichmentTemplate(template);
+            return createTemplateResponse;
+        } catch (LedpException exception) {
+            log.error(String.format("Failed to create enrichment template: template ID %s", template.getTemplateId(),
                     exception.getMessage()));
             log.error(ExceptionUtils.getStackTrace(exception));
             UIAction action = UIActionUtils.generateUIAction("", View.Banner, Status.Error, exception.getMessage());
