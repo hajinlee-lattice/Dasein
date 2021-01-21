@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -12,6 +13,7 @@ class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
 
   private val dummyColumn: String = "DJ_f8f7d5c7"
   private val aggregate_prefix = "AGGR_"
+  private val systemBatchJoinColumn = InterfaceName.EntityId.name
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[LegacyDeleteJobConfig]): Unit = {
     val config: LegacyDeleteJobConfig = lattice.config
@@ -28,16 +30,32 @@ class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
     val result = entity match {
       case BusinessEntity.Account
         if operationType.equals(CleanupOperationType.BYUPLOAD_ID) =>
-        original.alias("original")
-          .join(delete, Seq(joinColumn.getAccountId), "left")
-          .where(delete.col(joinColumn.getAccountId).isNull)
-          .select("original.*")
+        if (systemBatchJoinColumn.equals(joinColumn.getAccountId)) {
+          original.alias("original")
+            .withColumn(InterfaceName.AccountId.name, original.col(joinColumn.getAccountId))
+            .join(delete, Seq(joinColumn.getAccountId), "left")
+            .where(delete.col(joinColumn.getAccountId).isNull)
+            .select("original.*")
+        } else {
+          original.alias("original")
+            .join(delete, Seq(joinColumn.getAccountId), "left")
+            .where(delete.col(joinColumn.getAccountId).isNull)
+            .select("original.*")
+        }
       case BusinessEntity.Contact
         if operationType.equals(CleanupOperationType.BYUPLOAD_ID) =>
-        original.alias("original")
-          .join(delete, Seq(joinColumn.getContactId), "left")
-          .where(delete.col(joinColumn.getContactId).isNull)
-          .select("original.*")
+        if (systemBatchJoinColumn.equals(joinColumn.getContactId)) {
+          original.alias("original")
+            .withColumn(InterfaceName.ContactId.name, original.col(joinColumn.getContactId))
+            .join(delete, Seq(joinColumn.getContactId), "left")
+            .where(delete.col(joinColumn.getContactId).isNull)
+            .select("original.*")
+        } else {
+          original.alias("original")
+            .join(delete, Seq(joinColumn.getContactId), "left")
+            .where(delete.col(joinColumn.getContactId).isNull)
+            .select("original.*")
+        }
       case BusinessEntity.Transaction =>
         getDeleteResultByTransaction(operationType, original, delete, joinColumn, config)
     }
@@ -79,9 +97,5 @@ class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
       case _ => throw new UnsupportedOperationException(s"Unsupported type $operationType!")
     }
   }
-
-  //val toDateOnlyFromMillis: UserDefinedFunction = udf((time: String) => DateTimeUtils.toDateOnlyFromMillis(time))
-
-  //val dateToDayPeriod: UserDefinedFunction = udf((dateString: String) => DateTimeUtils.dateToDayPeriod(dateString))
 }
 

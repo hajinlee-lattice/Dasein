@@ -101,7 +101,7 @@ public class LegacyDeleteSystemBatchByUpload extends RunSparkJob<LegacyDeleteSpa
         LegacyDeleteJobConfig config = new LegacyDeleteJobConfig();
         config.setBusinessEntity(stepConfiguration.getEntity());
         config.setOperationType(type);
-        config.setJoinedColumns(getJoinedColumns(stepConfiguration.getEntity(), type));
+        config.setJoinedColumns(getJoinedColumns(stepConfiguration.getEntity()));
         config.setDeleteSourceIdx(0);
         config.setInput(Arrays.asList(mergeDeleteTable, input2));
         return config;
@@ -131,18 +131,14 @@ public class LegacyDeleteSystemBatchByUpload extends RunSparkJob<LegacyDeleteSpa
         dataCollectionProxy.upsertTable(customerSpace.toString(), cleanupTableName, systemBatchStore, inactive);
     }
 
-    private LegacyDeleteJobConfig.JoinedColumns getJoinedColumns(BusinessEntity entity, CleanupOperationType type) {
+    private LegacyDeleteJobConfig.JoinedColumns getJoinedColumns(BusinessEntity entity) {
         LegacyDeleteJobConfig.JoinedColumns joinedColumns = new LegacyDeleteJobConfig.JoinedColumns();
-        String account_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerAccountId.name() :
-                InterfaceName.AccountId.name();
-        String contact_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerContactId.name() :
-                InterfaceName.ContactId.name();
         switch (entity) {
             case Account:
-                joinedColumns.setAccountId(account_id);
+                joinedColumns.setAccountId(InterfaceName.EntityId.name());
                 break;
             case Contact:
-                joinedColumns.setContactId(contact_id);
+                joinedColumns.setContactId(InterfaceName.EntityId.name());
                 break;
             default:
                 break;
