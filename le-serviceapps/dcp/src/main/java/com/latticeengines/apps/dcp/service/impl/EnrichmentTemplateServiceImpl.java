@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -117,6 +118,7 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
 
             return templates.stream().map(EnrichmentTemplateSummary::new).collect(Collectors.toList());
         } catch (Exception exception) {
+            log.error(ExceptionUtils.getStackTrace(exception));
             log.error(String.format("Error querying for enrichment templates: %s", exception.getMessage()));
             throw new LedpException(LedpCode.LEDP_60017, new String[] { exception.getMessage() });
         }

@@ -27,12 +27,14 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
 
     @Override
     public ResponseDocument<String> createEnrichmentTemplate(EnrichmentTemplate enrichmentTemplate) {
-        return enrichmentTemplateProxy.createEnrichmentTemplate(enrichmentTemplate);
+        return enrichmentTemplateProxy.createEnrichmentTemplate(MultiTenantContext.getShortTenantId(),
+                enrichmentTemplate);
     }
 
     @Override
-    public List<EnrichmentTemplateSummary> getEnrichmentTemplates(String domain, String recordType, Boolean includeArchived,
-                                                                  String createdBy) {
-        return enrichmentTemplateProxy.getEnrichmentTemplates(domain, recordType, includeArchived, createdBy);
+    public List<EnrichmentTemplateSummary> getEnrichmentTemplates(String domain, String recordType,
+            Boolean includeArchived, String createdBy) {
+        return enrichmentTemplateProxy.getEnrichmentTemplates(MultiTenantContext.getShortTenantId(), domain, recordType,
+                includeArchived, createdBy);
     }
 }
