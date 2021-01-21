@@ -29,11 +29,11 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     fi
     sudo mv "${ARTIFACT_DIR}/spark-${SPARK_VERSION}-bin-hadoop2.7" "${SPARK_HOME}"
 
-    if [[ ! -f "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar" ]]; then
-        MAVEN_URL="https://repo1.maven.org/maven2/com/sun/jersey/jersey-bundle/1.19.1/jersey-bundle-1.19.1.jar"
-        wget --no-check-certificate ${MAVEN_URL} -O "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar"
+    if [[ ! -f "${ARTIFACT_DIR}/jersey-core-1.9.jar" ]]; then
+        MAVEN_URL="https://repo1.maven.org/maven2/com/sun/jersey/jersey-core/1.9/jersey-core-1.9.jar"
+        wget --no-check-certificate ${MAVEN_URL} -O "${ARTIFACT_DIR}/jersey-core-1.9.jar"
     fi
-    sudo cp "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar" "${SPARK_HOME}/jars"
+    sudo cp "${ARTIFACT_DIR}/jersey-core-1.9.jar" "${SPARK_HOME}/jars"
 
     # match spark build dependency
     AWS_SDK_VERSION=1.7.4
