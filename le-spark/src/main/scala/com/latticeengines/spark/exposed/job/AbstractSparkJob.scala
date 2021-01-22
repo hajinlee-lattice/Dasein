@@ -217,8 +217,9 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   def coalesceTgt(df: DataFrame, numPartitionLimit: Int): DataFrame = {
     if (df.rdd.getNumPartitions >= numPartitionLimit) {
       df.coalesce((numPartitionLimit + 1) / 2)
+    } else {
+      df
     }
-    df
   }
 
   def runJob(spark: SparkSession, lattice: LatticeContext[C]): Unit
