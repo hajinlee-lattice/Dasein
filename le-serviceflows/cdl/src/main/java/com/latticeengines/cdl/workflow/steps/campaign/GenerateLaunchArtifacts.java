@@ -25,6 +25,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -87,6 +88,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private CampaignLaunchUtils campaignLaunchUtils;
 
     private Set<String> additionalContactAttr = new HashSet<>(Arrays.asList(InterfaceName.FirstName.name(),
             InterfaceName.LastName.name(), InterfaceName.Address_Street_2.name(), InterfaceName.DoNotCall.name(),
@@ -161,6 +165,10 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         if (StringUtils.isNotBlank(contactLookupId)) {
             contactLookups.add(new AttributeLookup(BusinessEntity.Contact, contactLookupId));
         }
+        if (campaignLaunchUtils.getUseCustomerId(customerSpace, launch.getDestinationSysName())) {
+            appendCustomerId(accountLookups, InterfaceName.CustomerAccountId, BusinessEntity.Account);
+            appendCustomerId(contactLookups, InterfaceName.CustomerContactId, BusinessEntity.Contact);
+        }
         SparkJobResult sparkJobResult;
         if (baseOnOtherTapType) {
             sparkJobResult = runSparkJob(accountLookups, contactLookups, positiveDeltaDataUnit, negativeDeltaDataUnit,
@@ -182,6 +190,19 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName());
         }
         processSparkJobResults(channelConfig.getAudienceType(), channelConfig.getSystemName(), sparkJobResult);
+    }
+
+    private void appendCustomerId(Set<Lookup> lookups, InterfaceName customerId, BusinessEntity entity){
+        boolean hasCustomerId = false;
+        for (Lookup lookup : lookups) {
+            AttributeLookup attributeLookup = (AttributeLookup) lookup;
+            if (customerId.name().equals(attributeLookup.getAttribute())) {
+                hasCustomerId = true;
+            }
+        }
+        if (!hasCustomerId) {
+            lookups.add(new AttributeLookup(entity, customerId.name()));
+        }
     }
 
     private SparkJobResult runSparkJob(Set<Lookup> accountLookups, Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit,

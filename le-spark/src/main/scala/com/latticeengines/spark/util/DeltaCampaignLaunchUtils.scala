@@ -36,14 +36,14 @@ private[spark] object DeltaCampaignLaunchUtils {
                             TENANT_ID: Long, //
                             DELETED: Boolean)
 
-  def createRec(account: Row, serializedCtx: String): Recommendation = {
+  def createRec(account: Row, serializedCtx: String, userCustomerId: Boolean): Recommendation = {
 
     val playLaunchContext = JsonUtils.deserialize(serializedCtx, classOf[PlayLaunchSparkContext])
     val launchTimestampMillis: Long = playLaunchContext.getLaunchTimestampMillis
     val playId: String = playLaunchContext.getPlayName
     val playLaunchId: String = playLaunchContext.getPlayLaunchId
     val tenantId: Long = playLaunchContext.getTenantPid
-    val accountId: String = checkAndGet(account, InterfaceName.AccountId.name)
+    val accountId: String = checkAndGet(account, getAccountId(userCustomerId))
     val externalAccountId: String = accountId
     val uuid: String = UUID.randomUUID().toString
     val description: String = playLaunchContext.getPlayDescription
@@ -128,6 +128,14 @@ private[spark] object DeltaCampaignLaunchUtils {
       tenantId, // TENANT_ID
       DELETED = false // DELETED
     )
+  }
+
+  def getAccountId(userCustomerId: Boolean): String = {
+    if (userCustomerId) {
+      InterfaceName.CustomerAccountId.name
+    } else {
+      InterfaceName.AccountId.name
+    }
   }
 
   def getDefaultLikelihood(bucket: RatingBucketName): Double = {

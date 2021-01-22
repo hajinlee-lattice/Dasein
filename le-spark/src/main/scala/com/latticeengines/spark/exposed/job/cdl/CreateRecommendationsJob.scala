@@ -54,7 +54,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     KryoUtils.write(bos, playLaunchContext)
     val serializedCtx = JsonUtils.serialize(playLaunchContext)
     logSpark(s"serializedCtx is: $serializedCtx")
-    val createRecFunc = (account: Row) => DeltaCampaignLaunchUtils.createRec(account, serializedCtx)
+    val createRecFunc = (account: Row) => DeltaCampaignLaunchUtils.createRec(account, serializedCtx, false)
     val accountAndPlayLaunch = limitedAccountTable.rdd.map(createRecFunc)
 
     val derivedAccounts = spark.createDataFrame(accountAndPlayLaunch) //
@@ -260,7 +260,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
   private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String, joinKey: String): DataFrame = {
       val contactWithoutJoinKey = contactTable.drop(joinKey)
-      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId)
+      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId, false)
       val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
         flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
         count(lit(1)).as("CONTACT_NUM") //

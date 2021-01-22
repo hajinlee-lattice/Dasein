@@ -12,7 +12,7 @@ import org.apache.spark.sql.types._
 
 import scala.collection.mutable.Map;
 
-class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId: String) extends UserDefinedAggregateFunction {
+class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId: String, userCustomerId: Boolean) extends UserDefinedAggregateFunction {
 
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = schema
@@ -54,7 +54,7 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
         PlaymakerConstants.Country -> getInputValue(input, InterfaceName.Country.name()), //
         PlaymakerConstants.SfdcContactID -> (if (sfdcContactIdEmpty) "" else getInputValue(input, sfdcContactId)), //
         PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
-        PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
+        PlaymakerConstants.ContactID -> getInputValue(input, getContactId(userCustomerId)), //
         PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()), //
         PlaymakerConstants.FirstName -> getInputValue(input, InterfaceName.FirstName.name()), //
         PlaymakerConstants.LastName -> getInputValue(input, InterfaceName.LastName.name()), //
@@ -67,6 +67,14 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
     }
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
     buffer(0) = cur :+ ele
+  }
+
+  def getContactId(userCustomerId: Boolean): String = {
+    if (userCustomerId) {
+      InterfaceName.CustomerContactId.name
+    } else {
+      InterfaceName.ContactId.name
+    }
   }
 
   private def getInputValue(input: Row, key: String): String = {

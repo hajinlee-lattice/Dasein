@@ -130,7 +130,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       var recommendations: DataFrame = null
       val result: DataFrame = baseAddRecDf
       if (!completeContactTable.rdd.isEmpty && !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName)) {
-        val aggregatedContacts = aggregateContacts(completeContactTable, sfdcContactId, joinKey)
+        val aggregatedContacts = aggregateContacts(completeContactTable, sfdcContactId, joinKey, deltaCampaignLaunchSparkContext)
         recommendations = baseAddRecDf.join(aggregatedContacts, joinKey :: Nil, "left")
         logDataFrame("recommendations", recommendations, joinKey, Seq(joinKey, "CONTACT_NUM"), limit = 100)
         recommendations = recommendations.withColumnRenamed(joinKey, "ACCOUNT_ID")
@@ -162,7 +162,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     KryoUtils.write(bos, deltaCampaignLaunchSparkContext)
     val serializedCtx = JsonUtils.serialize(deltaCampaignLaunchSparkContext)
     logSpark(s"serializedCtx is: $serializedCtx")
-    val createRecFunc = (account: Row) => DeltaCampaignLaunchUtils.createRec(account, serializedCtx)
+    val createRecFunc = (account: Row) => DeltaCampaignLaunchUtils.createRec(account, serializedCtx, deltaCampaignLaunchSparkContext.getUseCustomerId)
     val accountAndPlayLaunch = addAccountTable.rdd.map(createRecFunc)
 
     val derivedAccounts = spark.createDataFrame(accountAndPlayLaunch) //
@@ -287,10 +287,10 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     userConfiguredDataFrame
   }
 
-  private def aggregateContacts(contactTable: DataFrame, sfdcContactId: String, joinKey: String): DataFrame= {
+  private def aggregateContacts(contactTable: DataFrame, sfdcContactId: String, joinKey: String, deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext): DataFrame= {
     val contactTableToUse: DataFrame = contactTable
     val contactWithoutJoinKey = contactTableToUse.drop(joinKey)
-    val flattenUdf = new Flatten(contactWithoutJoinKey.schema, Seq.empty[String], sfdcContactId)
+    val flattenUdf = new Flatten(contactWithoutJoinKey.schema, Seq.empty[String], sfdcContactId, deltaCampaignLaunchSparkContext.getUseCustomerId)
     val aggregatedContacts = contactTableToUse.groupBy(joinKey).agg( //
       flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
       count(lit(1)).as("CONTACT_NUM") //
