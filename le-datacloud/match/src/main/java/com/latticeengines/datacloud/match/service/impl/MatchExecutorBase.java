@@ -94,12 +94,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Value("${datacloud.yarn.fetchonly.num.threads}")
     private int publishThreadPool;
+    @Value("${datacloud.yarn.fetchonly.queue.size:200}")
+    private int queueSize;
 
     @PostConstruct
     public void init() {
         if (isMatchHistoryEnabled) {
             log.info("MatchHistory is enabled.");
-            publishExecutor = ThreadPoolUtils.getFixedSizeThreadPool("bulk-match-publish", publishThreadPool);
+            publishExecutor = ThreadPoolUtils.getBoundingQueueThreadPool(1, publishThreadPool, 1, queueSize);
         }
     }
 

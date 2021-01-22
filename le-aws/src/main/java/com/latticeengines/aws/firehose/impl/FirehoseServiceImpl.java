@@ -27,7 +27,7 @@ public class FirehoseServiceImpl implements FirehoseService {
 
     private AmazonKinesisFirehose firehoseClient;
 
-    @Value("${aws.ds.firehose.batch.size:200}")
+    @Value("${aws.ds.firehose.batch.size:100}")
     private int firehoseBatchSize;
 
     @Inject
