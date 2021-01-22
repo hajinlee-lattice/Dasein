@@ -6,4 +6,6 @@ public interface InboundConnectionProxy {
 
     BrokerReference getBrokerReference(String customerSpace, BrokerReference brokerReference);
 
+    BrokerReference updateBroker(String customerSpace, BrokerReference brokerReference);
 }
+

@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "AGGREGATE_HISTORY", uniqueConstraints = {
+@Table(name = "AGGREGATION_HISTORY", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"SOURCE_ID", "FK_TENANT_ID"})})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)

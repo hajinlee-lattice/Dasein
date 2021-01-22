@@ -23,6 +23,7 @@ public class BrokerInitialLoadWorkflowSubmitter extends WorkflowSubmitter {
 
     private BrokerInitialLoadWorkflowConfiguration configure(CustomerSpace customerSpace, BrokerInitialLoadRequest request) {
         return new BrokerInitialLoadWorkflowConfiguration.Builder().customer(customerSpace).sourceId(request.getSourceId())
-                .startTime(request.getStartTime()).endTime(request.getEndTime()).inboundConnectionType(request.getInboundConnectionType()).build();
+                .startTime(request.getStartTime()).endTime(request.getEndTime()).inboundConnectionType(request.getInboundConnectionType())
+                .bucket(request.getBucket()).build();
     }
 }

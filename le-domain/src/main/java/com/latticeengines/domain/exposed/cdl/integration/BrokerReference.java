@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.integration;
 
 
-import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -24,7 +23,7 @@ public class BrokerReference {
     private String dataStreamId;
 
     @JsonProperty("active")
-    private boolean active;
+    private Boolean active;
 
     @JsonProperty("sourceId")
     private String sourceId;
@@ -41,15 +40,14 @@ public class BrokerReference {
     @JsonProperty("documentType")
     private String documentType;
 
-    @JsonProperty("nextScheduledTime")
-    private Date nextScheduledTime;
+    @JsonProperty("lastAggregationWorkflowId")
+    private Long lastAggregationWorkflowId;
 
-
-    public boolean isActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
@@ -100,5 +98,13 @@ public class BrokerReference {
 
     public void setScheduler(IngestionScheduler scheduler) {
         this.scheduler = scheduler;
+    }
+
+    public Long getLastAggregationWorkflowId() {
+        return lastAggregationWorkflowId;
+    }
+
+    public void setLastAggregationWorkflowId(Long lastAggregationWorkflowId) {
+        this.lastAggregationWorkflowId = lastAggregationWorkflowId;
     }
 }

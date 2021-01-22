@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.integration;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -91,12 +90,15 @@ public class BrokerDataInitialLoad extends BaseWorkflowStep<BrokerDataInitialLoa
         BusinessEntity entity = BusinessEntity.valueOf(brokerReference.getDocumentType());
         S3DataUnit s3DataUnit = createS3DataUnit(tenantId, entity, templateId);
         s3DataUnit = (S3DataUnit) dataUnitProxy.create(tenantId, s3DataUnit, false);
-        generateInitData(tenantId, s3DataUnit, brokerReference);
+        generateInitData(s3DataUnit, brokerReference);
         AggregationHistory aggregationHistory = new AggregationHistory();
         aggregationHistory.setLastSyncTime(configuration.getEndTime());
         aggregationHistory.setDataStreamId(templateId);
         aggregationHistory.setSourceId(sourceId);
         aggregationHistoryProxy.create(tenantId, aggregationHistory);
+        brokerReference.setActive(true);
+        brokerReference.setDataStreamId(templateId);
+        inboundConnectionProxy.updateBroker(tenantId, brokerReference);
     }
 
     private DataTemplate createDataTemplate(String tenantId, BrokerReference brokerReference) {
@@ -159,22 +161,11 @@ public class BrokerDataInitialLoad extends BaseWorkflowStep<BrokerDataInitialLoa
         return s3DataUnit;
     }
 
-    private void createTmpDir(String dir) {
-        File file = new File(dir);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-    }
-
-    private void generateInitData(String tenantId, S3DataUnit s3DataUnit, BrokerReference brokerReference) {
-        String documentType = brokerReference.getDocumentType();
-        String sourceId = brokerReference.getSourceId();
+    private void generateInitData(S3DataUnit s3DataUnit, BrokerReference brokerReference) {
         String fileName = s3DataUnit.getName() + ".avro";
         String separator = HdfsToS3PathBuilder.PATH_SEPARATOR;
-        String subDir = tenantId + separator + sourceId + separator + documentType;
         String key = s3DataUnit.getPrefix() + separator + fileName;
-        createTmpDir(fileDir + subDir);
-        File file = new File(fileDir + subDir, fileName);
+        File file = new File(fileName);
         uploadFileToS3(s3DataUnit.getName(), file, brokerReference.getSelectedFields(), s3DataUnit.getBucket(), key);
     }
 

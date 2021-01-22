@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.integration;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
-import com.latticeengines.domain.exposed.cdl.integration.BrokerInitialLoadRequest;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
@@ -19,7 +18,7 @@ public interface Broker {
 
     List<ColumnMetadata> describeDocumentType(String documentType);
 
-    BrokerInitialLoadRequest schedule(IngestionScheduler scheduler);
+    void schedule(IngestionScheduler scheduler);
 
     BrokerReference getBrokerReference();
 }

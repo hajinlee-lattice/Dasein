@@ -18,8 +18,15 @@ public class InboundConnectionProxyImpl extends MicroserviceRestApiProxy impleme
     @Override
     public BrokerReference getBrokerReference(String customerSpace, BrokerReference brokerReference) {
         StringBuilder url = new StringBuilder();
-        url.append(constructUrl("customerspaces/{customerSpace}/inboundconnection/brokereference",
+        url.append(constructUrl("customerspaces/{customerSpace}/inboundconnection/brokerreference",
                 shortenCustomerSpace(customerSpace)));
-        return post("get broker summary by broker reference", url.toString(), brokerReference, BrokerReference.class);
+        return post("get broker reference", url.toString(), brokerReference, BrokerReference.class);
+    }
+
+    @Override
+    public BrokerReference updateBroker(String customerSpace, BrokerReference brokerReference) {
+        StringBuilder url = new StringBuilder();
+        url.append(constructUrl("customerspaces/{customerSpace}/inboundconnection", shortenCustomerSpace(customerSpace)));
+        return post("update broker", url.toString(), brokerReference, BrokerReference.class);
     }
 }

@@ -41,6 +41,11 @@ public class BrokerInitialLoadWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder bucket(String bucket) {
+            brokerDataInitialLoadConfiguration.setBucket(bucket);
+            return this;
+        }
+
         public BrokerInitialLoadWorkflowConfiguration build() {
             configuration.add(brokerDataInitialLoadConfiguration);
             return configuration;

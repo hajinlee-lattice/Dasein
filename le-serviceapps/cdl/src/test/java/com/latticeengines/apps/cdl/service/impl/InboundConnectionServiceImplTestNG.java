@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -22,7 +21,6 @@ import com.latticeengines.apps.cdl.service.MockBrokerInstanceService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
-import com.latticeengines.domain.exposed.cdl.MockBrokerInstance;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
 import com.latticeengines.domain.exposed.cdl.integration.InboundConnectionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -54,6 +52,7 @@ public class InboundConnectionServiceImplTestNG extends CDLFunctionalTestNGBase 
         List<String> selectedFields = new ArrayList<>();
         selectedFields.addAll(Lists.newArrayList(InterfaceName.AccountId.name(), InterfaceName.City.name(), InterfaceName.PhoneNumber.name()));
         brokerReference.setSelectedFields(selectedFields);
+        brokerReference.setDocumentType(BusinessEntity.Account.name());
         brokerReference = inboundConnectionService.setUpBroker(brokerReference);
         Broker broker = inboundConnectionService.getBroker(brokerReference);
         Assert.assertTrue(broker instanceof MockBroker);
@@ -62,25 +61,17 @@ public class InboundConnectionServiceImplTestNG extends CDLFunctionalTestNGBase 
         List<String> entities = broker.listDocumentTypes();
         Assert.assertTrue(entities.contains(BusinessEntity.Account.name()));
         Assert.assertTrue(entities.contains(BusinessEntity.Contact.name()));
-        Assert.assertEquals(broker.describeDocumentType(BusinessEntity.Account.name()).size(), 8);
+        Assert.assertEquals(broker.describeDocumentType(BusinessEntity.Account.name()).size(), 7);
         Assert.assertEquals(broker.describeDocumentType(BusinessEntity.Contact.name()).size(), 6);
         broker.start();
-        String cronExpression = "0 0/10 * * * ?";
-        Date startTime = new Date(System.currentTimeMillis());
-        IngestionScheduler scheduler = new IngestionScheduler();
-        scheduler.setCronExpression(cronExpression);
-        scheduler.setStartTime(startTime);
-        broker.schedule(scheduler);
         retry.execute(context -> {
-            MockBrokerInstance mockBrokerInstance = mockBrokerInstanceService.findBySourceId(sourceId);
-            Assert.assertNotNull(mockBrokerInstance);
-            List<String> selectedFields2 = mockBrokerInstance.getSelectedFields();
+            BrokerReference brokerReference1 = broker.getBrokerReference();
+            Assert.assertNotNull(brokerReference1);
+            List<String> selectedFields2 = brokerReference1.getSelectedFields();
             Assert.assertEquals(selectedFields2.size(), 3);
-            Assert.assertFalse(mockBrokerInstance.getActive());
-            IngestionScheduler savedScheduler = mockBrokerInstance.getIngestionScheduler();
-            Assert.assertNotNull(savedScheduler);
-            Assert.assertEquals(savedScheduler.getCronExpression(), cronExpression);
-            Assert.assertEquals(savedScheduler.getStartTime(), startTime);
+            Assert.assertTrue(brokerReference1.getActive());
+            IngestionScheduler savedScheduler = brokerReference1.getScheduler();
+            Assert.assertNull(savedScheduler);
             return true;
         });
     }

@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.cdl.AggregationHistory;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.cdl.AggregationHistoryProxy;
 
-@Component("inboundConnectionProxy")
+@Component("aggregationHistoryProxy")
 public class AggregationHistoryProxyImpl extends MicroserviceRestApiProxy implements AggregationHistoryProxy {
 
     protected AggregationHistoryProxyImpl() {

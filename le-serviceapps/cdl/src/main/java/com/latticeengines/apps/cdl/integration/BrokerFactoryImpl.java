@@ -27,9 +27,9 @@ public class BrokerFactoryImpl implements BrokerFactory {
                 case Mock:
                     MockBrokerInstance mockBrokerInstance = new MockBrokerInstance();
                     mockBrokerInstance.setSelectedFields(brokerReference.getSelectedFields());
+                    mockBrokerInstance.setDocumentType(brokerReference.getDocumentType());
                     mockBrokerInstance = mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
                     brokerReference.setSourceId(mockBrokerInstance.getSourceId());
-                    brokerReference.setDataStreamId(mockBrokerInstance.getDataStreamId());
                     return brokerReference;
                 default:
                     throw new RuntimeException("Inbound connection type is wrong, can't setup broker.");

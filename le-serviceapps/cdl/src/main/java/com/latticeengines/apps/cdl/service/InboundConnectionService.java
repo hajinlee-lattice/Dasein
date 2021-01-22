@@ -22,6 +22,6 @@ public interface InboundConnectionService {
 
     void schedule(BrokerReference brokerReference);
 
-    void updateBroker(BrokerReference brokerReference);
+    BrokerReference updateBroker(BrokerReference brokerReference);
 
 }

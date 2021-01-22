@@ -36,12 +36,6 @@ public class InboundConnectionResource {
         return inboundConnectionService.listDocumentTypes(brokerReference);
     }
 
-    @PostMapping("/setupbroker")
-    @ApiOperation(value = "set up broker")
-    public BrokerReference setUpBroker(@PathVariable String customerSpace, @RequestBody BrokerReference brokerReference) {
-        return inboundConnectionService.setUpBroker(brokerReference);
-    }
-
     @PostMapping("/desdocumenttype")
     @ApiOperation(value = "get schema for a broker with certain entity")
     public List<ColumnMetadata> describeDocumentType(@PathVariable String customerSpace, @RequestParam(value = "documentType") String documentType,
@@ -49,9 +43,28 @@ public class InboundConnectionResource {
         return inboundConnectionService.describeDocumentType(brokerReference, documentType);
     }
 
+    @PostMapping("/setupbroker")
+    @ApiOperation(value = "set up broker")
+    public BrokerReference setUpBroker(@PathVariable String customerSpace, @RequestBody BrokerReference brokerReference) {
+        return inboundConnectionService.setUpBroker(brokerReference);
+    }
+
     @PostMapping("/brokerreference")
     @ApiOperation(value = "get broker reference by broker reference")
     public BrokerReference getBrokerReference(@PathVariable String customerSpace, @RequestBody BrokerReference brokerReference) {
         return inboundConnectionService.getBrokerReference(brokerReference);
     }
+
+    @PostMapping("")
+    @ApiOperation(value = "update broker by broker reference")
+    public BrokerReference updateBroker(@PathVariable String customerSpace, @RequestBody BrokerReference brokerReference) {
+        return inboundConnectionService.updateBroker(brokerReference);
+    }
+
+    @PostMapping("/schedule")
+    @ApiOperation(value = "get broker reference by broker reference")
+    public void schedule(@PathVariable String customerSpace, @RequestBody BrokerReference brokerReference) {
+        inboundConnectionService.schedule(brokerReference);
+    }
+
 }

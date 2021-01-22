@@ -13,6 +13,8 @@ public class BrokerInitialLoadRequest {
 
     private Date endTime;
 
+    private String bucket;
+
     public String getSourceId() {
         return sourceId;
     }
@@ -45,4 +47,11 @@ public class BrokerInitialLoadRequest {
         this.endTime = endTime;
     }
 
+    public String getBucket() {
+        return bucket;
+    }
+
+    public void setBucket(String bucket) {
+        this.bucket = bucket;
+    }
 }

@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.AggregationHistoryEntityMgr;
 import com.latticeengines.apps.cdl.service.AggregationHistoryService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.AggregationHistory;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("aggregationHistoryService")
 public class AggregationHistoryServiceImpl implements AggregationHistoryService {
@@ -20,6 +22,8 @@ public class AggregationHistoryServiceImpl implements AggregationHistoryService 
 
     @Override
     public AggregationHistory create(AggregationHistory aggregationHistory) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        aggregationHistory.setTenant(tenant);
         aggregationHistoryEntityMgr.create(aggregationHistory);
         return aggregationHistory;
     }

@@ -19,6 +19,8 @@ import com.google.common.collect.Lists;
 import com.latticeengines.apps.cdl.service.InboundConnectionService;
 import com.latticeengines.apps.cdl.service.MockBrokerInstanceService;
 import com.latticeengines.common.exposed.util.CronUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
 import com.latticeengines.domain.exposed.cdl.MockBrokerInstance;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerInitialLoadRequest;
@@ -58,25 +60,27 @@ public class MockBroker extends BaseBroker {
     }
 
     @Override
-    public BrokerInitialLoadRequest schedule(IngestionScheduler scheduler) {
+    public void schedule(IngestionScheduler scheduler) {
         MockBrokerInstance mockBrokerInstance = mockBrokerInstanceService.findBySourceId(sourceId);
         if (mockBrokerInstance != null) {
+            CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getShortTenantId());
             IngestionScheduler preScheduler = mockBrokerInstance.getIngestionScheduler();
             mockBrokerInstance.setIngestionScheduler(scheduler);
             mockBrokerInstance.setActive(false);
             mockBrokerInstance.setDataStreamId(null);
-            mockBrokerInstance.setNextScheduledTime(null);
-            mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
-            BrokerInitialLoadRequest initialLoadData = new BrokerInitialLoadRequest();
-            initialLoadData.setInboundConnectionType(InboundConnectionType.Mock);
-            initialLoadData.setSourceId(sourceId);
-            initialLoadData.setStartTime(scheduler.getStartTime());
+            BrokerInitialLoadRequest initialLoadDataRequest = new BrokerInitialLoadRequest();
+            initialLoadDataRequest.setInboundConnectionType(InboundConnectionType.Mock);
+            initialLoadDataRequest.setSourceId(sourceId);
+            initialLoadDataRequest.setStartTime(scheduler.getStartTime());
+            initialLoadDataRequest.setBucket(s3Bucket);
             if (preScheduler != null) {
-                initialLoadData.setEndTime(getPreFireTime(preScheduler, scheduler).toDate());
+                initialLoadDataRequest.setEndTime(getPreFireTime(preScheduler, scheduler).toDate());
             } else {
-                initialLoadData.setEndTime(getPreFireTime(scheduler).toDate());
+                initialLoadDataRequest.setEndTime(getPreFireTime(scheduler).toDate());
             }
-            return initialLoadData;
+            long workflowPid = submitInitialLoadWorkflow(customerSpace, initialLoadDataRequest);
+            mockBrokerInstance.setLastAggregationWorkflowId(workflowPid);
+            mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
         } else {
             throw new RuntimeException(String.format("Can'd find mock instance by id %s.", sourceId));
         }
@@ -104,7 +108,7 @@ public class MockBroker extends BaseBroker {
         MockBrokerInstance mockBrokerInstance = new MockBrokerInstance();
         mockBrokerInstance.setSourceId(sourceId);
         mockBrokerInstance.setDataStreamId(brokerReference.getDataStreamId());
-        mockBrokerInstance.setActive(brokerReference.isActive());
+        mockBrokerInstance.setActive(brokerReference.getActive());
         mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
     }
 
@@ -160,6 +164,8 @@ public class MockBroker extends BaseBroker {
             brokerReference.setSelectedFields(mockBrokerInstance.getSelectedFields());
             brokerReference.setActive(mockBrokerInstance.getActive());
             brokerReference.setSourceId(mockBrokerInstance.getSourceId());
+            brokerReference.setDocumentType(mockBrokerInstance.getDocumentType());
+            brokerReference.setConnectionType(InboundConnectionType.Mock);
             return brokerReference;
         } else {
             throw new RuntimeException(String.format("Can'd find mock instance by id %s.", sourceId));
