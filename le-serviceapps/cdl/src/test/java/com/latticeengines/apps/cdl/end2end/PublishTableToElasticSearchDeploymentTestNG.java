@@ -24,6 +24,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.xerial.snappy.Snappy;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -128,13 +129,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         DataPage dataPage = activityProxy.getData(mainCustomerSpace, null, query);
         Assert.assertTrue(dataPage.getData().size() > 0);
 
-        elasticSearchService.deleteIndex(indexName);
-
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singleton(AssertionError.class), null);
-        retry.execute(context -> {
-            Assert.assertFalse(elasticSearchService.indexExists(indexName));
-            return true;
-        });
+        deleteIndex(indexName);
 
     }
 
@@ -151,11 +146,13 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         String value = matchProxy.lookupInternalAccountId(mainCustomerSpace, InterfaceName.AccountId.name(), "898",
                 null);
 
-        Assert.assertTrue(StringUtils.isNotBlank(value));
+        Assert.assertEquals(value, "898");
+
+        deleteIndex(indexName);
     }
 
     @Test(groups = "end2end")
-    private void testPublishContact() {
+    private void testPublishContact() throws IOException {
 
         String tableName = dataCollectionProxy.getTableName(mainCustomerSpace, ConsolidatedContact);
         PublishTableToESRequest request = generateRequest( ConsolidatedContact, tableName);
@@ -170,19 +167,40 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
                 null);
 
         Assert.assertTrue(CollectionUtils.isNotEmpty(contacts));
+        Map<String, Object> map = contacts.get(0);
+        Assert.assertTrue(map.containsKey(ConsolidatedContact.name()));
+        // get the column value, then verify the key in map
+        Object value = map.get(ConsolidatedContact.name());
+        Map<?, ?> record = JsonUtils.deserialize(IOUtils.toString(Snappy.uncompress((byte[]) value), "UTF-8"),
+                Map.class);
 
-        contacts = matchProxy.lookupContacts(mainCustomerSpace,
-                InterfaceName.AccountId.name(), "898", "",
-                null);
+        Map<String, Object> recordMap = JsonUtils.convertMap(record, String.class, Object.class);
+        Assert.assertTrue(recordMap.containsKey(InterfaceName.AccountId.name()));
+        Assert.assertTrue(recordMap.containsKey(InterfaceName.ContactId.name()));
+
+        List<Map<String, Object>> contact = matchProxy.lookupContacts(mainCustomerSpace,
+                null, null,
+                "5ae2bdccfc13ae3162000382", null);
+        map = contacts.get(0);
+        value = map.get(ConsolidatedContact.name());
+        record = JsonUtils.deserialize(IOUtils.toString(Snappy.uncompress((byte[]) value), "UTF-8"),
+                Map.class);
+
+        recordMap = JsonUtils.convertMap(record, String.class, Object.class);
+        Assert.assertTrue(recordMap.containsKey(InterfaceName.AccountId.name()));
+        Assert.assertTrue(recordMap.containsKey(InterfaceName.ContactId.name()));
+
+
+        deleteIndex(indexName);
     }
 
     private String getIndexName(TableRoleInCollection role) {
+        String entity = ElasticSearchUtils.getEntityFromTableRole(role);
         ElasticSearchDataUnit unit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(mainCustomerSpace,
-                role.name(),
+                entity,
                 DataUnit.StorageType.ElasticSearch);
         Assert.assertNotNull(unit);
         Assert.assertTrue(StringUtils.isNotBlank(unit.getSignature()));
-        String entity = ElasticSearchUtils.getEntityFromTableRole(role);
         String signature = unit.getSignature();
         String indexName = ElasticSearchUtils.constructIndexName(CustomerSpace.shortenCustomerSpace(mainCustomerSpace),
                 entity, signature);
@@ -193,6 +211,16 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
             return true;
         });
         return indexName;
+    }
+
+    private void deleteIndex(String indexName) {
+        elasticSearchService.deleteIndex(indexName);
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            Assert.assertFalse(elasticSearchService.indexExists(indexName));
+            return true;
+        });
     }
 
     private void verifyField(Map<String, Object> mappings, String field, String type) {
