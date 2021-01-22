@@ -21,7 +21,6 @@ import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.GenerateRecommendationCSVContext;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -141,9 +140,8 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         return customerSpace;
     }
 
-    private boolean shouldIgnoreAccountsWithoutContacts(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
-        return config.getDestinationSysType() == CDLExternalSystemType.MAP
-                || ChannelConfigUtil.isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
+    public boolean shouldIgnoreAccountsWithoutContacts(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
+        return ChannelConfigUtil.isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
     }
 
     private String getTaskDescription(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
