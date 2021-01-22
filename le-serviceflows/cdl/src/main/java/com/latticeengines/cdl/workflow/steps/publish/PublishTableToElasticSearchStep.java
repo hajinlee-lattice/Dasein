@@ -185,7 +185,7 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
             elasticSearchService.updateIndexMapping(idxName, role.name(), "nested");
         } else {
             log.info("set binary to fieldName {}", role.name());
-            elasticSearchService.updateIndexMapping(idxName, role.name(), "nested");
+            elasticSearchService.updateIndexMapping(idxName, role.name(), "binary");
         }
         return true;
     }
