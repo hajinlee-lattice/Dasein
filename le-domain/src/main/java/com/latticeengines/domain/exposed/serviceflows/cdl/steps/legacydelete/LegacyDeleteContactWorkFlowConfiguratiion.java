@@ -9,12 +9,12 @@ public class LegacyDeleteContactWorkFlowConfiguratiion extends BaseCDLWorkflowCo
     public static class Builder {
         private LegacyDeleteContactWorkFlowConfiguratiion configuration =
                 new LegacyDeleteContactWorkFlowConfiguratiion();
-        private LegacyDeleteSparkStepConfiguration legacyDeleteSparkStepConfiguration =
-                new LegacyDeleteSparkStepConfiguration();
+        private LegacyDeleteStepConfiguration legacyDeleteSparkStepConfiguration =
+                new LegacyDeleteStepConfiguration();
 
         public Builder Customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
-            legacyDeleteSparkStepConfiguration.setCustomer(customerSpace.toString());
+            legacyDeleteSparkStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
