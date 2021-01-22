@@ -455,7 +455,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCCovid19() {
-        checkAndVerifyCategory(Category.COVID_19, (config) -> {
+        checkAndVerifyEmptyCategory(Category.COVID_19, (config) -> {
             if (skipVerifyDeprecatedLDCAttrs(config)) {
                 return true;
             }
@@ -648,6 +648,11 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         Long count = Flux.fromIterable(attrConfigs).parallel().runOn(scheduler) //
                 .map(verifier).sequential().count().block();
         log.info("Verified " + count + " attr configs in the category " + category);
+    }
+
+    private void checkAndVerifyEmptyCategory(Category category, Function<AttrConfig, Boolean> verifier) {
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
+        Assert.assertFalse(CollectionUtils.isNotEmpty(attrConfigs));
     }
 
     private void verifySystemAttr(AttrConfig attrConfig, Category category) {
