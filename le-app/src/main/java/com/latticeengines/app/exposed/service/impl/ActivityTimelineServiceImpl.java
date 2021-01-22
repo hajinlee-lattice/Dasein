@@ -162,10 +162,10 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         newContactsCount += newIdentifiedContactsCount;
         int newEngagementsCount = dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
                 + dataFilter(data, AtlasStream.StreamType.MarketingActivity, null).size();
-        int newOpportunitiesCount = (int) dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
+        int newOpportunitiesCount =  deduplicateOpportunityEvent(dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
                 .filter(t -> !t.get(InterfaceName.Detail1.name()).equals("Closed")
                         && !t.get(InterfaceName.Detail1.name()).equals("Closed Won"))
-                .count();
+                .collect(Collectors.toList())).size();
 
         List<AtlasStream> streams = activityStoreProxy.getStreams(customerSpace);
         int days = timelinePeriod.getDays();
@@ -185,6 +185,18 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                         ActivityTimelineMetrics.MetricsType.AccountIntent.getContext(days)));
 
         return metrics;
+    }
+
+    private List<Map<String,Object>> deduplicateOpportunityEvent(List<Map<String,Object>> data){
+        Map<String,Map<String,Object>> opportunityIdMap = new HashMap<String,Map<String,Object>>();
+        for(Map<String,Object> map:data){
+            String opportunityId = (String) map.get(InterfaceName.Detail2.name());
+            if(opportunityId==null||opportunityIdMap.containsKey(opportunityId)) {
+                continue;
+            }
+            opportunityIdMap.put(opportunityId,map);
+        }
+        return new ArrayList(opportunityIdMap.values());
     }
 
     private List<Map<String, Object>> getDeduplicateIntentData(DataPage data) {
