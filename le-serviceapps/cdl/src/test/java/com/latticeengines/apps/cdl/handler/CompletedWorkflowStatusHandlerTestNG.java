@@ -53,8 +53,6 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
     @Test(groups = "functional")
     public void testCompletedWorkflowStatusSynced() {
         createAll();
-        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
-        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
 
         Long totalRecords = 100L;
         Long processed = 100L;
@@ -83,8 +81,6 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
     @Test(groups = "functional")
     public void testCompletedWorkflowStatusPartialSync() {
         createAll();
-        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
-        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
 
         Long totalRecords = 100L;
         Long processed = 90L;
@@ -133,18 +129,16 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
 
         Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Completed.toString());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.SyncFailed);
-        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
-        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_TABLE);
+        Assert.assertNull(channel.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(channel.getPreviousLaunchedContactUniverseTable());
+        Assert.assertNull(channel.getCurrentLaunchedAccountUniverseTable());
+        Assert.assertNull(channel.getCurrentLaunchedContactUniverseTable());
         teardown(launchId, channel.getId(), play.getName());
     }
 
     @Test(groups = "functional")
     public void testCompletedWorkflowStatusSyncedWithNoProcessed() {
         createAll();
-        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
-        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
 
         Long totalRecords = 0L;
         Long processed = 0L;

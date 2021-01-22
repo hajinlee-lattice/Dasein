@@ -130,8 +130,6 @@ public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
         channel.setChannelConfig(new MarketoChannelConfig());
         channel.setCurrentLaunchedAccountUniverseTable(CURRENT_TABLE);
         channel.setCurrentLaunchedContactUniverseTable(CURRENT_TABLE);
-        channel.setPreviousLaunchedAccountUniverseTable(PREVIOUS_TABLE);
-        channel.setPreviousLaunchedContactUniverseTable(PREVIOUS_TABLE);
 
         playLaunchChannelService.create(NAME, channel);
         log.info("Created PlayLaunchChannel with ID: " + channel.getId());
