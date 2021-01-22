@@ -141,8 +141,8 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         return customerSpace;
     }
 
-    private boolean shouldIgnoreAccountsWithoutContacts(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
-        return config.getDestinationSysType() == CDLExternalSystemType.MAP
+    public boolean shouldIgnoreAccountsWithoutContacts(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
+        return (config.getDestinationSysType() == CDLExternalSystemType.MAP && config.getDestinationSysName() != CDLExternalSystemName.Outreach)
                 || ChannelConfigUtil.isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
     }
 

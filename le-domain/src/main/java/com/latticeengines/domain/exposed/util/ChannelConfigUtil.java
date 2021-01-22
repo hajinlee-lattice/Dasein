@@ -27,7 +27,12 @@ public final class ChannelConfigUtil {
         switch (destinationSystemName) {
         case Marketo:
         case Outreach:
-            return true;
+            if (channelConfig == null) {
+                log.info("Channel config object is null. Returning false by default");
+                return false;
+            }
+            OutreachChannelConfig outreachConfig = (OutreachChannelConfig) channelConfig;
+            return outreachConfig.getAudienceType() == AudienceType.CONTACTS;
         case Eloqua:
             return true;
         case Salesforce:
