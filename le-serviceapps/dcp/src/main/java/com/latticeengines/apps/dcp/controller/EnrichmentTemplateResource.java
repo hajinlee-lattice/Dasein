@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,12 +39,11 @@ public class EnrichmentTemplateResource {
     @PostMapping("/layout")
     @ResponseBody
     @ApiOperation(value = "Create an EnrichmentTemplate from Layout")
-    public ResponseDocument<String> create(@PathVariable String customerSpace,
+    public ResponseDocument<EnrichmentTemplateSummary> create(@PathVariable String customerSpace,
             @RequestBody CreateEnrichmentTemplateRequest request) {
         try {
-            ResponseDocument<String> result = enrichmentTemplateService.create(customerSpace, request.getLayoutId(),
-                    request.getTemplateName());
-            return result;
+            return ResponseDocument.successResponse(enrichmentTemplateService.create(customerSpace, request.getLayoutId(),
+                    request.getTemplateName()));
         } catch (LedpException exception) {
             log.error(String.format("Failed to create enrichment template from existing layout %s: %s",
                     request.getLayoutId(), exception.getMessage()));
@@ -55,11 +55,10 @@ public class EnrichmentTemplateResource {
     @PostMapping("/create-template")
     @ResponseBody
     @ApiOperation(value = "Create an Enrichment Template")
-    public ResponseDocument<String> create(@PathVariable String customerSpace,
+    public ResponseDocument<EnrichmentTemplateSummary> create(@PathVariable String customerSpace,
             @RequestBody EnrichmentTemplate template) {
         try {
-            ResponseDocument<String> result = enrichmentTemplateService.create(template);
-            return result;
+            return ResponseDocument.successResponse(enrichmentTemplateService.create(template));
         } catch (LedpException exception) {
             log.error(String.format("Failed to create enrichment template: template ID %s", template.getTemplateId(),
                     exception.getMessage()));
@@ -71,8 +70,15 @@ public class EnrichmentTemplateResource {
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "List Enrichment Templates")
-    public List<EnrichmentTemplateSummary> getEnrichmentTemplates(@PathVariable String customerSpace,
+    public List<EnrichmentTemplateSummary> listEnrichmentTemplates(@PathVariable String customerSpace,
             @RequestBody ListEnrichmentTemplateRequest listEnrichmentTemplateRequest) {
-        return enrichmentTemplateService.getEnrichmentTemplates(listEnrichmentTemplateRequest);
+        return enrichmentTemplateService.listEnrichmentTemplates(listEnrichmentTemplateRequest);
+    }
+
+    @GetMapping("/template/{templateId}")
+    @ResponseBody
+    @ApiOperation(value = "Get Enrichment Template")
+    public EnrichmentTemplateSummary getEnrichmentTemplate(@PathVariable String customerSpace, @PathVariable String templateId) {
+        return enrichmentTemplateService.getEnrichmentTemplate(templateId);
     }
 }

@@ -9,6 +9,7 @@ import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 
 public interface EnrichmentTemplateRepository  extends BaseJpaRepository<EnrichmentTemplate, Long> {
+    EnrichmentTemplate findByTemplateId(String templateId);
 
     @Query("SELECT et FROM EnrichmentTemplate AS et")
     List<EnrichmentTemplate> findAllEnrichmentTemplates(Pageable pageable);

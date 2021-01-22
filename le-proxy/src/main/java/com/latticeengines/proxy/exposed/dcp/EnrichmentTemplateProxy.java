@@ -26,7 +26,7 @@ public class EnrichmentTemplateProxy extends MicroserviceRestApiProxy implements
 
     private static final String PREFIX = "/customerspaces/{customerSpace}/enrichmenttemplate";
 
-    public ResponseDocument<String> createEnrichmentTemplate(String customerSpace, String layoutId,
+    public ResponseDocument<EnrichmentTemplateSummary> createEnrichmentTemplate(String customerSpace, String layoutId,
             String templateName) {
         String baseUrl = PREFIX + "/layout";
         String url = constructUrl(baseUrl, customerSpace);
@@ -34,7 +34,7 @@ public class EnrichmentTemplateProxy extends MicroserviceRestApiProxy implements
         return post("Create an EnrichmentTemplate from Layout", url, request, ResponseDocument.class);
     }
 
-    public ResponseDocument<String> createEnrichmentTemplate(String customerSpace,
+    public ResponseDocument<EnrichmentTemplateSummary> createEnrichmentTemplate(String customerSpace,
             EnrichmentTemplate enrichmentTemplate) {
         String baseUrl = PREFIX + "/create-template";
         String url = constructUrl(baseUrl, customerSpace);
@@ -50,5 +50,11 @@ public class EnrichmentTemplateProxy extends MicroserviceRestApiProxy implements
 
         List<?> rawList = post("List Enrichment Templates", url, request, List.class);
         return JsonUtils.convertList(rawList, EnrichmentTemplateSummary.class);
+    }
+
+    public EnrichmentTemplateSummary getEnrichmentTemplate(String customerSpace, String templateId) {
+        String baseUrl = PREFIX + "/template/{templateId}";
+        String url = constructUrl(baseUrl, customerSpace, templateId);
+        return get("Get Enrichment Template", url, EnrichmentTemplateSummary.class);
     }
 }
