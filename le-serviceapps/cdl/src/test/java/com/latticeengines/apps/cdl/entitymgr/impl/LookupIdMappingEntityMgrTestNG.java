@@ -372,7 +372,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         validateLookupIdWithAuth(lookupIdWithAuth);
         ExternalSystemAuthentication extSysAuth = lookupIdWithAuth.getExternalAuthentication();
 
-        LookupIdMap lookupIdMapByExtSysAuth = lookupIdMappingEntityMgr.getLookupIdMapByExtSysAuth(extSysAuth.getId());
+        LookupIdMap lookupIdMapByExtSysAuth = lookupIdMappingEntityMgr.retrieveLookupIdMapByExtSysAuth(extSysAuth.getId());
         validateLookupIdWithAuth(lookupIdMapByExtSysAuth);
         assertEquals(lookupIdWithAuth.getPid(), lookupIdMapByExtSysAuth.getPid());
     }

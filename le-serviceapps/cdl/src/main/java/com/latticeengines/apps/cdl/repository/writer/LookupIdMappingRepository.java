@@ -24,5 +24,5 @@ public interface LookupIdMappingRepository
 
     @Query("SELECT l FROM LookupIdMap l WHERE l.externalAuthentication is not null "
             + "and l.externalAuthentication.id = :extSystemAuthId")
-    LookupIdMap findByExternalSystemAuthentication(@Param("extSystemAuthId") String externalSystemAuthId);
+    LookupIdMap retrieveByExternalSystemAuthentication(@Param("extSystemAuthId") String externalSystemAuthId);
 }

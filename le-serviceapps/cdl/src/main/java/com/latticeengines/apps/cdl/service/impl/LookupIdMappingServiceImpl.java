@@ -246,7 +246,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
 
     @Override
     public LookupIdMap getLookupIdMapByExtSysAuth(String externalSystemAuthId) {
-        return lookupIdMappingEntityMgr.getLookupIdMapByExtSysAuth(externalSystemAuthId);
+        return lookupIdMappingEntityMgr.retrieveLookupIdMapByExtSysAuth(externalSystemAuthId);
     }
 
     private LookupIdMap findExistingLookupIdMap(LookupIdMap lookupIdMap) {
