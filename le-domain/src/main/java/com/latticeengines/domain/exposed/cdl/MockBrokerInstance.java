@@ -98,6 +98,10 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
     @JsonProperty("nextScheduledTime")
     private Date nextScheduledTime;
 
+    @JsonProperty("lastAggregationWorkflowId")
+    @Column(name = "FK_WORKFLOW_ID")
+    private Long lastAggregationWorkflowId;
+
     @Override
     public Long getPid() {
         return pid;

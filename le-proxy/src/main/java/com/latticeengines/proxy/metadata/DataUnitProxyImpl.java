@@ -28,6 +28,13 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
     }
 
     @Override
+    public DataUnit create(String customerSpace, DataUnit dataUnit, boolean purgeOldSnapShot) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit", shortenCustomerSpace(customerSpace));
+        url += "?" + "purgeOldSnapShot=" + purgeOldSnapShot;
+        return post("create data unit", url, dataUnit, DataUnit.class);
+    }
+
+    @Override
     public DataUnit updateByNameAndType(String customerSpace, DataUnit dataUnit) {
         String url = constructUrl("/customerspaces/{customerSpace}/dataunit", shortenCustomerSpace(customerSpace));
         return put("update data unit", url, dataUnit, DataUnit.class);

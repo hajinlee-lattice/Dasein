@@ -70,6 +70,9 @@ public class MockBrokerInstanceServiceImpl implements MockBrokerInstanceService 
         if (existingMockBrokerInstance.getIngestionScheduler() != null) {
             mockBrokerInstance.setIngestionScheduler(existingMockBrokerInstance.getIngestionScheduler());
         }
+        if (mockBrokerInstance.getIngestionScheduler() != null) {
+            mockBrokerInstance.setNextScheduledTime(CronUtils.getNextFireTime(mockBrokerInstance.getIngestionScheduler().getCronExpression()).toDate());
+        }
         mockBrokerInstance.setActive(existingMockBrokerInstance.getActive());
         mockBrokerInstanceEntityMgr.createOrUpdate(mockBrokerInstance);
         return mockBrokerInstance;
@@ -77,11 +80,9 @@ public class MockBrokerInstanceServiceImpl implements MockBrokerInstanceService 
 
     private void validate(MockBrokerInstance mockBrokerInstance) {
         IngestionScheduler scheduler = mockBrokerInstance.getIngestionScheduler();
-        if (scheduler != null) {
-            String cronExpression = scheduler.getCronExpression();
-            if (StringUtils.isEmpty(cronExpression) || !CronUtils.isValidExpression(cronExpression)) {
-                throw new LedpException(LedpCode.LEDP_41004);
-            }
+        String cronExpression = scheduler.getCronExpression();
+        if (StringUtils.isEmpty(cronExpression) || !CronUtils.isValidExpression(cronExpression)) {
+            throw new LedpException(LedpCode.LEDP_40101);
         }
     }
 

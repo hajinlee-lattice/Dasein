@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -23,7 +24,6 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
 import com.latticeengines.domain.exposed.cdl.MockBrokerInstance;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
-import com.latticeengines.domain.exposed.cdl.integration.BrokerSetupInfo;
 import com.latticeengines.domain.exposed.cdl.integration.InboundConnectionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -49,12 +49,12 @@ public class InboundConnectionServiceImplTestNG extends CDLFunctionalTestNGBase 
 
     @Test(groups = "functional")
     public void testBrokerFactory() {
-        BrokerSetupInfo brokerSetupInfo = new BrokerSetupInfo();
-        brokerSetupInfo.setConnectionType(InboundConnectionType.Mock);
+        BrokerReference brokerReference = new BrokerReference();
+        brokerReference.setConnectionType(InboundConnectionType.Mock);
         List<String> selectedFields = new ArrayList<>();
         selectedFields.addAll(Lists.newArrayList(InterfaceName.AccountId.name(), InterfaceName.City.name(), InterfaceName.PhoneNumber.name()));
-        brokerSetupInfo.setSelectedFields(selectedFields);
-        BrokerReference brokerReference = inboundConnectionService.setUpBroker(brokerSetupInfo);
+        brokerReference.setSelectedFields(selectedFields);
+        brokerReference = inboundConnectionService.setUpBroker(brokerReference);
         Broker broker = inboundConnectionService.getBroker(brokerReference);
         Assert.assertTrue(broker instanceof MockBroker);
         String sourceId = brokerReference.getSourceId();
@@ -66,7 +66,7 @@ public class InboundConnectionServiceImplTestNG extends CDLFunctionalTestNGBase 
         Assert.assertEquals(broker.describeDocumentType(BusinessEntity.Contact.name()).size(), 6);
         broker.start();
         String cronExpression = "0 0/10 * * * ?";
-        long startTime = System.currentTimeMillis();
+        Date startTime = new Date(System.currentTimeMillis());
         IngestionScheduler scheduler = new IngestionScheduler();
         scheduler.setCronExpression(cronExpression);
         scheduler.setStartTime(startTime);

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.InboundConnectionService;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
-import com.latticeengines.domain.exposed.cdl.integration.BrokerSetupInfo;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 import io.swagger.annotations.Api;
@@ -39,8 +38,8 @@ public class InboundConnectionResource {
 
     @PostMapping("/setupbroker")
     @ApiOperation(value = "set up broker")
-    public BrokerReference setUpBroker(@PathVariable String customerSpace, @RequestBody BrokerSetupInfo brokerSetupInfo) {
-        return inboundConnectionService.setUpBroker(brokerSetupInfo);
+    public BrokerReference setUpBroker(@PathVariable String customerSpace, @RequestBody BrokerReference brokerReference) {
+        return inboundConnectionService.setUpBroker(brokerReference);
     }
 
     @PostMapping("/desdocumenttype")
@@ -48,5 +47,11 @@ public class InboundConnectionResource {
     public List<ColumnMetadata> describeDocumentType(@PathVariable String customerSpace, @RequestParam(value = "documentType") String documentType,
                                                      @RequestBody BrokerReference brokerReference) {
         return inboundConnectionService.describeDocumentType(brokerReference, documentType);
+    }
+
+    @PostMapping("/brokerreference")
+    @ApiOperation(value = "get broker reference by broker reference")
+    public BrokerReference getBrokerReference(@PathVariable String customerSpace, @RequestBody BrokerReference brokerReference) {
+        return inboundConnectionService.getBrokerReference(brokerReference);
     }
 }

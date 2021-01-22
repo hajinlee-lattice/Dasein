@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -46,9 +47,8 @@ public class MockBrokerInstanceServiceImplTestNG extends CDLFunctionalTestNGBase
                 InterfaceName.City.name(), InterfaceName.PhoneNumber.name()));
         mockBrokerInstance.get().setDocumentType("Account");
         String cronExpression = "0 0/10 * * * ?";
-        long startTime = System.currentTimeMillis();
+        Date startTime = new Date(System.currentTimeMillis());
         IngestionScheduler scheduler = new IngestionScheduler();
-
         scheduler.setCronExpression(cronExpression);
         scheduler.setStartTime(startTime);
         mockBrokerInstance.get().setIngestionScheduler(scheduler);

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -17,9 +18,12 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.latticeengines.apps.cdl.service.InboundConnectionService;
 import com.latticeengines.apps.cdl.service.MockBrokerInstanceService;
+import com.latticeengines.common.exposed.util.CronUtils;
 import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
 import com.latticeengines.domain.exposed.cdl.MockBrokerInstance;
+import com.latticeengines.domain.exposed.cdl.integration.BrokerInitialLoadRequest;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
+import com.latticeengines.domain.exposed.cdl.integration.InboundConnectionType;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -33,8 +37,7 @@ public class MockBroker extends BaseBroker {
     private static final Logger log = LoggerFactory.getLogger(MockBroker.class);
 
     private final List<String> accountAttributes = Lists.newArrayList(InterfaceName.AccountId.name(), InterfaceName.CompanyName.name(),
-            InterfaceName.City.name(), InterfaceName.Country.name(), InterfaceName.DUNS.name(), InterfaceName.PhoneNumber.name(),
-            InterfaceName.Website.name(), InterfaceName.Industry.name());
+            InterfaceName.City.name(), InterfaceName.Country.name(), InterfaceName.PhoneNumber.name(), InterfaceName.Website.name(), InterfaceName.Industry.name());
 
     private final List<String> contactAttributes = Lists.newArrayList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(), InterfaceName.Email.name(),
             InterfaceName.FirstName.name(), InterfaceName.LastName.name(), InterfaceName.Title.name());
@@ -55,22 +58,54 @@ public class MockBroker extends BaseBroker {
     }
 
     @Override
-    public void schedule(IngestionScheduler scheduler) {
+    public BrokerInitialLoadRequest schedule(IngestionScheduler scheduler) {
         MockBrokerInstance mockBrokerInstance = mockBrokerInstanceService.findBySourceId(sourceId);
         if (mockBrokerInstance != null) {
+            IngestionScheduler preScheduler = mockBrokerInstance.getIngestionScheduler();
             mockBrokerInstance.setIngestionScheduler(scheduler);
             mockBrokerInstance.setActive(false);
             mockBrokerInstance.setDataStreamId(null);
             mockBrokerInstance.setNextScheduledTime(null);
             mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
+            BrokerInitialLoadRequest initialLoadData = new BrokerInitialLoadRequest();
+            initialLoadData.setInboundConnectionType(InboundConnectionType.Mock);
+            initialLoadData.setSourceId(sourceId);
+            initialLoadData.setStartTime(scheduler.getStartTime());
+            if (preScheduler != null) {
+                initialLoadData.setEndTime(getPreFireTime(preScheduler, scheduler).toDate());
+            } else {
+                initialLoadData.setEndTime(getPreFireTime(scheduler).toDate());
+            }
+            return initialLoadData;
         } else {
-            log.info(String.format("Can'd find mock instance by id %s.", sourceId));
+            throw new RuntimeException(String.format("Can'd find mock instance by id %s.", sourceId));
         }
+    }
+
+    private DateTime getPreFireTime(IngestionScheduler old, IngestionScheduler current) {
+        DateTime oldPreFireTime = getPreFireTime(old);
+        DateTime currentPreFireTime = getPreFireTime(current);
+        return oldPreFireTime.isBefore(currentPreFireTime) ? currentPreFireTime : oldPreFireTime;
+    }
+
+
+    private DateTime getPreFireTime(IngestionScheduler scheduler) {
+        String cronExpression = scheduler.getCronExpression();
+        return CronUtils.getPreviousFireTime(cronExpression);
     }
 
     @Override
     public void start() {
         setActive(true);
+    }
+
+    @Override
+    public void update(BrokerReference brokerReference) {
+        MockBrokerInstance mockBrokerInstance = new MockBrokerInstance();
+        mockBrokerInstance.setSourceId(sourceId);
+        mockBrokerInstance.setDataStreamId(brokerReference.getDataStreamId());
+        mockBrokerInstance.setActive(brokerReference.isActive());
+        mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
     }
 
     private void setActive(boolean active) {
@@ -79,7 +114,7 @@ public class MockBroker extends BaseBroker {
             mockBrokerInstance.setActive(active);
             mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
         } else {
-            log.info(String.format("Can'd find mock instance by id %s.", sourceId));
+            throw new RuntimeException(String.format("Can'd find mock instance by id %s.", sourceId));
         }
     }
 
@@ -116,4 +151,18 @@ public class MockBroker extends BaseBroker {
         return Collections.emptyList();
     }
 
+    @Override
+    public BrokerReference getBrokerReference() {
+        MockBrokerInstance mockBrokerInstance = mockBrokerInstanceService.findBySourceId(sourceId);
+        if (mockBrokerInstance != null) {
+            BrokerReference brokerReference = new BrokerReference();
+            brokerReference.setDataStreamId(mockBrokerInstance.getDataStreamId());
+            brokerReference.setSelectedFields(mockBrokerInstance.getSelectedFields());
+            brokerReference.setActive(mockBrokerInstance.getActive());
+            brokerReference.setSourceId(mockBrokerInstance.getSourceId());
+            return brokerReference;
+        } else {
+            throw new RuntimeException(String.format("Can'd find mock instance by id %s.", sourceId));
+        }
+    }
 }

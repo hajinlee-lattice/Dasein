@@ -1,12 +1,14 @@
 package com.latticeengines.domain.exposed.cdl.integration;
 
 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -21,8 +23,8 @@ public class BrokerReference {
     @JsonProperty("dataStreamId")
     private String dataStreamId;
 
-    @JsonProperty("enabled")
-    private boolean enabled;
+    @JsonProperty("active")
+    private boolean active;
 
     @JsonProperty("sourceId")
     private String sourceId;
@@ -33,12 +35,22 @@ public class BrokerReference {
     @JsonProperty("connectionType")
     private InboundConnectionType connectionType;
 
-    public boolean isEnabled() {
-        return enabled;
+    @JsonProperty("scheduler")
+    private IngestionScheduler scheduler;
+
+    @JsonProperty("documentType")
+    private String documentType;
+
+    @JsonProperty("nextScheduledTime")
+    private Date nextScheduledTime;
+
+
+    public boolean isActive() {
+        return active;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public List<String> getSelectedFields() {
@@ -72,5 +84,21 @@ public class BrokerReference {
 
     public void setDataStreamId(String dataStreamId) {
         this.dataStreamId = dataStreamId;
+    }
+
+    public String getDocumentType() {
+        return documentType;
+    }
+
+    public void setDocumentType(String documentType) {
+        this.documentType = documentType;
+    }
+
+    public IngestionScheduler getScheduler() {
+        return scheduler;
+    }
+
+    public void setScheduler(IngestionScheduler scheduler) {
+        this.scheduler = scheduler;
     }
 }
