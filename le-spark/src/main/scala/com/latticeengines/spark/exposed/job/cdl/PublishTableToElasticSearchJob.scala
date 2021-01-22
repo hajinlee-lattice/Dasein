@@ -9,7 +9,8 @@ import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJo
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.ElasticSearchUtils
 import com.latticeengines.spark.util.ElasticSearchUtils._
-import org.apache.spark.sql.functions.{col, map, udf, lit}
+import org.apache.spark.sql.functions.{col, lit, map, udf}
+import org.apache.spark.sql.types.StructField
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import org.elasticsearch.spark.sql._
 import org.xerial.snappy.Snappy
@@ -69,8 +70,8 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
 
 
     val packUdf = udf((s: Map[String, Any]) => Snappy.compress(JsonUtils.serialize(s)))
-    val columns = mutable.LinkedHashSet[Column]()
-    table.schema.fields.foreach( field =>{
+    val columns : mutable.LinkedHashSet[Column]= mutable.LinkedHashSet[Column]()
+    table.schema.fields.foreach( (field : StructField) =>{
       columns.add(lit(field.name))
       columns.add(col(field.name))
     })
