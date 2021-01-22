@@ -120,7 +120,7 @@ public class LegacyDeleteByUpload extends BaseTransformWrapperStep<LegacyDeleteS
         request.setName(requestName);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
-        TransformationStepConfig mergeDelete = mergeDelete(actions, InterfaceName.AccountId.name());
+        TransformationStepConfig mergeDelete = mergeDelete(actions, getJoinColumn());
         steps.add(mergeDelete);
         int legacyDeleteMergeStep = steps.size() - 1;
         if (hasSystemStore()) {
@@ -190,8 +190,11 @@ public class LegacyDeleteByUpload extends BaseTransformWrapperStep<LegacyDeleteS
     }
 
     private String getJoinColumn() {
-        return BusinessEntity.Contact.equals(configuration.getEntity()) ? InterfaceName.ContactId.name() :
-                InterfaceName.AccountId.name();
+        return BusinessEntity.Contact.equals(configuration.getEntity()) ?
+                (configuration.isEntityMatchGAEnabled() ?
+                        InterfaceName.CustomerContactId.name() : InterfaceName.ContactId.name()) :
+                (configuration.isEntityMatchGAEnabled()?
+                        InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name());
     }
 
     private void registerBatchStore() {
