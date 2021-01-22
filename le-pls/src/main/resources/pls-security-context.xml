@@ -667,6 +667,7 @@
                    create-session="stateless">
         <security:csrf disabled="true"/>
         <security:intercept-url pattern="/pls/enrichment-template/**" access="hasRole('View_DCP_Projects')"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
 </beans>
