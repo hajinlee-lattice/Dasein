@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJo
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.ElasticSearchUtils
 import com.latticeengines.spark.util.ElasticSearchUtils._
-import org.apache.spark.sql.functions.{col, map, udf}
+import org.apache.spark.sql.functions.{col, map, udf, lit}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import org.elasticsearch.spark.sql._
 import org.xerial.snappy.Snappy
@@ -68,9 +68,12 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
                      baseConfig : Map[String, String], compressed : Boolean) : Unit = {
 
 
-    val packUdf = udf((s:String) => Snappy.compress(JsonUtils.serialize(s)))
+    val packUdf = udf((s: Map[String, Any]) => Snappy.compress(JsonUtils.serialize(s)))
     val columns = mutable.LinkedHashSet[Column]()
-    table.columns.foreach(column => columns.add(col(column)))
+    table.schema.fields.foreach( field =>{
+      columns.add(lit(field.name))
+      columns.add(col(field.name))
+    })
     if (compressed)
       table.withColumn(role.name(), packUdf(map(columns.toSeq : _*))).select(docIdCol, role.name())
         .saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
