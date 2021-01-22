@@ -179,7 +179,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public LookupIdMap getLookupIdMapByExtSysAuth(String externalSystemAuthId) {
-        return lookupIdMappingRepository.findByExternalSystemAuthentication(externalSystemAuthId);
+    public LookupIdMap retrieveLookupIdMapByExtSysAuth(String externalSystemAuthId) {
+        return lookupIdMappingRepository.retrieveByExternalSystemAuthentication(externalSystemAuthId);
     }
 }
