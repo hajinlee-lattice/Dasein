@@ -652,7 +652,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     private void checkAndVerifyEmptyCategory(Category category, Function<AttrConfig, Boolean> verifier) {
         List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
-        Assert.assertTrue(CollectionUtils.isEmpty(attrConfigs));
+        Assert.assertFalse(CollectionUtils.isNotEmpty(attrConfigs));
     }
 
     private void verifySystemAttr(AttrConfig attrConfig, Category category) {
