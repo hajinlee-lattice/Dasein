@@ -62,6 +62,7 @@
     {
       "StreamType": "Opportunity",
       "Detail1": "Order Booked",
+      "Detail2": "Opp001",
       "AccountId": "0014P000028BlGMQA0",
       "EventTimestamp": 1596906000000,
       "EventType": "Opportunity Update",
@@ -73,6 +74,7 @@
     {
       "StreamType": "Opportunity",
       "Detail1": "Order Booked",
+      "Detail2": "Opp001",
       "AccountId": "0014P000028BlGMQA0",
       "EventTimestamp": 1596906000000,
       "EventType": "Opportunity Update",
@@ -106,6 +108,7 @@
     {
       "StreamType": "Opportunity",
       "Detail1": "Solution Development",
+      "Detail2": "Opp002",
       "AccountId": "0014P000028BlGMQA0",
       "EventTimestamp": 1596733200000,
       "EventType": "Opportunity Update",
@@ -117,6 +120,7 @@
     {
       "StreamType": "Opportunity",
       "Detail1": "Solution Development",
+      "Detail2": "Opp002",
       "AccountId": "0014P000028BlGMQA0",
       "EventTimestamp": 1596733200000,
       "EventType": "Opportunity Update",
