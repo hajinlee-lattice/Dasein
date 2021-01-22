@@ -163,11 +163,11 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         int newEngagementsCount = dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
                 + dataFilter(data, AtlasStream.StreamType.MarketingActivity, null).size();
 
-        List<Map<String,Object>> opportunityData =  dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
+        List<Map<String, Object>> opportunityData = dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
                 .filter(t -> !t.get(InterfaceName.Detail1.name()).equals("Closed")
                         && !t.get(InterfaceName.Detail1.name()).equals("Closed Won"))
                 .collect(Collectors.toList());
-        int newOpportunitiesCount =  deduplicateOpportunityEvent(opportunityData).size();
+        int newOpportunitiesCount = deduplicateOpportunityEvent(opportunityData).size();
 
         List<AtlasStream> streams = activityStoreProxy.getStreams(customerSpace);
         int days = timelinePeriod.getDays();
@@ -189,14 +189,14 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         return metrics;
     }
 
-    private List<Map<String,Object>> deduplicateOpportunityEvent(List<Map<String,Object>> data){
-        Map<String,Map<String,Object>> opportunityEventMap = new HashMap<String,Map<String,Object>>();
-        for(Map<String,Object> map:data){
+    private List<Map<String, Object>> deduplicateOpportunityEvent(List<Map<String, Object>> data) {
+        Map<String, Map<String, Object>> opportunityEventMap = new HashMap<String, Map<String, Object>>();
+        for (Map<String, Object> map : data) {
             String opportunityId = (String) map.get(InterfaceName.Detail2.name());
-            if(opportunityId==null||opportunityEventMap.containsKey(opportunityId)) {
+            if (opportunityId == null || opportunityEventMap.containsKey(opportunityId)) {
                 continue;
             }
-            opportunityEventMap.put(opportunityId,map);
+            opportunityEventMap.put(opportunityId, map);
         }
         return new ArrayList(opportunityEventMap.values());
     }
