@@ -6,16 +6,12 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.ulysses.entitymgr.EnrichedAccountEntityMgr;
 import com.latticeengines.ulysses.entitymgr.impl.EnrichedAccountEntityMgrImpl;
 import com.latticeengines.ulysses.service.EnrichedAccountService;
 
 @Component("enrichedAccountService")
 public class EnrichedAccountServiceImpl implements EnrichedAccountService {
-
-    @Inject
-    private FabricMessageService messageService;
 
     @Inject
     private FabricDataService dataService;
@@ -27,7 +23,7 @@ public class EnrichedAccountServiceImpl implements EnrichedAccountService {
 
     @PostConstruct
     public void postConstruct() throws Exception {
-        scoreAndEnrichmentEntityMgr = new EnrichedAccountEntityMgrImpl(messageService, dataService);
+        scoreAndEnrichmentEntityMgr = new EnrichedAccountEntityMgrImpl(dataService);
         scoreAndEnrichmentEntityMgr.init();
     }
 

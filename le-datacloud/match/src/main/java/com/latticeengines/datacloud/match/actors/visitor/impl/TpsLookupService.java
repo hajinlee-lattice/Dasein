@@ -33,7 +33,6 @@ import com.latticeengines.datacloud.match.domain.TpsLookupResult;
 import com.latticeengines.datacloud.match.entitymgr.ContactTpsLookupEntryMgr;
 import com.latticeengines.datacloud.match.entitymgr.impl.ContactTpsLookupEntryMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.match.ContactTpsLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
@@ -47,9 +46,6 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
     private Random random = new Random(4);
 
     private Map<String, ContactTpsLookupEntryMgr> lookupMgrs = new HashMap<>();
-
-    @Inject
-    private FabricMessageService messageService;
 
     @Inject
     private FabricDataService dataService;
@@ -179,7 +175,7 @@ public class TpsLookupService extends DataSourceLookupServiceBase implements DnB
         log.info("TpsLookupService, datacloud version " + version);
         ContactTpsLookupEntryMgr lookupMgr = lookupMgrs.get(version);
         if (lookupMgr == null) {
-            lookupMgr = new ContactTpsLookupEntryMgrImpl(messageService, dataService, version);
+            lookupMgr = new ContactTpsLookupEntryMgrImpl(dataService, version);
             lookupMgr.init();
             lookupMgrs.put(version, lookupMgr);
         }

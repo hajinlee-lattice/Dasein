@@ -5,12 +5,19 @@ metadata:
   labels:
     app: le-dynamo
 spec:
+  volumes:
+    - name: le-dynamo-data
+      persistentVolumeClaim:
+        claimName: le-dynamo-data
   containers:
     - name: dynamo
       image: latticeengines/dynamo
       imagePullPolicy: Never
       ports:
         - containerPort: 8000
+      volumeMounts:
+        - mountPath: "/var/lib/dynamo"
+          name: le-dynamo-data
 
 ---
 

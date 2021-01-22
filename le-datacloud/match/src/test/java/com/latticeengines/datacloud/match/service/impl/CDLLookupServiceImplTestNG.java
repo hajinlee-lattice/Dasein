@@ -21,7 +21,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.match.service.CDLLookupService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class CDLLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
@@ -29,9 +28,6 @@ public class CDLLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBa
 
     @Inject
     private CDLLookupService cdlLookupService;
-
-    @Inject
-    private FabricMessageService messageService;
 
     @Inject
     private FabricDataService dataService;

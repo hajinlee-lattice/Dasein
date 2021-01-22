@@ -24,9 +24,6 @@ public class FabricDataServiceImpl implements FabricDataService {
     @Inject
     DynamoDataServiceProvider dynamoService;
 
-    @Inject
-    RedisDataServiceProvider redisService;
-
     public FabricDataServiceImpl() {
         log.debug("Initing fabric data service");
     }
@@ -66,9 +63,6 @@ public class FabricDataServiceImpl implements FabricDataService {
         serviceProviders = new HashMap<>();
 
         // Add preconfigured data services
-        if (redisService != null) {
-            serviceProviders.put(redisService.getName(), redisService);
-        }
         if (dynamoService != null) {
             serviceProviders.put(dynamoService.getName(), dynamoService);
         }
