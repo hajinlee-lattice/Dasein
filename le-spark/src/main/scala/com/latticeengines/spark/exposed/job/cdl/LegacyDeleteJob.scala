@@ -11,9 +11,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
 
-  private val dummyColumn: String = "DJ_f8f7d5c7"
   private val aggregate_prefix = "AGGR_"
-  private val systemBatchJoinColumn = InterfaceName.EntityId.name
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[LegacyDeleteJobConfig]): Unit = {
     val config: LegacyDeleteJobConfig = lattice.config
@@ -30,9 +28,9 @@ class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
     val result = entity match {
       case BusinessEntity.Account
         if operationType.equals(CleanupOperationType.BYUPLOAD_ID) =>
-        if (systemBatchJoinColumn.equals(joinColumn.getAccountId)) {
+        if (config.getSourceColumns != null) {
           original.alias("original")
-            .withColumn(InterfaceName.AccountId.name, original.col(joinColumn.getAccountId))
+            .withColumn(joinColumn.getAccountId, original.col(config.getSourceColumns.getAccountId))
             .join(delete, Seq(joinColumn.getAccountId), "left")
             .where(delete.col(joinColumn.getAccountId).isNull)
             .select("original.*")
@@ -44,9 +42,9 @@ class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
         }
       case BusinessEntity.Contact
         if operationType.equals(CleanupOperationType.BYUPLOAD_ID) =>
-        if (systemBatchJoinColumn.equals(joinColumn.getContactId)) {
+        if (config.getSourceColumns != null) {
           original.alias("original")
-            .withColumn(InterfaceName.ContactId.name, original.col(joinColumn.getContactId))
+            .withColumn(joinColumn.getContactId, original.col(config.getSourceColumns.getContactId))
             .join(delete, Seq(joinColumn.getContactId), "left")
             .where(delete.col(joinColumn.getContactId).isNull)
             .select("original.*")

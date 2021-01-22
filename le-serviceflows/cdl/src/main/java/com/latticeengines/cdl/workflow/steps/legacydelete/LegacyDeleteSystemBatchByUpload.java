@@ -102,6 +102,7 @@ public class LegacyDeleteSystemBatchByUpload extends RunSparkJob<LegacyDeleteSpa
         config.setBusinessEntity(stepConfiguration.getEntity());
         config.setOperationType(type);
         config.setJoinedColumns(getJoinedColumns(stepConfiguration.getEntity()));
+        config.setSourceColumns(getSourceColumns(stepConfiguration.getEntity()));
         config.setDeleteSourceIdx(0);
         config.setInput(Arrays.asList(mergeDeleteTable, input2));
         return config;
@@ -131,7 +132,7 @@ public class LegacyDeleteSystemBatchByUpload extends RunSparkJob<LegacyDeleteSpa
         dataCollectionProxy.upsertTable(customerSpace.toString(), cleanupTableName, systemBatchStore, inactive);
     }
 
-    private LegacyDeleteJobConfig.JoinedColumns getJoinedColumns(BusinessEntity entity) {
+    private LegacyDeleteJobConfig.JoinedColumns getSourceColumns(BusinessEntity entity) {
         LegacyDeleteJobConfig.JoinedColumns joinedColumns = new LegacyDeleteJobConfig.JoinedColumns();
         switch (entity) {
             case Account:
@@ -139,6 +140,25 @@ public class LegacyDeleteSystemBatchByUpload extends RunSparkJob<LegacyDeleteSpa
                 break;
             case Contact:
                 joinedColumns.setContactId(InterfaceName.EntityId.name());
+                break;
+            default:
+                break;
+        }
+        return joinedColumns;
+    }
+
+    private LegacyDeleteJobConfig.JoinedColumns getJoinedColumns(BusinessEntity entity) {
+        LegacyDeleteJobConfig.JoinedColumns joinedColumns = new LegacyDeleteJobConfig.JoinedColumns();
+        String account_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerAccountId.name() :
+                InterfaceName.AccountId.name();
+        String contact_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerContactId.name() :
+                InterfaceName.ContactId.name();
+        switch (entity) {
+            case Account:
+                joinedColumns.setAccountId(account_id);
+                break;
+            case Contact:
+                joinedColumns.setContactId(contact_id);
                 break;
             default:
                 break;

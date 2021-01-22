@@ -21,6 +21,9 @@ public class LegacyDeleteJobConfig extends SparkJobConfig {
     @JsonProperty("joined_columns")
     private JoinedColumns joinedColumns;
 
+    @JsonProperty("source_columns")
+    private JoinedColumns sourceColumns;
+
     @Override
     public String getName() {
         return NAME;
@@ -56,6 +59,14 @@ public class LegacyDeleteJobConfig extends SparkJobConfig {
 
     public void setJoinedColumns(JoinedColumns joinedColumns) {
         this.joinedColumns = joinedColumns;
+    }
+
+    public JoinedColumns getSourceColumns() {
+        return sourceColumns;
+    }
+
+    public void setSourceColumns(JoinedColumns sourceColumns) {
+        this.sourceColumns = sourceColumns;
     }
 
     public static class JoinedColumns {
