@@ -334,10 +334,10 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end-pending" }, description = "Test hard delete for accounts which have activity store data", dependsOnMethods = {
+            "qa-activitystore-end2end" }, description = "Test hard delete for accounts which have activity store data", dependsOnMethods = {
                     "testAccountRematchCorrectness", "testContactRematchCorrectness",
                     "testCustomIntentRematchCorrectness", "testOpportunityRematchCorrectness",
-                    "testWebVisitRematchCorrectness", "testMarketingRematchCorrectness" })
+                    "testWebVisitRematchCorrectness", "testMarketingRematchCorrectness" }, enabled = false)
     public void testAccountHardDelete() throws TimeoutException {
         registerDeleteData(activityStoreTestDataPath + "/HardDeleteTestScenarios.csv", true);
         // wait all file import actions are done
@@ -352,48 +352,48 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end-pending" }, description = "Account correctness check after account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+            "qa-activitystore-end2end" }, description = "Account correctness check after account hard delete tests", dependsOnMethods = {
+                    "testAccountHardDelete" }, enabled = false)
     public void testAccountHardDeleteCorrectness() throws TimeoutException {
         List<Map<String, Object>> allAccounts = queryAccountRecords();
         Assert.assertEquals(allAccounts.size(), 54, "Account number is incorrect!!");
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end-pending" }, description = "Contact correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+            "qa-activitystore-end2end" }, description = "Contact correctness check for account hard delete tests", dependsOnMethods = {
+                    "testAccountHardDelete" }, enabled = false)
     public void testContactHardDeleteCorrectness() throws TimeoutException {
         List<Map<String, Object>> allContacts = queryContactRecords();
         Assert.assertEquals(allContacts.size(), 120, "Contact number is incorrect!!");
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end-pending" }, description = "CustomIntent correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+            "qa-activitystore-end2end" }, description = "CustomIntent correctness check for account hard delete tests", dependsOnMethods = {
+                    "testAccountHardDelete" }, enabled = false)
     public void testCustomIntentHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryCustomIntentRecords();
         Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/customintent.json", actualResult);
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end-pending" }, description = "Opportunity correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+            "qa-activitystore-end2end" }, description = "Opportunity correctness check for account hard delete tests", dependsOnMethods = {
+                    "testAccountHardDelete" }, enabled = false)
     public void testOpportunityHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryOpportunityRecords();
         Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/opportunity.json", actualResult);
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end-pending" }, description = "WebVisit correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+            "qa-activitystore-end2end" }, description = "WebVisit correctness check for account hard delete tests", dependsOnMethods = {
+                    "testAccountHardDelete" }, enabled = false)
     public void testWebVisitHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryWebVisitRecords();
         Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/webvisit.json", actualResult);
     }
 
     @Test(groups = {
-            "qa-activitystore-end2end-pending" }, description = "Marketing Activity correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+            "qa-activitystore-end2end" }, description = "Marketing Activity correctness check for account hard delete tests", dependsOnMethods = {
+                    "testAccountHardDelete" }, enabled = false)
     public void testMarketingHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryAccountMarketingRecords();
         Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/accountmarketing.json", actualResult);
