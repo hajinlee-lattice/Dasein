@@ -822,6 +822,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
                 Assert.assertNotNull(record.get(InterfaceName.EntityId.name()).toString());
                 if ("C0_01".equals(record.get(TEST_ID).toString())) {
                     googleEntityId = record.get(InterfaceName.EntityId.name()).toString();
+                } else if ("C0_03".equals(record.get(TEST_ID).toString())) {
+                    Assert.assertEquals(record.get(InterfaceName.EntityId.name()).toString(), ENTITY_ANONYMOUS_ID);
                 }
             } else {
                 Assert.assertEquals(record.get(InterfaceName.EntityId.name()).toString(), googleEntityId);
