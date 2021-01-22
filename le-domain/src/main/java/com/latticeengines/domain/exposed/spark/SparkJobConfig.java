@@ -229,6 +229,10 @@ public abstract class SparkJobConfig implements Serializable {
     @JsonProperty("SpecialTargets")
     private Map<Integer, DataUnit.DataFormat> specialTargets;
 
+    //if partition number over than this value, will cut 1/2 partition num
+    @JsonProperty("NumPartitionLimit")
+    public Integer numPartitionLimit;
+
     public abstract String getName();
 
     public int getNumTargets() {
@@ -277,5 +281,4 @@ public abstract class SparkJobConfig implements Serializable {
             return Collections.emptyList();
         }
     }
-
 }
