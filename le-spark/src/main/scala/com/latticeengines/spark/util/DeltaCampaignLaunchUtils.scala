@@ -142,8 +142,7 @@ private[spark] object DeltaCampaignLaunchUtils {
     bucket match {
       case null => 0.0
       case RatingBucketName.A => 95.0
-      case
-        RatingBucketName.B => 70.0
+      case RatingBucketName.B => 70.0
       case RatingBucketName.C => 40.0
       case RatingBucketName.D => 20.0
       case RatingBucketName.E => 10.0
