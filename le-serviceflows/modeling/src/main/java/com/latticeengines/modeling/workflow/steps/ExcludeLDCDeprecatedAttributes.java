@@ -64,7 +64,7 @@ public class ExcludeLDCDeprecatedAttributes extends BaseWorkflowStep<ExcludeLDCD
         if (CollectionUtils.isNotEmpty(metadata)) {
             for (ColumnMetadata column : metadata) {
                 if (column != null && (Boolean.TRUE
-                        .equals(column.getShouldDeprecate() || expiredLicenses.contains(column.getDataLicense())))) {
+                        .equals(column.getShouldDeprecate()) || expiredLicenses.contains(column.getDataLicense()))) {
                     attributesDeprecated.add(column.getAttrName());
                 }
             }
