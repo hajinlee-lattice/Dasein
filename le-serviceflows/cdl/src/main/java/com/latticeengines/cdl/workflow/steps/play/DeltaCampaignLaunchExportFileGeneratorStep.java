@@ -142,8 +142,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
     }
 
     public boolean shouldIgnoreAccountsWithoutContacts(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
-        return (config.getDestinationSysType() == CDLExternalSystemType.MAP && config.getDestinationSysName() != CDLExternalSystemName.Outreach)
-                || ChannelConfigUtil.isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
+        return ChannelConfigUtil.isContactAudienceType(config.getDestinationSysName(), config.getChannelConfig());
     }
 
     private String getTaskDescription(DeltaCampaignLaunchExportFilesGeneratorConfiguration config) {
