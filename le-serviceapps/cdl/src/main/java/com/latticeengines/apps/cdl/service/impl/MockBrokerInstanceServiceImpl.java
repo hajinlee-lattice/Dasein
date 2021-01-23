@@ -65,9 +65,7 @@ public class MockBrokerInstanceServiceImpl implements MockBrokerInstanceService 
             }
             if (existingMockBrokerInstance.getIngestionScheduler() != null) {
                 mockBrokerInstance.setIngestionScheduler(existingMockBrokerInstance.getIngestionScheduler());
-            }
-            if (mockBrokerInstance.getIngestionScheduler() != null) {
-                mockBrokerInstance.setNextScheduledTime(CronUtils.getNextFireTime(mockBrokerInstance.getIngestionScheduler().getCronExpression()).toDate());
+                mockBrokerInstance.setNextScheduledTime(CronUtils.getPreviousFireTimeByCron(mockBrokerInstance.getIngestionScheduler().getCronExpression()));
             }
             if (existingMockBrokerInstance.getActive() != null) {
                 mockBrokerInstance.setActive(existingMockBrokerInstance.getActive());
