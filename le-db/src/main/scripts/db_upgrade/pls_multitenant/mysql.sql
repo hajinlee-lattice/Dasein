@@ -95,7 +95,19 @@ CREATE PROCEDURE `UpdateSchema`()
               `UPDATED` DATETIME NOT NULL,
               PRIMARY KEY (`PID`)
           ) engine=InnoDB;
-      
+
+      CREATE TABLE `AGGREGATION_HISTORY`
+          (
+              `PID` BIGINT NOT NULL AUTO_INCREMENT,
+              `DATA_STREAM_ID` VARCHAR(255),
+              `LAST_SYNC_TIME` DATETIME NOT NULL,
+              `SOURCE_ID` VARCHAR(255) NOT NULL,
+              `FK_TENANT_ID` BIGINT,
+              PRIMARY KEY (`PID`)
+          ) engine=InnoDB;
+
+      ALTER TABLE `AGGREGATION_HISTORY` ADD CONSTRAINT `FK_AGGREGATIONHISTORY_FKTENANTID_TENANT` FOREIGN KEY
+          (`FK_TENANT_ID`) REFERENCES `TENANT` ON DELETE CASCADE;
 
   END //
 -- ##############################################################
