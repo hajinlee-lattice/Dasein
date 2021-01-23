@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -50,6 +52,10 @@ public class ActivationLimitValidator extends AttrValidator {
         // are not empty after render method
         List<AttrConfig> userSelectedActiveConfigs = LimitValidatorUtils.returnPropertyConfigs(userProvidedAttrConfigs,
                 ColumnMetadataKey.State, AttrState.Active);
+
+        // add the attribute user activate before it was deprecated
+        userSelectedActiveConfigs.addAll(returnDeprecatedConfigs(userProvidedAttrConfigs));
+
         List<AttrConfig> userSelectedInactiveConfigs = LimitValidatorUtils
                 .returnPropertyConfigs(userProvidedAttrConfigs, ColumnMetadataKey.State, AttrState.Inactive);
 
@@ -117,4 +123,25 @@ public class ActivationLimitValidator extends AttrValidator {
 
     }
 
+
+    /**
+     * this method return deprecated attribute which was activated by user before it was deprecated
+     * the corresponding code is modifyDeprecatedAttrState in AbstractAttrConfigService
+     * @param attrConfigs
+     * @return
+     */
+    public static List<AttrConfig> returnDeprecatedConfigs(List<AttrConfig> attrConfigs) {
+        List<AttrConfig> stateConfigs = new ArrayList<>();
+        for (AttrConfig config : attrConfigs) {
+            try {
+                if (Boolean.TRUE.equals(config.getShouldDeprecate()) && config.getAttrProps().get(ColumnMetadataKey.State) != null
+                        && AttrState.Deprecated.equals(config.getAttrProps().get(ColumnMetadataKey.State).getCustomValue())) {
+                    stateConfigs.add(config);
+                }
+            } catch (NullPointerException e) {
+                throw new LedpException(LedpCode.LEDP_40026, new String[] { config.getAttrName() });
+            }
+        }
+        return stateConfigs;
+    }
 }
