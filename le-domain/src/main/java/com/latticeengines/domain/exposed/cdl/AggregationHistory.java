@@ -55,8 +55,8 @@ public class AggregationHistory implements HasPid, HasTenant {
     private String dataStreamId;
 
     @Temporal(TIMESTAMP)
-    @JsonProperty("updated")
-    @Column(name = "UPDATED", nullable = false)
+    @JsonProperty("lastSyncTime")
+    @Column(name = "LAST_SYNC_TIME", nullable = false)
     private Date lastSyncTime;
 
     @Override
