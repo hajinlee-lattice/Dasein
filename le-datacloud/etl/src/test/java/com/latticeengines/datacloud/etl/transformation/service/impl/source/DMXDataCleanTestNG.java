@@ -1,7 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl.source;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.source.DMXDataCleanFlow;
-import com.latticeengines.datacloud.dataflow.transformation.source.HGDataCleanFlow;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;

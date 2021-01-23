@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation.source;
 
 import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
