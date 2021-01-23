@@ -30,6 +30,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.transfer.MultipleFileDownload;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 public class S3Utilities {
 
@@ -75,8 +78,7 @@ public class S3Utilities {
         }
     }
 
-    public static ObjectMetadata getObjectSummary(String bucketName, String key)
-            throws AmazonServiceException, IOException {
+    public static ObjectMetadata getObjectSummary(String bucketName, String key) throws AmazonServiceException {
         logger.info("GetObjectSummary {}://{}", bucketName, key);
         S3Object o = s3Client.getObject(bucketName, key);
         try {
@@ -98,6 +100,23 @@ public class S3Utilities {
         for (String key : keyList) {
             download(bucketName, key, Paths.get(desDirectory, FilenameUtils.getName(key)).toString());
         }
+    }
+
+    public static boolean downloadDirectory(String bucketName, String keyFolder, String desDirectory) {
+        TransferManager transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
+        File des = new File(desDirectory);
+        if (!des.exists()) {
+            des.mkdirs();
+        }
+        MultipleFileDownload download = transferManager.downloadDirectory(bucketName, keyFolder, des);
+        try {
+            download.waitForCompletion();
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage());
+            return false;
+        }
+        transferManager.shutdownNow(false);
+        return true;
     }
 
     public static boolean keyExists(String bucketName, String key) {
