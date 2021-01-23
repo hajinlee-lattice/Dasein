@@ -71,6 +71,7 @@ import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -101,6 +102,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component
@@ -142,6 +144,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final DataFeedService dataFeedService;
 
+    private final MatchProxy matchProxy;
+
     private final WorkflowProxy workflowProxy;
 
     private final CatalogEntityMgr catalogEntityMgr;
@@ -174,9 +178,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                                            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr,
                                            ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
                                            CDLAttrConfigProxy cdlAttrConfigProxy,
-                                           S3ImportSystemService s3ImportSystemService, TimeLineService timeLineService) {
+            S3ImportSystemService s3ImportSystemService, TimeLineService timeLineService, MatchProxy matchProxy) {
         this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
+        this.matchProxy = matchProxy;
         this.workflowProxy = workflowProxy;
         this.catalogEntityMgr = catalogEntityMgr;
         this.streamEntityMgr = streamEntityMgr;
@@ -824,7 +829,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .entityMatchGAOnly(entityMatchGAOnly) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
-                .entityMatchConfiguration(request.getEntityMatchConfiguration()) //
+                .entityMatchConfiguration(getMatchConfiguration(customerSpace, request)) //
                 .eraseByNullEnabled(eraseByNullEnabled) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
                 .fullProfile(Boolean.TRUE.equals(request.getFullProfile())) //
@@ -877,6 +882,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             dataFeedService.failExecution(customerSpace, "", datafeed.getStatus().getName());
             throw new RuntimeException(String.format("Failed to retry %s's P&A workflow", customerSpace));
         }
+    }
+
+    private EntityMatchConfiguration getMatchConfiguration(@NotNull String customerSpace,
+            @NotNull ProcessAnalyzeRequest request) {
+        EntityMatchConfiguration configFromReq = request.getEntityMatchConfiguration();
+        EntityMatchConfiguration savedConfig = matchProxy.getEntityMatchConfiguration(customerSpace);
+        log.info("Match config from request = {}, saved match config = {}, tenant = {}", configFromReq, savedConfig,
+                customerSpace);
+        if (configFromReq == null || savedConfig == null) {
+            return configFromReq != null ? configFromReq : savedConfig;
+        }
+
+        return configFromReq.mergeWith(savedConfig);
     }
 
     /*-
