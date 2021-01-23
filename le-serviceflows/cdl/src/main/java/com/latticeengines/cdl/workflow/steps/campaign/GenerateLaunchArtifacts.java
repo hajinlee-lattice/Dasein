@@ -152,22 +152,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             log.info("No Contact data found in the Attribute Repo");
         }
 
-        ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
-        String accountLookupId = launch == null ? channel.getLookupIdMap().getAccountId()
-                : launch.getDestinationAccountId();
-        String contactLookupId = launch == null ? channel.getLookupIdMap().getContactId()
-                : launch.getDestinationContactId();
-        CDLExternalSystemName externalSystemName = launch == null ? channel.getLookupIdMap().getExternalSystemName()
-                : launch.getDestinationSysName();
-        log.info("externalSystemName=" + externalSystemName);
-
-        List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
-                channel.getId());
-
-        if (fieldMappingMetadata != null) {
-            log.info("For tenant= " + config.getCustomerSpace().getTenantId() + ", playChannelId= " + channel.getId()
-                    + ", the columnMetadata size is=" + fieldMappingMetadata.size());
-        }
         TapType tapType = play.getTapType();
         baseOnOtherTapType = TapType.ListSegment.equals(tapType);
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
@@ -177,6 +161,17 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 getRemoveDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class);
         String accountLookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
         String contactLookupId = launch == null ? channel.getLookupIdMap().getContactId() : launch.getDestinationContactId();
+        CDLExternalSystemName externalSystemName = launch == null ? channel.getLookupIdMap().getExternalSystemName()
+                : launch.getDestinationSysName();
+        log.info("externalSystemName=" + externalSystemName);
+
+        List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
+                channel.getId());
+        if (fieldMappingMetadata != null) {
+            log.info("For tenant= " + config.getCustomerSpace().getTenantId() + ", playChannelId= " + channel.getId()
+                    + ", the columnMetadata size is=" + fieldMappingMetadata.size());
+        }
+
         Set<Lookup> accountLookups = buildLookupsByEntity(BusinessEntity.Account, fieldMappingMetadata, channel);
         if (StringUtils.isNotBlank(accountLookupId)) {
             accountLookups.add(new AttributeLookup(BusinessEntity.Account, accountLookupId));
