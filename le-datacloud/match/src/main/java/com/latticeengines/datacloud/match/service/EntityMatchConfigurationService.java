@@ -6,7 +6,9 @@ import java.util.Map;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
  * Central place to manage all entity match related configurations
@@ -160,4 +162,22 @@ public interface EntityMatchConfigurationService {
      *            true to lazily copy
      */
     void setShouldCopyToStagingLazily(boolean shouldCopyToStagingLazily);
+
+    /**
+     * Retrieve persisted configuration for target tenant.
+     *
+     * @param tenant
+     * @return config object, {@code null} if not configuration exists
+     */
+    EntityMatchConfiguration getConfiguration(@NotNull Tenant tenant);
+
+    /**
+     * Persist given configuration for target tenant
+     *
+     * @param tenant
+     *            tenant object
+     * @param configuration
+     *            config object
+     */
+    void saveConfiguration(@NotNull Tenant tenant, @NotNull EntityMatchConfiguration configuration);
 }

@@ -3,8 +3,11 @@ package com.latticeengines.domain.exposed.datacloud.match.entity;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -60,6 +63,21 @@ public class EntityMatchConfiguration {
     @JsonProperty("AllocationModes")
     public Map<String, Map<String, Boolean>> getAllocationModes() {
         return allocationModes;
+    }
+
+    @JsonIgnore
+    // layer values from current object on top of the other object
+    public EntityMatchConfiguration mergeWith(EntityMatchConfiguration that) {
+        if (that == null) {
+            return this;
+        }
+        return new EntityMatchConfiguration( //
+                ObjectUtils.defaultIfNull(numStagingShards, that.numStagingShards), //
+                ObjectUtils.defaultIfNull(stagingTableName, that.stagingTableName), //
+                ObjectUtils.defaultIfNull(lazyCopyToStaging, that.lazyCopyToStaging), //
+                ObjectUtils.defaultIfNull(skippedMatchFields, that.skippedMatchFields), //
+                ObjectUtils.defaultIfNull(allocationModes, that.allocationModes) //
+        );
     }
 
     @Override

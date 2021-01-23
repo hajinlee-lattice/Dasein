@@ -82,10 +82,10 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     @Value("${datacloud.match.contact.concurrent.blocks.max}")
     private Integer maxContactConcurrentBlocks;
 
-    @Value("${datacloud.match.lookup.account.concurrent.blocks.max")
+    @Value("${datacloud.match.lookup.account.concurrent.blocks.max}")
     private Integer maxLookupAccountConcurrentBlocks;
 
-    @Value("${datacloud.match.lookup.contact.concurrent.blocks.max")
+    @Value("${datacloud.match.lookup.contact.concurrent.blocks.max}")
     private Integer maxLookupContactConcurrentBlocks;
 
     @Value("${datacloud.match.txn.concurrent.blocks.max}")
