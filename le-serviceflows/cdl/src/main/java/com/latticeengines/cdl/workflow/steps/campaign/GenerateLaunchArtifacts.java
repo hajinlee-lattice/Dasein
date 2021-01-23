@@ -144,14 +144,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             return;
         }
 
-        version = parseDataCollectionVersion(configuration);
-        attrRepo = parseAttrRepo(configuration);
-        evaluationDate = parseEvaluationDateStr(configuration);
-        boolean contactsDataExists = AttrRepoUtils.testExistsEntity(attrRepo, BusinessEntity.Contact);
-        if (!contactsDataExists) {
-            log.info("No Contact data found in the Attribute Repo");
-        }
-
         TapType tapType = play.getTapType();
         baseOnOtherTapType = TapType.ListSegment.equals(tapType);
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
