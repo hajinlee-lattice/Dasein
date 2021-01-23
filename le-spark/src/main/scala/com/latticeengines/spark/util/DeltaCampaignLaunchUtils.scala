@@ -14,6 +14,7 @@ private[spark] object DeltaCampaignLaunchUtils {
   case class Recommendation(PID: Option[Long], //
                             EXTERNAL_ID: String, //
                             AccountId: String, //
+                            CustomerAccountId: String, //
                             LE_ACCOUNT_EXTERNAL_ID: String, //
                             PLAY_ID: String, //
                             LAUNCH_ID: String, //
@@ -43,7 +44,8 @@ private[spark] object DeltaCampaignLaunchUtils {
     val playId: String = playLaunchContext.getPlayName
     val playLaunchId: String = playLaunchContext.getPlayLaunchId
     val tenantId: Long = playLaunchContext.getTenantPid
-    val accountId: String = checkAndGet(account, getAccountId(userCustomerId))
+    val accountId: String = checkAndGet(account, InterfaceName.AccountId.name)
+    val customerAccountId: String = checkAndGet(account, getAccountId(userCustomerId))
     val externalAccountId: String = accountId
     val uuid: String = UUID.randomUUID().toString
     val description: String = playLaunchContext.getPlayDescription
@@ -105,7 +107,8 @@ private[spark] object DeltaCampaignLaunchUtils {
 
     Recommendation(None, // PID
       uuid, // EXTERNAL_ID
-      accountId, // ACCOUNT_ID
+      accountId, // AccountId
+      customerAccountId, // CustomerAccountId
       externalAccountId, // LE_ACCOUNT_EXTERNAL_ID
       playId, // PLAY_ID
       playLaunchId, // LAUNCH_ID
