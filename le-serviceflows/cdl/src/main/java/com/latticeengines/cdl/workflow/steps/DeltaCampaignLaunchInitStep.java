@@ -50,7 +50,6 @@ import com.latticeengines.domain.exposed.util.ExportUtils;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.CreateDeltaRecommendationsJob;
-import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
 @Component("deltaCampaignLaunchInitStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
