@@ -64,8 +64,8 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static final String DNB_FILE = "LE_SEED_OUTPUT_2019_05_001.OUT.gz";
     private static final String ORB_INGESTION = "OrbTest";
     private static final String BOMBORA_INGESTION = "BomboraTest";
-    private static final String BOMBORA_FILE_VERSION1 = "20200921";
-    private static final String BOMBORA_FILE_VERSION2 = "20200928";
+    private static final String BOMBORA_FILE_VERSION1 = "20210114";
+    private static final String BOMBORA_FILE_VERSION2 = "20210121";
     private static String bomboraTestVersion1;
     private static String bomboraTestVersion2;
 
