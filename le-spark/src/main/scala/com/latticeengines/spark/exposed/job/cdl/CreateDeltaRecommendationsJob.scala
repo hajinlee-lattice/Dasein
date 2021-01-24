@@ -179,7 +179,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
   // returns recommendation table with one more column "CustomerAccountId". It value is equal to CustomerAccountId when user specifies 'UseCustomerId' to be true. 
   // Otherwise, its value is equal to AccountId column. Need to drop 'CustomerAccountId' column for cases where 'UseCustomerId' is false before further processing.
-  // Note that the parameter 'UseCustomerId' can only be true for Eloqua and SFDC launch. And it should be deprecated after PLS-18991 is completed
+  // Note that the parameter 'UseCustomerId' can only be true for Eloqua launch. And it should be deprecated after PLS-18991 is completed
   private def createRecommendationDf(spark: SparkSession, deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, addAccountTable: DataFrame): DataFrame = {
     val joinKey: String = deltaCampaignLaunchSparkContext.getJoinKey
     val bos: ByteArrayOutputStream = new ByteArrayOutputStream
