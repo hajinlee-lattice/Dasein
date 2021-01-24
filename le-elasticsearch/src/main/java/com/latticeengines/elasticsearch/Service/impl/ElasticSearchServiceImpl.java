@@ -194,6 +194,22 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
     }
 
     @Override
+    public boolean updateAccountIndexMapping(String indexName, String fieldName, String type, List<String> lookupIds,
+                                             String subType) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
+        try {
+            retry.execute(context -> {
+                ElasticSearchUtils.updateAccountIndexMapping(client, indexName, fieldName, type, lookupIds, subType);
+                return 0;
+            });
+        } catch (IOException e) {
+            log.error("failed to update mapping for index {}  field {}", indexName, fieldName, e);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean deleteIndex(String indexName) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(MAX_RETRY);
         try {

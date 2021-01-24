@@ -205,7 +205,7 @@ public class CDLLookupServiceImpl implements CDLLookupService {
                 DataUnit.StorageType.ElasticSearch)) != null) {
             log.info("feature flag is enabled and data unit is null for {}", customerSpace);
             String signature = dataUnit.getSignature();
-            String indexName = ElasticSearchUtils.constructIndexName(customerSpace, BusinessEntity.Contact.name(),
+            String indexName = ElasticSearchUtils.constructIndexName(customerSpace, BusinessEntity.Account.name(),
                     signature);
             return lookupInternalAccountIdByEs(customerSpace, indexName, lookupIdKey, lookupIdValue);
         } else {

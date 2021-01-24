@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +23,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJobConfiguration;
 import com.latticeengines.elasticsearch.Service.ElasticSearchService;
 import com.latticeengines.elasticsearch.util.ElasticSearchUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
@@ -67,6 +69,9 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private CDLExternalSystemProxy cdlExternalSystemProxy;
 
     private List<ElasticSearchExportConfig> configs;
 
@@ -172,7 +177,7 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
         if (BusinessEntity.Account.name().equals(entity)) {
             // TODO get columns from account look up
             elasticSearchService.createAccountIndexWithLookupIds(idxName, esConfig,
-                    Collections.singletonList(InterfaceName.AccountId.name()));
+                    Collections.EMPTY_LIST);
         } else {
             elasticSearchService.createIndexWithSettings(idxName, esConfig, entity);
         }
@@ -182,7 +187,16 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
             log.info("no column for timeline profile");
         } else if (AccountLookup.name().equals(role.name())) {
             log.info("set nested to fieldName {}", role.name());
-            elasticSearchService.updateIndexMapping(idxName, role.name(), "nested");
+            Map<String, List<CDLExternalSystemMapping>> mappings =
+                    cdlExternalSystemProxy.getExternalSystemMap(customerSpace.toString());
+            List<String> lookupIds = new ArrayList<>();
+            if (MapUtils.isNotEmpty(mappings)) {
+                for (Map.Entry<String, List<CDLExternalSystemMapping>> systemEntry : mappings.entrySet()) {
+                    List<CDLExternalSystemMapping> systemMapping = systemEntry.getValue();
+                    systemMapping.forEach(mapping -> lookupIds.add(mapping.getFieldName()));
+                }
+            }
+            elasticSearchService.updateAccountIndexMapping(idxName, role.name(), "nested", lookupIds, "keyword");
         } else {
             log.info("set binary to fieldName {}", role.name());
             elasticSearchService.updateIndexMapping(idxName, role.name(), "binary");
