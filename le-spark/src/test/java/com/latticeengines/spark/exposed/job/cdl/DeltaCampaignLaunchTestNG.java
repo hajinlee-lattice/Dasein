@@ -70,6 +70,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     private boolean createAddCsvDataFrame;
     private boolean createDeleteCsvDataFrame;
     private boolean launchToDb;
+    private boolean useCustomerId;
     Map<String, DataUnit> inputUnitsCopy = new HashMap<>();
 
     @Override
@@ -90,11 +91,12 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
 
     @Test(groups = "functional", dataProvider = "dataFrameProvider")
     public void runTest(boolean launchToDbDev, boolean createRecommendationDataFrameVal, boolean createAddCsvDataFrameVal,
-            boolean createDeleteCsvDataFrameVal) {
+            boolean createDeleteCsvDataFrameVal, boolean useCustomerId) {
         createRecommendationDataFrame = createRecommendationDataFrameVal;
         createAddCsvDataFrame = createAddCsvDataFrameVal;
         createDeleteCsvDataFrame = createDeleteCsvDataFrameVal;
         launchToDb = launchToDbDev;
+        this.useCustomerId = useCustomerId;
         overwriteInputUnits(launchToDbDev);
         CreateDeltaRecommendationConfig sparkConfig = generateCreateDeltaRecommendationConfig(launchToDbDev);
         SparkJobResult result = runSparkJob(CreateDeltaRecommendationsJob.class, sparkConfig);
@@ -291,6 +293,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 .setAccountColsRecNotIncludedStd(CampaignLaunchUtils.generateAccountColsRecNotIncludedStdForS3());
         deltaCampaignLaunchSparkContext
                 .setAccountColsRecNotIncludedNonStd(CampaignLaunchUtils.generateAccountColsRecNotIncludedNonStdForS3());
+        deltaCampaignLaunchSparkContext.setUseCustomerId(useCustomerId);
         deltaCampaignLaunchSparkContext.setContactCols(CampaignLaunchUtils.generateContactColsForS3());
         deltaCampaignLaunchSparkContext.setCreateRecommendationDataFrame(createRecommendationDataFrame);
         deltaCampaignLaunchSparkContext.setCreateAddCsvDataFrame(createAddCsvDataFrame);
@@ -415,7 +418,8 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             for (int j = 0; j < completeContactPerAccount; j++) {
                 completeContacts[completeContactPerAccount * i + j][0] = i + "L";
                 completeContacts[completeContactPerAccount * i + j][1] = String.valueOf(completeContactPerAccount * i + j);
-                completeContacts[completeContactPerAccount * i + j][2] = (addAccounts.length * i + j) + "L";
+                completeContacts[completeContactPerAccount * i + j][2] = (addAccounts.length * i + (j + 1) * 1000)
+                        + "L";
                 completeContacts[completeContactPerAccount * i + j][3] = "Kind Inc.";
                 completeContacts[completeContactPerAccount * i + j][4] = "michael@kind.com";
                 completeContacts[completeContactPerAccount * i + j][5] = "Michael Jackson";
@@ -436,10 +440,16 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     @DataProvider
     public Object[][] dataFrameProvider() {
         return new Object[][]{ // the first parameter indicate is a connector launch to DB or not
-                {false, true, true, true}, // generate all three dataFrames
-                {false, false, false, true}, // only generate delete csv dataFrame
-                {false, true, true, false},// Account only case for two data Frames
-                {true, true, true, false} // launch to DB case
+                { false, true, true, true, false }, // generate all three
+                                                    // dataFrames
+                { false, false, false, true, false }, // only generate delete
+                                                      // csv dataFrame
+                { false, true, true, false, false }, // Account only case for
+                                                     // two data Frames
+                { true, true, true, false, false }, // launch to DB case
+                { true, true, true, false, true } // launch to DB case and user
+                                                  // CustomerAccountId and
+                                                  // CustomerContactId
         };
     }
 

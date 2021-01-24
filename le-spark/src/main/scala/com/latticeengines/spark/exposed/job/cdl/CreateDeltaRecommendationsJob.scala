@@ -101,8 +101,12 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
   private def generateCsvDfForDbConnector(deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, contactTable: DataFrame, recommendationDF: DataFrame, joinKey: String, contactCols: Seq[String]): DataFrame ={
     var result: DataFrame = recommendationDF
+    var contactColsToJoin: Seq[String] = contactCols
     if (!contactTable.rdd.isEmpty) {
-      val columnsExistInContactCols: Seq[String] = contactCols.filter(name => contactTable.columns.contains(name))
+      if (deltaCampaignLaunchSparkContext.getUseCustomerId) {
+        contactColsToJoin = contactColsToJoin :+ InterfaceName.CustomerContactId.name()
+      }
+      val columnsExistInContactCols: Seq[String] = contactColsToJoin.filter(name => contactTable.columns.contains(name))
       val joinKeyCol: Option[String] = Some(joinKey)
       val contactTableToJoin: DataFrame = contactTable.select((columnsExistInContactCols ++ joinKeyCol).map(name => col(name)): _*)
       val newAttrs = contactTableToJoin.columns.map(c => ExportUtils.CONTACT_ATTR_PREFIX + c)
@@ -114,6 +118,8 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       if (deltaCampaignLaunchSparkContext.getUseCustomerId) {
         result = result.drop(joinKey)
         result = result.withColumnRenamed("CustomerAccountId", joinKey)
+        result = result.drop(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name())
+        result = result.withColumnRenamed(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.CustomerContactId.name(), ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name())
       }
     }
     result
