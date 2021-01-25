@@ -152,11 +152,13 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             launchUniverseDataUnit = executeSparkJob(frontEndquery);
             log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
             // 3) check for 'Contacts per Account' limit
-            if (useContactsPerAccountLimit || CDLExternalSystemName.Eloqua.equals(channelConfig.getSystemName())) {
+            if (useContactsPerAccountLimit) {
                 Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
                 Long contactAccountRatioThreshold = WorkflowJobUtils.getContactAccountRatioThresholdFromZK(customerSpace);
                 launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
                         maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, contactAccountRatioThreshold);
+                // CONTACTS_DATA_UNIT is only used in calculating Eloqua launch in GenerateLaunchArtifactsJob
+                putObjectInContext(CONTACTS_DATA_UNIT, launchUniverseDataUnit);
             }
         }
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
