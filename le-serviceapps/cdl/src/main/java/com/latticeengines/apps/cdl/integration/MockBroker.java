@@ -23,7 +23,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.IngestionScheduler;
 import com.latticeengines.domain.exposed.cdl.MockBrokerInstance;
-import com.latticeengines.domain.exposed.cdl.integration.BrokerInitialLoadRequest;
+import com.latticeengines.domain.exposed.cdl.integration.BrokerFullLoadRequest;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
 import com.latticeengines.domain.exposed.cdl.integration.InboundConnectionType;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -68,17 +68,17 @@ public class MockBroker extends BaseBroker {
             mockBrokerInstance.setIngestionScheduler(scheduler);
             mockBrokerInstance.setActive(false);
             mockBrokerInstance.setDataStreamId(null);
-            BrokerInitialLoadRequest initialLoadDataRequest = new BrokerInitialLoadRequest();
-            initialLoadDataRequest.setInboundConnectionType(InboundConnectionType.Mock);
-            initialLoadDataRequest.setSourceId(sourceId);
-            initialLoadDataRequest.setStartTime(scheduler.getStartTime());
-            initialLoadDataRequest.setBucket(s3Bucket);
+            BrokerFullLoadRequest request = new BrokerFullLoadRequest();
+            request.setInboundConnectionType(InboundConnectionType.Mock);
+            request.setSourceId(sourceId);
+            request.setStartTime(scheduler.getStartTime());
+            request.setBucket(s3Bucket);
             if (preScheduler != null) {
-                initialLoadDataRequest.setEndTime(getPreFireTime(preScheduler, scheduler).toDate());
+                request.setEndTime(getPreFireTime(preScheduler, scheduler).toDate());
             } else {
-                initialLoadDataRequest.setEndTime(getPreFireTime(scheduler).toDate());
+                request.setEndTime(getPreFireTime(scheduler).toDate());
             }
-            long workflowPid = submitInitialLoadWorkflow(customerSpace, initialLoadDataRequest);
+            long workflowPid = submitFullLoadWorkflow(customerSpace, request);
             mockBrokerInstance.setLastAggregationWorkflowId(workflowPid);
             mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
         } else {

@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.cdl.integration;
 
 import java.util.Date;
 
-public class BrokerInitialLoadRequest {
+public class BrokerFullLoadRequest {
 
     private String sourceId;
 

@@ -5,11 +5,11 @@ import javax.inject.Inject;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.latticeengines.apps.cdl.workflow.BrokerInitialLoadWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.BrokerFullLoadWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.integration.BrokerInitialLoadRequest;
+import com.latticeengines.domain.exposed.cdl.integration.BrokerFullLoadRequest;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -20,7 +20,7 @@ public abstract class BaseBroker implements Broker {
     protected String sourceId;
 
     @Inject
-    protected BrokerInitialLoadWorkflowSubmitter brokerInitialLoadWorkflowSubmitter;
+    protected BrokerFullLoadWorkflowSubmitter brokerFullLoadWorkflowSubmitter;
 
     @Inject
     protected WorkflowProxy workflowProxy;
@@ -41,8 +41,8 @@ public abstract class BaseBroker implements Broker {
         }
     }
 
-    protected long submitInitialLoadWorkflow(CustomerSpace customerSpace, BrokerInitialLoadRequest brokerInitialLoadRequest) {
-        ApplicationId appId = brokerInitialLoadWorkflowSubmitter.submit(customerSpace, brokerInitialLoadRequest, new WorkflowPidWrapper(-1l));
+    protected long submitFullLoadWorkflow(CustomerSpace customerSpace, BrokerFullLoadRequest brokerFullLoadRequest) {
+        ApplicationId appId = brokerFullLoadWorkflowSubmitter.submit(customerSpace, brokerFullLoadRequest, new WorkflowPidWrapper(-1l));
         return getWorkflowPid(appId);
 
     }

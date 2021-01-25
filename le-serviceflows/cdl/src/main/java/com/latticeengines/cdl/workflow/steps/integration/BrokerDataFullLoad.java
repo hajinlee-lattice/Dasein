@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.integration.BrokerDataInitialLoadConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.integration.BrokerDataFullLoadConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.AggregationHistoryProxy;
 import com.latticeengines.proxy.exposed.cdl.InboundConnectionProxy;
@@ -47,11 +47,11 @@ import com.latticeengines.proxy.exposed.metadata.DataTemplateProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-@Component("brokerDataInitialLoad")
+@Component("brokerDataFullLoad")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class BrokerDataInitialLoad extends BaseWorkflowStep<BrokerDataInitialLoadConfiguration> {
+public class BrokerDataFullLoad extends BaseWorkflowStep<BrokerDataFullLoadConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(BrokerDataInitialLoad.class);
+    private static final Logger log = LoggerFactory.getLogger(BrokerDataFullLoad.class);
 
     @Inject
     private DataTemplateProxy dataTemplateProxy;

@@ -8,21 +8,21 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.integration.BrokerInitialLoadRequest;
-import com.latticeengines.domain.exposed.serviceflows.cdl.BrokerInitialLoadWorkflowConfiguration;
+import com.latticeengines.domain.exposed.cdl.integration.BrokerFullLoadRequest;
+import com.latticeengines.domain.exposed.serviceflows.cdl.BrokerFullLoadWorkflowConfiguration;
 
 @Component
-public class BrokerInitialLoadWorkflowSubmitter extends WorkflowSubmitter {
+public class BrokerFullLoadWorkflowSubmitter extends WorkflowSubmitter {
 
     @WithWorkflowJobPid
-    public ApplicationId submit(@NotNull CustomerSpace customerSpace, @NotNull BrokerInitialLoadRequest request,
+    public ApplicationId submit(@NotNull CustomerSpace customerSpace, @NotNull BrokerFullLoadRequest request,
                                 @NotNull WorkflowPidWrapper pidWrapper) {
-        BrokerInitialLoadWorkflowConfiguration configuration = configure(customerSpace, request);
+        BrokerFullLoadWorkflowConfiguration configuration = configure(customerSpace, request);
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
 
-    private BrokerInitialLoadWorkflowConfiguration configure(CustomerSpace customerSpace, BrokerInitialLoadRequest request) {
-        return new BrokerInitialLoadWorkflowConfiguration.Builder().customer(customerSpace).sourceId(request.getSourceId())
+    private BrokerFullLoadWorkflowConfiguration configure(CustomerSpace customerSpace, BrokerFullLoadRequest request) {
+        return new BrokerFullLoadWorkflowConfiguration.Builder().customer(customerSpace).sourceId(request.getSourceId())
                 .startTime(request.getStartTime()).endTime(request.getEndTime()).inboundConnectionType(request.getInboundConnectionType())
                 .bucket(request.getBucket()).build();
     }

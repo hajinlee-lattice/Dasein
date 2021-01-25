@@ -9,26 +9,26 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.integration.BrokerDataInitialLoad;
-import com.latticeengines.domain.exposed.serviceflows.cdl.BrokerInitialLoadWorkflowConfiguration;
+import com.latticeengines.cdl.workflow.steps.integration.BrokerDataFullLoad;
+import com.latticeengines.domain.exposed.serviceflows.cdl.BrokerFullLoadWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("brokerInitialLoadWorkflow")
+@Component("brokerFullLoadWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class BrokerInitialLoadWorkflow extends AbstractWorkflow<BrokerInitialLoadWorkflowConfiguration> {
+public class BrokerFullLoadWorkflow extends AbstractWorkflow<BrokerFullLoadWorkflowConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(BrokerInitialLoadWorkflow.class);
+    private static final Logger log = LoggerFactory.getLogger(BrokerFullLoadWorkflow.class);
 
     @Inject
-    private BrokerDataInitialLoad brokerDataInitialLoad;
+    private BrokerDataFullLoad brokerDataFullLoad;
 
     @Override
-    public Workflow defineWorkflow(BrokerInitialLoadWorkflowConfiguration workflowConfig) {
+    public Workflow defineWorkflow(BrokerFullLoadWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
-                .next(brokerDataInitialLoad)
+                .next(brokerDataFullLoad)
                 .build();
     }
 }

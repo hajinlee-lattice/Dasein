@@ -123,7 +123,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = GenerateVisitReportWorkflowConfiguration.class, name = "GenerateVisitReportWorkflowConfiguration"),
         @Type(value = PublishTableToElasticSearchWorkflowConfiguration.class, name = "PublishTableToElasticSearchWorkflowConfiguration"),
         @Type(value = PublishActivityAlertWorkflowConfiguration.class, name = PublishActivityAlertWorkflowConfiguration.NAME),
-        @Type(value = BrokerInitialLoadWorkflowConfiguration.class, name = "BrokerInitialLoadWorkflowConfiguration"),
+        @Type(value = BrokerFullLoadWorkflowConfiguration.class, name = "BrokerFullLoadWorkflowConfiguration"),
         @Type(value = BrokerAggregationWorkflowConfiguration.class, name = "BrokerAggregationWorkflowConfiguration")
 })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {

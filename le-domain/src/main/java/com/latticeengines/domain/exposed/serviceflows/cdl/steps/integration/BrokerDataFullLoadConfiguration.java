@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.integration.InboundConnectionType;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
-public class BrokerDataInitialLoadConfiguration extends BaseStepConfiguration {
+public class BrokerDataFullLoadConfiguration extends BaseStepConfiguration {
 
     private CustomerSpace customerSpace;
 
