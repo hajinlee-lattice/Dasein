@@ -151,7 +151,6 @@ public final class ElasticSearchUtils {
                             .startObject("normalizer")
                             .startObject("my_normalizer")
                             .field("type", "custom")
-                            .field("char_filter", "html_strip")
                             .field("filter", new String[]{"lowercase"})
                             .endObject()
                             .endObject()
@@ -227,7 +226,7 @@ public final class ElasticSearchUtils {
             log.info("field {} exists in the index {}", fieldName, indexName);
             return false;
         }
-        log.info("set field name {} with type {} for index {}", fieldName, indexName, type);
+        log.info("set field name {} with type {} for index {}", fieldName, type, indexName);
         PutMappingRequest request = new PutMappingRequest(indexName);
         XContentBuilder builder = XContentFactory.jsonBuilder().startObject()
                 .startObject(PROPERTIES)
@@ -256,7 +255,7 @@ public final class ElasticSearchUtils {
             log.info("field {} exists in the index {}", fieldName, indexName);
             return false;
         }
-        log.info("set field name {} with type {} for index {}", fieldName, indexName, type);
+        log.info("set field name {} with type {} for index {}", fieldName, type, indexName);
 
         PutMappingRequest request = new PutMappingRequest(indexName);
         request.source(XContentFactory.jsonBuilder()
@@ -484,7 +483,8 @@ public final class ElasticSearchUtils {
             workflowSpan = tracer.activeSpan();
             SearchRequest request = new SearchRequest(indexName);
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-            TermQueryBuilder queryBuilder = QueryBuilders.termQuery(lookupIdKey, lookupIdValue.toLowerCase());
+            TermQueryBuilder queryBuilder = QueryBuilders.termQuery(AccountLookup.name() + "." + lookupIdKey,
+                    lookupIdValue);
             NestedQueryBuilder nestedQueryBuilder = QueryBuilders.nestedQuery(AccountLookup.name(), queryBuilder,
                     ScoreMode.Max);
             searchSourceBuilder.query(nestedQueryBuilder);

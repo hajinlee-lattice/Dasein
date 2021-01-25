@@ -21,11 +21,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.Base64Utils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.xerial.snappy.Snappy;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -34,6 +36,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
@@ -106,6 +109,8 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
         JobStatus status = waitForWorkflowStatus(appId, false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
+        // wait the refresh interval
+        SleepUtils.sleep(60000);
         // fake data for query
         prepareTimeline();
 
@@ -141,6 +146,8 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
         JobStatus status = waitForWorkflowStatus(appId, false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
+        // wait the refresh interval
+        SleepUtils.sleep(60000);
 
         String indexName = getIndexName(ConsolidatedAccount);
         String value = matchProxy.lookupInternalAccountId(mainCustomerSpace, InterfaceName.AccountId.name(), "898",
@@ -159,40 +166,81 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
         JobStatus status = waitForWorkflowStatus(appId, false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
+        // wait the refresh interval
+        SleepUtils.sleep(60000);
 
         String indexName = getIndexName( ConsolidatedContact);
 
+        // search contacts by account id
         List<Map<String, Object>> contacts = matchProxy.lookupContacts(mainCustomerSpace,
                 InterfaceName.AccountId.name(), "898", "",
                 null);
 
         Assert.assertTrue(CollectionUtils.isNotEmpty(contacts));
-        Map<String, Object> map = contacts.get(0);
-        Assert.assertTrue(map.containsKey(ConsolidatedContact.name()));
-        // get the column value, then verify the key in map
-        Object value = map.get(ConsolidatedContact.name());
-        Map<?, ?> record = JsonUtils.deserialize(IOUtils.toString(Snappy.uncompress((byte[]) value), "UTF-8"),
-                Map.class);
+        Map<String, Object> result = contacts.get(0);
+        Assert.assertTrue(result.containsKey(ConsolidatedContact.name()));
 
-        Map<String, Object> recordMap = JsonUtils.convertMap(record, String.class, Object.class);
+        // get the column value, then verify the key in map
+        Map<String, String> recordMap =
+                JsonUtils.deserialize(
+                        new String(
+                                Snappy.uncompress(
+                                        Base64Utils.decode(
+                                                String.valueOf(result.get(ConsolidatedContact.name())).getBytes()))),
+                        new TypeReference<Map<String, String>>() {});
+
         Assert.assertTrue(recordMap.containsKey(InterfaceName.AccountId.name()));
         Assert.assertTrue(recordMap.containsKey(InterfaceName.ContactId.name()));
 
-        List<Map<String, Object>> contact = matchProxy.lookupContacts(mainCustomerSpace,
+        // search contacts by contact id
+        List<Map<String, Object>> contacts1 = matchProxy.lookupContacts(mainCustomerSpace,
                 null, null,
                 "5ae2bdccfc13ae3162000382", null);
-        map = contacts.get(0);
-        value = map.get(ConsolidatedContact.name());
-        record = JsonUtils.deserialize(IOUtils.toString(Snappy.uncompress((byte[]) value), "UTF-8"),
-                Map.class);
+        Map<String, Object> result1 = contacts.get(0);
 
-        recordMap = JsonUtils.convertMap(record, String.class, Object.class);
-        Assert.assertTrue(recordMap.containsKey(InterfaceName.AccountId.name()));
-        Assert.assertTrue(recordMap.containsKey(InterfaceName.ContactId.name()));
+        Map<String, String> recordMap1 =
+                JsonUtils.deserialize(
+                        new String(
+                                Snappy.uncompress(
+                                        Base64Utils.decode(
+                                                String.valueOf(result1.get(ConsolidatedContact.name())).getBytes()))),
+                        new TypeReference<Map<String, String>>() {});
+
+        Assert.assertTrue(recordMap1.containsKey(InterfaceName.AccountId.name()));
+        Assert.assertTrue(recordMap1.containsKey(InterfaceName.ContactId.name()));
 
 
         deleteIndex(indexName);
     }
+
+    @Test(groups = "end2end")
+    private void testPublishAccountLookup() throws IOException {
+
+        String tableName = setupTables(TableRoleInCollection.AccountLookup);
+        PublishTableToESRequest request = generateRequest(TableRoleInCollection.AccountLookup, tableName);
+        String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
+        JobStatus status = waitForWorkflowStatus(appId, false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+        // wait the refresh interval
+        SleepUtils.sleep(60000);
+
+        String indexName = getIndexName(TableRoleInCollection.AccountLookup);
+        String value = matchProxy.lookupInternalAccountId(mainCustomerSpace, "AtlasLookupKey",
+                "user_qa_personal_system_id_0014p000028blgqqa0",
+                null);
+        Assert.assertEquals(value, "0014P000028BlGQQA0");
+
+        // upper
+        String value1 = matchProxy.lookupInternalAccountId(mainCustomerSpace, "AtlasLookupKey",
+                "USER_qa_personal_system_id_0014p000028blgqqa0",
+                null);
+        Assert.assertEquals(value1, "0014P000028BlGQQA0");
+
+        deleteIndex(indexName);
+
+    }
+
+
 
     private String getIndexName(TableRoleInCollection role) {
         String entity = ElasticSearchUtils.getEntityFromTableRole(role);
@@ -231,7 +279,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
     }
 
     private PublishTableToESRequest generateTimelineRequest(TableRoleInCollection role) throws IOException {
-        String tableName = setupTables();
+        String tableName = setupTables(role);
         return generateRequest(role, tableName);
     }
 
@@ -255,10 +303,11 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         return request;
     }
 
-    private String setupTables() throws IOException {
+    private String setupTables(TableRoleInCollection role) throws IOException {
         Table esTable = JsonUtils
                 .deserialize(IOUtils.toString(ClassLoader.getSystemResourceAsStream(
-                        "end2end/role/timelineprofile.json"), "UTF-8"), Table.class);
+                        String.format("end2end/role/%s.json", role.name().toLowerCase())), "UTF-8"),
+                        Table.class);
         String esTableName = NamingUtils.timestamp("es");
         esTable.setName(esTableName);
         Extract extract = esTable.getExtracts().get(0);
@@ -273,7 +322,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         String path = ClassLoader
                 .getSystemResource("end2end/role").getPath();
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, //
-                path + "/timelineprofile.avro", //
+                path + String.format("/%s.avro", role.name().toLowerCase()), //
                 PathBuilder
                         .buildDataTablePath(CamilleEnvironment.getPodId(),
                                 CustomerSpace.parse(mainCustomerSpace))

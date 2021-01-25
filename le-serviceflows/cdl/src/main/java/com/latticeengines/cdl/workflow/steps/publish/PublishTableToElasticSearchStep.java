@@ -193,7 +193,9 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
             if (MapUtils.isNotEmpty(mappings)) {
                 for (Map.Entry<String, List<CDLExternalSystemMapping>> systemEntry : mappings.entrySet()) {
                     List<CDLExternalSystemMapping> systemMapping = systemEntry.getValue();
-                    systemMapping.forEach(mapping -> lookupIds.add(mapping.getFieldName()));
+                    if (CollectionUtils.isNotEmpty(systemMapping)) {
+                        systemMapping.forEach(mapping -> lookupIds.add(mapping.getFieldName()));
+                    }
                 }
             }
             elasticSearchService.updateAccountIndexMapping(idxName, role.name(), "nested", lookupIds, "keyword");
