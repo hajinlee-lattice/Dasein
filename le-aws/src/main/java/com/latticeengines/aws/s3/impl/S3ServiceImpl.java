@@ -470,7 +470,20 @@ public class S3ServiceImpl implements S3Service {
         // create a PutObjectRequest passing the folder name suffixed by /
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, folderName + "/", emptyContent, metadata);
         putObjectRequest.setCannedAcl(ACL);
-        s3Client.putObject(putObjectRequest);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3, Collections.singletonList(AmazonS3Exception.class), null);
+        String finalFolderName = folderName;
+        retry.execute(ctx -> {
+            try {
+                if (ctx.getRetryCount() > 0) {
+                    log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") create s3 folder: " + finalFolderName);
+                }
+                s3Client.putObject(putObjectRequest);
+            } catch (AmazonS3Exception e) {
+                log.error("Encounter S3 Exception: " + e.getErrorCode());
+                throw e;
+            }
+            return true;
+        });
     }
 
     private void setAclRecursive(String bucket, String prefix) {
