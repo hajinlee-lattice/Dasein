@@ -61,6 +61,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       .toDF("PID", //
       "EXTERNAL_ID", //
       "AccountId", //
+      "CustomerAccountId", //
       "LE_ACCOUNT_EXTERNAL_ID", //
       "PLAY_ID", //
       "LAUNCH_ID", //
@@ -81,7 +82,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       "DESTINATION_ORG_ID", //
       "DESTINATION_SYS_TYPE", //
       "TENANT_ID", //
-      "DELETED")
+      "DELETED").drop("CustomerAccountId")
 
     // add log
     logSpark("Before joining, the derivedAccounts is:")
