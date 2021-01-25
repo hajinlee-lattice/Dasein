@@ -721,6 +721,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         boolean entityMatchGAOnly = FeatureFlagUtils.isEntityMatchGAOnly(flags);
         boolean internalEnrichEnabled = zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(customerSpace));
+        boolean eraseByNullEnabled = FeatureFlagUtils.isImportEraseByNullEnabled(flags);
         int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations()
                 : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService
@@ -824,6 +825,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
                 .entityMatchConfiguration(request.getEntityMatchConfiguration()) //
+                .eraseByNullEnabled(eraseByNullEnabled) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
                 .fullProfile(Boolean.TRUE.equals(request.getFullProfile())) //
                 .skipEntities(request.getSkipEntities()) //

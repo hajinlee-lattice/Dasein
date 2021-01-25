@@ -425,6 +425,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             config.setJoinKey(batchStorePrimaryKey);
         }
         config.setSwitchSides(switchSides);
+        config.setEraseByNullEnabled(configuration.isEraseByNullEnabled());
         return config;
     }
 

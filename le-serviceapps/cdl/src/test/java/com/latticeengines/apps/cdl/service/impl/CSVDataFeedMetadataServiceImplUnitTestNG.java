@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 
 public class CSVDataFeedMetadataServiceImplUnitTestNG {
 
@@ -88,7 +89,9 @@ public class CSVDataFeedMetadataServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetConnectorConfig() {
-        String str = csvDataFeedMetadataServiceImpl.getConnectorConfig(csvImportConfig, JOB_IDENTIFIER);
+        DataFeedTask dataFeedTask = new DataFeedTask();
+        dataFeedTask.setUniqueId(JOB_IDENTIFIER);
+        String str = csvDataFeedMetadataServiceImpl.getConnectorConfig(csvImportConfig, dataFeedTask);
         Assert.assertTrue(str.contains(JOB_IDENTIFIER));
     }
 }

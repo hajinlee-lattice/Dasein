@@ -33,7 +33,7 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
         breakable {
           var rhsDf = selectSystemBatch(lattice.input.head, templates(i), joinKey, config.isKeepPrefix)
           if (rhsDf.count() == 0) break
-          lhsDf = MergeUtils.merge(lhsDf, rhsDf, Seq(joinKey), Set(), minCols, maxCols, overwriteByNull = overwriteByNull)
+          lhsDf = MergeUtils.merge(lhsDf, rhsDf, Seq(joinKey), Set(), minCols, maxCols, overwriteByNull = overwriteByNull, false)
         }
       }
     }

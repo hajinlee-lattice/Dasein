@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.cdl.CDLImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
@@ -49,7 +50,7 @@ public abstract class DataFeedMetadataService {
 
     public abstract CSVImportFileInfo getImportFileInfo(CDLImportConfig importConfig);
 
-    public abstract String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier);
+    public abstract String getConnectorConfig(CDLImportConfig importConfig, DataFeedTask dataFeedTask);
 
     public boolean needUpdateDataFeedStatus() {
         return true;
