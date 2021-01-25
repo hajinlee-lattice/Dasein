@@ -28,7 +28,7 @@ public class RecommendationDanteFormatter implements DanteFormatter<Recommendati
     @SuppressWarnings("unchecked")
     public List<String> format(List<Recommendation> entities) {
         return entities != null //
-                ? entities.stream().map(this::format).collect(Collectors.toList()) //
+                ? entities.stream().filter(entity -> entity != null).map(this::format).collect(Collectors.toList()) //
                 : Collections.EMPTY_LIST;
     }
 
