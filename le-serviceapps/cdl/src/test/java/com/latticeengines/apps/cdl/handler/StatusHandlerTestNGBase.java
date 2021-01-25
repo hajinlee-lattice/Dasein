@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
 
@@ -72,6 +73,9 @@ public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
     private PlayService playService;
 
     @Inject
+    protected TableEntityMgr tableEntityMgr;
+
+    @Inject
     private PlayTypeService playTypeService;
 
     protected String NAME = "play" + CURRENT_TIME_MILLIS;
@@ -80,8 +84,10 @@ public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
     protected String PLAY_TARGET_SEGMENT_NAME = "Play Target Segment - 2";
     protected String CREATED_BY = "lattice@lattice-engines.com";
 
-    protected String CURRENT_TABLE = "Current_table";
-    protected String PREVIOUS_TABLE = "Previous_table";
+    protected String CURRENT_ACCOUNT_TABLE = "Current_account_table";
+    protected String CURRENT_CONTACT_TABLE = "Current_contact_table";
+    protected String PREVIOUS_ACCOUNT_TABLE = "Previous_account_table";
+    protected String PREVIOUS_CONTACT_TABLE = "Previous_contact_table";
 
     protected Play createPlay() {
         Play play = new Play();
@@ -117,7 +123,16 @@ public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
         return lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
     }
 
+    protected void createTables() {
+        createTable(CURRENT_ACCOUNT_TABLE);
+        createTable(CURRENT_CONTACT_TABLE);
+        createTable(PREVIOUS_ACCOUNT_TABLE);
+        createTable(PREVIOUS_CONTACT_TABLE);
+    }
+
     protected PlayLaunchChannel createPlayLaunchChannel(Play play, LookupIdMap lookupIdMap) {
+        createTables();
+
         PlayLaunchChannel channel = new PlayLaunchChannel();
         channel.setTenant(mainTestTenant);
         channel.setPlay(play);
@@ -128,8 +143,10 @@ public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
         channel.setId(NamingUtils.randomSuffix("Launch__", 16));
         channel.setLaunchUnscored(false);
         channel.setChannelConfig(new MarketoChannelConfig());
-        channel.setCurrentLaunchedAccountUniverseTable(CURRENT_TABLE);
-        channel.setCurrentLaunchedContactUniverseTable(CURRENT_TABLE);
+        channel.setCurrentLaunchedAccountUniverseTable(CURRENT_ACCOUNT_TABLE);
+        channel.setCurrentLaunchedContactUniverseTable(CURRENT_CONTACT_TABLE);
+        channel.setPreviousLaunchedAccountUniverseTable(PREVIOUS_ACCOUNT_TABLE);
+        channel.setPreviousLaunchedContactUniverseTable(PREVIOUS_CONTACT_TABLE);
 
         playLaunchChannelService.create(NAME, channel);
         log.info("Created PlayLaunchChannel with ID: " + channel.getId());
@@ -207,6 +224,26 @@ public class StatusHandlerTestNGBase extends CDLFunctionalTestNGBase {
 
         if (playName != null) {
             playService.deleteByName(playName, false);
+        }
+
+        teardownTables();
+    }
+
+    private void teardownTables() {
+        if (tableEntityMgr.findByName(CURRENT_ACCOUNT_TABLE) != null) {
+            tableEntityMgr.deleteByName(CURRENT_ACCOUNT_TABLE);
+        }
+
+        if (tableEntityMgr.findByName(CURRENT_CONTACT_TABLE) != null) {
+            tableEntityMgr.deleteByName(CURRENT_CONTACT_TABLE);
+        }
+
+        if (tableEntityMgr.findByName(PREVIOUS_ACCOUNT_TABLE) != null) {
+            tableEntityMgr.deleteByName(PREVIOUS_ACCOUNT_TABLE);
+        }
+
+        if (tableEntityMgr.findByName(PREVIOUS_CONTACT_TABLE) != null) {
+            tableEntityMgr.deleteByName(PREVIOUS_CONTACT_TABLE);
         }
     }
 }
