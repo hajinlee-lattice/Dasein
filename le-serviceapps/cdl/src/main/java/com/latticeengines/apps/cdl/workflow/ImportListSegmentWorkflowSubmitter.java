@@ -29,10 +29,14 @@ public class ImportListSegmentWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${aws.customer.s3.bucket}")
     private String customerBucket;
 
+    private String FILE_KEY = "FILE_KEY";
+
     @WithWorkflowJobPid
     public ApplicationId submit(@NotNull String customerSpace, @NotNull ListSegmentImportRequest request, @NotNull WorkflowPidWrapper pidWrapper) {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importListSegmentWorkflow");
+        inputProperties.put(WorkflowContextConstants.Inputs.SEGMENT_NAME, request.getSegmentName());
+        inputProperties.put(FILE_KEY, request.getS3FileKey());
         ImportListSegmentWorkflowConfiguration configuration = new ImportListSegmentWorkflowConfiguration.Builder()
                 .customer(CustomerSpace.parse(customerSpace))
                 .sourceBucket(dateStageBucket)
