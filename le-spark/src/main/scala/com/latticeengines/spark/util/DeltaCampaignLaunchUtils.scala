@@ -73,7 +73,7 @@ private[spark] object DeltaCampaignLaunchUtils {
 
     val sfdcAccountId: String =
       if (playLaunchContext.getSfdcAccountID == null)
-        null
+        checkAndGet(account, getAccountId(playLaunchContext.getIsEntityMatch))
       else
         checkAndGet(account, playLaunchContext.getSfdcAccountID)
 
