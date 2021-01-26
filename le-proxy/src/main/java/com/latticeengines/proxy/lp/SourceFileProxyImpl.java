@@ -91,9 +91,13 @@ public class SourceFileProxyImpl extends MicroserviceRestApiProxy implements Sou
     }
 
     @Override
-    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty,  String entity) {
+    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty,  String entity, String schema) {
         String url = URL_PRERIX + "/fromS3?entity={entity}";
-        url = constructUrl(url, shortenCustomerSpace(customerSpace), entity);
+        url = constructUrl(url, shortenCustomerSpace(customerSpace), entity, schema);
+        if (schema != null) {
+            url += "&schema=" + schema;
+        }
+
         ResponseDocument responseDocument = post("create SourceFile by s#", url, fileProperty, ResponseDocument.class);
         if (responseDocument == null) {
             return null;

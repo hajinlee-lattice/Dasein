@@ -153,7 +153,7 @@ public class SourceFileServiceImpl implements SourceFileService {
     }
 
     @Override
-    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty, String entity) {
+    public SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty, String entity, String schema) {
         String key = PathUtils.formatKey(s3Bucket, fileProperty.getFilePath());
         InputStream inputStream;
         try {
@@ -174,7 +174,11 @@ public class SourceFileServiceImpl implements SourceFileService {
             SchemaInterpretation schemaInterpretation;
             //TODO: SchemaInterpretation cannot match all BusinessEntity, need fix later.
             try {
-                schemaInterpretation = SchemaInterpretation.getByName(entity);
+                if (schema != null) {
+                    schemaInterpretation = SchemaInterpretation.getByName(schema);
+                } else {
+                    schemaInterpretation = SchemaInterpretation.getByName(entity);
+                }
             } catch (IllegalArgumentException e) {
                 schemaInterpretation = null;
             }
