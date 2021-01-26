@@ -28,12 +28,4 @@ public interface ActivityAlertRepository extends BaseJpaRepository<ActivityAlert
     @Query(value = "delete from ActivityAlert where CREATION_TIMESTAMP < :creationTimestamp limit :maxUpdateRows", nativeQuery = true)
     int deleteByCreationTimestampBefore(@Param("creationTimestamp") Date creationTimestamp,
             @Param("maxUpdateRows") int max);
-
-    @Transactional
-    @Modifying
-    @Query(value = "delete from ActivityAlert where TENANT_ID = :tenantId and CREATION_TIMESTAMP < :creationTimestamp limit :maxUpdateRows", nativeQuery = true)
-    int deleteByTenantAndCreationTimestampBefore( //
-            @Param("tenantId") Long tenantId, //
-            @Param("creationTimestamp") Date creationTimestamp, //
-            @Param("maxUpdateRows") int max);
 }
