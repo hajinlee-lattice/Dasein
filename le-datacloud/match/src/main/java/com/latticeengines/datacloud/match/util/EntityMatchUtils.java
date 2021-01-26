@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -340,9 +340,12 @@ public final class EntityMatchUtils {
             return false;
         }
 
+        // use the value in config first, fallback to value in input if not provided
+        Boolean allocateIdInConfig = input.getEntityMatchConfiguration() != null
+                ? input.getEntityMatchConfiguration().getAllocateId()
+                : null;
         return OperationalMode.isEntityMatch(input.getOperationalMode())
-                && (input.isAllocateId() || (input.getEntityMatchConfiguration() != null
-                        && BooleanUtils.isTrue(input.getEntityMatchConfiguration().getAllocateId())));
+                && ObjectUtils.defaultIfNull(allocateIdInConfig, input.isAllocateId());
     }
 
     /**
