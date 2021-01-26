@@ -42,7 +42,8 @@ public class AppMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.app.exposed.entitymanager.impl.ActivityAlertEntityMgrImpl.*(..)))")
+    @Before("execution(* com.latticeengines.app.exposed.entitymanager.impl.ActivityAlertEntityMgrImpl.*(..)) &&"
+            + "!execution(* com.latticeengines.app.exposed.entitymanager.impl.ActivityAlertEntityMgrImpl.deleteByExpireDateBefore(..))")
     public void dataEntityMgrMethods(JoinPoint joinPoint) {
         Tenant tenant = MultiTenantContext.getTenant();
 
