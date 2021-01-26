@@ -149,6 +149,13 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             entityMatchConfigurationService.setIsAllocateMode(allocateMode);
         }
         if (input.getEntityMatchConfiguration() != null
+                && input.getEntityMatchConfiguration().getAllocateId() != null) {
+            boolean allocationModeInConfig = input.getEntityMatchConfiguration().getAllocateId();
+            logger.info("Overwrite allocate mode with value in entity match configuration. AllocateId = {}",
+                    allocationModeInConfig);
+            entityMatchConfigurationService.setIsAllocateMode(allocationModeInConfig);
+        }
+        if (input.getEntityMatchConfiguration() != null
                 && MapUtils.isNotEmpty(input.getEntityMatchConfiguration().getAllocationModes())) {
             String srcEntity = input.getSourceEntity();
             if (StringUtils.isBlank(srcEntity)) {

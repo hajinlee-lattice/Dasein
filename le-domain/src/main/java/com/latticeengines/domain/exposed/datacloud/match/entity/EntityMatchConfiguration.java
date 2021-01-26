@@ -24,6 +24,7 @@ public class EntityMatchConfiguration {
     private final Boolean lazyCopyToStaging;
     // entity -> set of field names to skip in match
     private final Map<String, Set<String>> skippedMatchFields;
+    private final Boolean allocateId;
     private final Map<String, Map<String, Boolean>> allocationModes;
 
     @JsonCreator
@@ -31,12 +32,14 @@ public class EntityMatchConfiguration {
             @JsonProperty("NumStagingShards") Integer numStagingShards, //
             @JsonProperty("StagingTableName") String stagingTableName, //
             @JsonProperty("LazyCopyToStaging") Boolean lazyCopyToStaging, //
-            @JsonProperty("SkippedMatchFields") Map<String, Set<String>> skippedMatchFields,
+            @JsonProperty("SkippedMatchFields") Map<String, Set<String>> skippedMatchFields, //
+            @JsonProperty("AllocateId") Boolean allocateId, //
             @JsonProperty("AllocationModes") Map<String, Map<String, Boolean>> allocationModes) {
         this.numStagingShards = numStagingShards;
         this.stagingTableName = stagingTableName;
         this.lazyCopyToStaging = lazyCopyToStaging;
         this.skippedMatchFields = skippedMatchFields;
+        this.allocateId = allocateId;
         this.allocationModes = allocationModes;
     }
 
@@ -60,6 +63,11 @@ public class EntityMatchConfiguration {
         return skippedMatchFields;
     }
 
+    @JsonProperty("AllocateId")
+    public Boolean getAllocateId() {
+        return allocateId;
+    }
+
     @JsonProperty("AllocationModes")
     public Map<String, Map<String, Boolean>> getAllocationModes() {
         return allocationModes;
@@ -76,6 +84,7 @@ public class EntityMatchConfiguration {
                 ObjectUtils.defaultIfNull(stagingTableName, that.stagingTableName), //
                 ObjectUtils.defaultIfNull(lazyCopyToStaging, that.lazyCopyToStaging), //
                 ObjectUtils.defaultIfNull(skippedMatchFields, that.skippedMatchFields), //
+                ObjectUtils.defaultIfNull(allocateId, that.allocateId), //
                 ObjectUtils.defaultIfNull(allocationModes, that.allocationModes) //
         );
     }
@@ -84,7 +93,7 @@ public class EntityMatchConfiguration {
     public String toString() {
         return "EntityMatchConfiguration{" + "numStagingShards=" + numStagingShards + ", stagingTableName='"
                 + stagingTableName + '\'' + ", lazyCopyToStaging=" + lazyCopyToStaging + ", skippedMatchFields="
-                + skippedMatchFields + ", allocationModes=" + allocationModes + '}';
+                + skippedMatchFields + ", allocateId=" + allocateId + ", allocationModes=" + allocationModes + '}';
     }
 
     // TODO refactor and move all configuration here

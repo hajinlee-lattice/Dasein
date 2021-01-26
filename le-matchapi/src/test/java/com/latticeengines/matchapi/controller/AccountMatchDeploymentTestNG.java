@@ -549,7 +549,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         EntityMatchConfiguration oldConfig = input.getEntityMatchConfiguration();
         EntityMatchConfiguration newConfig = new EntityMatchConfiguration(oldConfig.getNumStagingShards(),
                 oldConfig.getStagingTableName(), oldConfig.isLazyCopyToStaging(), oldConfig.getSkippedMatchFields(),
-                Collections.singletonMap(BusinessEntity.Account.name(),
+                null, Collections.singletonMap(BusinessEntity.Account.name(),
                         Collections.singletonMap(BusinessEntity.Account.name(), false)));
         input.setReturnAnonymousWhenUnmatched(true);
         input.setEntityMatchConfiguration(newConfig);
@@ -610,7 +610,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         Map<String, Map<String, Boolean>> allocationModes = Collections.singletonMap(BusinessEntity.Account.name(),
                 Collections.singletonMap(BusinessEntity.Account.name(), true));
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, allocationModes));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, allocationModes));
         return input;
     }
 
@@ -629,7 +629,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, null));
         return input;
     }
 
@@ -667,7 +667,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, null));
         return input;
     }
 
@@ -692,7 +692,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
         input.setInputBuffer(prepareBulkData(CASE_INVALID_VALUE));
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, null));
         return input;
     }
 
@@ -717,7 +717,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
         input.setInputBuffer(prepareBulkData(CASE_PREFERRED_ID));
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, null));
         return input;
     }
 

@@ -673,7 +673,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
         if (request.getEntityMatchConfiguration() == null) {
             request.setEntityMatchConfiguration(
-                    new EntityMatchConfiguration(TEST_NUM_STAGING_SHARDS, null, true, null, null));
+                    new EntityMatchConfiguration(TEST_NUM_STAGING_SHARDS, null, true, null, null, null));
         }
         log.info("Start processing and analyzing ... request = {}", JsonUtils.serialize(request));
         ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), request);
