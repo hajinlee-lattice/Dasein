@@ -46,7 +46,6 @@ private[spark] object DeltaCampaignLaunchUtils {
     val tenantId: Long = playLaunchContext.getTenantPid
     val accountId: String = checkAndGet(account, InterfaceName.AccountId.name)
     val customerAccountId: String = checkAndGet(account, getAccountId(userCustomerId))
-    val externalAccountId: String = accountId
     val uuid: String = UUID.randomUUID().toString
     val description: String = playLaunchContext.getPlayDescription
     val ratingModelId: String = playLaunchContext.getModelId
@@ -76,6 +75,8 @@ private[spark] object DeltaCampaignLaunchUtils {
         checkAndGet(account, getAccountId(playLaunchContext.getIsEntityMatch))
       else
         checkAndGet(account, playLaunchContext.getSfdcAccountID)
+
+    val externalAccountId: String = sfdcAccountId
 
     var companyName: String = checkAndGet(account, InterfaceName.CompanyName.name)
     if (StringUtils.isBlank(companyName)) {
