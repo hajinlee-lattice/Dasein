@@ -38,6 +38,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
@@ -247,10 +248,11 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private int getMaxConcurrentBlock(@NotNull MatchInput input, @NotNull Integer maxConcurrentBlocks) {
-        if (!OperationalMode.isEntityMatch(input.getOperationalMode()) || input.isAllocateId()) {
+        if (!OperationalMode.isEntityMatch(input.getOperationalMode())
+                || EntityMatchUtils.isAllocateIdModeEntityMatch(input)) {
             log.info(
-                    "Not performing entity match in lookup mode, use default per-entity value. OperationalMode = {}, IsAllocateId = {}",
-                    input.getOperationalMode(), input.isAllocateId());
+                    "Not performing entity match in lookup mode, use default per-entity value. OperationalMode = {}, IsAllocateId = {}, Config = {}",
+                    input.getOperationalMode(), input.isAllocateId(), input.getEntityMatchConfiguration());
             return maxConcurrentBlocks;
         }
 
