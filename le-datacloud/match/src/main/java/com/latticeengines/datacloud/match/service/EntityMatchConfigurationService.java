@@ -122,9 +122,12 @@ public interface EntityMatchConfigurationService {
     RetryTemplate getRetryTemplate(@NotNull EntityMatchEnvironment env);
 
     /**
-     * TODO comments
+     * Configure whether to allocate/create specific entity. This map will overwrite
+     * the global flag. E.g., Account -> true, Contact -> false means we will only
+     * match to existing contact but not creating new ones
      *
      * @param perEntityAllocationModes
+     *            map of entity -> allocateId flag (create new entity if true)
      */
     void setPerEntityAllocationModes(Map<String, Boolean> perEntityAllocationModes);
 
