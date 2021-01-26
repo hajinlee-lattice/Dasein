@@ -35,7 +35,7 @@ public class DashboardServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        super.setup();
+        setupTestEnvironmentWithOneTenant();
     }
 
     @Test(groups = "deployment")
