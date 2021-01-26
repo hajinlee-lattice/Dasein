@@ -28,6 +28,9 @@ public class LivyServerManager {
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
+    @Value("${hadoop.use.defaultlivy}")
+    private Boolean useDefaultLivy;
+
     @Inject
     private EMRCacheService emrCacheService;
 
@@ -51,7 +54,8 @@ public class LivyServerManager {
     private Queue<String> serverQueue = new ConcurrentLinkedQueue<>();
 
     public String getLivyHost() {
-        return Boolean.TRUE.equals(useEmr) ? manager.getLivyServerUrl(emrClusterName) : "http://localhost:8998";
+        return Boolean.TRUE.equals(useEmr) ? (Boolean.TRUE.equals(useDefaultLivy) ? emrCacheService.getLivyUrl()
+                : manager.getLivyServerUrl(emrClusterName)) : "http://localhost:8998";
     }
 
     private String getLivyServerUrl(String emrClusterName) {
