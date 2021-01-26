@@ -2,14 +2,14 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.camille.CustomerSpace
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection
+import com.latticeengines.domain.exposed.metadata.{InterfaceName, TableRoleInCollection}
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection._
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJobConfiguration
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.ElasticSearchUtils
 import com.latticeengines.spark.util.ElasticSearchUtils._
-import org.apache.spark.sql.functions.{col, lit, map, udf}
+import org.apache.spark.sql.functions.{col, lit, map, udf, first}
 import org.apache.spark.sql.types.StructField
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import org.elasticsearch.spark.sql._
@@ -59,28 +59,52 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
           signature)
         if (role == TableRoleInCollection.TimelineProfile)
           table.saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
+        else if (role == TableRoleInCollection.AccountLookup)
+          saveToESWithMeta(table, indexName, role, entity, docIdCol, baseConfig, false)
         else
-          saveToESWithMeta(table, indexName, role, docIdCol, baseConfig, true)
+          saveToESWithMeta(table, indexName, role, entity, docIdCol, baseConfig, true)
       }
     }
   }
 
-  def saveToESWithMeta(table : DataFrame, indexName : String, role : TableRoleInCollection, docIdCol : String,
-                     baseConfig : Map[String, String], compressed : Boolean) : Unit = {
+  def saveToESWithMeta(table : DataFrame, indexName : String, role : TableRoleInCollection, entity : String,
+                       docIdCol: String, baseConfig : Map[String, String], compressed : Boolean) : Unit = {
 
+    if (compressed) {
+      val compressUdf = udf((s: Map[String, Any]) => Snappy.compress(JsonUtils.serialize(s)))
+      val columns: mutable.LinkedHashSet[Column] = mutable.LinkedHashSet[Column]()
+      table.schema.fields.foreach((field: StructField) => {
+        columns.add(lit(field.name))
+        columns.add(col(field.name))
+      })
+      if (BusinessEntity.Contact.name().eq(entity))
+        // if entity is contact, account id is keyword
+        table.withColumn(role.name(), compressUdf(map(columns.toSeq: _*)))
+          .select(docIdCol, accountId, role.name())
+          .saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
+      else
+        table.withColumn(role.name(), compressUdf(map(columns.toSeq: _*)))
+          .select(docIdCol, role.name())
+          .saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
+    } else if (role == TableRoleInCollection.AccountLookup) {
+      // group by account Id, parse the atlas lookup key
+      val nameUdf = udf((atlasKey: String) => atlasKey.substring(0, atlasKey.lastIndexOf("_")))
+      val valueUdf = udf((atlasKey: String) => atlasKey.substring(atlasKey.lastIndexOf("_") + 1));
+      val generated: DataFrame = table.withColumn("lookupColumnName", nameUdf(col(InterfaceName.AtlasLookupKey.name())))
+        .withColumn("lookupColumnVal", valueUdf(col(InterfaceName.AtlasLookupKey.name())))
+        .groupBy(InterfaceName.AccountId.name())
+        .pivot("lookupColumnName")
+        .agg(first("lookupColumnVal"))
+        .drop("lookupColumnName", "lookupColumnVal")
+      val columns: mutable.LinkedHashSet[Column] = mutable.LinkedHashSet[Column]()
+      generated.schema.fields.foreach((field: StructField) => {
+        columns.add(lit(field.name))
+        columns.add(col(field.name))
+      })
+      generated.withColumn(role.name(), map(columns.toSeq: _*)).select(docIdCol, role.name())
+        .saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
+    }
 
-    val packUdf = udf((s: Map[String, Any]) => Snappy.compress(JsonUtils.serialize(s)))
-    val columns : mutable.LinkedHashSet[Column]= mutable.LinkedHashSet[Column]()
-    table.schema.fields.foreach( (field : StructField) =>{
-      columns.add(lit(field.name))
-      columns.add(col(field.name))
-    })
-    if (compressed)
-      table.withColumn(role.name(), packUdf(map(columns.toSeq : _*))).select(docIdCol, role.name())
-        .saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
-    else
-      table.withColumn(role.name(), map(columns.toSeq : _*)).select(docIdCol, role.name())
-        .saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
   }
 
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountLookup;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMarketingActivityProfile;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedCuratedAccountAttribute;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedCuratedContact;
@@ -120,9 +121,12 @@ public class GenerateChangeTable extends BaseProcessAnalyzeSparkStep<GenerateCha
                 addToListInContext(TABLES_GOING_TO_ES, config, ElasticSearchExportConfig.class);
             } else if (isChanged(role)) {
                 log.info("Create Change List for role=" + role + " activeTable=" + activeTable);
-                addToListInContext(TABLES_GOING_TO_ES,
-                        createChangeListAndChangedTable(role, dataUnit, entityKey),
-                        ElasticSearchExportConfig.class);
+                ElasticSearchExportConfig config = createChangeListAndChangedTable(role, dataUnit, entityKey);
+                if (config != null) {
+                    addToListInContext(TABLES_GOING_TO_ES,
+                            config,
+                            ElasticSearchExportConfig.class);
+                }
             }
         }
     }
@@ -208,6 +212,10 @@ public class GenerateChangeTable extends BaseProcessAnalyzeSparkStep<GenerateCha
 
         String changeListTableName = NamingUtils.timestamp(role.name() + "_ChangeList");
         HdfsDataUnit changeListDataUnit = result.getTargets().get(0);
+        if (changeListDataUnit.getCount() == 0L) {
+            log.info("change list is empty for role {} in {}", role, customerSpaceStr);
+            return null;
+        }
         Table changeListTable = toTable(changeListTableName, changeListDataUnit);
         metadataProxy.createTable(customerSpaceStr, changeListTableName, changeListTable);
         log.info("Create change list table {} in {}", changeListTableName, customerSpace);
@@ -262,7 +270,7 @@ public class GenerateChangeTable extends BaseProcessAnalyzeSparkStep<GenerateCha
 
     private List<TableRoleInCollection> getAccountPublishedRoles() {
         return Arrays.asList(
-                //AccountLookup,
+                AccountLookup,
                 //ConsolidatedAccount,
                 CalculatedCuratedAccountAttribute,
                 CalculatedPurchaseHistory,

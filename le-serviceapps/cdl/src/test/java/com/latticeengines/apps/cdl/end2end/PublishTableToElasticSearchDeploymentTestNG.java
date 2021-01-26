@@ -225,14 +225,14 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         SleepUtils.sleep(60000);
 
         String indexName = getIndexName(TableRoleInCollection.AccountLookup);
-        String value = matchProxy.lookupInternalAccountId(mainCustomerSpace, "AtlasLookupKey",
-                "user_qa_personal_system_id_0014p000028blgqqa0",
+        String value = matchProxy.lookupInternalAccountId(mainCustomerSpace, "user_qa_personal_system_id",
+                "0014p000028blgqqa0",
                 null);
         Assert.assertEquals(value, "0014P000028BlGQQA0");
 
         // upper
-        String value1 = matchProxy.lookupInternalAccountId(mainCustomerSpace, "AtlasLookupKey",
-                "USER_qa_personal_system_id_0014p000028blgqqa0",
+        String value1 = matchProxy.lookupInternalAccountId(mainCustomerSpace, "USER_qa_personal_system_id",
+                "0014p000028blgqqa0",
                 null);
         Assert.assertEquals(value1, "0014P000028BlGQQA0");
 
