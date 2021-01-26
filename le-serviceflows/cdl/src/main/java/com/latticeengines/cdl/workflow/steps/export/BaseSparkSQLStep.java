@@ -19,6 +19,8 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -217,6 +219,10 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
 
     protected int scaleBySize(double totalSizeInGb) {
         return ScalingUtils.getMultiplier(totalSizeInGb);
+    }
+
+    protected boolean hasContactsPerAccountLimit(PlayLaunchChannel channel, BusinessEntity mainEntity) {
+        return (mainEntity == BusinessEntity.Contact) && (channel.getMaxContactsPerAccount() != null);
     }
 
 }

@@ -150,15 +150,14 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             log.info("Full Launch Universe Query: " + frontEndquery.toString());
             // 2) get DataFrame for Account and Contact
             launchUniverseDataUnit = executeSparkJob(frontEndquery);
-            log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
+            log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse after first sparkjob", launchUniverseDataUnit));
             // 3) check for 'Contacts per Account' limit
             if (useContactsPerAccountLimit) {
                 Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
                 Long contactAccountRatioThreshold = WorkflowJobUtils.getContactAccountRatioThresholdFromZK(customerSpace);
                 launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
                         maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, contactAccountRatioThreshold);
-                // CONTACTS_DATA_UNIT is only used in calculating Eloqua launch in GenerateLaunchArtifactsJob
-                putObjectInContext(CONTACTS_DATA_UNIT, launchUniverseDataUnit);
+                log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse after second sparkjob", launchUniverseDataUnit));
             }
         }
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
@@ -198,10 +197,6 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 stopSparkSQLSession();
             }
         });
-    }
-
-    private boolean hasContactsPerAccountLimit(PlayLaunchChannel channel, BusinessEntity mainEntity) {
-        return (mainEntity == BusinessEntity.Contact) && (channel.getMaxContactsPerAccount() != null);
     }
 
     private HdfsDataUnit executeSparkJobContactsPerAccount(HdfsDataUnit launchDataUniverseDataUnit, //
