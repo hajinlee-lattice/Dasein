@@ -12,8 +12,9 @@ class FilterByJoinJob extends AbstractSparkJob[FilterByJoinConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[FilterByJoinConfig]): Unit = {
     val config: FilterByJoinConfig = lattice.config
-    val source: DataFrame = lattice.input.head
-    val input: DataFrame = if (lattice.input.size == 1) null else lattice.input(1)
+    val switchSide = config.getSwitchSide != null && config.getSwitchSide
+    var source: DataFrame = lattice.input.head
+    var input: DataFrame = if (lattice.input.size == 1) null else lattice.input(1)
     val key = config.getKey
     val selectColumns = if (config.getSelectColumns == null) null else config.getSelectColumns.asScala.toList
     val joinType = config.getJoinType
@@ -23,6 +24,11 @@ class FilterByJoinJob extends AbstractSparkJob[FilterByJoinConfig] {
     if (input != null) {
       // Rename columns in the input data (except join key) to avoid conflicts on column names
       var renamed: DataFrame = input
+      if (switchSide) {
+        renamed = source
+        source = input
+        input = renamed
+      }
       input.columns.foreach(column => {
         if (!column.equalsIgnoreCase(key)) {
           renamed = renamed.withColumnRenamed(column, inputPrefix + column)

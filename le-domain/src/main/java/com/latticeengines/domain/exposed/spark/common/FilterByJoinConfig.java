@@ -18,6 +18,9 @@ public class FilterByJoinConfig extends SparkJobConfig {
     @JsonProperty("SelectColumns")
     private List<String> selectColumns;
 
+    @JsonProperty("SwitchSide")
+    private Boolean switchSide; // when true, reverse the order of the input
+
     @Override
     public String getName() {
         return NAME;
@@ -45,5 +48,13 @@ public class FilterByJoinConfig extends SparkJobConfig {
 
     public void setSelectColumns(List<String> selectColumns) {
         this.selectColumns = selectColumns;
+    }
+
+    public Boolean getSwitchSide() {
+        return switchSide;
+    }
+
+    public void setSwitchSide(Boolean switchSide) {
+        this.switchSide = switchSide;
     }
 }
