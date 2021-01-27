@@ -114,7 +114,7 @@ public class SpecificVersionMatchDeploymentTestNG extends AdvancedMatchDeploymen
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, null));
         return input;
     }
 

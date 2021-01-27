@@ -148,7 +148,7 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
     private void populateExistingData() throws Exception {
         int expectedAccounts = 2;
         MatchInput input = prepareBulkMatchInput(prepareStringData("existing_data", DEFAULT_FIELDS, EXISTING_DATA),
-                Sets.newHashSet(Country.name(), CompanyName.name()));
+                true, Sets.newHashSet(Country.name(), CompanyName.name()), null);
 
         MatchCommand result = runAndVerifyBulkMatch(input, getPodId());
         Assert.assertNotNull(result);
@@ -185,8 +185,9 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
                 "Number of published contacts does not match the expected value");
     }
 
-    @Test(groups = "deployment", priority = 2, dataProvider = "contactImport1", dependsOnMethods = "populateExistingData")
-    private void importData(String testGroupId, ContactBulkMatchTestCase[] testCases) throws Exception {
+    @Test(groups = "deployment", priority = 2, dataProvider = "contactImport1", dependsOnMethods = "populateExistingData", singleThreaded = true)
+    private void importData(String testGroupId, Boolean allocateId, Map<String, Map<String, Boolean>> allocationModes,
+            ContactBulkMatchTestCase[] testCases) throws Exception {
         // clear out staging (impact from other tests), existing data will be stored in
         // serving
         bumpStagingVersion();
@@ -202,9 +203,11 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
             expectedCCIds.put(testId, testCases[i].expectedCustomerContactId);
         }
         boolean hasNewAccount = expectedCAIds.values().stream().anyMatch(Objects::isNull);
+        boolean hasNewContact = expectedCCIds.values().stream().anyMatch(Objects::isNull);
 
         MatchInput input = prepareBulkMatchInput(
-                prepareStringData(String.format("contact_import_1_group_%s", testGroupId), DEFAULT_FIELDS, data), null);
+                prepareStringData(String.format("contact_import_1_group_%s", testGroupId), DEFAULT_FIELDS, data),
+                allocateId, null, allocationModes);
 
         MatchCommand result = runAndVerifyBulkMatch(input, getPodId());
         Assert.assertNotNull(result);
@@ -217,11 +220,13 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
 
         Assert.assertEquals(matchResults.size(), data.length,
                 "Match result row count does not match existing data row count");
-        if (hasNewAccount) {
-            Assert.assertFalse(newEntities.isEmpty(), "Should have newly allocated accounts");
-            verifyNewAccounts(newEntities, -1, null);
+        if (hasNewAccount || hasNewContact) {
+            Assert.assertFalse(newEntities.isEmpty(), "Should have newly allocated entities");
         } else {
-            Assert.assertTrue(newEntities.isEmpty(), "Should not have newly allocated accounts");
+            Assert.assertTrue(newEntities.isEmpty(), "Should not have newly allocated entities");
+        }
+        if (hasNewAccount) {
+            verifyNewAccounts(newEntities, -1, null);
         }
 
         Pair<Map<String, String>, Map<String, String>> entityIdMaps = verifyMatchResultForImportData(matchResults);
@@ -235,7 +240,7 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
     private Object[][] contactImport1() {
         return new Object[][] { //
                 { //
-                        "grp1", //
+                        "grp1", true, null, //
                         new ContactBulkMatchTestCase[] { //
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
@@ -318,6 +323,88 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
                                    // does not match because existing data all have account info, so only
                                    // AccountEntityId+N+P mapping is setup, we have to use CustomerContactId to
                                    // link, we will be able to match with N+P after the mapping is setup though)
+                        }, //
+                }, //
+                { //
+                        "grp2", false, null, //
+                        new ContactBulkMatchTestCase[] { //
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C2_01", "t10", //
+                                                null, null, null, null, "", "", //
+                                                null, "D&B", "USA", "CA", //
+                                        }, ENTITY_ANONYMOUS_ID, ENTITY_ANONYMOUS_ID //
+                                ), // no contact info and new account => both anonymous since allocate ID = false
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C2_02", "t10", //
+                                                "C_CID_NOT_EXIST_1", null, null, null, "", "", //
+                                                null, "D&B", "USA", "CA", //
+                                        }, ENTITY_ANONYMOUS_ID, ENTITY_ANONYMOUS_ID //
+                                ), // new contact & account info => both anonymous since allocate ID = false
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C2_03", "t10", //
+                                                "C_CID_01", null, null, null, "", "", //
+                                                null, "D&B", "USA", "CA", //
+                                        }, ENTITY_ANONYMOUS_ID, "C_CID_01" //
+                                ), // existing contact + new account
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C2_04", "t10", //
+                                                "C_CID_01", null, null, null, "", "", //
+                                                null, "Netflix", "USA", "CA", //
+                                        }, "C_AID_02", "C_CID_01" //
+                                ), // existing contact + existing account
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C2_05", "t10", //
+                                                "C_CID_NOT_EXIST_2", null, null, null, "", "", //
+                                                null, "Netflix", "USA", "CA", //
+                                        }, "C_AID_02", ENTITY_ANONYMOUS_ID //
+                                ), // new contact + existing account
+                        }, //
+                }, //
+                { // same scenario as grp 2 but only not creating account, still create contact
+                        "grp3", true,
+                        Collections.singletonMap(BusinessEntity.Contact.name(),
+                                Collections.singletonMap(BusinessEntity.Account.name(), false)), //
+                        new ContactBulkMatchTestCase[] { //
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C3_01", "t10", //
+                                                null, null, null, null, "", "", //
+                                                null, "D&B", "USA", "CA", //
+                                        }, ENTITY_ANONYMOUS_ID, ENTITY_ANONYMOUS_ID //
+                                ), // no contact info and new account => both anonymous since allocate ID = false
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C3_02", "t10", //
+                                                "C_CID_NOT_EXIST_1", null, null, null, "", "", //
+                                                null, "D&B", "USA", "CA", //
+                                        }, ENTITY_ANONYMOUS_ID, null //
+                                ), // new contact & account info => both anonymous since allocate ID = false
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C3_03", "t10", //
+                                                "C_CID_01", null, null, null, "", "", //
+                                                null, "D&B", "USA", "CA", //
+                                        }, ENTITY_ANONYMOUS_ID, "C_CID_01" //
+                                ), // existing contact + new account
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C3_04", "t10", //
+                                                "C_CID_01", null, null, null, "", "", //
+                                                null, "Netflix", "USA", "CA", //
+                                        }, "C_AID_02", "C_CID_01" //
+                                ), // existing contact + existing account
+                                new ContactBulkMatchTestCase( //
+                                        new Object[] { //
+                                                "C3_05", "t10", //
+                                                "C_CID_NOT_EXIST_2", null, null, null, "", "", //
+                                                null, "Netflix", "USA", "CA", //
+                                        }, "C_AID_02", null //
+                                ), // new contact + existing account
                         }, //
                 }, //
         };
@@ -482,7 +569,8 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
         return getOutputPath(command).replace("Output", "NewEntities");
     }
 
-    private MatchInput prepareBulkMatchInput(InputBuffer buffer, Set<String> newEntityFields) {
+    private MatchInput prepareBulkMatchInput(InputBuffer buffer, boolean allocateId, Set<String> newEntityFields,
+            Map<String, Map<String, Boolean>> allocationModes) {
         MatchInput input = new MatchInput();
         input.setTenant(testTenant);
         input.setDataCloudVersion(currentDataCloudVersion);
@@ -491,7 +579,6 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
         input.setSkipKeyResolution(true);
         input.setOperationalMode(OperationalMode.ENTITY_MATCH);
         input.setTargetEntity(BusinessEntity.Contact.name());
-        input.setAllocateId(true);
         input.setOutputNewEntities(true);
         input.setIncludeLineageFields(true);
         if (CollectionUtils.isNotEmpty(newEntityFields)) {
@@ -501,8 +588,12 @@ ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGBase {
         input.setInputBuffer(buffer);
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
+        input.setReturnAnonymousWhenUnmatched(true);
+        // test overwriting AllocateId with value in config
+        input.setAllocateId(false);
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, allocateId,
+                        allocationModes));
         return input;
     }
 

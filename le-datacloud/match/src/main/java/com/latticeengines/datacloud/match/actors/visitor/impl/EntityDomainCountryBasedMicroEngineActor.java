@@ -20,7 +20,7 @@ public class EntityDomainCountryBasedMicroEngineActor extends EntityMicroEngineA
 
     @Override
     protected boolean shouldProcess(@NotNull MatchTraveler traveler) {
-        return StringUtils.isNotBlank(traveler.getMatchKeyTuple().getDomain());
+        return !matchFoundInLookupMode(traveler) && StringUtils.isNotBlank(traveler.getMatchKeyTuple().getDomain());
     }
 
     @Override

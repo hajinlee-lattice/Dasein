@@ -42,6 +42,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
@@ -58,6 +59,8 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.TimelineRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.ConfigurationRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
@@ -399,6 +402,21 @@ public class MatchResource {
     @ApiOperation(value = "Bump up next entity match version of a target tenant in a list of specified environments")
     public BumpVersionResponse bumpNextVersion(@RequestBody BumpVersionRequest request) {
         return bumpVersion(request, true);
+    }
+
+    @PostMapping("/entity/configurations")
+    @ResponseBody
+    @ApiOperation(value = "Save entity match configuration for target tenant")
+    public SimpleBooleanResponse saveEntityMatchConfiguration(@RequestBody ConfigurationRequest request) {
+        entityMatchConfigurationService.saveConfiguration(request.getTenant(), request.getConfiguration());
+        return SimpleBooleanResponse.successResponse();
+    }
+
+    @GetMapping("/entity/configurations/{customerSpace}")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve saved entity match configuration for target tenant")
+    public EntityMatchConfiguration getEntityMatchConfiguration(@PathVariable String customerSpace) {
+        return entityMatchConfigurationService.getConfiguration(new Tenant(customerSpace));
     }
 
     /*

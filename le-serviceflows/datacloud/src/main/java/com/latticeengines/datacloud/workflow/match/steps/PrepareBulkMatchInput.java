@@ -33,15 +33,18 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
 import com.latticeengines.serviceflows.workflow.util.SparkUtils;
@@ -79,6 +82,12 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     @Value("${datacloud.match.contact.concurrent.blocks.max}")
     private Integer maxContactConcurrentBlocks;
+
+    @Value("${datacloud.match.lookup.account.concurrent.blocks.max}")
+    private Integer maxLookupAccountConcurrentBlocks;
+
+    @Value("${datacloud.match.lookup.contact.concurrent.blocks.max}")
+    private Integer maxLookupContactConcurrentBlocks;
 
     @Value("${datacloud.match.txn.concurrent.blocks.max}")
     private Integer maxTxnConcurrentBlocks;
@@ -232,8 +241,35 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             throw new IllegalArgumentException(
                     String.format("Invalid setting for entity %s: %s", input.getTargetEntity(), blockInfo.toString()));
         }
-        executionContext.put(BulkMatchContextKey.MAX_CONCURRENT_BLOCKS, blockInfo.getRight());
-        return determineNumBlocks(count, blockInfo.getLeft(), blockInfo.getMiddle(), blockInfo.getRight());
+
+        int maxConcurrentBlocks = getMaxConcurrentBlock(input, blockInfo.getRight());
+        executionContext.put(BulkMatchContextKey.MAX_CONCURRENT_BLOCKS, maxConcurrentBlocks);
+        return determineNumBlocks(count, blockInfo.getLeft(), blockInfo.getMiddle(), maxConcurrentBlocks);
+    }
+
+    private int getMaxConcurrentBlock(@NotNull MatchInput input, @NotNull Integer maxConcurrentBlocks) {
+        if (!OperationalMode.isEntityMatch(input.getOperationalMode())
+                || EntityMatchUtils.isAllocateIdModeEntityMatch(input)) {
+            log.info(
+                    "Not performing entity match in lookup mode, use default per-entity value. OperationalMode = {}, IsAllocateId = {}, Config = {}",
+                    input.getOperationalMode(), input.isAllocateId(), input.getEntityMatchConfiguration());
+            return maxConcurrentBlocks;
+        }
+
+        String targetEntity = input.getTargetEntity();
+        if (BusinessEntity.Account.name().equals(targetEntity)) {
+            log.info("In lookup mode account match, allow higher concurrent match blocks ({})",
+                    maxLookupAccountConcurrentBlocks);
+            return maxLookupAccountConcurrentBlocks;
+        } else if (BusinessEntity.Contact.name().equals(targetEntity)) {
+            log.info("In lookup mode contact match, allow higher concurrent match blocks ({})",
+                    maxLookupContactConcurrentBlocks);
+            return maxLookupContactConcurrentBlocks;
+        }
+
+        log.warn("Unrecognized target entity ({}) in lookup mode, use default per-entity value {}",
+                input.getTargetEntity(), maxConcurrentBlocks);
+        return maxConcurrentBlocks;
     }
 
     /**

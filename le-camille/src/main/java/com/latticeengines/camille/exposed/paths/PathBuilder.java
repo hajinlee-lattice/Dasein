@@ -305,6 +305,12 @@ public final class PathBuilder {
                 PathConstants.SERVICES, PathConstants.CDL, PathConstants.TIMEZONE);
     }
 
+    public static Path buildMatchConfigurationPath(String podId, CustomerSpace customerSpace) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, customerSpace.getContractId(),
+                PathConstants.TENANTS, customerSpace.getTenantId(), PathConstants.SPACES, customerSpace.getSpaceId(),
+                PathConstants.SERVICES, PathConstants.CDL, PathConstants.MATCH_CONFIGURATION);
+    }
+
     public static Path buildCatalogQuotaLimitPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.CATALOG_QUOTA_LIMIT_FILE);
     }

@@ -11,6 +11,8 @@ import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
@@ -20,11 +22,14 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.ConfigurationRequest;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
@@ -88,6 +93,21 @@ public class MatchProxy extends BaseRestApiProxy {
     public BumpVersionResponse bumpNextVersion(BumpVersionRequest request) {
         String url = constructUrl("/entity/versions/next");
         return postKryo("bump_next_version", url, request, BumpVersionResponse.class);
+    }
+
+    public SimpleBooleanResponse saveEntityMatchConfiguration(@NotNull String customerSpace,
+            @NotNull EntityMatchConfiguration configuration) {
+        String url = constructUrl("/entity/configurations");
+        ConfigurationRequest request = new ConfigurationRequest();
+        request.setTenant(new Tenant(customerSpace));
+        request.setConfiguration(configuration);
+        return postKryo("save_entity_match_configuration", url, request, SimpleBooleanResponse.class);
+    }
+
+    public EntityMatchConfiguration getEntityMatchConfiguration(@NotNull String customerSpace) {
+        String url = constructUrl("/entity/configurations/{customerSpace}",
+                CustomerSpace.shortenCustomerSpace(customerSpace));
+        return get("save_entity_match_configuration", url, EntityMatchConfiguration.class);
     }
 
     public Map<EntityMatchEnvironment, EntityMatchVersion> getEntityMatchVersions(String customerSpace,
