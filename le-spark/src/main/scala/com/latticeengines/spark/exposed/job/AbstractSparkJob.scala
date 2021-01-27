@@ -1,6 +1,5 @@
 package com.latticeengines.spark.exposed.job
 
-import java.io.StringWriter
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
@@ -12,9 +11,10 @@ import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.livy.scalaapi.ScalaJobContext
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
+import java.io.StringWriter
 import scala.collection.JavaConverters._
 
 abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext => String) {
@@ -179,9 +179,9 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       }
       val partitionKeys = if (tgt.getPartitionKeys == null) List() else tgt.getPartitionKeys.asScala.toList
       if (partitionKeys.isEmpty) {
-        df.write.format(fmt).mode(SaveMode.Overwrite).save(path)
+        df.write.format(fmt).save(path)
       } else {
-        df.write.partitionBy(partitionKeys: _*).format(fmt).mode(SaveMode.Overwrite).save(path)
+        df.write.partitionBy(partitionKeys: _*).format(fmt).save(path)
       }
       if (fmt.equals("csv")) {
         tgt.setCount(df.count())
