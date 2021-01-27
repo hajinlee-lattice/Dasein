@@ -12,15 +12,15 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnitStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
-import com.latticeengines.proxy.exposed.metadata.DataTemplateProxy;
+import com.latticeengines.proxy.exposed.metadata.NamedDataTemplateProxy;
 import com.latticeengines.proxy.exposed.metadata.ProxyDataTemplate;
 
 import reactor.core.publisher.Flux;
 
-@Component("dataTemplateProxy")
-public class DatatTemplateProxyImpl extends MicroserviceRestApiProxy implements DataTemplateProxy {
+@Component("namedDataTemplateProxy")
+public class NamedDataTemplateProxyImpl extends MicroserviceRestApiProxy implements NamedDataTemplateProxy {
 
-    protected DatatTemplateProxyImpl() {
+    protected NamedDataTemplateProxyImpl() {
         super("metadata/datatemplate");
     }
 

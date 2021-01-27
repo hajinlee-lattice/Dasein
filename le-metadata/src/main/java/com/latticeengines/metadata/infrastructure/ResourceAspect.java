@@ -45,6 +45,14 @@ public class ResourceAspect {
         setMultiTenantContext(customerSpace);
     }
 
+    @Before("execution(* com.latticeengines.metadata.controller.DataTemplateResource.*(..))")
+    public void beforeAllMethodsForDataTemplateResource(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        setMultiTenantContext(customerSpace);
+    }
+
+
     private void setTableType(JoinPoint joinPoint, TableType tableType) {
         tableTypeHolder.setTableType(tableType);
         Object[] args = joinPoint.getArgs();

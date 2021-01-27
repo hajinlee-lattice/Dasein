@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,14 +46,6 @@ public class MockBrokerInstanceServiceImplTestNG extends CDLFunctionalTestNGBase
         mockBrokerInstance.get().getSelectedFields().addAll(Lists.newArrayList(InterfaceName.AccountId.name(),
                 InterfaceName.City.name(), InterfaceName.PhoneNumber.name()));
         mockBrokerInstance.get().setDocumentType("Account");
-        String cronExpression = "0 0/10 * * * ?";
-        long startTime = System.currentTimeMillis();
-        IngestionScheduler scheduler = new IngestionScheduler();
-
-        scheduler.setCronExpression(cronExpression);
-        scheduler.setStartTime(startTime);
-        mockBrokerInstance.get().setIngestionScheduler(scheduler);
-        mockBrokerInstance.get().setActive(true);
         MockBrokerInstance mockBrokerInstance2 = mockBrokerInstanceService.createOrUpdate(mockBrokerInstance.get());
         String sourceId = mockBrokerInstance2.getSourceId();
         retry.execute(context -> {
@@ -62,22 +55,27 @@ public class MockBrokerInstanceServiceImplTestNG extends CDLFunctionalTestNGBase
             List<String> selectedFields = mockBrokerInstance.get().getSelectedFields();
             Assert.assertNotNull(selectedFields);
             Assert.assertEquals(selectedFields.size(), 3);
-            IngestionScheduler savedScheduler = mockBrokerInstance.get().getIngestionScheduler();
-            Assert.assertNotNull(savedScheduler);
-            Assert.assertEquals(savedScheduler.getCronExpression(), cronExpression);
-            Assert.assertEquals(savedScheduler.getStartTime(), startTime);
-            Assert.assertTrue(mockBrokerInstance.get().getActive());
-            List<MockBrokerInstance> instances = mockBrokerInstanceService.getAllInstance(5);
-            Assert.assertEquals(instances.size(), 1);
             return true;
         });
         String displayName1 = "mockBrokerInstance1";
         mockBrokerInstance.get().setDisplayName(displayName1);
+        String cronExpression = "0 0/10 * * * ?";
+        Date startTime = new Date(System.currentTimeMillis());
+        IngestionScheduler scheduler = new IngestionScheduler();
+        scheduler.setCronExpression(cronExpression);
+        scheduler.setStartTime(startTime);
+        mockBrokerInstance.get().setIngestionScheduler(scheduler);
+        mockBrokerInstance.get().setActive(true);
         mockBrokerInstanceService.createOrUpdate(mockBrokerInstance.get());
         retry.execute(context -> {
             mockBrokerInstance.set(mockBrokerInstanceService.findBySourceId(sourceId));
             Assert.assertNotNull(mockBrokerInstance.get());
             Assert.assertEquals(mockBrokerInstance.get().getDisplayName(), displayName1);
+            IngestionScheduler savedScheduler = mockBrokerInstance.get().getIngestionScheduler();
+            Assert.assertNotNull(savedScheduler);
+            Assert.assertEquals(savedScheduler.getCronExpression(), cronExpression);
+            Assert.assertEquals(savedScheduler.getStartTime(), startTime);
+            Assert.assertTrue(mockBrokerInstance.get().getActive());
             return true;
         });
     }

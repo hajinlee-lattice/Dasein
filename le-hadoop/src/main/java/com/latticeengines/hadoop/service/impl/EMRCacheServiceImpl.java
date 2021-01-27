@@ -77,7 +77,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
                 clusterId = getClusterIdFromConsul(clusterName);
             }
         } catch (Exception e) {
-            log.info("Failed to get cluster id for " + clusterName + "from consul.", e);
+            log.info("Failed to get cluster id for " + clusterName + " from consul.", e);
             clusterId = "";
         }
         if (StringUtils.isBlank(clusterId)) {

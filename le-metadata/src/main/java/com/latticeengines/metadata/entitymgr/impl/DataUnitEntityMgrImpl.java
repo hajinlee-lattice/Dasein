@@ -64,6 +64,16 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     @Override
     @Transactional(transactionManager = "documentTransactionManager", propagation = Propagation.REQUIRED)
     public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit) {
+        return createOrUpdateDataUnit(tenantId, dataUnit, true);
+    }
+
+    @Override
+    @Transactional(transactionManager = "documentTransactionManager", propagation = Propagation.REQUIRED)
+    public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit, boolean purgeOldSnapShot) {
+        return createOrUpdateDataUnit(tenantId, dataUnit, purgeOldSnapShot);
+    }
+
+    private DataUnit createOrUpdateDataUnit(String tenantId, DataUnit dataUnit , boolean purgeOldSnapShot){
         String name = dataUnit.getName();
         dataUnit.setTenant(tenantId);
         DataUnit.StorageType storageType = dataUnit.getStorageType();
@@ -73,7 +83,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         }
         DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (existing == null) {
-            dataUnit = createNewDataUnit(tenantId, dataUnit);
+            dataUnit = createNewDataUnit(tenantId, dataUnit, purgeOldSnapShot);
             return dataUnit;
         } else {
             return updateExistingDataUnit(dataUnit, existing);
@@ -170,7 +180,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         service.submit(runnable);
     }
 
-    private DataUnit createNewDataUnit(String tenantId, DataUnit dataUnit) {
+    private DataUnit createNewDataUnit(String tenantId, DataUnit dataUnit, boolean purgeOldSnapShot) {
         DataUnitEntity newEntity = new DataUnitEntity();
         newEntity.setTenantId(tenantId);
         newEntity.setUuid(UUID.randomUUID().toString());
@@ -178,7 +188,9 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         newEntity.setDocument(dataUnit);
         DataUnitEntity saved = repository.save(newEntity);
         removeMasterRole(dataUnit);
-        purgeOlsSnapShot(dataUnit);
+        if (purgeOldSnapShot) {
+            purgeOlsSnapShot(dataUnit);
+        }
         return convertEntity(saved);
     }
 

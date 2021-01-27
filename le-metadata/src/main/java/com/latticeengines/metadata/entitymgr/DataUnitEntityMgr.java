@@ -33,4 +33,6 @@ public interface DataUnitEntityMgr {
     DataUnit findByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role);
 
     List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize);
+
+    DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit, boolean purgeOldSnapShot);
 }
