@@ -199,7 +199,9 @@ public class S3ImportServiceImpl implements S3ImportService {
         } else {
             messageList = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.Atlas);
             List<S3ImportMessage> messageListSegment = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.LISTSEGMENT);
+            List<S3ImportMessage> messageDataOperation = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.DATAOPERATION);
             messageList.addAll(messageListSegment);
+            messageList.addAll(messageDataOperation);
         }
 
         if (CollectionUtils.isNotEmpty(messageList)) {
@@ -227,7 +229,8 @@ public class S3ImportServiceImpl implements S3ImportService {
 
     @SuppressWarnings("unchecked")
     private boolean shouldSet(String tenantId, S3ImportMessageType messageType) {
-        String url = (S3ImportMessageType.Atlas.equals(messageType) || S3ImportMessageType.LISTSEGMENT.equals(messageType)) ?
+        String url = (S3ImportMessageType.Atlas.equals(messageType) || S3ImportMessageType.LISTSEGMENT.equals(messageType)
+                || S3ImportMessageType.DATAOPERATION.equals(messageType)) ?
                 appPublicUrl + STACK_INFO_URL : dcpPublicUrl + STACK_INFO_URL;
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
         boolean currentActive = true;
