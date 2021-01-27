@@ -18,10 +18,13 @@ import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -48,6 +51,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
     @Inject
     private SegmentService segmentService;
+
+    @Inject
+    private BatonService batonService;
 
     private static Map<CDLExternalSystemName, ExportFieldMetadataService> registry = new HashMap<>();
 
@@ -130,6 +136,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         AudienceType audienceType = channel.getChannelConfig().getAudienceType();
 
         Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+                customerSpace,
                 channel);
         Play play = channel.getPlay();
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
@@ -182,7 +189,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
      * Map (ExportFieldMetadataDefaults.attributeName ->
      * ServingStore.attributeName)
      */
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(PlayLaunchChannel channel) {
+    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(
+            String customerSpace,
+            PlayLaunchChannel channel) {
         return Collections.emptyMap();
     }
 
@@ -242,6 +251,22 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             return getServingMetadata(customerSpace, entities, attributeSetName)
                     .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm)).block();
         }
+    }
+
+    protected String getDefaultAccountIdForTenant(String customerSpace) {
+        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))) {
+            return InterfaceName.CustomerAccountId.name();
+        }
+        
+        return InterfaceName.AccountId.name();
+    }
+
+    protected String getDefaultContactIdForTenant(String customerSpace) {
+        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))) {
+            return InterfaceName.CustomerContactId.name();
+        }
+
+        return InterfaceName.ContactId.name();
     }
 
     protected ColumnMetadata constructCampaignDerivedColumnMetadata(ExportFieldMetadataDefaults defaultExportField) {
