@@ -71,14 +71,14 @@ public class RestActiveDirectoryFilter extends AbstractAuthenticationTokenFilter
                 response.getOutputStream().write(token.getBytes());
                 response.getOutputStream().flush();
             } catch (Exception e) {
-                throw new BadCredentialsException("Unauthorized.");
+                throw new BadCredentialsException("Unauthorized.", e);
             }
             return auth;
         } else {
             try {
                 return buildAuth(ticket);
             } catch (Exception e) {
-                throw new BadCredentialsException("Unauthorized.");
+                throw new BadCredentialsException("Unauthorized.", e);
             }
         }
     }
