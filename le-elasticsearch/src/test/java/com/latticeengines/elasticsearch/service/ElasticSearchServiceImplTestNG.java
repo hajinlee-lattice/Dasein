@@ -220,12 +220,13 @@ public class ElasticSearchServiceImplTestNG extends ElasticSearchFunctionalTestN
         Map<String, Map<String, String>> doc = new HashMap<>();
         doc.put(columnName, new HashMap<>());
         doc.get(columnName).put("AtlasAccountId", "testAccount");
+        doc.get(columnName).put(AccountId.name(), "1");
         boolean created = elasticSearchService.createDocument(accountIndex, "1", JsonUtils.serialize(doc));
         Assert.assertTrue(created);
         // wait refresh time
         SleepUtils.sleep(61000);
 
-        // normal case
+        // normal case, search account id
         String id = elasticSearchService.searchAccountIdByLookupId(accountIndex, "AtlasAccountId", "testAccount");
         Assert.assertEquals(id, "1");
 
@@ -236,6 +237,26 @@ public class ElasticSearchServiceImplTestNG extends ElasticSearchFunctionalTestN
         // lowercase
         String id3 = elasticSearchService.searchAccountIdByLookupId(accountIndex, "AtlasAccountId", "testaccount");
         Assert.assertEquals(id3, "1");
+
+
+
+        // search account by lookup id
+        Map<String, Object> result1 = elasticSearchService.searchByLookupId(accountIndex, "AtlasAccountId",
+                "testAccount");
+        Assert.assertTrue(result1.containsKey(columnName));
+        Map<String, String> doc1 = JsonUtils.deserialize(JsonUtils.serialize(result1.get(columnName)),
+                new TypeReference<Map<String, String>>() {});
+        Assert.assertEquals(doc1.get(AccountId.name()), "1");
+        Assert.assertEquals(doc1.get("AtlasAccountId"), "testAccount");
+
+
+        // search account by account id
+        Map<String, Object> result2 = elasticSearchService.searchByAccountId(accountIndex, "1");
+        Map<String, String> doc2 = JsonUtils.deserialize(JsonUtils.serialize(result2.get(columnName)),
+                new TypeReference<Map<String, String>>() {});
+        Assert.assertEquals(doc2.get(AccountId.name()), "1");
+        Assert.assertEquals(doc2.get("AtlasAccountId"), "testAccount");
+
 
         elasticSearchService.deleteIndex(accountIndex);
 

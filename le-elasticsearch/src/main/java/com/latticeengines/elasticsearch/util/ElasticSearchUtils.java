@@ -258,15 +258,6 @@ public final class ElasticSearchUtils {
         log.info("set field name {} with type {} for index {}", fieldName, type, indexName);
 
         PutMappingRequest request = new PutMappingRequest(indexName);
-        request.source(XContentFactory.jsonBuilder()
-                .startObject()
-                .startObject("analysis")
-                .startObject("normalizer")
-                .startObject("my_normalizer")
-                .field("type", "custom")
-                .field("char_filter", "html_strip")
-                .field("filter", new String[]{"lowercase"})
-                .endObject().endObject().endObject().endObject());
         XContentBuilder builder = XContentFactory.jsonBuilder().startObject()
                 .startObject(PROPERTIES)
                 .startObject(fieldName)
@@ -455,8 +446,10 @@ public final class ElasticSearchUtils {
             SearchRequest searchRequest = new SearchRequest(indexName);
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             TermQueryBuilder queryBuilder = QueryBuilders.termQuery(
-                    lookupIdKey, lookupIdValue.toLowerCase());
-            searchSourceBuilder.query(queryBuilder);
+                    AccountLookup.name() + "." + lookupIdKey, lookupIdValue.toLowerCase());
+            NestedQueryBuilder nestedQueryBuilder = QueryBuilders.nestedQuery(AccountLookup.name(), queryBuilder,
+                    ScoreMode.Max);
+            searchSourceBuilder.query(nestedQueryBuilder);
             log.info("accountByLookup query is {}.", searchSourceBuilder);
             workflowSpan.log(String.format("indexName : %s, accountByLookup query : %s",
                     indexName, queryBuilder.toString()));
