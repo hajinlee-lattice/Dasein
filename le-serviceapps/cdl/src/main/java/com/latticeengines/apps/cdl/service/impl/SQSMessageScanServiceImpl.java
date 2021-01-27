@@ -83,8 +83,8 @@ public class SQSMessageScanServiceImpl implements SQSMessageScanService {
             CuratorFramework client = CamilleEnvironment.getCamille().getCuratorClient();
             String lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(),
                     CamilleEnvironment.getDivision(), SQS_SCAN_LOCK).toString();
-            runner = new ImportAggregateRunner(client, lockPath, leStack, hostAddress);
-            runner.start();
+//            runner = new ImportAggregateRunner(client, lockPath, leStack, hostAddress);
+//            runner.start();
         }
     }
 
