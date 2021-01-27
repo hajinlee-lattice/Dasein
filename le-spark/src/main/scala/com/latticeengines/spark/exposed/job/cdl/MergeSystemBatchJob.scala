@@ -8,6 +8,7 @@ import com.latticeengines.spark.util.MergeUtils
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 import scala.util.control.Breaks._
@@ -27,13 +28,14 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
 
     val overwriteByNull: Boolean =
       if (config.getNotOverwriteByNull == null) true else !config.getNotOverwriteByNull.booleanValue()
-    var lhsDf = selectSystemBatch(lattice.input.head, templates(0), joinKey, config.isKeepPrefix)
+    var lhsDf = selectSystemBatch(lattice.input.head, templates.head, joinKey, config.isKeepPrefix)
     if (templates.length > 1) {
       for (i <- 1 until templates.length) {
         breakable {
-          var rhsDf = selectSystemBatch(lattice.input.head, templates(i), joinKey, config.isKeepPrefix)
+          val rhsDf = selectSystemBatch(lattice.input.head, templates(i), joinKey, config.isKeepPrefix)
           if (rhsDf.count() == 0) break
-          lhsDf = MergeUtils.merge(lhsDf, rhsDf, Seq(joinKey), Set(), minCols, maxCols, overwriteByNull = overwriteByNull, false)
+          lhsDf = MergeUtils.merge(lhsDf, rhsDf, Seq(joinKey), Set(), minCols, maxCols,
+            overwriteByNull = overwriteByNull, eraseByNull = false).persist(StorageLevel.DISK_ONLY)
         }
       }
     }
@@ -41,21 +43,22 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
       lhsDf = lhsDf.drop(batchSourceName)
     }
     // filter out __ANONYMOUS__ ids
-    val retDf = if (lhsDf.columns.contains(config.getIdColumn)) lhsDf.filter(lhsDf(config.getIdColumn) =!= DataCloudConstants.ENTITY_ANONYMOUS_ID) else lhsDf
+    val retDf = if (lhsDf.columns.contains(config.getIdColumn)) {
+      lhsDf.filter(lhsDf(config.getIdColumn) =!= DataCloudConstants.ENTITY_ANONYMOUS_ID)
+    } else {
+      lhsDf
+    }
+    logSpark(s"Output columns: ${retDf.columns.mkString(", ")}")
+    logSpark(s"Output count: ${retDf.count()}")
     lattice.output = retDf :: Nil
   }
 
   private def selectSystemBatch(df: DataFrame, template: String, joinKey: String, keepPrefix: Boolean): DataFrame = {
-    var fields = scala.collection.mutable.ListBuffer[String]()
-    fields += joinKey
-    df.columns.foreach { c =>
-      if (c.startsWith(template + "__")) {
-        fields += c
-      }
-    }
+    val fields: List[String] = joinKey :: df.columns.filter(_.startsWith(template + "__")).toList
     var newDf = df.select(fields map col: _*)
     newDf = removeTemplatePrefix(newDf, template, joinKey, keepPrefix)
-    newDf.na.drop(2)
+    // remove completely empty rows
+    newDf.na.drop(2).persist(StorageLevel.DISK_ONLY)
   }
 
   private def removeTemplatePrefix(df: DataFrame, template: String, joinKey: String, keepPrefix: Boolean): DataFrame = {
@@ -64,7 +67,7 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
     } else {
       val newColumns =
         df.columns map (c => if (c == joinKey) c else c.stripPrefix(template + "__"))
-      return df.toDF(newColumns: _*)
+        df.toDF(newColumns: _*)
     }
   }
 
