@@ -277,8 +277,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     contactDataUnit = getEntityQueryData(query);
 
                     if (useContactsPerAccountLimit) {
-                        // Use table that processed contacts per account limit in GenerateLaunchUniverse
-                        targetContactsDataUnit = getObjectFromContext(FULL_CONTACTS_UNIVERSE, HdfsDataUnit.class);
+                        // Use dataUnit that includes contacts per account limit processing in GenerateLaunchUniverse
+                        targetContactsDataUnit = getObjectFromContext(FULL_LAUNCH_UNIVERSE, HdfsDataUnit.class);
                     } else {
                         FrontEndQuery targetContactsQuery = FrontEndQuery.fromSegment(targetSegment);
                         targetContactsQuery.setLookups(new ArrayList<>(contactLookups));
