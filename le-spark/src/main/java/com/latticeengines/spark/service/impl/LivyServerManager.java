@@ -28,7 +28,7 @@ public class LivyServerManager {
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
-    @Value("${hadoop.use.defaultlivy}")
+    @Value("${hadoop.use.defaultlivy:false}")
     private Boolean useDefaultLivy;
 
     @Inject
