@@ -224,9 +224,6 @@ public class SourceColumn implements HasPid, Serializable {
         OTHER, //
         BUILTWITH_TOPATTR, //
         HGDATA_NEWTECH, //
-        DMX_PROD_TECH, //
-        DMX_VEN_TECH, //
-        DMX_SOL_TECH, //
         DEPIVOT, //
         COLUMN_NAME_MAPPING, //
         MERGE_SEED, //

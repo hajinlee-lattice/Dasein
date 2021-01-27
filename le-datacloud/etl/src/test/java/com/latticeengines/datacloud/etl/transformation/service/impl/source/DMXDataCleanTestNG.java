@@ -112,37 +112,36 @@ public class DMXDataCleanTestNG extends PipelineTransformationTestNGBase {
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         while (records.hasNext()) {            
             log.info("Start to verify records one by one.");
-            // Duns, Intensity, Segment_Name, Supplier_Name, Collection_Name
+            // Duns, Segment_Name, Supplier_Name, Collection_Name
             Object[][] expected = new Object[][] { //
-                    { "884745530", "High", null, "amazon.com", null }, //
-                    { "060902413", "High", "GOOGLE MAPS", null, null }, //
-                    { "072148831", "Low", null, null, "DATABASE SOFTWARE SOLN" }, //
+                    { "884745530", null, "amazon.com", null }, //
+                    { "060902413", "GOOGLE MAPS", null, null }, //
+                    { "072148831", null, null, "DATABASE SOFTWARE SOLN" }, //
             };
             Map<String, Object[]> expectedMap = new HashMap<>();
             for (Object[] obj : expected) {
-                expectedMap.put(buildId(obj[0], obj[1], obj[2], obj[3], obj[4]), obj);
+                expectedMap.put(buildId(obj[0], obj[1], obj[2], obj[3]), obj);
             }
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             while (records.hasNext()) {
                 GenericRecord record = records.next();
                 log.info(record.toString());
                 String id = buildId(record.get(DMXDataCleanFlow.FINAL_DUNS), //
-                        record.get(DMXDataCleanFlow.FINAL_INTENSITY), //
                         record.get(DMXDataCleanFlow.FINAL_SEGMENT_NAME), //
                         record.get(DMXDataCleanFlow.FINAL_SUPPLIER_NAME), //
                         record.get(DMXDataCleanFlow.FINAL_COLLECTION_NAME));
                 Assert.assertNotNull(expectedMap.get(id));
                 Object[] expectedRecord = expectedMap.get(id);
                 Assert.assertTrue(isObjEquals(record.get(DMXDataCleanFlow.FINAL_DUNS), expectedRecord[0]));
-                Assert.assertTrue(isObjEquals(record.get(DMXDataCleanFlow.FINAL_INTENSITY), expectedRecord[1]));
-                Assert.assertTrue(isObjEquals(record.get(DMXDataCleanFlow.FINAL_SEGMENT_NAME), expectedRecord[2]));
-                Assert.assertTrue(isObjEquals(record.get(DMXDataCleanFlow.FINAL_SUPPLIER_NAME), expectedRecord[3]));
-                Assert.assertTrue(isObjEquals(record.get(DMXDataCleanFlow.FINAL_COLLECTION_NAME), expectedRecord[4]));
+                Assert.assertTrue(isObjEquals(record.get(DMXDataCleanFlow.FINAL_SEGMENT_NAME), expectedRecord[1]));
+                Assert.assertTrue(isObjEquals(record.get(DMXDataCleanFlow.FINAL_SUPPLIER_NAME), expectedRecord[2]));
+                Assert.assertTrue(isObjEquals(record.get(DMXDataCleanFlow.FINAL_COLLECTION_NAME), expectedRecord[3]));
             }
         }
     }
     
-    private String buildId(Object duns, Object intensity, Object segment, Object supplier, Object collection) {
-        return String.valueOf(duns) + String.valueOf(intensity) + String.valueOf(segment) + String.valueOf(supplier) + String.valueOf(collection);
+    private String buildId(Object duns, Object segment, Object supplier, Object collection) {
+        return String.valueOf(duns) + String.valueOf(segment) + String.valueOf(supplier) + String.valueOf(collection);
     }
 
 }

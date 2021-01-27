@@ -331,19 +331,6 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
                 .map(entry -> Pair.of(stripPrefix(entry.getKey()), entry.getValue())) //
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1));
     }
-    
-    @Override
-    public String searchByDomainDunsNameCountryStateCityZipCode(RestHighLevelClient client, String indexName, String domain,
-            String duns, String name, String country, String state, String city, String zipCode) {
-        Preconditions.checkNotNull(indexName, "index name should not be null");
-        Preconditions.checkNotNull(domain, "Domain should not be null");
-        Preconditions.checkNotNull(name, "name value should not be null");
-        Preconditions.checkNotNull(country, "country value should not be null");
-        Preconditions.checkNotNull(state, "state value should not be null");
-        Preconditions.checkNotNull(city, "city value should not be null");
-        Preconditions.checkNotNull(zipCode, "zipCode value should not be null");
-        return ElasticSearchUtils.searchByDomainDunsNameCountryStateCityZipCode(client, indexName, domain, duns, name, country, state, city, zipCode);
-    }
 
     private String stripPrefix(String key) {
         return key.substring(key.indexOf(":") + 1);

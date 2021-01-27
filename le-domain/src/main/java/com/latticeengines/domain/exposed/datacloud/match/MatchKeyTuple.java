@@ -21,9 +21,6 @@ public class MatchKeyTuple implements Fact {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MatchKeyTuple.class);
-    
-    @JsonProperty("IndexName")
-    private String indexName;
 
     @JsonProperty("Domain")
     private String domain;
@@ -83,14 +80,6 @@ public class MatchKeyTuple implements Fact {
     @JsonIgnore
     private boolean domainFromMultiCandidates;
 
-    public String getIndexName() {
-        return indexName;
-    }
-
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
-    }
-    
     @MetricField(name = MatchConstants.DOMAIN_FIELD)
     public String getDomain() {
         return domain;

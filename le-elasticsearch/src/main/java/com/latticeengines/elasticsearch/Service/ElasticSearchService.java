@@ -3,8 +3,6 @@ package com.latticeengines.elasticsearch.Service;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.client.RestHighLevelClient;
-
 import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
 
 public interface ElasticSearchService {
@@ -42,9 +40,6 @@ public interface ElasticSearchService {
     List<Map<String, Object>> searchContactByAccountId(String indexName, String internalAccountId);
 
     String searchAccountIdByLookupId(String indexName, String lookupIdKey, String lookupIdValue);
-    
-    String searchByDomainDunsNameCountryStateCityZipCode(RestHighLevelClient client, String indexName, String domain,
-            String duns, String name, String country, String state, String city, String zipCode);
 
     ElasticSearchConfig getDefaultElasticSearchConfig();
 }

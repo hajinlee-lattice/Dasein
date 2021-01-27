@@ -26,11 +26,6 @@ public class AccountLookupRequest {
             String zipCode) {
         ids.add(AccountLookupEntry.buildIdWithLocation(domain, duns, country, state, zipCode));
     }
-    
-    public void addLookupPair(String domain, String duns, String country, String state,
-            String zipCode, String name, String city) {
-        ids.add(AccountLookupEntry.buildIdWithLocation(domain, duns, country, state, zipCode, name, city));
-    }
 
     public void addId(String id) {
         ids.add(id);
