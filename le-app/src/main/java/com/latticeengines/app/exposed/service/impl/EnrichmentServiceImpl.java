@@ -56,13 +56,17 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     public TopNTree getTopNTree(boolean excludeInternalEnrichment) {
         String tenantId = MultiTenantContext.getShortTenantId();
         TopNTree topNTree = columnMetadataProxy.getTopNTree(excludeInternalEnrichment);
-        List<Category> categories = new ArrayList<>(topNTree.getCategories().keySet());
+        TopNTree newTopNTree = new TopNTree();
+        newTopNTree.setCategories(topNTree.getCategories());
+
+        List<Category> categories = new ArrayList<>(newTopNTree.getCategories().keySet());
         for (Category cat : categories) {
             if (batonService.getMaxDataLicense(cat, tenantId) == 0) {
-                topNTree.getCategories().remove(cat);
+                newTopNTree.getCategories().remove(cat);
+                log.info("Tenant=" + tenantId + ", catetory=" + cat + ", data cloud license is 0");
             }
         }
-        return topNTree;
+        return newTopNTree;
     }
 
 }
