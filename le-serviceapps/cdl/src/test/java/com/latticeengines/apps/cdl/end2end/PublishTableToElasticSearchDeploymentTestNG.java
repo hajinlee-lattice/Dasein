@@ -222,7 +222,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
     }
 
     //
-    @Test(groups = "end2end", enabled = false)
+    @Test(groups = "end2end")
     private void testPublishAccountLookup() throws IOException {
 
         // prepare lookup id
