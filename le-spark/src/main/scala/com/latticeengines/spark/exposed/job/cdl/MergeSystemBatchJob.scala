@@ -22,7 +22,8 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
     val config: MergeSystemBatchConfig = lattice.config
     val joinKey = config.getJoinKey
     val templates =
-      if (CollectionUtils.isEmpty(config.getTemplates)) getTemplates(lattice.input.head.columns, joinKey) else config.getTemplates.asScala.toList
+      if (CollectionUtils.isEmpty(config.getTemplates)) getTemplates(lattice.input.head.columns, joinKey)
+      else config.getTemplates.asScala.toList
     val minCols: Set[String] = if (config.getMinColumns == null) Set() else config.getMinColumns.asScala.toSet
     val maxCols: Set[String] = if (config.getMaxColumns == null) Set() else config.getMaxColumns.asScala.toSet
 
@@ -48,8 +49,6 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
     } else {
       lhsDf
     }
-    logSpark(s"Output columns: ${retDf.columns.mkString(", ")}")
-    logSpark(s"Output count: ${retDf.count()}")
     lattice.output = retDf :: Nil
   }
 

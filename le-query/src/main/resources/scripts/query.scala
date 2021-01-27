@@ -6,6 +6,7 @@ import java.util.zip.GZIPInputStream
 import org.apache.commons.io.IOUtils
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf}
+import org.apache.spark.storage.StorageLevel
 
 val outputMode = lattice.params.get("OUTPUT_MODE").asText()
 
@@ -62,7 +63,7 @@ val sqlDF: DataFrame =
       val name = pair.head
       val statement = pair(1)
       if (name != "final") {
-        spark.sql(statement).createOrReplaceTempView(name)
+        spark.sql(statement).persist(StorageLevel.DISK_ONLY).createOrReplaceTempView(name)
       }
       statement
     })
