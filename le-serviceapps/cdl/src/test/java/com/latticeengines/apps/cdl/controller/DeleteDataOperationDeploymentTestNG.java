@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.end2end;
+package com.latticeengines.apps.cdl.controller;
 
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 
@@ -8,10 +8,8 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -20,44 +18,39 @@ import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DataDeleteOperationConfiguration;
 import com.latticeengines.domain.exposed.cdl.DataOperationRequest;
 import com.latticeengines.domain.exposed.metadata.DataOperation;
 import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
-/**
- * Going to reuse this test for Soft delete, so the setup step looks redundant
- * for now.
- */
-/*
- * dpltc deploy -a pls,admin,cdl,modeling,lp,metadata,workflowapi,eai
- */
-public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
+public class DeleteDataOperationDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DeleteDataOperationDeploymentTestNG.class);
 
@@ -68,7 +61,16 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
     private MetadataProxy metadataProxy;
 
     @Inject
+    private CDLProxy cdlProxy;
+
+    @Inject
     S3Service s3Service;
+
+    @Value("${aws.s3.bucket}")
+    protected String s3Bucket;
+
+    @Inject
+    protected Configuration yarnConfiguration;
 
     private RetryTemplate retry;
 
@@ -76,46 +78,28 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
 
     private Set<String> accountIdsForAll = new HashSet<>();
 
-    private Set<String> contactIdsForAll = new HashSet<>();
-
     private List<Integer> expectedUploadSize = new ArrayList<>();
 
-    @BeforeClass(groups = "end2end")
-    @Override
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
-        Map<String, Boolean> featureFlagMap = new HashMap<>();
-        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
-        setupEnd2EndTestEnvironment(featureFlagMap);
-        resumeCheckpoint(ProcessTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT);
+        setupTestEnvironment();
+        MultiTenantContext.setTenant(mainTestTenant);
         log.info("Setup Complete!");
         customerSpace = CustomerSpace.parse(mainCustomerSpace).getTenantId();
         retry = RetryUtils.getRetryTemplate(10, //
                 Collections.singleton(AssertionError.class), null);
     }
 
-    @Test(groups = "end2end")
+    @Test(groups = "deployment-app")
     public void testRegisterDeleteData() throws Exception {
         extractIds();
         triggerDataOperations();
         verifyRegister();
-        processAnalyze();
-        verifyAfterPA();
     }
 
     private void extractIds() {
-        String accountTableName = dataCollectionProxy.getTableName(customerSpace,
-                TableRoleInCollection.ConsolidatedAccount);
-        Table accountTable = metadataProxy.getTableSummary(customerSpace, accountTableName);
-
-        Iterable<GenericRecord> accountItr = iterateRecords(accountTable);
-
-        for (GenericRecord record : accountItr) {
-            String accountId = record.get(InterfaceName.AccountId.name()).toString();
-            accountIdsForAll.add(accountId);
-            if (accountIdsForAll.size() >= 20) {
-                break;
-            }
+        for (int i =0; i < 20; i++) {
+            accountIdsForAll.add(String.valueOf(i));
         }
     }
 
@@ -187,20 +171,6 @@ public class DeleteDataOperationDeploymentTestNG extends CDLEnd2EndDeploymentTes
             Integer count = (int) StreamSupport.stream(iterateRecords(registeredDeleteTable).spliterator(), false)
                     .count();
             Assert.assertEquals(count, expectedUploadSize.get(i));
-        }
-    }
-
-    private void verifyAfterPA() {
-        Set<String> accountIdsToDelete = new HashSet<>(accountIdsForAll);
-        Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
-        for (GenericRecord record : iterateRecords(table)) {
-            String accountId = record.get(InterfaceName.AccountId.name()).toString();
-            Assert.assertFalse(accountIdsToDelete.contains(accountId), "Should not contain id " + accountId);
-        }
-        table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.SystemAccount);
-        for (GenericRecord record : iterateRecords(table)) {
-            String accountId = record.get(InterfaceName.EntityId.name()).toString();
-            Assert.assertFalse(accountIdsToDelete.contains(accountId), "Should not contain id " + accountId);
         }
     }
 
