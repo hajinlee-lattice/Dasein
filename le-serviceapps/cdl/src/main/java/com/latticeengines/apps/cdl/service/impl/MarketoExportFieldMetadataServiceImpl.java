@@ -21,8 +21,8 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     private static final Logger log = LoggerFactory.getLogger(MarketoExportFieldMetadataServiceImpl.class);
 
-    private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC Account ID";
-    private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC Contact ID";
+    private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC_ACCOUNT_ID";
+    private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC_CONTACT_ID";
 
     protected MarketoExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.Marketo);
@@ -55,7 +55,7 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
             }
 
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Marketo, mappedFieldNames,
-                    accountAttributesMap, contactAttributesMap);
+                    accountAttributesMap, contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
         } else {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Marketo, accountAttributesMap,
                     contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
