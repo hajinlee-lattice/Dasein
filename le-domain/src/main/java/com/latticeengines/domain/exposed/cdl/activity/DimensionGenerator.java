@@ -73,7 +73,9 @@ public class DimensionGenerator {
         ENUM("Enum"),
         // Use case: Opportunity -- IsWon is a boolean attribute, simply take
         // true and false as dimension values
-        BOOLEAN("Boolean");
+        BOOLEAN("Boolean"),
+        // derive from multiple columns (only support 2 now)
+        DERIVE("Derive");
 
         private static Map<String, DimensionGeneratorOption> nameMap;
         private static Set<String> values;

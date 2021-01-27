@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.CreateActivityMetricsGroupRequest;
 
 public interface ActivityMetricsGroupService {
 
@@ -18,4 +19,6 @@ public interface ActivityMetricsGroupService {
     List<ActivityMetricsGroup> setupDefaultMarketingGroups(String customerSpace, String streamName);
 
     List<ActivityMetricsGroup> setupDefaultDnbIntentGroups(String customerSpace, String streamName);
+
+    boolean createCustomizedGroup(String customerSpace, CreateActivityMetricsGroupRequest request);
 }

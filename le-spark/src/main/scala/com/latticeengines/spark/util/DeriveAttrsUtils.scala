@@ -11,7 +11,7 @@ import org.apache.commons.collections4.CollectionUtils
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, DoubleType, LongType, StringType}
-import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.{Column, DataFrame, Row}
 
 import scala.collection.JavaConversions._
 
@@ -158,5 +158,11 @@ private[spark] object DeriveAttrsUtils {
 
   def appendVersionStamp(df: DataFrame, version: Long): DataFrame = {
     df.withColumn(VERSION_COL, lit(version).cast(LongType))
+  }
+
+  def concatColumns: UserDefinedFunction = udf((row: Row) => row.mkString("_"))
+
+  def getCompositeColumn(colNames: Seq[String]): Column = {
+    concatColumns(struct(colNames.map(colName => trim(col(colName))): _*))
   }
 }

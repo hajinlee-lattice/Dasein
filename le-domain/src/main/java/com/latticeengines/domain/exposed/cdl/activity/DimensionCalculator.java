@@ -9,12 +9,15 @@ import com.google.common.base.Objects;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = DimensionCalculator.class, name = "DimensionCalculator"),
-        @JsonSubTypes.Type(value = DimensionCalculatorRegexMode.class, name = "DimensionCalculatorRegexMode")
+        @JsonSubTypes.Type(value = DimensionCalculator.class, name = DimensionCalculator.NAME),
+        @JsonSubTypes.Type(value = DimensionCalculatorRegexMode.class, name = DimensionCalculatorRegexMode.NAME),
+        @JsonSubTypes.Type(value = CompositeDimensionCalculator.class, name = CompositeDimensionCalculator.NAME)
 })
 public class DimensionCalculator implements Serializable {
 
     private static final long serialVersionUID = -4708499649443194248L;
+
+    public static final String NAME = "DimensionCalculator";
 
     @JsonProperty("name")
     protected String name;

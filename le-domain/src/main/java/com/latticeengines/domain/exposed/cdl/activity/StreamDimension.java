@@ -106,9 +106,14 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
     private Set<Usage> usages;
 
     @JsonProperty("shouldReplace")
-    @Column(name="SHOULD_REPLACE")
+    @Column(name = "SHOULD_REPLACE")
     // if false, newly generated dimension map will be merged into the active version
     private Boolean shouldReplace = true;
+
+    @JsonProperty("deriveConfig")
+    @Type(type = "json")
+    @Column(name = "DERIVE_CONFIG", columnDefinition = "'JSON'")
+    private DeriveConfig deriveConfig;
 
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -219,6 +224,14 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
 
     public void setShouldReplace(Boolean shouldReplace) {
         this.shouldReplace = shouldReplace;
+    }
+
+    public DeriveConfig getDeriveConfig() {
+        return deriveConfig;
+    }
+
+    public void setDeriveConfig(DeriveConfig deriveConfig) {
+        this.deriveConfig = deriveConfig;
     }
 
     @Override

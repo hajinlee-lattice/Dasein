@@ -16,6 +16,7 @@ import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
 import com.latticeengines.apps.cdl.service.ActivityMetricsService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
+import com.latticeengines.domain.exposed.cdl.activity.CreateActivityMetricsGroupRequest;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActivityMetricsWithAction;
@@ -104,5 +105,12 @@ public class ActivityMetricsResource {
                     customerSpace));
         }
         return true;
+    }
+
+
+    @PostMapping("/groups/customize/create")
+    @ApiOperation(value = "Setup customized metrics group")
+    public Boolean createGroup(@PathVariable String customerSpace, @RequestBody CreateActivityMetricsGroupRequest request) {
+        return activityMetricsGroupService.createCustomizedGroup(customerSpace, request);
     }
 }

@@ -323,7 +323,7 @@ public class ActivityMetricDecorator implements Decorator {
             }
         }
 
-        String descTmpl = group.getDescriptionTmpl().getTemplate();
+        String descTmpl = group.getDescriptionTmpl() == null ? null : group.getDescriptionTmpl().getTemplate();
         if (StringUtils.isNotBlank(descTmpl)) {
             try {
                 cm.setDescription(getTrimmedTemplate(descTmpl, params));

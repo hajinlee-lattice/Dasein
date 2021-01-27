@@ -329,7 +329,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                 throw new IllegalArgumentException("Failed to render display name for attribute " + attrName, e);
             }
         }
-        String descTmpl = group.getDescriptionTmpl().getTemplate();
+        String descTmpl = group.getDescriptionTmpl() == null ? null : group.getDescriptionTmpl().getTemplate();
         if (StringUtils.isNotBlank(descTmpl)) {
             try {
                 attr.setDescription(TemplateUtils.renderByMap(descTmpl, params));
@@ -345,7 +345,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                 throw new IllegalArgumentException("Failed to render sub-category for attribute " + attrName, e);
             }
         }
-        if (Category.WEB_VISIT_PROFILE.equals(group.getCategory())) { // TODO - this block is for backwards compatibility, should remove after merge and add secondary tmpl to existing web visit groups and keep only the one in else block
+        if (Category.WEB_VISIT_PROFILE.equals(group.getCategory()) && !group.getRollupDimensions().contains(InterfaceName.DerivedId.name())) { // TODO - this block is for backwards compatibility, should remove after merge and add secondary tmpl to existing web visit groups and keep only the one in else block
             String secondarySubCategoryTmpl = "${PathPatternId.PathPattern}";
             if (StringUtils.isNotBlank(secondarySubCategoryTmpl)) {
                 try {

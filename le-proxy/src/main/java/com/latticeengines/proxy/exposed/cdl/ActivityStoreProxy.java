@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
+import com.latticeengines.domain.exposed.cdl.activity.DeriveConfig;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.cdl.activity.KeysWrapper;
@@ -180,5 +181,11 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
                 shortenCustomerSpace(customerSpace));
         List<?> list = put("gen_default_activity_alerts_configuration", url, null, List.class);
         return JsonUtils.convertList(list, ActivityAlertsConfig.class);
+    }
+
+    public boolean addDerivedDimension(@NotNull String customerSpace, @NotNull String streamName, @NotNull DeriveConfig deriveConfig) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/streams/{streamName}/dimensions/add/derivedDimension",
+                shortenCustomerSpace(customerSpace), streamName);
+        return post("addDerivedDimension", url, deriveConfig, Boolean.class);
     }
 }

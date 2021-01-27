@@ -3,11 +3,10 @@ package com.latticeengines.spark.exposed.job.cdl
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util
-
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
 import com.latticeengines.domain.exposed.cdl.activity._
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, StreamDateId, __Row_Count__, __StreamDate}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{DerivedId, LastActivityDate, StreamDateId, __Row_Count__, __StreamDate}
 import com.latticeengines.domain.exposed.spark.cdl.SparkIOMetadataWrapper.Partition
 import com.latticeengines.domain.exposed.spark.cdl.{AggDailyActivityConfig, SparkIOMetadataWrapper}
 import com.latticeengines.domain.exposed.util.ActivityStoreUtils
@@ -16,6 +15,7 @@ import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.{BooleanUtils, StringUtils}
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
+import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, LongType, StringType, StructField}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -243,6 +243,8 @@ object DimensionValueHelper extends Serializable {
     calculator match {
       case regexCalculator: DimensionCalculatorRegexMode =>
         DimensionValueHelper.matchRegexDimensionValue(df, dimensionName, dimValues, regexCalculator, getValueFn)
+      case compositeDimensionCalculator: CompositeDimensionCalculator =>
+        DimensionValueHelper.deriveCompositeDimensionValue(df, compositeDimensionCalculator.deriveConfig, getValueFn)
       case _ =>
         // non-regex can only have one match (exact match)
         val calDimValue = udf {
@@ -291,5 +293,21 @@ object DimensionValueHelper extends Serializable {
         }
       }
     })(RowEncoder(df.schema.add(StructField(dimensionName, StringType, nullable = true))))
+  }
+
+  def deriveCompositeDimensionValue(df: DataFrame, deriveConfig: DeriveConfig, getValueFn: AnyRef => String): DataFrame = {
+    val deriveSrc = deriveConfig.sourceAttrs.asScala
+    val getDimName: UserDefinedFunction = udf((row: Row) => {
+      val vals: List[String] = deriveSrc.map(src => {
+        val value = row.getAs[String](src)
+        if (StringUtils.isBlank(value)) "" else value
+      }).toList
+      deriveConfig.findDimensionName(vals.asJava)
+    })
+    val columnNames = df.columns
+    // hash of derived dimension name value
+    val withRawId: DataFrame = df.withColumn("__raw_id", getDimName(struct(columnNames.map(colName => col(colName)): _*)))
+    val getDerivedIdUdf: UserDefinedFunction = udf((rawId: String) => getValueFn(rawId))
+    withRawId.withColumn(DerivedId.name, getDerivedIdUdf(col("__raw_id"))).drop("__raw_id")
   }
 }
