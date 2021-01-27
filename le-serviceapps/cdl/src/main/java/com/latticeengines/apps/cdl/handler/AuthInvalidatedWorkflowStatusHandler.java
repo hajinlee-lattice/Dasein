@@ -70,6 +70,7 @@ public class AuthInvalidatedWorkflowStatusHandler implements WorkflowStatusHandl
 
     private void handleInvalidatedAuth(ExternalSystemAuthentication extSysAuth, String trayAuthId, String trayUserId) {
         String extSysAuthId = extSysAuth.getId();
+        log.info("Handling lookupIdMap with ExternalSystemAuthentication ID: " + extSysAuthId);
         LookupIdMap lookupIdMap = lookupIdMappingService.getLookupIdMapByExtSysAuth(extSysAuthId);
         if (lookupIdMap == null) {
             log.info("LookupIdMap not found. Deleting Tray Auth: " + trayAuthId);
