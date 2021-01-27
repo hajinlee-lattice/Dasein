@@ -53,7 +53,7 @@ public class CreateCdlEventTableFilterStep extends BaseEventQueryStep<CreateCdlE
 
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-                prepareEventQuery(false);
+                prepareEventQuery(true);
                 HdfsDataUnit trainData = getEventQueryData(configuration.getTrainQuery(), EventType.Training);
                 EventFrontEndQuery eventQuery = configuration.getEventQuery();
                 eventQuery.setCalculateProductRevenue(configuration.isExpectedValue());
