@@ -26,6 +26,8 @@ public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
     private static final String COUNTRY_TOKEN = "_COUNTRY_";
     private static final String STATE_TOKEN = "_STATE_";
     private static final String ZIPCODE_TOKEN = "_ZIPCODE_";
+    private static final String NAME_TOKEN = "_NAME_";
+    private static final String CITY_TOKEN = "_CITY_";
     private static final String DOMAIN = "domain"; // parsed from key
     private static final String DUNS = "duns"; // parsed from key
     private static final String LATTICE_ACCOUNT_ID = "latticeAccountId";
@@ -83,6 +85,19 @@ public class AccountLookupEntry extends BaseFabricEntity<AccountLookupEntry>
         zipCode = zipCode != null ? zipCode : UNKNOWN;
         return DOMAIN_TOKEN + domain + DUNS_TOKEN + duns + COUNTRY_TOKEN + country + STATE_TOKEN
                 + state + ZIPCODE_TOKEN + zipCode;
+    }
+    
+    public static String buildIdWithLocation(String domain, String duns, String country,
+            String state, String zipCode, String name, String city) {
+        domain = domain != null ? domain : UNKNOWN;
+        duns = duns != null ? duns : UNKNOWN;
+        country = country != null ? country : UNKNOWN;
+        state = state != null ? state : UNKNOWN;
+        zipCode = zipCode != null ? zipCode : UNKNOWN;
+        name = name != null ? name : UNKNOWN;
+        city = city != null ? city : UNKNOWN;
+        return DOMAIN_TOKEN + domain + DUNS_TOKEN + duns + COUNTRY_TOKEN + country + STATE_TOKEN
+                + state + ZIPCODE_TOKEN + zipCode + NAME_TOKEN + name + CITY_TOKEN + city;
     }
 
     @Override

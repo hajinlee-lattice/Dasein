@@ -34,6 +34,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEn
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryStateBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryZipCodeBasedMicroEngineActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.DomainDunsNameCountryStateCityZipCodeBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsDomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsGuideBookLookupActor;
@@ -42,6 +43,7 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.DunsToDunsMicroEng
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsToTpsMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DunsValidateMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DynamoLookupActor;
+import com.latticeengines.datacloud.match.actors.visitor.impl.ElasticSearchLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityAssociateActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDomainCountryBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.EntityDunsBasedMicroEngineActor;
@@ -90,6 +92,9 @@ public class MatchActorSystem extends ActorSystemTemplate {
 
     @Value("${datacloud.match.dynamoLookupActor.actor.cardinality:10}")
     private int dynamoLookupActorCardinality;
+    
+    @Value("${datacloud.match.esLookupActor.actor.cardinality:10}")
+    private int esLookupActorCardinality;
 
     @Value("${datacloud.match.dunsGuideBookLookupActor.actor.cardinality:3}")
     private int dunsGuideBookLookupActorCardinality;
@@ -208,6 +213,7 @@ public class MatchActorSystem extends ActorSystemTemplate {
                 EntityEmailBasedMicroEngineActor.class, //
                 EntityNamePhoneBasedMicroEngineActor.class, //
                 DunsToTpsMicroEngineActor.class, //
+                DomainDunsNameCountryStateCityZipCodeBasedMicroEngineActor.class, // 
         };
         for (Class<? extends ActorTemplate> clz : microEngineClz) {
             initNamedActor(clz);
@@ -229,6 +235,7 @@ public class MatchActorSystem extends ActorSystemTemplate {
 
     private void initDataSourceActors() {
         initNamedActor(DynamoLookupActor.class, true, dynamoLookupActorCardinality);
+        initNamedActor(ElasticSearchLookupActor.class, true, esLookupActorCardinality);
         initNamedActor(DnBLookupActor.class, true, dnbLookupActorCardinality);
         initNamedActor(DnBCacheLookupActor.class, true, dnbCacheLookupActorCardinality);
         initNamedActor(DunsGuideBookLookupActor.class, true, dunsGuideBookLookupActorCardinality);
