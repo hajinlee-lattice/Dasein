@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.cdl.activitydata.ActivityAlert;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.TimeLineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
