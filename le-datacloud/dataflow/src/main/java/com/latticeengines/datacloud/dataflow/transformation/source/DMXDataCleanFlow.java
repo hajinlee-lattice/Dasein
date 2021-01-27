@@ -16,12 +16,10 @@ public class DMXDataCleanFlow extends ConfigurableFlowBase<DMXDataCleanConfig> {
     
     private DMXDataCleanConfig config;
     
-    private static final String ID = "_LDC_ID_";
-    
     public static final String FINAL_DUNS = "Duns";
+    public static final String FINAL_INTENSITY = "intensity";
     public static final String FINAL_SUPPLIER_NAME = "Supplier_Name";
     public static final String FINAL_SEGMENT_NAME = "Segment_Name";
-    public static final String FINAL_INTENSITY = "Intensity";
     public static final String FINAL_CATEGORY = "Category";
     public static final String FINAL_DESCRIPTION = "Description";
     public static final String FINAL_COLLECTION_NAME = "Collection_Name";
@@ -51,7 +49,7 @@ public class DMXDataCleanFlow extends ConfigurableFlowBase<DMXDataCleanConfig> {
         Node prodTechInd = source
                 .filter(config.getRecordTypeField() + ".equals(\"P\")", new FieldList(config.getRecordTypeField())) //
                 .rename(new FieldList(config.getProductField()), new FieldList(FINAL_SEGMENT_NAME)) //
-                .retain(new FieldList(config.getDunsField(), FINAL_SEGMENT_NAME)) //
+                .retain(new FieldList(config.getDunsField(), config.getIntensityField(), FINAL_SEGMENT_NAME)) //
                 .addColumnWithFixedValue(FINAL_SUPPLIER_NAME, null, String.class) //
                 .addColumnWithFixedValue(FINAL_COLLECTION_NAME, null, String.class);
         // Type = Vendor
@@ -59,7 +57,7 @@ public class DMXDataCleanFlow extends ConfigurableFlowBase<DMXDataCleanConfig> {
                 .addColumnWithFixedValue(FINAL_SEGMENT_NAME, null, String.class) //
                 .filter(config.getRecordTypeField() + ".equals(\"V\")", new FieldList(config.getRecordTypeField())) //
                 .rename(new FieldList(config.getRecordValueField()), new FieldList(FINAL_SUPPLIER_NAME)) //
-                .retain(new FieldList(config.getDunsField(), FINAL_SEGMENT_NAME, FINAL_SUPPLIER_NAME)) //
+                .retain(new FieldList(config.getDunsField(), config.getIntensityField(), FINAL_SEGMENT_NAME, FINAL_SUPPLIER_NAME)) //
                 .addColumnWithFixedValue(FINAL_COLLECTION_NAME, null, String.class);
         // Type = Solution
         Node solTechInd = source
@@ -67,7 +65,7 @@ public class DMXDataCleanFlow extends ConfigurableFlowBase<DMXDataCleanConfig> {
                 .addColumnWithFixedValue(FINAL_SUPPLIER_NAME, null, String.class) //
                 .filter(config.getRecordTypeField() + ".equals(\"S\")", new FieldList(config.getRecordTypeField())) //
                 .rename(new FieldList(config.getRecordValueField()), new FieldList(FINAL_COLLECTION_NAME)) //
-                .retain(new FieldList(config.getDunsField(), FINAL_SEGMENT_NAME, FINAL_SUPPLIER_NAME, FINAL_COLLECTION_NAME));
+                .retain(new FieldList(config.getDunsField(), config.getIntensityField(), FINAL_SEGMENT_NAME, FINAL_SUPPLIER_NAME, FINAL_COLLECTION_NAME));
         
         // Merge Data
         Node mergedData = prodTechInd //
