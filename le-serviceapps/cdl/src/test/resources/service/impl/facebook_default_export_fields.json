@@ -474,7 +474,7 @@
    },
    {
       "attrName": "ContactId",
-      "displayName": "Contact ID",
+      "displayName": "Lattice Contact ID",
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",

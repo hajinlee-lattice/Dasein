@@ -19,7 +19,7 @@
       "standardField":true,
       "exportEnabled":true,
       "forcePopulate":false,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    },
    {
       "attrName": "LE_ACCOUNT_EXTERNAL_ID",
