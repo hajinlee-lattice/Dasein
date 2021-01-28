@@ -129,7 +129,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         userService.createUser(EXTERNAL_USER_EMAIL, createUserReg(EXTERNAL_USER_EMAIL));
         update(EXTERNAL_USER_EMAIL, true, AccessLevel.EXTERNAL_USER, true);
 
-        // existing external user: assert success, no meter change
+        // existing external user: assert success, no meter change after update
         update(EXTERNAL_USER_EMAIL, true, AccessLevel.EXTERNAL_ADMIN, false);
         delete(EXTERNAL_USER_EMAIL, true);
 
@@ -178,7 +178,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertNotNull(response);
         assertEquals(response.isSuccess(), expectSuccess);
 
-//        Thread.sleep(3000);
+        Thread.sleep(3000);
         int currCount = getSeatCount();
         if (expectSuccess && !EmailUtils.isInternalUser(email)) {
             assertEquals(currCount, initialCount - 1);
