@@ -21,6 +21,9 @@ public class RecommendationDanteFormatter implements DanteFormatter<Recommendati
 
     @Override
     public String format(Recommendation entity) {
+        if (entity == null) {
+            return null;
+        }
         return new DanteLead(entity).toString();
     }
 
