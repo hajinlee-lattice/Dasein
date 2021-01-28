@@ -45,7 +45,7 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
 
     @Override
     public int getNumTargets() {
-        return 3;
+        return 2;
     }
 
     public boolean getFilterPrimaryJoinKeyNulls() {

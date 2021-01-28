@@ -114,7 +114,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setIsAccountEntity(true);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
-        Assert.assertEquals(result.getTargets().size(), 3);
+        Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 2);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 1);
         long previousAccumulativeAccounts = JsonUtils
@@ -134,7 +134,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setFilterPrimaryJoinKeyNulls(true);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
-        Assert.assertEquals(result.getTargets().size(), 3);
+        Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 2);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 3);
         long previousAccumulativeAccounts = JsonUtils
@@ -155,7 +155,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setIsAccountEntity(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
-        Assert.assertEquals(result.getTargets().size(), 3);
+        Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 3);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 4);
         long previousAccumulativeAccounts = JsonUtils
@@ -174,7 +174,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setIsAccountEntity(true);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
-        Assert.assertEquals(result.getTargets().size(), 3);
+        Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 7);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
         long previousAccumulativeAccounts = JsonUtils
@@ -194,7 +194,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setIsAccountEntity(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
-        Assert.assertEquals(result.getTargets().size(), 3);
+        Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 7);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
         long previousAccumulativeAccounts = JsonUtils
@@ -214,7 +214,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setIsAccountEntity(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
-        Assert.assertEquals(result.getTargets().size(), 3);
+        Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 9);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
         long previousAccumulativeAccounts = JsonUtils
@@ -234,7 +234,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setIsAccountEntity(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
-        Assert.assertEquals(result.getTargets().size(), 3);
+        Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 0);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
         long previousAccumulativeAccounts = JsonUtils

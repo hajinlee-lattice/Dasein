@@ -118,7 +118,7 @@ public class CalculateDeltaStep extends BaseSparkStep<CalculateDeltaStepConfigur
             }
             log.info("Executing CalculateDeltaJob with config: " + JsonUtils.serialize(config));
             SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
-            //result.getTargets().add(currentLaunchUniverse);
+            result.getTargets().add(currentLaunchUniverse);
             log.info("CalculateDeltaJob Results: " + JsonUtils.serialize(result));
             return result;
         });
@@ -161,12 +161,12 @@ public class CalculateDeltaStep extends BaseSparkStep<CalculateDeltaStepConfigur
 
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey, boolean createTable) {
         log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
-        if (createTable) {
-            Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
-            metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
-            putObjectInContext(contextKey, tableName);
-            log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
-        }
+        // if (createTable) {
+        //     Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
+        //     metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
+        //     putObjectInContext(contextKey, tableName);
+        //     log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
+        // }
         putObjectInContext(contextKey + ATLAS_EXPORT_DATA_UNIT, dataUnit);
         Map<String, Long> counts = getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class);
         if (MapUtils.isEmpty(counts)) {
