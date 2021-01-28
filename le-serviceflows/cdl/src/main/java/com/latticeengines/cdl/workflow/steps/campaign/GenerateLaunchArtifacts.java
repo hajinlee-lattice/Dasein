@@ -275,21 +275,17 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     query.setLookups(new ArrayList<>(contactLookups));
                     query.setMainEntity(BusinessEntity.Contact);
                     contactDataUnit = getEntityQueryData(query);
-
-                    if (useContactsPerAccountLimit) {
-                        // Use dataUnit that includes contacts per account limit processing in GenerateLaunchUniverse
-                        targetContactsDataUnit = getObjectFromContext(FULL_CONTACTS_UNIVERSE + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class);
-                    } else {
-                        FrontEndQuery targetContactsQuery = FrontEndQuery.fromSegment(targetSegment);
-                        targetContactsQuery.setLookups(new ArrayList<>(contactLookups));
-                        targetContactsQuery.setMainEntity(BusinessEntity.Contact);
-                        targetContactsDataUnit = getEntityQueryData(targetContactsQuery);
-                    }
+                    FrontEndQuery targetContactsQuery = FrontEndQuery.fromSegment(targetSegment);
+                    targetContactsQuery.setLookups(new ArrayList<>(contactLookups));
+                    targetContactsQuery.setMainEntity(BusinessEntity.Contact);
+                    targetContactsDataUnit = getEntityQueryData(targetContactsQuery);
+                    HdfsDataUnit perAccountLimitedContacts = getObjectFromContext(FULL_CONTACTS_UNIVERSE + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class);
                 } else {
                     log.info("Ignoring Contact lookups since no contact data found in the Attribute Repo");
                 }
                 GenerateLaunchArtifactsJobConfig config = getJobConfig(accountLookups, contactLookups, accountDataUnit, contactDataUnit,
-                        targetContactsDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity, suppressAccountsWithoutContacts, externalSystemName);
+                        targetContactsDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity, suppressAccountsWithoutContacts,
+                        externalSystemName, perAccountLimitedContacts, useContactsPerAccountLimit);
                 log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
                 log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));

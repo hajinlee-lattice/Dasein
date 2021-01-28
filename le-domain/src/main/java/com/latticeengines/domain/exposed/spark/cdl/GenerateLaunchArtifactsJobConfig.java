@@ -49,12 +49,14 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
             DataUnit contactsData, DataUnit targetSegmentsContactsData, //
             DataUnit negativeDelta, DataUnit positiveDelta, //
             BusinessEntity mainEntity, boolean includeAccountsWithoutContacts, //
-            String workSpace, CDLExternalSystemName externalSystemName) {
+            String workSpace, CDLExternalSystemName externalSystemName, DataUnit perAccountLimitedContacts,
+            boolean useContactsPerAccountLimit) {
         this.setWorkspace(workSpace);
-        this.setInput(Lists.newArrayList(accountsData, contactsData, targetSegmentsContactsData, negativeDelta, positiveDelta));
+        this.setInput(Lists.newArrayList(accountsData, contactsData, targetSegmentsContactsData, negativeDelta, positiveDelta, perAccountLimitedContacts));
         this.mainEntity = mainEntity;
         this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
         this.externalSystemName = externalSystemName;
+        this.useContactsPerAccountLimit = useContactsPerAccountLimit
     }
 
     @Override
@@ -82,6 +84,14 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
 
     public void setIncludeAccountsWithoutContacts(boolean includeAccountsWithoutContacts) {
         this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
+    }
+
+    public boolean useContactsPerAccountLimit() {
+        return useContactsPerAccountLimit;
+    }
+
+    public void setUseContactsPerAccountLimit(boolean useContactsPerAccountLimit) {
+        return this.useContactsPerAccountLimit = useContactsPerAccountLimit;
     }
 
     public void setExternalSystemName(CDLExternalSystemName externalSystemName) {

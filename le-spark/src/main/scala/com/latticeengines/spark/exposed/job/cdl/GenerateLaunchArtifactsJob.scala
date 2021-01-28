@@ -29,6 +29,7 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     val contactCountry = InterfaceName.ContactCountry.name()
     val accountAttributes: Set[String] = config.getAccountAttributes.asScala
     val contactAttributes: Set[String] = config.getContactAttributes.asScala
+    val useContactsPerAccountLimit: config.useContactsPerAccountLimit
     val accountsDf = lattice.input(0)
     var contactsDf = lattice.input(1)
     if (contactsDf.rdd.isEmpty) {
@@ -46,6 +47,7 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     if (positiveDeltaDf.rdd.isEmpty()) {
       positiveDeltaDf = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
     }
+    val perAccountLimitedContactsDf = lattice.input(5)
     var distinctPositiveAccountsDf = positiveDeltaDf
     var distinctNegativeAccountsDf = negativeDeltaDf
     enrichAttributes(accountsDf, accountAttributes)
@@ -73,6 +75,11 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
         addedContactsData = CountryCodeUtils.convert(addedContactsData, contactCountry, contactCountry, url, user, password, key, salt)
         fullContactsData = CountryCodeUtils.convert(fullContactsData, contactCountry, contactCountry, url, user, password, key, salt)
       }
+
+      if (useContactsPerAccountLimit) {
+        fullContactsData = fullContactsData.drop(accountId).join(perAccountLimitedContactsDf, Seq(contactId), "inner").select(fullContactsData + ".*")
+      }
+
       lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData)
     }
   }
