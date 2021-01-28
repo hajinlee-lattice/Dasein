@@ -81,8 +81,6 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
         log.info("Outreach accountId " + accountId);
         if (!StringUtils.isEmpty(accountId)) {
             remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, accountId);
-        } else {
-            remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, getDefaultAccountIdForTenant(customerSpace));
         }
 
         String prospectOwner = channel.getLookupIdMap().getProspectOwner();
