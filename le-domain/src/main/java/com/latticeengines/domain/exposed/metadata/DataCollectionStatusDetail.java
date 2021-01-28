@@ -136,11 +136,6 @@ public class DataCollectionStatusDetail implements Serializable {
 
     @JsonProperty("accountLookupSource")
     private List<String> accountLookupSource = new ArrayList<>();
-    /**
-     * this listSegment is used for ssvi tenant to get target Account List
-     */
-    @JsonProperty("listSegmentNames")
-    private List<String> listSegmentNames = new ArrayList<>();
 
     public Integer getMinTxnDate() {
         return minTxnDate;
@@ -392,13 +387,5 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setSpendingAnalysisPublished(Boolean spendingAnalysisPublished) {
         this.spendingAnalysisPublished = spendingAnalysisPublished;
-    }
-
-    public List<String> getListSegmentNames() {
-        return listSegmentNames;
-    }
-
-    public void setListSegmentNames(List<String> listSegmentNames) {
-        this.listSegmentNames = listSegmentNames;
     }
 }

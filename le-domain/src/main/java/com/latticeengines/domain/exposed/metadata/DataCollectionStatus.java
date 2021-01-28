@@ -471,13 +471,4 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     public void setSpendingAnalysisPublished(Boolean spendingAnalysisPublished) {
         this.detail.setSpendingAnalysisPublished(spendingAnalysisPublished);
     }
-
-    @JsonProperty("listSegmentNames")
-    public List<String> getListSegmentNames() {
-        return this.detail.getListSegmentNames();
-    }
-
-    public void setListSegmentNames(List<String> listSegmentNames) {
-        this.detail.setListSegmentNames(listSegmentNames);
-    }
 }

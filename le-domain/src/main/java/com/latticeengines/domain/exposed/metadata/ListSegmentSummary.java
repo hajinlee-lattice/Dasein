@@ -31,6 +31,8 @@ public class ListSegmentSummary implements Serializable {
     private String tableHdfsLocation;
     @JsonProperty("table_name")
     private String tableName;
+    @JsonProperty("athena_table_name")
+    private String athenaTableName;
 
     public String getSegmentName() {
         return segmentName;
@@ -70,6 +72,14 @@ public class ListSegmentSummary implements Serializable {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public String getAthenaTableName() {
+        return athenaTableName;
+    }
+
+    public void setAthenaTableName(String athenaTableName) {
+        this.athenaTableName = athenaTableName;
     }
 
     public String getTableHdfsLocation() {

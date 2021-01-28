@@ -10,13 +10,11 @@ public interface DashboardService {
 
     DashboardResponse getDashboardList(String customerSpace);
 
-    MetadataSegment createListSegment(String customerSpace, String segmentName);
+    MetadataSegment createTargetAccountList(String customerSpace, String listName);
 
-    ListSegment updateSegmentFieldMapping(String customerSpace, String segmentName, CSVAdaptor csvAdaptor);
+    ListSegmentSummary getTargetAccountList(String customerSpace, String listName);
 
-    ListSegmentSummary getListSegmentMappings(String customerSpace, String segmentName);
+    ListSegment updateTargetAccountListMapping(String customerSpace, String listName, CSVAdaptor mapping);
 
-    ListSegmentSummary getListSegmentSummary(String customerSpace, String segmentName);
-
-    void deleteListSegment(String customerSpace, String segmentName);
+    void deleteTargetAccountList(String customerSpace, String listName);
 }
