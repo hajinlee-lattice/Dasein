@@ -160,7 +160,6 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         Map<String, Object> result = matchProxy.lookupAccount(mainCustomerSpace, indexName,
                 AccountId.name(), "898");
 
-        System.out.println("test Account " + JsonUtils.serialize(result));
         Assert.assertEquals(result.get(AccountId.name()).toString(), "898");
 
     }
@@ -184,7 +183,6 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
                 null);
 
         Assert.assertTrue(CollectionUtils.isNotEmpty(contacts));
-        System.out.println("test : " + JsonUtils.serialize(contacts));
         Map<String, Object> result = contacts.get(0);
         Assert.assertTrue(result.containsKey(ConsolidatedContact.name()));
 
@@ -221,7 +219,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         deleteIndex(indexName);
     }
 
-    //
+    // share the same index with consolidate account
     @Test(groups = "end2end", dependsOnMethods = "testPublishAccount")
     private void testPublishAccountLookup() throws IOException {
 
@@ -251,20 +249,20 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         String value = matchProxy.lookupInternalAccountId(mainCustomerSpace, "user_MarketoAccountID",
                 "0014p000028blgqqa0",
                 null);
-        Assert.assertEquals(value, "0014P000028BlGQQA0");
+        Assert.assertEquals(value, "898");
 
         // user_SalesforceAccountID
         String value1 = matchProxy.lookupInternalAccountId(mainCustomerSpace, "user_SalesforceAccountID",
                 "0014p000028blgqqa0",
                 null);
-        Assert.assertEquals(value1, "0014P000028BlGQQA0");
+        Assert.assertEquals(value1, "898");
 
 
         // user_SalesforceSandboxAccountID
         String value2 = matchProxy.lookupInternalAccountId(mainCustomerSpace, "user_SalesforceSandboxAccountID",
                 "0015p000028blgqqa0",
                 null);
-        Assert.assertEquals(value2, "0014P000028BlGQQA0");
+        Assert.assertEquals(value2, "898");
         deleteIndex(indexName);
 
     }
