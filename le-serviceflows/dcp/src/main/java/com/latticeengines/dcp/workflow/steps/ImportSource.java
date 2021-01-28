@@ -183,7 +183,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         if (eaiImportJobDetail.getIgnoredRows().intValue() > 0) {
             String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
             String uploadErrorDir = UploadS3PathBuilderUtils.getUploadImportErrorResultDir(configuration.getProjectId(),
-                    configuration.getSourceId(), upload.getUploadConfig().getUploadTSPrefix());
+                    configuration.getSourceId(), upload.getDisplayName(), upload.getUploadConfig().getUploadTimestamp());
             String uploadErrorDirKey = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder, uploadErrorDir);
             if (!s3Service.objectExist(dropBoxSummary.getBucket(), uploadErrorDirKey)) {
                 s3Service.createFolder(dropBoxSummary.getBucket(), uploadErrorDirKey);

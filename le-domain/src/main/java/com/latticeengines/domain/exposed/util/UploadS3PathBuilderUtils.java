@@ -6,6 +6,7 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.util.PathUtils;
 
 public final class UploadS3PathBuilderUtils {
 
@@ -13,16 +14,17 @@ public final class UploadS3PathBuilderUtils {
     private static final String SLASH = "/";
     private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd-HH-mm-ss.SSS";
 
-    private static String dropFolder = DROP_FOLDER + SLASH + "%s";
+    private static final String dropFolder = DROP_FOLDER + SLASH + "%s";
 
-    private static String projectDir = "/Projects/%s";
-    private static String sourceDir = projectDir + "/Sources/%s";
-    private static String dropDir = sourceDir + "/drop";
-    private static String uploadDir = sourceDir + "/Uploads";
-    private static String uploadRawDir = uploadDir + "/%s/RawFile/";
-    private static String uploadImportDir = uploadDir + "/%s/ImportResult/";
-    private static String uploadImportErrorDir = uploadImportDir + "ImportError/";
-    private static String uploadMatchDir = uploadDir + "/%s/MatchResult/";
+    private static final String projectDir = "/Projects/%s";
+    private static final String sourceDir = projectDir + "/Sources/%s";
+    private static final String dropDir = sourceDir + "/drop";
+    private static final String uploadRoot = sourceDir + "/Uploads";
+    private static final String uploadDir = uploadRoot + "/%s_%s";
+    private static final String uploadRawDir = uploadDir + "/RawFile/";
+    private static final String uploadImportDir = uploadDir + "/ImportResult/";
+    private static final String uploadImportErrorDir = uploadImportDir + "ImportError/";
+    private static final String uploadMatchDir = uploadDir + "/MatchResult/";
 
     protected UploadS3PathBuilderUtils() {
         throw new UnsupportedOperationException();
@@ -42,7 +44,7 @@ public final class UploadS3PathBuilderUtils {
     public static String getUploadRoot(String projectId, String sourceId) {
         Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
-        return String.format(uploadDir, projectId, sourceId);
+        return String.format(uploadRoot, projectId, sourceId);
     }
 
     public static String getDropFolder(String dropbox) {
@@ -50,32 +52,32 @@ public final class UploadS3PathBuilderUtils {
         return String.format(dropFolder, dropbox);
     }
 
-    public static String getUploadRawDir(String projectId, String sourceId, String timestamp) {
+    public static String getUploadRawDir(String projectId, String sourceId, String displayName, String timestamp) {
         Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
-        Preconditions.checkArgument(StringUtils.isNotBlank(timestamp));
-        return String.format(uploadRawDir, projectId, sourceId, timestamp);
+        Preconditions.checkArgument(StringUtils.isNotBlank(displayName) || StringUtils.isNotBlank(timestamp));
+        return String.format(uploadRawDir, projectId, sourceId, PathUtils.getFileNameWithoutExtension(displayName), timestamp);
     }
 
-    public static String getUploadImportResultDir(String projectId, String sourceId, String timestamp) {
+    public static String getUploadImportResultDir(String projectId, String sourceId, String displayName, String timestamp) {
         Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
-        Preconditions.checkArgument(StringUtils.isNotBlank(timestamp));
-        return String.format(uploadImportDir, projectId, sourceId, timestamp);
+        Preconditions.checkArgument(StringUtils.isNotBlank(displayName) || StringUtils.isNotBlank(timestamp));
+        return String.format(uploadImportDir, projectId, sourceId, PathUtils.getFileNameWithoutExtension(displayName), timestamp);
     }
 
-    public static String getUploadImportErrorResultDir(String projectId, String sourceId, String timestamp) {
+    public static String getUploadImportErrorResultDir(String projectId, String sourceId, String displayName, String timestamp) {
         Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
-        Preconditions.checkArgument(StringUtils.isNotBlank(timestamp));
-        return String.format(uploadImportErrorDir, projectId, sourceId, timestamp);
+        Preconditions.checkArgument(StringUtils.isNotBlank(displayName) || StringUtils.isNotBlank(timestamp));
+        return String.format(uploadImportErrorDir, projectId, sourceId, PathUtils.getFileNameWithoutExtension(displayName), timestamp);
     }
 
-    public static String getUploadMatchResultDir(String projectId, String sourceId, String timestamp) {
+    public static String getUploadMatchResultDir(String projectId, String sourceId, String displayName, String timestamp) {
         Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
-        Preconditions.checkArgument(StringUtils.isNotBlank(timestamp));
-        return String.format(uploadMatchDir, projectId, sourceId, timestamp);
+        Preconditions.checkArgument(StringUtils.isNotBlank(displayName) || StringUtils.isNotBlank(timestamp));
+        return String.format(uploadMatchDir, projectId, sourceId, PathUtils.getFileNameWithoutExtension(displayName), timestamp);
     }
 
     public static String combinePath(boolean withHeadingSlash, boolean withTailingSlash, String... pathParts) {

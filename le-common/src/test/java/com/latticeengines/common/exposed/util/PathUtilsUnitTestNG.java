@@ -21,6 +21,16 @@ public class PathUtilsUnitTestNG {
                 String.format("Nested glob not match the expected value. path=%s, nNestedDirs=%d", path, nNestedDirs));
     }
 
+    @Test(groups = "unit")
+    private void testFileName() {
+        Assert.assertEquals(PathUtils.getFileNameWithoutExtension("test.csv"), "test");
+        Assert.assertEquals(PathUtils.getFileNameWithoutExtension("none"), "none");
+        Assert.assertEquals(PathUtils.getFileNameWithoutExtension("with/folder"), "folder");
+        Assert.assertEquals(PathUtils.getFileNameWithoutExtension("/with/multiple/folders.ext"), "folders");
+        Assert.assertTrue(PathUtils.getFileNameWithoutExtension(".some").isEmpty());
+        Assert.assertEquals(PathUtils.getFileNameWithoutExtension("multiple.extension.test"), "multiple.extension");
+    }
+
     @DataProvider(name = "toNestedDirGlob")
     private Object[][] toNestedDirGlobTestData() {
         return new Object[][] { //
