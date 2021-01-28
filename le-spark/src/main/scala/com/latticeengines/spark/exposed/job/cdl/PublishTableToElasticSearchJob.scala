@@ -71,7 +71,7 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
                        docIdCol: String, baseConfig : Map[String, String], compressed : Boolean) : Unit = {
 
     if (compressed) {
-      val compressUdf = udf((s: Map[String, Any]) => Snappy.compress(JsonUtils.serialize(s)))
+      val compressUdf = udf((s: Map[String, Any]) => Snappy.compress(JsonUtils.serialize(s.asJava)))
       val columns: mutable.LinkedHashSet[Column] = mutable.LinkedHashSet[Column]()
       table.schema.fields.foreach((field: StructField) => {
         columns.add(lit(field.name))

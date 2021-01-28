@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.end2end;
 
 import static com.latticeengines.apps.cdl.end2end.ProcessAccountWithAdvancedMatchDeploymentTestNG.CHECK_POINT;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
@@ -157,12 +158,11 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
 
         String indexName = getIndexName(ConsolidatedAccount);
         Map<String, Object> result = matchProxy.lookupAccount(mainCustomerSpace, indexName,
-                InterfaceName.AccountId.name(), "898");
+                AccountId.name(), "898");
 
         System.out.println("test Account " + JsonUtils.serialize(result));
-//        Assert.assertEquals(result, "898");
+        Assert.assertEquals(result.get(AccountId.name()).toString(), "898");
 
-        deleteIndex(indexName);
     }
 
     @Test(groups = "end2end")
@@ -180,7 +180,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
 
         // search contacts by account id
         List<Map<String, Object>> contacts = matchProxy.lookupContacts(mainCustomerSpace,
-                InterfaceName.AccountId.name(), "898", "",
+                AccountId.name(), "898", "",
                 null);
 
         Assert.assertTrue(CollectionUtils.isNotEmpty(contacts));
@@ -197,7 +197,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
                                                 String.valueOf(result.get(ConsolidatedContact.name())).getBytes()))),
                         new TypeReference<Map<String, String>>() {});
 
-        Assert.assertTrue(recordMap.containsKey(InterfaceName.AccountId.name()));
+        Assert.assertTrue(recordMap.containsKey(AccountId.name()));
         Assert.assertTrue(recordMap.containsKey(InterfaceName.ContactId.name()));
 
         // search contacts by contact id
@@ -214,7 +214,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
                                                 String.valueOf(result1.get(ConsolidatedContact.name())).getBytes()))),
                         new TypeReference<Map<String, String>>() {});
 
-        Assert.assertTrue(recordMap1.containsKey(InterfaceName.AccountId.name()));
+        Assert.assertTrue(recordMap1.containsKey(AccountId.name()));
         Assert.assertTrue(recordMap1.containsKey(InterfaceName.ContactId.name()));
 
 
@@ -222,7 +222,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
     }
 
     //
-    @Test(groups = "end2end")
+    @Test(groups = "end2end", dependsOnMethods = "testPublishAccount")
     private void testPublishAccountLookup() throws IOException {
 
         // prepare lookup id
@@ -315,7 +315,14 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
     private PublishTableToESRequest generateRequest(TableRoleInCollection role, String tableName) {
         PublishTableToESRequest request = new PublishTableToESRequest();
         ElasticSearchExportConfig config = new ElasticSearchExportConfig();
-        config.setSignature(ElasticSearchUtils.generateNewVersion());
+        String entity = ElasticSearchUtils.getEntityFromTableRole(role);
+        ElasticSearchDataUnit unit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(mainCustomerSpace, entity,
+                DataUnit.StorageType.ElasticSearch);
+        if (unit != null) {
+            config.setSignature(unit.getSignature());
+        } else {
+            config.setSignature(ElasticSearchUtils.generateNewVersion());
+        }
         config.setTableRoleInCollection(role);
         config.setTableName(tableName);
         List<ElasticSearchExportConfig> configs = Collections.singletonList(config);
