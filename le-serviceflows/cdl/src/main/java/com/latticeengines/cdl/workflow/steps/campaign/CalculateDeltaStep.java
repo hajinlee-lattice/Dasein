@@ -118,7 +118,7 @@ public class CalculateDeltaStep extends BaseSparkStep<CalculateDeltaStepConfigur
             }
             log.info("Executing CalculateDeltaJob with config: " + JsonUtils.serialize(config));
             SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
-            result.getTargets().add(currentLaunchUniverse);
+            //result.getTargets().add(currentLaunchUniverse);
             log.info("CalculateDeltaJob Results: " + JsonUtils.serialize(result));
             return result;
         });

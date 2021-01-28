@@ -72,7 +72,10 @@ class CalculateDeltaJob extends AbstractSparkJob[CalculateDeltaJobConfig] {
     }
       .select(oldDFAlias + ".*")
 
-    lattice.output = List(positiveDelta, negativeDelta)
+    // Load fullData as .avro for later use
+    val fullData = newData.transform { df => df }.select("*")
+
+    lattice.output = List(positiveDelta, negativeDelta, fullData)
   }
 
 }
