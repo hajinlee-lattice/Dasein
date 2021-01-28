@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -72,6 +74,9 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     private boolean launchToDb;
     private boolean useCustomerId;
     private boolean isEntityMatch;
+    private boolean testSfdcId;
+    private String sfdcAccountId;
+    private String sfdcContactId;
     Map<String, DataUnit> inputUnitsCopy = new HashMap<>();
 
     @Override
@@ -92,13 +97,17 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
 
     @Test(groups = "functional", dataProvider = "dataFrameProvider")
     public void runTest(boolean launchToDbDev, boolean createRecommendationDataFrameVal, boolean createAddCsvDataFrameVal,
-            boolean createDeleteCsvDataFrameVal, boolean useCustomerId, boolean isEntityMatch) {
+            boolean createDeleteCsvDataFrameVal, boolean useCustomerId, boolean isEntityMatch,
+            Triple<Boolean, String, String> sfdcIdTestCase) {
         createRecommendationDataFrame = createRecommendationDataFrameVal;
         createAddCsvDataFrame = createAddCsvDataFrameVal;
         createDeleteCsvDataFrame = createDeleteCsvDataFrameVal;
         launchToDb = launchToDbDev;
         this.useCustomerId = useCustomerId;
         this.isEntityMatch = isEntityMatch;
+        this.testSfdcId = sfdcIdTestCase.getLeft();
+        this.sfdcAccountId = sfdcIdTestCase.getMiddle();
+        this.sfdcContactId = sfdcIdTestCase.getRight();
         overwriteInputUnits(launchToDbDev);
         CreateDeltaRecommendationConfig sparkConfig = generateCreateDeltaRecommendationConfig(launchToDbDev);
         SparkJobResult result = runSparkJob(CreateDeltaRecommendationsJob.class, sparkConfig);
@@ -168,10 +177,10 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 Assert.assertNull(contactObject);
                 AvroUtils.AvroFilesIterator addCsvDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration,
                         PathUtils.toAvroGlob(addCsvDf.getPath()));
-                verifyContactColumns(addCsvDfIterator.getSchema());
+                verifyColumns(addCsvDfIterator.getSchema());
                 AvroUtils.AvroFilesIterator deleteCsvDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration,
                         PathUtils.toAvroGlob(deleteCsvDf.getPath()));
-                verifyContactColumns(deleteCsvDfIterator.getSchema());
+                verifyColumns(deleteCsvDfIterator.getSchema());
             } catch (Exception e) {
                 log.error("Failed to get record from avro file.", e);
             }
@@ -199,7 +208,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             Assert.assertEquals(deleteCsvDf.getCount().intValue(), 10);
             AvroUtils.AvroFilesIterator deleteCsvDfIterator = AvroUtils.iterateAvroFiles(yarnConfiguration,
                     PathUtils.toAvroGlob(deleteCsvDf.getPath()));
-            verifyContactColumns(deleteCsvDfIterator.getSchema());
+            verifyColumns(deleteCsvDfIterator.getSchema());
         } else if (createRecommendationDataFrame && createAddCsvDataFrame && !createDeleteCsvDataFrame) {
             HdfsDataUnit recDf = result.getTargets().get(0);
             HdfsDataUnit addCsvDf = result.getTargets().get(1);
@@ -208,7 +217,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             Schema schema = addCsvDfIterator.getSchema();
             List<String> contactColumns = CampaignLaunchUtils.generateContactColsForS3();
             if (launchToDb) {
-                verifyContactColumns(schema);
+                verifyColumns(schema);
             } else {
                 for (String contactColumn : contactColumns) {
                     Schema.Field field = schema.getField(ExportUtils.CONTACT_ATTR_PREFIX + contactColumn);
@@ -222,19 +231,63 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         }
     }
 
-    private void verifyContactColumns(Schema schema) {
-        List<String> contactColumns = CampaignLaunchUtils.generateContactColsForS3();
-        Set<String> excludeFields = Sets.newHashSet(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Address_Street_1.name(),
+    private void verifyColumns(Schema schema) {
+        List<String> expectedAccountColumns;
+        List<String> expectedContactColumns = CampaignLaunchUtils.generateContactColsForS3();
+        Set<String> excludeContactColumns = Sets.newHashSet(
+                ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Address_Street_1.name(),
                 ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.SalesforceContactID.name(),
                 ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Name.name());
-        for (String contactColumn : contactColumns) {
-            Schema.Field field = schema.getField(ExportUtils.CONTACT_ATTR_PREFIX + contactColumn);
-            if (excludeFields.contains(ExportUtils.CONTACT_ATTR_PREFIX + contactColumn)) {
-                Assert.assertNull(field);
+        ;
+
+        if (launchToDb) {
+            expectedAccountColumns = CampaignLaunchUtils.generateRecommendationOutputAccountCols();
+        } else {
+            expectedAccountColumns = CampaignLaunchUtils.generateAccountColsRecIncludedForS3();
+        }
+
+        if (testSfdcId) {
+            String expectedSfdcAccountId = CampaignLaunchUtils.generateExpectedSfdcAccountIdCol(sfdcAccountId,
+                    isEntityMatch);
+            String expectedSfdcContactId = CampaignLaunchUtils.generateExpectedSfdcContactIdCol(sfdcContactId,
+                    isEntityMatch);
+            if (!expectedAccountColumns.contains(expectedSfdcAccountId)) {
+                expectedAccountColumns.add(expectedSfdcAccountId);
+            }
+            if (!expectedContactColumns.contains(expectedSfdcContactId)) {
+                expectedContactColumns.add(expectedSfdcContactId);
+            }
+            excludeContactColumns.remove(expectedSfdcContactId);
+        }
+
+        verifyColumns(schema, expectedAccountColumns, expectedContactColumns, excludeContactColumns);
+    }
+
+    private void verifyColumns(Schema schema, List<String> expectedAccountColumns, List<String> expectedContactColumns,
+            Set<String> excludeContactColumns) {
+        Set<String> uniqueCols = schema.getFields().stream()
+                .map(field -> field.name()).collect(Collectors.toSet());
+        Assert.assertEquals(schema.getFields().size(), uniqueCols.size());
+
+        for (String accountColumn : expectedAccountColumns) {
+            Schema.Field field = schema.getField(accountColumn);
+            Assert.assertNotNull(field, generateAssertionErrorMsg(accountColumn, schema));
+        }
+        for (String contactColumn : expectedContactColumns) {
+            String expectedColumnName = ExportUtils.CONTACT_ATTR_PREFIX + contactColumn;
+            Schema.Field field = schema.getField(expectedColumnName);
+            if (excludeContactColumns.contains(expectedColumnName)) {
+                Assert.assertNull(field, generateAssertionErrorMsg(expectedColumnName, schema));
             } else {
-                Assert.assertNotNull(field);
+                Assert.assertNotNull(field, generateAssertionErrorMsg(expectedColumnName, schema));
             }
         }
+    }
+
+    private String generateAssertionErrorMsg(String colName, Schema schema) {
+        String stringifiedSchema = schema.getFields().stream().map(Schema.Field::name).collect(Collectors.toList())
+                .toString();
+        return String.format("%s in %s", colName, stringifiedSchema);
     }
 
     private DeltaCampaignLaunchSparkContext generateDeltaCampaignLaunchSparkContext(boolean launchToDb) {
@@ -297,11 +350,22 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 .setAccountColsRecNotIncludedNonStd(CampaignLaunchUtils.generateAccountColsRecNotIncludedNonStdForS3());
         deltaCampaignLaunchSparkContext.setUseCustomerId(useCustomerId);
         deltaCampaignLaunchSparkContext.setIsEntityMatch(isEntityMatch);
-        deltaCampaignLaunchSparkContext.setContactCols(CampaignLaunchUtils.generateContactColsForS3());
+        if (testSfdcId) {
+            List<String> contactCols = CampaignLaunchUtils.generateContactColsForS3();
+            String expectedSfdcContactId = CampaignLaunchUtils.generateExpectedSfdcContactIdCol(sfdcContactId, isEntityMatch);
+            if (!contactCols.contains(expectedSfdcContactId)) {
+                contactCols.add(expectedSfdcContactId);
+            }
+            deltaCampaignLaunchSparkContext.setContactCols(contactCols);
+        } else {
+            deltaCampaignLaunchSparkContext.setContactCols(CampaignLaunchUtils.generateContactColsForS3());
+        }
         deltaCampaignLaunchSparkContext.setCreateRecommendationDataFrame(createRecommendationDataFrame);
         deltaCampaignLaunchSparkContext.setCreateAddCsvDataFrame(createAddCsvDataFrame);
         deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataFrame(createDeleteCsvDataFrame);
         deltaCampaignLaunchSparkContext.setPublishRecommendationsToDB(launchToDb);
+        deltaCampaignLaunchSparkContext.setSfdcAccountID(sfdcAccountId);
+        deltaCampaignLaunchSparkContext.setSfdcContactID(sfdcContactId);
         return deltaCampaignLaunchSparkContext;
     }
 
@@ -443,21 +507,36 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
 
     @DataProvider
     public Object[][] dataFrameProvider() {
-        return new Object[][]{ // the first parameter indicate is a connector launch to DB or not
-                { false, true, true, true, false, false }, // generate all three
-                                                           // dataFrames
-                { false, false, false, true, false, false }, // only generate delete
-                                                             // csv dataFrame
-                { false, true, true, false, false, false }, // Account only case for
-                                                            // two data Frames
-                { true, true, true, false, false, false }, // launch to DB case
-                { true, true, true, false, true, false }, // launch to DB case and user
-                                                          // CustomerAccountId and
-                                                          // CustomerContactId using useCustomerId
-                { true, true, true, false, false, true } // launch to DB case and user
-                                                         // CustomerAccountId and
-                                                         // CustomerContactId using isEntityMatch
+        Triple<Boolean, String, String> testNoSfdcIds = Triple.of(false, null, null);
+        Triple<Boolean, String, String> testSfdcIdsWithNull = Triple.of(true, null, null);
+        Triple<Boolean, String, String> testSfdcIdsWithValues = Triple.of(true, InterfaceName.CompanyName.name(),
+                InterfaceName.FirstName.name());
+
+        return new Object[][] {
+                // launchToDbDev, createRecommendationDataFrameVal,
+                // createAddCsvDataFrameVal, createDeleteCsvDataFrameVal,
+                // useCustomerId, isEntityMatch, SfdcIdTestCase
+
+                // generate all three dataFrames
+                { false, true, true, true, false, false, testNoSfdcIds },
+                // only generate delete csv dataFrame
+                { false, false, false, true, false, false, testNoSfdcIds },
+                // Account only case for two data Frames
+                { false, true, true, false, false, false, testSfdcIdsWithNull },
+                // launch to DB case
+                { true, true, true, false, false, false, testSfdcIdsWithValues },
+                // launch to DB case and user CustomerAccountId and
+                // CustomerContactId using useCustomerId
+                { true, true, true, false, true, false, testNoSfdcIds },
+                // launch to DB case and user CustomerAccountId and
+                // CustomerContactId using isEntityMatch
+                { true, true, true, false, false, true, testSfdcIdsWithNull },
+                // launch to DB case and custom SFDC Account and Contact ID
+                // using isEntityMatch
+                { true, true, true, false, false, true, testSfdcIdsWithValues },
+                // generate 3 dataframe and custom SFDC Account and Contact ID
+                // using isEntityMatch
+                { false, true, true, false, false, true, testSfdcIdsWithValues } 
         };
     }
-
 }
