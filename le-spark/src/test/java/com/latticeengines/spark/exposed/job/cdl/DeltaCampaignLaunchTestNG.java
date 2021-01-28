@@ -71,6 +71,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     private boolean createDeleteCsvDataFrame;
     private boolean launchToDb;
     private boolean useCustomerId;
+    private boolean isEntityMatch;
     Map<String, DataUnit> inputUnitsCopy = new HashMap<>();
 
     @Override
@@ -91,12 +92,13 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
 
     @Test(groups = "functional", dataProvider = "dataFrameProvider")
     public void runTest(boolean launchToDbDev, boolean createRecommendationDataFrameVal, boolean createAddCsvDataFrameVal,
-            boolean createDeleteCsvDataFrameVal, boolean useCustomerId) {
+            boolean createDeleteCsvDataFrameVal, boolean useCustomerId, boolean isEntityMatch) {
         createRecommendationDataFrame = createRecommendationDataFrameVal;
         createAddCsvDataFrame = createAddCsvDataFrameVal;
         createDeleteCsvDataFrame = createDeleteCsvDataFrameVal;
         launchToDb = launchToDbDev;
         this.useCustomerId = useCustomerId;
+        this.isEntityMatch = isEntityMatch;
         overwriteInputUnits(launchToDbDev);
         CreateDeltaRecommendationConfig sparkConfig = generateCreateDeltaRecommendationConfig(launchToDbDev);
         SparkJobResult result = runSparkJob(CreateDeltaRecommendationsJob.class, sparkConfig);
@@ -294,6 +296,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         deltaCampaignLaunchSparkContext
                 .setAccountColsRecNotIncludedNonStd(CampaignLaunchUtils.generateAccountColsRecNotIncludedNonStdForS3());
         deltaCampaignLaunchSparkContext.setUseCustomerId(useCustomerId);
+        deltaCampaignLaunchSparkContext.setIsEntityMatch(isEntityMatch);
         deltaCampaignLaunchSparkContext.setContactCols(CampaignLaunchUtils.generateContactColsForS3());
         deltaCampaignLaunchSparkContext.setCreateRecommendationDataFrame(createRecommendationDataFrame);
         deltaCampaignLaunchSparkContext.setCreateAddCsvDataFrame(createAddCsvDataFrame);
@@ -440,16 +443,19 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     @DataProvider
     public Object[][] dataFrameProvider() {
         return new Object[][]{ // the first parameter indicate is a connector launch to DB or not
-                { false, true, true, true, false }, // generate all three
-                                                    // dataFrames
-                { false, false, false, true, false }, // only generate delete
-                                                      // csv dataFrame
-                { false, true, true, false, false }, // Account only case for
-                                                     // two data Frames
-                { true, true, true, false, false }, // launch to DB case
-                { true, true, true, false, true } // launch to DB case and user
-                                                  // CustomerAccountId and
-                                                  // CustomerContactId
+                { false, true, true, true, false, false }, // generate all three
+                                                           // dataFrames
+                { false, false, false, true, false, false }, // only generate delete
+                                                             // csv dataFrame
+                { false, true, true, false, false, false }, // Account only case for
+                                                            // two data Frames
+                { true, true, true, false, false, false }, // launch to DB case
+                { true, true, true, false, true, false }, // launch to DB case and user
+                                                          // CustomerAccountId and
+                                                          // CustomerContactId using useCustomerId
+                { true, true, true, false, false, true } // launch to DB case and user
+                                                         // CustomerAccountId and
+                                                         // CustomerContactId using isEntityMatch
         };
     }
 

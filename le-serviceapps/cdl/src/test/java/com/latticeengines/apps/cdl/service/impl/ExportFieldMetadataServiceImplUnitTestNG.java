@@ -78,7 +78,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
 
         assertEquals(defaultMarketoExportFields.size(), 41);
         assertEquals(defaultMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                23);
+                25);
 
     }
 
@@ -88,7 +88,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
                 .getAllAttributes(CDLExternalSystemName.Marketo);
         long count1 = originalMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getStandardField)
                 .count();
-        assertEquals(count1, 14);
+        assertEquals(count1, 16);
         ExportFieldMetadataDefaults firstField = originalMarketoExportFields.get(0);
         firstField.setStandardField(!firstField.getStandardField());
         List<ExportFieldMetadataDefaults> toSave = new ArrayList<>();
@@ -98,7 +98,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         originalMarketoExportFields = exportService.getAllAttributes(CDLExternalSystemName.Marketo);
         long count2 = originalMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getStandardField)
                 .count();
-        assertEquals(count2, 15);
+        assertEquals(count2, 17);
 
         firstField.setStandardField(!firstField.getStandardField());
         toSave = new ArrayList<>();
@@ -108,7 +108,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         originalMarketoExportFields = exportService.getAllAttributes(CDLExternalSystemName.Marketo);
         long count3 = originalMarketoExportFields.stream().filter(ExportFieldMetadataDefaults::getStandardField)
                 .count();
-        assertEquals(count3, 14);
+        assertEquals(count3, 16);
     }
 
     @Test(groups = "functional")

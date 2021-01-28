@@ -112,10 +112,10 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
      * and Contact with same internal name are both in it.
      */
     protected List<ColumnMetadata> enrichExportFieldMappings(CDLExternalSystemName systemName, List<String> fieldNames,
-                                                             Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
+            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
+            Map<String, String> defaultFieldsAttrToServingStoreAttrRemap) {
         List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
         Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMap(systemName);
-        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = new HashMap<>();
         fieldNames.forEach(fieldName -> {
             ExportFieldMetadataDefaults defaultField = defaultFieldsMetadataMap.get(fieldName);
             if (defaultField == null) {

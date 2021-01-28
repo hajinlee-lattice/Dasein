@@ -63,7 +63,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
             }
 
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Outreach, mappedFieldNames,
-                    accountAttributesMap, contactAttributesMap);
+                    accountAttributesMap, contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
         } else {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Outreach, accountAttributesMap,
                     contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
