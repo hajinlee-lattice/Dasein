@@ -117,7 +117,7 @@ public class RecommendationCleanupServiceImpl implements RecommendationCleanupSe
     void cleanupRecommendationForChurnedCustomers() {
         int softDeleted = cleanupRecommendationDueToExpiredTenants(false);
         int hardDeleted = cleanupRecommendationDueToExpiredTenants(true);
-        log.info("Deleting recommendations for expired tenants, Soft delete: " + softDeleted + "Hard delete: "
+        log.info("Deleting recommendations for expired tenants, Soft delete: " + softDeleted + " Hard delete: "
                 + hardDeleted);
     }
 
