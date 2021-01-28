@@ -19,7 +19,7 @@
       "standardField":true,
       "exportEnabled":true,
       "forcePopulate":false,
-      "audienceType": ["ACCOUNTS", "CONTACTS"]
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName": "LE_ACCOUNT_EXTERNAL_ID",
@@ -261,7 +261,7 @@
       "standardField":true,
       "exportEnabled":true,
       "forcePopulate":false,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    },
    {
       "attrName": "Email",
@@ -404,6 +404,6 @@
       "standardField":true,
       "exportEnabled":true,
       "forcePopulate":false,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    }
 ]

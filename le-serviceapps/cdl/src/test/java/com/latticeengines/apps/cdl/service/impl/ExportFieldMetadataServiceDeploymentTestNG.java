@@ -439,14 +439,15 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        // Account Name
-        assertEquals(columnMetadata.size(), 1);
+        // Account Name, SDR Email, SDR Account Id
+        assertEquals(columnMetadata.size(), 3);
 
         List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
         log.info(JsonUtils.serialize(attrNames));
 
+        // B/c we didn't specify the values in lookupIdMap
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
-        assertEquals(nonStandardFields, 0);
+        assertEquals(nonStandardFields, 2);
     }
 
     @Test(groups = "deployment-app")
