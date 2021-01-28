@@ -18,6 +18,9 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
     @JsonProperty("IncludeAccountsWithoutContacts")
     private boolean includeAccountsWithoutContacts;
 
+    @JsonProperty("UseContactsPerAccountLimit")
+    private boolean useContactsPerAccountLimit;
+
     @JsonProperty("ExternalSystemName")
     private CDLExternalSystemName externalSystemName;
 
@@ -56,7 +59,7 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
         this.mainEntity = mainEntity;
         this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
         this.externalSystemName = externalSystemName;
-        this.useContactsPerAccountLimit = useContactsPerAccountLimit
+        this.useContactsPerAccountLimit = useContactsPerAccountLimit;
     }
 
     @Override
@@ -91,7 +94,7 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
     }
 
     public void setUseContactsPerAccountLimit(boolean useContactsPerAccountLimit) {
-        return this.useContactsPerAccountLimit = useContactsPerAccountLimit;
+        this.useContactsPerAccountLimit = useContactsPerAccountLimit;
     }
 
     public void setExternalSystemName(CDLExternalSystemName externalSystemName) {

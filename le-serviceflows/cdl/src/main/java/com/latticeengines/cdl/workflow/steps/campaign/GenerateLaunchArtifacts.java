@@ -149,6 +149,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         BusinessEntity mainEntity = channelConfig.getAudienceType().asBusinessEntity();
         boolean useContactsPerAccountLimit = hasContactsPerAccountLimit(channel, mainEntity);
+        HdfsDataUnit perAccountLimitedContacts  = useContactsPerAccountLimit ? //
+                getObjectFromContext(FULL_CONTACTS_UNIVERSE + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class) : new HdfsDataUnit();
         HdfsDataUnit positiveDeltaDataUnit = getObjectFromContext(
                 getAddDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class);
         HdfsDataUnit negativeDeltaDataUnit = getObjectFromContext(
@@ -181,7 +183,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         SparkJobResult sparkJobResult;
         if (baseOnOtherTapType) {
             sparkJobResult = runSparkJob(accountLookups, contactLookups, positiveDeltaDataUnit, negativeDeltaDataUnit,
-                    mainEntity, channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName());
+                    mainEntity, channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName(),
+                    perAccountLimitedContacts, useContactsPerAccountLimit);
         } else {
             version = parseDataCollectionVersion(configuration);
             attrRepo = parseAttrRepo(configuration);
@@ -197,7 +200,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     positiveDeltaDataUnit, negativeDeltaDataUnit,
                     contactsDataExists ? mainEntity : BusinessEntity.Account,
                     contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts(), channel.getLookupIdMap().getExternalSystemName(),
-                    useContactsPerAccountLimit);
+                    perAccountLimitedContacts, useContactsPerAccountLimit);
         }
         processSparkJobResults(channelConfig.getAudienceType(), channelConfig.getSystemName(), sparkJobResult);
     }
@@ -216,7 +219,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     }
 
     private SparkJobResult runSparkJob(Set<Lookup> accountLookups, Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit,
-                                       BusinessEntity mainEntity, boolean suppressAccountsWithoutContacts, CDLExternalSystemName externalSystemName) {
+                                       BusinessEntity mainEntity, boolean suppressAccountsWithoutContacts, CDLExternalSystemName externalSystemName,
+                                       HdfsDataUnit perAccountLimitedContacts, boolean useContactsPerAccountLimit) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -226,7 +230,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             HdfsDataUnit accountDataUnit = getObjectFromContext(ACCOUNTS_DATA_UNIT, HdfsDataUnit.class);
             HdfsDataUnit contactDataUnit = getObjectFromContext(CONTACTS_DATA_UNIT, HdfsDataUnit.class);
             GenerateLaunchArtifactsJobConfig config = getJobConfig(accountLookups, contactLookups, accountDataUnit, contactDataUnit,
-                    contactDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity, suppressAccountsWithoutContacts, externalSystemName);
+                    contactDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity, suppressAccountsWithoutContacts, externalSystemName,
+                    perAccountLimitedContacts, useContactsPerAccountLimit);
             log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
             SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
             log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));
@@ -237,10 +242,12 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     private GenerateLaunchArtifactsJobConfig getJobConfig(Set<Lookup> accountLookups, Set<Lookup> contactLookups, HdfsDataUnit accountDataUnit,
                                                           HdfsDataUnit contactDataUnit, HdfsDataUnit targetContactsDataUnit,
                                                           HdfsDataUnit negativeDeltaDataUnit, HdfsDataUnit positiveDeltaDataUnit, BusinessEntity mainEntity,
-                                                          boolean suppressAccountsWithoutContacts, CDLExternalSystemName externalSystemName) {
+                                                          boolean suppressAccountsWithoutContacts, CDLExternalSystemName externalSystemName,
+                                                          HdfsDataUnit perAccountLimitedContacts, boolean useContactsPerAccountLimit) {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit, //
                 contactDataUnit, targetContactsDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, //
-                mainEntity, !suppressAccountsWithoutContacts, getRandomWorkspace(), externalSystemName);
+                mainEntity, !suppressAccountsWithoutContacts, getRandomWorkspace(), externalSystemName, //
+                perAccountLimitedContacts, useContactsPerAccountLimit);
         config.setAccountAttributes(accountLookups.stream().map(lookup -> ((AttributeLookup)lookup).getAttribute()).collect(Collectors.toSet()));
         config.setContactAttributes(contactLookups.stream().map(lookup -> ((AttributeLookup)lookup).getAttribute()).collect(Collectors.toSet()));
         if (CDLExternalSystemName.AD_PLATFORMS.contains(externalSystemName)) {
@@ -257,7 +264,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     private SparkJobResult executeSparkJob(MetadataSegment targetSegment, Set<Lookup> accountLookups, Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit,
                                            HdfsDataUnit negativeDeltaDataUnit, BusinessEntity mainEntity, boolean contactsDataExists, boolean suppressAccountsWithoutContacts,
-                                           CDLExternalSystemName externalSystemName, boolean useContactsPerAccountLimit) {
+                                           CDLExternalSystemName externalSystemName, HdfsDataUnit perAccountLimitedContacts, boolean useContactsPerAccountLimit) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -279,7 +286,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     targetContactsQuery.setLookups(new ArrayList<>(contactLookups));
                     targetContactsQuery.setMainEntity(BusinessEntity.Contact);
                     targetContactsDataUnit = getEntityQueryData(targetContactsQuery);
-                    HdfsDataUnit perAccountLimitedContacts = getObjectFromContext(FULL_CONTACTS_UNIVERSE + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class);
                 } else {
                     log.info("Ignoring Contact lookups since no contact data found in the Attribute Repo");
                 }

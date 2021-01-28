@@ -29,7 +29,6 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     val contactCountry = InterfaceName.ContactCountry.name()
     val accountAttributes: Set[String] = config.getAccountAttributes.asScala
     val contactAttributes: Set[String] = config.getContactAttributes.asScala
-    val useContactsPerAccountLimit: config.useContactsPerAccountLimit
     val accountsDf = lattice.input(0)
     var contactsDf = lattice.input(1)
     if (contactsDf.rdd.isEmpty) {
@@ -76,7 +75,7 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
         fullContactsData = CountryCodeUtils.convert(fullContactsData, contactCountry, contactCountry, url, user, password, key, salt)
       }
 
-      if (useContactsPerAccountLimit) {
+      if (config.useContactsPerAccountLimit) {
         fullContactsData = fullContactsData.drop(accountId).join(perAccountLimitedContactsDf, Seq(contactId), "inner").select(fullContactsData + ".*")
       }
 
