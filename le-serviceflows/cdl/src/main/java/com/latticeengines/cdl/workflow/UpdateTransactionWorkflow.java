@@ -83,6 +83,7 @@ public class UpdateTransactionWorkflow extends AbstractWorkflow<UpdateTransactio
         return new WorkflowBuilder(name(), config) //
                 .next(cloneTransaction) //
                 .next(clonePurchaseHistory) //
+                // --- shared with rebuild transaction ---
                 .next(rollupProductStepWrapper) //
                 .next(splitTransactionStep) //
                 .next(aggDailyTransactionStep) //
@@ -90,6 +91,7 @@ public class UpdateTransactionWorkflow extends AbstractWorkflow<UpdateTransactio
                 .next(buildDailyTransaction) //
                 .next(buildPeriodTransaction) //
                 .next(buildSpendingAnalysis) //
+                // --- shared with rebuild transaction ---
                 .build();
     }
 }
