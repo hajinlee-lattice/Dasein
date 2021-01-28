@@ -24,6 +24,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
-        if (Boolean.FALSE.equals(getObjectFromContext(IS_SSVI_TENANT, Boolean.class))) {
+        if (BooleanUtils.isNotTrue(getObjectFromContext(IS_SSVI_TENANT, Boolean.class))) {
             log.info("tenant isn't ssvi tenant, will skip this step.");
             return null;
         }
