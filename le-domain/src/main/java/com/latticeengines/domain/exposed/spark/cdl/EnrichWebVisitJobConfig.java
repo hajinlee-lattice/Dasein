@@ -11,6 +11,9 @@ public class EnrichWebVisitJobConfig extends SparkJobConfig implements Serializa
     private static final long serialVersionUID = 0L;
     public static final String NAME = "enrichWebVisitJob";
 
+    @JsonProperty
+    public String accountIdCol;
+
     // null if no imports
     @JsonProperty
     public Integer matchedWebVisitInputIdx;

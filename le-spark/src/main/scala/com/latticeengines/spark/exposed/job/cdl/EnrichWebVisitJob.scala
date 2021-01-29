@@ -20,6 +20,7 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 
 class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
+  private val outputAccountIdCol = "account_id"
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[EnrichWebVisitJobConfig]): Unit = {
     val config: EnrichWebVisitJobConfig = lattice.config
@@ -35,7 +36,7 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
 
       matchedTable = selectedAttributes.foldLeft(matchedTable) {
         case (df, (columnName, displayName)) => addAllNullsIfMissingAndRename(df, columnName, displayName)
-      }
+      }.withColumn(outputAccountIdCol, col(config.accountIdCol))
       matchedTable = matchedTable.select(selectedAttributes.values.toList.map(columnName =>
         matchedTable.col(columnName)): _*)
     }

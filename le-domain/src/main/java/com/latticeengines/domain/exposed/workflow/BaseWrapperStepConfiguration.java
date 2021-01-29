@@ -20,15 +20,16 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.DeleteBy
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-@JsonSubTypes({
-        @Type(value = BaseProcessEntityStepConfiguration.class, name = "BaseProcessEntityStepConfiguration"),
-        @Type(value = ConvertBatchStoreStepConfiguration.class, name = "ConvertBatchStoreStepConfiguration"),
-        @Type(value = CleanupByUploadWrapperConfiguration.class, name = "CleanupByUploadWrapperConfiguration"),
-        @Type(value = LegacyDeleteByUploadStepConfiguration.class, name = "LegacyDeleteByUploadStepConfiguration"),
-        @Type(value = DeleteByUploadStepConfiguration.class, name = "DeleteByUploadStepConfiguration"),
-        @Type(value = LegacyDeleteStepConfiguration.class, name = "LegacyDeleteStepConfiguration")})
-        @Type(value = EnrichWebVisitStepConfiguration.class, name = "EnrichWebVisitStepConfiguration"),
-        @Type(value = RenameAndMatchStepConfiguration.class, name = "RenameAndMatchStepConfiguration") })
+@JsonSubTypes({ //
+        @Type(value = BaseProcessEntityStepConfiguration.class, name = "BaseProcessEntityStepConfiguration"), //
+        @Type(value = ConvertBatchStoreStepConfiguration.class, name = "ConvertBatchStoreStepConfiguration"), //
+        @Type(value = CleanupByUploadWrapperConfiguration.class, name = "CleanupByUploadWrapperConfiguration"), //
+        @Type(value = LegacyDeleteByUploadStepConfiguration.class, name = "LegacyDeleteByUploadStepConfiguration"), //
+        @Type(value = DeleteByUploadStepConfiguration.class, name = "DeleteByUploadStepConfiguration"), //
+        @Type(value = LegacyDeleteStepConfiguration.class, name = "LegacyDeleteStepConfiguration"), //
+        @Type(value = EnrichWebVisitStepConfiguration.class, name = "EnrichWebVisitStepConfiguration"), //
+        @Type(value = RenameAndMatchStepConfiguration.class, name = "RenameAndMatchStepConfiguration") //
+})
 public class BaseWrapperStepConfiguration extends BaseStepConfiguration {
 
     @NotNull

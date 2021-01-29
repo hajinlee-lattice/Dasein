@@ -42,6 +42,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
@@ -223,6 +224,9 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
             addBaseTables(step, masterTableName);
         }
 
+        config.accountIdCol = BooleanUtils.isTrue(getObjectFromContext(IS_CDL_TENANT, Boolean.class))
+                ? InterfaceName.EntityId.name()
+                : DataCloudConstants.ATTR_LDC_DUNS;
         config.selectedAttributes = getSelectedAttributes();
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         setTargetTable(step, ConsolidatedWebVisit.name());
@@ -407,11 +411,6 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
 
     private Map<String, String> getSelectedAttributes() {
         Map<String, String> selectedAttributes = new HashMap<>();
-        if (BooleanUtils.isTrue(getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
-            selectedAttributes.put(InterfaceName.AccountId.name(), "account_id");
-        } else {
-            selectedAttributes.put("LDC_DUNS", "account_id");
-        }
         selectedAttributes.put("WebVisitDate", "visit_date");
         selectedAttributes.put("UserId", "user_id");
         selectedAttributes.put("WebVisitPageUrl", "page_url");
