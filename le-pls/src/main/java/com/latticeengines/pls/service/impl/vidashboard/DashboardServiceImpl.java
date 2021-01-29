@@ -90,7 +90,8 @@ public class DashboardServiceImpl implements DashboardService {
     public ListSegment updateTargetAccountListMapping(@NotNull String customerSpace, String listName,
             @NotNull CSVAdaptor csvAdaptor) {
         listName = getOrUseDefaultListName(listName);
-        MetadataSegment segment = segmentProxy.getListSegmentByName(customerSpace, listName);
+        MetadataSegment segment = segmentProxy.getListSegmentByExternalInfo(customerSpace, SSVI_EXTERNAL_SYSTEM_NAME,
+                listName);
         if (segment == null) {
             // TODO throw proper UI exception
             log.error("cannot find target account list {}.", listName);

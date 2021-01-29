@@ -59,7 +59,7 @@ public class SSVIResource {
     @PutMapping("/target-account-lists/default/mappings")
     @ResponseBody
     @ApiOperation("update default target account list segment's field Mappings")
-    public ListSegment createSegment(@RequestBody CSVAdaptor csvAdaptor) {
+    public ListSegment updateTargetAccountListMappings(@RequestBody CSVAdaptor csvAdaptor) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return dashboardService.updateTargetAccountListMapping(customerSpace.toString(), null, csvAdaptor);
     }
