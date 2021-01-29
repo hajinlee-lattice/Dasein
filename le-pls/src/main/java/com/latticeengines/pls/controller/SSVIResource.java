@@ -4,6 +4,9 @@ import javax.inject.Inject;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,6 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardResponse;
+import com.latticeengines.domain.exposed.cdl.dashboard.TargetAccountList;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
 
 import io.swagger.annotations.Api;
@@ -31,5 +38,29 @@ public class SSVIResource {
     public DashboardResponse getDashboardList() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return dashboardService.getDashboardList(customerSpace.toString());
+    }
+
+    @PostMapping("/target-account-lists")
+    @ResponseBody
+    @ApiOperation("create default target account list segment")
+    public MetadataSegment createDefaultTargetAccountList() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        return dashboardService.createTargetAccountList(customerSpace.toString(), null);
+    }
+
+    @GetMapping("/target-account-lists/default")
+    @ResponseBody
+    @ApiOperation("retrieve default target account list segment")
+    public TargetAccountList getDefaultTargetAccountList() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        return dashboardService.getTargetAccountList(customerSpace.toString(), null);
+    }
+
+    @PutMapping("/target-account-lists/default/mappings")
+    @ResponseBody
+    @ApiOperation("update default target account list segment's field Mappings")
+    public ListSegment updateTargetAccountListMappings(@RequestBody CSVAdaptor csvAdaptor) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        return dashboardService.updateTargetAccountListMapping(customerSpace.toString(), null, csvAdaptor);
     }
 }
