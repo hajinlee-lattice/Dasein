@@ -218,7 +218,7 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
 
     @Override
     public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
-                                                                            String signature, boolean withStreamName) {
+            String signature, boolean withStreamName) {
         if (StringUtils.isBlank(signature)) {
             signature = getDimensionMetadataSignature(MultiTenantContext.getShortTenantId());
             if (StringUtils.isBlank(signature)) {
@@ -247,6 +247,13 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     }
 
     @Override
+    @WithCustomerSpace
+    public List<ActivityMetricsGroup> findByTenant(String customerSpace) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return activityMetricsGroupEntityMgr.findByTenant(tenant);
+    }
+
+    @Override
     public Map<String, String> allocateDimensionId(@NotNull String customerSpace,
             @NotNull Set<String> dimensionValues) {
         return dimensionMetadataService.allocateDimensionId(MultiTenantContext.getShortTenantId(), dimensionValues);
@@ -265,7 +272,7 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @Override
     public List<AtlasStream> getStreams(String customerSpace) {
         List<AtlasStream> streams = streamEntityMgr.findByTenant(MultiTenantContext.getTenant());
-        for (AtlasStream stream: streams) {
+        for (AtlasStream stream : streams) {
             stream.setTenant(null);
             stream.setDimensions(null);
         }
@@ -275,7 +282,8 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @Override
     @WithCustomerSpace
     public List<AtlasStream> getStreamsByStreamType(String customerSpace, AtlasStream.StreamType streamType) {
-        List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(MultiTenantContext.getTenant(), streamType);
+        List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(MultiTenantContext.getTenant(),
+                streamType);
         return CollectionUtils.isEmpty(streams) ? Collections.emptyList() : streams;
     }
 
@@ -297,12 +305,12 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         Tenant tenant = MultiTenantContext.getTenant();
         Map<AtlasStream.StreamType, List<String>> map = new HashMap<>();
         Arrays.stream(AtlasStream.StreamType.values()).forEach(type -> {
-          List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(tenant, type);
-          if (CollectionUtils.isNotEmpty(streams)) {
-              map.put(type, streams.stream().map(AtlasStream::getName).collect(Collectors.toList()));
-          } else {
-              map.put(type, Collections.emptyList());
-          }
+            List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(tenant, type);
+            if (CollectionUtils.isNotEmpty(streams)) {
+                map.put(type, streams.stream().map(AtlasStream::getName).collect(Collectors.toList()));
+            } else {
+                map.put(type, Collections.emptyList());
+            }
         });
         return map;
     }

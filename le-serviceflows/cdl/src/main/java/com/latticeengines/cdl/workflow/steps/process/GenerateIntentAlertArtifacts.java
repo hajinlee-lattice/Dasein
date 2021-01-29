@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -27,8 +28,10 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -76,10 +79,6 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
     private Table rawStreamTable = null;
     private Table ibmTable = null;
     private Table bsbmTable = null;
-
-    // DNBIntent related MetricsGroup ids
-    private static final String INTENTDATA_BY_MODELNAME_GROUPID = "ibm";
-    private static final String BUYING_STAGE_BY_MODEL_GROUPID = "bsbm";
 
     private static final List<String> SELECTED_ATTRIBUTES = ImmutableList.of("ModelName", "Stage", "LDC_Name",
             "LDC_City", "STATE_PROVINCE_ABBR", "LDC_Country", "LDC_PrimaryIndustry", "LE_REVENUE_RANGE", "LDC_DUNS");
@@ -136,13 +135,31 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
             throw new RuntimeException("GenerateIntentAlertArtifacts failed due to no active RawStream table");
         }
 
-        // Get all MetricsGroup related tables
-        List<String> metricsGroupsignatures = Arrays.asList(INTENTDATA_BY_MODELNAME_GROUPID,
-                BUYING_STAGE_BY_MODEL_GROUPID);
+        // Loop through the metricGroup list to find the targeted groupIds
+        String buyingStageGroupId = null;
+        String hasIntentTimerangeGroupId = null;
+        List<ActivityMetricsGroup> metricsGroups = activityStoreProxy.findGroupsByTenant(customerSpace.toString());
+        for (ActivityMetricsGroup group : metricsGroups) {
+            if (group.getCategory() == Category.DNBINTENTDATA_PROFILE) {
+                String targetAttr = group.getAggregation().getTargetAttribute();
+                if (StringUtils.equalsIgnoreCase(targetAttr, InterfaceName.BuyingScore.name())) {
+                    buyingStageGroupId = group.getGroupId();
+                } else if (StringUtils.equalsIgnoreCase(targetAttr, InterfaceName.HasIntent.name())) {
+                    if (group.getActivityTimeRange().getParamSet().size() > 1) {
+                        hasIntentTimerangeGroupId = group.getGroupId();
+                    }
+                }
+            }
+        }
+        if (buyingStageGroupId == null || hasIntentTimerangeGroupId == null) {
+            throw new RuntimeException("GenerateIntentAlertArtifacts failed due to missing metricGroup");
+        }
+        // Find the corresponding MetricsGroup table using groupId
+        List<String> metricsGroupsignatures = Arrays.asList(hasIntentTimerangeGroupId, buyingStageGroupId);
         Map<String, String> tableNamesMap = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
                 TableRoleInCollection.MetricsGroup, activeVersion, metricsGroupsignatures);
-        ibmTable = metadataProxy.getTable(customerSpace.toString(), tableNamesMap.get(INTENTDATA_BY_MODELNAME_GROUPID));
-        bsbmTable = metadataProxy.getTable(customerSpace.toString(), tableNamesMap.get(BUYING_STAGE_BY_MODEL_GROUPID));
+        ibmTable = metadataProxy.getTable(customerSpace.toString(), tableNamesMap.get(hasIntentTimerangeGroupId));
+        bsbmTable = metadataProxy.getTable(customerSpace.toString(), tableNamesMap.get(buyingStageGroupId));
         if (ibmTable == null || bsbmTable == null) {
             log.error("Missing DNBIntent MetricsGroup related tables");
             throw new RuntimeException(

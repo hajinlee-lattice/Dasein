@@ -181,6 +181,13 @@ public class ActivityStoreResource {
         return activityStoreService.findGroupByGroupId(customerSpace, groupId);
     }
 
+    @GetMapping("/metricsGroups")
+    @ResponseBody
+    @ApiOperation("Retrieve metricsGroup list by tenant")
+    public List<ActivityMetricsGroup> findGroupsByTenant(@PathVariable(value = "customerSpace") String customerSpace) {
+        return activityStoreService.findByTenant(customerSpace);
+    }
+
     @DeleteMapping("/dimensionMetadata/{signature}")
     @ResponseBody
     @ApiOperation("Clear all dimension metadata associated with given signature")
