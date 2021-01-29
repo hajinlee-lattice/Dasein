@@ -102,7 +102,7 @@ public class FinishReportGenerationStep extends BaseSparkStep<ProcessStepConfigu
                 parquetWebVisit.getPath());
         Table table = toTable(parquetWebVisitTableName, parquetWebVisit);
         metadataProxy.createTable(customer, parquetWebVisitTableName, table);
-        boolean skipped = exportToS3(table);
+        boolean skipped = exportToS3(table, true, DataUnit.DataFormat.PARQUET);
         if (skipped) {
             log.info("Skip exporting web visit table to s3");
         } else {

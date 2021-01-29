@@ -123,6 +123,7 @@ public class EntityMatchCheckpoint extends BaseWorkflowStep<ProcessStepConfigura
                     customerSpace.toString(), table, //
                     pathBuilder, s3Bucket, podId, //
                     yarnConfiguration, //
+                    null, //
                     fileStatus -> true);
             if (batchStoreRequest == null) {
                 throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);

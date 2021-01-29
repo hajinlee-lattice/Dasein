@@ -41,6 +41,7 @@ public class HdfsS3ImporterExporter implements Runnable {
     private boolean isSync;
     private boolean isImportFolder;
     private boolean isExportFolder;
+    private DataUnit.DataFormat dataFormat;
 
     public HdfsS3ImporterExporter(String customerSpace, //
                            Configuration distCpConfiguration, //
@@ -60,6 +61,7 @@ public class HdfsS3ImporterExporter implements Runnable {
         this.isSync = request.isSync;
         this.isImportFolder = request.isImportFolder;
         this.isExportFolder = request.isExportFolder;
+        this.dataFormat = request.dataFormat;
     }
 
     @Override
@@ -135,6 +137,7 @@ public class HdfsS3ImporterExporter implements Runnable {
             unit.setTenant(tenantId);
             unit.setName(tableName);
             unit.setLinkedDir(tgtPath);
+            unit.setDataFormat(dataFormat);
             DataUnit created = dataUnitProxy.create(customerSpace, unit);
             log.info("Registered DataUnit: " + JsonUtils.pprint(created));
         } else {
