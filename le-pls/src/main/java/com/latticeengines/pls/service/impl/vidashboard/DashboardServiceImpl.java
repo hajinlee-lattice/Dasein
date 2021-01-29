@@ -20,10 +20,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardResponse;
+import com.latticeengines.domain.exposed.cdl.dashboard.TargetAccountList;
 import com.latticeengines.domain.exposed.looker.EmbedUrlData;
 import com.latticeengines.domain.exposed.looker.EmbedUrlUtils;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
-import com.latticeengines.domain.exposed.metadata.ListSegmentSummary;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
@@ -103,7 +103,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public ListSegmentSummary getTargetAccountList(String customerSpace, String listName) {
+    public TargetAccountList getTargetAccountList(String customerSpace, String listName) {
         listName = getOrUseDefaultListName(listName);
         MetadataSegment segment = segmentProxy.getListSegmentByExternalInfo(customerSpace, SSVI_EXTERNAL_SYSTEM_NAME,
                 listName);
@@ -112,12 +112,12 @@ public class DashboardServiceImpl implements DashboardService {
             log.error("cannot find target account list {}.", listName);
             throw new IllegalArgumentException(String.format("cannot find target account list %s.", listName));
         }
-        return generateListSegmentSummary(customerSpace, segment);
+        return toTargetAccountList(customerSpace, segment);
     }
 
     @Override
     public void deleteTargetAccountList(String customerSpace, String listName) {
-        ListSegmentSummary list = getTargetAccountList(customerSpace, listName);
+        TargetAccountList list = getTargetAccountList(customerSpace, listName);
         if (list == null) {
             // TODO throw proper UI exception
             log.error("cannot find target account list {}.", listName);
@@ -126,17 +126,17 @@ public class DashboardServiceImpl implements DashboardService {
         segmentProxy.deleteSegmentByName(customerSpace, listName, false);
     }
 
-    private ListSegmentSummary generateListSegmentSummary(@NotNull String customerSpace,
+    private TargetAccountList toTargetAccountList(@NotNull String customerSpace,
             @NotNull MetadataSegment segment) {
         ListSegment listSegment = segment.getListSegment();
-        ListSegmentSummary segmentSummary = new ListSegmentSummary();
-        segmentSummary.setSegmentName(segment.getName());
-        segmentSummary.setCsvAdaptor(listSegment.getCsvAdaptor());
-        segmentSummary.setS3UploadDropFolder(listSegment.getS3DropFolder());
+        TargetAccountList targetAccountList = new TargetAccountList();
+        targetAccountList.setSegmentName(segment.getName());
+        targetAccountList.setCsvAdaptor(listSegment.getCsvAdaptor());
+        targetAccountList.setS3UploadDropFolder(listSegment.getS3DropFolder());
         Map<String, String> dataTemplates = listSegment.getDataTemplates();
         if (MapUtils.isEmpty(dataTemplates) || !dataTemplates.containsKey(BusinessEntity.Account.name())) {
             log.warn("No account data template in target account list {}", segment.getName());
-            return segmentSummary;
+            return targetAccountList;
         }
         String dataTemplateId = dataTemplates.get(BusinessEntity.Account.name());
         DataUnit dataUnit = dataUnitProxy.getByDataTemplateIdAndRole(customerSpace, dataTemplateId,
@@ -144,17 +144,17 @@ public class DashboardServiceImpl implements DashboardService {
         if (dataUnit == null) {
             log.warn("No data unit found for target account list {} and data template {}", segment.getName(),
                     dataTemplateId);
-            return segmentSummary;
+            return targetAccountList;
         }
 
         AthenaDataUnit athenaDataUnit = (AthenaDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
                 dataUnit.getName(), DataUnit.StorageType.Athena);
         S3DataUnit dataUnit1 = (S3DataUnit) dataUnit;
-        segmentSummary.setTableName(dataUnit1.getName());
-        segmentSummary.setTableLocation(dataUnit1.getLinkedDir());
-        segmentSummary.setTableHdfsLocation(dataUnit1.getLinkedHdfsPath());
-        segmentSummary.setAthenaTableName(athenaDataUnit == null ? null : athenaDataUnit.getAthenaTable());
-        return segmentSummary;
+        targetAccountList.setTableName(dataUnit1.getName());
+        targetAccountList.setS3Path(dataUnit1.getLinkedDir());
+        targetAccountList.setHdfsPath(dataUnit1.getLinkedHdfsPath());
+        targetAccountList.setAthenaTableName(athenaDataUnit == null ? null : athenaDataUnit.getAthenaTable());
+        return targetAccountList;
     }
 
     private MetadataSegment generateMetadataSegment(String listName) {
@@ -231,7 +231,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private String getTargetAccountTableName(String customerSpace) {
-        ListSegmentSummary defaultTargetAccountList = getTargetAccountList(customerSpace, null);
+        TargetAccountList defaultTargetAccountList = getTargetAccountList(customerSpace, null);
         return defaultTargetAccountList == null ? null : defaultTargetAccountList.getAthenaTableName();
     }
 }

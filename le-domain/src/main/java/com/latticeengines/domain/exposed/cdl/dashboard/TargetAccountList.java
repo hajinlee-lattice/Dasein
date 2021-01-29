@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.metadata;
+package com.latticeengines.domain.exposed.cdl.dashboard;
 
 import java.io.Serializable;
 
@@ -15,22 +15,28 @@ import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
         getterVisibility = JsonAutoDetect.Visibility.NONE, //
         setterVisibility = JsonAutoDetect.Visibility.NONE //
 )
-public class ListSegmentSummary implements Serializable {
+public class TargetAccountList implements Serializable {
 
-    private static final long serialVersionUID = -8532367815438372760L;
+    private static final long serialVersionUID = -8532367815438155760L;
 
-    @JsonProperty("segment_name")
+    @JsonProperty("name")
     private String segmentName;
-    @JsonProperty("csv_adaptor")
+
+    @JsonProperty("mappings")
     private CSVAdaptor csvAdaptor;
-    @JsonProperty("s3_upload_dropfolder")
+
+    @JsonProperty("s3_drop_folder")
     private String s3UploadDropFolder;
-    @JsonProperty("table_location")
-    private String tableLocation;
-    @JsonProperty("table_hdfs_location")
-    private String tableHdfsLocation;
+
     @JsonProperty("table_name")
     private String tableName;
+
+    @JsonProperty("s3_path")
+    private String s3Path;
+
+    @JsonProperty("hdfs_path")
+    private String hdfsPath;
+
     @JsonProperty("athena_table_name")
     private String athenaTableName;
 
@@ -58,14 +64,6 @@ public class ListSegmentSummary implements Serializable {
         this.s3UploadDropFolder = s3UploadDropFolder;
     }
 
-    public String getTableLocation() {
-        return tableLocation;
-    }
-
-    public void setTableLocation(String tableLocation) {
-        this.tableLocation = tableLocation;
-    }
-
     public String getTableName() {
         return tableName;
     }
@@ -74,19 +72,27 @@ public class ListSegmentSummary implements Serializable {
         this.tableName = tableName;
     }
 
+    public String getS3Path() {
+        return s3Path;
+    }
+
+    public void setS3Path(String s3Path) {
+        this.s3Path = s3Path;
+    }
+
+    public String getHdfsPath() {
+        return hdfsPath;
+    }
+
+    public void setHdfsPath(String hdfsPath) {
+        this.hdfsPath = hdfsPath;
+    }
+
     public String getAthenaTableName() {
         return athenaTableName;
     }
 
     public void setAthenaTableName(String athenaTableName) {
         this.athenaTableName = athenaTableName;
-    }
-
-    public String getTableHdfsLocation() {
-        return tableHdfsLocation;
-    }
-
-    public void setTableHdfsLocation(String tableHdfsLocation) {
-        this.tableHdfsLocation = tableHdfsLocation;
     }
 }
