@@ -453,7 +453,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
             CURATED_ACCOUNT_STATS_TABLE_NAME, //
             CURATED_CONTACT_SERVING_TABLE_NAME, //
-            CURATED_CONTACT_STATS_TABLE_NAME //
+            CURATED_CONTACT_STATS_TABLE_NAME, //
+            SSVI_WEBVISIT_RAW_TABLE //
     );
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME);
 

@@ -53,7 +53,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -122,15 +121,10 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         int mergeWebVisitStep = -1;
-        if (Boolean.FALSE.equals(getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
+        if (BooleanUtils.isNotTrue(getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
             buildWebVisitImportColumnNames();
             if (!CollectionUtils.isEmpty(webVisitImports)) {
                 log.info("find new webVisit Import, do mergeWebVisitImport and match.");
-                /*-
-                 * normal steps:
-                 * 1. merge imports
-                 * 2. match against current universe
-                 */
                 List<String> importTables = webVisitImports.stream() //
                         .map(ActivityImport::getTableName) //
                         .collect(Collectors.toList());
@@ -165,8 +159,6 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
     protected void onPostTransformationCompleted() {
         String tableName = getFullTableName(ConsolidatedWebVisit.name());
         exportToS3AndAddToContext(tableName, SSVI_WEBVISIT_RAW_TABLE);
-        dataUnitProxy.registerAthenaDataUnit(customerSpace.toString(), tableName);
-        dataCollectionProxy.upsertTable(customerSpace.toString(), tableName, ConsolidatedWebVisit, inactive);
     }
 
     private boolean isShortCutMode() {
@@ -231,7 +223,6 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
             addBaseTables(step, masterTableName);
         }
 
-        config.setSpecialTarget(0, DataUnit.DataFormat.PARQUET);
         config.selectedAttributes = getSelectedAttributes();
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         setTargetTable(step, ConsolidatedWebVisit.name());

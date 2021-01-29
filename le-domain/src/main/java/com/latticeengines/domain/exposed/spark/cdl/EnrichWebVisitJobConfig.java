@@ -29,9 +29,6 @@ public class EnrichWebVisitJobConfig extends SparkJobConfig implements Serializa
     @JsonProperty
     public Integer latticeAccountTableIdx;
 
-    @JsonProperty
-    public int targetNum;
-
     @Override
     public int getNumTargets() {
         return 1;

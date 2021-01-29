@@ -21,8 +21,6 @@ import scala.collection.JavaConverters.mapAsScalaMapConverter
 
 class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
 
-  val partitionKey: String = StreamDateId.name()
-
   override def runJob(spark: SparkSession, lattice: LatticeContext[EnrichWebVisitJobConfig]): Unit = {
     val config: EnrichWebVisitJobConfig = lattice.config
     val selectedAttributes = config.selectedAttributes.asScala

@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.EnrichWebVisitStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 
 public class GenerateVisitReportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -17,15 +18,18 @@ public class GenerateVisitReportWorkflowConfiguration extends BaseCDLWorkflowCon
         private GenerateVisitReportWorkflowConfiguration configuration = new GenerateVisitReportWorkflowConfiguration();
         private EnrichWebVisitStepConfiguration enrichWebVisitSparkStepConfiguration =
                 new EnrichWebVisitStepConfiguration();
+        private ProcessStepConfiguration finishReportGenerationStepConfig = new ProcessStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
+            finishReportGenerationStepConfig.setCustomerSpace(customerSpace);
             enrichWebVisitSparkStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
+            finishReportGenerationStepConfig.setInternalResourceHostPort(internalResourceHostPort);
             enrichWebVisitSparkStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
@@ -69,6 +73,7 @@ public class GenerateVisitReportWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.setContainerConfiguration("generateVisitReportWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(enrichWebVisitSparkStepConfiguration);
+            configuration.add(finishReportGenerationStepConfig);
             return configuration;
         }
     }
