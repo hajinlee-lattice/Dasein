@@ -100,7 +100,12 @@ public class FinishReportGenerationStep extends BaseSparkStep<ProcessStepConfigu
                 parquetWebVisit.getPath());
         Table table = toTable(parquetWebVisitTableName, parquetWebVisit);
         metadataProxy.createTable(customer, parquetWebVisitTableName, table);
-        dataUnitProxy.registerAthenaDataUnit(customerSpace.toString(), parquetWebVisitTableName);
+        boolean skipped = exportToS3(table);
+        if (skipped) {
+            log.info("Skip exporting web visit table to s3");
+        } else {
+            dataUnitProxy.registerAthenaDataUnit(customerSpace.toString(), parquetWebVisitTableName);
+        }
         dataCollectionProxy.upsertTable(customerSpace.toString(), parquetWebVisitTableName, ConsolidatedWebVisit,
                 inactive);
     }
