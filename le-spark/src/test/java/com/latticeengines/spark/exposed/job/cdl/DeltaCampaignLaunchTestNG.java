@@ -322,18 +322,19 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         addAccounts = new Object[][] { //
                 { "0L", "0000", "destinationAccountId", "Lattice", "Lattice Engines", 98, "A", "1000",
                         "www.lattice-engines.com", "01/01/2019" }, //
-                { "1L", "0001", "destinationAccountId", "DnB", "DnB", 97, "B", "2000", "www.dnb.com", "01/01/2019" }, //
+                { "1L", "0001", null, "DnB", "DnB", 97, "B", "2000", "www.dnb.com",
+                        "01/01/2019" }, //
                 { "2L", "0002", "destinationAccountId", "Google", "Google", 98, "C", "3000", "www.google.com",
                         "01/01/2019" }, //
                 { "3L", "0003", "destinationAccountId", "Facebook", "FB", 93, "E", "1000000", "www.facebook.com",
                         "01/01/2019" }, //
-                { "4L", "0004", "destinationAccountId", "Apple", "Apple", null, null, null, "www.apple.com",
+                { "4L", "0004", "", "Apple", "Apple", null, null, null, "www.apple.com",
                         "01/01/2019" }, //
                 { "5L", "0005", "destinationAccountId", "SalesForce", "SalesForce", null, "A", null,
                         "www.salesforce.com", "01/01/2019" }, //
                 { "6L", "0006", "destinationAccountId", "Adobe", "Adobe", 98, null, "1000", "www.adobe.com",
                         "01/01/2019" }, //
-                { "7L", "0007", "destinationAccountId", "Eloqua", "Eloqua", 40, "F", "100", "www.eloqua.com",
+                { "7L", "0007", null, "Eloqua", "Eloqua", 40, "F", "100", "www.eloqua.com",
                         "01/01/2019" }, //
                 { "8L", "0008", "destinationAccountId", "Dell", "Dell", 8, "F", "10", "www.dell.com", "01/01/2019" }, //
                 { "9L", "0009", "destinationAccountId", "HP", "HP", 38, "E", "500", "www.hp.com", "01/01/2019" }, //
