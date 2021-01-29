@@ -95,14 +95,17 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         TimeLine created = timeLineService.createOrUpdateTimeLine(mainCustomerSpace, timeLine1);
         Assert.assertNotNull(created.getPid());
         Assert.assertNotNull(created.getTimelineId());
-
-        created = timeLineService.findByPid(mainCustomerSpace, created.getPid());
-
+        AtomicReference<TimeLine> createdAtom = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom.set(timeLineService.findByPid(mainCustomerSpace, timeLine1.getPid()));
+            Assert.assertNotNull(createdAtom.get());
+            return true;
+        });
+        created = createdAtom.get();
         Assert.assertEquals(created.getName(), timelineName1);
         Assert.assertTrue(created.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity.name()));
         Assert.assertTrue(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).containsKey(MOTION));
         Assert.assertEquals(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
-        AtomicReference<TimeLine> createdAtom = new AtomicReference<>();
         retry.execute(context -> {
             createdAtom.set(timeLineService.findByTimelineId(mainCustomerSpace, timeLine1.getTimelineId()));
             Assert.assertNotNull(createdAtom.get());
