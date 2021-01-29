@@ -63,12 +63,14 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         verifyCleanupAllAttrConfig();
         verifyCleanup();
+        logCount();
         if (isLocalEnvironment()) {
             processAnalyzeSkipPublishToS3();
         } else {
             processAnalyze();
         }
         Assert.assertEquals(1, verifyAction());
+        logCount();
         verifyProcess();
         verifyCleanupAll();
     }
@@ -158,6 +160,13 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         verifyStatsCubes();
     }
 
+    private void logCount() {
+        long accountCount = countTableRole(BusinessEntity.Account.getBatchStore());
+        log.info("Account Batch Count: " + accountCount);
+        long contactCount = countTableRole(BusinessEntity.Contact.getBatchStore());
+        log.info("Contact Batch Count: " + contactCount);
+    }
+
     private void verifyStatsCubes() {
         StatisticsContainer container = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertTrue(container.getStatsCubes().containsKey(BusinessEntity.Contact.name()),
@@ -167,7 +176,8 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     private void importData() {
-        mockCSVImport(BusinessEntity.Contact, 2, "DefaultSystem_ContactData");
+        long mockImported = mockCSVImport(BusinessEntity.Contact, 2, "DefaultSystem_ContactData");
+        log.info("Mock imported Contact records: " + mockImported);
     }
 
 }
