@@ -37,12 +37,16 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.cdl.workflow.steps.merge.MatchUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -50,6 +54,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -188,8 +193,7 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
         // set stream type to source entity to get higher concurrency
         baseMatchInput.setSourceEntity(stream.getStreamType().name());
         // match entity
-        matchConfig = MatchUtils.getLegacyMatchConfigForAccount(customerSpace.toString(), baseMatchInput,
-                importTableColumns);
+        matchConfig = getMatchConfig(baseMatchInput, importTableColumns);
         steps.add(match(matchInputTableIdx, null, matchConfig));
     }
 
@@ -259,10 +263,20 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
         return step;
     }
 
+    private String getMatchConfig(MatchInput baseMatchInput, Set<String> columnNames) {
+        MatchTransformerConfig config = new MatchTransformerConfig();
+        baseMatchInput.setCustomSelection(getDataCloudAttrColumns());
+        baseMatchInput.setOperationalMode(OperationalMode.LDC_MATCH);
+        baseMatchInput.setKeyMap(MatchUtils.getAccountMatchKeysAccount(columnNames, null, false, null));
+        baseMatchInput.setPartialMatchEnabled(true);
+        baseMatchInput.setTenant(new Tenant(customerSpace.toString()));
+        config.setMatchInput(baseMatchInput);
+        return JsonUtils.serialize(config);
+    }
+
     private MatchInput getBaseMatchInput() {
         MatchInput matchInput = new MatchInput();
         matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
-        matchInput.setApplicationId(getApplicationId());
         matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
         matchInput.setExcludePublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(false);
@@ -389,9 +403,24 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
         return tables;
     }
 
-    private static Map<String, String> getSelectedAttributes() {
+    private static ColumnSelection getDataCloudAttrColumns() {
+        ColumnSelection selection = new ColumnSelection();
+        List<String> cols = Arrays.asList("LE_GlobalUlt_salesUSD", "LE_DomUlt_SalesUSD", "LE_GlobalULt_EmployeeTotal",
+                "LE_DomUlt_EmployeeTotal", "LDC_DUNS", "DOMESTIC_ULTIMATE_DUNS_NUMBER", "GLOBAL_ULTIMATE_DUNS_NUMBER",
+                "LE_SIC_CODE", "LE_Site_NAICS_Code", "LE_INDUSTRY", "LE_EMPLOYEE_RANGE", "LE_REVENUE_RANGE",
+                "LE_IS_PRIMARY_DOMAIN", "LDC_Domain", "LDC_Name", "LDC_Country", "LDC_State", "LDC_City",
+                "LE_DNB_TYPE");
+        selection.setColumns(cols.stream().map(Column::new).collect(Collectors.toList()));
+        return selection;
+    }
+
+    private Map<String, String> getSelectedAttributes() {
         Map<String, String> selectedAttributes = new HashMap<>();
-        selectedAttributes.put("AccountId", "account_id");
+        if (BooleanUtils.isTrue(getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
+            selectedAttributes.put(InterfaceName.AccountId.name(), "account_id");
+        } else {
+            selectedAttributes.put("LDC_DUNS", "account_id");
+        }
         selectedAttributes.put("WebVisitDate", "visit_date");
         selectedAttributes.put("UserId", "user_id");
         selectedAttributes.put("WebVisitPageUrl", "page_url");

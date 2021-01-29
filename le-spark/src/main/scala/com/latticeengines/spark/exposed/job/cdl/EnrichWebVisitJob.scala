@@ -59,7 +59,7 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
   // hard-code parsing utm code (from google analytics) on web visit url for now
   // since we only have one url column and one vendor
   private def parseUtmCodes(df: DataFrame): DataFrame = {
-    val urlCol = WebVisitPageUrl.name
+    val urlCol = "page_url"
     if (!df.columns.contains(urlCol)) {
       df
     } else {
@@ -80,7 +80,7 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
         } else None
     }
     val queryParam = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, col.name)
-    df.withColumn(col.name, urlDecode(callUDF("parse_url", df.col(urlCol), lit("QUERY"), lit(queryParam))))
+    df.withColumn(queryParam, urlDecode(callUDF("parse_url", df.col(urlCol), lit("QUERY"), lit(queryParam))))
   }
 
   def addAllNullsIfMissingAndRename(df: DataFrame, requiredCol: String, displayName: String): DataFrame = {
