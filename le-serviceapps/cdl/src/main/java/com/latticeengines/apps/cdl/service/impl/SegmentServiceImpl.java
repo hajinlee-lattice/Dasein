@@ -135,7 +135,9 @@ public class SegmentServiceImpl implements SegmentService {
             if (existingSegment != null) {
                 persistedSegment = segmentEntityMgr.updateListSegment(segment, existingSegment);
             } else {
-                segment.setName(NamingUtils.timestampWithRandom("Segment"));
+                if (StringUtils.isEmpty(existingSegment.getName())){
+                    segment.setName(NamingUtils.timestampWithRandom("Segment"));
+                }
                 persistedSegment = createListSegment(segment);
             }
         } else if (StringUtils.isNotEmpty(segment.getName())) {
