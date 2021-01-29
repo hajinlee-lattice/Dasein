@@ -11,10 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -104,7 +106,9 @@ public class FinishReportGenerationStep extends BaseSparkStep<ProcessStepConfigu
         if (skipped) {
             log.info("Skip exporting web visit table to s3");
         } else {
-            dataUnitProxy.registerAthenaDataUnit(customerSpace.toString(), parquetWebVisitTableName);
+            RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(10, 2000, 1.5, null);
+            template.execute(
+                    ctx -> dataUnitProxy.registerAthenaDataUnit(customerSpace.toString(), parquetWebVisitTableName));
         }
         dataCollectionProxy.upsertTable(customerSpace.toString(), parquetWebVisitTableName, ConsolidatedWebVisit,
                 inactive);

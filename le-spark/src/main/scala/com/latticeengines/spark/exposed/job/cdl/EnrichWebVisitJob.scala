@@ -34,10 +34,11 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
         matchedTable = matchedTable.join(latticeAccountTable, Seq(AccountId.name), "left")
       }
 
-      matchedTable = selectedAttributes.foldLeft(matchedTable) {
+      matchedTable = selectedAttributes.foldLeft(matchedTable
+        .withColumn(outputAccountIdCol, col(config.accountIdCol))) {
         case (df, (columnName, displayName)) => addAllNullsIfMissingAndRename(df, columnName, displayName)
-      }.withColumn(outputAccountIdCol, col(config.accountIdCol))
-      matchedTable = matchedTable.select(selectedAttributes.values.toList.map(columnName =>
+      }
+      matchedTable = matchedTable.select(col(outputAccountIdCol) :: selectedAttributes.values.toList.map(columnName =>
         matchedTable.col(columnName)): _*)
     }
     if (config.masterInputIdx != null) {
