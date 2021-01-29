@@ -150,7 +150,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         BusinessEntity mainEntity = channelConfig.getAudienceType().asBusinessEntity();
         boolean useContactsPerAccountLimit = hasContactsPerAccountLimit(channel, mainEntity);
         HdfsDataUnit perAccountLimitedContacts  = useContactsPerAccountLimit ? //
-                getObjectFromContext(FULL_CONTACTS_UNIVERSE + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class) : new HdfsDataUnit();
+                getObjectFromContext(FULL_CONTACTS_UNIVERSE + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class) : null;
         HdfsDataUnit positiveDeltaDataUnit = getObjectFromContext(
                 getAddDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class);
         HdfsDataUnit negativeDeltaDataUnit = getObjectFromContext(

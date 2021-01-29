@@ -46,7 +46,10 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
     if (positiveDeltaDf.rdd.isEmpty()) {
       positiveDeltaDf = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
     }
-    val perAccountLimitedContactsDf = lattice.input(5)
+    var perAccountLimitedContactsDf = lattice.input(5)
+    if (perAccountLimitedContactsDf.rdd.isEmpty()) {
+      perAccountLimitedContactsDf = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], getSchema(mainEntity))
+    }
     var distinctPositiveAccountsDf = positiveDeltaDf
     var distinctNegativeAccountsDf = negativeDeltaDf
     enrichAttributes(accountsDf, accountAttributes)
@@ -76,7 +79,7 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
       }
 
       if (config.useContactsPerAccountLimit) {
-        fullContactsData = fullContactsData.drop(accountId).join(perAccountLimitedContactsDf, Seq(contactId), "inner").select(fullContactsData + ".*")
+        fullContactsData = fullContactsData.drop(accountId).join(perAccountLimitedContactsDf, Seq(contactId), "inner")
       }
 
       lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData)

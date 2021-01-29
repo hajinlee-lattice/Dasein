@@ -59,6 +59,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     private DataUnit accountData;
     private DataUnit contactData;
     private DataUnit contactNoContactCountryData;
+    private DataUnit limitedContactsData;
 
     private HdfsFileFilter avroFileFilter = new HdfsFileFilter() {
         @Override
@@ -187,6 +188,13 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
                     .fromPath("/tmp/testGenerateLaunchArtifacts" + fileName + extension);
             logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName));
 
+            fileName = "limitedContacts";
+            createAvroFromJson(fileName,
+                    String.format("com/latticeengines/common/exposed/util/SparkCountRecordsTest/%sData.json", fileName),
+                    deltaContactSchema, DeltaContact.class, yarnConfiguration);
+            limitedContactsData = HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName + extension);
+            logHDFSDataUnit(fileName, HdfsDataUnit.fromPath("/tmp/testGenerateLaunchArtifacts" + fileName));
+
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -194,20 +202,21 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     }
 
     private void putDataUnits(DataUnit accountDataUnit, DataUnit contactDataUnit, DataUnit targetSegmentsContactsDataUnit,
-                              DataUnit negativeDeltaDataUnit, DataUnit positiveDeltaDataUnit) {
+                              DataUnit negativeDeltaDataUnit, DataUnit positiveDeltaDataUnit, DataUnit perAccountLimitedContacts) {
         Map<String, DataUnit> inputUnits = new HashMap<>();
         inputUnits.put("Input0", accountDataUnit);
         inputUnits.put("Input1", contactDataUnit);
         inputUnits.put("Input2", targetSegmentsContactsDataUnit);
         inputUnits.put("Input3", negativeDeltaDataUnit);
         inputUnits.put("Input4", positiveDeltaDataUnit);
+        inputUnits.put("Input5", perAccountLimitedContacts);
         setInputUnits(inputUnits);
     }
 
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForAccountEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        putDataUnits(accountData, contactData, contactData, negativeAccounts, positiveAccounts);
+        putDataUnits(accountData, contactData, contactData, negativeAccounts, positiveAccounts, null);
         config.setMainEntity(BusinessEntity.Account);
         config.setWorkspace("testGenerateLaunchArtifactsForAccountEntity");
 
@@ -224,7 +233,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForAccountEntityWithoutContacts() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        putDataUnits(accountData, null, null, negativeAccounts, positiveAccounts);
+        putDataUnits(accountData, null, null, negativeAccounts, positiveAccounts, null);
         config.setMainEntity(BusinessEntity.Account);
         config.setWorkspace("testGenerateLaunchArtifactsForAccountEntity");
 
@@ -241,7 +250,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForExtraNegativeAccountEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        putDataUnits(accountData, contactData, contactData, negativeExtraAccounts, positiveAccounts);
+        putDataUnits(accountData, contactData, contactData, negativeExtraAccounts, positiveAccounts, null);
         config.setMainEntity(BusinessEntity.Account);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
 
@@ -258,7 +267,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForContactEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        putDataUnits(accountData, contactData, contactData, negativeContacts, positiveContacts);
+        putDataUnits(accountData, contactData, contactData, negativeContacts, positiveContacts, null);
         config.setMainEntity(BusinessEntity.Contact);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
 
@@ -277,7 +286,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForExtraNegativeContactEntity() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        putDataUnits(accountData, contactData, contactData, negativeExtraContacts, positiveContacts);
+        putDataUnits(accountData, contactData, contactData, negativeExtraContacts, positiveContacts, null);
         config.setMainEntity(BusinessEntity.Contact);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
 
@@ -296,7 +305,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsForNullPositiveContacts() {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        putDataUnits(accountData, contactData, contactData, null, nullPositiveContacts);
+        putDataUnits(accountData, contactData, contactData, null, nullPositiveContacts, null);
         config.setMainEntity(BusinessEntity.Contact);
         config.setIncludeAccountsWithoutContacts(true);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
@@ -316,7 +325,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsJobForContactCountyConversion() throws Exception {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        putDataUnits(accountData, contactData, contactData, null, positiveContacts);
+        putDataUnits(accountData, contactData, contactData, null, positiveContacts, null);
         config.setMainEntity(BusinessEntity.Contact);
         config.setWorkspace("testGenerateLaunchArtifactsJobForContactCountyConversion");
         config.setExternalSystemName(CDLExternalSystemName.GoogleAds);
@@ -337,7 +346,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsJobForAccountCountyConversion() throws Exception {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        putDataUnits(accountData, contactData, null, null, positiveAccounts);
+        putDataUnits(accountData, contactData, null, null, positiveAccounts, null);
         config.setMainEntity(BusinessEntity.Account);
         config.setWorkspace("testGenerateLaunchArtifactsJobForAccountCountyConversion");
         config.setExternalSystemName(CDLExternalSystemName.LinkedIn);
@@ -363,7 +372,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
     @Test(groups = "functional")
     public void testGenerateLaunchArtifactsJobWithNoCountry() throws Exception {
         GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
-        putDataUnits(accountData, contactNoContactCountryData, contactNoContactCountryData, null, positiveContacts);
+        putDataUnits(accountData, contactNoContactCountryData, contactNoContactCountryData, null, positiveContacts, null);
         config.setMainEntity(BusinessEntity.Contact);
         config.setWorkspace("testGenerateLaunchArtifactsJobWithNoCountry");
         config.setExternalSystemName(CDLExternalSystemName.GoogleAds);
@@ -379,6 +388,22 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
                 InterfaceName.ContactCountry.name());
         testCountryConversion(yarnConfiguration, result.getTargets().get(3).getPath(), avroFileFilter,
                 InterfaceName.ContactCountry.name());
+    }
+
+    @Test(groups = "functional")
+    public void testGenerateLaunchArtifactsJobContactLimit() throws Exception {
+        GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig();
+        putDataUnits(accountData, contactData, contactData, null, positiveContacts, limitedContactsData);
+        config.setExternalSystemName(CDLExternalSystemName.Eloqua);
+        config.setMainEntity(BusinessEntity.Contact);
+        config.setWorkspace("testGenerateLaunchArtifactsJobContactLimit");
+        config.setUseContactsPerAccountLimit(true);
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateLaunchArtifactsJob.class, config);
+        log.info("testGenerateLaunchArtifactsJobContactLimit Results: " + JsonUtils.serialize(result));
+
+        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 3);
     }
 
     interface AvroExportable {
