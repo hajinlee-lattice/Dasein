@@ -15,7 +15,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
-import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -71,15 +71,14 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         ensureSubscriberSeatState();
     }
 
-    @AfterClass(groups = { "deployment" })
-    public void tearDown() {
+    @AfterTest(groups = "deployment")
+    public void cleanupUsers() {
         userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
         userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
     }
 
     @Test(groups = "deployment")
     public void testRegisterInternalEmail() throws InterruptedException {
-        userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
         String[] subscriberNumbers = {SUBSCRIBER_NUMBER_OPEN, SUBSCRIBER_NUMBER_FULL};
         for (String sn : subscriberNumbers) {
             switchSubscriber(sn);
@@ -95,7 +94,6 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = {"testRegisterInternalEmail"})
     public void testRegisterExternalEmail() throws InterruptedException {
         // subscriber with open seats: assert success, meter change
-        userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
         switchSubscriber(SUBSCRIBER_NUMBER_OPEN);
         register(EXTERNAL_USER_EMAIL, true);
         delete(EXTERNAL_USER_EMAIL, true);
@@ -108,7 +106,6 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = {"testRegisterExternalEmail"})
     public void testUpdateInternalEmail() throws InterruptedException {
-        userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
         String[] subscriberNumbers = {SUBSCRIBER_NUMBER_OPEN, SUBSCRIBER_NUMBER_FULL};
         for (String sn : subscriberNumbers) {
             switchSubscriber(sn);
@@ -124,7 +121,6 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = {"testUpdateInternalEmail"})
     public void testUpdateExternalEmail() throws InterruptedException {
         // subscriber with open seats, new external user: assert success, meter change
-        userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
         switchSubscriber(SUBSCRIBER_NUMBER_OPEN);
         userService.createUser(EXTERNAL_USER_EMAIL, createUserReg(EXTERNAL_USER_EMAIL));
         update(EXTERNAL_USER_EMAIL, true, AccessLevel.EXTERNAL_USER, true);
@@ -138,7 +134,6 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         userService.createUser(EXTERNAL_USER_EMAIL, createUserReg(EXTERNAL_USER_EMAIL));
         update(EXTERNAL_USER_EMAIL, false, AccessLevel.EXTERNAL_USER, true);
         delete(EXTERNAL_USER_EMAIL, false);
-        userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
     }
 
     private void switchSubscriber(String subscriberNumber) {
@@ -235,7 +230,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         }
         Thread.sleep(3000);
         assertTrue(getAvailableSeats(SUBSCRIBER_NUMBER_OPEN) >= 1);
-        assertTrue(getAvailableSeats(SUBSCRIBER_NUMBER_FULL) <= 0);
+        assertEquals(getAvailableSeats(SUBSCRIBER_NUMBER_FULL), 0);
     }
 
     private int getAvailableSeats(String subscriberNumber) {
@@ -260,6 +255,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         usageEvent.setSubscriberCountry("US");
         usageEvent.setContractTermStartDate(current_date);
         usageEvent.setContractTermEndDate(DateUtils.addHours(current_date, 1));
+        vboService.sendUserUsageEvent(usageEvent);
     }
 
     private UserRegistration createUserReg(String email) {
