@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardResponse;
+import com.latticeengines.domain.exposed.cdl.dashboard.TargetAccountList;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
-import com.latticeengines.domain.exposed.metadata.ListSegmentSummary;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
@@ -51,7 +51,7 @@ public class SSVIResource {
     @GetMapping("/target-account-lists/default")
     @ResponseBody
     @ApiOperation("retrieve default target account list segment")
-    public ListSegmentSummary getDefaultTargetAccountList() {
+    public TargetAccountList getDefaultTargetAccountList() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         return dashboardService.getTargetAccountList(customerSpace.toString(), null);
     }

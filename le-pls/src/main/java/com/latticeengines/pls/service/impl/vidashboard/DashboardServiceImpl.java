@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl.vidashboard;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,19 +18,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardResponse;
 import com.latticeengines.domain.exposed.cdl.dashboard.TargetAccountList;
 import com.latticeengines.domain.exposed.looker.EmbedUrlData;
 import com.latticeengines.domain.exposed.looker.EmbedUrlUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
+import com.latticeengines.domain.exposed.metadata.template.ImportFieldMapping;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -73,6 +79,9 @@ public class DashboardServiceImpl implements DashboardService {
     @Inject
     private DataUnitProxy dataUnitProxy;
 
+    @Inject
+    private BatonService batonService;
+
     @Override
     public DashboardResponse getDashboardList(String customerSpace) {
         DashboardResponse res = new DashboardResponse();
@@ -83,7 +92,7 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public MetadataSegment createTargetAccountList(@NotNull String customerSpace, String listName) {
         listName = getOrUseDefaultListName(listName);
-        return segmentProxy.createOrUpdateListSegment(customerSpace, generateMetadataSegment(listName));
+        return segmentProxy.createOrUpdateListSegment(customerSpace, generateMetadataSegment(customerSpace, listName));
     }
 
     @Override
@@ -157,13 +166,14 @@ public class DashboardServiceImpl implements DashboardService {
         return targetAccountList;
     }
 
-    private MetadataSegment generateMetadataSegment(String listName) {
+    private MetadataSegment generateMetadataSegment(String customerSpace, String listName) {
         MetadataSegment metadataSegment = new MetadataSegment();
         metadataSegment.setName(listName);
         metadataSegment.setDisplayName(listName);
         ListSegment listSegment = new ListSegment();
         listSegment.setExternalSystem(SSVI_EXTERNAL_SYSTEM_NAME);
         listSegment.setExternalSegmentId(listName);
+        listSegment.setCsvAdaptor(defaultMappings(customerSpace));
         metadataSegment.setListSegment(listSegment);
         return metadataSegment;
     }
@@ -224,6 +234,37 @@ public class DashboardServiceImpl implements DashboardService {
             }
         }
         return userAttrs;
+    }
+
+    private CSVAdaptor defaultMappings(String tenant) {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenant);
+        CSVAdaptor adaptor = new CSVAdaptor();
+        List<ImportFieldMapping> mappings = new ArrayList<>(Arrays.asList( //
+                stringFieldMapping(InterfaceName.DUNS.name(), InterfaceName.DUNS.name()), //
+                stringFieldMapping(InterfaceName.Website.name(), InterfaceName.Website.name()), //
+                stringFieldMapping(InterfaceName.CompanyName.name(), InterfaceName.CompanyName.name()), //
+                stringFieldMapping(InterfaceName.Country.name(), InterfaceName.Country.name()), //
+                stringFieldMapping(InterfaceName.State.name(), InterfaceName.State.name()), //
+                stringFieldMapping(InterfaceName.City.name(), InterfaceName.City.name()), //
+                stringFieldMapping(InterfaceName.Address_Street_1.name(), InterfaceName.Address_Street_1.name()), //
+                stringFieldMapping(InterfaceName.PostalCode.name(), InterfaceName.PostalCode.name()) //
+        ));
+        // TODO change default mapping after matching is added to list segment upload
+        if (batonService.hasModule(customerSpace, LatticeModule.CDL)) {
+            mappings.add(stringFieldMapping(InterfaceName.AccountId.name(), "account_id"));
+        } else {
+            mappings.add(stringFieldMapping(InterfaceName.DUNS.name(), "account_id"));
+        }
+        adaptor.setImportFieldMappings(mappings);
+        return adaptor;
+    }
+
+    private ImportFieldMapping stringFieldMapping(String userFieldName, String internalFieldName) {
+        ImportFieldMapping mapping = new ImportFieldMapping();
+        mapping.setFieldName(internalFieldName);
+        mapping.setUserFieldName(userFieldName);
+        mapping.setFieldType(UserDefinedType.TEXT);
+        return mapping;
     }
 
     private String getOrUseDefaultListName(String listName) {
