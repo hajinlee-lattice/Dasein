@@ -343,6 +343,12 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         } else {
             log.info("No Full contacts");
         }
+        HdfsDataUnit fullUniverse = getObjectFromContext(FULL_LAUNCH_UNIVERSE, HdfsDataUnit.class);
+        if (fullUniverse != null) {
+            processHDFSDataUnit(String.format("Full%sUniverse_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
+                    fullUniverse, audienceType.getInterfaceName(), getFullUniverseContextKeyByAudienceType(audienceType));
+        }
+        log.info("Counts: " + JsonUtils.serialize(getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class)));
         if (audienceType == AudienceType.CONTACTS) {
             HdfsDataUnit addedContactsDataUnit = sparkJobResult.getTargets().get(3);
             if (addedContactsDataUnit != null && addedContactsDataUnit.getCount() > 0) {
@@ -593,6 +599,17 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             return REMOVED_CONTACTS_DELTA_TABLE;
         default:
             return null;
+        }
+    }
+
+    private String getFullUniverseContextKeyByAudienceType(AudienceType audienceType) {
+        switch (audienceType) {
+            case ACCOUNTS:
+                return FULL_ACCOUNTS_UNIVERSE;
+            case CONTACTS:
+                return FULL_CONTACTS_UNIVERSE;
+            default:
+                return null;
         }
     }
 }
