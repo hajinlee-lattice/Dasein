@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public class DimensionMetadata implements Serializable {
     private static final long serialVersionUID = -2500038370595664739L;
 
     @JsonProperty(DIMENSION_VALUES_KEY)
-    private List<Map<String, Object>> dimensionValues;
+    private List<Map<String, Object>> dimensionValues = new ArrayList<>();
 
     @JsonProperty(CARDINALITY_KEY)
     private long cardinality;

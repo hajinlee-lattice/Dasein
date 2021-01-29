@@ -163,6 +163,9 @@ public enum InterfaceName {
 
     ModelName, ModelNameId, HasIntent, IntentScore, BuyingScore, //
 
+    // Derived Attributes
+    DerivedId, DerivedName, DerivedPattern,
+
     // timeline column
     Detail2, Detail1, EventTimestamp, EventType, StreamType, Source,
 

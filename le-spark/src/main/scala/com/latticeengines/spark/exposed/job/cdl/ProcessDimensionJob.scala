@@ -2,18 +2,22 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata.{CARDINALITY_KEY, DIMENSION_VALUES_KEY}
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig
+import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig.DerivedDimension
 import com.latticeengines.spark.exposed.job.cdl.ProcessDimensionJob.FREQ_COL
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.spark.sql.SparkSession
+import org.apache.commons.lang3.StringUtils
+import org.apache.spark.sql.expressions.UserDefinedFunction
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.json4s.jackson.Serialization
 
 import scala.collection.JavaConverters._
 
 /**
-  * Go through dimension value source (Stream or Catalog) and form its value space
-  */
+ * Go through dimension value source (Stream or Catalog) and form its value space
+ */
 class ProcessDimensionJob extends AbstractSparkJob[ProcessDimensionConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[ProcessDimensionConfig]): Unit = {
@@ -22,9 +26,8 @@ class ProcessDimensionJob extends AbstractSparkJob[ProcessDimensionConfig] {
     val dimDfs = dimensions mapValues { dim =>
       val attrs = dim.attrs.asScala.toSeq
       val dedupAttrs = if (dim.dedupAttrs == null) attrs else dim.dedupAttrs.asScala.toSeq
-      val hashAttrs = Option(dim.hashAttrs)
       val renameAttrs = Option(dim.renameAttrs)
-      val hashVal = udf { obj: Any => DimensionGenerator.hashDimensionValue(obj) }
+      val hashVal: UserDefinedFunction = udf { obj: Any => DimensionGenerator.hashDimensionValue(obj) }
 
       val allAttrNotNull = attrs.foldLeft(lit(true)) {
         (acc, attr) => acc.and(col(attr).isNotNull)
@@ -32,9 +35,7 @@ class ProcessDimensionJob extends AbstractSparkJob[ProcessDimensionConfig] {
 
       // hash & rename
       val inputDf = lattice.input(dim.inputIdx)
-      var df = hashAttrs.fold(inputDf)(_.asScala.foldLeft(inputDf) {
-        (accDf, entry) => accDf.withColumn(entry._2, hashVal(col(entry._1)))
-      })
+      var df = hashDimension(inputDf, dim, hashVal)
       df = renameAttrs.fold(df)(_.asScala.foldLeft(df) {
         (accDf, entry) => accDf.withColumnRenamed(entry._2, entry._1)
       })
@@ -71,6 +72,45 @@ class ProcessDimensionJob extends AbstractSparkJob[ProcessDimensionConfig] {
       val outputIdxMap = dimResults.zipWithIndex.map(t => (t._1._1, t._2)).toMap
       lattice.output = dimResults.map(_._2)
       lattice.outputStr = Serialization.write(outputIdxMap)(org.json4s.DefaultFormats)
+    }
+  }
+
+  def hashDimension(inputDf: DataFrame, dim: ProcessDimensionConfig.Dimension, hashVal: UserDefinedFunction): DataFrame = {
+    dim match {
+      case derivedDimension: DerivedDimension =>
+        val dimIdName: String = InterfaceName.DerivedId.name
+        val dimName: String = InterfaceName.DerivedName.name
+        val dimPattern: String = InterfaceName.DerivedPattern.name
+        val deriveConfig = derivedDimension.deriveConfig
+        val deriveSrc = deriveConfig.sourceAttrs.asScala
+        val getDimNameUdf: UserDefinedFunction = udf((row: Row) => {
+          val vals: List[String] = deriveSrc.map(src => {
+            val value = row.getAs[String](src)
+            if (StringUtils.isBlank(value)) "" else value
+          }).toList
+          deriveConfig.findDimensionName(vals.asJava)
+        })
+        val getDimIdUdf: UserDefinedFunction = udf((row: Row) => {
+          val vals: List[String] = deriveSrc.map(src => {
+            val value = row.getAs[String](src)
+            if (StringUtils.isBlank(value)) "" else value
+          }).toList
+          deriveConfig.findDimensionId(vals.asJava)
+        })
+        val getDimPatternUdf: UserDefinedFunction = udf((row: Row) => {
+          val vals: List[String] = deriveSrc.map(src => {
+            val value = row.getAs[String](src)
+            if (StringUtils.isBlank(value)) "" else value
+          }).toList
+          deriveConfig.findDimensionPattern(vals.asJava)
+        })
+        val columnNames = inputDf.columns
+        inputDf.withColumn(dimIdName, getDimIdUdf(struct(columnNames.map(colName => col(colName)): _*)))
+          .withColumn(dimName, getDimNameUdf(struct(columnNames.map(colName => col(colName)): _*)))
+          .withColumn(dimPattern, getDimPatternUdf(struct(columnNames.map(colName => col(colName)): _*)))
+      case _ => Option(dim.hashAttrs).fold(inputDf)(_.asScala.foldLeft(inputDf) {
+        (accDf, entry) => accDf.withColumn(entry._2, hashVal(col(entry._1)))
+      })
     }
   }
 }

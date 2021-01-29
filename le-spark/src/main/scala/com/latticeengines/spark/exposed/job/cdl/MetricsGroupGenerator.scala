@@ -172,9 +172,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
 
     val excludeNull: DataFrame = rolledUp.na.drop // only required columns exist at this stage. drop all null
 
-    def concatColumns: UserDefinedFunction = udf((row: Row) => row.mkString("_"))
-
-    val pivoted: DataFrame = excludeNull.withColumn("combColumn", concatColumns(struct(pivotCols.map(col): _*))).groupBy(entityIdColName)
+    val pivoted: DataFrame = excludeNull.withColumn("combColumn", DeriveAttrsUtils.concatColumns(struct(pivotCols.map(col): _*))).groupBy(entityIdColName)
       .pivot("combColumn").agg(DeriveAttrsUtils.getAggr(excludeNull, deriver))
     var attrRenamed: DataFrame = pivoted.columns.foldLeft(pivoted) { (pivotedDF, colName) =>
       if (!colName.equals(entityIdColName)) {
