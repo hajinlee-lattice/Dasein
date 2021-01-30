@@ -150,13 +150,14 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             log.info("Full Launch Universe Query: " + frontEndquery.toString());
             // 2) get DataFrame for Account and Contact
             launchUniverseDataUnit = executeSparkJob(frontEndquery);
-            log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse", launchUniverseDataUnit));
+            log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse after first sparkjob", launchUniverseDataUnit));
             // 3) check for 'Contacts per Account' limit
-            if (useContactsPerAccountLimit || CDLExternalSystemName.Eloqua.equals(channelConfig.getSystemName())) {
+            if (useContactsPerAccountLimit) {
                 Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
                 Long contactAccountRatioThreshold = WorkflowJobUtils.getContactAccountRatioThresholdFromZK(customerSpace);
                 launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
                         maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, contactAccountRatioThreshold);
+                log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse after second sparkjob", launchUniverseDataUnit));
             }
         }
         putObjectInContext(FULL_LAUNCH_UNIVERSE, launchUniverseDataUnit);
@@ -196,10 +197,6 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                 stopSparkSQLSession();
             }
         });
-    }
-
-    private boolean hasContactsPerAccountLimit(PlayLaunchChannel channel, BusinessEntity mainEntity) {
-        return (mainEntity == BusinessEntity.Contact) && (channel.getMaxContactsPerAccount() != null);
     }
 
     private HdfsDataUnit executeSparkJobContactsPerAccount(HdfsDataUnit launchDataUniverseDataUnit, //
