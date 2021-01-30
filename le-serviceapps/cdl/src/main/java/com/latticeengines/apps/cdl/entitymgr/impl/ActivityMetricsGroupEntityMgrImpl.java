@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +63,11 @@ public class ActivityMetricsGroupEntityMgrImpl extends JpaEntityMgrRepositoryImp
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ActivityMetricsGroup> findByTenant(Tenant tenant) {
-        return readerRepository.findByTenant(tenant);
+        List<ActivityMetricsGroup> metricsGroups = readerRepository.findByTenant(tenant);
+        for (ActivityMetricsGroup group : metricsGroups) {
+            group.getStream().setDimensions(null);
+        }
+        return metricsGroups;
     }
 
     @Override

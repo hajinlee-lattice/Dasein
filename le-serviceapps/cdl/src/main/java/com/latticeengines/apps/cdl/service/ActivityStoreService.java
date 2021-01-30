@@ -139,6 +139,15 @@ public interface ActivityStoreService {
     ActivityMetricsGroup findGroupByGroupId(String customerSpace, String groupId);
 
     /**
+     * Retrieve a list of ActivityMetricsGroup for current tenant
+     * @param customerSpace
+     *          target tenant
+     * @return
+     *          A list of ActivityMetricsGroup for current tenant
+     */
+    List<ActivityMetricsGroup> findByTenant(String customerSpace);
+
+    /**
      * Wrapper for {@link DimensionMetadataService#allocateDimensionId(String, Set)}
      *
      * @return map of dimension value -> allocated ID

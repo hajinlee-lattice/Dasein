@@ -106,9 +106,10 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
 
     @SuppressWarnings("unchecked")
     public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
-                                                                            String signature, boolean withStreamName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata?withStreamName" +
-                        "={withStreamName}", shortenCustomerSpace(customerSpace), withStreamName);
+            String signature, boolean withStreamName) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/activities/dimensionMetadata?withStreamName" + "={withStreamName}",
+                shortenCustomerSpace(customerSpace), withStreamName);
         if (StringUtils.isNotBlank(signature)) {
             url += "&signature=" + signature;
         }
@@ -161,6 +162,13 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         String url = constructUrl("/customerspaces/{customerSpace}/activities/metricsGroups/groupId/{groupId}",
                 shortenCustomerSpace(customerSpace), groupId);
         return get("findGroupByGroupId", url, ActivityMetricsGroup.class);
+    }
+
+    public List<ActivityMetricsGroup> findGroupsByTenant(@NotNull String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/metricsGroups",
+                shortenCustomerSpace(customerSpace));
+        List<?> list = get("findGroupsByTenant", url, List.class);
+        return JsonUtils.convertList(list, ActivityMetricsGroup.class);
     }
 
     public List<JourneyStage> getJourneyStages(@NotNull String customerSpace) {
