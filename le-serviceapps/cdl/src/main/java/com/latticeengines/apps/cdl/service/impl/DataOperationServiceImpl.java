@@ -109,7 +109,7 @@ public class DataOperationServiceImpl implements DataOperationService {
     }
 
     @Override
-    public String submitJob(String customerSpace, DataOperationRequest dataOperationRequest) {
+    public ApplicationId submitJob(String customerSpace, DataOperationRequest dataOperationRequest) {
         try {
             DataOperation dataOperation = findDataOperationByDropPath(customerSpace, dataOperationRequest.getS3DropPath());
             String key = dataOperationRequest.getS3FileKey();
@@ -132,14 +132,13 @@ public class DataOperationServiceImpl implements DataOperationService {
                 request.setHardDelete(DataDeleteOperationConfiguration.DeleteType.HARD.equals(deleteOperationConfiguration.getDeleteType()));
                 request.setIdSystem(dataOperation.getConfiguration().getSystemName());
                 customerSpace = CustomerSpace.parse(customerSpace).toString();
-                ApplicationId applicationId = cdlDataCleanupService.registerDeleteData(customerSpace, request);
-                return applicationId.toString();
+                return cdlDataCleanupService.registerDeleteData(customerSpace, request);
             } else {
-                return "unsupported data operation";
+                throw new UnsupportedOperationException("Unsupported data operation");
             }
         } catch (Exception e) {
             log.error("error:", e);
-            return e.getMessage();
+            throw e;
         }
     }
 
