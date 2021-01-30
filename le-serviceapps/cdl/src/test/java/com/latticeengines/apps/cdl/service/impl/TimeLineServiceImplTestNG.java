@@ -60,24 +60,49 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         created = timeLineService.createOrUpdateTimeLine(mainCustomerSpace, timeline);
         Assert.assertNotNull(created.getPid());
         Assert.assertNotNull(created.getTimelineId());
+        log.info("Created timeline PID={} timelineId={}", created.getPid(), created.getTimelineId());
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testCreate", retryAnalyzer = SimpleRetryAnalyzer.class)
-    public void testFetch() {
-        TimeLine fetchedByPid = timeLineService.findByPid(mainCustomerSpace, created.getPid());
-        Assert.assertEquals(fetchedByPid.getName(), TIMELINE_NAME);
-        Assert.assertTrue(fetchedByPid.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity.name()));
-        Assert.assertTrue(fetchedByPid.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).containsKey(MOTION));
-        Assert.assertEquals(fetchedByPid.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
-        TimeLine fetchedByTimelineId = timeLineService.findByTimelineId(mainCustomerSpace, created.getTimelineId());
-        Assert.assertEquals(fetchedByTimelineId.getTimelineId(), created.getTimelineId());
+    @Test(groups = "functional", dependsOnMethods = "testCreate")
+    public void testFetchByPid() {
+        log.info("Test fetch by PID 10 retries. PID: {}", created.getPid());
+        retry.execute(ctx -> {
+            log.info("Fetch by pid retry count: {}", ctx.getRetryCount());
+            TimeLine fetchedByPid = timeLineService.findByPid(mainCustomerSpace, created.getPid());
+            log.info("Fetched by PID: {}", fetchedByPid);
+            Assert.assertNotNull(fetchedByPid);
+            Assert.assertEquals(fetchedByPid.getName(), TIMELINE_NAME);
+            Assert.assertTrue(fetchedByPid.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity.name()));
+            Assert.assertTrue(fetchedByPid.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).containsKey(MOTION));
+            Assert.assertEquals(fetchedByPid.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
+            return true;
+        });
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testFetch", retryAnalyzer = SimpleRetryAnalyzer.class)
+    @Test(groups = "functional", dependsOnMethods = "testCreate")
+    public void testFetchByTimelineId() {
+        // TODO - why fetching by timelineId so slow?
+        log.info("Test fetch by timelineId 10 retries. timelineId: {}", created.getTimelineId());
+        retry.execute(ctx -> {
+            log.info("Fetch by timelineId retry count: {}", ctx.getRetryCount());
+            TimeLine fetchedByTimelineId = timeLineService.findByTimelineId(mainCustomerSpace, created.getTimelineId());
+            log.info("Fetched by timelineId: {}", fetchedByTimelineId);
+            Assert.assertNotNull(fetchedByTimelineId);
+            Assert.assertEquals(fetchedByTimelineId.getTimelineId(), created.getTimelineId());
+            return true;
+        });
+    }
+
+    @Test(groups = "functional", dependsOnMethods = {"testFetchByPid", "testFetchByTimelineId"})
     public void testDelete() {
-        timeLineService.delete(mainCustomerSpace, created);
-        TimeLine fetched = timeLineService.findByTimelineId(mainCustomerSpace, created.getTimelineId());
-        Assert.assertNull(fetched);
+        log.info("Test delete timeline with 10 retries. PID={}", created.getPid());
+        retry.execute(ctx -> {
+            log.info("Test delete retry count: {}", ctx.getRetryCount());
+            timeLineService.delete(mainCustomerSpace, created);
+            TimeLine fetched = timeLineService.findByTimelineId(mainCustomerSpace, created.getTimelineId());
+            Assert.assertNull(fetched);
+            return true;
+        });
     }
 
     @Test(groups = "functional", dependsOnMethods = "testDelete")
@@ -85,6 +110,7 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         timeLineService.createDefaultTimeLine(mainCustomerSpace);
         AtomicReference<List<TimeLine>> createdAtom = new AtomicReference<>();
         retry.execute(context -> {
+            log.info("Create default timeline retry count: {}", context.getRetryCount());
             createdAtom.set(timeLineService.findByTenant(mainCustomerSpace));
             Assert.assertEquals(createdAtom.get().size(), 2);
             return true;
@@ -93,6 +119,7 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(timeLines.size(), 2);
         AtomicReference<TimeLine> createdAtom1 = new AtomicReference<>();
         retry.execute(context -> {
+            log.info("Fetch default timeline retry count: {}", context.getRetryCount());
             createdAtom1.set(timeLineService.findByTenantAndEntity(mainCustomerSpace, BusinessEntity.Account));
             Assert.assertNotNull(createdAtom1.get());
             return true;
