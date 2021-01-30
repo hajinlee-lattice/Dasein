@@ -120,13 +120,13 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     }
 
     @Override
-    public void deregisterExternalSystem(LookupIdMap lookupIdsMap) {
-        if (lookupIdsMap == null) {
+    public void deregisterExternalSystem(LookupIdMap lookupIdMap) {
+        if (lookupIdMap == null) {
             return;
         }
 
-        LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdsMap.getOrgId(),
-                lookupIdsMap.getExternalSystemType());
+        LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdMap.getOrgId(),
+                lookupIdMap.getExternalSystemType());
         if (existingLookupIdMap != null && existingLookupIdMap.getIsRegistered()) {
             existingLookupIdMap.setIsRegistered(false);
             lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap);
