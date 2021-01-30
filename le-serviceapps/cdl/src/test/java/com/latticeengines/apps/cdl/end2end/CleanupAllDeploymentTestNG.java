@@ -48,6 +48,8 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private Map<BusinessEntity, String> tablename = new HashMap();
 
+    private long mockImportedContact;
+
     @BeforeClass(groups = { "end2end" })
     @Override
     public void setup() throws Exception {
@@ -155,6 +157,7 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         long numAccounts = ACCOUNT_IMPORT_SIZE_1;
 
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
+        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), mockImportedContact);
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertNotNull(getTableName(BusinessEntity.Contact.getBatchStore()));
         verifyStatsCubes();
@@ -176,8 +179,8 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     private void importData() {
-        long mockImported = mockCSVImport(BusinessEntity.Contact, 2, "DefaultSystem_ContactData");
-        log.info("Mock imported Contact records: " + mockImported);
+        mockImportedContact = mockCSVImport(BusinessEntity.Contact, 2, "DefaultSystem_ContactData");
+        log.info("Mock imported Contact records: " + mockImportedContact);
     }
 
 }
