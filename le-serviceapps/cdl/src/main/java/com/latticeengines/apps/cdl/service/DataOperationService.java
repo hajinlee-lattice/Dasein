@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+
 import com.latticeengines.domain.exposed.cdl.DataOperationConfiguration;
 import com.latticeengines.domain.exposed.cdl.DataOperationRequest;
 import com.latticeengines.domain.exposed.metadata.DataOperation;
@@ -18,5 +20,5 @@ public interface DataOperationService {
 
     void deleteDataOperation(String customerSpace, DataOperation dataOperation);
 
-    String submitJob(String customerSpace, DataOperationRequest dataOperationRequest);
+    ApplicationId submitJob(String customerSpace, DataOperationRequest dataOperationRequest);
 }

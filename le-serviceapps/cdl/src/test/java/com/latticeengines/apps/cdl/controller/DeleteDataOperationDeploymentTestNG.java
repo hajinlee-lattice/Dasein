@@ -66,7 +66,7 @@ public class DeleteDataOperationDeploymentTestNG extends CDLDeploymentTestNGBase
     @Inject
     S3Service s3Service;
 
-    @Value("${aws.s3.bucket}")
+    @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
 
     @Inject
@@ -159,7 +159,7 @@ public class DeleteDataOperationDeploymentTestNG extends CDLDeploymentTestNGBase
                 .filter(action -> ActionType.SOFT_DELETE.equals(action.getType())).collect(Collectors.toList());
         Assert.assertNotNull(softDeletes);
         Assert.assertEquals(softDeletes.size(), expectedUploadSize.size());
-        log.info("Soft Delet Actions: " + JsonUtils.serialize(softDeletes));
+        log.info("Soft Delete Actions: " + JsonUtils.serialize(softDeletes));
 
         for (int i = 0; i < expectedUploadSize.size(); i++) {
             DeleteActionConfiguration deleteActionConfiguration = (DeleteActionConfiguration) softDeletes.get(i)

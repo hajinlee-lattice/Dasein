@@ -867,10 +867,19 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         return get("Find Data Operation By Drop Path", url, DataOperation.class);
     }
 
+    @SuppressWarnings("unchecked")
     public ApplicationId submitDataOperationJob(String customerSpace, DataOperationRequest dataOperationRequest) {
         String baseUrl = "/customerspaces/{customerSpace}/dataoperation/submitJob";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
-        String appIdStr = post("Submit Data Operation Job", url, dataOperationRequest, String.class);
-        return ApplicationIdUtils.toApplicationIdObj(appIdStr);
+        ResponseDocument<String> responseDoc = post("Submit Data Operation Job", url, dataOperationRequest,
+                ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
+        } else {
+            throw new RuntimeException(StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 }
