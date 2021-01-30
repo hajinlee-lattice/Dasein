@@ -95,7 +95,7 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         Assert.assertNotNull(reports);
 
         Assert.assertEquals(CollectionUtils.size(reports), 1);
-        verifyReport(reports.get(0), 3L, 3L, 17L);
+        verifyReport(reports.get(0), 3L, 3L, 20L);
 
         SimpleValueFilter simpleValueFilter = new SimpleValueFilter();
         simpleValueFilter.setReverse(true);
@@ -107,7 +107,12 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         r2.setFieldName("City");
         r2.setValue("BATH");
         r2.setOperator(SimpleValueFilter.Restriction.Operator.NOT_EQUAL);
-        simpleValueFilter.setRestrictions(Arrays.asList(r1, r2));
+        SimpleValueFilter.Restriction r3 = new SimpleValueFilter.Restriction();
+        r3.setFieldName("CustomerAccountId");
+        r3.setValue("00124000[0|1|2]1DNcl1AAD");
+        r3.setOperator(SimpleValueFilter.Restriction.Operator.MATCH);
+
+        simpleValueFilter.setRestrictions(Arrays.asList(r1, r2, r3));
         cdlProxy.addSimpleValueFilter(customerSpace, dataFeedTaskId, simpleValueFilter);
 
         startCDLImport(sourceFile, ENTITY_ACCOUNT, DEFAULT_SYSTEM);
@@ -119,7 +124,7 @@ public class CSVFileImportTemplateValidatorDeploymentTestNG extends CSVFileImpor
         Assert.assertEquals(CollectionUtils.size(reports), 2);
 
         reports.sort(Comparator.comparing(Report::getCreated));
-        verifyReport(reports.get(1), 4L, 4L, 16L);
+        verifyReport(reports.get(1), 6L, 6L, 17L);
     }
 
     public boolean assertAttributeInDataFeedTask(String dataFeedTaskId, String name, Integer length,
