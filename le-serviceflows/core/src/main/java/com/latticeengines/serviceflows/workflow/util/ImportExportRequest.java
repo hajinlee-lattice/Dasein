@@ -15,6 +15,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
 public class ImportExportRequest {
@@ -28,6 +29,7 @@ public class ImportExportRequest {
     public boolean isSync;
     public boolean isImportFolder;
     public boolean isExportFolder;
+    public DataUnit.DataFormat dataFormat;
 
     public ImportExportRequest() {
     }
@@ -63,7 +65,9 @@ public class ImportExportRequest {
             String customer, Table table, //
             HdfsToS3PathBuilder pathBuilder, String s3Bucket, String podId, //
             Configuration yarnConfiguration, //
+            DataUnit.DataFormat dataFormat, //
             Predicate<FileStatus> fileStatusFilter) {
+
         String tableName = table.getName();
         List<Extract> extracts = table.getExtracts();
         if (CollectionUtils.isEmpty(extracts) || StringUtils.isBlank(extracts.get(0).getPath())) {
@@ -82,7 +86,9 @@ public class ImportExportRequest {
         if (fileStatusFilter.test(fileStatus)) {
             String tenantId = CustomerSpace.parse(customer).getTenantId();
             String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
-            return new ImportExportRequest(srcDir, tgtDir, tableName, true, true);
+            ImportExportRequest request = new ImportExportRequest(srcDir, tgtDir, tableName, true, true);
+            request.dataFormat = dataFormat;
+            return request;
         } else {
             log.warn("Hdfs file status does not pass the predicate. Won't export " + tableName + " to S3.");
             return null;

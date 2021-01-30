@@ -10,6 +10,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,11 +187,12 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     }
 
     private boolean isSSVINeedSkipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-        if (Boolean.FALSE.equals(step.getObjectFromContext(IS_SSVI_TENANT, Boolean.class)) && inWorkflow(seq,
-                generateVisitReportWorkflow)) {
-            return true;
+        if (inWorkflow(seq, generateVisitReportWorkflow)) {
+            // only SSVI tenant execute this workflow
+            return BooleanUtils.isNotTrue(step.getObjectFromContext(IS_SSVI_TENANT, Boolean.class));
         }
-        if (Boolean.TRUE.equals(step.getObjectFromContext(IS_SSVI_TENANT, Boolean.class)) && Boolean.FALSE.equals(step.getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
+        if (BooleanUtils.isTrue(step.getObjectFromContext(IS_SSVI_TENANT, Boolean.class))
+                && BooleanUtils.isNotTrue(step.getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
             return !isStartProcessingStep(step) && !isImportProcessAnalyzeFromS3(step) && !inWorkflow(seq,
                     processCatalogWorkflow) && !isExportProcessAnalyzeToS3(step) && !isFinishProcessing(step);
         }

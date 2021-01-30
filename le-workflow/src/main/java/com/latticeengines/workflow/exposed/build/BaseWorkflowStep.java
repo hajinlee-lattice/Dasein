@@ -404,8 +404,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String TIMELINE_EXPORT_FILES = "TIMELINE_EXPORT_FILES";
     public static final String IS_SSVI_TENANT = "IS_SSVI_TENANT";
     public static final String IS_CDL_TENANT = "IS_CDL_TENANT";
-    public static final String SSVI_MATCH_STREAM_TARGETTABLE = "SSVI_MATCH_STREAM_TARGETTABLE";
-    public static final String SSVI_WEBVISIT_RAW_TABLES = "SSVI_WEBVISIT_RAW_TABLES";
+    public static final String SSVI_WEBVISIT_RAW_TABLE = "SSVI_WEBVISIT_RAW_TABLE";
 
     public static final String TABLEROLES_GOING_TO_ES = "TABLEROLES_GOING_TO_ES";
 
@@ -454,7 +453,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
             CURATED_ACCOUNT_STATS_TABLE_NAME, //
             CURATED_CONTACT_SERVING_TABLE_NAME, //
-            CURATED_CONTACT_STATS_TABLE_NAME //
+            CURATED_CONTACT_STATS_TABLE_NAME, //
+            SSVI_WEBVISIT_RAW_TABLE //
     );
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME);
 

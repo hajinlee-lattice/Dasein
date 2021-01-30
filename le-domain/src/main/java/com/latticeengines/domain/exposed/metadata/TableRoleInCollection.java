@@ -69,7 +69,7 @@ public enum TableRoleInCollection {
     TimelineProfile, //
     AccountJourneyStage, //
     ActivityAlert, //
-    AccountMaster,
+    AccountMaster, //
     ConsolidatedWebVisit;
 
     static {

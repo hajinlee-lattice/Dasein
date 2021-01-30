@@ -37,7 +37,8 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @JsonSubTypes.Type(value = TimeLineSparkStepConfiguration.class, name = "TimeLineSparkStepConfiguration"), //
         @JsonSubTypes.Type(value = ExportToElasticSearchStepConfiguration.class, name =
                 "ExportToElasticSearchStepConfiguration"), //
-        @JsonSubTypes.Type(value = PublishTableToElasticSearchStepConfiguration.class, name = "PublishTableToElasticSearchStepConfiguration")
+        @JsonSubTypes.Type(value = PublishTableToElasticSearchStepConfiguration.class, name =
+                "PublishTableToElasticSearchStepConfiguration"),
 })
 public class SparkJobStepConfiguration extends BaseStepConfiguration {
 

@@ -818,6 +818,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .catalogPrimaryKeyColumns(getCatalogPrimaryKeyColumns(customerSpace, catalogs)) //
                 .catalogIngestionBehaivors(getCatalogIngestionBehavior(customerSpace, catalogs)) //
                 .catalogImports(getCatalogImports(tenant, completedActions, catalogs)) //
+                .setCatalog(catalogs)
                 .activityStreams(streams) //
                 .activityMetricsGroups(groups) //
                 .activeRawStreamTables(getActiveActivityStreamTables(customerSpace, new ArrayList<>(streams.values()))) //

@@ -188,6 +188,8 @@ public final class DataCloudConstants {
 
     public static final String TRANSACTION_STANDARDIZER = "transactionStandardizer";
 
+    public static final String TRANSFORMER_ENRICH_WEBVISIT = "EnrichWebVisitTxfmr";
+
     /***********************************
      * Transformer names for AM rebuild
      ***********************************/

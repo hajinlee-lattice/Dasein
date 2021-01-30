@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
@@ -84,6 +85,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private LegacyDeleteWorkflowConfiguration.Builder legacyDeleteWorkFlowBuilder = new LegacyDeleteWorkflowConfiguration.Builder();
         private PublishToElasticSearchConfiguration publishToElasticSearchConfiguration =
                 new PublishToElasticSearchConfiguration();
+        private GenerateVisitReportWorkflowConfiguration.Builder generateVisitReportWorkflowBuilder =
+                new GenerateVisitReportWorkflowConfiguration.Builder();
 
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
@@ -116,6 +119,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             apsGenerationStepConfiguration.setCustomer(customerSpace.getTenantId());
             importExportS3.setCustomerSpace(customerSpace);
             publishToElasticSearchConfiguration.setCustomerSpace(customerSpace);
+            generateVisitReportWorkflowBuilder.customer(customerSpace);
             return this;
         }
 
@@ -155,6 +159,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             importExportS3.setInternalResourceHostPort(internalResourceHostPort);
             publishToElasticSearchConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            generateVisitReportWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -208,6 +213,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.rebuildEntities(entities);
             if (SetUtils.emptyIfNull(entities).contains(BusinessEntity.ActivityStream)) {
                 timeLineSparkStepConfiguration.setShouldRebuild(true);
+                generateVisitReportWorkflowBuilder.setRebuildMode(true);
             }
             return this;
         }
@@ -301,6 +307,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder catalogImports(Map<String, List<ActivityImport>> catalogImports) {
             processCatalogWorkflowBuilder.catalogImports(catalogImports);
+            generateVisitReportWorkflowBuilder.setCatalogImports(catalogImports);
             return this;
         }
 
@@ -315,6 +322,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.activityStreams(streams);
             convertBatchStoreToDataTableWorkflowBuilder.activityStreams(streams);
             matchEntityWorkflowBuilder.activityStreams(streams);
+            generateVisitReportWorkflowBuilder.activityStreams(streams);
             return this;
         }
 
@@ -328,6 +336,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.activityStreamImports(activityStreamImports);
             convertBatchStoreToDataTableWorkflowBuilder.activityStreamImports(activityStreamImports);
             matchEntityWorkflowBuilder.activityStreamImports(activityStreamImports);
+            generateVisitReportWorkflowBuilder.activityStreamImports(activityStreamImports);
             return this;
         }
 
@@ -386,6 +395,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.setRematchMode(fullRematch);
             convertBatchStoreToDataTableWorkflowBuilder.setRematchMode(fullRematch);
             matchEntityWorkflowBuilder.setRematchMode(fullRematch);
+            generateVisitReportWorkflowBuilder.setRematchMode(fullRematch);
             return this;
         }
 
@@ -420,6 +430,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
                     .setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             matchEntityWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             processTransactionWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Transaction));
+            generateVisitReportWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             return this;
         }
 
@@ -459,6 +470,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder setCatalog(List<Catalog> catalogs) {
+            generateVisitReportWorkflowBuilder.setCatalog(catalogs);
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
@@ -484,6 +500,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(awsPythonDataConfiguration);
             configuration.add(apsGenerationStepConfiguration);
             configuration.add(importExportS3);
+            configuration.add(generateVisitReportWorkflowBuilder.build());
             configuration.add(publishToElasticSearchConfiguration);
             return configuration;
         }

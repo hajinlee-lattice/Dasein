@@ -348,7 +348,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
             ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
                     customerSpace.toString(), table, //
                     pathBuilder, s3Bucket, podId, //
-                    yarnConfiguration, //
+                    yarnConfiguration, null, //
                     fileStatus -> true);
             if (batchStoreRequest == null) {
                 throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);
