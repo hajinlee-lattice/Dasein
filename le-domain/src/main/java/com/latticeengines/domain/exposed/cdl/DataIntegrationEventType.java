@@ -8,17 +8,19 @@ import java.util.Set;
 
 public enum DataIntegrationEventType {
     WorkflowSubmitted, ExportStart, Initiated, InProgress, Completed, Failed, AudienceCreation, //
-    AudienceSizeUpdate, DestinationAccountCreation, AuthInvalidated;
+    AudienceSizeUpdate, DestinationAccountCreation, AuthInvalidated, ReceivedFromAcxiom, AcxiomCompleted;
 
     private static Map<DataIntegrationEventType, Collection<DataIntegrationEventType>> transitionMap = new HashMap<>();
 
     static {
         Set<DataIntegrationEventType> statesAfterSubmitted = new HashSet<>();
+        statesAfterSubmitted.add(ReceivedFromAcxiom);
         statesAfterSubmitted.add(ExportStart);
         statesAfterSubmitted.add(Initiated);
         statesAfterSubmitted.add(InProgress);
         statesAfterSubmitted.add(Failed);
         statesAfterSubmitted.add(Completed);
+        statesAfterSubmitted.add(AcxiomCompleted);
         statesAfterSubmitted.add(AudienceCreation);
         statesAfterSubmitted.add(AudienceSizeUpdate);
         transitionMap.put(WorkflowSubmitted, statesAfterSubmitted);
@@ -28,6 +30,7 @@ public enum DataIntegrationEventType {
         statesAfterExportStarted.add(InProgress);
         statesAfterExportStarted.add(Failed);
         statesAfterExportStarted.add(Completed);
+        statesAfterExportStarted.add(AcxiomCompleted);
         statesAfterExportStarted.add(AudienceCreation);
         statesAfterExportStarted.add(AudienceSizeUpdate);
         transitionMap.put(ExportStart, statesAfterExportStarted);
@@ -36,6 +39,7 @@ public enum DataIntegrationEventType {
         statesAfterInitiated.add(InProgress);
         statesAfterInitiated.add(Failed);
         statesAfterInitiated.add(Completed);
+        statesAfterInitiated.add(AcxiomCompleted);
         statesAfterInitiated.add(AudienceCreation);
         statesAfterInitiated.add(AudienceSizeUpdate);
         transitionMap.put(Initiated, statesAfterInitiated);
@@ -44,12 +48,14 @@ public enum DataIntegrationEventType {
         statesAfterAudienceCreation.add(InProgress);
         statesAfterAudienceCreation.add(Failed);
         statesAfterAudienceCreation.add(Completed);
+        statesAfterAudienceCreation.add(AcxiomCompleted);
         statesAfterAudienceCreation.add(AudienceSizeUpdate);
         transitionMap.put(AudienceCreation, statesAfterAudienceCreation);
 
         Set<DataIntegrationEventType> statesAfterInProgress = new HashSet<>();
         statesAfterInProgress.add(Failed);
         statesAfterInProgress.add(Completed);
+        statesAfterInProgress.add(AcxiomCompleted);
         statesAfterInProgress.add(AudienceSizeUpdate);
         transitionMap.put(InProgress, statesAfterInProgress);
 

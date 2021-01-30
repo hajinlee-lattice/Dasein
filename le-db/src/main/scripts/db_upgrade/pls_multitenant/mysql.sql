@@ -36,6 +36,9 @@ CREATE PROCEDURE `UpdateSchema`()
       ALTER TABLE `PLS_MultiTenant`.`ACTIVITY_METRIC_GROUP`
               ADD COLUMN `CSOverwrite` JSON NULL DEFAULT NULL;
 
+      ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH`
+              ADD COLUMN `RECORDS_STATS` JSON NULL DEFAULT NULL;
+              
       CREATE TABLE `DCP_ENRICHMENT_TEMPLATE` (
         `PID` bigint(20) NOT NULL AUTO_INCREMENT,
         `TEMPLATE_ID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,

@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
+import com.latticeengines.domain.exposed.pls.RecordsStats;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.proxy.exposed.pls.EmailProxy;
 
@@ -112,6 +113,20 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
         }
 
         updateLaunchUniverse(playLaunch.getLaunchState(), launchId);
+
+        RecordsStats recordsStats = playLaunch.getRecordsStats();
+
+        if (recordsStats == null) {
+            recordsStats = new RecordsStats();
+        }
+
+        recordsStats.setRecordsFromLattice(totalRecords);
+        recordsStats.setRecordsReceivedByTray(totalRecords);
+        recordsStats.setRecordsToAcxiom(totalRecords);
+        recordsStats.setLatticeRecordsSucceedToDestination(recordsProcessed);
+        recordsStats.setLatticeRecordsFailToDestination(recordsFailed);
+        playLaunch.setRecordsStats(recordsStats);
+
         playLaunchService.update(playLaunch);
     }
 
