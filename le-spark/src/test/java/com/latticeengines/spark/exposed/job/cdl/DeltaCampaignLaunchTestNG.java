@@ -238,7 +238,6 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Address_Street_1.name(),
                 ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.SalesforceContactID.name(),
                 ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.Name.name());
-        ;
 
         if (launchToDb) {
             expectedAccountColumns = CampaignLaunchUtils.generateRecommendationOutputAccountCols();
