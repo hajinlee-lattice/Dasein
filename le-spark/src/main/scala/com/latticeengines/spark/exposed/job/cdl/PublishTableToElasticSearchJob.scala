@@ -92,6 +92,7 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
       val valueUdf = udf((atlasKey: String) => atlasKey.substring(atlasKey.lastIndexOf("_") + 1));
       val generated: DataFrame = table.withColumn("lookupColumnName", nameUdf(col(InterfaceName.AtlasLookupKey.name())))
         .withColumn("lookupColumnVal", valueUdf(col(InterfaceName.AtlasLookupKey.name())))
+        .filter(col("lookupColumnName") =!= InterfaceName.AccountId.name)
         .groupBy(InterfaceName.AccountId.name())
         .pivot("lookupColumnName")
         .agg(first("lookupColumnVal"))
