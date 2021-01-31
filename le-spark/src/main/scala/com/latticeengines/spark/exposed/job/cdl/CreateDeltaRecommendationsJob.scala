@@ -101,6 +101,8 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
 
   private def generateCsvDfForDbConnector(deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext, contactTable: DataFrame, recommendationDF: DataFrame, joinKey: String, contactCols: Seq[String]): DataFrame ={
     var result: DataFrame = recommendationDF
+    result = renameSfdcAccountIdColumnForRecommendationDf(result, deltaCampaignLaunchSparkContext)
+
     var contactColsToJoin: Seq[String] = contactCols
     if (!contactTable.rdd.isEmpty) {
       if (deltaCampaignLaunchSparkContext.getUseCustomerId) {
@@ -120,6 +122,24 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
         result = result.withColumnRenamed("CustomerAccountId", joinKey)
         result = result.drop(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name())
         result = result.withColumnRenamed(ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.CustomerContactId.name(), ExportUtils.CONTACT_ATTR_PREFIX + InterfaceName.ContactId.name())
+      }
+    }
+    result
+  }
+
+  private def renameSfdcAccountIdColumnForRecommendationDf(recommendationDF: DataFrame, deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext): DataFrame ={
+    var result: DataFrame = recommendationDF
+    var sfdcAccountId = deltaCampaignLaunchSparkContext.getSfdcAccountID
+
+    val userCustomerId = deltaCampaignLaunchSparkContext.getUseCustomerId
+
+    if (!userCustomerId) {
+      // Remove the if statement after usercustomerid is removed
+      if (sfdcAccountId == null) {
+        sfdcAccountId = DeltaCampaignLaunchUtils.getAccountId(deltaCampaignLaunchSparkContext.getIsEntityMatch)
+      }
+      if (!result.columns.contains(sfdcAccountId)) {
+        result = result.withColumnRenamed("SFDC_ACCOUNT_ID", sfdcAccountId)
       }
     }
     result

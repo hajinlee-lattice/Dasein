@@ -152,12 +152,7 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setDataDbUser(dataDbUser);
         deltaCampaignLaunchSparkContext.setPublishRecommendationsToDB(campaignLaunchUtils
                 .shouldPublishRecommendationsToDB(customerSpace, playLaunch.getDestinationSysName()));
-        if (deltaCampaignLaunchSparkContext.getPublishRecommendationsToDB() &&
-                !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName())) {
-            deltaCampaignLaunchSparkContext.setContactCols(config.getContactDisplayNames().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()));
-        } else {
-            deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
-        }
+        deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
         deltaCampaignLaunchSparkContext.setUseCustomerId(campaignLaunchUtils.getUseCustomerId(customerSpace, playLaunch.getDestinationSysName()));
         deltaCampaignLaunchSparkContext
                 .setIsEntityMatch(batonService.isEntityMatchEnabled(customerSpace));
