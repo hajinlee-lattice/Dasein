@@ -199,7 +199,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             Map<String, ColumnMetadata> contactAttributesMap,
             Map<String, String> defaultFieldsAttrToServingStoreAttrRemap) {
         String attrName = defaultField.getAttrName();
-        ColumnMetadata cm = constructCampaignDerivedColumnMetadata(defaultField);
+        ColumnMetadata cm = null;
 
         if (defaultField.getStandardField() && defaultField.getEntity() != BusinessEntity.Contact) {
             if (defaultFieldsAttrToServingStoreAttrRemap.containsKey(defaultField.getAttrName())) {
@@ -222,6 +222,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             } else if (defaultField.getForcePopulateIfExportEnabled()) {
                 cm = constructForcePopulateColumnMetadata(defaultField);
             }
+        }
+        if (cm == null) {
+            cm = constructCampaignDerivedColumnMetadata(defaultField, attrName);
         }
         return cm;
     }
@@ -269,8 +272,8 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         return InterfaceName.ContactId.name();
     }
 
-    protected ColumnMetadata constructCampaignDerivedColumnMetadata(ExportFieldMetadataDefaults defaultExportField) {
-        ColumnMetadata cm = new ColumnMetadata(defaultExportField.getAttrName(), defaultExportField.getJavaClass());
+    protected ColumnMetadata constructCampaignDerivedColumnMetadata(ExportFieldMetadataDefaults defaultExportField, String attrName) {
+        ColumnMetadata cm = new ColumnMetadata(attrName, defaultExportField.getJavaClass());
         cm.setDisplayName(defaultExportField.getDisplayName());
         cm.setIsCampaignDerivedField(true);
         cm.setEntity(defaultExportField.getEntity());

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 
 @Component("eloquaExportFieldMetadataService")
@@ -19,7 +20,6 @@ public class EloquaExportFieldMetadataServiceImpl extends ExportFieldMetadataSer
     private static final Logger log = LoggerFactory.getLogger(EloquaExportFieldMetadataServiceImpl.class);
 
     private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC_ACCOUNT_ID";
-
     private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC_CONTACT_ID";
 
     protected EloquaExportFieldMetadataServiceImpl() {
@@ -43,6 +43,10 @@ public class EloquaExportFieldMetadataServiceImpl extends ExportFieldMetadataSer
             remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, accountId);
         } else {
             remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, getDefaultAccountIdForTenant(customerSpace));
+
+            if (getDefaultAccountIdForTenant(customerSpace).equals(InterfaceName.AccountId.name())) {
+                remappingMap.put(InterfaceName.AccountId.name(), SFDC_ACCOUNT_ID_INTERNAL_NAME);
+            }
         }
 
         String contactId = channel.getLookupIdMap().getContactId();
@@ -51,8 +55,11 @@ public class EloquaExportFieldMetadataServiceImpl extends ExportFieldMetadataSer
             remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, contactId);
         } else {
             remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, getDefaultContactIdForTenant(customerSpace));
-        }
 
+            if (getDefaultContactIdForTenant(customerSpace).equals(InterfaceName.ContactId.name())) {
+                remappingMap.put(InterfaceName.ContactId.name(), SFDC_CONTACT_ID_INTERNAL_NAME);
+            }
+        }
         return remappingMap;
     }
 }

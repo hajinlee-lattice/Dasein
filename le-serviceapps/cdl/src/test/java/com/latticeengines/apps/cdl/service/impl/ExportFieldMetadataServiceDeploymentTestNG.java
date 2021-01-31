@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -31,6 +33,7 @@ import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -102,6 +105,33 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     @Inject
     @Spy
     private DefaultExportFieldMetadataServiceImpl defaultExportFieldMetadataServiceWithNoServingStore;
+
+    @Inject
+    @Mock
+    private BatonService batonService;
+
+    @Inject
+    @InjectMocks
+    private S3ExportFieldMetadataServiceImpl S3ExportFieldMetadataServiceImpl;
+
+    @Inject
+    @InjectMocks
+    private SalesforceExportFieldMetadataServiceImpl salesforceExportFieldMetadataServiceImpl;
+
+    @Inject
+    @InjectMocks
+    private EloquaExportFieldMetadataServiceImpl eloquaExportFieldMetadataServiceImpl;
+
+    @Inject
+    @InjectMocks
+    private MarketoExportFieldMetadataServiceImpl marketoExportFieldMetadataServiceImpl;
+
+    private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC_ACCOUNT_ID";
+    private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC_CONTACT_ID";
+    private static final String ACCOUNT_ID_DISPLAY_NAME = "Account ID";
+    private static final String CONTACT_ID_DISPLAY_NAME = "Contact ID";
+    private static final String LATTICE_ACCOUNT_ID_DISPLAY_NAME = "Lattice Account ID";
+    private static final String LATTICE_CONTACT_ID_DISPLAY_NAME = "Lattice Contact ID";
 
     private List<CDLExternalSystemName> systemsToCheck = Arrays.asList(
             CDLExternalSystemName.Marketo, //
@@ -176,7 +206,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 4);
+        assertEquals(columnMetadata.size(), 5);
 
         long nonStandardFieldsCount = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFieldsCount, 0);
@@ -184,6 +214,16 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ExportFieldMetadataDefaults> exportFieldMetadataList = exportFieldMetadataDefaultsService
                 .getExportEnabledAttributesForAudienceType(CDLExternalSystemName.Marketo, AudienceType.CONTACTS);
         compareEntityInMetadata(columnMetadata, exportFieldMetadataList);
+        
+        Mockito.doReturn(false).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> legacyTenantColumnMetadata = marketoExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        testRemappedValues(legacyTenantColumnMetadata, InterfaceName.ContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+
+        Mockito.doReturn(true).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> entityMatchTenantColumnMetadata = marketoExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.ContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
     }
 
     @Test(groups = "deployment-app")
@@ -212,6 +252,20 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ExportFieldMetadataDefaults> exportFieldMetadataList = exportFieldMetadataDefaultsService
                 .getExportEnabledAttributesForAudienceType(externalSystemName, audienceType);
         compareEntityInMetadata(columnMetadata, exportFieldMetadataList);
+        
+        Mockito.doReturn(false).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> legacyTenantColumnMetadata = S3ExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        testRemappedValues(legacyTenantColumnMetadata, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, InterfaceName.ContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, SFDC_ACCOUNT_ID_INTERNAL_NAME, LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, SFDC_CONTACT_ID_INTERNAL_NAME, LATTICE_CONTACT_ID_DISPLAY_NAME);
+
+        Mockito.doReturn(true).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> entityMatchTenantColumnMetadata = S3ExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.CustomerAccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.CustomerContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
@@ -505,10 +559,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         CDLExternalSystemName externalSystemName = CDLExternalSystemName.Eloqua;
         AudienceType audienceType = AudienceType.CONTACTS;
 
-        LookupIdMap lookupIdMap = registerLookupIdMap(CDLExternalSystemType.MAP, externalSystemName, "Eloqua",
-                null,
-                null,
-                InterfaceName.ContactId.name());
+        LookupIdMap lookupIdMap = registerLookupIdMap(CDLExternalSystemType.MAP, externalSystemName, "Eloqua");
 
         PlayLaunchChannel channel = createPlayLaunchChannel(new EloquaChannelConfig(), lookupIdMap, play);
 
@@ -527,6 +578,20 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ExportFieldMetadataDefaults> exportFieldMetadataList = exportFieldMetadataDefaultsService
                 .getExportEnabledAttributesForAudienceType(externalSystemName, audienceType);
         compareEntityInMetadata(columnMetadata, exportFieldMetadataList);
+        
+        Mockito.doReturn(false).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> legacyTenantColumnMetadata = eloquaExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        testRemappedValues(legacyTenantColumnMetadata, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, InterfaceName.ContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, SFDC_ACCOUNT_ID_INTERNAL_NAME, LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, SFDC_CONTACT_ID_INTERNAL_NAME, LATTICE_CONTACT_ID_DISPLAY_NAME);
+
+        Mockito.doReturn(true).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> entityMatchTenantColumnMetadata = eloquaExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.CustomerAccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.CustomerContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
     }
 
     @Test(groups = "deployment-app")
@@ -534,10 +599,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         CDLExternalSystemName externalSystemName = CDLExternalSystemName.Salesforce;
         AudienceType audienceType = AudienceType.ACCOUNTS;
 
-        LookupIdMap lookupIdMap = registerLookupIdMap(CDLExternalSystemType.MAP, externalSystemName, "Salesforce",
-                null,
-                null,
-                InterfaceName.ContactId.name());
+        LookupIdMap lookupIdMap = registerLookupIdMap(CDLExternalSystemType.MAP, externalSystemName, "Salesforce");
 
         PlayLaunchChannel channel = createPlayLaunchChannel(new SalesforceChannelConfig(), lookupIdMap, play);
 
@@ -556,6 +618,20 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ExportFieldMetadataDefaults> exportFieldMetadataList = exportFieldMetadataDefaultsService
                 .getExportEnabledAttributesForAudienceType(externalSystemName, audienceType);
         compareEntityInMetadata(columnMetadata, exportFieldMetadataList);
+        
+        Mockito.doReturn(false).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> legacyTenantColumnMetadata = salesforceExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        testRemappedValues(legacyTenantColumnMetadata, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, InterfaceName.ContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, SFDC_ACCOUNT_ID_INTERNAL_NAME, LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyTenantColumnMetadata, SFDC_CONTACT_ID_INTERNAL_NAME, LATTICE_CONTACT_ID_DISPLAY_NAME);
+
+        Mockito.doReturn(true).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> entityMatchTenantColumnMetadata = salesforceExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.CustomerAccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.CustomerContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchTenantColumnMetadata, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
     }
 
     @Test(groups = "deployment-app")
@@ -699,7 +775,13 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         fieldMapping_3.setDestinationField("phone");
         fieldMapping_3.setOverwriteValue(false);
 
-        lookupIdMap.setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2, fieldMapping_3));
+        ExportFieldMetadataMapping fieldMapping_4 = new ExportFieldMetadataMapping();
+        fieldMapping_4.setSourceField(InterfaceName.AccountId.name());
+        fieldMapping_4.setDestinationField("lattice account id");
+        fieldMapping_4.setOverwriteValue(false);
+
+        lookupIdMap
+                .setExportFieldMappings(Arrays.asList(fieldMapping_1, fieldMapping_2, fieldMapping_3, fieldMapping_4));
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
 
         return lookupIdMap;
@@ -800,5 +882,11 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
                                 columnMetadataToCompare.getAttrName()));
             }
         });
+    }
+    
+    private void testRemappedValues(List<ColumnMetadata> columnMetadata, String expectedInternalName, String expectedDisplayName) {
+        ColumnMetadata legacyContactId = columnMetadata.stream()
+                .filter(column -> column.getAttrName().equals(expectedInternalName)).findAny().orElse(null);
+        assertEquals(expectedDisplayName, legacyContactId.getDisplayName());
     }
 }
