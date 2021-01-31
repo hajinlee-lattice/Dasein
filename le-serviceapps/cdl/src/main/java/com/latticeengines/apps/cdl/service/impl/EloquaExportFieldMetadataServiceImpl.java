@@ -33,7 +33,7 @@ public class EloquaExportFieldMetadataServiceImpl extends ExportFieldMetadataSer
     }
 
     @Override
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(
+    protected Map<String, String> getDefaultFieldsAttrNameToServingStoreAttrNameMap(
             String customerSpace,
             PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();

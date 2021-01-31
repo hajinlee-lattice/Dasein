@@ -36,7 +36,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
         OutreachChannelConfig channelConfig = (OutreachChannelConfig) channel.getChannelConfig();
         AudienceType audienceType = channelConfig.getAudienceType();
-        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrNameToServingStoreAttrNameMap(
                 customerSpace, channel);
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
                 channel.getLookupIdMap().getTenant().getPid());
@@ -50,17 +50,8 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Outreach, accountAttributesMap,
                     contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap, audienceType);
         } else if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
-            String prospectOwner = channel.getLookupIdMap().getProspectOwner();
-            log.info("Outreach prospectOwner " + prospectOwner);
-            if (prospectOwner != null && accountAttributesMap.containsKey(prospectOwner)) {
-                mappedFieldNames.add(PROSPECT_OWNER_INTERNAL_NAME);
-            }
-
-            String accountId = channel.getLookupIdMap().getAccountId();
-            log.info("Outreach accountId " + accountId);
-            if (accountId != null && accountAttributesMap.containsKey(accountId)) {
-                mappedFieldNames.add(SFDC_ACCOUNT_ID_INTERNAL_NAME);
-            }
+            mappedFieldNames.add(PROSPECT_OWNER_INTERNAL_NAME);
+            mappedFieldNames.add(SFDC_ACCOUNT_ID_INTERNAL_NAME);
 
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Outreach, mappedFieldNames,
                     accountAttributesMap, contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
@@ -72,7 +63,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
     }
 
     @Override
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(
+    protected Map<String, String> getDefaultFieldsAttrNameToServingStoreAttrNameMap(
             String customerSpace,
             PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();

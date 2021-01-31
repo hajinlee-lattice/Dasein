@@ -42,7 +42,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
                 Arrays.asList(BusinessEntity.Account), channelConfig.getAttributeSetName(), play);
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
                 Arrays.asList(BusinessEntity.Contact), channelConfig.getAttributeSetName(), play);
-        Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+        Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = getDefaultFieldsAttrNameToServingStoreAttrNameMap(
                 customerSpace, channel);
         List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.AWS_S3,
                 accountAttributesMap, contactAttributesMap, defaultFieldsAttributesToServingStoreAttributesRemap, channelAudienceType);
@@ -54,7 +54,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
     }
 
     @Override
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(
+    protected Map<String, String> getDefaultFieldsAttrNameToServingStoreAttrNameMap(
             String customerSpace,
             PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();

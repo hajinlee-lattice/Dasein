@@ -135,7 +135,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         CDLExternalSystemName systemName = channel.getChannelConfig().getSystemName();
         AudienceType audienceType = channel.getChannelConfig().getAudienceType();
 
-        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrNameToServingStoreAttrNameMap(
                 customerSpace,
                 channel);
         Play play = channel.getPlay();
@@ -186,10 +186,11 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     }
 
     /*
-     * Map (ExportFieldMetadataDefaults.attributeName ->
-     * ServingStore.attributeName)
+     * Map (ExportFieldMetadataDefaults.attributeName -> ServingStore.attributeName)
+     * Enables us to map ExportFieldMetadataDefaults to specific ServingStore attributes
+     * and combine the ExportFieldMetadataDefaults Display Name with ServingStore internal name
      */
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(
+    protected Map<String, String> getDefaultFieldsAttrNameToServingStoreAttrNameMap(
             String customerSpace,
             PlayLaunchChannel channel) {
         return Collections.emptyMap();
