@@ -8,13 +8,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteByUploadStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.CleanupByUploadWrapperConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.RenameAndMatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ConvertBatchStoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.EnrichWebVisitStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.EnrichWebVisitStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.DeleteByUploadStepConfiguration;
 
