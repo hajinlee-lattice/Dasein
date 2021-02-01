@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -44,6 +46,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     private AdminProxy adminProxy;
     private com.latticeengines.security.exposed.service.TenantService tenantService;
     private GlobalAuthUserTenantRightEntityMgr userTenantRightEntityMgr;
+    private BatonService batonService;
 
     private static final Logger log = LoggerFactory.getLogger(AdminRecycleTenantJobCallable.class);
 
@@ -54,6 +57,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         this.adminProxy = builder.adminProxy;
         this.tenantService = builder.tenantService;
         this.userTenantRightEntityMgr = builder.userTenantRightEntityMgr;
+        this.batonService = builder.batonService;
     }
 
     @Override
@@ -67,9 +71,14 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 if (tenant.getExpiredTime() == null) {
                     continue;
                 }
+                CustomerSpace space = CustomerSpace.parse(tenant.getId());
+                if (batonService.hasProduct(space, LatticeProduct.DCP)) {
+                    log.info("skip recycling the dnb connect tenant {}", space);
+                    continue;
+                }
                 long expiredTime = tenant.getExpiredTime();
                 long currentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                CustomerSpace space = CustomerSpace.parse(tenant.getId());
+
                 // send email two weeks before user can't access tenant
                 if (expiredTime - EMAIL_PERIOD < currentTime && currentTime < expiredTime) {
                     int days = (int) Math.ceil((expiredTime - currentTime) / TimeUnit.DAYS.toMillis(1));
@@ -167,6 +176,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         private AdminProxy adminProxy;
         private com.latticeengines.security.exposed.service.TenantService tenantService;
         private GlobalAuthUserTenantRightEntityMgr userTenantRightEntityMgr;
+        private BatonService batonService;
 
         public Builder() {
 
@@ -201,5 +211,11 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
             this.userTenantRightEntityMgr = userTenantRightEntityMgr;
             return this;
         }
+
+        public Builder batonService(BatonService batonService) {
+            this.batonService = batonService;
+            return this;
+        }
+
     }
 }
