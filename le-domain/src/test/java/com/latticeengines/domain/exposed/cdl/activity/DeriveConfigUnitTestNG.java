@@ -23,17 +23,17 @@ public class DeriveConfigUnitTestNG {
 
     DeriveConfig deriveConfig;
 
-    @BeforeMethod
+    @BeforeMethod(groups = "unit")
     public void setUp() {
         deriveConfig = getDeriveConfig();
     }
 
-    @Test(dataProvider = "valsForIdProvider")
+    @Test(groups = "unit", dataProvider = "valsForIdProvider")
     public void testFindDimensionId(List<String> vals, String expected) {
         Assert.assertEquals(deriveConfig.findDimensionId(vals), expected);
     }
 
-    @Test(dataProvider = "valuesForNameProvider")
+    @Test(groups = "unit", dataProvider = "valuesForNameProvider")
     public void testFindDimensionName(List<String> vals, String expected) {
         Assert.assertEquals(deriveConfig.findDimensionName(vals), expected);
     }
