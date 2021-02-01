@@ -710,23 +710,23 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return Pair.of(fileName, is);
     }
 
-    void mockCSVImport(BusinessEntity entity, int fileIdx, String feedType) {
-        mockCSVImport(entity, null, fileIdx, feedType);
+    long mockCSVImport(BusinessEntity entity, int fileIdx, String feedType) {
+        return mockCSVImport(entity, null, fileIdx, feedType);
     }
 
     void mockVISIDBImport(BusinessEntity entity, int fileIdx, String feedType) {
         mockVISIDBImport(entity, null, fileIdx, feedType);
     }
 
-    void mockCSVImport(BusinessEntity entity, String suffix, int fileIdx, String feedType) {
-        mockImport(entity, suffix, fileIdx, feedType, SourceType.FILE);
+    long mockCSVImport(BusinessEntity entity, String suffix, int fileIdx, String feedType) {
+        return mockImport(entity, suffix, fileIdx, feedType, SourceType.FILE);
     }
 
     void mockVISIDBImport(BusinessEntity entity, String suffix, int fileIdx, String feedType) {
         mockImport(entity, suffix, fileIdx, feedType, SourceType.VISIDB);
     }
 
-    void mockImport(BusinessEntity entity, String suffix, int fileIdx, String feedType, SourceType sourceType) {
+    long mockImport(BusinessEntity entity, String suffix, int fileIdx, String feedType, SourceType sourceType) {
         List<String> strings = registerMockDataFeedTask(entity, suffix, feedType, sourceType);
         String feedTaskId = strings.get(0);
         String templateName = strings.get(1);
@@ -755,6 +755,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 extract);
         registerImportAction(feedTaskId, numRecords, tableNames,
                 sourceType == SourceType.VISIDB ? CDLConstants.DEFAULT_VISIDB_USER : INITIATOR);
+        return numRecords;
     }
 
     private Table getMockTemplate(BusinessEntity entity, String suffix, String feedType) {

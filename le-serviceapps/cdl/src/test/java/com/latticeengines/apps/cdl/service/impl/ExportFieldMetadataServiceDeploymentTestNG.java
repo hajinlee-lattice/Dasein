@@ -756,8 +756,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         CDLExternalSystemName externalSystemName = CDLExternalSystemName.Salesforce;
         AudienceType audienceType = AudienceType.ACCOUNTS;
 
-        LookupIdMap lookupIdMap = registerLookupIdMap(CDLExternalSystemType.MAP, externalSystemName);
-
+        LookupIdMap lookupIdMap = registerLookupIdMap(CDLExternalSystemType.CRM, externalSystemName);
         PlayLaunchChannel channel = createPlayLaunchChannel(new SalesforceChannelConfig(), lookupIdMap, play);
 
         ExportFieldMetadataService fieldMetadataService = ExportFieldMetadataServiceBase
@@ -776,7 +775,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
                 .getExportEnabledAttributesForAudienceType(externalSystemName, audienceType);
         compareEntityInMetadata(columnMetadata, exportFieldMetadataList);
         
-        LookupIdMap lookupIdMapWithMappedSfdcIds = registerLookupIdMap(CDLExternalSystemType.MAP, externalSystemName,
+        LookupIdMap lookupIdMapWithMappedSfdcIds = registerLookupIdMap(CDLExternalSystemType.CRM, externalSystemName,
                 InterfaceName.Website.name(), null, InterfaceName.ContactCity.name());
         PlayLaunchChannel channelWithMappedSfdcIds = createPlayLaunchChannel(new SalesforceChannelConfig(), lookupIdMapWithMappedSfdcIds,
                 play);
