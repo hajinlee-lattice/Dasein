@@ -38,7 +38,7 @@ public class DataOperationServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCRUD() {
         DataDeleteOperationConfiguration configuration = new DataDeleteOperationConfiguration();
-        configuration.setEntity(BusinessEntity.Account);
+        configuration.setIdEntity(BusinessEntity.Account);
         configuration.setSystemName("DefaultSystem");
         configuration.setDeleteType(DataDeleteOperationConfiguration.DeleteType.SOFT);
         String dropPath = dataOperationService.createDataOperation(mainCustomerSpace, DataOperation.OperationType.DELETE,configuration);

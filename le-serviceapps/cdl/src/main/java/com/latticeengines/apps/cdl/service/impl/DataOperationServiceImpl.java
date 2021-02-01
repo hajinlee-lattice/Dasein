@@ -86,7 +86,7 @@ public class DataOperationServiceImpl implements DataOperationService {
     }
 
     private String generateDropPath(DataOperation dataOperation) {
-        String idColumn = BusinessEntity.Account.equals(dataOperation.getConfiguration().getEntity()) ? InterfaceName.AccountId.name()
+        String idColumn = BusinessEntity.Account.equals(dataOperation.getConfiguration().getIdEntity()) ? InterfaceName.AccountId.name()
                 : InterfaceName.ContactId.name();
         String systemName = StringUtils.isEmpty(dataOperation.getConfiguration().getSystemName()) ? DEFAULTSYSTEM
                 : dataOperation.getConfiguration().getSystemName();
@@ -118,16 +118,17 @@ public class DataOperationServiceImpl implements DataOperationService {
             fileProperty.setFileName(fileName);
             fileProperty.setFilePath(dataOperationRequest.getS3Bucket() + "/" + key);
             fileProperty.setDirectory(false);
-            SchemaInterpretation schema = Account.equals(dataOperation.getConfiguration().getEntity()) ? SchemaInterpretation.DeleteByAccountTemplate
+            SchemaInterpretation schema = Account.equals(dataOperation.getConfiguration().getIdEntity()) ? SchemaInterpretation.DeleteByAccountTemplate
                     : SchemaInterpretation.DeleteByContactTemplate;
-            SourceFile sourceFile = sourceFileProxy.createSourceFileFromS3(customerSpace, fileProperty, dataOperation.getConfiguration().getEntity().name(),
+            SourceFile sourceFile = sourceFileProxy.createSourceFileFromS3(customerSpace, fileProperty, dataOperation.getConfiguration().getIdEntity().name(),
                     schema.name());
             resolveMetadata(customerSpace, sourceFile);
             DataOperationConfiguration configuration = dataOperation.getConfiguration();
             if (configuration instanceof DataDeleteOperationConfiguration) {
                 DataDeleteOperationConfiguration deleteOperationConfiguration = (DataDeleteOperationConfiguration) configuration;
                 DeleteRequest request = new DeleteRequest();
-                request.setIdEntity(deleteOperationConfiguration.getEntity());
+                request.setIdEntity(deleteOperationConfiguration.getIdEntity());
+                request.setDeleteEntityType(deleteOperationConfiguration.getDeleteEntityType());
                 request.setFilename(sourceFile.getName());
                 request.setHardDelete(DataDeleteOperationConfiguration.DeleteType.HARD.equals(deleteOperationConfiguration.getDeleteType()));
                 request.setIdSystem(dataOperation.getConfiguration().getSystemName());
