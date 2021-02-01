@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -145,7 +146,8 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
                 if (StringUtils.equalsIgnoreCase(targetAttr, InterfaceName.BuyingScore.name())) {
                     buyingStageGroupId = group.getGroupId();
                 } else if (StringUtils.equalsIgnoreCase(targetAttr, InterfaceName.HasIntent.name())) {
-                    if (group.getActivityTimeRange().getParamSet().size() > 1) {
+                    Set<List<Integer>> paraSet = group.getActivityTimeRange().getParamSet();
+                    if (paraSet != null && paraSet.size() > 1) {
                         hasIntentTimerangeGroupId = group.getGroupId();
                     }
                 }
@@ -154,6 +156,8 @@ public class GenerateIntentAlertArtifacts extends BaseSparkStep<GenerateIntentAl
         if (buyingStageGroupId == null || hasIntentTimerangeGroupId == null) {
             throw new RuntimeException("GenerateIntentAlertArtifacts failed due to missing metricGroup");
         }
+        log.info("buyingStageGroupId: {}, hasIntentTimerangeGroupId: {}", buyingStageGroupId,
+                hasIntentTimerangeGroupId);
         // Find the corresponding MetricsGroup table using groupId
         List<String> metricsGroupsignatures = Arrays.asList(hasIntentTimerangeGroupId, buyingStageGroupId);
         Map<String, String> tableNamesMap = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(),
