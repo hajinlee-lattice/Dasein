@@ -534,7 +534,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         CDLExternalSystemName externalSystemName = CDLExternalSystemName.Salesforce;
         AudienceType audienceType = AudienceType.ACCOUNTS;
 
-        LookupIdMap lookupIdMap = registerLookupIdMap(CDLExternalSystemType.MAP, externalSystemName, "Salesforce",
+        LookupIdMap lookupIdMap = registerLookupIdMap(CDLExternalSystemType.CRM, externalSystemName, "Salesforce",
                 null,
                 null,
                 InterfaceName.ContactId.name());
