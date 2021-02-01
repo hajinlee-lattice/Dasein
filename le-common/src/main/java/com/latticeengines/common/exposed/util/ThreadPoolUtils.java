@@ -83,11 +83,11 @@ public final class ThreadPoolUtils {
         return new ForkJoinPool(size, workerThreadFactory, null, false);
     }
 
-    public static ExecutorService getBoundingQueueThreadPool(int minSize, int maxSize, int idleMins,
+    public static ExecutorService getBoundedQueueCallerThreadPool(int minSize, int maxSize, int idleMins,
             int queueSize) {
         BlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<Runnable>(queueSize);
         ExecutorService executorService = new ThreadPoolExecutor(minSize, maxSize, idleMins, TimeUnit.MINUTES,
-                runnableQueue);
+                runnableQueue, new ThreadPoolExecutor.CallerRunsPolicy());
         Runtime.getRuntime().addShutdownHook(new Thread(executorService::shutdownNow));
         return executorService;
     }
@@ -241,10 +241,6 @@ public final class ThreadPoolUtils {
 
     public static void shutdownAndAwaitTermination(ExecutorService pool, long threadPoolTimeoutMin) {
         pool.shutdown(); // Disable new tasks from being submitted
-        awaitTermination(pool, threadPoolTimeoutMin);
-    }
-
-    public static void awaitTermination(ExecutorService pool, long threadPoolTimeoutMin) {
         try {
             // Wait a while for existing tasks to terminate
             if (!pool.awaitTermination(threadPoolTimeoutMin, TimeUnit.MINUTES)) {
