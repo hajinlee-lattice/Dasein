@@ -9,8 +9,8 @@ import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJo
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.ElasticSearchUtils
 import com.latticeengines.spark.util.ElasticSearchUtils._
-import org.apache.spark.sql.functions.{col, lit, map, udf, first}
-import org.apache.spark.sql.types.StructField
+import org.apache.spark.sql.functions.{col, first, lit, map, udf}
+import org.apache.spark.sql.types.{StringType, StructField}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import org.elasticsearch.spark.sql._
 import org.xerial.snappy.Snappy
@@ -71,11 +71,11 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
                        docIdCol: String, baseConfig : Map[String, String], compressed : Boolean) : Unit = {
 
     if (compressed) {
-      val compressUdf = udf((s: Map[String, Any]) => Snappy.compress(JsonUtils.serialize(s.asJava)))
+      val compressUdf = udf((s: Map[String, String]) => Snappy.compress(JsonUtils.serialize(s.asJava)))
       val columns: mutable.LinkedHashSet[Column] = mutable.LinkedHashSet[Column]()
       table.schema.fields.foreach((field: StructField) => {
-        columns.add(lit(field.name))
-        columns.add(col(field.name))
+        columns.add(lit(field.name).cast(StringType))
+        columns.add(col(field.name).cast(StringType))
       })
       if (BusinessEntity.Contact.name().eq(entity))
         // if entity is contact, account id is keyword
@@ -99,8 +99,8 @@ class PublishTableToElasticSearchJob extends AbstractSparkJob[PublishTableToElas
         .drop("lookupColumnName", "lookupColumnVal")
       val columns: mutable.LinkedHashSet[Column] = mutable.LinkedHashSet[Column]()
       generated.schema.fields.foreach((field: StructField) => {
-        columns.add(lit(field.name))
-        columns.add(col(field.name))
+        columns.add(lit(field.name).cast(StringType))
+        columns.add(col(field.name).cast(StringType))
       })
       generated.withColumn(role.name(), map(columns.toSeq: _*)).select(docIdCol, role.name())
         .saveToEs(indexName, baseConfig + ("es.mapping.id" -> docIdCol))
