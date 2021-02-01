@@ -136,7 +136,7 @@ public class GenerateChangeTable extends BaseProcessAnalyzeSparkStep<GenerateCha
      */
     private void generateSpecialChangeTable(ElasticSearchDataUnit dataUnit, String version,
                                             TableRoleInCollection role, String entityKey, String contextKey) {
-        Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), ConsolidatedAccount, active);
+        Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
         if (dataUnit == null || activeTable == null) {
             log.info("publish inactive table to elastic search");
             Table inactiveTable = dataCollectionProxy.getTable(customerSpace.toString(), role, inactive);
@@ -242,7 +242,7 @@ public class GenerateChangeTable extends BaseProcessAnalyzeSparkStep<GenerateCha
         String changeTableName = NamingUtils.timestamp(role.name() + "_ChangeTable");
         Table changeTable = toTable(changeTableName, changeTableDataUnit);
         metadataProxy.createTable(customerSpaceStr, changeTableName, changeTable);
-        log.info("create partial updated table {} in {}", changeTableName, customerSpace);
+        log.info("create partially updated table {} in {}", changeTableName, customerSpace);
         ElasticSearchExportConfig exportConfig = new ElasticSearchExportConfig();
         exportConfig.setTableName(changeTableName);
         exportConfig.setTableRoleInCollection(role);

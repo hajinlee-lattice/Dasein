@@ -264,7 +264,6 @@ public class CreateChangeListTestNG extends SparkJobFunctionalTestNGBase {
             String toDouble = record.get(ToDouble) == null ? null : record.get(ToDouble).toString();
             String key = rowId + "-" + columnId;
             log.info("Key=" + key + " Record=" + record.toString());
-
             switch (key) {
             case "entityId1-first":
                 Assert.assertEquals(dataType, "String", record.toString());
