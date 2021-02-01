@@ -118,13 +118,23 @@ public class SimpleValueFilter extends TemplateValidator {
             if (record.get(fieldName) == null) {
                 return false;
             } else {
-                return record.get(fieldName).equals(value);
+                switch (operator) {
+                    case EQUAL:
+                        return record.get(fieldName).equals(value);
+                    case NOT_EQUAL:
+                        return !record.get(fieldName).equals(value);
+                    case MATCH:
+                        return record.get(fieldName).matches(value);
+                    default:
+                        return false;
+                }
             }
         }
 
         public enum Operator {
             EQUAL,
-            NOT_EQUAL
+            NOT_EQUAL,
+            MATCH
         }
     }
 }
