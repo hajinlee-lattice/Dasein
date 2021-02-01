@@ -592,14 +592,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (fieldMapping.getIdType() != null && StringUtils.isNotBlank(fieldMapping.getSystemName())) {
                 String key = fieldMapping.getIdType() + "|" + fieldMapping.getSystemName();
                 if (mappingKeys.contains(key)) {
-//                    String message = String.format(
-//                            "Multiple user fields are mapped to %s with the same type %s",
-//                            fieldMapping.getSystemName(), fieldMapping.getIdType());
-//                    FieldValidation validation = createValidation(fieldMapping.getUserField(),
-//                            fieldMapping.getMappedField(),
-//                            ValidationStatus.ERROR, message);
-//                    validations.add(validation);
-//                    groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
+                    String message = String.format(
+                            "Multiple user fields are mapped to %s with the same type %s",
+                            fieldMapping.getSystemName(), fieldMapping.getIdType());
+                    FieldValidation validation = createValidation(fieldMapping.getUserField(),
+                            fieldMapping.getMappedField(),
+                            ValidationStatus.ERROR, message);
+                    validations.add(validation);
+                    groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
                 } else {
                     mappingKeys.add(key);
                 }
