@@ -31,7 +31,7 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling MarketoExportFieldMetadataService for channel " + channel.getId());
-        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrNameToServingStoreAttrNameMap(
                 customerSpace, channel);
         Play play = channel.getPlay();
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
@@ -42,17 +42,8 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
                 channel.getLookupIdMap().getTenant().getPid());
         List<ColumnMetadata> exportColumnMetadataList;
         if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
-            String accountId = channel.getLookupIdMap().getAccountId();
-            log.info("Marketo accountId " + accountId);
-            if (accountId != null && accountAttributesMap.containsKey(accountId)) {
-                mappedFieldNames.add(SFDC_ACCOUNT_ID_INTERNAL_NAME);
-            }
-
-            String contactId = channel.getLookupIdMap().getContactId();
-            log.info("Marketo contactId " + contactId);
-            if (contactId != null && contactAttributesMap.containsKey(contactId)) {
-                mappedFieldNames.add(SFDC_CONTACT_ID_INTERNAL_NAME);
-            }
+            mappedFieldNames.add(SFDC_ACCOUNT_ID_INTERNAL_NAME);
+            mappedFieldNames.add(SFDC_CONTACT_ID_INTERNAL_NAME);
 
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Marketo, mappedFieldNames,
                     accountAttributesMap, contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
@@ -64,7 +55,7 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
     }
 
     @Override
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(String customerSpace,
+    protected Map<String, String> getDefaultFieldsAttrNameToServingStoreAttrNameMap(String customerSpace,
             PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();
 
@@ -83,7 +74,6 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
         } else {
             remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, getDefaultContactIdForTenant(customerSpace));
         }
-
         return remappingMap;
     }
 

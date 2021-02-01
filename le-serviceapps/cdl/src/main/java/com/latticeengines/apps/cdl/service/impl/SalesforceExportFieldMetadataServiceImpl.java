@@ -18,9 +18,8 @@ public class SalesforceExportFieldMetadataServiceImpl extends ExportFieldMetadat
 
     private static final Logger log = LoggerFactory.getLogger(SalesforceExportFieldMetadataServiceImpl.class);
 
-    private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC Account ID";
-
-    private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC Contact ID";
+    private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC_ACCOUNT_ID";
+    private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC_CONTACT_ID";
 
     protected SalesforceExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.Salesforce);
@@ -33,7 +32,7 @@ public class SalesforceExportFieldMetadataServiceImpl extends ExportFieldMetadat
     }
 
     @Override
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(
+    protected Map<String, String> getDefaultFieldsAttrNameToServingStoreAttrNameMap(
             String customerSpace,
             PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();
@@ -53,7 +52,6 @@ public class SalesforceExportFieldMetadataServiceImpl extends ExportFieldMetadat
         } else {
             remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, getDefaultContactIdForTenant(customerSpace));
         }
-
         return remappingMap;
     }
 }

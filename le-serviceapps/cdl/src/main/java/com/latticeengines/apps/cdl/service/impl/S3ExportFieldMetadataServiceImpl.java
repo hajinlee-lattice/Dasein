@@ -25,7 +25,6 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
     private static final Logger log = LoggerFactory.getLogger(S3ExportFieldMetadataServiceImpl.class);
 
     private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC_ACCOUNT_ID";
-
     private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC_CONTACT_ID";
 
     protected S3ExportFieldMetadataServiceImpl() {
@@ -42,7 +41,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
                 Arrays.asList(BusinessEntity.Account), channelConfig.getAttributeSetName(), play);
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
                 Arrays.asList(BusinessEntity.Contact), channelConfig.getAttributeSetName(), play);
-        Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+        Map<String, String> defaultFieldsAttributesToServingStoreAttributesRemap = getDefaultFieldsAttrNameToServingStoreAttrNameMap(
                 customerSpace, channel);
         List<ColumnMetadata> exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.AWS_S3,
                 accountAttributesMap, contactAttributesMap, defaultFieldsAttributesToServingStoreAttributesRemap, channelAudienceType);
@@ -54,7 +53,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
     }
 
     @Override
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(
+    protected Map<String, String> getDefaultFieldsAttrNameToServingStoreAttrNameMap(
             String customerSpace,
             PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();

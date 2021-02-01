@@ -23,7 +23,7 @@
    },
    {
       "attrName":"AccountId",
-      "displayName":"Account ID",
+      "displayName":"Lattice Account ID",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Eloqua",
@@ -34,7 +34,7 @@
    },
    {
       "attrName":"LE_ACCOUNT_EXTERNAL_ID",
-      "displayName":"Lattice Account ID",
+      "displayName":"Customer Account ID",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Eloqua",
@@ -122,7 +122,7 @@
    },
    {
       "attrName":"SFDC_ACCOUNT_ID",
-      "displayName":"SFDC Account ID",
+      "displayName":"Account ID",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Eloqua",
@@ -452,7 +452,7 @@
    },
    {
       "attrName":"SFDC_CONTACT_ID",
-      "displayName":"Contact SFDC ID",
+      "displayName":"Contact ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Eloqua",
@@ -474,7 +474,7 @@
    },
    {
       "attrName":"ContactId",
-      "displayName":"Contact ID",
+      "displayName":"Lattice Contact ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Eloqua",

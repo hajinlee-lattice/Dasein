@@ -57,6 +57,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
     private static Map<CDLExternalSystemName, ExportFieldMetadataService> registry = new HashMap<>();
 
+    private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC_ACCOUNT_ID";
+    private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC_CONTACT_ID";
+
     protected ExportFieldMetadataServiceBase() {
     }
 
@@ -135,7 +138,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         CDLExternalSystemName systemName = channel.getChannelConfig().getSystemName();
         AudienceType audienceType = channel.getChannelConfig().getAudienceType();
 
-        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrNameToServingStoreAttrNameMap(
                 customerSpace,
                 channel);
         Play play = channel.getPlay();
@@ -186,10 +189,11 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
     }
 
     /*
-     * Map (ExportFieldMetadataDefaults.attributeName ->
-     * ServingStore.attributeName)
+     * Map (ExportFieldMetadataDefaults.attributeName -> ServingStore.attributeName)
+     * Enables us to map ExportFieldMetadataDefaults to specific ServingStore attributes
+     * and combine the ExportFieldMetadataDefaults Display Name with ServingStore internal name
      */
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(
+    protected Map<String, String> getDefaultFieldsAttrNameToServingStoreAttrNameMap(
             String customerSpace,
             PlayLaunchChannel channel) {
         return Collections.emptyMap();
@@ -199,7 +203,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             Map<String, ColumnMetadata> contactAttributesMap,
             Map<String, String> defaultFieldsAttrToServingStoreAttrRemap) {
         String attrName = defaultField.getAttrName();
-        ColumnMetadata cm = constructCampaignDerivedColumnMetadata(defaultField);
+        ColumnMetadata cm = null;
 
         if (defaultField.getStandardField() && defaultField.getEntity() != BusinessEntity.Contact) {
             if (defaultFieldsAttrToServingStoreAttrRemap.containsKey(defaultField.getAttrName())) {
@@ -222,6 +226,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             } else if (defaultField.getForcePopulateIfExportEnabled()) {
                 cm = constructForcePopulateColumnMetadata(defaultField);
             }
+        }
+        if (cm == null) {
+            cm = constructCampaignDerivedColumnMetadata(defaultField, attrName);
         }
         return cm;
     }
@@ -258,7 +265,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             return InterfaceName.CustomerAccountId.name();
         }
         
-        return InterfaceName.AccountId.name();
+        return SFDC_ACCOUNT_ID_INTERNAL_NAME;
     }
 
     protected String getDefaultContactIdForTenant(String customerSpace) {
@@ -266,11 +273,11 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             return InterfaceName.CustomerContactId.name();
         }
 
-        return InterfaceName.ContactId.name();
+        return SFDC_CONTACT_ID_INTERNAL_NAME;
     }
 
-    protected ColumnMetadata constructCampaignDerivedColumnMetadata(ExportFieldMetadataDefaults defaultExportField) {
-        ColumnMetadata cm = new ColumnMetadata(defaultExportField.getAttrName(), defaultExportField.getJavaClass());
+    protected ColumnMetadata constructCampaignDerivedColumnMetadata(ExportFieldMetadataDefaults defaultExportField, String attrName) {
+        ColumnMetadata cm = new ColumnMetadata(attrName, defaultExportField.getJavaClass());
         cm.setDisplayName(defaultExportField.getDisplayName());
         cm.setIsCampaignDerivedField(true);
         cm.setEntity(defaultExportField.getEntity());

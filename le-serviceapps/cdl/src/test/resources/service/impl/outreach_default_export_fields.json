@@ -259,7 +259,7 @@
       "javaClass": "String",
       "externalSystemName": "Outreach",
       "standardField":true,
-      "exportEnabled":true,
+      "exportEnabled":false,
       "forcePopulate":false,
       "audienceType": ["ACCOUNTS", "CONTACTS"]
    },
@@ -347,7 +347,7 @@
       "javaClass": "String",
       "externalSystemName": "Outreach",
       "standardField":true,
-      "exportEnabled":true,
+      "exportEnabled":false,
       "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
@@ -391,7 +391,7 @@
       "javaClass": "String",
       "externalSystemName": "Outreach",
       "standardField":true,
-      "exportEnabled":true,
+      "exportEnabled":false,
       "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
@@ -402,7 +402,7 @@
       "javaClass": "String",
       "externalSystemName": "Outreach",
       "standardField":true,
-      "exportEnabled":true,
+      "exportEnabled":false,
       "forcePopulate":false,
       "audienceType": ["ACCOUNTS", "CONTACTS"]
    }
