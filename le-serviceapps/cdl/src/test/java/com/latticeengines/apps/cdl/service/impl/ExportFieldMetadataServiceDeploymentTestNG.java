@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
@@ -130,7 +131,6 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
 
     private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC_ACCOUNT_ID";
     private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC_CONTACT_ID";
-    private static final String SDR_EMAIL_INTERNAL_NAME = "SDR_Email";
 
     private static final String ACCOUNT_ID_DISPLAY_NAME = "Account ID";
     private static final String CONTACT_ID_DISPLAY_NAME = "Contact ID";
@@ -231,7 +231,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         Map<String, ColumnMetadata> legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
         testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, CONTACT_ID_DISPLAY_NAME);
         testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
 
         legacyTenantColumnMetadata = marketoExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace,
@@ -298,10 +298,10 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> legacyTenantColumnMetadata = S3ExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), CONTACT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, LATTICE_ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, LATTICE_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
 
         legacyTenantColumnMetadata = S3ExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace,
                 channelWithMappedSfdcIds);
@@ -531,20 +531,20 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         log.info(JsonUtils.serialize(columnMetadata));
 
         // 3 mapped fields
-        assertEquals(columnMetadata.size(), 5);
+        assertEquals(columnMetadata.size(), 3);
 
         List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
         log.info(JsonUtils.serialize(attrNames));
 
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
-        assertEquals(nonStandardFields, 2);
+        assertEquals(nonStandardFields, 0);
 
         List<ExportFieldMetadataDefaults> exportFieldMetadataList = exportFieldMetadataDefaultsService
                 .getExportEnabledAttributesForAudienceType(externalSystemName, audienceType);
         compareEntityInMetadata(columnMetadata, exportFieldMetadataList);
         
-        LookupIdMap lookupIdMapWithMappedSfdcIds = registerOutreachLookupIdMap(InterfaceName.State.name(),
-                InterfaceName.ContactName.name());
+        LookupIdMap lookupIdMapWithMappedSfdcIds = registerOutreachLookupIdMap(InterfaceName.AccountId.name(),
+                InterfaceName.LDC_Name.name());
         PlayLaunchChannel channelWithMappedSfdcIds = createPlayLaunchChannel(outreachChannel,
                 lookupIdMapWithMappedSfdcIds, play);
 
@@ -552,29 +552,29 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> legacyTenantColumnMetadata = outreachExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, SDR_EMAIL_INTERNAL_NAME, SDR_EMAIL_DISPLAY_NAME);
+        assertNull(legacyColumnMetadataMap.get(ACCOUNT_ID_DISPLAY_NAME));
+        assertNull(legacyColumnMetadataMap.get(SDR_EMAIL_DISPLAY_NAME));
 
         legacyTenantColumnMetadata = outreachExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace,
                 channelWithMappedSfdcIds);
         legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.State.name(), ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactName.name(), SDR_EMAIL_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.LDC_Name.name(), SDR_EMAIL_DISPLAY_NAME);
 
         Mockito.doReturn(true).when(batonService).isEntityMatchEnabled(any());
         List<ColumnMetadata> entityMatchTenantColumnMetadata = outreachExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(entityMatchColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, SDR_EMAIL_INTERNAL_NAME, SDR_EMAIL_DISPLAY_NAME);
+        assertNull(entityMatchColumnMetadataMap.get(ACCOUNT_ID_DISPLAY_NAME));
+        assertNull(entityMatchColumnMetadataMap.get(SDR_EMAIL_DISPLAY_NAME));
 
         entityMatchTenantColumnMetadata = outreachExportFieldMetadataServiceImpl
                 .getExportEnabledFields(mainCustomerSpace, channelWithMappedSfdcIds);
         entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.State.name(), ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactName.name(), SDR_EMAIL_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.LDC_Name.name(), SDR_EMAIL_DISPLAY_NAME);
     }
 
     @Test(groups = "deployment-app")
@@ -592,15 +592,48 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        // Account Name, SDR Email, SDR Account Id
-        assertEquals(columnMetadata.size(), 3);
+        // Account Name
+        assertEquals(columnMetadata.size(), 1);
 
         List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
         log.info(JsonUtils.serialize(attrNames));
 
         // B/c we didn't specify the values in lookupIdMap
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
-        assertEquals(nonStandardFields, 2);
+        assertEquals(nonStandardFields, 0);
+        
+        LookupIdMap lookupIdMapWithMappedSfdcIds = registerOutreachLookupIdMap(InterfaceName.AccountId.name(),
+                InterfaceName.LDC_Name.name());
+        PlayLaunchChannel channelWithMappedSfdcIds = createPlayLaunchChannel(outreachChannel,
+                lookupIdMapWithMappedSfdcIds, play);
+
+        Mockito.doReturn(false).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> legacyTenantColumnMetadata = outreachExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        Map<String, ColumnMetadata> legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
+                .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
+        assertNull(legacyColumnMetadataMap.get(ACCOUNT_ID_DISPLAY_NAME));
+        assertNull(legacyColumnMetadataMap.get(SDR_EMAIL_DISPLAY_NAME));
+
+        legacyTenantColumnMetadata = outreachExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace,
+                channelWithMappedSfdcIds);
+        legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
+                .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.LDC_Name.name(), SDR_EMAIL_DISPLAY_NAME);
+
+        Mockito.doReturn(true).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> entityMatchTenantColumnMetadata = outreachExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
+        Map<String, ColumnMetadata> entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
+                .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
+        assertNull(entityMatchColumnMetadataMap.get(ACCOUNT_ID_DISPLAY_NAME));
+        assertNull(entityMatchColumnMetadataMap.get(SDR_EMAIL_DISPLAY_NAME));
+
+        entityMatchTenantColumnMetadata = outreachExportFieldMetadataServiceImpl
+                .getExportEnabledFields(mainCustomerSpace, channelWithMappedSfdcIds);
+        entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
+                .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.LDC_Name.name(), SDR_EMAIL_DISPLAY_NAME);
     }
 
     @Test(groups = "deployment-app")
@@ -687,10 +720,10 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> legacyTenantColumnMetadata = eloquaExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), CONTACT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, LATTICE_ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, LATTICE_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
         
         legacyTenantColumnMetadata = eloquaExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channelWithMappedSfdcIds);
         legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
@@ -704,24 +737,18 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> entityMatchTenantColumnMetadata = eloquaExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerAccountId.name(),
-                ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerContactId.name(),
-                CONTACT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(),
-                LATTICE_ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(),
-                LATTICE_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerAccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
         
         entityMatchTenantColumnMetadata = eloquaExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channelWithMappedSfdcIds);
         entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.Website.name(), ACCOUNT_ID_DISPLAY_NAME);
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactCity.name(), CONTACT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(),
-                LATTICE_ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(),
-                LATTICE_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
     }
 
     @Test(groups = "deployment-app")
@@ -758,10 +785,10 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> legacyTenantColumnMetadata = salesforceExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), CONTACT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, LATTICE_ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, LATTICE_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
         
         legacyTenantColumnMetadata = salesforceExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channelWithMappedSfdcIds);
         legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
@@ -775,24 +802,18 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> entityMatchTenantColumnMetadata = salesforceExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerAccountId.name(),
-                ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerContactId.name(),
-                CONTACT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(),
-                LATTICE_ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(),
-                LATTICE_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerAccountId.name(), ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerContactId.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
         
         entityMatchTenantColumnMetadata = salesforceExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channelWithMappedSfdcIds);
         entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.Website.name(), ACCOUNT_ID_DISPLAY_NAME);
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactCity.name(), CONTACT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(),
-                LATTICE_ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(),
-                LATTICE_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
     }
 
     @Test(groups = "deployment-app")

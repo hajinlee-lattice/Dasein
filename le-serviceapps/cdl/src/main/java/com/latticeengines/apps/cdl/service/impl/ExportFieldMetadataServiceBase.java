@@ -57,6 +57,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
     private static Map<CDLExternalSystemName, ExportFieldMetadataService> registry = new HashMap<>();
 
+    private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC_ACCOUNT_ID";
+    private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC_CONTACT_ID";
+
     protected ExportFieldMetadataServiceBase() {
     }
 
@@ -262,7 +265,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             return InterfaceName.CustomerAccountId.name();
         }
         
-        return InterfaceName.AccountId.name();
+        return SFDC_ACCOUNT_ID_INTERNAL_NAME;
     }
 
     protected String getDefaultContactIdForTenant(String customerSpace) {
@@ -270,7 +273,7 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             return InterfaceName.CustomerContactId.name();
         }
 
-        return InterfaceName.ContactId.name();
+        return SFDC_CONTACT_ID_INTERNAL_NAME;
     }
 
     protected ColumnMetadata constructCampaignDerivedColumnMetadata(ExportFieldMetadataDefaults defaultExportField, String attrName) {
