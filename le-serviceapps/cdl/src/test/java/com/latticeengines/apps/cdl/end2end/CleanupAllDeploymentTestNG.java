@@ -48,6 +48,8 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private Map<BusinessEntity, String> tablename = new HashMap();
 
+    private long mockImportedContact;
+
     @BeforeClass(groups = { "end2end" })
     @Override
     public void setup() throws Exception {
@@ -63,12 +65,14 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         verifyCleanupAllAttrConfig();
         verifyCleanup();
+        logCount();
         if (isLocalEnvironment()) {
             processAnalyzeSkipPublishToS3();
         } else {
             processAnalyze();
         }
         Assert.assertEquals(1, verifyAction());
+        logCount();
         verifyProcess();
         verifyCleanupAll();
     }
@@ -153,9 +157,17 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         long numAccounts = ACCOUNT_IMPORT_SIZE_1;
 
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
+        Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), mockImportedContact);
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertNotNull(getTableName(BusinessEntity.Contact.getBatchStore()));
         verifyStatsCubes();
+    }
+
+    private void logCount() {
+        long accountCount = countTableRole(BusinessEntity.Account.getBatchStore());
+        log.info("Account Batch Count: " + accountCount);
+        long contactCount = countTableRole(BusinessEntity.Contact.getBatchStore());
+        log.info("Contact Batch Count: " + contactCount);
     }
 
     private void verifyStatsCubes() {
@@ -167,7 +179,8 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     private void importData() {
-        mockCSVImport(BusinessEntity.Contact, 2, "DefaultSystem_ContactData");
+        mockImportedContact = mockCSVImport(BusinessEntity.Contact, 2, "DefaultSystem_ContactData");
+        log.info("Mock imported Contact records: " + mockImportedContact);
     }
 
 }
