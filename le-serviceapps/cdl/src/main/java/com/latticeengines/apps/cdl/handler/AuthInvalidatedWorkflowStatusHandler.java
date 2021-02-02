@@ -76,8 +76,12 @@ public class AuthInvalidatedWorkflowStatusHandler implements WorkflowStatusHandl
             log.info("LookupIdMap not found. Deleting Tray Auth: " + trayAuthId);
             deleteTrayAuth(trayAuthId, trayUserId);
         } else {
-            log.info("Deregistering lookupIdMap ID: " + lookupIdMap.getId());
-            lookupIdMappingService.deregisterExternalSystem(lookupIdMap);
+            String lookupIdMapId = lookupIdMap.getId();
+            log.info("Deregistering lookupIdMap ID: " + lookupIdMapId);
+            if (lookupIdMap.getIsRegistered()) {
+                lookupIdMap.setIsRegistered(false);
+                lookupIdMappingService.updateLookupIdMap(lookupIdMapId, lookupIdMap);
+            }
         }
     }
 
