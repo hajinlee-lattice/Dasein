@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.cdl.workflow.steps.merge.BaseActivityStreamStep;
-import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -141,8 +140,8 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
                 steps.add(mergeSoftDelete);
                 int mergeDeleteStep = steps.size() - 1;
                 String rawStreamTablePrefix = String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId);
-                if (BusinessEntity.Account.equals(idEntity) && AtlasStream.StreamType.MarketingActivity
-                        .equals(configuration.getActivityStreamMap().get(streamId).getStreamType())) {
+                List<String> matchEntities = configuration.getActivityStreamMap().get(streamId).getMatchEntities();
+                if (BusinessEntity.Account.equals(idEntity) && matchEntities!=null && matchEntities.contains(BusinessEntity.Contact)) {
                     List<String> selectColumns = Arrays.asList(InterfaceName.AccountId.name(),
                             InterfaceName.ContactId.name());
                     TransformationStepConfig joinStep = joinTable(mergeDeleteStep, consolidatedContactTable, idColumn,
