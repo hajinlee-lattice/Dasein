@@ -30,7 +30,8 @@ import com.latticeengines.security.exposed.service.TenantService;
 public class AuthInvalidatedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AuthInvalidatedWorkflowStatusHandlerTestNG.class);
-    private static String TEST_TRAY_ID = "TEST_TRAY_";
+    private static String TEST_TRAY_ID_1 = "TEST_TRAY_1_";
+    private static String TEST_TRAY_ID_2 = "TEST_TRAY_2_";
     private static long CURRENT_TIME_MILLIS = System.currentTimeMillis();
     private static String TEST_TENANT = "Test Lattice Tenant";
 
@@ -47,23 +48,31 @@ public class AuthInvalidatedWorkflowStatusHandlerTestNG extends StatusHandlerTes
     TenantService tenantService;
 
     private Tenant tenant1;
-    private LookupIdMap lookupIdMap;
+    private LookupIdMap lookupIdMap1;
+    private LookupIdMap lookupIdMap2;
     private DataIntegrationStatusMonitorMessage statusMessage;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
         addAnotherTenant();
-        lookupIdMap = createLookupIdMap();
-        statusMessage = createAuthStatusMessage();
+        lookupIdMap1 = createLookupIdMap();
+        lookupIdMap2 = createLookupIdMap();
+        statusMessage = createAuthStatusMessage(TEST_TRAY_ID_2);
     }
 
     @Test(groups = "functional")
     public void testAuthInvalidatedWorkflowStatusHandler() {
-        String lookupIdMapId = lookupIdMap.getId();
-        createExtSysAuth(lookupIdMap);
-        Assert.assertTrue(lookupIdMap.getIsRegistered());
-        log.info(lookupIdMap.getTenant().toString());
+        String lookupIdMapId2 = lookupIdMap2.getId();
+        createExtSysAuth(lookupIdMap1, TEST_TRAY_ID_1);
+        log.info("lookupIdMap1 tenant: " + lookupIdMap1.getTenant().toString());
+
+        lookupIdMap2.setTenant(tenant1);
+        createExtSysAuth(lookupIdMap2, TEST_TRAY_ID_2);
+        log.info("lookupIdMap2 tenant: " + lookupIdMap2.getTenant().toString());
+
+        Assert.assertTrue(lookupIdMap2.getIsRegistered());
+
         String statusJson = JsonUtils.serialize(statusMessage);
         log.info("STATUS SERIALIZED " + statusJson);
 
@@ -75,32 +84,32 @@ public class AuthInvalidatedWorkflowStatusHandlerTestNG extends StatusHandlerTes
                 Collections.singleton(AssertionError.class), null);
 
         retry.execute(context -> {
-            LookupIdMap updatedLookupIdMap = lookupIdMappingService.getLookupIdMap(lookupIdMapId);
+            LookupIdMap updatedLookupIdMap = lookupIdMappingService.getLookupIdMap(lookupIdMapId2);
             Assert.assertFalse(updatedLookupIdMap.getIsRegistered());
             return true;
         });
     }
 
-    private AuthInvalidatedEventDetail createAuthEventDetail() {
+    private AuthInvalidatedEventDetail createAuthEventDetail(String authName) {
         AuthInvalidatedEventDetail eventDetail = new AuthInvalidatedEventDetail();
-        eventDetail.setTrayAuthenticationId(TEST_TRAY_ID + CURRENT_TIME_MILLIS);
+        eventDetail.setTrayAuthenticationId(authName + CURRENT_TIME_MILLIS);
         return eventDetail;
     }
 
-    private ExternalSystemAuthentication createExtSysAuth(LookupIdMap lookupIdMap) {
+    private ExternalSystemAuthentication createExtSysAuth(LookupIdMap lookupIdMap, String authName) {
         ExternalSystemAuthentication extSysAuth = new ExternalSystemAuthentication();
-        extSysAuth.setTrayAuthenticationId(TEST_TRAY_ID + CURRENT_TIME_MILLIS);
+        extSysAuth.setTrayAuthenticationId(authName + CURRENT_TIME_MILLIS);
         extSysAuth.setLookupIdMap(lookupIdMap);
         externalSystemAuthenticationService.createAuthentication(extSysAuth);
         return extSysAuth;
     }
 
-    private DataIntegrationStatusMonitorMessage createAuthStatusMessage() {
+    private DataIntegrationStatusMonitorMessage createAuthStatusMessage(String authName) {
         DataIntegrationStatusMonitorMessage statusMessage = new DataIntegrationStatusMonitorMessage();
         statusMessage.setMessageType(MessageType.Information.toString());
         statusMessage.setEventType(DataIntegrationEventType.AuthInvalidated.toString());
         statusMessage.setEventTime(new Date());
-        statusMessage.setEventDetail(createAuthEventDetail());
+        statusMessage.setEventDetail(createAuthEventDetail(authName));
 
         return statusMessage;
     }
