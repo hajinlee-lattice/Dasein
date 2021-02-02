@@ -110,6 +110,10 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                     });
 
                 } else if (currentTime > expiredTime + INACTIVE_PERIOD) {
+                    if (!TenantStatus.INACTIVE.equals(tenant.getStatus())) {
+                        log.info("tenant status is not inactive won't be deleted for {}", space);
+                        throw new RuntimeException(String.format("unsupported settings for tenant %s", space));
+                    }
                     adminProxy.deleteTenant(space.getContractId(), space.getTenantId());
                     log.info(String.format("tenant %s has been deleted", tenant.getName()));
                 }
