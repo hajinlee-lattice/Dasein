@@ -101,7 +101,7 @@ public enum Category {
 
     private static Map<String, Category> nameMap;
     private static Set<String> values;
-    private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE, DNB_TECHNOLOGY_PROFILE,
+    private static List<Category> premiumCategories = Arrays.asList(INTENT, DNB_TECHNOLOGY_PROFILE, TECHNOLOGY_PROFILE,
             WEBSITE_KEYWORDS, ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES, GROWTH_TRENDS, COVID_19);
     // used in following scenarios
     // 1. iteration metadata API called via remodeling UI
@@ -113,8 +113,8 @@ public enum Category {
             COVID_19, //
             INTENT, //
             ONLINE_PRESENCE, //
-            TECHNOLOGY_PROFILE, //
             DNB_TECHNOLOGY_PROFILE, //
+            TECHNOLOGY_PROFILE, //
             WEBSITE_KEYWORDS, //
             WEBSITE_PROFILE, //
             AI_INSIGHTS //
