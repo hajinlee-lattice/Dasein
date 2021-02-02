@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.dcp.CreateEnrichmentTemplateRequest;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
 import com.latticeengines.domain.exposed.dcp.ListEnrichmentTemplateRequest;
@@ -34,16 +35,18 @@ public class EnrichmentTemplateResource {
     @Inject
     private EnrichmentTemplateService enrichmentTemplateService;
 
-    @PostMapping("/{layoutId}")
+    @PostMapping("/layout")
     @ResponseBody
     @ApiOperation(value = "Create an EnrichmentTemplate from Layout")
-    public ResponseDocument<String> create(@PathVariable String layoutId, @RequestBody String templateName) {
+    public ResponseDocument<String> create(@PathVariable String customerSpace,
+            @RequestBody CreateEnrichmentTemplateRequest request) {
         try {
-            ResponseDocument<String> result = enrichmentTemplateService.create(layoutId, templateName);
+            ResponseDocument<String> result = enrichmentTemplateService.create(customerSpace, request.getLayoutId(),
+                    request.getTemplateName());
             return result;
         } catch (LedpException exception) {
-            log.error(String.format("Failed to create enrichment template from existing layout %s: %s", layoutId,
-                    exception.getMessage()));
+            log.error(String.format("Failed to create enrichment template from existing layout %s: %s",
+                    request.getLayoutId(), exception.getMessage()));
             log.error(ExceptionUtils.getStackTrace(exception));
             return ResponseDocument.failedResponse(exception);
         }
@@ -52,7 +55,8 @@ public class EnrichmentTemplateResource {
     @PostMapping("/create-template")
     @ResponseBody
     @ApiOperation(value = "Create an Enrichment Template")
-    public ResponseDocument<String> create(@RequestBody EnrichmentTemplate template) {
+    public ResponseDocument<String> create(@PathVariable String customerSpace,
+            @RequestBody EnrichmentTemplate template) {
         try {
             ResponseDocument<String> result = enrichmentTemplateService.create(template);
             return result;
@@ -67,7 +71,7 @@ public class EnrichmentTemplateResource {
     @PostMapping("/list")
     @ResponseBody
     @ApiOperation(value = "List Enrichment Templates")
-    public List<EnrichmentTemplateSummary> getEnrichmentTemplates(
+    public List<EnrichmentTemplateSummary> getEnrichmentTemplates(@PathVariable String customerSpace,
             @RequestBody ListEnrichmentTemplateRequest listEnrichmentTemplateRequest) {
         return enrichmentTemplateService.getEnrichmentTemplates(listEnrichmentTemplateRequest);
     }

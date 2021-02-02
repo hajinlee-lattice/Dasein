@@ -62,7 +62,7 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
     @JsonProperty("recordType")
     private DataRecordType recordType;
 
-    @Column(name = "ELEMENTS", columnDefinition = "'JSON'", nullable = false)
+    @Column(name = "ELEMENTS", columnDefinition = "'JSON'")
     @Type(type = "json")
     private List<String> elements;
 
@@ -78,7 +78,7 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
     @Column(name = "UPDATE_TIME", nullable = false)
     @JsonProperty("updateTime")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updateTime = new Date();
+    private Date updated = new Date();
 
     @Column(name = "CREATED_BY", nullable = false)
     @JsonProperty("createdBy")
@@ -100,8 +100,18 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
         this.recordType = enrichmentLayout.getRecordType();
         this.elements = enrichmentLayout.getElements();
         this.createTime = enrichmentLayout.getCreated();
-        this.updateTime = enrichmentLayout.getUpdated();
+        this.updated = enrichmentLayout.getUpdated();
         this.createdBy = enrichmentLayout.getCreatedBy();
+    }
+
+    public EnrichmentTemplate(EnrichmentLayoutDetail enrichmentLayoutDetail) {
+        this.templateId = NamingUtils.uuid("Template");
+        this.domain = enrichmentLayoutDetail.getDomain();
+        this.recordType = enrichmentLayoutDetail.getRecordType();
+        this.elements = enrichmentLayoutDetail.getElements();
+        this.createTime = enrichmentLayoutDetail.getCreated();
+        this.updated = enrichmentLayoutDetail.getUpdated();
+        this.createdBy = enrichmentLayoutDetail.getCreatedBy();
     }
 
     @Override

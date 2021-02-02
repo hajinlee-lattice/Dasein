@@ -2,9 +2,13 @@ package com.latticeengines.proxy.exposed.dcp;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.dcp.CreateEnrichmentTemplateRequest;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
 import com.latticeengines.domain.exposed.dcp.ListEnrichmentTemplateRequest;
@@ -14,6 +18,8 @@ import com.latticeengines.proxy.exposed.ProxyInterface;
 @Component("enrichmentTemplateProxy")
 public class EnrichmentTemplateProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
+    private static final Logger log = LoggerFactory.getLogger(EnrichmentTemplateProxy.class);
+
     protected EnrichmentTemplateProxy() {
         super("dcp");
     }
@@ -22,9 +28,10 @@ public class EnrichmentTemplateProxy extends MicroserviceRestApiProxy implements
 
     public ResponseDocument<String> createEnrichmentTemplate(String customerSpace, String layoutId,
             String templateName) {
-        String baseUrl = PREFIX + "/{layoutId}";
-        String url = constructUrl(baseUrl, customerSpace, layoutId, templateName);
-        return post("Create an EnrichmentTemplate from Layout", url, templateName, ResponseDocument.class);
+        String baseUrl = PREFIX + "/layout";
+        String url = constructUrl(baseUrl, customerSpace);
+        CreateEnrichmentTemplateRequest request = new CreateEnrichmentTemplateRequest(layoutId, templateName);
+        return post("Create an EnrichmentTemplate from Layout", url, request, ResponseDocument.class);
     }
 
     public ResponseDocument<String> createEnrichmentTemplate(String customerSpace,
@@ -40,6 +47,8 @@ public class EnrichmentTemplateProxy extends MicroserviceRestApiProxy implements
         String url = constructUrl(baseUrl, customerSpace);
         ListEnrichmentTemplateRequest request = new ListEnrichmentTemplateRequest(customerSpace, domain, recordType,
                 includeArchived, createdBy);
-        return post("List Enrichment Templates", url, request, List.class);
+
+        List<?> rawList = post("List Enrichment Templates", url, request, List.class);
+        return JsonUtils.convertList(rawList, EnrichmentTemplateSummary.class);
     }
 }
