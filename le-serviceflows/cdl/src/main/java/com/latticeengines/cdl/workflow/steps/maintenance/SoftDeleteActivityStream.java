@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -47,8 +46,6 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
     static final String BEAN_NAME = "softDeleteActivityStream";
 
     private List<Action> softDeleteActivityActions;
-
-    private String consolidatedContactTable;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -104,13 +101,6 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
             DeleteActionConfiguration config = (DeleteActionConfiguration) deleteAction.getActionConfiguration();
             return config.hasEntity(BusinessEntity.ActivityStream);
         }).collect(Collectors.toList());
-
-        consolidatedContactTable = dataCollectionProxy.getTableName(customerSpace.getTenantId(),
-                TableRoleInCollection.ConsolidatedContact, inactive);
-        if (StringUtils.isBlank(consolidatedContactTable)) {
-            consolidatedContactTable = dataCollectionProxy.getTableName(customerSpace.getTenantId(),
-                    TableRoleInCollection.ConsolidatedContact, active);
-        }
     }
 
     @Override

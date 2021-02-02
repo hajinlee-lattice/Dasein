@@ -23,6 +23,7 @@ public class FilterByJoinJobTestNG extends SparkJobFunctionalTestNGBase {
         runnables.add(this::testInnerJoin);
         runnables.add(this::testOuterJoin);
         runnables.add(this::testLeftAntiJoin);
+        runnables.add(this::testSwitchSide);
         ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
 
@@ -136,5 +137,34 @@ public class FilterByJoinJobTestNG extends SparkJobFunctionalTestNGBase {
         };
         input.add(uploadHdfsDataUnit(inputData, inputFields));
         return input;
+    }
+
+    private void testSwitchSide() {
+        List<String> input = prepareData();
+        FilterByJoinConfig config = getSwitchSideConfig();
+        SparkJobResult result = runSparkJob(FilterByJoinJob.class, config, input,
+                String.format("/tmp/%s/%s/testSwitchSide", leStack, this.getClass().getSimpleName()));
+        verify(result, Collections.singletonList(this::verifySwitchSide));
+    }
+
+    private FilterByJoinConfig getSwitchSideConfig() {
+        FilterByJoinConfig config = new FilterByJoinConfig();
+        config.setJoinType("left_anti");
+        config.setSelectColumns(Arrays.asList("Id", "Attr1"));
+        config.setSwitchSide(true);
+        config.setKey("Id");
+        return config;
+    }
+
+    private Boolean verifySwitchSide(HdfsDataUnit switchSideResults) {
+        final AtomicLong count = new AtomicLong();
+        verifyAndReadTarget(switchSideResults).forEachRemaining(record -> {
+            System.out.println(record);
+            Assert.assertEquals(record.getSchema().getFields().size(), 2);
+            count.addAndGet(1);
+            Assert.assertEquals("5", record.get("Id").toString());
+        });
+        Assert.assertEquals(count.get(), 1L);
+        return true;
     }
 }

@@ -157,6 +157,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_LEGACY_DELETE_TXFMR = "LegacyDeleteTxfmr";
     public static final String TRANSFORMER_MERGE_TS_DELETE_TXFMR = "MergeTimeSeriesDeleteDataTxfmr";
     public static final String TRANSFORMER_SELECT_BY_COLUMN_TXFMR = "SelectByColumnTxfmr";
+    public static final String TRANSFORMER_FILTER_BY_JOIN_TXFMR = "FilterByJoinTxfmr";
     public static final String TRANSFORMER_UPSERT_TXFMR = "UpsertTxfmr";
     public static final String TRANSFORMER_MERGE_SYSTEM_BATCH_TXFMR = "MergeSystemBatchTxfmr";
     public static final String TRANSFORMER_PROFILE_TXFMR = "ProfileTxfmr";
