@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
-import com.latticeengines.apps.dcp.testframework.DCPFunctionalTestNGBase;
+import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
 import com.latticeengines.domain.exposed.dcp.ListEnrichmentTemplateRequest;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase {
+public class EnrichmentTemplateServiceImplTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private EnrichmentLayoutService enrichmentLayoutService;
@@ -35,7 +35,7 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
 
     private static final String sourceIdTemplate = "Source_%s";
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment-dcp")
     public void setup() {
         setupTestEnvironment();
         mainTestTenant.setSubscriberNumber(SUBSRIBER_NUMBER_MANY_DOMAINS);
@@ -62,7 +62,7 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
         return layout;
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment-dcp")
     public void testCreateTemplateFromLayout() {
         String layoutId = RandomStringUtils.randomAlphanumeric(4);
         String tenantId = "PropDataService.PropDataService.Production";
@@ -75,13 +75,13 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
 
         String templateName = "Test_Enrichment_Template";
 
-        ResponseDocument<String> createTemplateResult = enrichmentTemplateService.create(layoutId, templateName);
+        ResponseDocument<String> createTemplateResult = enrichmentTemplateService.create(tenantId, layoutId, templateName);
 
         Assert.assertNotNull(createTemplateResult);
         Assert.assertTrue(createTemplateResult.isSuccess(), "Enrichment Template is not valid");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment-dcp")
     public void testCreateTemplate() {
         EnrichmentTemplate template = new EnrichmentTemplate();
         template.setDomain(DataDomain.SalesMarketing);
@@ -97,18 +97,19 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
         Assert.assertTrue(createTemplateResult.isSuccess(), "Enrichment Template is not valid");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment-dcp")
     public void testListTemplates() {
         EnrichmentLayout layout1 = createLayout(DataDomain.Finance, DataRecordType.Analytical);
         EnrichmentLayout layout2 = createLayout(DataDomain.SalesMarketing, DataRecordType.Domain);
+        String tenantId = "PropDataService.PropDataService.Production";
 
-        ResponseDocument<String> createTemplateResult1 = enrichmentTemplateService.create(layout1.getLayoutId(),
+        ResponseDocument<String> createTemplateResult1 = enrichmentTemplateService.create(tenantId, layout1.getLayoutId(),
                 "template1");
 
         Assert.assertNotNull(createTemplateResult1);
         Assert.assertTrue(createTemplateResult1.isSuccess(), "Enrichment Template is not valid");
 
-        ResponseDocument<String> createTemplateResult2 = enrichmentTemplateService.create(layout2.getLayoutId(),
+        ResponseDocument<String> createTemplateResult2 = enrichmentTemplateService.create(tenantId, layout2.getLayoutId(),
                 "template2");
 
         Assert.assertNotNull(createTemplateResult2);

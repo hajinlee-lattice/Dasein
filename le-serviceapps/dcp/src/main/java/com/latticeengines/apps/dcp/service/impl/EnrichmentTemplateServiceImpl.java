@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.dcp.entitymgr.EnrichmentLayoutEntityMgr;
 import com.latticeengines.apps.dcp.entitymgr.EnrichmentTemplateEntityMgr;
+import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
 import com.latticeengines.apps.dcp.service.EntitlementService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -46,15 +47,18 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
     private EnrichmentLayoutEntityMgr enrichmentLayoutEntityMgr;
 
     @Inject
+    private EnrichmentLayoutService enrichmentLayoutService;
+
+    @Inject
     private PrimeMetadataProxy primeMetadataProxy;
 
     @Inject
     private EntitlementService entitlementService;
 
     @Override
-    public ResponseDocument<String> create(String layoutId, String templateName) {
+    public ResponseDocument<String> create(String customerSpace, String layoutId, String templateName) {
         Tenant tenant = MultiTenantContext.getTenant();
-        EnrichmentLayout enrichmentLayout = enrichmentLayoutEntityMgr.findByLayoutId(layoutId);
+        EnrichmentLayout enrichmentLayout = enrichmentLayoutService.findByLayoutId(customerSpace, layoutId);
 
         if (enrichmentLayout == null) {
             log.error("Could not find an enrichment layout with layoutId " + layoutId);

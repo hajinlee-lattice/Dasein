@@ -46,7 +46,7 @@ public class EnrichmentTemplateResource {
     @ResponseBody
     @ApiOperation("Create enrichment template")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public ResponseDocument<String> createTemplate(@PathVariable String layoutId, @RequestBody String templateName) {
+    public ResponseDocument<String> createTemplate(@PathVariable String layoutId, @RequestParam String templateName) {
         try {
             ResponseDocument<String> createTemplateResponse = enrichmentTemplateService
                     .createEnrichmentTemplate(layoutId, templateName);
