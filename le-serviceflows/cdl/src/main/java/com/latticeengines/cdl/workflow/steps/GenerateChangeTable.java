@@ -197,11 +197,17 @@ public class GenerateChangeTable extends BaseProcessAnalyzeSparkStep<GenerateCha
         HdfsDataUnit activeDataUnit = activeTable.toHdfsDataUnit("Active" + role);
         HdfsDataUnit inactiveDataUnit = inactiveTable.toHdfsDataUnit("Inactive" + role);
 
-        // in migration mode, need to use AccountId/ContactId because legacy
-        // won't have EntityId column
-        String joinKey = (configuration.isEntityMatchEnabled() && !inMigrationMode()) ? InterfaceName.EntityId.name()
-                : entityKey;
 
+        String joinKey;
+        if (AccountLookup == role) {
+            // account lookup doesn't have entity id
+            joinKey = entityKey;
+        } else {
+            // in migration mode, need to use AccountId/ContactId because legacy
+            // won't have EntityId column
+            joinKey = (configuration.isEntityMatchEnabled() && !inMigrationMode()) ? InterfaceName.EntityId.name() :
+                    entityKey;
+        }
         // step1: generate change list
         ChangeListConfig config = getChangeListConfig(joinKey);
         List<DataUnit> inputs = new LinkedList<>();
