@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.auth.exposed.util.TeamUtils;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Source;
@@ -66,6 +68,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Inject
     private DataMappingService dataMappingService;
+
+    @Inject
+    private BatonService batonService;
 
     @Override
     public Source createSource(SourceRequest sourceRequest) {
@@ -151,9 +156,12 @@ public class SourceServiceImpl implements SourceService {
                         entityTypeObj.getDisplayName()));
 
         // 2b. Retrieve Spec for given systemType and systemObject.
+        String systemType = S3ImportSystem.SystemType.DCP.name();
+        if (batonService.isEnabled(customerSpace, LatticeFeatureFlag.MATCH_MAPPING_V2))
+            systemType += "-v2";
         fetchFieldDefinitionsResponse.setImportWorkflowSpec(
                 importWorkflowSpecProxy.getImportWorkflowSpec(customerSpace.toString(),
-                        S3ImportSystem.SystemType.DCP.name(),
+                        systemType,
                         entityTypeObj.getDisplayName()));
 
         // 2c. Find previously saved template matching this customerSpace, sourceId, if it exists.
