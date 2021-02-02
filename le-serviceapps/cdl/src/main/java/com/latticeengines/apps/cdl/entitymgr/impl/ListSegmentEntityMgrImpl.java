@@ -74,6 +74,9 @@ public class ListSegmentEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Lis
                 existingDataTemplates.put(entry.getKey(), entry.getValue());
             }
         }
+        if (incomingListSegment.getConfig() != null) {
+            existingListSegment.setConfig(incomingListSegment.getConfig());
+        }
     }
 
     @Override
