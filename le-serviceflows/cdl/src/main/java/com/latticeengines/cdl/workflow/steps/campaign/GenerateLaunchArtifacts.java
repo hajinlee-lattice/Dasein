@@ -148,9 +148,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         baseOnOtherTapType = TapType.ListSegment.equals(tapType);
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         BusinessEntity mainEntity = channelConfig.getAudienceType().asBusinessEntity();
-        boolean useContactsPerAccountLimit = hasContactsPerAccountLimit(channel, mainEntity);
-        HdfsDataUnit perAccountLimitedContacts  = useContactsPerAccountLimit ? //
-                getObjectFromContext(FULL_CONTACTS_UNIVERSE + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class) : null;
         HdfsDataUnit positiveDeltaDataUnit = getObjectFromContext(
                 getAddDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class);
         HdfsDataUnit negativeDeltaDataUnit = getObjectFromContext(
@@ -160,6 +157,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         CDLExternalSystemName externalSystemName = launch == null ? channel.getLookupIdMap().getExternalSystemName()
                 : launch.getDestinationSysName();
         log.info("externalSystemName=" + externalSystemName);
+        boolean useContactsPerAccountLimit = hasContactsPerAccountLimit(channel, mainEntity, externalSystemName);
+        HdfsDataUnit perAccountLimitedContacts  = useContactsPerAccountLimit ? //
+                getObjectFromContext(FULL_CONTACTS_UNIVERSE + ATLAS_EXPORT_DATA_UNIT, HdfsDataUnit.class) : null;
 
         List<ColumnMetadata> fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
                 channel.getId());
@@ -611,5 +611,11 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             default:
                 return null;
         }
+    }
+
+    private boolean hasContactsPerAccountLimit(PlayLaunchChannel channel, BusinessEntity mainEntity, //
+            CDLExternalSystemName externalSystemName) {
+        return (mainEntity == BusinessEntity.Contact) && (channel.getMaxContactsPerAccount() != null) && //
+                CDLExternalSystemName.Eloqua.equals(externalSystemName);
     }
 }

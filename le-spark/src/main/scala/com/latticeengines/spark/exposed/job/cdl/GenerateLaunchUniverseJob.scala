@@ -33,7 +33,7 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     logSpark("Input schema is as follows:")
     trimmedData.printSchema
 
-    if(contactAccountRatioThreshold != null) {
+    if (contactAccountRatioThreshold != null && (maxContactsPerAccount == null || contactAccountRatioThreshold < maxContactsPerAccount)) {
       checkContactAccountRatio(trimmedData, accountId, contactAccountRatioThreshold)
     }
 

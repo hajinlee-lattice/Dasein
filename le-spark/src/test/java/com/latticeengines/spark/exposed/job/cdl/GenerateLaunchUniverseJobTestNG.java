@@ -130,6 +130,42 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
         Assert.assertTrue(verifyDefaultSort(result));
     }
 
+    @Test(groups = "functional")
+    public void testGenerateLaunchUniverseJobThresholdLimitNotApplied() throws Exception {
+        GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig();
+        config.setWorkspace("testGenerateLaunchUniverseJobThresholdLimitNotApplied");
+
+        config.setContactAccountRatioThreshold(2L);
+        config.setMaxContactsPerAccount(2L);
+        config.setContactsPerAccountSortAttribute(CDL_UPDATED_TIME);
+        config.setContactsPerAccountSortDirection(DESC);
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateLaunchUniverseJob.class, config);
+        log.info("TestGenerateLaunchUniverseJobThresholdLimitNotApplied Results: " + JsonUtils.serialize(result));
+
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 16);
+    }
+
+    @Test(groups = "functional")
+    public void testGenerateLaunchUniverseJobThresholdLimitApplied() throws Exception {
+        GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig();
+        config.setWorkspace("testGenerateLaunchUniverseJobThresholdLimitApplied");
+        config.setContactAccountRatioThreshold(2L);
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        String error = null;
+
+        try {
+            SparkJobResult result = runSparkJob(GenerateLaunchUniverseJob.class, config);
+            log.info("TestGenerateLaunchUniverseJobThresholdLimitApplied Results: " + JsonUtils.serialize(result));
+        } catch (Exception e) {
+            error = e.getMessage();
+        }
+
+        Assert.assertNotNull(error);
+    }
+
     private boolean verifyDefaultSort(SparkJobResult result) throws Exception {
         String hdfsDir = result.getTargets().get(0).getPath();
         String fieldName = "ContactId";
