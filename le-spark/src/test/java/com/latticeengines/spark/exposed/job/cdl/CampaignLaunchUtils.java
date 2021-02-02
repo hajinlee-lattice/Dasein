@@ -15,6 +15,9 @@ import com.latticeengines.domain.exposed.playmakercore.RecommendationColumnName;
 
 public final class CampaignLaunchUtils {
 
+    public static final String SFDC_ACCOUNT_ID = "SFDC_ACCOUNT_ID";
+    public static final String SFDC_CONTACT_ID = "SFDC_CONTACT_ID";
+
     protected CampaignLaunchUtils() {
         throw new UnsupportedOperationException();
     }
@@ -232,7 +235,7 @@ public final class CampaignLaunchUtils {
         if (isEntityMatch) {
             return InterfaceName.CustomerAccountId.name();
         }
-        return InterfaceName.AccountId.name();
+        return SFDC_ACCOUNT_ID;
     }
 
     public static String generateExpectedSfdcContactIdCol(String sfdcContactId, boolean isEntityMatch) {
@@ -242,6 +245,6 @@ public final class CampaignLaunchUtils {
         if (isEntityMatch) {
             return InterfaceName.CustomerContactId.name();
         }
-        return InterfaceName.ContactId.name();
+        return SFDC_CONTACT_ID;
     }
 }

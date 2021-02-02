@@ -522,6 +522,8 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 { false, false, false, true, false, false, testNoSfdcIds },
                 // Account only case for two data Frames
                 { false, true, true, false, false, false, testSfdcIdsWithNull },
+                // Account only case and launch to db
+                { true, true, true, false, false, false, testSfdcIdsWithNull },
                 // launch to DB case
                 { true, true, true, false, false, false, testSfdcIdsWithValues },
                 // launch to DB case and user CustomerAccountId and
@@ -535,7 +537,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 { true, true, true, false, false, true, testSfdcIdsWithValues },
                 // generate 3 dataframe and custom SFDC Account and Contact ID
                 // using isEntityMatch
-                { false, true, true, false, false, true, testSfdcIdsWithValues } 
+                { false, true, true, false, false, true, testSfdcIdsWithValues }
         };
     }
 }
