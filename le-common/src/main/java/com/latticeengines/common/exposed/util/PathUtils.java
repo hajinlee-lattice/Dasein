@@ -113,4 +113,9 @@ public final class PathUtils {
         }
         return null;
     }
+
+    public static String getFileNameWithoutExtension(String path) {
+        path = path.substring(path.lastIndexOf('/') + 1);
+        return path.trim().replaceFirst("\\.[^\\W]+$", "");
+    }
 }

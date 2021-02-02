@@ -39,6 +39,7 @@ import com.latticeengines.app.exposed.service.FileDownloadService;
 import com.latticeengines.app.exposed.service.FileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.app.exposed.util.FileDownloaderRegistry;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.DownloadFileType;
@@ -148,8 +149,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         }
         fileId = fileId.substring(fileId.lastIndexOf('/') + 1);
 
-        String displayName = upload.getDisplayName();
-        String displayPrefix = displayName.substring(0, displayName.lastIndexOf('.')); // strip file extension
+        String displayPrefix = PathUtils.getFileNameWithoutExtension(upload.getDisplayName()); // strip file extension
 
         response.setHeader("Content-Encoding", "gzip");
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
@@ -171,7 +171,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
         }
          */
         List<String> paths = new ArrayList<>();
-        String uploadTS = config.getUploadTSPrefix();
+        String uploadTS = config.getUploadTimestamp();
         String rawPath = config.getUploadRawFilePath();
         String commonPrefix = rawPath.substring(0, rawPath.indexOf(uploadTS) + uploadTS.length() + 1);
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
