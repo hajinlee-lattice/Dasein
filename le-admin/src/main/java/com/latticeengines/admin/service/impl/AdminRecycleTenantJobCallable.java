@@ -3,6 +3,7 @@ package com.latticeengines.admin.service.impl;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -66,6 +67,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
         List<Tenant> tempTenants = tenantService.getTenantByTypes(Arrays.asList(TenantType.POC, TenantType.STAGING));
         if (CollectionUtils.isNotEmpty(tempTenants)) {
             log.info("Tenants size is " + tempTenants.size());
+            Set<String> tenantsWithInvalidSettings = new HashSet<>();
             for (Tenant tenant : tempTenants) {
                 log.info("begin dealing with tenant " + tenant.getName());
                 if (tenant.getExpiredTime() == null) {
@@ -112,12 +114,17 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 } else if (currentTime > expiredTime + INACTIVE_PERIOD) {
                     if (!TenantStatus.INACTIVE.equals(tenant.getStatus())) {
                         log.info("tenant status is not inactive won't be deleted for {}", space);
-                        throw new RuntimeException(String.format("unsupported settings for tenant %s", space));
+                        tenantsWithInvalidSettings.add(space.toString());
+                        continue;
                     }
                     adminProxy.deleteTenant(space.getContractId(), space.getTenantId());
                     log.info(String.format("tenant %s has been deleted", tenant.getName()));
                 }
 
+            }
+            if (CollectionUtils.isNotEmpty(tenantsWithInvalidSettings)) {
+                throw new RuntimeException(String.format("unsupported settings for tenant %s",
+                        tenantsWithInvalidSettings));
             }
         }
 
