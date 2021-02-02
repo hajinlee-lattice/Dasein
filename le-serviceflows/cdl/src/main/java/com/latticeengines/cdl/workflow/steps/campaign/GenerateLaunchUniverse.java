@@ -96,7 +96,9 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         BusinessEntity mainEntity = channelConfig.getAudienceType().asBusinessEntity();
         Long maxEntitiesToLaunch = channel.getMaxEntitiesToLaunch();
-        boolean useContactsPerAccountLimit = hasContactsPerAccountLimit(channel, mainEntity);
+        Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
+        Long contactAccountRatioThreshold = WorkflowJobUtils.getContactAccountRatioThresholdFromZK(customerSpace);
+        boolean useContactsPerAccountLimit = hasContactsPerAccountLimit(mainEntity, maxContactsPerAccount, contactAccountRatioThreshold);
         Set<RatingBucketName> launchBuckets = launch == null ? channel.getBucketsToLaunch()
                 : launch.getBucketsToLaunch();
         String lookupId = launch == null ? channel.getLookupIdMap().getAccountId() : launch.getDestinationAccountId();
@@ -153,8 +155,6 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse after first sparkjob", launchUniverseDataUnit));
             // 3) check for 'Contacts per Account' limit
             if (useContactsPerAccountLimit) {
-                Long maxContactsPerAccount = channel.getMaxContactsPerAccount();
-                Long contactAccountRatioThreshold = WorkflowJobUtils.getContactAccountRatioThresholdFromZK(customerSpace);
                 launchUniverseDataUnit = executeSparkJobContactsPerAccount(launchUniverseDataUnit,
                         maxContactsPerAccount, maxEntitiesToLaunch, customerSpace, contactAccountRatioThreshold);
                 log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse after second sparkjob", launchUniverseDataUnit));
@@ -285,4 +285,9 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         }
         return tag + ", " + JsonUtils.serialize(dataUnit);
     }
+
+    private boolean hasContactsPerAccountLimit(BusinessEntity mainEntity, Long maxContactsPerAccount, Long contactAccountRatioThreshold) {
+        return (mainEntity == BusinessEntity.Contact) && (maxContactsPerAccount != null || contactAccountRatioThreshold != null);
+    }
+
 }
