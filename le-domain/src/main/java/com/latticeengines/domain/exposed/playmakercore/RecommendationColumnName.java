@@ -47,7 +47,7 @@ public enum RecommendationColumnName {
                     .put(MONETARY_VALUE.name(), MONETARY_VALUE.name()) //
                     .put(LIKELIHOOD.name(), LIKELIHOOD.name()) //
                     .put(COMPANY_NAME.name(), InterfaceName.CompanyName.name()) //
-                    .put(SFDC_ACCOUNT_ID.name(), InterfaceName.SalesforceAccountID.name()) //
+                    .put(SFDC_ACCOUNT_ID.name(), SFDC_ACCOUNT_ID.name()) //
                     .put(PRIORITY_ID.name(), PRIORITY_ID.name()) //
                     .put(PRIORITY_DISPLAY_NAME.name(), PRIORITY_DISPLAY_NAME.name()) //
                     .put(MONETARY_VALUE_ISO4217_ID.name(), MONETARY_VALUE_ISO4217_ID.name()) //
@@ -75,7 +75,7 @@ public enum RecommendationColumnName {
                     .put(MONETARY_VALUE.name(), MONETARY_VALUE.name()) //
                     .put(LIKELIHOOD.name(), LIKELIHOOD.name()) //
                     .put(InterfaceName.CompanyName.name(), COMPANY_NAME.name()) //
-                    .put(InterfaceName.SalesforceAccountID.name(), SFDC_ACCOUNT_ID.name()) //
+                    .put(SFDC_ACCOUNT_ID.name(), SFDC_ACCOUNT_ID.name()) //
                     .put(PRIORITY_ID.name(), PRIORITY_ID.name()) //
                     .put(PRIORITY_DISPLAY_NAME.name(), PRIORITY_DISPLAY_NAME.name()) //
                     .put(MONETARY_VALUE_ISO4217_ID.name(), MONETARY_VALUE_ISO4217_ID.name()) //
