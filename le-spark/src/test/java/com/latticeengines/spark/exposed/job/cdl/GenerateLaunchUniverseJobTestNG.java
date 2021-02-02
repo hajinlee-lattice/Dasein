@@ -166,6 +166,26 @@ public class GenerateLaunchUniverseJobTestNG extends SparkJobFunctionalTestNGBas
         Assert.assertNotNull(error);
     }
 
+    @Test(groups = "functional")
+    public void testGenerateLaunchUniverseJobThresholdLimitApplied2() throws Exception {
+        GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig();
+        config.setWorkspace("testGenerateLaunchUniverseJobThresholdLimitApplied2");
+        config.setContactAccountRatioThreshold(2L);
+        config.setMaxContactsPerAccount(3L);
+
+        log.info("Config: " + JsonUtils.serialize(config));
+        String error = null;
+
+        try {
+            SparkJobResult result = runSparkJob(GenerateLaunchUniverseJob.class, config);
+            log.info("TestGenerateLaunchUniverseJobThresholdLimitApplied2 Results: " + JsonUtils.serialize(result));
+        } catch (Exception e) {
+            error = e.getMessage();
+        }
+
+        Assert.assertNotNull(error);
+    }
+
     private boolean verifyDefaultSort(SparkJobResult result) throws Exception {
         String hdfsDir = result.getTargets().get(0).getPath();
         String fieldName = "ContactId";
