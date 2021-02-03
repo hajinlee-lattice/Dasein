@@ -49,7 +49,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     private static final Logger log = LoggerFactory.getLogger(TrayConnectorTestServiceImpl.class);
 
     private static final String CDL_TRAY_TEST_VERIFICATION_END_POINT = "/cdl/tray/test/verify";
-    private static final String PATH_TEMPLATE = "connectors/%s/test-scenarios/%s/input.json";
+    private static final String PATH_TEMPLATE = "le-tray-testframework/connectors/%s/test-scenarios/%s/input.json";
     private static final String TEST_FILE_PATH_TEMPLATE = "tray-test/%s/%s/%s";
 
     private static final String CSV = "csv";
@@ -96,9 +96,6 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     @Value("${aws.customer.export.s3.bucket}")
     private String exportS3Bucket;
 
-    @Value("${cdl.tray.test.metadata.bucket}")
-    private String trayTestMetadataBucket;
-
     @Value("${cdl.tray.test.data.bucket}")
     private String trayTestDataBucket;
 
@@ -116,7 +113,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         log.info(String.format("Trigger test for tenant=%s, objectKey=%s", tenantId, objectKey));
 
         try {
-            InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
+            InputStream is = s3Service.readObjectAsStream(trayTestDataBucket, objectKey);
             TrayConnectorTestMetadata metadata = JsonUtils.deserialize(is, TrayConnectorTestMetadata.class);
             log.info("Retrieved metadata: " + JsonUtils.serialize(metadata));
 
