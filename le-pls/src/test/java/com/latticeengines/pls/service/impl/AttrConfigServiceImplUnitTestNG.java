@@ -108,13 +108,13 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalTpAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.tpLimit);
         Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForTp);
-        Assert.assertEquals(categoryOverview.getDisplayName(), Category.TECHNOLOGY_PROFILE.getName());
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.DNB_TECHNOLOGY_PROFILE.getName());
 
         categoryOverview = result.get(2);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalWebsiteKeywordAttrs);
         Assert.assertEquals(categoryOverview.getLimit(), AttrConfigServiceImplTestUtils.websiteKeywordLimit);
         Assert.assertEquals(categoryOverview.getSelected(), AttrConfigServiceImplTestUtils.activeForWebsiteKeyword);
-        Assert.assertEquals(categoryOverview.getDisplayName(), Category.DNB_TECHNOLOGY_PROFILE.getName());
+        Assert.assertEquals(categoryOverview.getDisplayName(), Category.TECHNOLOGY_PROFILE.getName());
 
         categoryOverview = result.get(3);
         Assert.assertEquals(categoryOverview.getTotalAttrs(), AttrConfigServiceImplTestUtils.totalWebsiteKeywordAttrs);
