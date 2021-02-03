@@ -512,7 +512,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ? Collections.emptyList()
                 : importAndDeleteJobs.stream().filter(
                         job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING
-                                && job.getJobStatus() != JobStatus.ENQUEUED)
+                                && job.getJobStatus() != JobStatus.ENQUEUED
+                                && job.getJobStatus() != JobStatus.FAILED
+                                && job.getJobStatus() != JobStatus.CANCELLED)
                 .map(Job::getPid).collect(Collectors.toList());
         log.info(String.format("Job pids that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobPids));
