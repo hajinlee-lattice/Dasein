@@ -202,7 +202,7 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
             String objectKey = String.format(PATH_TEMPLATE, test.getExternalSystemName(), test.getTestScenario());
             log.info("Retrieving test metadata with objectKey: " + objectKey);
 
-            InputStream is = s3Service.readObjectAsStream(trayTestMetadataBucket, objectKey);
+            InputStream is = s3Service.readObjectAsStream(trayTestDataBucket, objectKey);
             TrayConnectorTestMetadata metadata = JsonUtils.deserialize(is, TrayConnectorTestMetadata.class);
             log.info("Retrieved metadata: " + JsonUtils.serialize(metadata));
 
