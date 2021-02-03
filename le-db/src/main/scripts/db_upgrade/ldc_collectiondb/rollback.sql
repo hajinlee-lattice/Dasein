@@ -1,19 +1,16 @@
 /*
-* script name - mysql.sql
-* purpose - 'Release/Hotfix/Patch' DB upgrade script.
-* SQL should be backwards compatible.
-* 
+* script name - rollback.sql
+* purpose - 'Release/Hotfix/Patch' DB rollback script.
+* description - a rollback entry for each SQL at mysql.sql file
 */
 
--- *** DO NOT FORGET TO ADD rollback script to 'rollback.sql' file ***
+USE `LDC_CollectionDB`;
 
-USE `VboDB`;
-
-DROP PROCEDURE IF EXISTS `UpdateSchema`;
+DROP PROCEDURE IF EXISTS `RollbackSchema`;
 DELIMITER //
 
 -- ##############################################################
-CREATE PROCEDURE `UpdateSchema`()
+CREATE PROCEDURE `RollbackSchema`()
   BEGIN
     -- User input section (DDL/DML). This is just a template, developer can modify based on need.
 
@@ -25,4 +22,4 @@ CREATE PROCEDURE `UpdateSchema`()
 
 -- DO NOT touch this part
 DELIMITER ;
-CALL `UpdateSchema`();
+CALL `RollbackSchema`();
