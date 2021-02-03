@@ -186,6 +186,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         // DCP only
         Collection<LatticeProduct> dcp = Collections.singleton(LatticeProduct.DCP);
         createDefaultFeatureFlag(LatticeFeatureFlag.DCP_ENRICHMENT_LIBRARY, dcp).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.MATCH_MAPPING_V2, dcp).setDefaultValue(false);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
