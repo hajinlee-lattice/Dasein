@@ -3,7 +3,6 @@ package com.latticeengines.cdl.workflow.steps.campaign;
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -24,7 +23,6 @@ public class GenerateLaunchUniverseTestNG extends WorkflowTestNGBase {
 
     @Test(groups = "functional")
     public void testUseSparkJobContactsPerAccount() {
-        generateLaunchUniverse.setExecutionContext(new ExecutionContext());
         GenerateLaunchUniverseJobConfig config = new GenerateLaunchUniverseJobConfig();
 
         config.setMaxContactsPerAccount(2L);
