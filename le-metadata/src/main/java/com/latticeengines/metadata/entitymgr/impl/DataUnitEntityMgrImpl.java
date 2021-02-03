@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -62,18 +60,16 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     private int purgeSize = 3;
 
     @Override
-    @Transactional(transactionManager = "documentTransactionManager", propagation = Propagation.REQUIRED)
     public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit) {
-        return createOrUpdateDataUnit(tenantId, dataUnit, true);
+        return createOrUpdateDataUnit(tenantId, dataUnit, false);
     }
 
     @Override
-    @Transactional(transactionManager = "documentTransactionManager", propagation = Propagation.REQUIRED)
     public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit, boolean purgeOldSnapShot) {
         return createOrUpdateDataUnit(tenantId, dataUnit, purgeOldSnapShot);
     }
 
-    private DataUnit createOrUpdateDataUnit(String tenantId, DataUnit dataUnit , boolean purgeOldSnapShot){
+    private DataUnit createOrUpdateDataUnit(String tenantId, DataUnit dataUnit, boolean purgeOldSnapShot) {
         String name = dataUnit.getName();
         dataUnit.setTenant(tenantId);
         DataUnit.StorageType storageType = dataUnit.getStorageType();
@@ -92,7 +88,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     private void removeMasterRole(DataUnit dataUnit) {
         List<DataUnit.Role> roles = dataUnit.getRoles();
-        if (CollectionUtils.isNotEmpty(roles) && roles.contains(DataUnit.Role.Master)) {
+        if (CollectionUtils.isNotEmpty(roles) && roles.contains(DataUnit.Role.Master) && StringUtils.isNotEmpty(dataUnit.getDataTemplateId())) {
             List<DataUnitEntity> dataUnitEntities = findDataUnitEntitiesByDataTemplateIdAndRoleFromReader(dataUnit.getTenant(),
                     dataUnit.getDataTemplateId(), DataUnit.Role.Master);
             for (DataUnitEntity entity : dataUnitEntities) {
