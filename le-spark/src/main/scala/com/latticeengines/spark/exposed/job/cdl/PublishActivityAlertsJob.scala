@@ -35,8 +35,15 @@ class PublishActivityAlertsJob extends AbstractSparkJob[PublishActivityAlertsJob
     // default batchsize is 1000, scale up when dataset increases
     val batchSize = if (exportDf.count() / 100 < 1000) 1000 else exportDf.count() / 100
     prop.setProperty("batchsize", batchSize.toString)
-    // cap repartition at 100, scale up when dataset increases
-    val repartition: Int = if (exportDf.count() / 10000 < 100) (exportDf.count() / 10000).toInt else 100
+    // cap repartition at 20 based on the experiments to avoid overloading DB
+    val repartition: Int =
+      if (exportDf.count() / 100000 == 0) {
+        2
+      } else if (exportDf.count() / 100000 < 20) {
+        (exportDf.count() / 100000).toInt
+      } else {
+        20
+      }
     val table = config.getDbTableName
 
     // write data from spark dataframe to database
