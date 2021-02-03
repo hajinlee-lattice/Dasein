@@ -45,7 +45,7 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCrud() throws Exception {
         String name = NamingUtils.timestamp("Dynamo");
-        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name), true);
+        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name));
         Assert.assertNotNull(unit);
         Assert.assertTrue(unit instanceof DynamoDataUnit);
 
@@ -74,7 +74,7 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testFindByDataTemplateIdAndRole() {
         String name = NamingUtils.timestamp("Dynamo");
-        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name), true);
+        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name));
         Assert.assertNotNull(unit);
         Assert.assertTrue(unit instanceof DynamoDataUnit);
 
@@ -97,7 +97,7 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testFindAllDataUnitEntitiesWithExpiredRetentionPolicy() {
         String name = NamingUtils.timestamp("Dynamo");
-        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name), true);
+        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name));
         Assert.assertNotNull(unit);
         Assert.assertTrue(unit instanceof DynamoDataUnit);
 
