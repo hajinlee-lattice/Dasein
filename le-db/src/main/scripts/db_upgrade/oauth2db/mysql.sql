@@ -10,9 +10,21 @@ DROP PROCEDURE IF EXISTS `UpdateSchema`;
 DELIMITER //
 
 -- ##############################################################
+-- User input section (DDL/DML). This is just a template, developer can modify based on need.
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
-      -- User input section (DDL/DML). This is just a template, developer can modify based on need.
+      -- SECTION: Lattice DB Script
+
+
+
+
+
+      -- SECTION: DCP DB Script
+
+
+
+
+
 
   END //
 -- ##############################################################
