@@ -14,7 +14,8 @@ DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
       -- SECTION: Lattice DB Script
-
+      ALTER TABLE `PLS_MultiTenant`.`METADATA_LIST_SEGMENT`
+          ADD COLUMN `CONFIG` JSON;
 
 
 
