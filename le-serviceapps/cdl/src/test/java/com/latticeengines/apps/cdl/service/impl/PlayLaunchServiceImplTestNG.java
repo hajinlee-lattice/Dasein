@@ -53,6 +53,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.RecordsStats;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -485,6 +486,32 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testEntriesDashboard" })
+    public void testUpdateRecordsStats() {
+
+        PlayLaunch oldPlayLaunch = playLaunchService.findByLaunchId(playLaunch1.getLaunchId(), false);
+        RecordsStats recordsStats = oldPlayLaunch.getRecordsStats();
+
+        if (recordsStats == null) {
+            recordsStats = new RecordsStats();
+        }
+
+        recordsStats.setRecordsReceivedFromAcxiom(1000L);
+        recordsStats.setAcxiomRecordsSucceedToDestination(900L);
+        recordsStats.setAcxiomRecordsFailToDestination(100L);
+        oldPlayLaunch.setRecordsStats(recordsStats);
+        playLaunchService.update(oldPlayLaunch);
+
+        PlayLaunch updatedPlayLaunch = playLaunchService.findByLaunchId(playLaunch1.getLaunchId(), false);
+
+        Assert.assertNotNull(updatedPlayLaunch);
+        Assert.assertNotNull(updatedPlayLaunch.getRecordsStats());
+        Assert.assertEquals(updatedPlayLaunch.getRecordsStats().getRecordsReceivedFromAcxiom().longValue(), 1000L);
+        Assert.assertEquals(updatedPlayLaunch.getRecordsStats().getAcxiomRecordsSucceedToDestination().longValue(),
+                900L);
+        Assert.assertEquals(updatedPlayLaunch.getRecordsStats().getAcxiomRecordsFailToDestination().longValue(), 100L);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testUpdateRecordsStats" })
     public void testBasicDelete() {
 
         playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId(), false);

@@ -31,6 +31,12 @@ public class AcxiomCompletedWorkflowStatusHandler implements WorkflowStatusHandl
         return DataIntegrationEventType.AudienceSizeUpdate;
     }
 
+    public AcxiomCompletedWorkflowStatusHandler(PlayLaunchService playLaunchService,
+            DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr) {
+        this.playLaunchService = playLaunchService;
+        this.dataIntegrationStatusMonitoringEntityMgr = dataIntegrationStatusMonitoringEntityMgr;
+    }
+
     @Override
     public DataIntegrationStatusMonitor handleWorkflowState(DataIntegrationStatusMonitor statusMonitor,
             DataIntegrationStatusMonitorMessage status) {

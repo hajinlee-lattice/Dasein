@@ -1017,6 +1017,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         if (playLaunch.getTapType() != null) {
             this.setTapType(playLaunch.getTapType());
         }
+
+        // Records Stats
+        if (playLaunch.getRecordsStats() != null) {
+            this.setRecordsStats(playLaunch.getRecordsStats());
+        }
     }
 
     public String getAddRecommendationsTable() {

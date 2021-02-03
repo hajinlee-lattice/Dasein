@@ -31,6 +31,12 @@ public class ReceivedFromAcxiomWorkflowStatusHandler implements WorkflowStatusHa
         return DataIntegrationEventType.ReceivedFromAcxiom;
     }
 
+    public ReceivedFromAcxiomWorkflowStatusHandler(PlayLaunchService playLaunchService,
+            DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr) {
+        this.playLaunchService = playLaunchService;
+        this.dataIntegrationStatusMonitoringEntityMgr = dataIntegrationStatusMonitoringEntityMgr;
+    }
+
     @Override
     public DataIntegrationStatusMonitor handleWorkflowState(DataIntegrationStatusMonitor statusMonitor,
             DataIntegrationStatusMonitorMessage status) {
