@@ -84,6 +84,11 @@ public class ListSegment implements HasPid {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MetadataSegment metadataSegment;
 
+    @JsonProperty("config")
+    @Column(name = "CONFIG", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private ListSegmentConfig config;
+
     @Override
     public Long getPid() {
         return pid;
@@ -165,6 +170,14 @@ public class ListSegment implements HasPid {
 
     public void setCsvAdaptorStr(String csvAdaptorStr) {
         this.csvAdaptorStr = csvAdaptorStr;
+    }
+
+    public ListSegmentConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(ListSegmentConfig config) {
+        this.config = config;
     }
 
     public String getTemplateId(String templateKey) {
