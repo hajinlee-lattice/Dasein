@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -54,6 +55,21 @@ public class ImportListSegmentWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
+            return this;
+        }
+
+        public Builder isSSVITenant(boolean isSSVITenant) {
+            extractListSegmentCSVConfiguration.setSSVITenant(isSSVITenant);
+            return this;
+        }
+
+        public Builder isCDLTenant(boolean isCDLTenant) {
+            extractListSegmentCSVConfiguration.setCDLTenant(isCDLTenant);
+            return this;
+        }
+
+        public Builder systemIdMaps(Map<String, List<String>> systemIdMaps) {
+            extractListSegmentCSVConfiguration.setSystemIdMaps(systemIdMaps);
             return this;
         }
 

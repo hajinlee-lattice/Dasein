@@ -29,7 +29,6 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     importCSVColumns.foreach { c =>
       logSpark("column :" + c)
     }
-    println(fieldMappings)
     fieldMappings.foreach { fieldMapping =>
       if (importCSVColumns.contains(fieldMapping.getUserFieldName)) {
         columnsExist += fieldMapping.getUserFieldName
@@ -40,7 +39,9 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     val outputSchema = StructType(structFields)
     val transformedInput = spark.createDataFrame(importCSVDf.rdd, outputSchema)
     finalDfs += generateEntityDf(true, transformedInput, accountAttributes)
-    finalDfs += generateEntityDf(false, transformedInput, contactAttributes)
+    if (!contactAttributes.isEmpty) {
+      finalDfs += generateEntityDf(false, transformedInput, contactAttributes)
+    }
     lattice.output = finalDfs.toList
   }
 
