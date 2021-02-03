@@ -171,6 +171,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
             group.setDescriptionTmpl(StringUtils.isNotBlank(request.descriptionTmpl) ? getTemplate(request.descriptionTmpl) : null);
             group.setSecondarySubCategoryTmpl(StringUtils.isNotBlank(request.secSubCategoryTmpl) ? getTemplate(request.secSubCategoryTmpl): null);
             group.setNullImputation(request.nullImputation);
+            group.setReducer(request.reducer);
             activityMetricsGroupEntityMgr.create(group);
             return true;
         });

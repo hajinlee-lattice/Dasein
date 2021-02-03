@@ -25,13 +25,13 @@ public class CreateActivityMetricsGroupRequest {
     public StreamAttributeDeriver aggregation;
 
     @JsonProperty
-    public CategorizeValConfig categorizeValConfig;
+    public CategorizeValConfig categorizeValConfig; // unused for now
 
     @JsonProperty
     public Category category;
 
     @JsonProperty
-    public Map<ActivityMetricsGroup.ColumnSelectionStatus, Set<ColumnSelection.Predefined>> csOverwrite;
+    public Map<ActivityMetricsGroup.ColumnSelectionStatus, Set<ColumnSelection.Predefined>> csOverwrite; // unused for now
 
     @JsonProperty
     public BusinessEntity entity;
@@ -49,7 +49,7 @@ public class CreateActivityMetricsGroupRequest {
     public ActivityRowReducer reducer;
 
     @JsonProperty
-    public Boolean useLatestVersion;
+    public Boolean useLatestVersion; // unused for now
 
     @JsonProperty
     public List<String> rollupDimensions;
