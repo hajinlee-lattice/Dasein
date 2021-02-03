@@ -82,8 +82,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
 
         Assert.assertNotNull(subcategoryStrList);
 
-        Assert.assertTrue(subcategoryStrList.size() > 0);
-        System.out.println(subcategoryStrList.get(0));
+        Assert.assertTrue(subcategoryStrList.size() == 0);
     }
 
     private Set<String> getExpectedCategorySet() throws IOException {
