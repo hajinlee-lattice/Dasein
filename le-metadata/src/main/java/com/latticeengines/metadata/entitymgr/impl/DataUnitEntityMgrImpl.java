@@ -182,8 +182,8 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         newEntity.setUuid(UUID.randomUUID().toString());
         reformatS3DataUnit(dataUnit);
         newEntity.setDocument(dataUnit);
-        DataUnitEntity saved = repository.save(newEntity);
         removeMasterRole(dataUnit);
+        DataUnitEntity saved = repository.save(newEntity);
         if (purgeOldSnapShot) {
             purgeOlsSnapShot(dataUnit);
         }

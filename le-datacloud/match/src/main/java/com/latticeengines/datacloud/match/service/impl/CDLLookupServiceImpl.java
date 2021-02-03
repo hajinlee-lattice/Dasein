@@ -209,7 +209,7 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         }
         DynamoDataUnit lookupDataUnit = accountLookupDUCache.get(customerSpace);
         if (lookupDataUnit == null) {
-            log.info("lookupDataUnit is null, returun orginal lookup values.");
+            log.info("lookupDataUnit is null, return original lookup values.");
             return lookupIdValues;
         }
         return getInternalAccountIds(lookupDataUnit, lookupIdKey, lookupIdValues);

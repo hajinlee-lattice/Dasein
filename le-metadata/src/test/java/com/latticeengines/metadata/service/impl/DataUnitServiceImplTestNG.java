@@ -12,7 +12,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -46,7 +45,7 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCrud() throws Exception {
         String name = NamingUtils.timestamp("Dynamo");
-        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name));
+        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name), true);
         Assert.assertNotNull(unit);
         Assert.assertTrue(unit instanceof DynamoDataUnit);
 
@@ -73,12 +72,9 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testFindByDataTemplateIdAndRole() throws Exception {
-        String dataUnitStr = "{\"Roles\":[\"Master\", \"Test\"], \"StorageType\":\"Dynamo\"}";
-        DataUnit dataUnit = JsonUtils.deserialize(dataUnitStr, DynamoDataUnit.class);
-
+    public void testFindByDataTemplateIdAndRole() {
         String name = NamingUtils.timestamp("Dynamo");
-        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name));
+        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name), true);
         Assert.assertNotNull(unit);
         Assert.assertTrue(unit instanceof DynamoDataUnit);
 
@@ -99,12 +95,9 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testFindAllDataUnitEntitiesWithExpiredRetentionPolicy() throws Exception {
-        String dataUnitStr = "{\"Roles\":[\"Master\", \"Test\"], \"StorageType\":\"Dynamo\"}";
-        DataUnit dataUnit = JsonUtils.deserialize(dataUnitStr, DynamoDataUnit.class);
-
+    public void testFindAllDataUnitEntitiesWithExpiredRetentionPolicy() {
         String name = NamingUtils.timestamp("Dynamo");
-        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name));
+        DataUnit unit = dataUnitService.createOrUpdateByNameAndStorageType(createDynamoUnit(name), true);
         Assert.assertNotNull(unit);
         Assert.assertTrue(unit instanceof DynamoDataUnit);
 
