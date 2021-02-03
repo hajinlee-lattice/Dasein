@@ -137,7 +137,7 @@ public final class TestDunsGuideBookUtils {
                 /* ManualMatch redirect book */
                 { //
                         newTuple("Body Central", "USA", null, null), //
-                        "052267488", "151962479", //
+                        "052267488", "791164114", //
                         "ManualMatch" //
                 }, //
                 /*
@@ -210,7 +210,7 @@ public final class TestDunsGuideBookUtils {
                 // case)
                 { //
                         newTuple("South Florida Insulation Co", "USA", null, null), //
-                        null, null, null //
+                        "010418671", "010418671", null //
                 }, //
         }; //
     }
