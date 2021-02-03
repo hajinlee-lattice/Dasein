@@ -236,7 +236,7 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
         if (tableRows <= 0L) {
             return false;
         }
-        masterTable = cleanupTable;
+        masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, inactive);
         return currentIndex < cycleCount - 1;
     }
 
