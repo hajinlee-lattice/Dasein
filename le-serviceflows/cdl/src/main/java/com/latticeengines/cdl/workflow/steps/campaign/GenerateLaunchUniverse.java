@@ -151,7 +151,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
                     .build();
             log.info("Full Launch Universe Query: " + frontEndquery.toString());
             // 2) get DataFrame for Account and Contact
-            launchUniverseDataUnit = executeSparkJob(frontEndquery);
+            launchUniverseDataUnit = executeSparkJob(frontEndquery, maxEntitiesToLaunch);
             log.info(getHDFSDataUnitLogEntry("CurrentLaunchUniverse after first sparkjob", launchUniverseDataUnit));
             // 3) check for 'Contacts per Account' limit
             if (useContactsPerAccountLimit) {
@@ -171,7 +171,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         return result;
     }
 
-    private HdfsDataUnit executeSparkJob(FrontEndQuery frontEndQuery) {
+    private HdfsDataUnit executeSparkJob(FrontEndQuery frontEndQuery, Long maxEntitiesToLaunch) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -180,7 +180,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-                long userConfiguredLimit = frontEndQuery.getPageFilter() != null ? frontEndQuery.getPageFilter().getNumRows() : 0;
+                long userConfiguredLimit = maxEntitiesToLaunch == null ? 0 : maxEntitiesToLaunch;
                 if (frontEndQuery.getMainEntity() == BusinessEntity.Account) {
                     long accountsCount = getEntityQueryCount(buildFrontEndQuery(frontEndQuery, BusinessEntity.Account));
                     campaignLaunchUtils.checkCampaignLaunchAccountLimitation(limitToCheck(userConfiguredLimit, accountsCount));
