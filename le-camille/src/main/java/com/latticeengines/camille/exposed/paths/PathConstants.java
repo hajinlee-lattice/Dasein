@@ -74,6 +74,8 @@ public final class PathConstants {
 
     public static final String ACTIVITY_UPLOAD_QUOTA = "activityUploadQuota";
 
+    public static final String LOOKUP_ID_LIMIT = "lookupIdLimit";
+
     public static final String PLS = "PLS";
     public static final String CDL = "CDL";
 

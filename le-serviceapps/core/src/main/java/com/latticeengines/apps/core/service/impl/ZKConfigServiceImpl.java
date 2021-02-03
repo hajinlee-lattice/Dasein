@@ -34,6 +34,8 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     private static final String STACK = "Stack";
     private static final String TriggerName = "TriggerName";
 
+    private static final Integer DEFAULT_LOOKUP_ID_LIMIT = 80;
+
     @Inject
     private BatonService batonService;
 
@@ -243,6 +245,22 @@ public class ZKConfigServiceImpl implements ZKConfigService {
             log.warn("Failed to get trigger name from ZK for " + customerSpace.getTenantId(), e);
         }
         return messageType;
+    }
+
+    @Override
+    public Integer getLookupIdLimit(CustomerSpace customerSpace) {
+        // No tenant level config right now. Only check env level
+        Path path = PathBuilder.buildLookupIdLimitEnvConfigPath(CamilleEnvironment.getPodId());
+        Camille camille = CamilleEnvironment.getCamille();
+        try {
+            if (camille.exists(path)) {
+                String rawValue = camille.get(path).getData();
+                return Integer.parseInt(rawValue);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return DEFAULT_LOOKUP_ID_LIMIT;
     }
 
     private String getValueFromZK(CustomerSpace customerSpace, String componentName, String pathToAppend) throws Exception {
