@@ -31,4 +31,6 @@ public interface ZKConfigService {
     String getStack(CustomerSpace customerSpace);
 
     S3ImportMessageType getTriggerName(CustomerSpace customerSpace);
+
+    Integer getLookupIdLimit(CustomerSpace customerSpace);
 }

@@ -314,4 +314,8 @@ public final class PathBuilder {
     public static Path buildCatalogQuotaLimitPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.CATALOG_QUOTA_LIMIT_FILE);
     }
+
+    public static Path buildLookupIdLimitEnvConfigPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.LOOKUP_ID_LIMIT);
+    }
 }

@@ -38,6 +38,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.CDLExternalSystemEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
@@ -62,6 +63,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
@@ -170,6 +172,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final TimeLineService timeLineService;
 
+    private final CDLExternalSystemEntityMgr cdlExternalSystemEntityMgr;
+
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService,
                                            DataCollectionService dataCollectionService, DataFeedTaskService dataFeedTaskService,
@@ -178,7 +182,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                                            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr,
                                            ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
                                            CDLAttrConfigProxy cdlAttrConfigProxy,
-            S3ImportSystemService s3ImportSystemService, TimeLineService timeLineService, MatchProxy matchProxy) {
+                                           S3ImportSystemService s3ImportSystemService, TimeLineService timeLineService, MatchProxy matchProxy,
+                                           CDLExternalSystemEntityMgr cdlExternalSystemEntityMgr) {
         this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
         this.matchProxy = matchProxy;
@@ -194,6 +199,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.s3ImportSystemService = s3ImportSystemService;
         this.dataFeedTaskService = dataFeedTaskService;
         this.timeLineService = timeLineService;
+        this.cdlExternalSystemEntityMgr = cdlExternalSystemEntityMgr;
     }
 
     @WithWorkflowJobPid
@@ -203,6 +209,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        if (lookupIdLimitPassed(tenant)) {
+            throw new IllegalStateException(String.format("Tenant %s has too many lookup IDs configured.", tenant.getName()));
+        }
         boolean tenantInMigration = migrationTrackEntityMgr.tenantInMigration(tenant);
         if (!request.skipMigrationCheck && tenantInMigration) {
             log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
@@ -310,6 +319,21 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             dataFeedService.failExecution(customerSpace, "", datafeedStatus.getName());
             throw new RuntimeException(String.format("Failed to submit %s's P&A workflow", customerSpace), e);
         }
+    }
+
+    private boolean lookupIdLimitPassed(Tenant tenant) {
+        CDLExternalSystem system = cdlExternalSystemEntityMgr.findExternalSystem(BusinessEntity.Account);
+        if (system != null) {
+            Set<String> allIds = new HashSet<>();
+            allIds.addAll(system.getCRMIdList());
+            allIds.addAll(system.getMAPIdList());
+            allIds.addAll(system.getERPIdList());
+            allIds.addAll(system.getOtherIdList());
+            log.info("Found lookup id count: {}", allIds.size());
+            return allIds.size() > zkConfigService.getLookupIdLimit(CustomerSpace.parse(tenant.getId()));
+        }
+        log.info("No external system found.");
+        return false;
     }
 
     private Status getInitialDataFeedStatus(Status status) {
