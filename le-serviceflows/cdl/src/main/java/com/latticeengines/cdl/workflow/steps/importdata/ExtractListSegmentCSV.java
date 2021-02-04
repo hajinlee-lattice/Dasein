@@ -142,11 +142,12 @@ public class ExtractListSegmentCSV
                         .collect(Collectors.toMap(importFieldMapping -> importFieldMapping.getFieldName(), importFieldMapping -> importFieldMapping));
                 if (needMatch) {
                     setExtractListSegmentCSVConfig(extractListSegmentCSVConfig, 1,
-                            fieldMap.keySet().stream().collect(Collectors.toList()), Collections.emptyList(), null);
+                            fieldMap.keySet().stream().collect(Collectors.toList()), Collections.emptyList(), Collections.emptyMap());
                     SparkJobResult result = runSparkJob(ExtractListSegmentCSVJob.class, extractListSegmentCSVConfig);
                     HdfsDataUnit accountDataUnit = result.getTargets().get(0);
                     log.info("account data unit: {}.", JsonUtils.serialize(accountDataUnit));
                     MatchInput matchInput = constructMatchInput(accountDataUnit.getPath());
+                    log.info("Bulk match input is {}", JsonUtils.serialize(matchInput));
                     MatchCommand command = bulkMatchService.match(matchInput, null);
                     log.info("Bulk match finished: {}", JsonUtils.serialize(command));
                     ConvertMatchResultConfig convertMatchResultConfig = getConvertMatchResultConfig(command);
@@ -202,7 +203,7 @@ public class ExtractListSegmentCSV
         return convertMatchResultConfig;
     }
 
-    private MatchInput getBaseMatchInput() {
+    private MatchInput getBaseMatchInput(String avroDir) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
         matchInput.setExcludePublicDomain(false);
@@ -215,6 +216,9 @@ public class ExtractListSegmentCSV
         matchInput.setReturnAnonymousWhenUnmatched(true);
         matchInput.setUseDirectPlus(useDirectPlus);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
+        AvroInputBuffer inputBuffer = new AvroInputBuffer();
+        inputBuffer.setAvroDir(avroDir);
+        matchInput.setInputBuffer(inputBuffer);
         return matchInput;
     }
 
@@ -228,7 +232,7 @@ public class ExtractListSegmentCSV
 
     private MatchInput constructMatchInput(String avroDir) {
         Boolean isCDLTenant = configuration.isCDLTenant();
-        MatchInput matchInput = getBaseMatchInput();
+        MatchInput matchInput = getBaseMatchInput(avroDir);
         boolean entityMatchEnabled = batonService.isEntityMatchEnabled(customerSpace);
         if (BooleanUtils.isTrue(isCDLTenant) && entityMatchEnabled) {
             matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
@@ -245,11 +249,9 @@ public class ExtractListSegmentCSV
             matchInput.setEntityKeyMaps(entityKeyMaps);
         } else {
             matchInput.setOperationalMode(OperationalMode.LDC_MATCH);
-            AvroInputBuffer inputBuffer = new AvroInputBuffer();
-            inputBuffer.setAvroDir(avroDir);
-            matchInput.setInputBuffer(inputBuffer);
             matchInput.setTargetEntity(BusinessEntity.LatticeAccount.name());
             matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
+            matchInput.setDataCloudOnly(true);
             Set<String> inputFields = getInputFields(avroDir);
             Map<MatchKey, List<String>> keyMap = MatchUtils.getAccountMatchKeysAccount(inputFields, null, false, null);
             matchInput.setKeyMap(keyMap);
@@ -306,9 +308,15 @@ public class ExtractListSegmentCSV
                     ColumnField attribute = new ColumnField();
                     attribute.setAttrName(field.name());
                     if (BusinessEntity.Contact.equals(entity) && InterfaceName.PhoneNumber.name().equals(field.name())) {
-                        attribute.setDisplayName(fieldMap.get(ExtractListSegmentCSVConfiguration.Direct_Phone).getUserFieldName());
+                        ImportFieldMapping phoneMapping = fieldMap.get(ExtractListSegmentCSVConfiguration.Direct_Phone);
+                        if (phoneMapping != null) {
+                            attribute.setDisplayName(phoneMapping.getUserFieldName());
+                        }
                     } else {
-                        attribute.setDisplayName(fieldMap.get(field.name()).getUserFieldName());
+                        ImportFieldMapping importFieldMapping = fieldMap.get(field.name());
+                        if (importFieldMapping != null) {
+                            attribute.setDisplayName(fieldMap.get(field.name()).getUserFieldName());
+                        }
                     }
                     attributes.add(attribute);
                 }
