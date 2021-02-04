@@ -72,8 +72,10 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
         }
 
         // When launchToDb, we don't create delete recommendations
-        boolean launchToDb = CDLExternalSystemName.Salesforce.equals(extSysName) || CDLExternalSystemName.Eloqua.equals(extSysName);
+        // set the deleted numbers to 0 for dashboard summaries
+        boolean launchToDb = CDLExternalSystemName.LAUNCH_TO_DB.contains(extSysName);
         if (launchToDb) {
+            log.info("launchToDb is true - setting deleted counts to 0");
             accountsDeleted = 0L;
             contactsDeleted = 0L;
         }
