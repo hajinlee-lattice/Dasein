@@ -244,6 +244,7 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
                 .getDecoratedMetadata(mainCustomerSpace, BusinessEntity.Account,
                         Collections.singletonList(ColumnSelection.Predefined.LookupId), null)
                 .map(ColumnMetadata::getAttrName).collectList().block();
+        lookupIds.add(AccountId.name());
         request.setLookupIds(lookupIds);
 
         String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);

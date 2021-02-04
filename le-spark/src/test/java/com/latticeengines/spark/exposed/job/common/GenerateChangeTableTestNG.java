@@ -74,6 +74,7 @@ public class GenerateChangeTableTestNG extends SparkJobFunctionalTestNGBase {
         GenerateChangeTableConfig config = new GenerateChangeTableConfig();
         config.setJoinKey("EntityId");
         config.setAttrsForbidToSet(Collections.singleton("Id"));
+        config.setExclusionColumns(Collections.singletonList(InterfaceName.CDLCreatedTime.name()));
 
         SparkJobResult result = runSparkJob(GenerateChangeTableJob.class, config, input,
                 String.format("/tmp/%s/%s/commonColumns", leStack, this.getClass().getSimpleName()));

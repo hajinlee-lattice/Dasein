@@ -14,7 +14,8 @@ class GenerateChangeTableJob extends AbstractSparkJob[GenerateChangeTableConfig]
     val config : GenerateChangeTableConfig = lattice.config
     val fromTable : DataFrame = lattice.input.head
     val toTable: DataFrame = lattice.input(1)
-    val exclusionCols : Set[String] = config.getExclusionColumns.asScala.toSet
+    val exclusionCols : Set[String] = if (config.getExclusionColumns == null) Set() else config.getExclusionColumns
+      .asScala.toSet
     val joinKey = config.getJoinKey
     val attrsForbidToSet : Set[String] = if (config.getAttrsForbidToSet == null) Set() else config.getAttrsForbidToSet
       .asScala.toSet
