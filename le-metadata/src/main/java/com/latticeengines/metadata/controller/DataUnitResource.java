@@ -31,15 +31,13 @@ public class DataUnitResource {
     private DataUnitService dataUnitService;
 
     @PostMapping("")
-    public DataUnit create(@PathVariable String customerSpace,
-                           @RequestParam(value = "purgeOldSnapShot", defaultValue = "true", required = false) boolean purgeOldSnapShot, @RequestBody DataUnit dataUnit) {
-        return dataUnitService.createOrUpdateByNameAndStorageType(dataUnit, purgeOldSnapShot);
+    public DataUnit create(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
+        return dataUnitService.createOrUpdateByNameAndStorageType(dataUnit);
     }
 
     @PutMapping("")
-    public DataUnit updateByNameAndType(@PathVariable String customerSpace,
-                                        @RequestParam(value = "purgeOldSnapShot", defaultValue = "true", required = false) boolean purgeOldSnapShot, @RequestBody DataUnit dataUnit) {
-        return dataUnitService.createOrUpdateByNameAndStorageType(dataUnit, purgeOldSnapShot);
+    public DataUnit updateByNameAndType(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
+        return dataUnitService.createOrUpdateByNameAndStorageType(dataUnit);
     }
 
     @PutMapping("/delete")

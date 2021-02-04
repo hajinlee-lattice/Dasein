@@ -37,5 +37,4 @@ public interface DataUnitService {
 
     AthenaDataUnit registerAthenaDataUnit(String dataUnitName);
 
-    DataUnit createOrUpdateByNameAndStorageType(DataUnit dataUnit, boolean purgeOldSnapShot);
 }

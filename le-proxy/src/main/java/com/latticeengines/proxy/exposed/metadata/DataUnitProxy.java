@@ -27,6 +27,4 @@ public interface DataUnitProxy {
 
     AthenaDataUnit registerAthenaDataUnit(String customerSpace, String name);
 
-    DataUnit create(String customerSpace, DataUnit dataUnit, boolean purgeOldSnapShot);
-
 }

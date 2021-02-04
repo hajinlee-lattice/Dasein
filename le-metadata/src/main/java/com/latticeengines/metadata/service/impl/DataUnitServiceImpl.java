@@ -38,12 +38,6 @@ public class DataUnitServiceImpl implements DataUnitService {
     }
 
     @Override
-    public DataUnit createOrUpdateByNameAndStorageType(DataUnit dataUnit, boolean purgeOldSnapShot) {
-        String tenantId = MultiTenantContext.getShortTenantId();
-        return entityMgr.createOrUpdateByNameAndStorageType(tenantId, dataUnit, purgeOldSnapShot);
-    }
-
-    @Override
     public List<DataUnit> findByNameFromReader(String name) {
         String tenantId = MultiTenantContext.getShortTenantId();
         return entityMgr.findByNameFromReader(tenantId, name);

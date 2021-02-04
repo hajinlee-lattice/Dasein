@@ -34,5 +34,4 @@ public interface DataUnitEntityMgr {
 
     List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize);
 
-    DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit, boolean purgeOldSnapShot);
 }

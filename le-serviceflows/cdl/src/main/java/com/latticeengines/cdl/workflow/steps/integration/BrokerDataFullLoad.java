@@ -89,7 +89,7 @@ public class BrokerDataFullLoad extends BaseWorkflowStep<BrokerDataFullLoadConfi
         String templateId = dataTemplateProxy.create(tenantId, dataTemplate);
         BusinessEntity entity = BusinessEntity.valueOf(brokerReference.getDocumentType());
         S3DataUnit s3DataUnit = createS3DataUnit(tenantId, entity, templateId);
-        s3DataUnit = (S3DataUnit) dataUnitProxy.create(tenantId, s3DataUnit, false);
+        s3DataUnit = (S3DataUnit) dataUnitProxy.create(tenantId, s3DataUnit);
         generateInitData(s3DataUnit, brokerReference);
         AggregationHistory aggregationHistory = new AggregationHistory();
         aggregationHistory.setLastSyncTime(configuration.getEndTime());
