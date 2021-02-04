@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
@@ -156,6 +157,8 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setUseCustomerId(campaignLaunchUtils.getUseCustomerId(customerSpace, playLaunch.getDestinationSysName()));
         deltaCampaignLaunchSparkContext
                 .setIsEntityMatch(batonService.isEntityMatchEnabled(customerSpace));
+        deltaCampaignLaunchSparkContext.setShouldDefaultPopulateIds(
+                shouldDefaultPopulateIds(customerSpace, playLaunch.getDestinationSysName()));
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();
@@ -300,5 +303,12 @@ public class DeltaCampaignLaunchInitStep
                 log.info("Will not update play launch data.");
         }
         log.info(String.format("Created table %s.", tableName));
+    }
+
+    private boolean shouldDefaultPopulateIds(CustomerSpace customerSpace, CDLExternalSystemName systemName) {
+        if (systemName.equals(CDLExternalSystemName.Salesforce) || systemName.equals(CDLExternalSystemName.AWS_S3)) {
+            return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS);
+        }
+        return true;
     }
 }

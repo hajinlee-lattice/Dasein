@@ -12,7 +12,7 @@ import org.apache.spark.sql.types._
 
 import scala.collection.mutable.Map;
 
-class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId: String, userCustomerId: Boolean, isEntityMatch: Boolean) extends UserDefinedAggregateFunction {
+class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId: String, userCustomerId: Boolean, isEntityMatch: Boolean, shouldDefaultPopulateIds: Boolean) extends UserDefinedAggregateFunction {
 
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = schema
@@ -52,7 +52,16 @@ class Flatten(schema: StructType, configuredColumns: Seq[String], sfdcContactId:
         PlaymakerConstants.State -> getInputValue(input, InterfaceName.State.name()), //
         PlaymakerConstants.ZipCode -> getInputValue(input, InterfaceName.PostalCode.name()), //
         PlaymakerConstants.Country -> getInputValue(input, InterfaceName.Country.name()), //
-        PlaymakerConstants.SfdcContactID -> (if (sfdcContactIdEmpty) getInputValue(input, getContactId(isEntityMatch)) else getInputValue(input, sfdcContactId)), //
+        PlaymakerConstants.SfdcContactID -> (
+          if (sfdcContactIdEmpty) {
+            if (shouldDefaultPopulateIds) {
+              getInputValue(input, getContactId(isEntityMatch))
+            } else {
+              ""
+            }
+          } else {
+            getInputValue(input, sfdcContactId)
+          }), //
         PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
         PlaymakerConstants.ContactID -> getInputValue(input, getContactId(userCustomerId)), //
         PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()), //

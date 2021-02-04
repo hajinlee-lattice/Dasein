@@ -154,7 +154,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     val sfdcContactId: String = deltaCampaignLaunchSparkContext.getSfdcContactID
 
     if (!useCustomerId) {
-      if (!isEntityMatch && sfdcContactId == null && contactColsToAdd.contains("SFDC_CONTACT_ID")) {
+      if (deltaCampaignLaunchSparkContext.getShouldDefaultPopulateIds && !isEntityMatch && sfdcContactId == null && contactColsToAdd.contains("SFDC_CONTACT_ID")) {
         // Guarantee it is legacy tenant and unmapped and we want to export SFDC_CONTACT_ID
         result = contactDf.withColumn("SFDC_CONTACT_ID", col(InterfaceName.ContactId.name))
       }
@@ -358,7 +358,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
   private def aggregateContacts(contactTable: DataFrame, sfdcContactId: String, joinKey: String, deltaCampaignLaunchSparkContext: DeltaCampaignLaunchSparkContext): DataFrame= {
     val contactTableToUse: DataFrame = contactTable
     val contactWithoutJoinKey = contactTableToUse.drop(joinKey)
-    val flattenUdf = new Flatten(contactWithoutJoinKey.schema, Seq.empty[String], sfdcContactId, deltaCampaignLaunchSparkContext.getUseCustomerId, deltaCampaignLaunchSparkContext.getIsEntityMatch)
+    val flattenUdf = new Flatten(contactWithoutJoinKey.schema, Seq.empty[String], sfdcContactId, deltaCampaignLaunchSparkContext.getUseCustomerId, deltaCampaignLaunchSparkContext.getIsEntityMatch, deltaCampaignLaunchSparkContext.getShouldDefaultPopulateIds)
     val aggregatedContacts = contactTableToUse.groupBy(joinKey).agg( //
       flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
       count(lit(1)).as("CONTACT_NUM") //

@@ -23,7 +23,7 @@
    },
    {
       "attrName":"AccountId",
-      "displayName":"Lattice Account ID",
+      "displayName":"Account ID",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"AWS_S3",
@@ -133,7 +133,7 @@
    },
    {
       "attrName":"SFDC_ACCOUNT_ID",
-      "displayName":"Account ID",
+      "displayName":"SFDC Account ID",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"AWS_S3",
@@ -397,7 +397,7 @@
    },
    {
       "attrName":"SFDC_CONTACT_ID",
-      "displayName":"Contact ID",
+      "displayName":"SFDC Contact ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"AWS_S3",
@@ -419,7 +419,7 @@
    },
    {
       "attrName":"ContactId",
-      "displayName":"Lattice Contact ID",
+      "displayName":"Contact ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"AWS_S3",
