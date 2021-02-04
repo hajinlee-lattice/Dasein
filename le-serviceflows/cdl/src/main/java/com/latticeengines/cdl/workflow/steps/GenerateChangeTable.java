@@ -109,6 +109,9 @@ public class GenerateChangeTable extends BaseProcessAnalyzeSparkStep<GenerateCha
                 }
                 config.setTableRoleInCollection(role);
                 config.setTableName(inactiveTable.getName());
+                if (AccountLookup == role) {
+                    putObjectInContext(ACCOUNT_LOOKUP_TO_ES, Boolean.TRUE);
+                }
                 addToListInContext(TABLES_GOING_TO_ES, config, ElasticSearchExportConfig.class);
             } else if (isChanged(role)) {
                 log.info("Create Change table for role=" + role + " activeTable=" + activeTable);
@@ -184,6 +187,9 @@ public class GenerateChangeTable extends BaseProcessAnalyzeSparkStep<GenerateCha
         } else {
             log.info("data unit is null, use the version {} in {}", version, customerSpaceStr);
             exportConfig.setSignature(version);
+        }
+        if (AccountLookup == role) {
+            putObjectInContext(ACCOUNT_LOOKUP_TO_ES, Boolean.TRUE);
         }
 
         return exportConfig;

@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
 import com.latticeengines.domain.exposed.elasticsearch.PublishTableToESRequest;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -55,6 +56,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.ElasticSearchDataUnit;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.ActivityTimelineQuery;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -238,6 +240,12 @@ public class PublishTableToElasticSearchDeploymentTestNG extends CDLEnd2EndDeplo
         // user_SalesforceSandboxAccountID user_SalesforceAccountID user_SalesforceSandboxAccountID
         String tableName = setupTables(TableRoleInCollection.AccountLookup);
         PublishTableToESRequest request = generateRequest(TableRoleInCollection.AccountLookup, tableName);
+        List<String> lookupIds = servingStoreProxy
+                .getDecoratedMetadata(mainCustomerSpace, BusinessEntity.Account,
+                        Collections.singletonList(ColumnSelection.Predefined.LookupId), null)
+                .map(ColumnMetadata::getAttrName).collectList().block();
+        request.setLookupIds(lookupIds);
+
         String appId = publishTableProxy.publishTableToES(mainCustomerSpace, request);
         JobStatus status = waitForWorkflowStatus(appId, false);
         Assert.assertEquals(status, JobStatus.COMPLETED);

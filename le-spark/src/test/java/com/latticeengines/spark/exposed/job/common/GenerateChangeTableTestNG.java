@@ -32,8 +32,8 @@ public class GenerateChangeTableTestNG extends SparkJobFunctionalTestNGBase {
     public void testUpsert() {
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(this::testCreateChangeTable);
-       // runnables.add(this::testNoChange);
-        //runnables.add(this::testCommonColumns);
+        runnables.add(this::testNoChange);
+        runnables.add(this::testCommonColumns);
         ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
 
@@ -82,7 +82,7 @@ public class GenerateChangeTableTestNG extends SparkJobFunctionalTestNGBase {
 
     // fromTable: old data
     private List<String> upload2Data() {
-        List<String> input = upload1Data();
+        List<String> input = new ArrayList<>();
         if (input2 == null) {
             synchronized (this) {
                 if (input2 == null) {
@@ -159,7 +159,7 @@ public class GenerateChangeTableTestNG extends SparkJobFunctionalTestNGBase {
     // old data
     private Object[][] getInput1Data() {
         return new Object[][] { //
-                { 1, "entityId1", "john", "smith", null, 1000001L }, //
+                { 1, "entityId1", "john", "smith", null, 1000010L }, //
                 { 2, "entityId2", null, "ann", 18, 1000002L } //
         };
     }
@@ -194,8 +194,6 @@ public class GenerateChangeTableTestNG extends SparkJobFunctionalTestNGBase {
             Long time = record.get(InterfaceName.CDLCreatedTime.name()) != null ?
                     Long.valueOf(record.get(InterfaceName.CDLCreatedTime.name()).toString()) : null;
 
-            System.out.println("id " + id + " entity id " + entityId + " first " + first + " last " + last + " salary" +
-                    " " + salary );
             switch(entityId) {
                 case "entityId1":
                     Assert.assertEquals(id, "1");
@@ -213,8 +211,8 @@ public class GenerateChangeTableTestNG extends SparkJobFunctionalTestNGBase {
                     break;
                 case "entityId3":
                     Assert.assertEquals(id, "3");
-                    Assert.assertEquals(first, "mary");
-                    Assert.assertEquals(last, "ann");
+                    Assert.assertEquals(first, "mary2");
+                    Assert.assertEquals(last, "ann2");
                     Assert.assertNull(salary);
                     Assert.assertEquals(time.longValue(),  1000003L);
                     break;
@@ -262,7 +260,7 @@ public class GenerateChangeTableTestNG extends SparkJobFunctionalTestNGBase {
             rows++;
         }
 
-        Assert.assertEquals(rows, 1L);
+        Assert.assertEquals(rows, 1);
         return true;
     }
 }
