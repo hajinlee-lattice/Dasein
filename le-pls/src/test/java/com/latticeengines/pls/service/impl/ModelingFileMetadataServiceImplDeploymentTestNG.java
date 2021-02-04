@@ -286,6 +286,6 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends CSVFileImpo
 
         //1 error is Multiple user fields are mapped to standard field
         // 2. no field mapped to OTHER_SYSTEM, no unique id set
-        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 1);
+        Assert.assertEquals(groupedValidations.get(ValidationCategory.ColumnMapping).size(), 0);
     }
 }

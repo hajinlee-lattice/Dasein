@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -592,14 +593,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (fieldMapping.getIdType() != null && StringUtils.isNotBlank(fieldMapping.getSystemName())) {
                 String key = fieldMapping.getIdType() + "|" + fieldMapping.getSystemName();
                 if (mappingKeys.contains(key)) {
-                    String message = String.format(
-                            "Multiple user fields are mapped to %s with the same type %s",
-                            fieldMapping.getSystemName(), fieldMapping.getIdType());
-                    FieldValidation validation = createValidation(fieldMapping.getUserField(),
-                            fieldMapping.getMappedField(),
-                            ValidationStatus.ERROR, message);
-                    validations.add(validation);
-                    groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
+//                    String message = String.format(
+//                            "Multiple user fields are mapped to %s with the same type %s",
+//                            fieldMapping.getSystemName(), fieldMapping.getIdType());
+//                    FieldValidation validation = createValidation(fieldMapping.getUserField(),
+//                            fieldMapping.getMappedField(),
+//                            ValidationStatus.ERROR, message);
+//                    validations.add(validation);
+//                    groupedValidations.get(ValidationCategory.ColumnMapping).add(validation);
                 } else {
                     mappingKeys.add(key);
                 }
@@ -1194,8 +1195,12 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> mappedFieldName = new HashSet<>();
         Set<String> pendingUserFieldName = new HashSet<>();
         Set<String> mappedUserFieldName = new HashSet<>();
+        List<String> ignoredFields = ListUtils.emptyIfNull(fieldMappingDocument.getIgnoredFields());
         // 2.check if there's multiple mapping to standard field
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (ignoredFields.contains(fieldMapping.getUserField())) {
+                continue;
+            }
             if (fieldMapping.getMappedField() == null) {
                 pendingUserFieldName.add(fieldMapping.getUserField());
             } else {
