@@ -293,30 +293,18 @@ public class PlayLaunchChannelEntityMgrImpl
             }
         }
         if (StringUtils.isNotBlank(updatedChannel.getCurrentLaunchedAccountUniverseTable())) {
-            Table table = tableEntityMgr.findByName(updatedChannel.getCurrentLaunchedAccountUniverseTable(), false,
-                    false);
-            if (table != null) {
-                existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(table.getName());
-                existingPlayLaunchChannel.setResetDeltaCalculationData(false);
-            } else {
-                throw new LedpException(LedpCode.LEDP_32000,
-                        new String[] { "Failed to update channel: " + updatedChannel.getId()
-                                + " since no account universe table found by Id: "
-                                + updatedChannel.getCurrentLaunchedAccountUniverseTable() });
-            }
+            String tableName = retrieveLaunchUniverseTable(updatedChannel.getCurrentLaunchedAccountUniverseTable(),
+                    updatedChannel.getId());
+
+            existingPlayLaunchChannel.setCurrentLaunchedAccountUniverseTable(tableName);
+            existingPlayLaunchChannel.setResetDeltaCalculationData(false);
         }
         if (StringUtils.isNotBlank(updatedChannel.getCurrentLaunchedContactUniverseTable())) {
-            Table table = tableEntityMgr.findByName(updatedChannel.getCurrentLaunchedContactUniverseTable(), false,
-                    false);
-            if (table != null) {
-                existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(table.getName());
-                existingPlayLaunchChannel.setResetDeltaCalculationData(false);
-            } else {
-                throw new LedpException(LedpCode.LEDP_32000,
-                        new String[] { "Failed to update channel: " + updatedChannel.getId()
-                                + " since no contact universe table found by Id: "
-                                + updatedChannel.getCurrentLaunchedAccountUniverseTable() });
-            }
+            String tableName = retrieveLaunchUniverseTable(updatedChannel.getCurrentLaunchedContactUniverseTable(),
+                    updatedChannel.getId());
+
+            existingPlayLaunchChannel.setCurrentLaunchedContactUniverseTable(tableName);
+            existingPlayLaunchChannel.setResetDeltaCalculationData(false);
         }
 
         existingPlayLaunchChannel.setUpdatedBy(updatedChannel.getUpdatedBy());
@@ -352,6 +340,29 @@ public class PlayLaunchChannelEntityMgrImpl
         return channels;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public PlayLaunchChannel recoverLaunchUniverse(
+            PlayLaunchChannel retrievedChannel,
+            PlayLaunchChannel updatedChannel) {
+        String previousContactUniverse = updatedChannel.getPreviousLaunchedContactUniverseTable();
+        String previousAccountUniverse = updatedChannel.getPreviousLaunchedAccountUniverseTable();
+
+        if (previousContactUniverse != null) {
+            previousContactUniverse = retrieveLaunchUniverseTable(previousContactUniverse, updatedChannel.getId());
+        }
+
+        if (previousAccountUniverse != null) {
+            previousAccountUniverse = retrieveLaunchUniverseTable(previousAccountUniverse, updatedChannel.getId());
+        }
+
+        retrievedChannel.setCurrentLaunchedContactUniverseTable(previousContactUniverse);
+        retrievedChannel.setCurrentLaunchedAccountUniverseTable(previousAccountUniverse);
+
+        playLaunchChannelDao.update(retrievedChannel);
+        return retrievedChannel;
+    }
+
     private boolean validateAlwaysOnExpiration(PlayLaunchChannel channel) {
         if (!channel.getIsAlwaysOn())
             return true;
@@ -381,6 +392,18 @@ public class PlayLaunchChannelEntityMgrImpl
                     new String[] { JsonUtils.serialize(playLaunchChannel.getChannelConfig()).split("\"")[1],
                             systemName.getDisplayName() });
         }
+    }
+
+    private String retrieveLaunchUniverseTable(String tableName, String channelId) {
+        Table table = tableEntityMgr.findByName(tableName, false, false);
+        if (table == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Failed to update channel: "
+                            + channelId
+                            + " since no table found by Id: "
+                            + tableName });
+        }
+        return table.getName();
     }
 
 }

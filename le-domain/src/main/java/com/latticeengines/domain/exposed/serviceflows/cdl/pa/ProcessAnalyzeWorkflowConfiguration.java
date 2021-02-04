@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineR
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.PublishToElasticSearchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CommitEntityMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -81,6 +83,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
         private ConvertBatchStoreToDataTableWorkflowConfiguration.Builder convertBatchStoreToDataTableWorkflowBuilder = new ConvertBatchStoreToDataTableWorkflowConfiguration.Builder();
         private LegacyDeleteWorkflowConfiguration.Builder legacyDeleteWorkFlowBuilder = new LegacyDeleteWorkflowConfiguration.Builder();
+        private PublishToElasticSearchConfiguration publishToElasticSearchConfiguration =
+                new PublishToElasticSearchConfiguration();
+        private GenerateVisitReportWorkflowConfiguration.Builder generateVisitReportWorkflowBuilder =
+                new GenerateVisitReportWorkflowConfiguration.Builder();
+
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
@@ -111,6 +118,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             apsGenerationStepConfiguration.setCustomer(customerSpace.getTenantId());
             importExportS3.setCustomerSpace(customerSpace);
+            publishToElasticSearchConfiguration.setCustomerSpace(customerSpace);
+            generateVisitReportWorkflowBuilder.customer(customerSpace);
             return this;
         }
 
@@ -124,6 +133,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             processTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             importExportS3.setMicroServiceHostPort(microServiceHostPort);
+            publishToElasticSearchConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -148,6 +158,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             importExportS3.setInternalResourceHostPort(internalResourceHostPort);
+            publishToElasticSearchConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            generateVisitReportWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -201,6 +213,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.rebuildEntities(entities);
             if (SetUtils.emptyIfNull(entities).contains(BusinessEntity.ActivityStream)) {
                 timeLineSparkStepConfiguration.setShouldRebuild(true);
+                generateVisitReportWorkflowBuilder.setRebuildMode(true);
             }
             return this;
         }
@@ -294,6 +307,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder catalogImports(Map<String, List<ActivityImport>> catalogImports) {
             processCatalogWorkflowBuilder.catalogImports(catalogImports);
+            generateVisitReportWorkflowBuilder.setCatalogImports(catalogImports);
             return this;
         }
 
@@ -308,6 +322,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.activityStreams(streams);
             convertBatchStoreToDataTableWorkflowBuilder.activityStreams(streams);
             matchEntityWorkflowBuilder.activityStreams(streams);
+            generateVisitReportWorkflowBuilder.activityStreams(streams);
             return this;
         }
 
@@ -321,6 +336,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.activityStreamImports(activityStreamImports);
             convertBatchStoreToDataTableWorkflowBuilder.activityStreamImports(activityStreamImports);
             matchEntityWorkflowBuilder.activityStreamImports(activityStreamImports);
+            generateVisitReportWorkflowBuilder.activityStreamImports(activityStreamImports);
             return this;
         }
 
@@ -370,7 +386,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder skipDynamoExport(boolean skipDynamoExport) {
             exportToDynamo.setSkipStep(skipDynamoExport);
             exportTimelineRawTableToDynamo.setSkipStep(skipDynamoExport);
-//            atlasAccountLookupExportStepConfiguration.setSkipStep(skipDynamoExport);
+            // atlasAccountLookupExportStepConfiguration.setSkipStep(skipDynamoExport);
             return this;
         }
 
@@ -379,6 +395,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processActivityStreamWorkflowBuilder.setRematchMode(fullRematch);
             convertBatchStoreToDataTableWorkflowBuilder.setRematchMode(fullRematch);
             matchEntityWorkflowBuilder.setRematchMode(fullRematch);
+            generateVisitReportWorkflowBuilder.setRematchMode(fullRematch);
             return this;
         }
 
@@ -413,6 +430,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
                     .setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             matchEntityWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             processTransactionWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Transaction));
+            generateVisitReportWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             return this;
         }
 
@@ -433,6 +451,27 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder templateToSystemTypeMap(Map<String, S3ImportSystem.SystemType> templateToSystemTypeMap) {
             processActivityStreamWorkflowBuilder.templateToSystemTypeMap(templateToSystemTypeMap);
+            return this;
+        }
+
+        public Builder eraseByNullEnabled(boolean eraseByNullEnabled) {
+            processAccountWorkflowBuilder.eraseByNullEnabled(eraseByNullEnabled);
+            processContactWorkflowBuilder.eraseByNullEnabled(eraseByNullEnabled);
+            return this;
+        }
+
+        public Builder isSSVITenant(boolean isSSVITenant) {
+            processStepConfiguration.setSSVITenant(isSSVITenant);
+            return this;
+        }
+
+        public Builder isCDLTenant(boolean isCDLTenant) {
+            processStepConfiguration.setCDLTenant(isCDLTenant);
+            return this;
+        }
+
+        public Builder setCatalog(List<Catalog> catalogs) {
+            generateVisitReportWorkflowBuilder.setCatalog(catalogs);
             return this;
         }
 
@@ -461,6 +500,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(awsPythonDataConfiguration);
             configuration.add(apsGenerationStepConfiguration);
             configuration.add(importExportS3);
+            configuration.add(generateVisitReportWorkflowBuilder.build());
+            configuration.add(publishToElasticSearchConfiguration);
             return configuration;
         }
     }

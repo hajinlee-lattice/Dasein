@@ -58,7 +58,7 @@ public class SourceFileServiceImpl implements SourceFileService {
 
     @Override
     public SourceFile createSourceFileFromS3(FileProperty fileProperty, String entity) {
-        return sourceFileProxy.createSourceFileFromS3(getShortTenantId(), fileProperty, entity);
+        return sourceFileProxy.createSourceFileFromS3(getShortTenantId(), fileProperty, entity, null);
     }
 
     private String getShortTenantId() {

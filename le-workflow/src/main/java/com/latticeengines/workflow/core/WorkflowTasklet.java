@@ -89,6 +89,17 @@ class WorkflowTasklet implements Tasklet {
             stepExecution.setExitStatus(ExitStatus.NOOP);
             return RepeatStatus.FINISHED;
         }
+        if (!configurationWasSet && step.skipOnMissingConfiguration()) {
+            log.info("configuration for step {} is not set. skipping", step.name());
+            try {
+                step.skipStep();
+            } catch (Exception e) {
+                String msg = String.format("failed to skip step %s on missing configuration", step.name());
+                log.warn(msg, e);
+            }
+            stepExecution.setExitStatus(ExitStatus.NOOP);
+            return RepeatStatus.FINISHED;
+        }
 
         Tracer tracer = GlobalTracer.get();
         Span stepSpan = null;

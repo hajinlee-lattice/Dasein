@@ -244,6 +244,31 @@ class YarnTracker {
         return hasStuckNode;
     }
 
+    String getLatestApplicationId() {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        try {
+            return retry.execute(ctx -> {
+                try (YarnClient yarnClient = emrEnvService.getYarnClient(clusterId)) {
+                    String latestAppId = "";
+                    yarnClient.start();
+                    List<ApplicationReport> apps = //
+                            yarnClient.getApplications(EnumSet.copyOf(Arrays.asList(NON_TERMINAL_APP_STATES)));
+                    for (ApplicationReport app : apps) {
+                        if (app.getApplicationId().toString().compareToIgnoreCase(latestAppId) > 0) {
+                            latestAppId = app.getApplicationId().toString();
+                        }
+                    }
+                    return latestAppId;
+                } catch (IOException | YarnException e) {
+                    throw new RuntimeException("Failed to detect special app.", e);
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to detect latest app. Treat it as none.", e);
+            return "";
+        }
+    }
+
     private String addressToIp(String address) {
         String firstPart = address.substring(0, address.indexOf("."));
         return firstPart.replace("ip-", "").replace("-", ".");

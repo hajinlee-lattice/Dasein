@@ -20,6 +20,8 @@ public interface LookupIdMappingEntityMgr {
 
     LookupIdMap getLookupIdMap(String orgId, CDLExternalSystemType externalSystemType);
 
+    LookupIdMap retrieveLookupIdMapByExtSysAuth(String externalSystemAuthId);
+
     List<LookupIdMap> getLookupIdMapsByExtSysName(CDLExternalSystemName externalSystemName);
 
 }

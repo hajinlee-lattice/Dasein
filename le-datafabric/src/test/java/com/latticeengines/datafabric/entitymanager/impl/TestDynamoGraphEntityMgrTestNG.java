@@ -60,7 +60,7 @@ public class TestDynamoGraphEntityMgrTestNG extends DataFabricFunctionalTestNGBa
 
 
         BaseFabricEntityMgrImpl.Builder builder = new BaseFabricEntityMgrImpl.Builder()
-                .messageService(messageService).dataService(dataService) //
+                .dataService(dataService) //
                 .recordType(RECORD_TYPE) //
                 .store("DYNAMO").repository(repo);
 

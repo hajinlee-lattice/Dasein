@@ -6,7 +6,7 @@ ARTIFACT_DIR="${WSHOME}"/le-dev/artifacts
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
-    TOMCAT_VERSION=9.0.38
+    TOMCAT_VERSION=9.0.41
 
     sudo rm -rf "${CATALINA_HOME}"
     sudo mkdir -p "${CATALINA_HOME}" || true
@@ -39,8 +39,8 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
         APR_VERSION=`brew list apr | head -n 1 | cut -d / -f 6`
         echo "You installed apr ${APR_VERSION}"
         OPENSSL_PATH=`brew --prefix openssl`
-        OPENSSL_VERSION=`brew list openssl | head -n 1 | cut -d / -f 6`
-        echo "You installed openssl ${OPENSSL_VERSION}"
+        echo "You installed openssl:"
+        brew list openssl
         pushd "${CATALINA_HOME}"/bin
         tar xzf tomcat-native.tar.gz
         cd tomcat-native-*-src/native

@@ -14,6 +14,7 @@ private[spark] object DeltaCampaignLaunchUtils {
   case class Recommendation(PID: Option[Long], //
                             EXTERNAL_ID: String, //
                             AccountId: String, //
+                            CustomerAccountId: String, //
                             LE_ACCOUNT_EXTERNAL_ID: String, //
                             PLAY_ID: String, //
                             LAUNCH_ID: String, //
@@ -36,7 +37,7 @@ private[spark] object DeltaCampaignLaunchUtils {
                             TENANT_ID: Long, //
                             DELETED: Boolean)
 
-  def createRec(account: Row, serializedCtx: String): Recommendation = {
+  def createRec(account: Row, serializedCtx: String, userCustomerId: Boolean): Recommendation = {
 
     val playLaunchContext = JsonUtils.deserialize(serializedCtx, classOf[PlayLaunchSparkContext])
     val launchTimestampMillis: Long = playLaunchContext.getLaunchTimestampMillis
@@ -44,7 +45,7 @@ private[spark] object DeltaCampaignLaunchUtils {
     val playLaunchId: String = playLaunchContext.getPlayLaunchId
     val tenantId: Long = playLaunchContext.getTenantPid
     val accountId: String = checkAndGet(account, InterfaceName.AccountId.name)
-    val externalAccountId: String = accountId
+    val customerAccountId: String = checkAndGet(account, getAccountId(userCustomerId))
     val uuid: String = UUID.randomUUID().toString
     val description: String = playLaunchContext.getPlayDescription
     val ratingModelId: String = playLaunchContext.getModelId
@@ -62,6 +63,8 @@ private[spark] object DeltaCampaignLaunchUtils {
     var priorityId: String = null
     var priorityDisplayName: String = null
     var launchTime: Option[Long] = None
+    var sfdcAccountId: String = null
+    var externalAccountId: String = ""
 
     if (playLaunchContext.getCreated != null) {
       launchTime = Some(playLaunchContext.getCreated.getTime)
@@ -69,11 +72,15 @@ private[spark] object DeltaCampaignLaunchUtils {
       launchTime = Some(launchTimestampMillis)
     }
 
-    val sfdcAccountId: String =
-      if (playLaunchContext.getSfdcAccountID == null)
-        null
-      else
-        checkAndGet(account, playLaunchContext.getSfdcAccountID)
+    if (playLaunchContext.getSfdcAccountID == null) {
+      sfdcAccountId = checkAndGet(account, getAccountId(playLaunchContext.getIsEntityMatch))
+    } else {
+      sfdcAccountId = checkAndGet(account, playLaunchContext.getSfdcAccountID)
+    }
+
+    if (sfdcAccountId != null) {
+      externalAccountId = sfdcAccountId
+    }
 
     var companyName: String = checkAndGet(account, InterfaceName.CompanyName.name)
     if (StringUtils.isBlank(companyName)) {
@@ -105,7 +112,8 @@ private[spark] object DeltaCampaignLaunchUtils {
 
     Recommendation(None, // PID
       uuid, // EXTERNAL_ID
-      accountId, // ACCOUNT_ID
+      accountId, // AccountId
+      customerAccountId, // CustomerAccountId
       externalAccountId, // LE_ACCOUNT_EXTERNAL_ID
       playId, // PLAY_ID
       playLaunchId, // LAUNCH_ID
@@ -128,6 +136,14 @@ private[spark] object DeltaCampaignLaunchUtils {
       tenantId, // TENANT_ID
       DELETED = false // DELETED
     )
+  }
+
+  def getAccountId(userCustomerId: Boolean): String = {
+    if (userCustomerId) {
+      InterfaceName.CustomerAccountId.name
+    } else {
+      InterfaceName.AccountId.name
+    }
   }
 
   def getDefaultLikelihood(bucket: RatingBucketName): Double = {

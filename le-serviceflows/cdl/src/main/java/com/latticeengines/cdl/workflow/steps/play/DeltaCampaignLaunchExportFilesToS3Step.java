@@ -114,7 +114,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         }
         if (createTaskDescriptionFile) {
             exportFiles.put(DeltaCampaignLaunchWorkflowConfiguration.TASK_DESCRIPTION, getListObjectFromContext(
-                    DeltaCampaignLaunchWorkflowConfiguration.CREATE_TASK_DESCRIPTION_FILE, String.class));
+                    DeltaCampaignLaunchWorkflowConfiguration.TASK_DESCRIPTION_FILE, String.class));
         }
         log.info("Before processing, Uploading all HDFS files to S3. {}", exportFiles);
         LookupIdMap lookupIdMap = getConfiguration().getLookupIdMap();

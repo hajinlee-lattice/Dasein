@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -41,6 +43,7 @@ import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
@@ -60,6 +63,8 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.security.TenantType;
 
 public class BatonServiceImpl implements BatonService {
@@ -70,6 +75,10 @@ public class BatonServiceImpl implements BatonService {
     // TODO move to shared constant, default is configurable in zk so put this as
     // class constant first
     private static final ZoneId DEFAULT_TIMEZONE = ZoneId.of("America/Los_Angeles");
+
+    private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
+    private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
+    private static final String PLS = "PLS";
 
     private static TreeCache cache = null;
 
@@ -835,6 +844,107 @@ public class BatonServiceImpl implements BatonService {
             }
         }
         return cache;
+    }
+
+    @Override
+    public int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense) {
+        String maxPremiumLeadEnrichmentAttributes;
+        Camille camille = CamilleEnvironment.getCamille();
+        Path contractPath = null;
+        Path path = null;
+        try {
+            CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+            contractPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace, PLS);
+            if (dataLicense == null) {
+                path = contractPath.append(DATA_CLOUD_LICENSE).append(MAX_ENRICH_ATTRIBUTES);
+            } else {
+                path = contractPath.append(DATA_CLOUD_LICENSE).append("/" + dataLicense);
+            }
+            maxPremiumLeadEnrichmentAttributes = camille.get(path).getData();
+        } catch (KeeperException.NoNodeException ex) {
+            Path defaultConfigPath = null;
+            if (dataLicense == null) {
+                defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), PLS)
+                        .append(new Path(DATA_CLOUD_LICENSE).append(new Path(MAX_ENRICH_ATTRIBUTES)));
+            } else {
+                defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), PLS)
+                        .append(new Path(DATA_CLOUD_LICENSE).append(new Path("/" + dataLicense)));
+            }
+
+            try {
+                maxPremiumLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData();
+            } catch (Exception e) {
+                log.warn("Cannot get default value for maximum premium lead enrichment attributes. Using default 32");
+                maxPremiumLeadEnrichmentAttributes = "32";
+            }
+            try {
+                Integer attrNumber = Integer.parseInt(maxPremiumLeadEnrichmentAttributes);
+                camille.upsert(path, DocumentUtils.toRawDocument(attrNumber), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot get maximum premium lead enrichment attributes ", e);
+        }
+        return Integer.parseInt(maxPremiumLeadEnrichmentAttributes);
+    }
+
+    @Override
+    public Set<String> getExpiredLicenses(String tenantId) {
+        Set<String> licenses = new HashSet<>();
+        if (tenantId == null) {
+            return licenses;
+        }
+        DataLicense[] allLicenses = DataLicense.values();
+        for (DataLicense license : allLicenses) {
+            int limit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, license.getDataLicense());
+            if (limit == 0) {
+                licenses.add(license.getDataLicense());
+            }
+        }
+        return licenses;
+    }
+
+    @Override
+    public int getMaxDataLicense(Category category, String tenantId) {
+        if (category.isPremium()) {
+            String lic = null;
+            switch (category) {
+            case INTENT:
+                lic = DataLicense.BOMBORA.getDataLicense();
+                break;
+            case TECHNOLOGY_PROFILE:
+                lic = DataLicense.HG.getDataLicense();
+                break;
+            case DNB_TECHNOLOGY_PROFILE:
+                lic = DataLicense.DMX.getDataLicense();
+                break;
+            case WEBSITE_KEYWORDS:
+                lic = DataLicense.WEBSITEKEYWORDS.getDataLicense();
+                break;
+            case ACCOUNT_ATTRIBUTES:
+                lic = DataLicense.ACCOUNT.getDataLicense();
+                break;
+            case CONTACT_ATTRIBUTES:
+                lic = DataLicense.CONTACT.getDataLicense();
+                break;
+            case GROWTH_TRENDS:
+                lic = DataLicense.GROWTHTRENDS.getDataLicense();
+                break;
+            case COVID_19:
+                lic = DataLicense.COVID19.getDataLicense();
+                break;
+            default:
+                log.warn("Unsupported" + category);
+                break;
+            }
+            try {
+                return getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, lic);
+            } catch (Exception e) {
+                log.warn("Failed to get max premium lead enrichment attrs from ZK for Category=" + category, e);
+            }
+        }
+        return -1;
     }
 }
 

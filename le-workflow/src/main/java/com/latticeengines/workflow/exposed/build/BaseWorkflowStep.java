@@ -161,6 +161,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String TIMELINE_RAWTABLES_GOING_TO_DYNAMO = "TIMELINE_RAWTABLES_GOING_TO_DYNAMO";
     public static final String ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO = "ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
+    public static final String TABLES_GOING_TO_ES = "TABLES_GOING_TO_ES";
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     public static final String RATING_MODELS = "RATING_MODELS";
@@ -329,6 +330,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SPENDING_ANALYSIS_PERIOD_TABLE_NAME = "SPENDING_ANALYSIS_PERIOD_TABLE_NAME";
     protected static final String TIMELINE_MASTER_TABLE_NAME = "TIMELINE_MASTER_TABLE_NAME";
     protected static final String TIMELINE_DIFF_TABLE_NAME = "TIMELINE_DIFF_TABLE_NAME";
+    protected static final String TIMELINE_REBUILD = "TIMELINE_REBUILD";
     protected static final String JOURNEY_STAGE_TABLE_NAME = "JOURNEY_STAGE_TABLE_NAME";
     protected static final String ACTIVITY_ALERT_GENERATED = "ALERT_GENERATED";
     protected static final String ACTIVITY_ALERT_PUBLISHED = "ALERT_PUBLISHED";
@@ -366,6 +368,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String CUSTOM_EVENT_MATCH_ACCOUNT = "CUSTOM_EVENT_MATCH_ACCOUNT";
     protected static final String CUSTOM_EVENT_MATCH_ACCOUNT_ID = "CUSTOM_EVENT_MATCH_ACCOUNT_ID";
     protected static final String CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID = "CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID";
+    protected static final String DATA_STREAM = "DataStream";
 
     protected static final String INPUT_SKIPPED_ATTRIBUTES_KEY = "INPUT_SKIPPED_ATTRIBUTES_KEY";
 
@@ -399,6 +402,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String TIMELINE_EXPORT_ACCOUNTLIST = "TIMELINE_EXPORT_ACCOUNTLIST";
     public static final String TIMELINE_EXPORT_TABLES = "TIMELINE_EXPORT_TABLES";
     public static final String TIMELINE_EXPORT_FILES = "TIMELINE_EXPORT_FILES";
+    public static final String IS_SSVI_TENANT = "IS_SSVI_TENANT";
+    public static final String IS_CDL_TENANT = "IS_CDL_TENANT";
+    public static final String SSVI_WEBVISIT_RAW_TABLE = "SSVI_WEBVISIT_RAW_TABLE";
 
     public static final String TABLEROLES_GOING_TO_ES = "TABLEROLES_GOING_TO_ES";
 
@@ -447,7 +453,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
             CURATED_ACCOUNT_STATS_TABLE_NAME, //
             CURATED_CONTACT_SERVING_TABLE_NAME, //
-            CURATED_CONTACT_STATS_TABLE_NAME //
+            CURATED_CONTACT_STATS_TABLE_NAME, //
+            SSVI_WEBVISIT_RAW_TABLE //
     );
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME);
 
@@ -498,7 +505,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACTIVITY_METRICS_CATEGORIES, //
             ACTIVITY_ALERT_GENERATED, //
             ACTIVITY_ALERT_PUBLISHED, //
-            RETAIN_PRODUCT_TYPE);
+            RETAIN_PRODUCT_TYPE,
+            IS_SSVI_TENANT,
+            IS_CDL_TENANT);
 
     @Autowired
     protected Configuration yarnConfiguration;

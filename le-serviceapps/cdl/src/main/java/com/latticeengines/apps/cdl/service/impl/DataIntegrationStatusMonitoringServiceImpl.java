@@ -126,6 +126,17 @@ public class DataIntegrationStatusMonitoringServiceImpl implements DataIntegrati
         return dataIntegrationStatusMsgEntityMgr.getAllStatusMessages(statusMonitor.getPid());
     }
 
+    @Override
+    public void createAuthenticationStatuses(List<DataIntegrationStatusMonitorMessage> statuses) {
+        log.info("Handling authentication updates from Tray");
+        statuses.forEach(status -> {
+            String statusJson = JsonUtils.serialize(status);
+            log.info("STATUS SERIALIZED " + statusJson);
+            WorkflowStatusHandler handler = getWorkflowStatusHandler(status.getEventType());
+            handler.handleAuthenticationState(status);
+        });
+    }
+
     private WorkflowStatusHandler getWorkflowStatusHandler(String type) {
         DataIntegrationEventType eventType = DataIntegrationEventType.valueOf(type);
         WorkflowStatusHandler workflowStatusHandler = null;

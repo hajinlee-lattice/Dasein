@@ -86,6 +86,9 @@ public class SchemaRepository {
             if (BusinessEntity.Contact.equals(entity) && entityMatchEnabled) {
                 sysAttrs.add(InterfaceName.LatticeAccountId);
             }
+            if (BusinessEntity.CuratedAccount.equals(entity) || BusinessEntity.CuratedContact.equals(entity)) {
+                sysAttrs.add(InterfaceName.EntityCreatedSystemType);
+            }
         }
         return sysAttrs;
     }

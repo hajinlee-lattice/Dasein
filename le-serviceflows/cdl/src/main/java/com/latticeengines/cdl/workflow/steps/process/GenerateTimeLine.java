@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -70,6 +71,9 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     @Inject
     private ActivityStoreProxy activityStoreProxy;
 
+    @Value("${cdl.job.partition.limit}")
+    private Integer numPartitionLimit;
+
     private DataCollection.Version inactive;
     private DataCollection.Version active;
 
@@ -114,6 +118,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         activeTimelineMasterTableNames = MapUtils.emptyIfNull(dataCollectionProxy.getTableNamesWithSignatures(
                 customerSpace.toString(), TableRoleInCollection.TimelineProfile, active, null));
         checkRebuild();
+        putObjectInContext(TIMELINE_REBUILD, needRebuild);
         bumpVersion();
         dcStatus.setTimelineVersionMap(timelineVersionMap);
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
@@ -184,6 +189,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                 config.dimensionMetadataMap.entrySet().stream().filter(entry -> (configuration.getActivityStreamMap().get(entry.getKey()) != null && AtlasStream.StreamType.WebVisit.equals(configuration.getActivityStreamMap().get(entry.getKey()).getStreamType())))
                 .map(entry -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toMap(Pair::getKey,
                         Pair::getValue));
+        config.numPartitionLimit = numPartitionLimit;
         return config;
     }
 

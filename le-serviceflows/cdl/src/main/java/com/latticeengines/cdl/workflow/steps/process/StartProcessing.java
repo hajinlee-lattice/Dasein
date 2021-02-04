@@ -19,6 +19,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,6 +170,12 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (!hasKeyInContext(NEW_RECORD_CUT_OFF_TIME)) {
             putLongValueInContext(NEW_RECORD_CUT_OFF_TIME, System.currentTimeMillis());
         }
+
+        // lattice modules
+        boolean isSSVITenant = BooleanUtils.isTrue(configuration.isSSVITenant());
+        putObjectInContext(IS_SSVI_TENANT, isSSVITenant);
+        boolean isCDLTenant = BooleanUtils.isTrue(configuration.isCDLTenant());
+        putObjectInContext(IS_CDL_TENANT, isCDLTenant);
 
         // entityMatchVersion is using to bumpVersion when we Rematch
         // entityMatch tenant.

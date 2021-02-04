@@ -63,12 +63,17 @@ public final class WorkflowJobUtils {
     private static final String PUBLISH_RECOMMENDATION_FOR_S3_LAUNCH = "PublishRecommendationsForS3Launch";
     private static final String CONTACT_ACCOUNT_RATIO_THRESHOLD = "ContactAccountRatioThreshold";
     private static final Long DEFAULT_CONTACT_ACCOUNT_RATIO_THRESHOLD = 100000L;
+    private static final String USE_CUSTOMER_ID = "UseCustomerId";
     private static final String CDL = "CDL";
     private static final String CONTACTS_PER_ACCOUNT_SORT = "/ContactsPerAccountSort";
     private static final String ATTRIBUTE = "/Attribute";
     private static final String DIRECTION = "/Direction";
     private static final String CDL_UPDATED_TIME = "CDLUpdatedTime";
     private static final String DESC = "DESC";
+    private static final String LATTICE = "Lattice";
+    private static final String OUTREACH_TASK_SETTINGS = "/OutreachTaskSettings";
+    private static final String OWNER_PRIORITY = "/OwnerPriority";
+    private static final String DEFAULT_OWNER = "/DefaultOwner";
 
     private static ObjectMapper om = new ObjectMapper();
 
@@ -374,4 +379,32 @@ public final class WorkflowJobUtils {
         sortConfig.add(sortDir);
         return sortConfig;
     }
+
+    public static List<String> getOutreachTaskSettingsFromZK(CustomerSpace customerSpace) {
+        List<String> taskSettings = new ArrayList<>();
+        String ownerPriority = LATTICE;
+        String defaultOwner = "";
+        try {
+            ownerPriority = getValueFromZK(customerSpace, CDL, OUTREACH_TASK_SETTINGS + OWNER_PRIORITY);
+            defaultOwner = getValueFromZK(customerSpace, CDL, OUTREACH_TASK_SETTINGS + DEFAULT_OWNER);
+        } catch (Exception e) {
+            log.warn("Tenant Outreach Task Settings found but unable to read: ", e);
+        }
+        taskSettings.add(ownerPriority);
+        taskSettings.add(defaultOwner);
+        return taskSettings;
+    }
+    public static boolean getUseCustomerId(CustomerSpace customerSpace) {
+        boolean useCustomerID = false;
+        try {
+            String value = getValueFromZK(customerSpace, CDL, USE_CUSTOMER_ID);
+            if (StringUtils.isNotEmpty(value)) {
+                useCustomerID = Boolean.valueOf(value);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get use customer id from ZK for " + customerSpace.getTenantId(), e);
+        }
+        return useCustomerID;
+    }
+
 }

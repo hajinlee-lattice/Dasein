@@ -89,6 +89,27 @@
     {
       "Node": "ContactAccountRatioThreshold",
       "Data": 1000000
+    },
+    {
+      "Node": "OutreachTaskSettings",
+      "Children": [
+        {
+          "Node": "OwnerPriority",
+          "Data": "Lattice"
+        },
+        {
+          "Node": "DefaultOwner",
+          "Data": ""
+        }
+      ]
+    },
+    {
+      "Node": "Stack",
+      "Data": ""
+    },
+    {
+      "Node": "TriggerName",
+      "Data": "Undefined"
     }
   ]
 }

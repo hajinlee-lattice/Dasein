@@ -424,7 +424,7 @@ public class IDaaSServiceImpl extends AuthorizationServiceBase implements IDaaSS
     /**
      * Check if this subscriber_number is in IDaaS and returns subscriber_details
      * when requested.
-     * 
+     *
      * @param vboRequest
      * @return
      */

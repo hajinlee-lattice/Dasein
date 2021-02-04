@@ -33,7 +33,6 @@ import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
-
     private Play play;
     private String playName;
     private PlayLaunch playLaunch;
@@ -62,6 +61,9 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private TestPlaySetupConfig testPlaySetupConfig = null;
 
+    private String previousContactTable = "previousContactTable";
+    private String previousAccountTable = "previousAccountTable";
+
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         String existingTenant = null;
@@ -82,6 +84,10 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         playCreationHelper.createPlayTargetSegment();
         playCreationHelper.createLookupIdMapping(testPlaySetupConfig);
+
+        mainCustomerSpace = playCreationHelper.getCustomerSpace();
+        createTable(previousContactTable);
+        createTable(previousAccountTable);
     }
 
     @Test(groups = "deployment-app")
@@ -200,6 +206,22 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "searchPlayLaunch" })
+    public void testRecoverPlayLaunchChannel() throws InterruptedException {
+        PlayLaunchChannel channel = playProxy
+                .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), play.getName(), false).get(0);
+        Assert.assertNull(channel.getCurrentLaunchedAccountUniverseTable());
+        Assert.assertNull(channel.getCurrentLaunchedContactUniverseTable());
+
+        channel.setPreviousLaunchedAccountUniverseTable(previousAccountTable);
+        channel.setPreviousLaunchedContactUniverseTable(previousContactTable);
+        PlayLaunchChannel updatedChannel = playProxy.recoverPlayLaunchChannelLaunchUniverse(
+                playCreationHelper.getCustomerSpace(), play.getName(), channel.getId(), channel);
+
+        Assert.assertEquals(updatedChannel.getCurrentLaunchedAccountUniverseTable(), previousAccountTable);
+        Assert.assertEquals(updatedChannel.getCurrentLaunchedContactUniverseTable(), previousContactTable);
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = { "testRecoverPlayLaunchChannel" })
     public void testGetFullPlays() {
         Play retrievedFullPlay = playProxy.getPlay(mainTestTenant.getId(), playName);
         Assert.assertNotNull(retrievedFullPlay);

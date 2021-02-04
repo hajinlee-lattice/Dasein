@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -30,18 +31,27 @@ import com.amazonaws.services.dynamodbv2.document.RangeKeyCondition;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.dynamo.DynamoItemService;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
 import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.ElasticSearchDataUnit;
 import com.latticeengines.domain.exposed.query.ActivityTimelineQuery;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
+import com.latticeengines.elasticsearch.Service.ElasticSearchService;
+import com.latticeengines.elasticsearch.util.ElasticSearchUtils;
 import com.latticeengines.objectapi.service.ActivityTimelineQueryService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 
 @Component("timelineQueryService")
 public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQueryService {
@@ -56,6 +66,15 @@ public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQuerySe
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
+
+    @Inject
+    private ElasticSearchService elasticSearchService;
+
+    @Inject
+    private BatonService batonService;
 
     @Value("${eai.export.dynamo.timeline.signature}")
     private String signature;
@@ -94,19 +113,39 @@ public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQuerySe
                             activityTimelineQuery.getMainEntity().name(), customerSpace) });
         }
 
-        // [ startTime, endTime ], need to + 1 because it is doing string comparison and
-        // there is a suffix after timestamp
-        QuerySpec spec = new QuerySpec() //
-                .withHashKey(PARTITION_KEY,
-                        buildPartitionKey(timeline.getTimelineId(), timeLineVersion,
-                                activityTimelineQuery.getEntityId()))
-                .withRangeKeyCondition(new RangeKeyCondition(RANGE_KEY).between(
-                        activityTimelineQuery.getStartTimeStamp().toEpochMilli() + "",
-                        String.valueOf(activityTimelineQuery.getEndTimeStamp().toEpochMilli() + 1L)))
-                .withScanIndexForward(false);
-        String tableName = TABLE_NAME + signature;
-        return new DataPage(dynamoItemService.query(tableName, spec).stream().map(this::extractRecords)
-                .filter(Objects::nonNull).map(GenericTableActivity::getAttributes).collect(Collectors.toList()));
+        // query from elastic search if feature flag is enabled and data unit is not null
+
+        boolean isEnabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
+                LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH);
+        ElasticSearchDataUnit dataUnit;
+
+        if (isEnabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+                TableRoleInCollection.TimelineProfile.name(), DataUnit.StorageType.ElasticSearch)) != null) {
+                log.info("{} query form elastic search.", customerSpace);
+                String signature = dataUnit.getSignature();
+                String name = dataUnit.getName();
+                String indexName = ElasticSearchUtils.constructIndexName(customerSpace, name, signature);
+                List<Map<String, Object>> result = elasticSearchService.searchTimelineByEntityIdAndDateRange(indexName,
+                        activityTimelineQuery.getMainEntity().toString(), activityTimelineQuery.getEntityId(),
+                        activityTimelineQuery.getStartTimeStamp().toEpochMilli(),
+                        activityTimelineQuery.getEndTimeStamp().toEpochMilli());
+                return new DataPage(result);
+        } else {
+            // [ startTime, endTime ], need to + 1 because it is doing string comparison and
+            // there is a suffix after timestamp
+            log.info("{} query from dynamo db.", customerSpace);
+            QuerySpec spec = new QuerySpec() //
+                    .withHashKey(PARTITION_KEY,
+                            buildPartitionKey(timeline.getTimelineId(), timeLineVersion,
+                                    activityTimelineQuery.getEntityId()))
+                    .withRangeKeyCondition(new RangeKeyCondition(RANGE_KEY).between(
+                            activityTimelineQuery.getStartTimeStamp().toEpochMilli() + "",
+                            String.valueOf(activityTimelineQuery.getEndTimeStamp().toEpochMilli() + 1L)))
+                    .withScanIndexForward(false);
+            String tableName = TABLE_NAME + signature;
+            return new DataPage(dynamoItemService.query(tableName, spec).stream().map(this::extractRecords)
+                    .filter(Objects::nonNull).map(GenericTableActivity::getAttributes).collect(Collectors.toList()));
+        }
     }
 
     private Object buildPartitionKey(String timelineId, String timeLineVersion, String entityId) {

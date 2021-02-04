@@ -250,7 +250,8 @@ public class LivySessionServiceImpl implements LivySessionService {
         return Arrays.asList( //
                 "org.apache.livy:livy-scala-api_2.11:0.7.0-incubating", //
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11:2.10.1", //
-                "org.apache.spark:spark-avro_2.11:2.4.5" //
+                "org.apache.spark:spark-avro_2.11:2.4.7", //
+                "commons-httpclient:commons-httpclient:3.1"
         );
     }
 

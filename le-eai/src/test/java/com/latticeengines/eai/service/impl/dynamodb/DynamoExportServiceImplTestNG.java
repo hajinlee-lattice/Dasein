@@ -55,6 +55,11 @@ import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
+
+
+/**
+ * This test requires a local Dynamo running at port 8000
+ */
 public class DynamoExportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DynamoExportServiceImplTestNG.class);

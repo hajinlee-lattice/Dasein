@@ -23,6 +23,7 @@ import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.serviceflows.workflow.export.ImportProcessAnalyzeFromS3;
 import com.latticeengines.serviceflows.workflow.export.PublishActivityAlerts;
+import com.latticeengines.serviceflows.workflow.export.PublishToElasticSearch;
 import com.latticeengines.serviceflows.workflow.match.CommitEntityMatchWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -70,6 +71,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ProcessActivityStreamWorkflow processActivityStreamWorkflow;
 
     @Inject
+    private GenerateVisitReportWorkflow generateVisitReportWorkflow;
+
+    @Inject
     private ProcessRatingWorkflow processRatingWorkflow;
 
     @Inject
@@ -114,6 +118,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Inject
     private LegacyDeleteWorkFlow legacyDeleteWorkFlow;
 
+    @Inject
+    private PublishToElasticSearch publishToElasticSearch;
+
     @Override
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -128,6 +135,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(processTransactionWorkflow) //
                 .next(processCatalogWorkflow) //
                 .next(processActivityStreamWorkflow) //
+                .next(generateVisitReportWorkflow) //
                 .next(apsGeneration) //
                 .next(curatedAttributesWorkflow) //
                 .next(combineStatistics) //
@@ -141,6 +149,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(exportTimelineRawTableToDynamo) //
                 .next(publishActivityAlerts) //
                 .next(atlasAccountLookupExportWorkflow) //
+                .next(publishToElasticSearch)
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //
                 .choreographer(choreographer) //

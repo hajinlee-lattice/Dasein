@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,10 +39,15 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.CompositeDimensionCalculator;
+import com.latticeengines.domain.exposed.cdl.activity.DeriveConfig;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -216,7 +223,7 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
 
     @Override
     public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
-                                                                            String signature, boolean withStreamName) {
+            String signature, boolean withStreamName) {
         if (StringUtils.isBlank(signature)) {
             signature = getDimensionMetadataSignature(MultiTenantContext.getShortTenantId());
             if (StringUtils.isBlank(signature)) {
@@ -245,6 +252,13 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     }
 
     @Override
+    @WithCustomerSpace
+    public List<ActivityMetricsGroup> findByTenant(String customerSpace) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return activityMetricsGroupEntityMgr.findByTenant(tenant);
+    }
+
+    @Override
     public Map<String, String> allocateDimensionId(@NotNull String customerSpace,
             @NotNull Set<String> dimensionValues) {
         return dimensionMetadataService.allocateDimensionId(MultiTenantContext.getShortTenantId(), dimensionValues);
@@ -263,7 +277,7 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @Override
     public List<AtlasStream> getStreams(String customerSpace) {
         List<AtlasStream> streams = streamEntityMgr.findByTenant(MultiTenantContext.getTenant());
-        for (AtlasStream stream: streams) {
+        for (AtlasStream stream : streams) {
             stream.setTenant(null);
             stream.setDimensions(null);
         }
@@ -273,7 +287,8 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     @Override
     @WithCustomerSpace
     public List<AtlasStream> getStreamsByStreamType(String customerSpace, AtlasStream.StreamType streamType) {
-        List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(MultiTenantContext.getTenant(), streamType);
+        List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(MultiTenantContext.getTenant(),
+                streamType);
         return CollectionUtils.isEmpty(streams) ? Collections.emptyList() : streams;
     }
 
@@ -287,6 +302,58 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         }
         return streams.stream()
                 .collect(Collectors.toMap(AtlasStream::getStreamId, AtlasStream::getName, (v1, v2) -> v1));
+    }
+
+    @Override
+    @WithCustomerSpace
+    public Map<AtlasStream.StreamType, List<String>> getStreamTypeToStreamNamesMap(String customerSpace) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        Map<AtlasStream.StreamType, List<String>> map = new HashMap<>();
+        Arrays.stream(AtlasStream.StreamType.values()).forEach(type -> {
+            List<AtlasStream> streams = streamEntityMgr.findByTenantAndStreamType(tenant, type);
+            if (CollectionUtils.isNotEmpty(streams)) {
+                map.put(type, streams.stream().map(AtlasStream::getName).collect(Collectors.toList()));
+            } else {
+                map.put(type, Collections.emptyList());
+            }
+        });
+        return map;
+    }
+
+    @Override
+    @WithCustomerSpace
+    public boolean addDeriveDimensionConfig(String customerSpace, String streamName, DeriveConfig config) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        AtlasStream stream = streamEntityMgr.findByNameAndTenant(streamName, tenant);
+        if (stream == null) {
+            throw new IllegalArgumentException(String.format("Unable to find stream with name %s for tenant %s", streamName, tenant.getName()));
+        }
+        StreamDimension dimension = new StreamDimension();
+        log.info("Creating derive config: {}", config);
+        dimension.setDeriveConfig(config);
+        dimension.setName(InterfaceName.DerivedId.name());
+        dimension.setDisplayName(InterfaceName.DerivedId.name());
+        dimension.setTenant(tenant);
+        dimension.setStream(stream);
+        dimension.addUsages(StreamDimension.Usage.Pivot);
+        dimension.setCalculator(getDeriveCalculator(config));
+        dimension.setGenerator(getDeriveGenerator());
+        dimensionEntityMgr.create(dimension);
+        return true;
+    }
+
+    private DimensionGenerator getDeriveGenerator() {
+        DimensionGenerator generator = new DimensionGenerator();
+        generator.setAttribute(InterfaceName.DerivedName.name());
+        generator.setFromCatalog(false);
+        generator.setOption(DimensionGenerator.DimensionGeneratorOption.DERIVE);
+        return generator;
+    }
+
+    private DimensionCalculator getDeriveCalculator(DeriveConfig config) {
+        CompositeDimensionCalculator calculator = new CompositeDimensionCalculator();
+        calculator.deriveConfig = config;
+        return calculator;
     }
 
     private String getStreamId(@NotNull String streamName) {

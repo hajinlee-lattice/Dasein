@@ -73,7 +73,7 @@ public class CalculateScoreUtils {
         Map<String, String> scoreFieldMapBatch = new HashMap<>();
         if (MapUtils.isNotEmpty(allScoreFieldMap)) {
             for (String modelId : allScoreFieldMap.keySet()) {
-                String scoreField = scoreFieldMapBatch.get(modelId);
+                String scoreField = allScoreFieldMap.get(modelId);
                 scoreFieldMapBatch.put(modelId, scoreField);
                 if (scoreFieldMapBatch.size() >= batchSize) {
                     scoreFieldMaps.add(scoreFieldMapBatch);

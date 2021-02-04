@@ -27,7 +27,7 @@ public class HdfsToS3PathBuilder {
     // use s3a whenever possible, e.g. in emr
     private String protocol = "s3n";
 
-    private static final String PATH_SEPARATOR = "/";
+    public static final String PATH_SEPARATOR = "/";
     private static final String PROTOCOL_SEPARATOR = ":/";
     private static final String FILE_NAME_SEPARATOR = "-";
 

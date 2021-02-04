@@ -58,7 +58,7 @@ public class EntityIdAssociateMicroEngineActor extends EntityMicroEngineActorBas
     @Override
     protected boolean shouldProcess(@NotNull MatchTraveler traveler) {
         // only accept if the system is in allocate mode
-        return entityMatchConfigurationService.isAllocateMode();
+        return entityMatchConfigurationService.isAllocateMode(traveler.getEntity());
     }
 
     @Override

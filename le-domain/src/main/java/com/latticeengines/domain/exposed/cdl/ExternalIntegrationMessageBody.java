@@ -38,6 +38,10 @@ public class ExternalIntegrationMessageBody {
 
     private String taskType;
 
+    private String taskOwnerPriority;
+
+    private String taskDefaultOwner;
+
     public String getTrayTenantId() {
         return trayTenantId;
     }
@@ -156,5 +160,21 @@ public class ExternalIntegrationMessageBody {
 
     public String getTaskType() {
         return taskType;
+    }
+
+    public void setTaskOwnerPriority(String taskOwnerPriority) {
+        this.taskOwnerPriority = taskOwnerPriority;
+    }
+
+    public String getTaskOwnerPriority() {
+        return taskOwnerPriority;
+    }
+
+    public void setTaskDefaultOwner(String taskDefaultOwner) {
+        this.taskDefaultOwner = taskDefaultOwner;
+    }
+
+    public String getTaskDefaultOwner() {
+        return taskDefaultOwner;
     }
 }

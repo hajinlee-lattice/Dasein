@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -48,7 +51,13 @@ public class PeriodTransactionResource {
             log.warn("Invalid period transaction query, customer={}, accountId={}, periodName={} and productType={}", //
                     CustomerSpace.shortenCustomerSpace(customerSpace), accountId, periodName, productType);
         }
-        return purchaseHistoryService.getPeriodTransactionsByAccountId(accountId, periodName, productType, sqlUser);
+
+        PeriodStrategy.Template period = PeriodStrategy.Template.fromName(periodName);
+        if (null == period) {
+            throw new LedpException(LedpCode.LEDP_42001, new String[] { periodName });
+        }
+
+        return purchaseHistoryService.getPeriodTransactionsByAccountId(accountId, period.name(), productType, sqlUser);
     }
 
     @GetMapping("/spendanalyticssegments")
@@ -71,7 +80,13 @@ public class PeriodTransactionResource {
             log.warn("Invalid period transaction query, customer={}, segment={}, periodName={} and productType={}", //
                     CustomerSpace.shortenCustomerSpace(customerSpace), spendAnalyticsSegment, periodName, productType);
         }
-        return purchaseHistoryService.getPeriodTransactionsForSegmentAccounts(spendAnalyticsSegment, periodName,
+
+        PeriodStrategy.Template period = PeriodStrategy.Template.fromName(periodName);
+        if (null == period) {
+            throw new LedpException(LedpCode.LEDP_42001, new String[] { periodName });
+        }
+
+        return purchaseHistoryService.getPeriodTransactionsForSegmentAccounts(spendAnalyticsSegment, period.name(),
                 productType, sqlUser);
     }
 

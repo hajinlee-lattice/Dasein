@@ -5,17 +5,16 @@ import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.WebVisitProfile;
 
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
@@ -34,6 +33,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -42,11 +42,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
-import com.latticeengines.domain.exposed.util.OpportunityUtils;
-import com.latticeengines.domain.exposed.util.WebVisitUtils;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -57,7 +54,7 @@ public class ActivityMetricDecorator implements Decorator {
 
     // all activity metric serving entities shares the system attrs
     private final Set<String> systemAttrs = SchemaRepository //
-            .getSystemAttributes(BusinessEntity.WebVisitProfile, true).stream() //
+            .getSystemAttributes(WebVisitProfile, true).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
     private final String signature;
@@ -70,7 +67,7 @@ public class ActivityMetricDecorator implements Decorator {
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> metadataCache = new ConcurrentHashMap<>();
     private ConcurrentMap<String, ActivityMetricsGroup> groupCache = new ConcurrentHashMap<>();
-    private AtomicReference<Set<String>> streamsNeedSystemName = new AtomicReference<>(new HashSet<>()); // stream names of those who need to append system name
+    Map<AtlasStream.StreamType, List<String>> streamTypeNameMap = new HashMap<>();
 
     ActivityMetricDecorator(String signature, Tenant tenant, //
                             DimensionMetadataService dimensionMetadataService, //
@@ -85,31 +82,19 @@ public class ActivityMetricDecorator implements Decorator {
 
     @Override
     public Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata) {
-        getStreamsNeedSystemNames();
+        streamTypeNameMap = activityStoreService.getStreamTypeToStreamNamesMap(tenant.getId());
         return metadata.map(this::filter);
     }
 
     @Override
     public ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata) {
-        getStreamsNeedSystemNames();
+        streamTypeNameMap = activityStoreService.getStreamTypeToStreamNamesMap(tenant.getId());
         return metadata.map(this::filter);
     }
 
     @Override
     public String getName() {
         return "activity-metric-attrs";
-    }
-
-    private void getStreamsNeedSystemNames() {
-        Set<String> opportunityStreamNames = new HashSet<>();
-        activityStoreService.getStreamNameMap(tenant.getId()).values().forEach(streamName -> {
-            if (streamName.endsWith(EntityType.Opportunity.name())) {
-                opportunityStreamNames.add(streamName);
-            }
-        });
-        if (opportunityStreamNames.size() > 1) {
-            streamsNeedSystemName.set(opportunityStreamNames);
-        }
     }
 
     private ColumnMetadata filter(ColumnMetadata cm) {
@@ -165,13 +150,13 @@ public class ActivityMetricDecorator implements Decorator {
 
         String groupId = tokens.get(0);
         if (!groupCache.containsKey(groupId)) {
-            groupCache.put(groupId, activityMetricsGroupEntityMgr.findByGroupId(groupId));
+            ActivityMetricsGroup group = activityMetricsGroupEntityMgr.findByGroupId(groupId);
+            if (group != null) {
+                groupCache.put(groupId, group);
+            }
         }
         ActivityMetricsGroup group = groupCache.get(groupId);
-        if (group == null) {
-            throw new IllegalArgumentException(String.format("Cannot find the am group %s specified in attribute %s", //
-                    groupId, attrName));
-        }
+
 
         String[] rollupDimVals = tokens.get(1).split("_");
         String timeRange = tokens.get(2);
@@ -187,25 +172,39 @@ public class ActivityMetricDecorator implements Decorator {
         renderFundamentalType(cm, group);
         overwriteColumnSelection(cm, group);
 
-        switch (cm.getEntity()) {
+        BusinessEntity entity = cm.getEntity();
+        AtlasStream.StreamType streamType = group.getStream().getStreamType();
+        switch (entity) {
         case WebVisitProfile:
-            WebVisitUtils.setColumnMetadataUIProperties(cm, group, timeRange, params);
-            break;
-        case Opportunity:
-            OpportunityUtils.setColumnMetadataUIProperties(cm, group,
-                    streamsNeedSystemName.get().contains(group.getStream().getName()));
+            String pathPtn = ActivityStoreUtils.getDimensionValueAsString(params, InterfaceName.PathPatternId.name(),
+                    InterfaceName.PathPattern.name(), tenant);
+            ActivityStoreUtils.setColumnMetadataUIProperties(cm, timeRange, pathPtn);
+            if (StringUtils.isBlank(pathPtn)) {
+                log.warn("Failed to retrieve path pattern for attribute {} in group {} for tenant {}", cm.getAttrName(),
+                        group.getGroupId(), tenant.getName());
+            }
             break;
         case AccountMarketingActivity:
         case ContactMarketingActivity:
             String activityType = ActivityStoreUtils.getDimensionValueAsString(params,
                     InterfaceName.ActivityTypeId.name(), InterfaceName.ActivityType.name(), tenant);
             ActivityStoreUtils.setColumnMetadataUIProperties(cm, timeRange, activityType);
+            if (StringUtils.isBlank(activityType)) {
+                log.warn("Failed to retrieve activity type for attribute {} in group {} for tenant {}", cm.getAttrName(),
+                        group.getGroupId(), tenant.getName());
+            }
             break;
+        case Opportunity:
         case CustomIntent:
             // do nothing atm
             break;
         default:
             log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());
+        }
+        if (entity != WebVisitProfile && streamType != null) { // webVisit stream name doesn't contain system name
+            if (streamTypeNameMap.get(streamType).size() > 1) {
+                ActivityStoreUtils.appendSystemName(cm, group.getStream().getName());
+            }
         }
     }
 
@@ -324,7 +323,7 @@ public class ActivityMetricDecorator implements Decorator {
             }
         }
 
-        String descTmpl = group.getDescriptionTmpl().getTemplate();
+        String descTmpl = group.getDescriptionTmpl() == null ? null : group.getDescriptionTmpl().getTemplate();
         if (StringUtils.isNotBlank(descTmpl)) {
             try {
                 cm.setDescription(getTrimmedTemplate(descTmpl, params));

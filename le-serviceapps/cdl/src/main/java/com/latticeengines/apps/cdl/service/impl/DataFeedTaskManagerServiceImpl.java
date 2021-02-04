@@ -323,7 +323,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
         DataFeedTask dataFeedTask = getDataFeedTask(tenant, customerSpace, taskIdentifier);
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(dataFeedTask.getSource());
-        String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask.getUniqueId());
+        String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask);
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         if (csvImportFileInfo.isPartialFile()) {
@@ -358,7 +358,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         S3ImportEmailInfo emailInfo = generateEmailInfo(customerSpace.toString(),
                 importConfig.getCSVImportFileInfo().getReportFileDisplayName(), dataFeedTask, new Date());
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(dataFeedTask.getSource());
-        String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask.getUniqueId());
+        String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask);
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         checkImportWithWrongTemplate(customerSpace.toString(), dataFeedTask);
@@ -444,7 +444,10 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setReportFileDisplayName(importConfig.getS3FileName());
         csvImportFileInfo.setReportFilePath(backupPath);
         prepareImportConfig.setEmailInfo(emailInfo);
-        boolean enableImportEraseByNull = batonService.isEnabled(customerSpace,
+        String entity = dataFeedTask.getEntity();
+        boolean enableImportEraseByNull = (BusinessEntity.Account.name().equals(entity)
+                || BusinessEntity.Contact.name().equals(entity))
+                && batonService.isEnabled(customerSpace,
                 LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL);
         importConfig.setProperty(ImportProperty.ENABLE_ERASE_BY_NULL, String.valueOf(enableImportEraseByNull));
 

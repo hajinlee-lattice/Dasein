@@ -102,17 +102,17 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         s3Service.createFolder(dropBoxSummary.getBucket(), currentUploadRoot);
 
         String uploadRaw = UploadS3PathBuilderUtils.getUploadRawDir(projectDetails.getProjectId(),
-                source.getSourceId(), uploadTS);
+                source.getSourceId(), uploadDetails.getDisplayName(), uploadTS);
         s3Service.createFolder(dropBoxSummary.getBucket(),
                 UploadS3PathBuilderUtils.combinePath(false, false, dropFolder, uploadRaw));
 
         String uploadImportResult = UploadS3PathBuilderUtils.getUploadImportResultDir(projectDetails.getProjectId(),
-                source.getSourceId(), uploadTS);
+                source.getSourceId(), uploadDetails.getDisplayName(), uploadTS);
 
         s3Service.createFolder(dropBoxSummary.getBucket(),
                 UploadS3PathBuilderUtils.combinePath(false, false, dropFolder, uploadImportResult));
 
-        uploadDetails.getUploadConfig().setUploadTSPrefix(uploadTS);
+        uploadDetails.getUploadConfig().setUploadTimestamp(uploadTS);
 
         uploadDetails.getUploadConfig().setUploadRawFilePath(UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
                 uploadRaw, csvFileName));

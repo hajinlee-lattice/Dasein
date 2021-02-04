@@ -6,10 +6,13 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 
 public final class ChannelConfigUtil {
 
@@ -24,33 +27,32 @@ public final class ChannelConfigUtil {
         if (CDLExternalSystemName.LIVERAMP.contains(destinationSystemName)) {
             return false;
         }
+
+        if (channelConfig == null) {
+            log.info("Channel config object is null. Returning false by default");
+            return false;
+        }
+
         switch (destinationSystemName) {
         case Marketo:
-        case Outreach:
-            return true;
+            MarketoChannelConfig marketoConfig = (MarketoChannelConfig) channelConfig;
+            return marketoConfig.getAudienceType() == AudienceType.CONTACTS;
         case Eloqua:
-            return true;
+            EloquaChannelConfig eloquaConfig = (EloquaChannelConfig) channelConfig;
+            return eloquaConfig.getAudienceType() == AudienceType.CONTACTS;
         case Salesforce:
-            return false;
+            SalesforceChannelConfig sfConfig = (SalesforceChannelConfig) channelConfig;
+            return sfConfig.getAudienceType() == AudienceType.CONTACTS;
+        case Outreach:
+            OutreachChannelConfig outreachConfig = (OutreachChannelConfig) channelConfig;
+            return outreachConfig.getAudienceType() == AudienceType.CONTACTS;
         case LinkedIn:
-            if (channelConfig == null) {
-                log.info("Channel config object is null. Returning false by default");
-                return false;
-            }
             LinkedInChannelConfig linkedinConfig = (LinkedInChannelConfig) channelConfig;
             return linkedinConfig.getAudienceType() == AudienceType.CONTACTS;
         case Facebook:
-            if (channelConfig == null) {
-                log.info("Channel config object is null. Returning false by default");
-                return false;
-            }
             FacebookChannelConfig facebookConfig = (FacebookChannelConfig) channelConfig;
             return facebookConfig.getAudienceType() == AudienceType.CONTACTS;
         case GoogleAds:
-            if (channelConfig == null) {
-                log.info("Channel config object is null. Returning false by default");
-                return false;
-            }
             GoogleChannelConfig googleConfig = (GoogleChannelConfig) channelConfig;
             return googleConfig.getAudienceType() == AudienceType.CONTACTS;
         default:

@@ -316,6 +316,12 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
             public Collection<EntityType> getEntityTypes() {
                 return Collections.singletonList(EntityType.Leads);
             }
+
+            @Override
+            public EntityType getPrimaryContact() {
+                return EntityType.Leads;
+            }
+
             @Override
             public String getDefaultSystemName() {
                 return "Default_Pardot_System";

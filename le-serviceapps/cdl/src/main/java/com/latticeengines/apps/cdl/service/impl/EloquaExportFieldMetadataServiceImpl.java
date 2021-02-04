@@ -19,7 +19,6 @@ public class EloquaExportFieldMetadataServiceImpl extends ExportFieldMetadataSer
     private static final Logger log = LoggerFactory.getLogger(EloquaExportFieldMetadataServiceImpl.class);
 
     private static final String SFDC_ACCOUNT_ID_INTERNAL_NAME = "SFDC_ACCOUNT_ID";
-
     private static final String SFDC_CONTACT_ID_INTERNAL_NAME = "SFDC_CONTACT_ID";
 
     protected EloquaExportFieldMetadataServiceImpl() {
@@ -33,19 +32,25 @@ public class EloquaExportFieldMetadataServiceImpl extends ExportFieldMetadataSer
     }
 
     @Override
-    protected Map<String, String> getDefaultFieldsAttrToServingStoreAttrRemap(PlayLaunchChannel channel) {
+    protected Map<String, String> getDefaultFieldsAttrNameToServingStoreAttrNameMap(
+            String customerSpace,
+            PlayLaunchChannel channel) {
         Map<String, String> remappingMap = new HashMap<>();
         String accountId = channel.getLookupIdMap().getAccountId();
         log.info("Eloqua accountId " + accountId);
         if (!StringUtils.isEmpty(accountId)) {
             remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, accountId);
+        } else {
+            remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, getDefaultAccountIdForTenant(customerSpace));
         }
+
         String contactId = channel.getLookupIdMap().getContactId();
         log.info("Eloqua contactId " + contactId);
         if (!StringUtils.isEmpty(contactId)) {
             remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, contactId);
+        } else {
+            remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, getDefaultContactIdForTenant(customerSpace));
         }
-
         return remappingMap;
     }
 }

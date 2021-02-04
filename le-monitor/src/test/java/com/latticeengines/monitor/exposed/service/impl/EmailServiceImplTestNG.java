@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSUser;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -29,7 +30,7 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @ContextConfiguration(locations = { "classpath:test-monitor-context.xml" })
-public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//PowerMockTestCase
+public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {// PowerMockTestCase
 
     private static final String PASSWORD = "password";
     private static final String HOSTPORT = "hostport";
@@ -64,9 +65,9 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         EmailServiceImpl.log = newLog;
 
         Mockito.doAnswer(invocation -> {
-                Object[] params = invocation.getArguments();
-                logs.add((String) params[0]);
-                return logs;
+            Object[] params = invocation.getArguments();
+            logs.add((String) params[0]);
+            return logs;
         }).when(newLog).info(any());
     }
 
@@ -89,7 +90,6 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         emailService.sendNewUserEmail(user, PASSWORD, HOSTPORT, false);
     }
 
-
     @Test(groups = "functional")
     public void sendNewUserEmail() {
         emailService.sendNewUserEmail(user, PASSWORD, HOSTPORT, true);
@@ -102,7 +102,6 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("new user email"));
     }
-
 
     @Test(groups = "functional")
     public void sendExistingUserEmail() {
@@ -124,7 +123,6 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("forget password"));
     }
-
 
     @Test(groups = "functional")
     public void sendPlsCreateModelCompletionEmail() {
@@ -197,14 +195,12 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsEnrichInternalAttributeCompletionEmail() {
-        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
-                null);
+        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending PLS enrich internal attribute (" + MODEL_NAME + ") complete"));
 
-        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
-                null);
+        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending PLS enrich internal attribute (" + MODEL_NAME + ") complete"));
@@ -212,14 +208,12 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsEnrichInternalAttributeErrorEmail() {
-        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
-                null);
+        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending PLS enrich internal attribute (" + MODEL_NAME + ") error"));
 
-        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
-                null);
+        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending PLS enrich internal attribute (" + MODEL_NAME + ") error"));
@@ -279,12 +273,14 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsExportOrphanSuccessEmail() {
-        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenant.getName(), HOSTPORT, HOSTPORT, "export_id", "type");
+        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenant.getName(), HOSTPORT, HOSTPORT, "export_id",
+                "type");
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("type export complet"));
 
-        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenant.getName(), HOSTPORT, HOSTPORT, "export_id", "type");
+        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenant.getName(), HOSTPORT, HOSTPORT, "export_id",
+                "type");
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("type export complete"));
@@ -309,6 +305,7 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
     @Test(groups = "functional")
     public void sendUploadCompleteEmail() {
         UploadEmailInfo uploadEmailInfo = new UploadEmailInfo();
+        // List<String> recipientList = Arrays.asList(user.getEmail());
         List<String> recipientList = Arrays.asList(user.getEmail());
         uploadEmailInfo.setRecipientList(recipientList);
         uploadEmailInfo.setUploadDisplayName("Successful upload functional test");
@@ -331,6 +328,23 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         uploadEmailInfo.setProjectDisplayName("Project Display Name");
 
         emailService.sendUploadFailedEmail(uploadEmailInfo);
+    }
+
+    /**
+     * Test the email send when a new DCP user is added or assigned to a Tenant.
+     */
+    @Test(groups = "functional")
+    public void sendDCPWelcomeEmail() {
+
+        List<String> recipents = Arrays.asList(user.getEmail());
+
+        recipents.forEach(emailAddr -> {
+            IDaaSUser iDaasUser = new IDaaSUser();
+            iDaasUser.setEmailAddress(emailAddr);
+            iDaasUser.setFirstName("FirstName");
+            String url = "https://connect-dev.dnb.com";
+            emailService.sendDCPWelcomeEmail(iDaasUser, TENANT_NAME, url);
+        });
     }
 
 }

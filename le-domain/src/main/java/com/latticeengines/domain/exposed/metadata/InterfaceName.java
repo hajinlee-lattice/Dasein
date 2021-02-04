@@ -134,7 +134,7 @@ public enum InterfaceName {
     TimeRanges, // [start time,end time] tuple
 
     // These values are for Curated Attributes.
-    NumberOfContacts, EntityLastUpdatedDate, EntityCreatedDate, EntityCreatedSource, EntityCreatedType,
+    NumberOfContacts, EntityLastUpdatedDate, EntityCreatedDate, EntityCreatedSource, EntityCreatedType, EntityCreatedSystemType,
 
     // CDL External
     SalesforceSandboxAccountID, SalesforceSandboxContactID, MarketoAccountID, EloquaAccountID,
@@ -162,6 +162,9 @@ public enum InterfaceName {
     OpportunityId,
 
     ModelName, ModelNameId, HasIntent, IntentScore, BuyingScore, //
+
+    // Derived Attributes
+    DerivedId, DerivedName, DerivedPattern,
 
     // timeline column
     Detail2, Detail1, EventTimestamp, EventType, StreamType, Source,

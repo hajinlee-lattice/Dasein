@@ -57,6 +57,9 @@ import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNG
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
+/**
+ * This test requires a local Dynamo running at port 8000
+ */
 public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AtlasAccountLookupExportMapperTestNG.class);
@@ -67,6 +70,7 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
     private static final String ATTR_ACCOUNT_ID = "AccountId";
     private static final String ATTR_LOOKUP_ID_1 = "SalesforceAccount1";
     private static final String ATTR_LOOKUP_ID_2 = "SalesforceAccount2";
+    private static final String CUSTOMER_ACCOUNT_ID = InterfaceName.CustomerAccountId.name();
     private static final String ROW_ID = "RowId";
     private static final String COLUMN_ID = "ColumnId";
     private static final String FROM_STRING = "FromString";
@@ -146,6 +150,13 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
             Assert.assertNotNull(item);
             Assert.assertEquals(item.getString(DYNAMO_VALUE_FIELD), accountId);
         }
+        for (int i = 0; i < 5; i++) {
+            String accountId = toAccountId(i);
+            String key = String.format(KEY_FORMAT, tenant, currentVersion, CUSTOMER_ACCOUNT_ID, toCustomerAccountId(i));
+            Item item = dynamoItemService.getItem(dynamoTableName, new PrimaryKey(DYNAMO_PK_FIELD, key));
+            Assert.assertNotNull(item);
+            Assert.assertEquals(item.getString(DYNAMO_VALUE_FIELD), accountId);
+        }
     }
 
     @Test(groups = "dynamo", dependsOnMethods = "testInitLookupTable")
@@ -155,6 +166,15 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
         submitExport(createUpdateChangeList(), sourceFilePath2);
 
         String tenant = CustomerSpace.shortenCustomerSpace(TEST_CUSTOMER.toString());
+
+        // verify account 1 customerAccountId changed
+        String acc1OldKey = String.format(KEY_FORMAT, tenant, currentVersion, CUSTOMER_ACCOUNT_ID, toCustomerAccountId(1));
+        String acc1NewKey = String.format(KEY_FORMAT, tenant, currentVersion, CUSTOMER_ACCOUNT_ID, toCustomerAccountId(100));
+        Item acc1OldItem = dynamoItemService.getItem(dynamoTableName, new PrimaryKey(DYNAMO_PK_FIELD, acc1OldKey));
+        Item acc1NewItem = dynamoItemService.getItem(dynamoTableName, new PrimaryKey(DYNAMO_PK_FIELD, acc1NewKey));
+        Assert.assertTrue(acc1OldItem.getBoolean(LOOKUP_DELETED));
+        Assert.assertTrue(acc1NewItem.getBoolean(LOOKUP_CHANGED));
+
         // verify account 2 old record marked as deleted
         // new record marked as changed
         String acc2OldKey = String.format(KEY_FORMAT, tenant, currentVersion, ATTR_LOOKUP_ID_1, toLookupId1(2));
@@ -164,6 +184,7 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
         Assert.assertTrue(acc2OldItem.getBoolean(LOOKUP_DELETED));
         Assert.assertTrue(acc2NewItem.getBoolean(LOOKUP_CHANGED));
 
+        // verify account 3 lookup item marked deleted
         String acc3Key = String.format(KEY_FORMAT, tenant, currentVersion, ATTR_LOOKUP_ID_1, toLookupId1(3));
         Item acc3Item = dynamoItemService.getItem(dynamoTableName, new PrimaryKey(DYNAMO_PK_FIELD, acc3Key));
         Assert.assertTrue(acc3Item.getBoolean(LOOKUP_DELETED));
@@ -186,7 +207,7 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
         props.put(ExportProperty.NUM_MAPPERS, "2");
 
         props.put(CONFIG_TABLE_NAME, dynamoTableName);
-        props.put(CONFIG_ATLAS_LOOKUP_IDS, ATTR_LOOKUP_ID_1 + "," + ATTR_LOOKUP_ID_2);
+        props.put(CONFIG_ATLAS_LOOKUP_IDS, String.join(",", ATTR_LOOKUP_ID_1, ATTR_LOOKUP_ID_2));
         props.put(CONFIG_ENDPOINT, endpoint);
         props.put(CONFIG_EXPORT_VERSION, currentVersion);
         props.put(CONFIG_EXPORT_TYPE, EXPORT_TYPE);
@@ -214,6 +235,7 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
                 + "]}");
         List<GenericRecord> recordList = new ArrayList<>();
 
+        // creating new lookup record for accounts 1 to 5
         for (int i = 0; i < 5; i++) {
             recordList.add(new GenericRecordBuilder(schema).set(ROW_ID, toAccountId(i)) //
                     .set(COLUMN_ID, ATTR_LOOKUP_ID_1) //
@@ -223,7 +245,15 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
                     .build() //
             );
         }
-        // creating new lookup record
+        for (int i = 0; i < 5; i++) {
+            recordList.add(new GenericRecordBuilder(schema).set(ROW_ID, toAccountId(i)) //
+                    .set(COLUMN_ID, CUSTOMER_ACCOUNT_ID) //
+                    .set(DELETED, null) //
+                    .set(FROM_STRING, null) //
+                    .set(TO_STRING, toCustomerAccountId(i)) //
+                    .build() //
+            );
+        }
 
         AvroUtils.writeToHdfsFile(miniclusterConfiguration, schema, sourceFilePath, recordList);
 
@@ -267,6 +297,14 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
                 + "{\"name\":\"" + TO_STRING + "\",\"type\":[\"string\",\"null\"]}" //
                 + "]}");
         List<GenericRecord> recordList = new ArrayList<>();
+        // update customerAccountId for account 1
+        recordList.add(new GenericRecordBuilder(schema).set(ROW_ID, toAccountId(1)) //
+                .set(COLUMN_ID, CUSTOMER_ACCOUNT_ID) //
+                .set(DELETED, true) //
+                .set(FROM_STRING, toCustomerAccountId(1)) //
+                .set(TO_STRING, toCustomerAccountId(100)) //
+                .build() //
+        );
         // update lookup Id value
         recordList.add(new GenericRecordBuilder(schema).set(ROW_ID, toAccountId(2)) //
                 .set(COLUMN_ID, ATTR_LOOKUP_ID_1) //
@@ -275,7 +313,7 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
                 .set(TO_STRING, toLookupId1(200).toUpperCase()) // should be converted to lowercase by mapper
                 .build() //
         );
-        // delete lookup Id value
+        // delete lookup Id value for account 3
         recordList.add(new GenericRecordBuilder(schema).set(ROW_ID, toAccountId(3)) //
                 .set(COLUMN_ID, ATTR_LOOKUP_ID_1) //
                 .set(DELETED, true) //
@@ -323,6 +361,10 @@ public class AtlasAccountLookupExportMapperTestNG extends EaiMiniClusterFunction
 
     private String toLookupId2(int idx) {
         return String.format("bbb%09d", 300000 + idx);
+    }
+
+    private String toCustomerAccountId(int idx) {
+        return "ca_" + idx;
     }
 
 }

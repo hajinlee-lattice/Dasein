@@ -94,19 +94,23 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Value("${datacloud.yarn.fetchonly.num.threads}")
     private int publishThreadPool;
+    @Value("${datacloud.yarn.fetchonly.queue.size:200}")
+    private int queueSize;
 
     @PostConstruct
     public void init() {
         if (isMatchHistoryEnabled) {
             log.info("MatchHistory is enabled.");
-            publishExecutor = ThreadPoolUtils.getFixedSizeThreadPool("bulk-match-publish", publishThreadPool);
+            publishExecutor = ThreadPoolUtils.getBoundedQueueCallerThreadPool(1, publishThreadPool, 1, queueSize);
         }
     }
 
     @PreDestroy
     public void destroy() {
         if (isMatchHistoryEnabled) {
-            ThreadPoolUtils.shutdownAndAwaitTermination(publishExecutor, 30);
+            log.info("Shutting down match history executors");
+            ThreadPoolUtils.shutdownAndAwaitTermination(publishExecutor, 60);
+            log.info("Completed shutting match history executors");
         }
     }
 
@@ -228,7 +232,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 log.warn("Failed to publish match history! error=" + ex.getMessage());
             }
         };
-        publishExecutor.execute(runnable);
+        try {
+            publishExecutor.execute(runnable);
+        } catch (Throwable t) {
+            log.warn("Failed to publish match history!", t);
+        }
 
     }
 

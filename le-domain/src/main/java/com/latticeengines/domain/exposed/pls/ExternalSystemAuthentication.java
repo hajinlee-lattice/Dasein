@@ -36,12 +36,14 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_LOOKUPMAP_IDS, query = ExternalSystemAuthentication.SELECT_AUTHS_BY_LOOKUPMAP_IDS)
 @NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_AUTH_ID, query = ExternalSystemAuthentication.SELECT_AUTHS_BY_AUTH_ID)
 @NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_ALL_AUTHS, query = ExternalSystemAuthentication.SELECT_ALL_AUTHS)
+@NamedQuery(name = ExternalSystemAuthentication.NQ_FIND_AUTHS_BY_TRAY_AUTH_ID, query = ExternalSystemAuthentication.SELECT_AUTHS_BY_TRAY_AUTH_ID)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
     public static final String NQ_FIND_AUTHS_BY_LOOKUPMAP_IDS = "ExternalSystemAuthentication.findAuthsByLookupMapConfigId";
     public static final String NQ_FIND_AUTHS_BY_AUTH_ID = "ExternalSystemAuthentication.findAuthsByAuthId";
     public static final String NQ_FIND_ALL_AUTHS = "ExternalSystemAuthentication.findAllAuths";
+    public static final String NQ_FIND_AUTHS_BY_TRAY_AUTH_ID = "ExternalSystemAuthentication.findAuthsByTrayAuthId";
     static final String SELECT_AUTHS_BY_LOOKUPMAP_IDS = "SELECT new com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication "
             + "( esa, esa.lookupIdMap.id ) "
             + "FROM ExternalSystemAuthentication esa WHERE esa.lookupIdMap.id in :lookupMapIds";
@@ -49,6 +51,8 @@ public class ExternalSystemAuthentication implements HasPid, HasId<String>, HasT
             + "( esa, esa.lookupIdMap.id ) " + "FROM ExternalSystemAuthentication esa WHERE esa.id = :authId";
     static final String SELECT_ALL_AUTHS = "SELECT new com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication "
             + "( esa, esa.lookupIdMap.id ) " + "FROM ExternalSystemAuthentication esa";
+    static final String SELECT_AUTHS_BY_TRAY_AUTH_ID = "SELECT new com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication "
+            + "( esa, esa.lookupIdMap.id ) " + "FROM ExternalSystemAuthentication esa WHERE esa.trayAuthenticationId = :trayAuthId";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

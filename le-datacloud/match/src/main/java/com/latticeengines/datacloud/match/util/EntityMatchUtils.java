@@ -26,8 +26,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
@@ -56,6 +59,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
  * Utility functions for entity match
  */
 public final class EntityMatchUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(EntityMatchUtils.class);
 
     private static final BiMap<String, String> INVALID_CHARS_TOKENS = HashBiMap.create();
     // # and : is recommended not to use by dynamo, || is our internal delimiter
@@ -103,6 +108,23 @@ public final class EntityMatchUtils {
         if (config.isLazyCopyToStaging() != null) {
             service.setShouldCopyToStagingLazily(config.isLazyCopyToStaging());
         }
+    }
+
+    public static void setPerEntityAllocationModes(@NotNull EntityMatchConfigurationService service,
+            @NotNull EntityMatchConfiguration config, String srcEntity, boolean logResult) {
+        if (MapUtils.isEmpty(config.getAllocationModes()) || StringUtils.isBlank(srcEntity)) {
+            return;
+        }
+        config.getAllocationModes().entrySet().stream() //
+                .filter(e -> srcEntity.equals(e.getKey())) //
+                .findAny() //
+                .ifPresent(e -> {
+                    Map<String, Boolean> allocationModes = e.getValue();
+                    if (logResult) {
+                        log.info("Setting per entity allocation modes = {} for Entity {}", allocationModes, srcEntity);
+                    }
+                    service.setPerEntityAllocationModes(allocationModes);
+                });
     }
 
     /**
@@ -318,7 +340,12 @@ public final class EntityMatchUtils {
             return false;
         }
 
-        return OperationalMode.isEntityMatch(input.getOperationalMode()) && input.isAllocateId();
+        // use the value in config first, fallback to value in input if not provided
+        Boolean allocateIdInConfig = input.getEntityMatchConfiguration() != null
+                ? input.getEntityMatchConfiguration().getAllocateId()
+                : null;
+        return OperationalMode.isEntityMatch(input.getOperationalMode())
+                && ObjectUtils.defaultIfNull(allocateIdInConfig, input.isAllocateId());
     }
 
     /**

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.entitymgr.TimeLineEntityMgr;
 import com.latticeengines.apps.cdl.service.TimeLineService;
+import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
@@ -33,21 +34,26 @@ public class TimeLineServiceImpl implements TimeLineService {
     }
 
     @Override
+    @WithCustomerSpace
     public TimeLine findByTimelineId(String customerSpace, String timelineId) {
         return timeLineEntityMgr.findByTimeLineId(timelineId);
     }
 
     @Override
+    @WithCustomerSpace
     public List<TimeLine> findByTenant(String customerSpace) {
         Tenant tenant = MultiTenantContext.getTenant();
         return timeLineEntityMgr.findByTenant(tenant);
     }
 
     @Override
+    @WithCustomerSpace
     public TimeLine findByTenantAndEntity(String customerSpace, BusinessEntity entity) {
         return timeLineEntityMgr.findByEntity(entity.name());
     }
 
+    @Override
+    @WithCustomerSpace
     public TimeLine createOrUpdateTimeLine(String customerSpace, TimeLine timeLine) {
         String uniqueId = timeLine.getTimelineId();
         TimeLine newTimeLine = null;
@@ -70,6 +76,7 @@ public class TimeLineServiceImpl implements TimeLineService {
 
     //create default Account360/Contact360 timeline
     @Override
+    @WithCustomerSpace
     public void createDefaultTimeLine(String customerSpace) {
         createDefaultTimeline(customerSpace, BusinessEntity.Account, TimeLineStoreUtils.ACCOUNT360_TIMELINE_NAME);
         createDefaultTimeline(customerSpace, BusinessEntity.Contact, TimeLineStoreUtils.CONTACT360_TIMELINE_NAME);

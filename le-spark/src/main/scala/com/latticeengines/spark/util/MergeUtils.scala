@@ -13,21 +13,30 @@ private[spark] object MergeUtils {
 
   private val lhsMarker = "__merge_marker_lhs__"
   private val rhsMarker = "__merge_marker_rhs__"
+  private val erasePrefix = "Erase_"
+  private val templateSeperator = "__"
 
   def merge2(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
            overwriteByNull: Boolean): DataFrame = {
-    merge(lhs, rhs, joinKeys, colsFromLhs, Set(), Set(), overwriteByNull)
+    merge(lhs, rhs, joinKeys, colsFromLhs, Set(), Set(), overwriteByNull, false)
+  }
+
+  def mergeWithEraseByNull(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
+             overwriteByNull: Boolean, eraseByNull: Boolean): DataFrame = {
+    merge(lhs, rhs, joinKeys, colsFromLhs, Set(), Set(), overwriteByNull, eraseByNull)
   }
 
   def merge(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], minCols: Set[String], maxCols: Set[String], //
-             overwriteByNull: Boolean): DataFrame = {
+             overwriteByNull: Boolean, eraseByNull: Boolean): DataFrame = {
     val intersectCols = lhs.columns.intersect(rhs.columns).diff(joinKeys)
     val uniqueColsFromLhs = lhs.columns.diff(joinKeys.union(intersectCols))
-    val uniqueColsFromRhs = rhs.columns.diff(joinKeys.union(intersectCols))
+    var uniqueColsFromRhs = rhs.columns.diff(joinKeys.union(intersectCols))
+    if (eraseByNull) {
+      uniqueColsFromRhs = uniqueColsFromRhs.filter(!isEraseColumn(_))
+    }
 
     if (overwriteByNull && uniqueColsFromLhs.isEmpty && uniqueColsFromRhs.isEmpty) {
       // no need for per row operation
-
       if (colsFromLhs.isEmpty) {
         overwrite(lhs, rhs, joinKeys)
       } else {
@@ -49,7 +58,7 @@ private[spark] object MergeUtils {
     } else {
       // need to compute row by row
 
-      val outputSchema = getOutputSchema(lhs, rhs, joinKeys)
+      val outputSchema = getOutputSchema(lhs, dropEraseColumn(rhs, eraseByNull), joinKeys)
       val join = joinWithMarkers(lhs, rhs, joinKeys, "outer")
       val (lhsColPos, rhsColPos) = getColPosOnBothSides(join)
       join.map(row => {
@@ -92,7 +101,7 @@ private[spark] object MergeUtils {
                 secondVal
               }
             } else {
-              if (overwriteByNull || firstVal != null) {
+              if (overwriteByNull || firstVal != null || hasEraseByNull(eraseByNull, attr, row, rhsColPos)) {
                 firstVal
               } else {
                 secondVal
@@ -104,6 +113,33 @@ private[spark] object MergeUtils {
       })(RowEncoder(outputSchema))
 
     }
+  }
+
+  // return true if the attribute's corresponding Erase attribute exist and is true
+  private def hasEraseByNull(eraseByNull: Boolean, attr: String, row: Row, colPosMap: Map[String, Int]): Boolean = {
+    if (!eraseByNull) {
+      eraseByNull
+    } else {
+      var eraseAttr = erasePrefix + attr
+      val insertPos = attr.indexOf(templateSeperator)
+      if (insertPos > -1) {
+        eraseAttr = attr.patch(insertPos + templateSeperator.length, erasePrefix, 0)
+      }
+      colPosMap.contains(eraseAttr) && row.get(colPosMap(eraseAttr)) != null && row.get(colPosMap(eraseAttr)).asInstanceOf[Boolean]
+    }
+  }
+
+  def dropEraseColumn(df: DataFrame, eraseByNull: Boolean): DataFrame = {
+    if (eraseByNull) {
+      val selectedColumns = df.columns.filter(isEraseColumn)
+      df.drop(selectedColumns: _*)
+    } else {
+      df
+    }
+  }
+
+  private def isEraseColumn(col: String): Boolean = {
+    col.startsWith(erasePrefix) || col.contains(templateSeperator + erasePrefix)
   }
 
   def concat2(lhs: DataFrame, rhs: DataFrame): DataFrame = {

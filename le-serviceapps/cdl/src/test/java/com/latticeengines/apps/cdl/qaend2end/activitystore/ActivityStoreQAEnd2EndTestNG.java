@@ -19,8 +19,10 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.apps.cdl.testframework.CDLQATestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
@@ -49,26 +51,26 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     private String activityStoreTestDataPath;
 
-    private static String OTHER_SYSTEM_NAME = "OtherSystem";
+    private static final String OTHER_SYSTEM_NAME = "OtherSystem";
 
-    private String defaultAccountFileName = "Account_Default.csv";
-    private String otherAccountFileName = "Account_Other.csv";
+    private static final String DEFAULT_ACCOUNT_FILE_NAME = "Account_Default.csv";
+    private static final String OTHER_ACCOUNT_FILE_NAME = "Account_Other.csv";
 
-    private String contactFileName = "Contacts_Default.csv";
+    private static final String DEFAULT_CONTACT_FILE_NAME = "Contacts_Default.csv";
 
-    private String intentFileName = "Intent_Activity_delete.csv";
+    private static final String INTENT_FILE_NAME = "Intent_Activity_delete.csv";
     private static final String INTENT_TEMPLATE_PATH = "%s/dropfolder/%s/Templates/Default_DnbIntent_System_DnbIntentData";
 
-    private String webvisitFileName = "WebVisitData_delete.csv";
+    private static final String WEBVISIT_FILE_NAME = "WebVisitData_delete.csv";
     private static final String WEBVISIT_SYSTEM = "Default_Website_System";
 
-    private String opportunityFileName = "Opportunity_Data_delete.csv";
+    private static final String OPPORTUNITY_FILE_NAME = "Opportunity_Data_delete.csv";
 
-    private String marketingFileName = "Marketing_Activity_Data_Eloqua_delete.csv";
+    private static final String MARKETING_FILE_NAME = "Marketing_Activity_Data_Eloqua_delete.csv";
 
-    private String accountReimportFileName = "Account_Re-import.csv";
+    private static final String ACCOUNT_REIMPORT_FILE_NAME = "Account_Re-import.csv";
 
-    private String contactReimportFileName = "Contacts_Re-import.csv";
+    private static final String CONTACT_REIMPORT_FILE_NAME = "Contacts_Re-import.csv";
 
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
@@ -82,9 +84,10 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     @Inject
     private PlsCDLSoftDeleteProxy plsCDLSoftDeleteProxy;
 
-    @Override
-    protected void checkBasicInfo() {
-        super.checkBasicInfo();
+    @BeforeClass(groups = "qa-activitystore-end2end")
+    public void init() {
+        super.init();
+        downloadTestData();
         Assert.assertTrue(StringUtils.isNotEmpty(qaTestDataPath), "Test Data directory is required");
         activityStoreTestDataPath = qaTestDataPath + File.separator + "activitystore";
         log.info("Activity Store test data directory is " + activityStoreTestDataPath);
@@ -101,33 +104,33 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
         log.info("Starting file import...");
 
         log.info("Importing account data...");
-        String defaultAccountFilePath = activityStoreTestDataPath + File.separator + defaultAccountFileName;
+        String defaultAccountFilePath = activityStoreTestDataPath + File.separator + DEFAULT_ACCOUNT_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(defaultAccountFilePath, EntityType.Accounts);
-        String otherAccountFilePath = activityStoreTestDataPath + File.separator + otherAccountFileName;
+        String otherAccountFilePath = activityStoreTestDataPath + File.separator + OTHER_ACCOUNT_FILE_NAME;
         testFileImportService.doOneOffImport(otherAccountFilePath, OTHER_SYSTEM_NAME, EntityType.Accounts);
 
         log.info("Importing contact data...");
-        String contactFilePath = activityStoreTestDataPath + File.separator + contactFileName;
-        testFileImportService.doDefaultTemplateOneOffImport(contactFilePath, EntityType.Contacts);
-        testFileImportService.doOneOffImport(contactFilePath, OTHER_SYSTEM_NAME, EntityType.Contacts);
+        String defaultContactFilePath = activityStoreTestDataPath + File.separator + DEFAULT_CONTACT_FILE_NAME;
+        testFileImportService.doDefaultTemplateOneOffImport(defaultContactFilePath, EntityType.Contacts);
+        testFileImportService.doOneOffImport(defaultContactFilePath, OTHER_SYSTEM_NAME, EntityType.Contacts);
 
         log.info("Importing DnbIntent data...");
-        String intentFilePath = activityStoreTestDataPath + File.separator + intentFileName;
+        String intentFilePath = activityStoreTestDataPath + File.separator + INTENT_FILE_NAME;
         File intentFile = new File(intentFilePath);
         String bucketName = getIntentS3BucketName();
         S3Utilities.uploadFileToS3(bucketName, intentFile);
 
         log.info("Importing Webvisit data...");
-        String webvisitFilePath = activityStoreTestDataPath + File.separator + webvisitFileName;
+        String webvisitFilePath = activityStoreTestDataPath + File.separator + WEBVISIT_FILE_NAME;
         testFileImportService.doOneOffImport(webvisitFilePath, WEBVISIT_SYSTEM, EntityType.WebVisit);
 
         log.info("Importing Opportunity data...");
-        String opportunityFilePath = activityStoreTestDataPath + File.separator + opportunityFileName;
+        String opportunityFilePath = activityStoreTestDataPath + File.separator + OPPORTUNITY_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(opportunityFilePath, EntityType.Opportunity);
         testFileImportService.doOneOffImport(opportunityFilePath, OTHER_SYSTEM_NAME, EntityType.Opportunity);
 
         log.info("Importing Marketing data...");
-        String marketingFilePath = activityStoreTestDataPath + File.separator + marketingFileName;
+        String marketingFilePath = activityStoreTestDataPath + File.separator + MARKETING_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(marketingFilePath, EntityType.MarketingActivity);
         testFileImportService.doOneOffImport(marketingFilePath, OTHER_SYSTEM_NAME, EntityType.MarketingActivity);
         // wait all file import actions are done
@@ -137,8 +140,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
         // run PA
         log.info("Starting PA for file import...");
         ProcessAnalyzeRequest processAnalyzeRequest = new ProcessAnalyzeRequest();
-        processAnalyzeRequest.setFullRematch(true);
-        processAnalyzeRequest.setRebuildEntities(Collections.singleton(BusinessEntity.ActivityStream));
+        processAnalyzeRequest.setRebuildEntities(ImmutableSet.of(BusinessEntity.ActivityStream));
         testJobService.processAnalyze(mainTestTenant, true, processAnalyzeRequest);
     }
 
@@ -263,12 +265,12 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
             "testWebVisitSoftDeleteCorrectness", "testMarketingSoftDeleteCorrectness" })
     public void testActivityStoreRematch() throws TimeoutException {
         log.info("Importing deleted account data...");
-        String accountReimportFilePath = activityStoreTestDataPath + File.separator + accountReimportFileName;
+        String accountReimportFilePath = activityStoreTestDataPath + File.separator + ACCOUNT_REIMPORT_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(accountReimportFilePath, EntityType.Accounts);
         testFileImportService.doOneOffImport(accountReimportFilePath, OTHER_SYSTEM_NAME, EntityType.Accounts);
 
         log.info("Importing deleted contact data...");
-        String contactReimportFilePath = activityStoreTestDataPath + File.separator + contactReimportFileName;
+        String contactReimportFilePath = activityStoreTestDataPath + File.separator + CONTACT_REIMPORT_FILE_NAME;
         testFileImportService.doDefaultTemplateOneOffImport(contactReimportFilePath, EntityType.Contacts);
         // wait all file import actions are done
         log.info("Waiting all file import actions are done...");
@@ -335,7 +337,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
             "qa-activitystore-end2end" }, description = "Test hard delete for accounts which have activity store data", dependsOnMethods = {
                     "testAccountRematchCorrectness", "testContactRematchCorrectness",
                     "testCustomIntentRematchCorrectness", "testOpportunityRematchCorrectness",
-                    "testWebVisitRematchCorrectness", "testMarketingRematchCorrectness" })
+                    "testWebVisitRematchCorrectness", "testMarketingRematchCorrectness" }, enabled = false)
     public void testAccountHardDelete() throws TimeoutException {
         registerDeleteData(activityStoreTestDataPath + "/HardDeleteTestScenarios.csv", true);
         // wait all file import actions are done
@@ -351,7 +353,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     @Test(groups = {
             "qa-activitystore-end2end" }, description = "Account correctness check after account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+                    "testAccountHardDelete" }, enabled = false)
     public void testAccountHardDeleteCorrectness() throws TimeoutException {
         List<Map<String, Object>> allAccounts = queryAccountRecords();
         Assert.assertEquals(allAccounts.size(), 54, "Account number is incorrect!!");
@@ -359,7 +361,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     @Test(groups = {
             "qa-activitystore-end2end" }, description = "Contact correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+                    "testAccountHardDelete" }, enabled = false)
     public void testContactHardDeleteCorrectness() throws TimeoutException {
         List<Map<String, Object>> allContacts = queryContactRecords();
         Assert.assertEquals(allContacts.size(), 120, "Contact number is incorrect!!");
@@ -367,7 +369,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     @Test(groups = {
             "qa-activitystore-end2end" }, description = "CustomIntent correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+                    "testAccountHardDelete" }, enabled = false)
     public void testCustomIntentHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryCustomIntentRecords();
         Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/customintent.json", actualResult);
@@ -375,7 +377,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     @Test(groups = {
             "qa-activitystore-end2end" }, description = "Opportunity correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+                    "testAccountHardDelete" }, enabled = false)
     public void testOpportunityHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryOpportunityRecords();
         Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/opportunity.json", actualResult);
@@ -383,7 +385,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     @Test(groups = {
             "qa-activitystore-end2end" }, description = "WebVisit correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+                    "testAccountHardDelete" }, enabled = false)
     public void testWebVisitHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryWebVisitRecords();
         Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/webvisit.json", actualResult);
@@ -391,7 +393,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
 
     @Test(groups = {
             "qa-activitystore-end2end" }, description = "Marketing Activity correctness check for account hard delete tests", dependsOnMethods = {
-                    "testAccountHardDelete" })
+                    "testAccountHardDelete" }, enabled = false)
     public void testMarketingHardDeleteCorrectness() throws TimeoutException {
         JSONArray actualResult = queryAccountMarketingRecords();
         Util.assertResult(activityStoreTestDataPath + "/harddeleteresults/accountmarketing.json", actualResult);
@@ -418,12 +420,8 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     private List<Map<String, Object>> queryAccountRecords() {
         Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.BucketedAccount);
         List<Attribute> tbAttributes = table.getAttributes();
-        Attribute defaultSysAccountidAtt = tbAttributes.stream()
-                .filter(attribute -> attribute.getName().contains("DefaultSystem")).findFirst().orElse(null);
-        String defaultSysAccountidName = defaultSysAccountidAtt.getName().toLowerCase();
-        Attribute otherSysAccountidAtt = tbAttributes.stream()
-                .filter(attribute -> attribute.getName().contains(OTHER_SYSTEM_NAME)).findFirst().orElse(null);
-        String otherSysAccountidName = otherSysAccountidAtt.getName().toLowerCase();
+        String defaultSysAccountidName = getSystemAccountidColumnName(tbAttributes, "DefaultSystem");
+        String otherSysAccountidName = getSystemAccountidColumnName(tbAttributes, OTHER_SYSTEM_NAME);
 
         List<Map<String, Object>> entityRecords = getRecords(table,
                 String.format("accountid, companyname, %s as defaultsystem_accountid, %s as othersystem_accountid",
@@ -431,23 +429,29 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
         return entityRecords;
     }
 
+    private String getSystemAccountidColumnName(List<Attribute> tbAttributes, String systemName) {
+        Attribute sysAccountidAtt = tbAttributes.stream().filter(attribute -> attribute.getName().contains(systemName))
+                .findFirst().orElse(null);
+        return sysAccountidAtt.getName().toLowerCase();
+    }
+
     private List<Map<String, Object>> queryContactRecords() {
         Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.SortedContact);
         List<Attribute> tbAttributes = table.getAttributes();
-        Attribute defaultSysContactidAtt = tbAttributes.stream().filter(
-                attribute -> attribute.getName().contains("DefaultSystem") && attribute.getName().contains("ContactId"))
-                .findFirst().orElse(null);
-        String defaultSysContactidName = defaultSysContactidAtt.getName().toLowerCase();
-        Attribute otherSysContactidAtt = tbAttributes.stream()
-                .filter(attribute -> attribute.getName().contains(OTHER_SYSTEM_NAME)
-                        && attribute.getName().contains("ContactId"))
-                .findFirst().orElse(null);
-        String otherSysContactidName = otherSysContactidAtt.getName().toLowerCase();
+        String defaultSysContactidName = getSystemContactidColumnName(tbAttributes, "DefaultSystem");
+        String otherSysContactidName = getSystemContactidColumnName(tbAttributes, OTHER_SYSTEM_NAME);
 
         List<Map<String, Object>> entityRecords = getRecords(table,
                 String.format("contactid, %s as defaultsystem_contactid, %s as othersystem_contactid",
                         defaultSysContactidName, otherSysContactidName));
         return entityRecords;
+    }
+
+    private String getSystemContactidColumnName(List<Attribute> tbAttributes, String systemName) {
+        Attribute sysContactidAtt = tbAttributes.stream().filter(
+                attribute -> attribute.getName().contains(systemName) && attribute.getName().contains("ContactId"))
+                .findFirst().orElse(null);
+        return sysContactidAtt.getName().toLowerCase();
     }
 
     private String getLatticeAccountid(String defaultSystemAccountid) {
@@ -477,25 +481,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
     }
 
     private JSONArray queryCustomIntentRecords() {
-        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.CustomIntentProfile);
-        List<Attribute> tbAttributes = table.getAttributes();
-        Attribute accountidAtt = table.getAttribute(InterfaceName.AccountId.name());
-        tbAttributes.remove(accountidAtt);
-        List<Map<String, Object>> entityRecords = getRecords(table, null);
-        JSONArray resArray = new JSONArray();
-        for (Map<String, Object> record : entityRecords) {
-            JSONObject obj = new JSONObject();
-            JSONObject subObj = new JSONObject();
-            for (Attribute attribute : tbAttributes) {
-                subObj.put(attribute.getDisplayName(), record.get(attribute.getName()));
-            }
-            String accountName = getAccountAttributeValue("accountid", record.get(accountidAtt.getName()).toString(),
-                    "companyname");
-            obj.put(accountName, subObj);
-            resArray.put(obj);
-        }
-        System.out.println(resArray.toString(4));
-        return resArray;
+        return buildAccountLevelResult(TableRoleInCollection.CustomIntentProfile, false);
     }
 
     private JSONArray queryOpportunityRecords() {
@@ -518,36 +504,20 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
             obj.put(accountName, subObj);
             resArray.put(obj);
         }
-        System.out.println(resArray.toString(4));
+        log.debug(resArray.toString(4));
         return resArray;
     }
 
     private JSONArray queryWebVisitRecords() {
-        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), TableRoleInCollection.WebVisitProfile);
-        List<Attribute> tbAttributes = table.getAttributes();
-        Attribute accountidAtt = table.getAttribute(InterfaceName.AccountId.name());
-        tbAttributes.remove(accountidAtt);
-        List<Map<String, Object>> entityRecords = getRecords(table, null);
-        JSONArray resArray = new JSONArray();
-        for (Map<String, Object> record : entityRecords) {
-            JSONObject obj = new JSONObject();
-            JSONObject subObj = new JSONObject();
-            for (Attribute attribute : tbAttributes) {
-                subObj.put(attribute.getPropertyValue("Subcategory") + " - " + attribute.getDisplayName(),
-                        record.get(attribute.getName()));
-            }
-            String accountName = getAccountAttributeValue("accountid", record.get(accountidAtt.getName()).toString(),
-                    "companyname");
-            obj.put(accountName, subObj);
-            resArray.put(obj);
-        }
-        System.out.println(resArray.toString(4));
-        return resArray;
+        return buildAccountLevelResult(TableRoleInCollection.WebVisitProfile, true);
     }
 
     private JSONArray queryAccountMarketingRecords() {
-        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(),
-                TableRoleInCollection.AccountMarketingActivityProfile);
+        return buildAccountLevelResult(TableRoleInCollection.AccountMarketingActivityProfile, true);
+    }
+
+    private JSONArray buildAccountLevelResult(TableRoleInCollection tableRole, boolean needSubcategory) {
+        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), tableRole);
         List<Attribute> tbAttributes = table.getAttributes();
         Attribute accountidAtt = table.getAttribute(InterfaceName.AccountId.name());
         tbAttributes.remove(accountidAtt);
@@ -557,15 +527,19 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
             JSONObject obj = new JSONObject();
             JSONObject subObj = new JSONObject();
             for (Attribute attribute : tbAttributes) {
-                subObj.put(attribute.getPropertyValue("Subcategory") + " - " + attribute.getDisplayName(),
-                        record.get(attribute.getName()));
+                if (needSubcategory) {
+                    subObj.put(attribute.getPropertyValue("Subcategory") + " - " + attribute.getDisplayName(),
+                            record.get(attribute.getName()));
+                } else {
+                    subObj.put(attribute.getDisplayName(), record.get(attribute.getName()));
+                }
             }
             String accountName = getAccountAttributeValue("accountid", record.get(accountidAtt.getName()).toString(),
                     "companyname");
             obj.put(accountName, subObj);
             resArray.put(obj);
         }
-        System.out.println(resArray.toString(4));
+        log.debug(resArray.toString(4));
         return resArray;
     }
 
@@ -593,7 +567,7 @@ public class ActivityStoreQAEnd2EndTestNG extends CDLQATestNGBase {
             obj.put(contactName, subObj);
             resArray.put(obj);
         }
-        System.out.println(resArray.toString());
+        log.debug(resArray.toString());
         return resArray;
     }
 

@@ -54,7 +54,7 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
         ListTablesResult result = dynamoService.getClient().listTables();
         log.info("Tables: " + result.getTableNames());
 
-        entityMgr = new TestDynamoEntityMgrImpl(messageService, dataService, repo);
+        entityMgr = new TestDynamoEntityMgrImpl(dataService, repo);
         entityMgr.init();
 
     }

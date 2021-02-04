@@ -69,7 +69,7 @@ public class ExportProcessAnalyzeToS3 extends BaseImportExportS3<ImportExportS3S
         ImportExportRequest request = ImportExportRequest.exportAtlasTable( //
                 customer, table, //
                 pathBuilder, s3Bucket, podId, //
-                yarnConfiguration, //
+                yarnConfiguration, null, //
                 fileStatus -> {
                     long modifiedTime = fileStatus.getModificationTime();
                     String path = fileStatus.getPath().toString();

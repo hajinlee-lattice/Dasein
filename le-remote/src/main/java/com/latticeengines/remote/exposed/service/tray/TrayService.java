@@ -7,4 +7,8 @@ public interface TrayService {
     Object removeSolutionInstance(TraySettings settings);
 
     Object removeAuthentication(TraySettings settings);
+
+    Object removeAuthenticationById(String authId, String userToken);
+
+    String getTrayUserToken(String trayUserId);
 }

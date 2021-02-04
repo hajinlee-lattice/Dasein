@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.entitymanager.ActivityAlertEntityMgr;
 import com.latticeengines.app.exposed.service.ActivityAlertsCleanupService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("activityAlertsCleanupService")
 public class ActivityAlertsCleanupServiceImpl implements ActivityAlertsCleanupService {
@@ -36,11 +35,11 @@ public class ActivityAlertsCleanupServiceImpl implements ActivityAlertsCleanupSe
     }
 
     private void cleanupActivityAlertDueToExpiration() {
-        String tenantId = MultiTenantContext.getCustomerSpace().toString();
         Date expireDate = Date.from(Instant.now().atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS)
                 .minusDays(DAYS_TO_KEEP_ACTIVITY_ALERT).toInstant());
         boolean shouldLoop = true;
         int deletedCount = 0;
+        log.info("Cleaning up starts for activity alerts expired");
         try {
             while (shouldLoop) {
                 int updatedCount = activityAlertEntityMgr.deleteByExpireDateBefore(expireDate, maxUpdateRows);
@@ -53,9 +52,8 @@ public class ActivityAlertsCleanupServiceImpl implements ActivityAlertsCleanupSe
                 }
             }
             if (deletedCount > 0) {
-                log.info(String.format(
-                        "cleanupActivityAlerts: Tenant = %s, Completed cleanup activity alerts " + "(count = %d)",
-                        tenantId, deletedCount));
+                log.info(String.format("cleanupActivityAlerts: Completed cleanup activity alerts " + "(count = %d)",
+                        deletedCount));
             }
 
         } catch (Exception ex) {

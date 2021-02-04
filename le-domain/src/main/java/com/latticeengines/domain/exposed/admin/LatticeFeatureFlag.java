@@ -50,6 +50,11 @@ public enum LatticeFeatureFlag {
     ENABLE_IMPORT_V2("EnableImportV2", "Enable Import UI 2.0"), //
     SSVI_REPORT("SSVIReport", "SSVIReport"), //
     ENABLE_IMPORT_ERASE_BY_NULL("EnableImportEraseByNull", "enable using null in import to erase the previous value"),
+    PUBLISH_TO_ELASTICSEARCH("PublishToElasticSearch", "Publish To Elastic Search"), //
+    QUERY_FROM_ELASTICSEARCH("QueryFromElasticSearch", "Query From Elastic Search"), //
+
+    DCP_ENRICHMENT_LIBRARY("EnrichmentLibrary", "Enable Enrichment Library features"),
+    MATCH_MAPPING_V2("EnableMatchMappingV2", "Enable new spec layout and field requirements"),
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //

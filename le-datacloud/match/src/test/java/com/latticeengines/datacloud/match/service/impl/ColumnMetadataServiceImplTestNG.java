@@ -27,6 +27,7 @@ public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTes
     private DataCloudVersionService dataCloudVersionService;
     private static final String BOMBORA = "Bombora";
     private static final String HG = "HG";
+    private static final String DMX = "DMX";
 
     @Test(groups = "functional")
     public void testAvroSchemaForDerivedColumnsCache() {
@@ -49,6 +50,9 @@ public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTes
             for (ColumnMetadata columnMeta : columnMetadatas) {
                 if (columnMeta.getCategory().equals(Category.TECHNOLOGY_PROFILE)) {
                     Assert.assertEquals(columnMeta.getDataLicense(), HG);
+                }
+                if (columnMeta.getCategory().equals(Category.DNB_TECHNOLOGY_PROFILE)) {
+                    Assert.assertEquals(columnMeta.getDataLicense(), DMX);
                 }
                 if (columnMeta.getCategory().equals(Category.INTENT)) {
                     Assert.assertEquals(columnMeta.getDataLicense(), BOMBORA);

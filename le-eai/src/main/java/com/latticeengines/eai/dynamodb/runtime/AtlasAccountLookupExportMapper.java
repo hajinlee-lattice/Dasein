@@ -43,7 +43,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
 
     private static final Logger log = LoggerFactory.getLogger(AtlasAccountLookupExportMapper.class);
 
-    private static final int BUFFER_SIZE = 25;
+    private static final int BUFFER_SIZE = 100; // FIXME - changed back to 25 if any impact
     private static final String ATTR_PARTITION_KEY = InterfaceName.AtlasLookupKey.name();
     private static final String ATTR_ACCOUNT_ID = "AccountId";
 
@@ -86,6 +86,7 @@ public class AtlasAccountLookupExportMapper extends AvroExportMapper implements 
             lookupIds.addAll(Arrays.asList(lookupIdsStr.split(",")));
         }
         lookupIds.add(InterfaceName.AccountId.name());
+        lookupIds.add(InterfaceName.CustomerAccountId.name());
         log.info("lookupIds=[" + StringUtils.join(lookupIds, ",") + "]");
 
         String endpoint = config.get(HdfsToDynamoConfiguration.CONFIG_ENDPOINT);

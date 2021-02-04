@@ -42,7 +42,7 @@ public class AccountLookupToDynamoMapper extends AvroExportMapper implements Avr
 
     private static final Logger log = LoggerFactory.getLogger(AccountLookupToDynamoMapper.class);
 
-    private static final int BUFFER_SIZE = 25;
+    private static final int BUFFER_SIZE = 100; // FIXME - changed back to 25 if any impact
     private static final String ATTR_PARTITION_KEY = InterfaceName.AtlasLookupKey.name();
 
     private static final String KEY_FORMAT = "AccountLookup__%s__%s__%s"; // tenantId__ver__<lookupId_lookIdVal>

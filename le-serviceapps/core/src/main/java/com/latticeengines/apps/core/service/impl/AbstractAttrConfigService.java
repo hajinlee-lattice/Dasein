@@ -186,6 +186,16 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 overview.setLimit((long) zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
                         MultiTenantContext.getShortTenantId(), DataLicense.HG.getDataLicense()));
                 break;
+            case DNB_TECHNOLOGY_PROFILE:
+                long dmx = DEFAULT_LIMIT;
+                try {
+                    dmx = zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                            MultiTenantContext.getShortTenantId(), DataLicense.DMX.getDataLicense());
+                } catch (Exception e) {
+                    log.warn("Failed to get max premium lead enrichment attrs from ZK", e);
+                }
+                overview.setLimit(dmx);
+                break;
             case WEBSITE_KEYWORDS:
                 // TODO going to get rid of the try catch after the zookeeper is
                 // updated for all tenants

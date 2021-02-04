@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import static com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption.BOOLEAN;
+import static com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption.DERIVE;
 import static com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption.ENUM;
 import static com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption.HASH;
 import static com.latticeengines.domain.exposed.cdl.activity.StreamDimension.Usage.Pivot;
@@ -298,7 +299,8 @@ public class GenerateDimensionMetadata
             String dimId = UUID.randomUUID().toString();
             DimensionGenerator generator = dimension.getGenerator();
             DimensionCalculator calculator = dimension.getCalculator();
-            ProcessDimensionConfig.Dimension dim = new ProcessDimensionConfig.Dimension();
+            ProcessDimensionConfig.Dimension dim = generator.getOption() == DERIVE ?
+                    new ProcessDimensionConfig.DerivedDimension() : new ProcessDimensionConfig.Dimension();
             // save id mapping
             dimIdMap.put(Pair.of(streamId, dimName), dimId);
             // set input
@@ -328,6 +330,11 @@ public class GenerateDimensionMetadata
                 dim.hashAttrs = Collections.singletonMap(generator.getAttribute(), dimName);
             } else if (generator.getOption() == ENUM) {
                 dim.renameAttrs = Collections.singletonMap(generator.getAttribute(), dimName);
+            } else if (generator.getOption() == DERIVE) {
+                dim.attrs = Sets.newHashSet(InterfaceName.DerivedName.name(), InterfaceName.DerivedId.name(), InterfaceName.DerivedPattern.name());
+                dim.dedupAttrs = Collections.singleton(InterfaceName.DerivedId.name());
+                assert dim instanceof ProcessDimensionConfig.DerivedDimension;
+                ((ProcessDimensionConfig.DerivedDimension) dim).deriveConfig = dimension.getDeriveConfig();
             }
             if (calculator instanceof DimensionCalculatorRegexMode) {
                 // assume calculator pattern can only come from the same source as generator for

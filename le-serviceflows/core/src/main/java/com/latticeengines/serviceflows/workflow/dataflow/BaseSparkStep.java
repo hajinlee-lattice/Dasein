@@ -302,6 +302,10 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     }
 
     protected boolean exportToS3(Table table, boolean sync) {
+        return exportToS3(table, sync, null);
+    }
+
+    protected boolean exportToS3(Table table, boolean sync, DataUnit.DataFormat format) {
         String tableName = table.getName();
         boolean shouldSkip = Boolean.TRUE.equals(getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class));
         if (!shouldSkip) {
@@ -311,7 +315,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
             ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
                     customerSpace.toString(), table, //
                     pathBuilder, s3Bucket, podId, //
-                    yarnConfiguration, //
+                    yarnConfiguration, format, //
                     fileStatus -> true);
             if (batchStoreRequest == null) {
                 throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);

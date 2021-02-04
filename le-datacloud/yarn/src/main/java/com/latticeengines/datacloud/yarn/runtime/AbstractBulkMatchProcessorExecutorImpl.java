@@ -456,44 +456,44 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             if (CollectionUtils.isEmpty(events)) {
                 continue;
             }
-            for (VboUsageEvent event: events) {
+            for (VboUsageEvent event : events) {
                 GenericRecordBuilder builder = new GenericRecordBuilder(schema);
                 List<Schema.Field> fields = schema.getFields();
                 for (Schema.Field field : fields) {
                     Object val = null;
                     switch (field.name()) {
-                        case AVRO_ATTR_POAEID:
-                            val = event.getPoaeId();
-                            break;
-                        case AVRO_ATTR_TIMESTAMP:
-                            val = event.getEventTime();
-                            break;
-                        case AVRO_ATTR_EVENT_TYPE:
-                            val = event.getEventType();
-                            break;
-                        case AVRO_ATTR_FEATURE:
-                            val = event.getFeatureUri();
-                            break;
-                        case AVRO_ATTR_RESPONSE_TIME:
-                            val = event.getResponseTime();
-                            break;
-                        case AVRO_ATTR_SUBJECT_DUNS:
-                            val = event.getSubjectDuns();
-                            break;
-                        case AVRO_ATTR_SUBJECT_NAME:
-                            val = event.getSubjectName();
-                            break;
-                        case AVRO_ATTR_SUBJECT_CITY:
-                            val = event.getSubjectCity();
-                            break;
-                        case AVRO_ATTR_SUBJECT_STATE:
-                            val = event.getSubjectState();
-                            break;
-                        case AVRO_ATTR_SUBJECT_COUNTRY:
-                            val = event.getSubjectCountry();
-                            break;
-                        default:
-                            log.warn("Unknown usage data field {}", field.name());
+                    case AVRO_ATTR_POAEID:
+                        val = event.getPoaeId();
+                        break;
+                    case AVRO_ATTR_TIMESTAMP:
+                        val = event.getEventTime();
+                        break;
+                    case AVRO_ATTR_EVENT_TYPE:
+                        val = event.getEventType();
+                        break;
+                    case AVRO_ATTR_FEATURE:
+                        val = event.getFeatureUri();
+                        break;
+                    case AVRO_ATTR_RESPONSE_TIME:
+                        val = event.getResponseTime();
+                        break;
+                    case AVRO_ATTR_SUBJECT_DUNS:
+                        val = event.getSubjectDuns();
+                        break;
+                    case AVRO_ATTR_SUBJECT_NAME:
+                        val = event.getSubjectName();
+                        break;
+                    case AVRO_ATTR_SUBJECT_CITY:
+                        val = event.getSubjectCity();
+                        break;
+                    case AVRO_ATTR_SUBJECT_STATE:
+                        val = event.getSubjectState();
+                        break;
+                    case AVRO_ATTR_SUBJECT_COUNTRY:
+                        val = event.getSubjectCountry();
+                        break;
+                    default:
+                        log.warn("Unknown usage data field {}", field.name());
                     }
                     builder.set(field, val);
                 }
@@ -622,7 +622,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         StringBuilder errorInfo = new StringBuilder();
 
         if (outputRecord.getErrorCodes() != null) {
-            for (Map.Entry<MatchCoreErrorConstants.ErrorType, List<String>> entry : outputRecord.getErrorCodes().entrySet()) {
+            for (Map.Entry<MatchCoreErrorConstants.ErrorType, List<String>> entry : outputRecord.getErrorCodes()
+                    .entrySet()) {
                 if (errorCodes.length() > 0) {
                     errorCodes.append("||");
                 }
@@ -705,20 +706,24 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         Long count = uploadOutput(processorContext);
         finalizeMatchOutput(processorContext);
         generateOutputMetric(processorContext.getGroupMatchInput(), processorContext.getBlockOutput());
-        if (!processorContext.isMultiResultMatch() && processorContext.getReturnUnmatched()) {
-            if (!processorContext.getExcludePublicDomain()
-                    && !processorContext.getBlockSize().equals(count.intValue())) {
-                throw new RuntimeException(
-                        String.format("Block size [%d] does not equal to the count of the avro [%d].",
-                                processorContext.getBlockSize(), count));
-            }
-        } else {
-            // NOTE: This path appears not to get executed.
-            // check matched rows
-            if (!processorContext.getBlockOutput().getStatistics().getRowsMatched().equals(count.intValue())) {
-                throw new RuntimeException(String.format(
-                        "RowsMatched in MatchStatistics [%d] does not equal to the count of the avro [%d].",
-                        processorContext.getBlockOutput().getStatistics().getRowsMatched(), count));
+        // Only check counts for single result match, otherwise counts won't match
+        // exactly unless we keep tracking of it
+        if (!processorContext.isMultiResultMatch()) {
+            if (processorContext.getReturnUnmatched()) {
+                if (!processorContext.getExcludePublicDomain()
+                        && !processorContext.getBlockSize().equals(count.intValue())) {
+                    throw new RuntimeException(
+                            String.format("Block size [%d] does not equal to the count of the avro [%d].",
+                                    processorContext.getBlockSize(), count));
+                }
+            } else {
+                // NOTE: This path appears not to get executed.
+                // check matched rows
+                if (!processorContext.getBlockOutput().getStatistics().getRowsMatched().equals(count.intValue())) {
+                    throw new RuntimeException(String.format(
+                            "RowsMatched in MatchStatistics [%d] does not equal to the count of the avro [%d].",
+                            processorContext.getBlockOutput().getStatistics().getRowsMatched(), count));
+                }
             }
         }
 

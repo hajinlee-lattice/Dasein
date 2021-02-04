@@ -17,7 +17,7 @@ public enum CDLExternalSystemName {
     LinkedIn("LinkedIn", Arrays.asList(BusinessEntity.Contact, BusinessEntity.Account)), //
     GoogleAds("GoogleAds", Arrays.asList(BusinessEntity.Contact)), //
     AWS_S3("AWS S3", Arrays.asList(BusinessEntity.Contact, BusinessEntity.Account)), //
-    Outreach("Outreach", Arrays.asList(BusinessEntity.Contact)), //
+    Outreach("Outreach", Arrays.asList(BusinessEntity.Contact, BusinessEntity.Account)), //
     Adobe_Audience_Mgr("Adobe Audience Manager", Arrays.asList(BusinessEntity.Account)), //
     MediaMath("MediaMath", Arrays.asList(BusinessEntity.Account)), //
     TradeDesk("TradeDesk", Arrays.asList(BusinessEntity.Account)), //

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -84,7 +85,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
-        return createCompanyProfile(matchOutput, dataCloudVersion, considerInternalAttributes);
+        return createCompanyProfile(matchOutput, dataCloudVersion, considerInternalAttributes, customerSpace);
     }
 
     private FieldInterpretation getFieldInterpretation(String fieldName) {
@@ -98,7 +99,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     @SuppressWarnings("deprecation")
     private CompanyProfile createCompanyProfile(MatchOutput matchOutput, String dataCloudVersion,
-            Boolean considerInternalAttributes) {
+            Boolean considerInternalAttributes, CustomerSpace customerSpace) {
         CompanyProfile profile = new CompanyProfile();
 
         Map<String, Object> enrichValueMap = new HashMap<String, Object>();
@@ -112,6 +113,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             enrichValueMap.put(outputFields.get(i), String.valueOf(outputRecords.get(i)));
         }
 
+
         if (!MapUtils.isEmpty(enrichValueMap)) {
             for (String enrichKey : enrichValueMap.keySet()) {
                 Object value = enrichValueMap.get(enrichKey);
@@ -121,10 +123,14 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             }
 
             List<ColumnMetadata> enrichmentColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment);
+            Set<String> expiredLicenses = batonService.getExpiredLicenses(customerSpace.getTenantId());
 
             List<ColumnMetadata> requiredEnrichmentMetadataList = new ArrayList<>();
-
             for (ColumnMetadata attr : enrichmentColumns) {
+                if (!expiredLicenses.isEmpty() && expiredLicenses.contains(attr.getDataLicense())) {
+                    nonNullEnrichValueMap.remove(attr.getColumnName());
+                    continue;
+                }
                 if (nonNullEnrichValueMap.containsKey(attr.getColumnName())) {
                     requiredEnrichmentMetadataList.add(attr);
                     if (Boolean.TRUE.equals(attr.getCanInternalEnrich())) {

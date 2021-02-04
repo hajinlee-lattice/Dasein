@@ -604,7 +604,6 @@ public class EnrichLatticeAccount extends BaseProcessAnalyzeSparkStep<ProcessAcc
         } else { // No new change -> reuse old version LatticeAccount
             log.info("EnrichLatticeAccount, use current LatticeAccount table as the latest one");
             linkInactiveTable(LatticeAccount);
-            putStringValueInContext(LATTICE_ACCOUNT_TABLE_NAME, oldLatticeAccountTable.getName());
         }
     }
 

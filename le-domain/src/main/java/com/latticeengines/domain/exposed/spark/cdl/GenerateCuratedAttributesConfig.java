@@ -40,6 +40,10 @@ public class GenerateCuratedAttributesConfig extends SparkJobConfig {
     @JsonProperty
     public Map<String, String> templateTypeMap = new HashMap<>();
 
+    // template name -> system type
+    @JsonProperty
+    public Map<String, String> templateSystemTypeMap = new HashMap<>();
+
     // columnsToIncludeFromMaster-> other attributes from master to include in final
     // table
     @JsonProperty

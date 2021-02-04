@@ -18,11 +18,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
+import com.latticeengines.domain.exposed.cdl.LaunchBaseType;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MediaMathChannelConfig;
+import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -285,6 +287,26 @@ public class ImportDeltaCalculationResultsFromS3TestNG extends WorkflowTestNGBas
         result = importDeltaCalculationResultsFromS3.getMetadataTableNames(new CustomerSpace(), "", "");
         assertEquals(3, result.size());
         assertDataFrameResults(true, false, true);
+    }
+
+    @Test(groups = "functional")
+    public void testHasOutreachTaskDescription() {
+        OutreachChannelConfig outreachConfig = new OutreachChannelConfig();
+        outreachConfig.setLaunchBaseType(LaunchBaseType.TASK);
+        outreachConfig.setTaskDescription("Test task!");
+
+        boolean result = importDeltaCalculationResultsFromS3.hasOutreachTaskDescription(outreachConfig);
+        Assert.assertTrue(result);
+    }
+
+    @Test(groups = "functional")
+    public void testEmptyOutreachTaskDescription() {
+        OutreachChannelConfig outreachConfig = new OutreachChannelConfig();
+        outreachConfig.setLaunchBaseType(LaunchBaseType.TASK);
+        outreachConfig.setTaskDescription("");
+
+        boolean result = importDeltaCalculationResultsFromS3.hasOutreachTaskDescription(outreachConfig);
+        Assert.assertFalse(result);
     }
 
     private void clearExecutionContext() {

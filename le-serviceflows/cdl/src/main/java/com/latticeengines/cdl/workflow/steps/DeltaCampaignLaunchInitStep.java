@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
@@ -85,6 +86,9 @@ public class DeltaCampaignLaunchInitStep
     @Inject
     private PlayProxy playProxy;
 
+    @Inject
+    private BatonService batonService;
+
     private PlayLaunchContext playLaunchContext;
 
     private boolean createRecommendationDataFrame;
@@ -148,12 +152,10 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setDataDbUser(dataDbUser);
         deltaCampaignLaunchSparkContext.setPublishRecommendationsToDB(campaignLaunchUtils
                 .shouldPublishRecommendationsToDB(customerSpace, playLaunch.getDestinationSysName()));
-        if (deltaCampaignLaunchSparkContext.getPublishRecommendationsToDB() &&
-                !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName())) {
-            deltaCampaignLaunchSparkContext.setContactCols(config.getContactDisplayNames().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()));
-        } else {
-            deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
-        }
+        deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
+        deltaCampaignLaunchSparkContext.setUseCustomerId(campaignLaunchUtils.getUseCustomerId(customerSpace, playLaunch.getDestinationSysName()));
+        deltaCampaignLaunchSparkContext
+                .setIsEntityMatch(batonService.isEntityMatchEnabled(customerSpace));
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();

@@ -14,16 +14,15 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
 import com.latticeengines.datafabric.entitymanager.GenericTableEntityMgr;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datafabric.GenericTableEntity;
 
 public class GenericTableEntityMgrImpl implements GenericTableEntityMgr {
 
     private final GenericTableInternalEntityMgr internalEntityMgr;
 
-    public GenericTableEntityMgrImpl(FabricMessageService messageService, FabricDataService dataService,
+    public GenericTableEntityMgrImpl(FabricDataService dataService,
             String signature) {
-        internalEntityMgr = new GenericTableInternalEntityMgrImpl(messageService, dataService, signature);
+        internalEntityMgr = new GenericTableInternalEntityMgrImpl(dataService, signature);
         internalEntityMgr.init();
     }
 
@@ -75,7 +74,6 @@ public class GenericTableEntityMgrImpl implements GenericTableEntityMgr {
         if (CollectionUtils.isNotEmpty(ids)) {
             List<GenericTableEntity> entities = internalEntityMgr.batchFindByKey(ids);
             entities.forEach(entity -> {
-                System.out.println(JsonUtils.serialize(entity));
                 if (entity == null) {
                     results.add(null);
                 } else {
@@ -124,10 +122,9 @@ public class GenericTableEntityMgrImpl implements GenericTableEntityMgr {
 
     private class GenericTableInternalEntityMgrImpl extends BaseFabricEntityMgrImpl<GenericTableEntity>
             implements GenericTableInternalEntityMgr {
-        GenericTableInternalEntityMgrImpl(FabricMessageService messageService, FabricDataService dataService,
+        GenericTableInternalEntityMgrImpl(FabricDataService dataService,
                 String signature) {
             super(new BaseFabricEntityMgrImpl.Builder() //
-                    .messageService(messageService) //
                     .dataService(dataService) //
                     .recordType(GenericTableEntity.class.getSimpleName() + "_" + signature) //
                     .store(BaseFabricEntityMgrImpl.STORE_DYNAMO) //

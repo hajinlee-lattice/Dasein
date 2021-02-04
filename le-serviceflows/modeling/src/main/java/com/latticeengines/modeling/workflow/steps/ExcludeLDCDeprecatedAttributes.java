@@ -13,6 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -34,6 +35,9 @@ public class ExcludeLDCDeprecatedAttributes extends BaseWorkflowStep<ExcludeLDCD
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
+    @Inject
+    private BatonService batonService;
+
     @Override
     public void execute() {
         log.info("Starting ExcludeLDCDeprecatedAttributes");
@@ -54,12 +58,13 @@ public class ExcludeLDCDeprecatedAttributes extends BaseWorkflowStep<ExcludeLDCD
     }
 
     private Set<String> requestDeprecatedAttributes() {
+        Set<String> expiredLicenses = batonService.getExpiredLicenses(configuration.getCustomerSpace().getTenantId());
         Set<String> attributesDeprecated = new HashSet<>();
-
         List<ColumnMetadata> metadata = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model);
         if (CollectionUtils.isNotEmpty(metadata)) {
             for (ColumnMetadata column : metadata) {
-                if (column != null && Boolean.TRUE.equals(column.getShouldDeprecate())) {
+                if (column != null && (Boolean.TRUE
+                        .equals(column.getShouldDeprecate()) || expiredLicenses.contains(column.getDataLicense()))) {
                     attributesDeprecated.add(column.getAttrName());
                 }
             }

@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,8 +23,8 @@ public class InternalAccountIdLookupRequest {
     @JsonProperty("LookupId")
     private String lookupId;
 
-    @JsonProperty("LookupIdVal")
-    private String lookupIdVal;
+    @JsonProperty("LookupIdVals")
+    private List<String> lookupIdVals;
 
     public String getCustomerSpace() {
         return customerSpace;
@@ -48,11 +50,11 @@ public class InternalAccountIdLookupRequest {
         this.lookupId = lookupId;
     }
 
-    public String getLookupIdVal() {
-        return lookupIdVal;
+    public List<String> getLookupIdVals() {
+        return lookupIdVals;
     }
 
-    public void setLookupIdVal(String lookupIdVal) {
-        this.lookupIdVal = lookupIdVal;
+    public void setLookupIdVals(List<String> lookupIdVals) {
+        this.lookupIdVals = lookupIdVals;
     }
 }

@@ -1,10 +1,14 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.DerivedId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.UserId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.query.EntityTypeUtils.generateFullFeedType;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,23 +25,33 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
+import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.CreateActivityMetricsGroupRequest;
+import com.latticeengines.domain.exposed.cdl.activity.DeriveConfig;
 import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
+import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
+import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
+import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
 
@@ -64,11 +78,18 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     @Inject
     private TimeLineProxy timeLineProxy;
 
+    @Inject
+    private ActivityStoreProxy activityStoreProxy;
+
+    @Inject
+    private ActivityMetricsProxy activityMetricsProxy;
+
     @BeforeClass(groups = {"end2end"})
     @Override
     public void setup() throws Exception {
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
+        featureFlagMap.put(LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
 
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
@@ -79,10 +100,10 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         Map<String, Boolean> runCases = new HashMap<>();
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         if (isLocalEnvironment()) {
-            runCases.put(WEB_VISIT, false);
+            runCases.put(WEB_VISIT, true);
             runCases.put(OPPORTUNITY, false);
             runCases.put(MARKETING, false);
-            runCases.put(INTENT, true);
+            runCases.put(INTENT, false);
         } else {
             // run all cases
             runCases.put(WEB_VISIT, true);
@@ -96,8 +117,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         }
         if (runCases.get(OPPORTUNITY)) {
             log.info("setup opportunity");
-            // FIXME enable opportunity data again after test data is updated to the new
-            // schema
+            // FIXME enable opportunity data again after test data is updated to the new schema
             // setupOpportunityTemplates();
         }
         if (runCases.get(MARKETING)) {
@@ -250,6 +270,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
     private void setupWebVisit() throws Exception {
         setupWebVisitTemplates();
+        setupWebVisitDerivedDimension();
         mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 1,
                 generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit));
         Thread.sleep(2000);
@@ -261,6 +282,47 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         mockCSVImport(BusinessEntity.Catalog, ADVANCED_MATCH_SUFFIX, 3,
                 generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisitSourceMedium));
         Thread.sleep(2000);
+    }
+
+    private void setupWebVisitDerivedDimension() {
+        activityStoreProxy.addDerivedDimension(mainCustomerSpace, "WebVisit", getDeriveConfig());
+        activityMetricsProxy.createGroup(mainCustomerSpace, getDerivedDimGroupRequest());
+    }
+
+    private CreateActivityMetricsGroupRequest getDerivedDimGroupRequest() {
+        CreateActivityMetricsGroupRequest request = new CreateActivityMetricsGroupRequest();
+        request.streamName = "WebVisit";
+        request.groupName = "test derive dimension group";
+        request.javaClass = Long.class.getSimpleName();
+        request.entity = BusinessEntity.Account;
+        request.timeRange = ActivityStoreUtils.defaultTimeRange();
+        request.rollupDimensions = Collections.singletonList(DerivedId.name());
+        request.aggregation = getAggregation();
+        request.category = Category.WEB_VISIT_PROFILE;
+        request.subCategoryTmpl = StringTemplateConstants.DERIVED_DIMENSION_GROUP_SUBCATEGORY;
+        request.displayNameTmpl = StringTemplateConstants.DERIVED_DIMENSION_GROUP_DISPLAYNAME;
+        request.nullImputation = NullMetricsImputation.ZERO;
+        log.info("create group request: {}", request);
+        return request;
+    }
+
+    private StreamAttributeDeriver getAggregation() {
+        StreamAttributeDeriver deriver = new StreamAttributeDeriver();
+        deriver.setSourceAttributes(Collections.singletonList(InterfaceName.__Row_Count__.name()));
+        deriver.setTargetAttribute(InterfaceName.__Row_Count__.name());
+        deriver.setCalculation(StreamAttributeDeriver.Calculation.SUM);
+        deriver.setTargetFundamentalType(FundamentalType.NUMERIC);
+        return deriver;
+    }
+
+    private DeriveConfig getDeriveConfig() {
+        DeriveConfig config = new DeriveConfig();
+        config.sourceAttrs = Arrays.asList(UserId.name(), WebVisitPageUrl.name());
+        config.patterns = new ArrayList<>();
+        config.patterns.add(Arrays.asList("user 1 home", "a19c9c30-8638-4ada-afc7-16a3fb53a745", "https://dnb.com/home"));
+        config.patterns.add(Arrays.asList("user 2 news", "5dbae9f1-4466-48a1-a1ec-3d5639532387", "https://dnb.com/news.*"));
+        config.patterns.add(Arrays.asList("user 3 all", "9d8cbdd2-fcf9-45af-82cb-3a574262392c", "https://dnb.com.*"));
+        return config;
     }
 
     private void setupWebVisitTemplates() {

@@ -45,6 +45,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     private int depremiumSelectCount = 0;
     private int totalLeadEnrichmentCount;
 
+    @Override
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
@@ -127,8 +128,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
 
         Assert.assertNotNull(subcategoryStrList);
 
-        Assert.assertTrue(subcategoryStrList.size() > 0);
-        System.out.println(subcategoryStrList.get(0));
+        Assert.assertTrue(subcategoryStrList.size() == 0);
     }
 
     private Set<String> getExpectedCategorySet() throws IOException {

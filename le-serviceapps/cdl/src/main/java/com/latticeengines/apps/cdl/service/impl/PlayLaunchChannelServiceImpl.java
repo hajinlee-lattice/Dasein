@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageR
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.PlayUtils;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.EmailProxy;
 
@@ -84,6 +85,9 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
+
+    @Inject
+    private TableEntityMgr tableEntityMgr;
 
     @Value("${cdl.play.service.default.types.user}")
     private String serviceUser;
@@ -444,20 +448,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
-    public void updateCurrentLaunchedAccountUniverseWithPrevious(PlayLaunchChannel channel) {
-        channel.setCurrentLaunchedAccountUniverseTable(channel.getPreviousLaunchedAccountUniverseTable());
-        playLaunchChannelEntityMgr.update(channel);
-    }
-
-    @Override
     public void updatePreviousLaunchedAccountUniverseWithCurrent(PlayLaunchChannel channel) {
         channel.setPreviousLaunchedAccountUniverseTable(channel.getCurrentLaunchedAccountUniverseTable());
-        playLaunchChannelEntityMgr.update(channel);
-    }
-
-    @Override
-    public void updateCurrentLaunchedContactUniverseWithPrevious(PlayLaunchChannel channel) {
-        channel.setCurrentLaunchedContactUniverseTable(channel.getPreviousLaunchedContactUniverseTable());
         playLaunchChannelEntityMgr.update(channel);
     }
 
@@ -465,6 +457,13 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     public void updatePreviousLaunchedContactUniverseWithCurrent(PlayLaunchChannel channel) {
         channel.setPreviousLaunchedContactUniverseTable(channel.getCurrentLaunchedContactUniverseTable());
         playLaunchChannelEntityMgr.update(channel);
+    }
+
+    @Override
+    public PlayLaunchChannel recoverLaunchUniverse(PlayLaunchChannel channel) {
+        PlayLaunchChannel retrievedChannel = findById(channel.getId());
+
+        return playLaunchChannelEntityMgr.recoverLaunchUniverse(retrievedChannel, channel);
     }
 
 }

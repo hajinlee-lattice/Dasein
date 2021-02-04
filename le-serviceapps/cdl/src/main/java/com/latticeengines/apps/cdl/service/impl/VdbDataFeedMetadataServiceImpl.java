@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -280,7 +281,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public String getConnectorConfig(CDLImportConfig importConfig, String jobIdentifier) {
+    public String getConnectorConfig(CDLImportConfig importConfig, DataFeedTask dataFeedTask) {
         VdbLoadTableConfig vdbLoadTableConfig = ((VdbImportConfig) importConfig).getVdbLoadTableConfig();
         VdbConnectorConfiguration vdbConnectorConfiguration = new VdbConnectorConfiguration();
         vdbConnectorConfiguration.setGetQueryDataEndpoint(vdbLoadTableConfig.getGetQueryDataEndpoint());
@@ -289,6 +290,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         ImportVdbTableConfiguration importVdbTableConfiguration = new ImportVdbTableConfiguration();
         importVdbTableConfiguration.setBatchSize(vdbLoadTableConfig.getBatchSize());
         importVdbTableConfiguration.setDataCategory(vdbLoadTableConfig.getDataCategory());
+        String jobIdentifier = dataFeedTask.getUniqueId();
         importVdbTableConfiguration.setCollectionIdentifier(jobIdentifier);
         importVdbTableConfiguration.setVdbQueryHandle(vdbLoadTableConfig.getVdbQueryHandle());
         importVdbTableConfiguration.setMergeRule(ImportVdbTableMergeRule.getByName(vdbLoadTableConfig.getMergeRule()));

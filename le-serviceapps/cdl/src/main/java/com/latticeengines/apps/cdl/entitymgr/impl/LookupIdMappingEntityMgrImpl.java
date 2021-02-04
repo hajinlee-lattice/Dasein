@@ -150,7 +150,9 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
         }
 
         lookupIdMap.setUpdated(new Date(System.currentTimeMillis()));
-        lookupIdMap.setTenant(tenant);
+        if (lookupIdMap.getTenant() == null) {
+            lookupIdMap.setTenant(tenant);
+        }
         getDao().update(lookupIdMap);
 
         return lookupIdMap;
@@ -175,5 +177,11 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
     public void deleteLookupIdMap(String id) {
         LookupIdMap existingLookupIdMap = lookupIdMappingRepository.findById(id);
         getDao().delete(existingLookupIdMap);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public LookupIdMap retrieveLookupIdMapByExtSysAuth(String externalSystemAuthId) {
+        return lookupIdMappingRepository.retrieveByExternalSystemAuthentication(externalSystemAuthId);
     }
 }

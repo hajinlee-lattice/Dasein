@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -305,6 +306,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                     vboService.sendUserUsageEvent(usageEvent);
                 } catch (Exception e) {
                     log.error("Could not send usage report: ", e);
+                    log.error("Failed usage report stack trace: " + ExceptionUtils.getStackTrace(e));
                 }
             }
         }

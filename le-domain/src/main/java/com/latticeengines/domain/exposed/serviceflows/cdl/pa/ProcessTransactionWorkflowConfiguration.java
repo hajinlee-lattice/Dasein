@@ -73,6 +73,7 @@ public class ProcessTransactionWorkflowConfiguration extends BaseCDLWorkflowConf
 
         public Builder apsRollingPeriod(String apsRollingPeriod) {
             rebuildTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
+            updateTransactionWorkflowBuilder.apsRollingPeriod(apsRollingPeriod);
             return this;
         }
 

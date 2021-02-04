@@ -344,6 +344,7 @@
 
         <div class="table-container">
             <div class="top-category-row">
+                <#if top_industries?? && (top_industries?size > 0)>
                 <div class="row-container">
                     <div class="flag">Top Industries</div>
                     <div class="top-graph">
@@ -368,6 +369,8 @@
                         </div>
                     </div>
                 </div>
+                </#if>
+                <#if top_locations?? && (top_locations?size > 0)>
                 <div class="row-container">
                     <div class="flag">Top Locations</div>
                     <div class="top-graph">
@@ -392,6 +395,7 @@
                         </div>
                     </div>
                 </div>
+                </#if>
             </div>
 
             <#list model_pairs as model_pair>

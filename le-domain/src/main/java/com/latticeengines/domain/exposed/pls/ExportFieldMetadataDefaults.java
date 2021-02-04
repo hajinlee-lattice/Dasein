@@ -67,6 +67,10 @@ public class ExportFieldMetadataDefaults implements HasPid {
     @Column(name = "EXPORT_ENABLED", nullable = false)
     private Boolean exportEnabled;
 
+    @JsonProperty("forcePopulate")
+    @Column(name = "FORCE_POPULATE", nullable = false)
+    private Boolean forcePopulateIfExportEnabled;
+
     @JsonProperty("audienceType")
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "EXPORT_FIELD_METADATA_DEFAULTS_AUDIENCE_TYPE", joinColumns = @JoinColumn(name = "EXPORT_FIELD_METADATA_DEFAULTS_PID"))
@@ -155,6 +159,14 @@ public class ExportFieldMetadataDefaults implements HasPid {
 
     public void setExportEnabled(Boolean exportEnabled) {
         this.exportEnabled = exportEnabled;
+    }
+    
+    public Boolean getForcePopulateIfExportEnabled() {
+        return forcePopulateIfExportEnabled;
+    }
+
+    public void setForcePopulateIfExportEnabled(Boolean forcePopulateIfExportEnabled) {
+        this.forcePopulateIfExportEnabled = forcePopulateIfExportEnabled;
     }
 
     public List<AudienceType> getAudienceTypes() {

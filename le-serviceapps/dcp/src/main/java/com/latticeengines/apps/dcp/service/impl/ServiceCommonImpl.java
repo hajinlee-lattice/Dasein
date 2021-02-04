@@ -21,5 +21,4 @@ public class ServiceCommonImpl {
         return PageRequest.of(pageIndex, pageSize, sort);
     }
 
-
 }

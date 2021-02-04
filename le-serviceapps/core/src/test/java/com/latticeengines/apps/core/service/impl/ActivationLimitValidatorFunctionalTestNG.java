@@ -18,6 +18,7 @@ import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
+import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
@@ -44,21 +45,14 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
 
     @Test(groups = "functional")
     public void testDataLicense() throws Exception {
-        List<AttrConfig> attrConfigs = new ArrayList<>();
-        AttrConfigProp<AttrState> prop = new AttrConfigProp<>();
-        prop.setAllowCustomization(Boolean.TRUE);
-        prop.setCustomValue(AttrState.Active);
-        for (int i = 0; i < mockHGLimit; i++) {
-            AttrConfig config = new AttrConfig();
-            config.setAttrName(String.format("Attr%d", i));
-            config.setDataLicense("HG");
-            config.putProperty(ColumnMetadataKey.State, prop);
-            attrConfigs.add(config);
-        }
+        List<AttrConfig> attrConfigs = getInitializedConfigs();
         limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), 0);
 
         AttrConfig attrConfig = new AttrConfig();
+        AttrConfigProp<AttrState> prop = new AttrConfigProp<>();
+        prop.setAllowCustomization(Boolean.TRUE);
+        prop.setCustomValue(AttrState.Active);
         attrConfig.setAttrName("Attr_active");
         attrConfig.setDataLicense("HG");
         attrConfig.putProperty(ColumnMetadataKey.State, prop);
@@ -79,6 +73,39 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
         limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         // the inactive config should not have error message
         Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
+
     }
 
+    @Test(groups = "functional")
+    public void testDeprecateAttrs() throws Exception {
+        List<AttrConfig> attrConfigs = getInitializedConfigs();
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
+
+        AttrConfig attrConfig = new AttrConfig();
+        attrConfig.setShouldDeprecate(Boolean.TRUE);
+        AttrConfigProp<AttrState> prop = new AttrConfigProp<>();
+        prop.setAllowCustomization(Boolean.TRUE);
+        prop.setCustomValue(AttrState.Deprecated);
+        attrConfig.setAttrName("Attr_deprecate");
+        attrConfig.setDataLicense("HG");
+        attrConfig.putProperty(ColumnMetadataKey.State, prop);
+        attrConfigs.add(attrConfig);
+        limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size());
+    }
+
+    private List<AttrConfig> getInitializedConfigs() {
+        List<AttrConfig> attrConfigs = new ArrayList<>();
+        AttrConfigProp<AttrState> prop = new AttrConfigProp<>();
+        prop.setAllowCustomization(Boolean.TRUE);
+        prop.setCustomValue(AttrState.Active);
+        for (int i = 0; i < mockHGLimit; i++) {
+            AttrConfig config = new AttrConfig();
+            config.setAttrName(String.format("Attr%d", i));
+            config.setDataLicense(DataLicense.HG.name());
+            config.putProperty(ColumnMetadataKey.State, prop);
+            attrConfigs.add(config);
+        }
+        return attrConfigs;
+    }
 }

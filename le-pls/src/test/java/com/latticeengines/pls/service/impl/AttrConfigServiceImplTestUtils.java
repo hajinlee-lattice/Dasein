@@ -41,9 +41,13 @@ public final class AttrConfigServiceImplTestUtils {
     public static final Long inactiveForIntent = 4000L;
     public static final Long totalIntentAttrs = 90000L;
     public static final Long tpLimit = 500L;
+    public static final Long dnbTpLimit = 500L;
     public static final Long activeForTp = 5000L;
+    public static final Long activeForDnBTp = 5000L;
     public static final Long inactiveForTp = 4000L;
+    public static final Long inactiveForDnBTp = 4000L;
     public static final Long totalTpAttrs = 90000L;
+    public static final Long totalDnBTpAttrs = 90000L;
     public static final Long accountLimit = 500L;
     public static final Long activeForAccount = 5000L;
     public static final Long inactiveForAccount = 4000L;
@@ -817,6 +821,17 @@ public final class AttrConfigServiceImplTestUtils {
         valueCountMap = new HashMap<>();
         valueCountMap.put(AttrState.Active, activeForTp);
         valueCountMap.put(AttrState.Inactive, inactiveForTp);
+        propSummary.put(ColumnMetadataKey.State, valueCountMap);
+
+        AttrConfigCategoryOverview<AttrState> dnbTpCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();
+        map.put(Category.DNB_TECHNOLOGY_PROFILE.getName(), tpCategoryAttrConfigOverview);
+        dnbTpCategoryAttrConfigOverview.setLimit(dnbTpLimit);
+        dnbTpCategoryAttrConfigOverview.setTotalAttrs(totalDnBTpAttrs);
+        propSummary = new HashMap<>();
+        dnbTpCategoryAttrConfigOverview.setPropSummary(propSummary);
+        valueCountMap = new HashMap<>();
+        valueCountMap.put(AttrState.Active, activeForDnBTp);
+        valueCountMap.put(AttrState.Inactive, inactiveForDnBTp);
         propSummary.put(ColumnMetadataKey.State, valueCountMap);
 
         AttrConfigCategoryOverview<AttrState> accountCategoryAttrConfigOverview = new AttrConfigCategoryOverview<>();

@@ -264,6 +264,16 @@ public class PlayResource {
         return playLaunchChannelService.updateNextScheduledDate(playName, channelId);
     }
 
+    @PostMapping("/{playName}/channels/{channelId}/recoverLaunchUniverse")
+    @ResponseBody
+    @ApiOperation(value = "Recover the launch universe for play launch channel for a given play and channel id")
+    public PlayLaunchChannel recoverPlayLaunchChannelLaunchUniverse(
+            @PathVariable String customerSpace, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("channelId") String channelId, @RequestBody PlayLaunchChannel playLaunchChannel) {
+        return playLaunchChannelService.recoverLaunchUniverse(playLaunchChannel);
+    }
+
     @PostMapping("/{playName}/channels/{channelId}/launch")
     @ResponseBody
     @ApiOperation(value = "Queue a new Play launch for a given play, channel with delta tables")

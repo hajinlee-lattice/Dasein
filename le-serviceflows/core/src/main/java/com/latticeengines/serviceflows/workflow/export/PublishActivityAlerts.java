@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityAlertsConfig;
 import com.latticeengines.domain.exposed.cdl.activitydata.ActivityAlert;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.TimeLineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -109,7 +109,8 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
         String key = CipherUtils.generateKey();
         String random = RandomStringUtils.randomAlphanumeric(24);
         PublishActivityAlertsJobConfig config = new PublishActivityAlertsJobConfig();
-        config.setInput(Collections.singletonList(HdfsDataUnit.fromPath(alertTable.getExtracts().get(0).getPath())));
+        DataUnit alertTableDU = toDataUnit(alertTable, "AlertTable");
+        config.setInput(Collections.singletonList(alertTableDU));
         config.setDbDriver(dataDbDriver);
         config.setDbUrl(dataDbUrl);
         config.setDbUser(dataDbUser);
@@ -154,5 +155,11 @@ public class PublishActivityAlerts extends RunSparkJob<TimeLineSparkStepConfigur
     protected void postJobExecution(SparkJobResult result) {
         log.info("Activity alert publication completed");
         putObjectInContext(ACTIVITY_ALERT_PUBLISHED, true);
+    }
+
+    @Override
+    public boolean skipOnMissingConfiguration() {
+        // for retrying old jobs from previous release
+        return true;
     }
 }

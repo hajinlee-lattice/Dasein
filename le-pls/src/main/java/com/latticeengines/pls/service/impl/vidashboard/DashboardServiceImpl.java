@@ -1,333 +1,278 @@
 package com.latticeengines.pls.service.impl.vidashboard;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.core.util.UuidUtil;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StreamUtils;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.dashboard.Dashboard;
-import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilter;
-import com.latticeengines.domain.exposed.cdl.dashboard.DashboardFilterValue;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.dashboard.DashboardResponse;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.elasticsearch.Service.ElasticSearchService;
+import com.latticeengines.domain.exposed.cdl.dashboard.TargetAccountList;
+import com.latticeengines.domain.exposed.looker.EmbedUrlData;
+import com.latticeengines.domain.exposed.looker.EmbedUrlUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.metadata.datastore.AthenaDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
+import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
+import com.latticeengines.domain.exposed.metadata.template.ImportFieldMapping;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
-import com.latticeengines.proxy.exposed.cdl.DashboardProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 
 @Component("dashboardService")
 public class DashboardServiceImpl implements DashboardService {
 
     private static final Logger log = LoggerFactory.getLogger(DashboardServiceImpl.class);
 
-    private static final String INDEX_PATTERN_PREFIX = "index-pattern:";
-    private static final String VISUALIZATION_PREFIX = "visualization:";
-    private static final String DASHBOARD_PREFIX = "dashboard:";
+    private static final List<String> SSVI_USER_PERMISSIONS = Arrays.asList("see_drill_overlay",
+            "see_lookml_dashboards", "access_data");
+    private static final List<String> SSVI_DASHBOARDS = Arrays.asList("overview", "accounts_visited", "page_analysis");
+    private static final String USER_ATTR_WEB_VISIT_DATA_TABLE = "web_visit_data_table";
+    private static final String USER_ATTR_TARGET_ACCOUNT_LIST_TABLE = "target_account_list_table";
+    private static final String SSVI_EXTERNAL_SYSTEM_NAME = "SSVI";
+    private static final String DEFAULT_TARGET_ACCOUNT_LIST_SEGMENT_NAME = "ssvi_default_target_account_list";
 
-    private static final String DASHBOARD_JSONFILE_SUFFIX = "%s_dashboard.json";
-    private static final String PANEL_DIR_PATH = "%s_panel/";
+    @Value("${pls.looker.host}")
+    private String lookerHost;
 
-    private static final String INDEX_PATTERN_NAME_PLACEHOLDER = "<INDEX_PATTERN_NAME>";
-    private static final String INDEX_PATTERN_ID_PLACEHOLDER = "<INDEX_PATTERN_ID>";
-    private static final String CREATE_TIME_PLACEHOLDER = "<CREATED_TIME>";
-    private static final String PANEL_ID_PLACEHOLDER = "<PANEL%s_ID>";
-    private static final String NAME_PLACEHOLDER = "<NAME>";
-    private static final String COMPANY_TABLE_PLACEHOLDER = "<PANEL_COMPANY_TABLE_ID>";
-    private static final String COMPANY_LABEL_PLACEHOLDER = "<PANEL_COMPANY_LABEL_ID>";
-    private static final String PAGE_GROUP_PLACEHOLDER = "<PANEL_PAGE_GROUP_ID>";
-    private static final String KIBANA_URL_PLACEHOLDER = "<KIBANA_URL>";
-    private static final String DASHBOARD_URL_OTHER_FILTER_PLACEHOLDER = "<OTHER_FILTER>";
-    private static final String DASHBOARD_URL_ID_PLACEHOLDER = "<DASHBOARD_ID>";
-    private static final String DASHBOARD_NAME_PLACEHOLDER = "<DASHBOARD_NAME>";
+    @Value("${pls.looker.secret.encrypted}")
+    private String lookerEmbedSecret;
 
-    private static final String PATH_PREFIX = "com/latticeengines/pls/kibanaitems/%s";
+    @Value("${pls.looker.session.seconds:2400}")
+    private Long lookerSessionLengthInSeconds;
+
+    @Value("${pls.looker.ssvi.model}")
+    private String ssviLookerModelName;
+
+    @Value("${pls.looker.ssvi.usergroup.id}")
+    private Integer ssviUserGroupId;
 
     @Inject
-    private ElasticSearchService elasticSearchService;
+    private SegmentProxy segmentProxy;
+
     @Inject
-    private DashboardProxy dashboardProxy;
-    @Value("${cdl.elasticsearch.kibana.index}")
-    private String kibanaIndex;
-    @Value("${cdl.elasticsearch.kibana.url}")
-    private String kibanaUrl;
-    //indexPatternName need using esIndexName or esIndexNamePrefix(Regular expression)
-    private String indexPatternName;
-    private String indexPatternId;
-    private String jsonFile;
+    private DataCollectionProxy dataCollectionProxy;
 
-    private List<String> dashboardNameList = Arrays.asList("employee", "industry", "location", "overview", "page",
-            "page_group", "revenue");
-    //placeholder-> visualizationId : COMPANY_TABLE_PLACEHOLDER && COMPANY_LABEL_PLACEHOLDER
-    private Map<String, String> companyVisualizationMap;
-    //dashboardName-><placeholder, visualizationId>
-    private Map<String, Map<String, String>> dashboardVisualizationMap;
-    //dashboardName->dashboardId
-    private Map<String, String> dashboardIdMap;
-    //dashboard List Name -> dashboard Real Name
-    private Map<String, String> dashboardRealNameMap;
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
-    @Override
-    public void create(String customerSpace, String esIndexName) {
-        createIndexPattern(esIndexName);
-        String namePrefix = generateNameprefix(customerSpace);
-        createVisualization(namePrefix);
-        if (MapUtils.isEmpty(companyVisualizationMap)) {
-            log.error("visualization created failed, can't create dashboard.");
-            return;
-        }
-        createDashboard(namePrefix);
-        createDashboardUrl(customerSpace);
-    }
+    @Inject
+    private BatonService batonService;
 
     @Override
     public DashboardResponse getDashboardList(String customerSpace) {
         DashboardResponse res = new DashboardResponse();
-        res.setDashboardUrls(getDashboardMap(customerSpace));
-        res.setFilters(getFilterMap(customerSpace));
+        res.setDashboardUrls(getDashboardMap(customerSpace, getWebVisitTableName(customerSpace)));
         return res;
     }
 
-    private Map<String, String> getDashboardMap(String customerSpace) {
-        List<Dashboard> dashboardList = dashboardProxy.getDashboards(customerSpace);
-        Map<String, String> dashboardMap = new HashMap<>();
-        if (CollectionUtils.isEmpty(dashboardList)) {
-            log.warn("dashboard list is empty for tenant {}.", customerSpace);
-            return dashboardMap;
-        }
-        for (Dashboard dashboard : dashboardList) {
-            dashboardMap.put(dashboard.getName(), dashboard.getDashboardUrl());
-        }
-        return dashboardMap;
+    @Override
+    public MetadataSegment createTargetAccountList(@NotNull String customerSpace, String listName) {
+        listName = getOrUseDefaultListName(listName);
+        return segmentProxy.createOrUpdateListSegment(customerSpace, generateMetadataSegment(customerSpace, listName));
     }
 
-    private Map<String, List<DashboardFilterValue>> getFilterMap(String customerSpace) {
-        List<DashboardFilter> filters = dashboardProxy.getDashboardFilters(customerSpace);
-        Map<String, List<DashboardFilterValue>> filterMap = new HashMap<>();
-        if (MapUtils.isEmpty(filterMap)) {
-            log.warn("dashboard filter is empty, tenant is {}.", customerSpace);
-            return filterMap;
+    @Override
+    public ListSegment updateTargetAccountListMapping(@NotNull String customerSpace, String listName,
+            @NotNull CSVAdaptor csvAdaptor) {
+        listName = getOrUseDefaultListName(listName);
+        MetadataSegment segment = segmentProxy.getListSegmentByExternalInfo(customerSpace, SSVI_EXTERNAL_SYSTEM_NAME,
+                listName);
+        if (segment == null) {
+            // TODO throw proper UI exception
+            log.error("cannot find target account list {}.", listName);
+            throw new IllegalArgumentException(String.format("cannot find target account list %s.", listName));
         }
-        for (DashboardFilter filter : filters) {
-            filterMap.put(filter.getName(), filter.getFilterValue());
-        }
-        return filterMap;
+        ListSegment listSegment = segment.getListSegment();
+        listSegment.setCsvAdaptor(csvAdaptor);
+        return segmentProxy.updateListSegment(customerSpace, listSegment);
     }
 
-    private void createIndexPattern(String esIndexName) {
-        jsonFile = "";
-        try (InputStream inputStream =
-                     getClass().getClassLoader().getResourceAsStream(String.format(PATH_PREFIX, "data_index_pattern" +
-                             ".json"))) {
-            jsonFile = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-        } catch (IOException exception) {
-            throw new LedpException(LedpCode.LEDP_00002, "Can't read data_index_pattern", exception);
+    @Override
+    public TargetAccountList getTargetAccountList(String customerSpace, String listName) {
+        listName = getOrUseDefaultListName(listName);
+        MetadataSegment segment = segmentProxy.getListSegmentByExternalInfo(customerSpace, SSVI_EXTERNAL_SYSTEM_NAME,
+                listName);
+        if (segment == null) {
+            // TODO throw proper UI exception
+            log.error("cannot find target account list {}.", listName);
+            throw new IllegalArgumentException(String.format("cannot find target account list %s.", listName));
         }
-        log.info("indexPatternJson is {}, indexName is {}.", jsonFile, esIndexName);
-        indexPatternName = esIndexName;
-        indexPatternId = UuidUtil.getTimeBasedUuid().toString();
-        log.info("indexPatternId is {}, indexName is {}.", indexPatternId, esIndexName);
-
-        jsonFile = jsonFile.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER,
-                getDate());
-        elasticSearchService.createDocument(kibanaIndex, String.format("%s%s", INDEX_PATTERN_PREFIX,
-                indexPatternId), jsonFile);
+        return toTargetAccountList(customerSpace, segment);
     }
 
+    @Override
+    public void deleteTargetAccountList(String customerSpace, String listName) {
+        TargetAccountList list = getTargetAccountList(customerSpace, listName);
+        if (list == null) {
+            // TODO throw proper UI exception
+            log.error("cannot find target account list {}.", listName);
+            throw new IllegalArgumentException(String.format("cannot find target account list %s.", listName));
+        }
+        segmentProxy.deleteSegmentByName(customerSpace, listName, false);
+    }
 
+    private TargetAccountList toTargetAccountList(@NotNull String customerSpace,
+            @NotNull MetadataSegment segment) {
+        ListSegment listSegment = segment.getListSegment();
+        TargetAccountList targetAccountList = new TargetAccountList();
+        targetAccountList.setSegmentName(segment.getName());
+        targetAccountList.setCsvAdaptor(listSegment.getCsvAdaptor());
+        targetAccountList.setS3UploadDropFolder(listSegment.getS3DropFolder());
+        Map<String, String> dataTemplates = listSegment.getDataTemplates();
+        if (MapUtils.isEmpty(dataTemplates) || !dataTemplates.containsKey(BusinessEntity.Account.name())) {
+            log.warn("No account data template in target account list {}", segment.getName());
+            return targetAccountList;
+        }
+        String dataTemplateId = dataTemplates.get(BusinessEntity.Account.name());
+        DataUnit dataUnit = dataUnitProxy.getByDataTemplateIdAndRole(customerSpace, dataTemplateId,
+                DataUnit.Role.Master);
+        if (dataUnit == null) {
+            log.warn("No data unit found for target account list {} and data template {}", segment.getName(),
+                    dataTemplateId);
+            return targetAccountList;
+        }
 
-    private void createVisualization(String namePrefix) {
-        companyVisualizationMap = new HashMap<>();
-        dashboardVisualizationMap = new HashMap<>();
-        //visualization doc id->JsonString
-        Map<String, String> visualizationJsonFileMap = new HashMap<>();
-        String companyLabelFilePath = String.format(PATH_PREFIX, "panel_company_label.json");
-        companyVisualizationMap.put(COMPANY_LABEL_PLACEHOLDER, createVisualization(namePrefix,
-                companyLabelFilePath, visualizationJsonFileMap));
-        String companyTableFilePath = String.format(PATH_PREFIX, "panel_company_table.json");
-        companyVisualizationMap.put(COMPANY_TABLE_PLACEHOLDER, createVisualization(namePrefix, companyTableFilePath,
-                visualizationJsonFileMap));
-        String pageGroupFilePath = String.format(PATH_PREFIX, "panel_page_group.json");
-        companyVisualizationMap.put(PAGE_GROUP_PLACEHOLDER, createVisualization(namePrefix, pageGroupFilePath, visualizationJsonFileMap));
-        for (String dashboardName : dashboardNameList) {
-            Map<String, String> visualizationMap = new HashMap<>();
-            String panelPath = String.format(PATH_PREFIX, String.format(PANEL_DIR_PATH, dashboardName));
-            log.info("panel_path is {}", panelPath);
-            String fileJson;
-            try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(panelPath)) {
-                fileJson = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-                log.info("panel List is {}", fileJson);
-                String[] files = fileJson.split("\n");
-                for (String file : files) {
-                    String filePath = String.format("%s%s", panelPath, file);
-                    String number = Pattern.compile("[^0-9]").matcher(file).replaceAll("");
-                    log.info("panel id is {}", number);
-                    visualizationMap.put(String.format(PANEL_ID_PLACEHOLDER, number), createVisualization(namePrefix,
-                            filePath, visualizationJsonFileMap));
-                }
-                dashboardVisualizationMap.put(dashboardName, visualizationMap);
-            } catch (IOException exception) {
-                throw new LedpException(LedpCode.LEDP_00002, "Can't read visualization", exception);
+        AthenaDataUnit athenaDataUnit = (AthenaDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+                dataUnit.getName(), DataUnit.StorageType.Athena);
+        S3DataUnit dataUnit1 = (S3DataUnit) dataUnit;
+        targetAccountList.setTableName(dataUnit1.getName());
+        targetAccountList.setS3Path(dataUnit1.getLinkedDir());
+        targetAccountList.setHdfsPath(dataUnit1.getLinkedHdfsPath());
+        targetAccountList.setAthenaTableName(athenaDataUnit == null ? null : athenaDataUnit.getAthenaTable());
+        return targetAccountList;
+    }
+
+    private MetadataSegment generateMetadataSegment(String customerSpace, String listName) {
+        MetadataSegment metadataSegment = new MetadataSegment();
+        metadataSegment.setName(listName);
+        metadataSegment.setDisplayName(listName);
+        ListSegment listSegment = new ListSegment();
+        listSegment.setExternalSystem(SSVI_EXTERNAL_SYSTEM_NAME);
+        listSegment.setExternalSegmentId(listName);
+        listSegment.setCsvAdaptor(defaultMappings(customerSpace));
+        metadataSegment.setListSegment(listSegment);
+        return metadataSegment;
+    }
+
+    private Map<String, String> getDashboardMap(@NotNull String customerSpace, String webVisitTableName) {
+        String tenant = CustomerSpace.shortenCustomerSpace(customerSpace);
+        // FIXME add back checks to make sure web visit table exist
+        // if (StringUtils.isEmpty(webVisitTableName)) {
+        // return null;
+        // }
+        return SSVI_DASHBOARDS.stream().map(dashboard -> {
+            EmbedUrlData data = new EmbedUrlData();
+            data.setHost(lookerHost);
+            data.setSecret(lookerEmbedSecret);
+            data.setExternalUserId(tenant);
+            data.setFirstName("SSVI");
+            data.setLastName("User");
+            data.setGroupIds(Collections.singletonList(ssviUserGroupId));
+            data.setPermissions(SSVI_USER_PERMISSIONS);
+            data.setModels(Collections.singletonList(ssviLookerModelName));
+            data.setSessionLength(lookerSessionLengthInSeconds);
+            data.setEmbedUrl(EmbedUrlUtils.embedUrl(ssviLookerModelName, dashboard));
+            data.setForceLogoutLogin(true);
+            data.setUserAttributes(getUserAttributes(customerSpace, webVisitTableName));
+            return Pair.of(dashboard, EmbedUrlUtils.signEmbedDashboardUrl(data));
+        }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+    }
+
+    private String getWebVisitTableName(String customerSpace) {
+        String tableName = dataCollectionProxy.getTableName(customerSpace, TableRoleInCollection.ConsolidatedWebVisit);
+        if (StringUtils.isBlank(tableName)) {
+            log.warn("No web visit table found for tenant {}", customerSpace);
+            return null;
+        }
+
+        AthenaDataUnit unit = (AthenaDataUnit) dataUnitProxy.getByNameAndType(customerSpace, tableName,
+                DataUnit.StorageType.Athena);
+        if (unit == null) {
+            log.warn("No athena data unit found for web visit table {} and tenant {}", tableName, customerSpace);
+            return null;
+        }
+
+        log.info("Web visit athena table name = {} for tenant {}", unit.getAthenaTable(), customerSpace);
+        return unit.getAthenaTable();
+    }
+
+    private Map<String, Object> getUserAttributes(String customerSpace, String webVisitTableName) {
+        Map<String, Object> userAttrs = new HashMap<>();
+        if (StringUtils.isBlank(webVisitTableName)) {
+            // FIXME remove mock data
+            userAttrs.put(USER_ATTR_WEB_VISIT_DATA_TABLE, "atlas_qa_performance_b3_ssvi_data_v2");
+            userAttrs.put(USER_ATTR_TARGET_ACCOUNT_LIST_TABLE, "atlas_qa_performance_b3_account_list_data_v2");
+        } else {
+            userAttrs.put(USER_ATTR_WEB_VISIT_DATA_TABLE, webVisitTableName);
+            String accountTableName = getTargetAccountTableName(customerSpace);
+            if (StringUtils.isNotBlank(accountTableName)) {
+                userAttrs.put(USER_ATTR_TARGET_ACCOUNT_LIST_TABLE, accountTableName);
             }
         }
-        boolean isSuccess = elasticSearchService.createDocuments(kibanaIndex, visualizationJsonFileMap);
-
-        if (!isSuccess) {
-            log.error("Failed to create visualization documents, namePrefix is {}.", namePrefix);
-            throw new IllegalStateException(String.format("Failed to create visualization documents, namePrefix is %s.", namePrefix));
-        }
+        return userAttrs;
     }
 
-    private void createDashboard(String namePrefix) {
-        dashboardIdMap = new HashMap<>();
-        dashboardRealNameMap = new HashMap<>();
-        //dashboard doc id -> dashboard json file.
-        Map<String, String> dashboardFileMap = new HashMap<>();
-        for (String dashboardName : dashboardNameList) {
-            dashboardIdMap.put(dashboardName, createDashboard(namePrefix, dashboardName, dashboardFileMap));
+    private CSVAdaptor defaultMappings(String tenant) {
+        CustomerSpace customerSpace = CustomerSpace.parse(tenant);
+        CSVAdaptor adaptor = new CSVAdaptor();
+        List<ImportFieldMapping> mappings = new ArrayList<>(Arrays.asList( //
+                stringFieldMapping(InterfaceName.DUNS.name(), InterfaceName.DUNS.name()), //
+                stringFieldMapping(InterfaceName.Website.name(), InterfaceName.Website.name()), //
+                stringFieldMapping(InterfaceName.CompanyName.name(), InterfaceName.CompanyName.name()), //
+                stringFieldMapping(InterfaceName.Country.name(), InterfaceName.Country.name()), //
+                stringFieldMapping(InterfaceName.State.name(), InterfaceName.State.name()), //
+                stringFieldMapping(InterfaceName.City.name(), InterfaceName.City.name()), //
+                stringFieldMapping(InterfaceName.Address_Street_1.name(), InterfaceName.Address_Street_1.name()), //
+                stringFieldMapping(InterfaceName.PostalCode.name(), InterfaceName.PostalCode.name()) //
+        ));
+        // TODO change default mapping after matching is added to list segment upload
+        if (batonService.hasModule(customerSpace, LatticeModule.CDL)) {
+            mappings.add(stringFieldMapping(InterfaceName.AccountId.name(), "account_id"));
+        } else {
+            mappings.add(stringFieldMapping(InterfaceName.DUNS.name(), "account_id"));
         }
-        boolean isSuccess = elasticSearchService.createDocuments(kibanaIndex, dashboardFileMap);
-
-        if (!isSuccess) {
-            log.error("Failed to create dashboards, namePrefix is {}.", namePrefix);
-            throw new IllegalStateException(String.format("Failed to create dashboards, namePrefix is %s.",
-                    namePrefix));
-        }
+        adaptor.setImportFieldMappings(mappings);
+        return adaptor;
     }
 
-    private String createVisualization(String namePrefix, String filePath, Map<String, String> visualizationFiles) {
-        if (StringUtils.isEmpty(indexPatternName) || StringUtils.isEmpty(filePath)) {
-            return "";
-        }
-        log.info("visualization file path is {}.", filePath);
-        jsonFile = "";
-        try (InputStream inputStream =
-                     getClass().getClassLoader().getResourceAsStream(filePath)) {
-            jsonFile = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-        } catch (IOException exception) {
-            throw new LedpException(LedpCode.LEDP_00002, "Can't read panel file", exception);
-        }
-        String visualizationId = UuidUtil.getTimeBasedUuid().toString();
-        log.info("visualizationId is {}.", visualizationId);
-        jsonFile = jsonFile.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).
-                replace(INDEX_PATTERN_ID_PLACEHOLDER, indexPatternId)
-                .replace(CREATE_TIME_PLACEHOLDER, getDate()).replace(NAME_PLACEHOLDER, namePrefix);
-        log.info("visualization details is {}", jsonFile);
-        visualizationFiles.put(String.format("%s%s", VISUALIZATION_PREFIX, visualizationId), jsonFile);
-        return visualizationId;
+    private ImportFieldMapping stringFieldMapping(String userFieldName, String internalFieldName) {
+        ImportFieldMapping mapping = new ImportFieldMapping();
+        mapping.setFieldName(internalFieldName);
+        mapping.setUserFieldName(userFieldName);
+        mapping.setFieldType(UserDefinedType.TEXT);
+        return mapping;
     }
 
-    private String createDashboard(String namePrefix, String dashboardName, Map<String, String> dashboardFileMap) {
-        String dashboardFilePath = String.format(PATH_PREFIX, String.format(DASHBOARD_JSONFILE_SUFFIX, dashboardName));
-        Map<String, String> dashboardRelatedVisualizationMap = dashboardVisualizationMap.get(dashboardName);
-        if (MapUtils.isEmpty(dashboardRelatedVisualizationMap)) {
-            return "";
-        }
-        jsonFile = "";
-        try (InputStream inputStream =
-                     getClass().getClassLoader().getResourceAsStream(dashboardFilePath)) {
-            jsonFile = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-        } catch (IOException exception) {
-            throw new LedpException(LedpCode.LEDP_00002, "Can't read dashboard", exception);
-        }
-        String dashboardRealName = String.format("%s_%s", namePrefix, dashboardName);
-        String dashboardId = UuidUtil.getTimeBasedUuid().toString();
-        log.info("dashboardId is {}.", dashboardId);
-        jsonFile = jsonFile.replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName).replace(CREATE_TIME_PLACEHOLDER,
-                getDate()).replace(DASHBOARD_NAME_PLACEHOLDER, dashboardRealName)
-                .replace(COMPANY_LABEL_PLACEHOLDER, companyVisualizationMap.get(COMPANY_LABEL_PLACEHOLDER))
-                .replace(COMPANY_TABLE_PLACEHOLDER, companyVisualizationMap.get(COMPANY_TABLE_PLACEHOLDER))
-                .replace(PAGE_GROUP_PLACEHOLDER, companyVisualizationMap.get(PAGE_GROUP_PLACEHOLDER));
-        for (Map.Entry<String, String> entry : dashboardRelatedVisualizationMap.entrySet()) {
-            jsonFile = jsonFile.replace(entry.getKey(), entry.getValue());
-        }
-        log.info("Dashboard is {}", jsonFile);
-        dashboardFileMap.put(String.format("%s%s", DASHBOARD_PREFIX, dashboardId), jsonFile);
-        dashboardRealNameMap.put(dashboardName, dashboardRealName);
-        return dashboardId;
+    private String getOrUseDefaultListName(String listName) {
+        return StringUtils.defaultIfBlank(listName, DEFAULT_TARGET_ACCOUNT_LIST_SEGMENT_NAME);
     }
 
-    private void createDashboardUrl(String customerSpace) {
-        String urlFilePath = String.format(PATH_PREFIX, "dashboard_url.json");
-        Map<String, String> urlMap = getMapFromJson(urlFilePath);
-        if (MapUtils.isEmpty(urlMap)) {
-            log.error("Can't get url templates, create dashboard url failed.");
-            return;
-        }
-        String urlFilterFilePath = String.format(PATH_PREFIX, "dashboard_url_filter.json");
-        Map<String, String> urlFilterMap = getMapFromJson(urlFilterFilePath);
-        if (MapUtils.isEmpty(urlFilterMap)) {
-            log.error("Can't get url filter, create dashboard url failed.");
-        }
-        List<Dashboard> dashboards = new ArrayList<>();
-        for (String dashboardName : urlMap.keySet()) {
-            String dashboardUrlTemplate = urlMap.get(dashboardName);
-            String dashboardId = dashboardIdMap.get(dashboardName);
-            if (StringUtils.isEmpty(dashboardId)) {
-                log.error("can't create DashboardUrl for dashboard {}, because can't find this dashboard id.", dashboardName);
-                continue;
-            }
-            String dashboardUrlFilter = urlFilterMap.get(dashboardName);
-            String dashboardUrl =
-                    dashboardUrlTemplate.replace(KIBANA_URL_PLACEHOLDER, kibanaUrl)
-                            .replace(DASHBOARD_URL_ID_PLACEHOLDER, dashboardId)
-                            .replace(INDEX_PATTERN_NAME_PLACEHOLDER, indexPatternName);
-            if (StringUtils.isNotEmpty(dashboardUrlFilter)) {
-                dashboardUrl =
-                        dashboardUrl.replace(DASHBOARD_URL_OTHER_FILTER_PLACEHOLDER, dashboardUrlFilter)
-                                .replace(INDEX_PATTERN_ID_PLACEHOLDER, indexPatternId);
-            }
-            Dashboard dashboard = new Dashboard();
-            dashboard.setName(dashboardRealNameMap.get(dashboardName));
-            dashboard.setDashboardUrl(dashboardUrl);
-            dashboards.add(dashboard);
-        }
-        log.info("dashboards is {}", JsonUtils.serialize(dashboards));
-        dashboardProxy.createDashboardList(customerSpace, dashboards);
-
+    private String getTargetAccountTableName(String customerSpace) {
+        TargetAccountList defaultTargetAccountList = getTargetAccountList(customerSpace, null);
+        return defaultTargetAccountList == null ? null : defaultTargetAccountList.getAthenaTableName();
     }
-
-    private Map<String, String> getMapFromJson(String filePath) {
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
-            String json = StreamUtils.copyToString(inputStream, Charset.defaultCharset());
-            Map<?, ?> map = JsonUtils.deserialize(json, Map.class);
-            Map<String, String> convertMaps = JsonUtils.convertMap(map, String.class, String.class);
-            log.info("Map size is {}.", convertMaps.size());
-            return convertMaps;
-        } catch (IOException exception) {
-            throw new LedpException(LedpCode.LEDP_00002, "Can't read jsonFile from map.", exception);
-        }
-    }
-
-    private String getDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        Date date = new Date(System.currentTimeMillis());
-        return formatter.format(date);
-    }
-
-    private String generateNameprefix(String customerSpace) {
-        String uuid = RandomStringUtils.randomAlphabetic(6);
-        return String.format("%s_%s", customerSpace, uuid);
-    }
-
 }

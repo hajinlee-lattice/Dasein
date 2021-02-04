@@ -21,6 +21,8 @@ class ScaleCounter {
     private final int maxScaleInAttempts;
     private final int maxScaleOutAttempts;
     private long latestScaleOutTime;
+    private long latestScaleInTime;
+    private String lastAppIdWhenScaleIn;
 
     ScaleCounter(String emrCluster, //
                  PriorityQueue<Pair<Integer, Integer>> scaleInPq, PriorityQueue<Pair<Integer, Integer>> scaleOutPq, //
@@ -39,6 +41,22 @@ class ScaleCounter {
 
     void setLatestScaleOutTime(long latestScaleOutTime) {
         this.latestScaleOutTime = latestScaleOutTime;
+    }
+
+    long getLatestScaleInTime() {
+        return latestScaleInTime;
+    }
+
+    void setLatestScaleInTime(long latestScaleInTime) {
+        this.latestScaleInTime = latestScaleInTime;
+    }
+
+    String getLastAppIdWhenScaleIn() {
+        return lastAppIdWhenScaleIn;
+    }
+
+    void setLastAppIdWhenScaleIn(String lastAppIdWhenScaleIn) {
+        this.lastAppIdWhenScaleIn = lastAppIdWhenScaleIn;
     }
 
     Pair<Integer, Integer> incrementScaleOutCounter(int target) {

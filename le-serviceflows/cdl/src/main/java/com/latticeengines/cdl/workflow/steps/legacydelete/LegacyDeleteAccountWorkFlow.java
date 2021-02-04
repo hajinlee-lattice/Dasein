@@ -18,16 +18,12 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class LegacyDeleteAccountWorkFlow extends AbstractWorkflow<LegacyDeleteAccountWorkFlowConfiguration> {
 
     @Inject
-    private MergeDeleteStep mergeDeleteStep;
-
-    @Inject
-    private LegacyDeleteByUpload legacyDeleteByUpload;
+    private LegacyDeleteByUploadWrapper legacyDeleteByUploadWrapper;
 
     @Override
     public Workflow defineWorkflow(LegacyDeleteAccountWorkFlowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
-                .next(mergeDeleteStep)
-                .next(legacyDeleteByUpload)
+                .next(legacyDeleteByUploadWrapper)
                 .build();
     }
 

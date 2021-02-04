@@ -81,7 +81,7 @@ public interface CDLService {
 
     boolean autoImport(String templateFileName);
 
-    String getTemplateMappingContent(Table templateTable, Table standardTable);
+    String getTemplateMappingContent(List<TemplateFieldPreview> previews);
 
     String getSystemNameFromFeedType(String feedType);
 

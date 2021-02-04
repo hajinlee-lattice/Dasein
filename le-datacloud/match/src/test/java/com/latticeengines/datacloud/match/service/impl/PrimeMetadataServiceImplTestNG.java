@@ -35,7 +35,6 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     private void testGetBlocks() {
         List<DataBlock> blocks = primeMetadataService.getDataBlocks();
-
         Assert.assertEquals(blocks.size(), 18);
         DataBlock compInfoBlock = blocks.stream() //
                 .filter(b -> "companyinfo".equals(b.getBlockId())).findFirst().orElse(null);
@@ -191,5 +190,43 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
                 { lst4, 1 }, //
         };
     }
+
+    // test that all entityresolution elements are present and contain the expected data
+    @Test(groups = "functional")
+    private void testEntityResolutionBlockElements() {
+        List<DataBlock> blocks = primeMetadataService.getDataBlocks();
+        System.out.println(JsonUtils.pprint(blocks));
+        Assert.assertEquals(blocks.size(), 18, String.format("Incorrect num of data blocks.  Actual blocks %s", JsonUtils.pprint(getTestDataBlocks())));
+        DataBlock entityResolutionBlock = blocks.stream() //
+                .filter(b -> "entityresolution".equals(b.getBlockId())).findFirst().orElse(null);
+        Assert.assertNotNull(entityResolutionBlock);
+        List<DataBlock.Level> levels = entityResolutionBlock.getLevels();
+        DataBlock.Level level = levels.get(0);
+        Assert.assertNotNull(level);
+
+        DataBlock.Level levelOne = entityResolutionBlock.getLevels().stream().filter( l -> DataBlockLevel.L1.equals(l.getLevel())).findFirst().orElse(null);
+        Assert.assertNotNull(levelOne);
+        List<DataBlock.Element> elementList = levelOne.getElements();
+        Assert.assertNotNull(elementList);
+        Assert.assertEquals(elementList.size(), 9);
+
+        // Check some of the elements in this data block
+        DataBlock.Element matchedDuns = elementList.stream().filter(element -> element.getElementId().equals("MatchedDuns")).findFirst().orElse(null);
+        Assert.assertNotNull(matchedDuns);
+        Assert.assertEquals(matchedDuns.getDescription(), "The D-U-N-S Number, assigned by Dun & Bradstreet, is an identification number that uniquely identifies the entity in accordance with the Data Universal Numbering System (D-U-N-S).");
+        Assert.assertEquals(matchedDuns.getDataType(), "String");
+
+        DataBlock.Element iso2CountryCode = elementList.stream().filter(element -> element.getElementId().equals("MatchIso2CountryCode")).findFirst().orElse(null);
+        Assert.assertNotNull(iso2CountryCode);
+        Assert.assertEquals(iso2CountryCode.getDataType(), "String");
+        Assert.assertEquals( iso2CountryCode.getDescription() ,"The two-letter country code, defined by the International Organization for Standardization (ISO) ISO 3166-1 scheme identifying the country/market in which this address is located.");
+
+        DataBlock.Element confidenceCode = elementList.stream().filter(element -> element.getElementId().equals("ConfidenceCode")).findFirst().orElse(null);
+        Assert.assertNotNull(confidenceCode);
+        Assert.assertEquals(confidenceCode.getDataType(), "Integer");
+        Assert.assertEquals(confidenceCode.getDescription(), "A numeric value from 1 (low) up to 10 (high) indicating the level of certainty at which this possible candidate was included in this result set.");
+
+    }
+
 
 }

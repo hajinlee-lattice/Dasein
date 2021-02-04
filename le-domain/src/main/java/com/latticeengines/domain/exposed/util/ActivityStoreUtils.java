@@ -21,15 +21,21 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FilterOptions;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
  * General activity store helpers
  */
-public class ActivityStoreUtils {
+public final class ActivityStoreUtils {
+
+    private ActivityStoreUtils() {
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ActivityStoreUtils.class);
+
+    private static final String STREAM_NAME_FORMAT = "%s_%s"; // <sysName>_<entityType>
 
     // default time range shown in category tile (current value: last 8 weeks)
     public static final TimeFilter UI_DEFAULT_TIME_FILTER = new TimeFilter(ComparisonType.WITHIN,
@@ -37,9 +43,6 @@ public class ActivityStoreUtils {
     public static final String DEFAULT_TIME_RANGE = ActivityMetricsGroupUtils
             .timeFilterToTimeRangeTmpl(UI_DEFAULT_TIME_FILTER);
     private static final String CURRENT_WEEK_TIME_RANGE = "wi_0_w";
-
-    private ActivityStoreUtils() {
-    }
 
     /**
      * Transform activity store specific pattern into regular expression. This is to
@@ -168,10 +171,8 @@ public class ActivityStoreUtils {
         }
     }
 
-    public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull String timeRange,
-            String secondaryDisplayName) {
-        // any tag for filtering all attrs
-        cm.setFilterTags(getFilterTagsFromTimeRange(timeRange));
+    public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull String timeRange, String secondaryDisplayName) {
+        setFilterTags(cm, timeRange);
         if (!isDefaultPeriodRange(timeRange)) {
             // leave null for not hidden attrs to save some space
             cm.setIsHiddenInCategoryTile(true);
@@ -179,6 +180,10 @@ public class ActivityStoreUtils {
         if (StringUtils.isNotBlank(secondaryDisplayName)) {
             cm.setSecondarySubCategoryDisplayName(secondaryDisplayName);
         }
+    }
+
+    public static void setFilterTags(@NotNull ColumnMetadata cm, @NotNull String timeRange) {
+        cm.setFilterTags(getFilterTagsFromTimeRange(timeRange));
     }
 
     public static boolean isDefaultPeriodRange(String timeRange) {
@@ -213,5 +218,22 @@ public class ActivityStoreUtils {
             tags.add(ActivityMetricsGroupUtils.timeRangeTmplToPeriodOnly(timeRange, 0));
         }
         return tags;
+    }
+
+    public static String getStreamName(String systemName, EntityType entityType) {
+        return String.format(STREAM_NAME_FORMAT, systemName, entityType);
+    }
+
+    public static String getSystemNameFromStreamName(String streamName) {
+        int idx = streamName.lastIndexOf('_');
+        if (idx <= 0) {
+            log.warn("Unable to get system name from stream name {}", streamName);
+            return streamName;
+        }
+        return streamName.substring(0, idx);
+    }
+
+    public static void appendSystemName(ColumnMetadata cm, String streamName) {
+        cm.setDisplayName(String.format("%s: %s", getSystemNameFromStreamName(streamName), cm.getDisplayName()));
     }
 }

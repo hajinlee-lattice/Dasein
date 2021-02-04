@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyTxnStreamPostAggregationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.EnrichWebVisitJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ExportToElasticSearchJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ExtractListSegmentCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
@@ -67,6 +68,7 @@ import com.latticeengines.domain.exposed.spark.cdl.PeriodTxnStreamPostAggregatio
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.PublishTableToElasticSearchJobConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.PublishVIDataJobConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
@@ -205,7 +207,11 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = GenerateLiveRampLaunchArtifactsJobConfig.class, name = GenerateLiveRampLaunchArtifactsJobConfig.NAME), //
         @JsonSubTypes.Type(value = PublishVIDataJobConfiguration.class, name = PublishVIDataJobConfiguration.NAME), //
         @JsonSubTypes.Type(value = DailyTxnStreamPostAggregationConfig.class, name = DailyTxnStreamPostAggregationConfig.NAME), //
-        @JsonSubTypes.Type(value = PeriodTxnStreamPostAggregationConfig.class, name = PeriodTxnStreamPostAggregationConfig.NAME) //
+        @JsonSubTypes.Type(value = PeriodTxnStreamPostAggregationConfig.class, name =
+                PeriodTxnStreamPostAggregationConfig.NAME), //
+        @JsonSubTypes.Type(value = EnrichWebVisitJobConfig.class, name = EnrichWebVisitJobConfig.NAME), //
+        @JsonSubTypes.Type(value = PublishTableToElasticSearchJobConfiguration.class, name =
+                PublishTableToElasticSearchJobConfiguration.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
 
@@ -222,6 +228,10 @@ public abstract class SparkJobConfig implements Serializable {
 
     @JsonProperty("SpecialTargets")
     private Map<Integer, DataUnit.DataFormat> specialTargets;
+
+    //if partition number over than this value, will cut 1/2 partition num
+    @JsonProperty("NumPartitionLimit")
+    public Integer numPartitionLimit;
 
     public abstract String getName();
 
@@ -271,5 +281,4 @@ public abstract class SparkJobConfig implements Serializable {
             return Collections.emptyList();
         }
     }
-
 }

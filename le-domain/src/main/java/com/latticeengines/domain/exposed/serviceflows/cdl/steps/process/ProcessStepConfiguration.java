@@ -65,6 +65,12 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("entity_match_configuration")
     private EntityMatchConfiguration entityMatchConfiguration;
 
+    @JsonProperty("is_ssvi_tenant")
+    private boolean isSSVITenant;
+
+    @JsonProperty("is_cdl_tenant")
+    private boolean isCDLTenant;
+
     public DataFeed.Status getInitialDataFeedStatus() {
         return datafeedStatus;
     }
@@ -210,5 +216,21 @@ public class ProcessStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setEntityMatchConfiguration(EntityMatchConfiguration entityMatchConfiguration) {
         this.entityMatchConfiguration = entityMatchConfiguration;
+    }
+
+    public boolean isSSVITenant() {
+        return isSSVITenant;
+    }
+
+    public void setSSVITenant(boolean SSVITenant) {
+        isSSVITenant = SSVITenant;
+    }
+
+    public boolean isCDLTenant() {
+        return isCDLTenant;
+    }
+
+    public void setCDLTenant(boolean CDLTenant) {
+        isCDLTenant = CDLTenant;
     }
 }

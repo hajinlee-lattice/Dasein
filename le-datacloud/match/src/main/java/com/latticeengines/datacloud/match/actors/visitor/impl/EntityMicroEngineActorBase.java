@@ -89,6 +89,21 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
     // Entity Match doesn't need to use this method.
     protected void recordActorAndTuple(MatchTraveler traveler) {}
 
+    protected boolean matchFoundInLookupMode(MatchTraveler traveler) {
+        if (traveler == null || traveler.getEntity() == null
+                || CollectionUtils.isEmpty(traveler.getMatchLookupResults())) {
+            return false;
+        }
+        if (entityMatchConfigurationService.isAllocateMode(traveler.getEntity())) {
+            // not in lookup mode
+            return false;
+        }
+
+        return traveler.getMatchLookupResults() //
+                .stream() //
+                .anyMatch(pair -> pair != null && pair.getRight() != null && //
+                        pair.getRight().stream().anyMatch(StringUtils::isNotBlank));
+    }
 
     // For entity lookup actors. EntityIdAssociateActor and EntityIdResolveActor
     // both override this method

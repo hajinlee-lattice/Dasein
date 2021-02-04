@@ -25,7 +25,6 @@ import com.latticeengines.datacloud.match.entitymgr.impl.ContactTpsEntryMgrImpl;
 import com.latticeengines.datacloud.match.repository.reader.ContactMasterTpsColumnRepository;
 import com.latticeengines.datacloud.match.service.TpsFetchService;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.contactmaster.ContactMasterConstants;
 import com.latticeengines.domain.exposed.datacloud.contactmaster.LiveRampDestination;
 import com.latticeengines.domain.exposed.datacloud.match.ContactTpsEntry;
@@ -36,9 +35,6 @@ import com.latticeengines.domain.exposed.datacloud.match.config.TpsMatchConfig;
 public class TpsFetchServiceImpl implements TpsFetchService {
 
     private static final Logger log = LoggerFactory.getLogger(TpsFetchServiceImpl.class);
-
-    @Inject
-    private FabricMessageService messageService;
 
     @Inject
     private FabricDataService dataService;
@@ -85,7 +81,7 @@ public class TpsFetchServiceImpl implements TpsFetchService {
         log.debug("TpsFetchServiceImpl, datacloud version " + version);
         ContactTpsEntryMgr entityMgr = tpsEntityMgrs.get(version);
         if (entityMgr == null) {
-            entityMgr = new ContactTpsEntryMgrImpl(messageService, dataService, version);
+            entityMgr = new ContactTpsEntryMgrImpl(dataService, version);
             entityMgr.init();
             tpsEntityMgrs.put(version, entityMgr);
         }

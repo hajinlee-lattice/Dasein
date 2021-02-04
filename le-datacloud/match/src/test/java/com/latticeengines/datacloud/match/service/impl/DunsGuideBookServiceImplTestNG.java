@@ -27,7 +27,6 @@ import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.DunsGuideBookEntityMgr;
 import com.latticeengines.datacloud.match.entitymgr.impl.DunsGuideBookEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.DunsGuideBook;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -53,9 +52,6 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
     private DunsGuideBookServiceImpl service;
 
     @Inject
-    private FabricMessageService messageService;
-
-    @Inject
     private FabricDataService dataService;
 
     @Mock
@@ -69,8 +65,8 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
         MockitoAnnotations.initMocks(this);
         Mockito.when(mgr.findVersion(TEST_DATACLOUD_VERSION)).thenReturn(version);
         // used to setup/cleanup test data
-        dunsGuideBookMgr = new DunsGuideBookEntityMgrImpl(
-                messageService, dataService, TEST_DATACLOUD_VERSION + "_" + TEST_SIGNATURE);
+        dunsGuideBookMgr = new DunsGuideBookEntityMgrImpl(dataService,
+                TEST_DATACLOUD_VERSION + "_" + TEST_SIGNATURE);
         dunsGuideBookMgr.init();
     }
 

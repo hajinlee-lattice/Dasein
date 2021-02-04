@@ -1,7 +1,0 @@
-{
-  "revenue": "('$state':(store:appState),meta:(alias:!n,disabled:!f,index:<INDEX_PATTERN_ID>,key:LE_REVENUE_RANGE.keyword,negate:!f,params:(query:'<REVENUE_FILTER>'),type:phrase),query:(match_phrase:(LE_REVENUE_RANGE.keyword:'<REVENUE_FILTER>')))",
-  "industry": "('$state':(store:appState),meta:(alias:!n,disabled:!f,index:<INDEX_PATTERN_ID>,key:LE_INDUSTRY.keyword,negate:!f,params:(query:'<INDUSTRY_FILTER>'),type:phrase),query:(match_phrase:(LE_INDUSTRY.keyword:'<INDUSTRY_FILTER>')))",
-  "location": "('$state':(store:appState),meta:(alias:!n,disabled:!f,index:<INDEX_PATTERN_ID>,key:LDC_State.keyword,negate:!f,params:(query:<LOCATION_FILTER>),type:phrase),query:(match_phrase:(LDC_State.keyword:<LOCATION_FILTER>)))",
-  "page": "('$state':(store:appState),meta:(alias:!n,disabled:!f,index:<INDEX_PATTERN_ID>,key:UrlCategories.keyword,negate:!f,params:(query:'<PAGE_FILTER>'),type:phrase),query:(match_phrase:(UrlCategories.keyword:'<PAGE_FILTER>')))",
-  "employee": "('$state':(store:appState),meta:(alias:!n,disabled:!f,index:<INDEX_PATTERN_ID>,key:LE_EMPLOYEE_RANGE.keyword,negate:!f,params:(query:'<EMPLOYEE_FILTER>'),type:phrase),query:(match_phrase:(LE_EMPLOYEE_RANGE.keyword:'<EMPLOYEE_FILTER>')))"
-}

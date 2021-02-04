@@ -37,7 +37,7 @@ public class SimulationUnitTestNG {
     private List<String> dataCloudRefreshTenant;
     private List<String> tenantList;
 
-    @Test(groups = "unit")
+    @Test(groups = "manual")
     public void testMain() {
         this.tenantList = initTenant();
         this.clock.setTimestamp(1531373313L * 1000);

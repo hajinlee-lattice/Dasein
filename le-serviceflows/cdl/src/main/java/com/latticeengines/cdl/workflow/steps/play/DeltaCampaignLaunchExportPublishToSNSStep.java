@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWor
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchExportPublishToSNSConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
 @Component("deltaCampaignLaunchExportPublishToSNSStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -73,10 +74,10 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         String workflowRequestId = getStringValueFromContext(
                 DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID);
 
-        publishToSnsTopic(customerSpace.toString(), workflowRequestId);
+        publishToSnsTopic(customerSpace, workflowRequestId);
     }
 
-    public PublishResult publishToSnsTopic(String customerSpace, String workflowRequestId) {
+    public PublishResult publishToSnsTopic(CustomerSpace customerSpace, String workflowRequestId) {
         createAddCsvDataFrame = Boolean.toString(true)
                 .equals(getStringValueFromContext(DeltaCampaignLaunchWorkflowConfiguration.CREATE_ADD_CSV_DATA_FRAME));
         createDeleteCsvDataFrame = Boolean.toString(true).equals(
@@ -89,7 +90,7 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         DeltaCampaignLaunchExportPublishToSNSConfiguration config = getConfiguration();
         LookupIdMap lookupIdMap = config.getLookupIdMap();
 
-        DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(customerSpace);
+        DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
         ExternalIntegrationMessageBody messageBody = new ExternalIntegrationMessageBody();
         if (createAddCsvDataFrame) {
             Map<String, List<ExportFileConfig>> sourceFiles = getFiles(DeltaCampaignLaunchWorkflowConfiguration.ADD);
@@ -113,8 +114,9 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         messageBody.setFolderName(config.getExternalFolderName());
         messageBody.setExternalAudienceId(config.getExternalAudienceId());
         messageBody.setExternalAudienceName(config.getExternalAudienceName());
-        messageBody.setEnableAcxiom(checkAcxiomFeatureFlag(lookupIdMap.getExternalSystemName(), config.getCustomerSpace()));
+        messageBody.setEnableAcxiom(checkAcxiomFeatureFlag(lookupIdMap.getExternalSystemName(), customerSpace));
         channelConfigProcessor.updateSnsMessageWithChannelConfig(config.getChannelConfig(), messageBody);
+        setOutreachTaskSettings(messageBody, customerSpace);
 
         Map<String, Object> jsonMessage = new HashMap<>();
         jsonMessage.put("default", JsonUtils.serialize(messageBody));
@@ -164,5 +166,16 @@ public class DeltaCampaignLaunchExportPublishToSNSStep
         log.info("Setting enableAcxiom as: " + (isAdPlatform && acxiomFlag));
 
         return isAdPlatform && acxiomFlag;
+    }
+
+    private void setOutreachTaskSettings(ExternalIntegrationMessageBody messageBody, CustomerSpace customerSpace) {
+        if (messageBody.getTaskType() != null) {
+            List<String> taskSettings = WorkflowJobUtils.getOutreachTaskSettingsFromZK(customerSpace);
+            String ownerPriority = taskSettings.get(0);
+            String defaultOwner = taskSettings.get(1);
+
+            messageBody.setTaskOwnerPriority(ownerPriority);
+            messageBody.setTaskDefaultOwner(defaultOwner);
+        }
     }
 }

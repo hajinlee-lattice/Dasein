@@ -8,7 +8,8 @@ public enum DataLicense {
     ACCOUNT("Account", "My attributes"), //
     CONTACT("Contact", "Contact attributes"), //
     GROWTHTRENDS("GrowthTrends", "Growth Trends"), //
-    COVID19("COVID19", "COVID-19"); //
+    COVID19("COVID19", "COVID-19"), //
+    DMX("DMX", "DMX technology"); //
 
     private String dataLicense;
     private String description;

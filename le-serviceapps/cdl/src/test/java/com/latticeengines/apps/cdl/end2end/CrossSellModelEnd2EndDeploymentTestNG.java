@@ -317,8 +317,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
             Assert.assertEquals(trainingCount, 210, errorMsg);
             Assert.assertEquals(eventCount, 181, errorMsg);
         } else {
-            Assert.assertEquals(targetCount, 506, errorMsg);
-            Assert.assertEquals(trainingCount, 2359, errorMsg);
+            Assert.assertEquals(targetCount, 444, errorMsg);
+            Assert.assertEquals(trainingCount, 1748, errorMsg);
             Assert.assertEquals(eventCount, 66, errorMsg);
         }
     }

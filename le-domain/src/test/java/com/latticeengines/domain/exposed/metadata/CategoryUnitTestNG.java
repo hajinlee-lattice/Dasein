@@ -16,6 +16,7 @@ public class CategoryUnitTestNG {
         Assert.assertTrue(Category.ACCOUNT_ATTRIBUTES.isPremium());
         Assert.assertTrue(Category.CONTACT_ATTRIBUTES.isPremium());
         Assert.assertTrue(Category.TECHNOLOGY_PROFILE.isPremium());
+        Assert.assertTrue(Category.DNB_TECHNOLOGY_PROFILE.isPremium());
         Assert.assertFalse(Category.FIRMOGRAPHICS.isPremium());
         Assert.assertTrue(Category.GROWTH_TRENDS.isPremium());
         Assert.assertTrue(Category.COVID_19.isPremium());

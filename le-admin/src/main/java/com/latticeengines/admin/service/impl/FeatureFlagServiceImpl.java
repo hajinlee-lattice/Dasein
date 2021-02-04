@@ -3,7 +3,7 @@ package com.latticeengines.admin.service.impl;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +11,8 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.service.FeatureFlagService;
@@ -28,7 +30,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("featureFlagService")
 public class FeatureFlagServiceImpl implements FeatureFlagService {
 
-    private Map<LatticeFeatureFlag, FeatureFlagDefinition> flagDefinitionMap = new HashMap<>();
+    private Map<LatticeFeatureFlag, FeatureFlagDefinition> flagDefinitionMap = new EnumMap<>(LatticeFeatureFlag.class);
+    private Logger log = LoggerFactory.getLogger(FeatureFlagServiceImpl.class);
 
     @Inject
     private BatonService batonService;
@@ -169,6 +172,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_IMPORT_V2, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.SSVI_REPORT, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH, cg).setDefaultValue(false);
 
         // DCP & CG
         Collection<LatticeProduct> dcpCg = Arrays.asList(LatticeProduct.CG, LatticeProduct.DCP);
@@ -177,6 +182,11 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.PROTOTYPE_FEATURE, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALPHA_FEATURE, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.BETA_FEATURE, dcpCg).setDefaultValue(false);
+
+        // DCP only
+        Collection<LatticeProduct> dcp = Collections.singleton(LatticeProduct.DCP);
+        createDefaultFeatureFlag(LatticeFeatureFlag.DCP_ENRICHMENT_LIBRARY, dcp).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.MATCH_MAPPING_V2, dcp).setDefaultValue(false);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
@@ -201,6 +211,9 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
 
     private FeatureFlagDefinition createDefaultFeatureFlag(LatticeFeatureFlag featureFlag,
             Collection<LatticeProduct> latticeProducts) {
+        if (flagDefinitionMap.containsKey(featureFlag))
+            log.warn("Multiple definition of feature flag " + featureFlag.getName());
+
         FeatureFlagDefinition featureFlagDef = new FeatureFlagDefinition();
         featureFlagDef.setDisplayName(featureFlag.getName());
         featureFlagDef.setDocumentation(featureFlag.getDocumentation());

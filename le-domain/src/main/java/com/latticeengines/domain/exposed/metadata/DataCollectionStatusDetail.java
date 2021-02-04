@@ -111,9 +111,10 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("timelineRebuildFlag")
     private Boolean timelineRebuildFlag;
 
+    // maybe retire as value has been stored in data unit
     //key: BusinessEntity.name() -> value: elasticsearchVersion
-    @JsonProperty("entityWithESVersionMap")
-    private Map<String, String> entityWithESVersionMap;
+    @JsonProperty("entityToESVersionMap")
+    private Map<String, String> entityToESVersionMap;
 
     @JsonProperty("ActivityAlertVersion")
     private String activityAlertVersion;
@@ -340,12 +341,12 @@ public class DataCollectionStatusDetail implements Serializable {
         this.timelineRebuildFlag = timelineRebuildFlag;
     }
 
-    public Map<String, String> getEntityWithESVersionMap() {
-        return entityWithESVersionMap;
+    public Map<String, String> getEntityToESVersionMap() {
+        return entityToESVersionMap;
     }
 
-    public void setEntityWithESVersionMap(Map<String, String> entityWithESVersionMap) {
-        this.entityWithESVersionMap = entityWithESVersionMap;
+    public void setEntityToESVersionMap(Map<String, String> entityToESVersionMap) {
+        this.entityToESVersionMap = entityToESVersionMap;
     }
 
     public String getActivityAlertVersion() {

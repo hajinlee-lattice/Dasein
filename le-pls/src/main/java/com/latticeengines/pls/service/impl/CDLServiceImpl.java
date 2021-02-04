@@ -167,8 +167,8 @@ public class CDLServiceImpl implements CDLService {
     @Value("${pls.pa.max.concurrent.limit}")
     private int maxActivePA;
 
-    private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Your Field Name", "Standard Field Name",
-            "Data Type");
+    private List<String> templateMappingHeaders = Arrays.asList("Field Type", "Category", "Your Field Name",
+            "Standard Field Name", "Data Type");
 
     private static final String CUSTOM = "Custom";
     private static final String STANDARD = "Standard";
@@ -796,21 +796,20 @@ public class CDLServiceImpl implements CDLService {
     }
 
     // append field type for the file
-    private void appendFieldType(StringBuffer fileContent, Attribute attribute) {
-        UserDefinedType userDefinedType = MetadataResolver
-                .getFieldTypeFromPhysicalType(attribute.getPhysicalDataType());
+    private void appendFieldType(StringBuffer fileContent, TemplateFieldPreview preview) {
+        UserDefinedType userDefinedType = preview.getFieldType();
         if (userDefinedType.equals(UserDefinedType.DATE)) {
             StringBuffer formatStr = new StringBuffer();
-            if (!StringUtils.isBlank(attribute.getDateFormatString())) {
-                formatStr.append(attribute.getDateFormatString());
+            if (!StringUtils.isBlank(preview.getDateFormatString())) {
+                formatStr.append(preview.getDateFormatString());
                 formatStr.append(" ");
             }
-            if (!StringUtils.isBlank(attribute.getTimeFormatString())) {
-                formatStr.append(attribute.getTimeFormatString());
+            if (!StringUtils.isBlank(preview.getTimeFormatString())) {
+                formatStr.append(preview.getTimeFormatString());
                 formatStr.append(" ");
             }
-            if (!StringUtils.isBlank(attribute.getTimezone())) {
-                formatStr.append(attribute.getTimezone());
+            if (!StringUtils.isBlank(preview.getTimezone())) {
+                formatStr.append(preview.getTimezone());
             }
             if (StringUtils.isBlank(formatStr.toString())) {
                 fileContent.append(userDefinedType);
@@ -824,36 +823,39 @@ public class CDLServiceImpl implements CDLService {
 
     // get both mapped and unmapped field mappings
     @Override
-    public String getTemplateMappingContent(Table templateTable, Table standardTable) {
+    public String getTemplateMappingContent(List<TemplateFieldPreview> previews) {
         StringBuffer fileContent = new StringBuffer();
         for (String templateMappingHeader : templateMappingHeaders) {
             appendTemplateMapptingValue(fileContent, templateMappingHeader);
         }
         fileContent.deleteCharAt(fileContent.length() - 1);
         fileContent.append("\n");
-        Map<String, Attribute> standardAttrMap = standardTable.getAttributes().stream()
-                .collect(Collectors.toMap(Attribute::getName, Attribute -> Attribute));
-        for (Attribute attribute : templateTable.getAttributes()) {
-            if (standardAttrMap.containsKey(attribute.getName())) {
-                standardAttrMap.remove(attribute.getName());
+        for (TemplateFieldPreview preview : previews) {
+            // field category
+            if (FieldCategory.LatticeField.equals(preview.getFieldCategory())) {
                 appendTemplateMapptingValue(fileContent, STANDARD);
             } else {
                 appendTemplateMapptingValue(fileContent, CUSTOM);
             }
-            appendTemplateMapptingValue(fileContent,
-                    attribute.getSourceAttrName() == null ? attribute.getDisplayName() : attribute.getSourceAttrName());
-            appendTemplateMapptingValue(fileContent, attribute.getDisplayName());
-            appendFieldType(fileContent, attribute);
+            // lattice field category, only lattice field has
+            if (preview.getLatticeFieldCategory() != null) {
+                appendTemplateMapptingValue(fileContent, preview.getLatticeFieldCategory().toString());
+            } else {
+                // empty string if no
+                appendTemplateMapptingValue(fileContent, "");
+            }
+            // name from file
+            if (preview.isUnmapped()) {
+                appendTemplateMapptingValue(fileContent, UNMAPPED);
+            } else {
+                appendTemplateMapptingValue(fileContent, preview.getNameFromFile());
+            }
+            // name in template
+            appendTemplateMapptingValue(fileContent, preview.getNameInTemplate());
+            // data type
+            appendFieldType(fileContent, preview);
             fileContent.append("\n");
-        }
-        Set<Map.Entry<String, Attribute>> unmappedAttributes = standardAttrMap.entrySet();
-        for (Map.Entry<String, Attribute> entry : unmappedAttributes) {
-            Attribute attribute = entry.getValue();
-            appendTemplateMapptingValue(fileContent, STANDARD);
-            appendTemplateMapptingValue(fileContent, UNMAPPED);
-            appendTemplateMapptingValue(fileContent, attribute.getDisplayName());
-            appendFieldType(fileContent, attribute);
-            fileContent.append("\n");
+
         }
         fileContent.deleteCharAt(fileContent.length() - 1);
         return fileContent.toString();

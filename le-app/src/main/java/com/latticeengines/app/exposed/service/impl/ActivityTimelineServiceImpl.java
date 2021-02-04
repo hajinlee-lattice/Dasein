@@ -84,6 +84,9 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
     private static final String BUYING = "BUYING";
     private static final String RESEARCHING = "RESEARCHING";
 
+    private static final ArrayList<String> STAGES = new ArrayList<>(
+            Arrays.asList("Closed Won", "Closed", "Closed Lost"));
+
     private static Map<ActivityTimelineMetrics.MetricsType, List<AtlasStream.StreamType>> streamTypeListMap = new HashMap<ActivityTimelineMetrics.MetricsType, List<AtlasStream.StreamType>>() {
         {
             put(ActivityTimelineMetrics.MetricsType.NewActivities, Arrays.asList(AtlasStream.StreamType.WebVisit));
@@ -162,10 +165,10 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         newContactsCount += newIdentifiedContactsCount;
         int newEngagementsCount = dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
                 + dataFilter(data, AtlasStream.StreamType.MarketingActivity, null).size();
-        int newOpportunitiesCount = (int) dataFilter(data, AtlasStream.StreamType.Opportunity, null).stream()
-                .filter(t -> !t.get(InterfaceName.Detail1.name()).equals("Closed")
-                        && !t.get(InterfaceName.Detail1.name()).equals("Closed Won"))
-                .count();
+        int newOpportunitiesCount = deduplicateOpportunityData(
+                dataFilter(data, AtlasStream.StreamType.Opportunity, null)).stream()
+                        .filter(t -> !STAGES.contains(t.get(InterfaceName.Detail1.name()))).collect(Collectors.toList())
+                        .size();
 
         List<AtlasStream> streams = activityStoreProxy.getStreams(customerSpace);
         int days = timelinePeriod.getDays();
@@ -185,6 +188,26 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
                         ActivityTimelineMetrics.MetricsType.AccountIntent.getContext(days)));
 
         return metrics;
+    }
+
+    private List<Map<String, Object>> deduplicateOpportunityData(List<Map<String, Object>> data) {
+        Map<String, Map<String, Object>> opportunityMap = new HashMap<String, Map<String, Object>>();
+        for (Map<String, Object> map : data) {
+            String opportunityId = (String) map.get(InterfaceName.Detail2.name());
+            if (opportunityId == null) {
+                continue;
+            }
+            if (!opportunityMap.containsKey(opportunityId)) {
+                opportunityMap.put(opportunityId, map);
+                continue;
+            }
+            String oldStage = (String) opportunityMap.get(opportunityId).get(InterfaceName.Detail1.name());
+            String newStage = (String) map.get(InterfaceName.Detail1.name());
+            if (STAGES.indexOf(newStage) > STAGES.indexOf(oldStage)) {
+                opportunityMap.put(opportunityId, map);
+            }
+        }
+        return new ArrayList(opportunityMap.values());
     }
 
     private List<Map<String, Object>> getDeduplicateIntentData(DataPage data) {

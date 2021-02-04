@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,7 +197,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(0),
-                expectedResultFieldValues.get(0), true, (int) max);
+                expectedResultFieldValues.get(0), true, (int) max, null);
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
                         0, 0, max, null, null, //
@@ -212,7 +213,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(0),
-                expectedResultFieldValues.get(0), true, (int) max);
+                expectedResultFieldValues.get(0), true, (int) max, internalAccountIds);
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
                         0, 0, max, internalAccountIds, null, //
@@ -228,7 +229,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(1),
-                expectedResultFieldValues.get(1), true, (int) max);
+                expectedResultFieldValues.get(1), true, (int) max, internalAccountIds);
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
                         0, 0, max, internalAccountIds, null, null, //
@@ -244,7 +245,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(1),
-                expectedResultFieldValues.get(1), true, (int) max);
+                expectedResultFieldValues.get(1), true, (int) max, internalAccountIds);
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
                         0, 0, max, internalAccountIds, null, null, //
@@ -260,11 +261,12 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         List<Object> emptyResultsList = new ArrayList<Object>();
+        List<String> accountIds = Arrays.asList("id1", "id2", "id3", "id4", "id5");
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(1), emptyResultsList, false,
-                (int) max);
+                (int) max, accountIds);
         List<Map<String, Object>> datapage = //
                 lpiPMAccountExtensionImpl.getAccountExtensions( //
-                        0, 0, max, Arrays.asList("id1", "id2", "id3", "id4", "id5"), null, null, //
+                        0, 0, max, accountIds, null, null, //
                         String.join(",", expectedResultFields.get(1)), false, orgInfo);
         log.info(datapage.toString());
 
@@ -272,7 +274,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
     }
 
     private void createMockedMatchProxy(MatchProxy mockedMatchProxy, List<String> expectedResultFields,
-            List<Object> expectedResultFieldValues, boolean shouldCreateGoodResult, int maximum) {
+            List<Object> expectedResultFieldValues, boolean shouldCreateGoodResult, int maximum, List<String> accountIds) {
         MatchOutput matchOutput = new MatchOutput(UUID.randomUUID().toString());
         matchOutput.setOutputFields(expectedResultFields);
         ArrayList<OutputRecord> result = new ArrayList<OutputRecord>();
@@ -285,6 +287,9 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         });
         matchOutput.setResult(result);
         when(mockedMatchProxy.matchRealTime(any(MatchInput.class))).thenReturn(matchOutput);
+        if (CollectionUtils.isNotEmpty(accountIds)) {
+            when(mockedMatchProxyWithMatchedResult.lookupInternalAccountIds(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(accountIds);
+        }
     }
 
     private void checkResult(List<Map<String, Object>> datapage, List<String> expectedResultFields,

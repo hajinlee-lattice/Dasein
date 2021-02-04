@@ -365,4 +365,15 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertTrue(sourceFields.contains("Address"));
         assertTrue(sourceFields.contains("ZipCode"));
     }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCreateWithAuthentication" })
+    public void testGetLookupIdMapByExtSysAuth() {
+        LookupIdMap lookupIdWithAuth = lookupIdMappingEntityMgr.getLookupIdMap(configIdWithAuth);
+        validateLookupIdWithAuth(lookupIdWithAuth);
+        ExternalSystemAuthentication extSysAuth = lookupIdWithAuth.getExternalAuthentication();
+
+        LookupIdMap lookupIdMapByExtSysAuth = lookupIdMappingEntityMgr.retrieveLookupIdMapByExtSysAuth(extSysAuth.getId());
+        validateLookupIdWithAuth(lookupIdMapByExtSysAuth);
+        assertEquals(lookupIdWithAuth.getPid(), lookupIdMapByExtSysAuth.getPid());
+    }
 }

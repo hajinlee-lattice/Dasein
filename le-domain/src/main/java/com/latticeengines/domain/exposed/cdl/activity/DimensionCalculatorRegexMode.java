@@ -13,6 +13,8 @@ public class DimensionCalculatorRegexMode extends DimensionCalculator {
 
     private static final long serialVersionUID = 6264559124889189351L;
 
+    public static final String NAME = "DimensionCalculatorRegexMode";
+
     // attribute in stream or catalog which contains regex info
     @JsonProperty("pattern_attribute")
     private String patternAttribute;

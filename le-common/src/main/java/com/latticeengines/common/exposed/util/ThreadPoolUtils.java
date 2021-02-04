@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -13,8 +14,10 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -78,6 +81,15 @@ public final class ThreadPoolUtils {
                 };
         size = size == null ? Runtime.getRuntime().availableProcessors() : size;
         return new ForkJoinPool(size, workerThreadFactory, null, false);
+    }
+
+    public static ExecutorService getBoundedQueueCallerThreadPool(int minSize, int maxSize, int idleMins,
+            int queueSize) {
+        BlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<Runnable>(queueSize);
+        ExecutorService executorService = new ThreadPoolExecutor(minSize, maxSize, idleMins, TimeUnit.MINUTES,
+                runnableQueue, new ThreadPoolExecutor.CallerRunsPolicy());
+        Runtime.getRuntime().addShutdownHook(new Thread(executorService::shutdownNow));
+        return executorService;
     }
 
     /**

@@ -36,4 +36,6 @@ public interface DataUnitService {
     List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize);
 
     AthenaDataUnit registerAthenaDataUnit(String dataUnitName);
+
+    DataUnit createOrUpdateByNameAndStorageType(DataUnit dataUnit, boolean purgeOldSnapShot);
 }

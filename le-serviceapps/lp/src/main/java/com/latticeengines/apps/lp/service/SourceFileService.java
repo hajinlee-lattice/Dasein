@@ -26,7 +26,7 @@ public interface SourceFileService {
 
     List<SourceFile> findAllSourceFiles();
 
-    SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty, String entity);
+    SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty, String entity, String schema);
 
     SourceFile findByWorkflowPid(Long workflowPid);
 }

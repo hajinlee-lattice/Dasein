@@ -46,4 +46,9 @@ public class ExternalSystemAuthenticationServiceImpl implements ExternalSystemAu
     public List<ExternalSystemAuthentication> findAuthentications() {
         return externalSystemAuthenticationEntityMgr.findAuthentications();
     }
+
+    @Override
+    public List<ExternalSystemAuthentication> findAuthenticationsByTrayAuthId(String trayAuthId) {
+        return externalSystemAuthenticationEntityMgr.retrieveAuthenticationsByTrayAuthId(trayAuthId);
+    }
 }

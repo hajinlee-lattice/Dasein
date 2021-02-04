@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.testframework;
 
+import java.io.File;
+import java.nio.file.Paths;
+
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
@@ -31,6 +34,7 @@ import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.service.TestFileImportService;
 import com.latticeengines.testframework.exposed.service.TestJobService;
+import com.latticeengines.testframework.exposed.utils.S3Utilities;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
@@ -79,10 +83,19 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
     @Value("${qa.maintenant}")
     protected String mainTenant;
 
-    @Value("${qa.end2end.test.testdata.dir}")
+    private static final String S3_BUCKET = "latticeengines-qa-testdata";
+
+    private static final String S3_KEY_FOLDER = "AutomationTestData/CDLTenant/DataSet/qaend2end";
+
     protected String qaTestDataPath;
 
-    @BeforeClass(groups = { "qaend2end" })
+    @Value("${aws.qa.access.key}")
+    protected String awsAccessKey;
+
+    @Value("${aws.qa.secret.key.encrypted}")
+    protected String awsSecretKey;
+
+    @BeforeClass(alwaysRun = true)
     public void init() {
         checkBasicInfo();
         setupTestEnvironment(mainTenant);
@@ -95,17 +108,28 @@ public abstract class CDLQATestNGBase extends AbstractTestNGSpringContextTests {
         Assert.assertTrue(StringUtils.isNotEmpty(mainTenant), "Main tenant is required");
     }
 
-    @AfterClass(groups = { "qaend2end" })
+    @AfterClass(alwaysRun = true)
     public void tearDown() {
         logout();
     }
 
     protected void setupTestEnvironment(String existingTenant) {
-        System.out.println("Existing tenant: " + existingTenant);
+        log.info("Existing tenant: " + existingTenant);
         testBed.useExistingQATenantAsMain(existingTenant);
         mainTestTenant = testBed.getMainTestTenant();
         mainCustomerSpace = mainTestTenant.getId();
         MultiTenantContext.setTenant(mainTestTenant);
+    }
+
+    protected void downloadTestData() {
+        S3Utilities.setS3ClientWithCredentials(awsAccessKey, awsSecretKey);
+        String resourcePath = Paths.get("target").toUri().getPath();
+        qaTestDataPath = resourcePath + File.separator + S3_KEY_FOLDER;
+        if (!new File(qaTestDataPath).exists()) {
+            log.info("Downloading s3://{}/{} to {}", S3_BUCKET, S3_KEY_FOLDER, resourcePath);
+            Assert.assertTrue(S3Utilities.downloadDirectory(S3_BUCKET, S3_KEY_FOLDER, resourcePath),
+                    "Failed to download qa test data!!!");
+        }
     }
 
     protected void loginAndAttach(String userName, String password) {

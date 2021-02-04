@@ -23,7 +23,6 @@ import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.datafabric.util.RedisUtil;
 import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
@@ -33,11 +32,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
     private static final Logger log = LoggerFactory.getLogger(BaseFabricEntityMgrImpl.class);
 
-    public static final String STORE_REDIS = "REDIS";
     public static final String STORE_DYNAMO = "DYNAMO";
-
-    @Inject
-    protected FabricMessageService messageService;
 
     @Inject
     protected FabricDataService dataService;
@@ -69,9 +64,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         this.enforceRemoteDynamo = builder.enforceRemoteDynamo;
 
-        if (builder.messageService != null) {
-            this.messageService = builder.messageService;
-        }
         if (builder.dataService != null) {
             this.dataService = builder.dataService;
         }
@@ -93,10 +85,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (schema != null) {
             setupStore();
         }
-    }
-
-    public void setMessageService(FabricMessageService messageService) {
-        this.messageService = messageService;
     }
 
     private void setupStore() {
@@ -245,7 +233,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     }
 
     public static class Builder {
-        private FabricMessageService messageService = null;
         private FabricDataService dataService = null;
         private String store;
         private String repository;
@@ -264,11 +251,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         public Builder recordType(String recordType) {
             this.recordType = recordType;
-            return this;
-        }
-
-        public Builder messageService(FabricMessageService messageService) {
-            this.messageService = messageService;
             return this;
         }
 

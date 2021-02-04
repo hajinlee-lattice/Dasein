@@ -17,10 +17,25 @@ public class TrayServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "manual", enabled = true)
     public void testRemoveSolutionInstance() {
-        String userToken = "dbc3bcbdff634741af8724813c47f178cbd62071dd014b4a8aef3b15f1913d21";
-        String solutionInstanceId = "9b54bfd2-1b70-4762-9000-b3e1f7dea2a7";
+        // replace userToken and solutionInstanceId before running this test
+        String userToken = "e5cea19c5b914319a1fd2bb2fe6f911664b33c6bceef46ecb02d1cd9da88964c";
+        String solutionInstanceId = "90ba4b3f-7e65-4661-b6d6-320979df9c17";
         trayService.removeSolutionInstance(
                 new TraySettingsBuilder().userToken(userToken).solutionInstanceId(solutionInstanceId).build());
     }
 
+    @Test(groups = "manual", enabled = true)
+    public void testGetTrayUserToken() {
+        // This tray user ID is for tenant "QA_CDL_Auto_Playbook_Test"
+        String trayUserId = "f8b9d93d-f1d7-4076-a4a4-880887b2d2e5";
+        trayService.getTrayUserToken(trayUserId);
+    }
+
+    @Test(groups = "manual", enabled = true)
+    public void testRemoveAuthenticationById() {
+        // replace trayAuthId and userToken before running this test
+        String trayAuthId = "3fe59cca-ad46-43fa-96fa-2181cf29b1a6";
+        String userToken = "e5cea19c5b914319a1fd2bb2fe6f911664b33c6bceef46ecb02d1cd9da88964c";
+        trayService.removeAuthenticationById(trayAuthId, userToken);
+    }
 }

@@ -59,8 +59,8 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
 
     @Test(groups = "functional")
     public void testFailedWorkflowStatusHandler() {
-        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_CONTACT_TABLE);
         Assert.assertNotEquals(playLaunch.getLaunchState(), LaunchState.SyncFailed);
 
         FailedWorkflowStatusHandler handler = new FailedWorkflowStatusHandler(playLaunchService,
@@ -79,10 +79,10 @@ public class FailedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
             Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Failed.toString());
             Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.SyncFailed);
             Assert.assertEquals(updatedPlayLaunch.getContactsErrored(), Long.valueOf(100));
-            Assert.assertEquals(updatedChannel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
-            Assert.assertEquals(updatedChannel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_TABLE);
-            Assert.assertEquals(updatedChannel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_TABLE);
-            Assert.assertEquals(updatedChannel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_TABLE);
+            Assert.assertEquals(updatedChannel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_ACCOUNT_TABLE);
+            Assert.assertEquals(updatedChannel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_CONTACT_TABLE);
+            Assert.assertEquals(updatedChannel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_ACCOUNT_TABLE);
+            Assert.assertEquals(updatedChannel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_CONTACT_TABLE);
             return true;
         });
 

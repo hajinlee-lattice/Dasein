@@ -37,11 +37,9 @@ public interface PlayLaunchChannelService {
 
     void updateAttributeSetNameToDefault(String attributeSetName);
 
-    void updateCurrentLaunchedAccountUniverseWithPrevious(PlayLaunchChannel playLaunchChannel);
-
     void updatePreviousLaunchedAccountUniverseWithCurrent(PlayLaunchChannel playLaunchChannel);
 
-    void updateCurrentLaunchedContactUniverseWithPrevious(PlayLaunchChannel playLaunchChannel);
-
     void updatePreviousLaunchedContactUniverseWithCurrent(PlayLaunchChannel playLaunchChannel);
+
+    PlayLaunchChannel recoverLaunchUniverse(PlayLaunchChannel channel);
 }

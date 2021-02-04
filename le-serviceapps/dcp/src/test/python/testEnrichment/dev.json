@@ -1,0 +1,94 @@
+{
+	"id": "b39af062-ac61-484d-a2b2-36c341b7747f",
+	"name": "DCP - E (Dev/Test)",
+	"values": [
+		{
+			"key": "plsUrl",
+			"value": "https://internal-stack-e-web-1692646464.us-east-1.elb.amazonaws.com",
+			"enabled": true
+		},
+		{
+			"key": "microserviceUrl",
+			"value": "https://internal-stack-e-app-2068262021.us-east-1.elb.amazonaws.com",
+			"enabled": true
+		},
+		{
+			"key": "MagicAuthentication",
+			"value": "Security through obscurity!",
+			"enabled": true
+		},
+		{
+			"key": "token",
+			"value": "96e393b2-44f1-4f5e-a058-5e678d750af6.f2QFuJofgnTYcbxB",
+			"enabled": true
+		},
+		{
+			"key": "tenant",
+			"value": "{\"Identifier\":\"LoadTest4.LoadTest4.Production\",\"DisplayName\":\"\",\"Pid\":287247,\"RegisteredTime\":1598936225399,\"UIVersion\":\"4.0\",\"Status\":\"ACTIVE\",\"TenantType\":\"QA\",\"Contract\":\"\",\"EntitledApps\":\"DnB\",\"NotificationLevel\":\"ERROR\",\"NotificationType\":\"ALL_USER\",\"JobNotificationLevel\":{}}",
+			"enabled": true
+		},
+		{
+			"key": "fileName",
+			"value": "DCP_Alpha_TestFile1_Full_05-11-2020.csv",
+			"enabled": true
+		},
+		{
+			"key": "login",
+			"value": "winterj@dnb.com",
+			"enabled": true
+		},
+		{
+			"key": "password",
+			"value": "blah",
+			"enabled": true
+		},
+		{
+			"key": "fileImportId",
+			"value": "file_1599152484520.csv",
+			"enabled": true
+		},
+		{
+			"key": "authorization",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "dplusUrl",
+			"value": "https://tst.plus.dnb.com",
+			"enabled": true
+		},
+		{
+			"key": "dplusKey",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "dplusSecret",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "projectId",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "tenantName",
+			"value": "connect_engineering_202007222",
+			"enabled": true
+		},
+		{
+			"key": "sourceId",
+			"value": "Source_lta7ytzj",
+			"enabled": true
+		},
+		{
+			"key": "uploadId",
+			"value": "",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2020-12-16T21:40:41.101Z",
+	"_postman_exported_using": "Postman/7.36.0"
+}

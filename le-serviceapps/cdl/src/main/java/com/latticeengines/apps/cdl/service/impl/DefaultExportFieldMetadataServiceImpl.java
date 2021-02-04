@@ -15,9 +15,7 @@ public class DefaultExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
     DefaultExportFieldMetadataServiceImpl() {
         super(Arrays.asList(CDLExternalSystemName.LinkedIn, //
                 CDLExternalSystemName.Facebook, //
-                CDLExternalSystemName.GoogleAds, //
-                CDLExternalSystemName.Eloqua, //
-                CDLExternalSystemName.Salesforce));
+                CDLExternalSystemName.GoogleAds));
     }
 
     @Override

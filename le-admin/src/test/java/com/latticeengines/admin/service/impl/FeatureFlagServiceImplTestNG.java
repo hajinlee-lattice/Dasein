@@ -1,8 +1,8 @@
 package com.latticeengines.admin.service.impl;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -59,11 +59,11 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 defaultFeatureFlagMap.size() >= LatticeFeatureFlag.values().length + PlsFeatureFlag.values().length,
                 "Should have at least LatticeFeatureFlags and PlsFeatureFlags");
 
-        Collection<LatticeFeatureFlag> expectedPdFlags = Arrays.asList( //
+        Collection<LatticeFeatureFlag> expectedPdFlags = EnumSet.of( //
                 LatticeFeatureFlag.QUOTA, //
                 LatticeFeatureFlag.TARGET_MARKET, //
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL);
-        Collection<LatticeFeatureFlag> expectedCgFlags = Arrays.asList(//
+        Collection<LatticeFeatureFlag> expectedCgFlags = EnumSet.of(//
                 LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION, //
                 LatticeFeatureFlag.ENABLE_CDL, //
                 LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, //
@@ -103,12 +103,19 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ADVANCED_FILTERING, //
                 LatticeFeatureFlag.ENABLE_ACXIOM, //
                 LatticeFeatureFlag.ENABLE_IMPORT_V2, //
-                LatticeFeatureFlag.SSVI_REPORT
+                LatticeFeatureFlag.SSVI_REPORT,
+                LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL,
+                LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH, //
+                LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH
+        );
+        Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
+        Collection<LatticeFeatureFlag> expectedNonLpiFlags = EnumSet.noneOf(LatticeFeatureFlag.class);
+        Collection<LatticeFeatureFlag> expectedDcpFlags = EnumSet.of(
+                LatticeFeatureFlag.DCP_ENRICHMENT_LIBRARY,
+                LatticeFeatureFlag.MATCH_MAPPING_V2
         );
 
-        Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
-        Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
-        Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList( //
+        Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = EnumSet.of( //
                 LatticeFeatureFlag.ALLOW_PIVOT_FILE, //
                 LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, //
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, //
@@ -138,10 +145,18 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ATTRIBUTE_TOGGLING, //
                 LatticeFeatureFlag.ENABLE_ACXIOM, //
                 LatticeFeatureFlag.ENABLE_IMPORT_V2,
-                LatticeFeatureFlag.SSVI_REPORT);
+                LatticeFeatureFlag.SSVI_REPORT,
+                LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL,
+                LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH,
+                LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH,
+                LatticeFeatureFlag.DCP_ENRICHMENT_LIBRARY,
+                LatticeFeatureFlag.MATCH_MAPPING_V2
+        );
+
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);
+        expectedNonLpiFlags.addAll(expectedDcpFlags);
         expectedNonLpiFlags.remove(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION);
 
         for (LatticeFeatureFlag latticeFeatureFlag : LatticeFeatureFlag.values()) {
@@ -176,13 +191,15 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                         latticeFeatureFlag.getName() + " should be included in the product "
                                 + LatticeProduct.CG.getName() + ", but it is not.");
             }
-            if (!expectedDefaultFalseFlags.contains(latticeFeatureFlag)) {
-                Assert.assertTrue(flagDefinition.getDefaultValue(),
-                        String.format("Default feature flag %s, value should be true", latticeFeatureFlag.getName()));
-            } else {
-                Assert.assertFalse(flagDefinition.getDefaultValue(),
-                        String.format("Default feature flag %s, value should be false", latticeFeatureFlag.getName()));
+
+            if (expectedDcpFlags.contains(latticeFeatureFlag)) {
+                Assert.assertTrue(flagDefinition.getAvailableProducts().contains(LatticeProduct.DCP),
+                        latticeFeatureFlag.getName() + " should be included in the product "
+                                + LatticeProduct.DCP.getName() + ", but it is not.");
             }
+
+            Assert.assertNotEquals(expectedDefaultFalseFlags.contains(latticeFeatureFlag), flagDefinition.getDefaultValue(),
+                    String.format("Default feature flag %s, value should be %s", latticeFeatureFlag.getName(), !expectedDefaultFalseFlags.contains(latticeFeatureFlag)));
         }
     }
 

@@ -3,11 +3,11 @@ package com.latticeengines.spark.exposed.job.cdl
 import com.latticeengines.common.exposed.util.CipherUtils
 import com.latticeengines.domain.exposed.cdl.activitydata.ActivityAlert
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
+import com.latticeengines.domain.exposed.metadata.datastore.{HdfsDataUnit, S3DataUnit}
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.spark.sql.functions.{coalesce, col, from_unixtime, lit, typedLit}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{SaveMode, SparkSession}
 
 import scala.collection.JavaConverters.mapAsScalaMapConverter
@@ -15,7 +15,7 @@ import scala.collection.JavaConverters.mapAsScalaMapConverter
 class PublishActivityAlertsJob extends AbstractSparkJob[PublishActivityAlertsJobConfig] {
   override def runJob(spark: SparkSession, lattice: LatticeContext[PublishActivityAlertsJobConfig]): Unit = {
     val config: PublishActivityAlertsJobConfig = lattice.config
-    val alertsDf = loadHdfsUnit(spark, config.getTableToPublish.asInstanceOf[HdfsDataUnit])
+    val alertsDf = if (config.getTableToPublish.isInstanceOf[HdfsDataUnit]) loadHdfsUnit(spark, config.getTableToPublish.asInstanceOf[HdfsDataUnit]) else loadS3Unit(spark, config.getTableToPublish.asInstanceOf[S3DataUnit])
     val alertNameToAlertCategory = typedLit(config.alertNameToAlertCategory.asScala)
     val exportDf = alertsDf //
       .withColumnRenamed(InterfaceName.AccountId.name(), ActivityAlert.ENTITY_ID_COL)
@@ -32,10 +32,21 @@ class PublishActivityAlertsJob extends AbstractSparkJob[PublishActivityAlertsJob
     prop.setProperty("driver", config.getDbDriver)
     prop.setProperty("user", config.getDbUser)
     prop.setProperty("password", CipherUtils.decrypt(config.getDbPassword, config.getDbRandomStr.substring(24), config.getDbRandomStr.substring(0, 24)))
+    // default batchsize is 1000, scale up when dataset increases
+    val batchSize = if (exportDf.count() / 100 < 1000) 1000 else exportDf.count() / 100
+    prop.setProperty("batchsize", batchSize.toString)
+    // cap repartition at 20 based on the experiments to avoid overloading DB
+    val repartition: Int =
+      if (exportDf.count() / 100000 == 0) {
+        2
+      } else if (exportDf.count() / 100000 < 20) {
+        (exportDf.count() / 100000).toInt
+      } else {
+        20
+      }
     val table = config.getDbTableName
 
     // write data from spark dataframe to database
-    // we can repartition here, not doing it now to avoid premature optimization
-    exportDf.write.mode(SaveMode.Append).jdbc(config.getDbUrl, table, prop)
+    exportDf.repartition(repartition).write.mode(SaveMode.Append).jdbc(config.getDbUrl, table, prop)
   }
 }

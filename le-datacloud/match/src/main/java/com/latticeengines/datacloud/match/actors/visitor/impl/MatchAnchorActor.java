@@ -50,7 +50,8 @@ public class MatchAnchorActor extends AnchorActorTemplate {
 
     @Override
     protected boolean shouldPrepareRetravel(Traveler traveler) {
-        if (!entityMatchConfigurationService.isAllocateMode()) {
+        String entity = (traveler instanceof MatchTraveler) ? ((MatchTraveler) traveler).getEntity() : null;
+        if (!entityMatchConfigurationService.isAllocateMode(entity)) {
             return false;
         }
         return super.shouldPrepareRetravel(traveler);

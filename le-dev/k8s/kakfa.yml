@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kfk-zk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kfk-zk
+  template:
+    metadata:
+      labels:
+        name: kfk-zk
+        app: kfk-zk
+    spec:
+      containers:
+        - name: zoo1
+          image: bitnami/zookeeper
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 2181
+          env:
+            - name: ALLOW_ANONYMOUS_LOGIN
+              value: "yes"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kfk-zk-svc
+  labels:
+    app: kfk-zk
+spec:
+  selector:
+    app: kfk-zk
+  ports:
+    - name: client
+      port: 2181
+      protocol: TCP
+    - name: follower
+      port: 2888
+      protocol: TCP
+    - name: leader
+      port: 3888
+      protocol: TCP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kfk-bkr-svc
+  labels:
+    name: kfk-bkr-svc
+spec:
+  ports:
+    - port: 9093
+      protocol: TCP
+  selector:
+    app: kfk-bkr
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kfk-bkr-lb
+  labels:
+    name: kfk-bkr-lb
+spec:
+  ports:
+    - port: 9092
+      protocol: TCP
+  selector:
+    app: kfk-bkr
+  type: LoadBalancer
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kfk-bkr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kfk-bkr
+  template:
+    metadata:
+      name: kfk-bkr
+      labels:
+        app: kfk-bkr
+    spec:
+      initContainers:
+        - name: init-wait-for-zk
+          image: busybox
+          command: [ 'sh', '-c', "until nslookup kfk-zk-svc.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done" ]
+      containers:
+        - name: kfk-bkr
+          image: bitnami/kafka:2.7.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9091
+            - containerPort: 9092
+            - containerPort: 9093
+          env:
+            - name: KAFKA_CFG_ZOOKEEPER_CONNECT
+              value: "kfk-zk-svc:2181"
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: "yes"
+            - name: KAFKA_BROKER_ID
+              value: "0"
+            - name: KAFKA_CFG_LISTENERS
+              value: "CLIENT://:9091,EXTERNAL://:9092,K8S://:9093"
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: "CLIENT://:9091,EXTERNAL://localhost:9092,K8S://kfk-bkr-svc:9093"
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT,K8S:PLAINTEXT"
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "CLIENT"

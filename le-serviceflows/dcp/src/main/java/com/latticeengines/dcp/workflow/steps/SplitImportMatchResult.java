@@ -182,9 +182,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
 
         // create match result folder
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
-        String uploadTS = upload.getUploadConfig().getUploadTSPrefix();
+        String uploadTS = upload.getUploadConfig().getUploadTimestamp();
         String uploadMatchResultDir = UploadS3PathBuilderUtils.getUploadMatchResultDir(projectDetails.getProjectId(),
-                source.getSourceId(), uploadTS);
+                source.getSourceId(), upload.getDisplayName(), uploadTS);
         upload.getUploadConfig().setUploadMatchResultPrefix(uploadMatchResultDir);
         String matchResultPath = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder, uploadMatchResultDir);
         if (!s3Service.objectExist(dropBoxSummary.getBucket(), matchResultPath)) {

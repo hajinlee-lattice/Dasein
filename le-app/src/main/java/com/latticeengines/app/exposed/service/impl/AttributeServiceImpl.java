@@ -231,6 +231,7 @@ public class AttributeServiceImpl implements AttributeService {
             Category category, String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes) {
         AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
+                .batonService(batonService) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .attributeCustomizationService(attributeCustomizationService) //
                 .attributeDisplayNameFilter(attributeDisplayNameFilter) //
@@ -248,6 +249,7 @@ public class AttributeServiceImpl implements AttributeService {
     @Override
     public List<LeadEnrichmentAttribute> getAllAttributes() {
         AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
+                .batonService(batonService) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .considerInternalAttributes(true) //
                 .skipTenantLevelCustomization(true) //
@@ -389,6 +391,7 @@ public class AttributeServiceImpl implements AttributeService {
     public void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType,
             String fileName, Tenant tenant, Boolean isSelected, Boolean considerInternalAttributes) {
         AttributePageProcessor processor = new AttributePageProcessor.Builder().columnMetadataProxy(columnMetadataProxy) //
+                .batonService(batonService) //
                 .selectedAttrEntityMgr(selectedAttrEntityMgr) //
                 .onlySelectedAttributes(isSelected) //
                 .considerInternalAttributes(considerInternalAttributes) //

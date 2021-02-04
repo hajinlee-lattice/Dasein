@@ -7,6 +7,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -17,16 +18,18 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
       "attrName":"AccountId",
-      "displayName":"Account ID",
+      "displayName":"Lattice Account ID",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -37,6 +40,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -47,6 +51,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -57,6 +62,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -67,6 +73,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -77,6 +84,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -87,6 +95,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -97,6 +106,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -107,6 +117,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -117,17 +128,19 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"SFDC_ACCOUNT_ID",
-      "displayName":"SFDC Account ID",
+      "displayName":"Account ID",
       "entity":"Account",
       "javaClass":"String",
       "externalSystemName":"Marketo",
-      "standardField":false,
-      "exportEnabled":false,
-      "audienceType": []
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"PRIORITY_ID",
@@ -137,6 +150,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -147,6 +161,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -157,6 +172,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -167,6 +183,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -177,6 +194,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -187,6 +205,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -197,6 +216,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -207,6 +227,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -217,6 +238,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -227,6 +249,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -237,6 +260,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -247,6 +271,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -257,6 +282,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -267,6 +293,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -277,6 +304,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -287,6 +315,7 @@
       "externalSystemName":"Marketo",
       "standardField":false,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -297,6 +326,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -307,6 +337,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -317,6 +348,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -327,6 +359,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -337,6 +370,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -347,17 +381,19 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"SFDC_CONTACT_ID",
-      "displayName":"Contact SFDC ID",
+      "displayName":"Contact ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Marketo",
-      "standardField":false,
-      "exportEnabled":false,
-      "audienceType": []
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
+      "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"City",
@@ -367,16 +403,18 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName":"ContactId",
-      "displayName":"Contact ID",
+      "displayName":"Lattice Contact ID",
       "entity":"Contact",
       "javaClass":"String",
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -387,6 +425,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -397,6 +436,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -407,6 +447,7 @@
       "externalSystemName":"Marketo",
       "standardField":true,
       "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    }
 ]

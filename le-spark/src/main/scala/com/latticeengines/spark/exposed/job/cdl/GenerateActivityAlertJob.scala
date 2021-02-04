@@ -82,8 +82,6 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
           Some(generateReEngagedActivity(timelineDf, startTimestamp, endTimestamp))
         case Alert.HIGH_ENGAGEMENT_IN_ACCOUNT =>
           Some(generateHighEngagementInAccountAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
-        case Alert.KNOWN_WEB_VISITS =>
-          Some(generateKnownWebVisitsAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
         case Alert.ACTIVE_CONTACT_WEB_VISITS =>
           Some(generateActiveContactWebVisitsAlerts(qualifiedTimelineDf, startTimestamp, endTimestamp))
         case Alert.BUYING_INTENT_AROUND_PRODUCT_PAGES =>
@@ -241,29 +239,17 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
       .distinct()
   }
 
-  def generateKnownWebVisitsAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
-    val contactCntDf = getActiveContactsInTimeRange(timelineDf)
-
-    val maCountsDf = getMarketingActivityCountsInTimeRange(timelineDf)
-
-    // a) no. of known contacts > 0
-    // b) no. marketing activity > 0
-    addTimeRange(maCountsDf
-      .filter(col(maCounts).gt(0))
-      .join(contactCntDf, Seq(accountId))
-      .filter(contactCntDf.col(activeContacts).gt(0)), startTime, endTime)
-      .select(col(accountId), col(CreationTimestamp.name), packAlertData(activeContacts, maCounts))
-  }
-
   def generateActiveContactWebVisitsAlerts(timelineDf: DataFrame, startTime: Long, endTime: Long): DataFrame = {
     val contactCntTitleDf = getActiveContactsTitlesInTimeRange(timelineDf)
 
     val maCntDf = getMarketingActivityCountsInTimeRange(timelineDf)
 
-    // a) no. of known contacts >= 2 and no. marketing activity = 0
+    // a) no. of known contacts > 0 and no. marketing activity > 0
     // b) Show the titles of those known contacts
-    addTimeRange(contactCntTitleDf
-      .filter(col(activeContacts).geq(2)).join(maCntDf.filter(col(maCounts).gt(0)), Seq(accountId), "leftanti"), startTime, endTime)
+    addTimeRange(maCntDf
+      .filter(col(maCounts).gt(0))
+      .join(contactCntTitleDf, Seq(accountId))
+      .filter(contactCntTitleDf.col(activeContacts).gt(0)), startTime, endTime)
       .select(col(accountId), col(CreationTimestamp.name), packAlertData(activeContacts, titles, titleCnt))
   }
 
@@ -334,6 +320,8 @@ class GenerateActivityAlertJob extends AbstractSparkJob[ActivityAlertJobConfig] 
     timelineDf
       .filter(col(accountId).isNotNull.and(col(accountId).notEqual(anonymousId)))
       .filter(col(contactId).isNotNull.and(col(contactId).notEqual(anonymousId)))
+      .select(col(accountId), col(contactId), col(title))
+      .distinct()
       .groupBy(accountId)
       .agg(countDistinct(contactId).as(activeContacts), concatTitles(col(title)).as(titles), count(col(title)).as(titleCnt))
   }

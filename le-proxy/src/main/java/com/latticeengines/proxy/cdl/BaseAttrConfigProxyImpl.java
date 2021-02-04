@@ -2,6 +2,7 @@ package com.latticeengines.proxy.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,12 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         if (categoryNames != null) {
             url.append("?");
             for (String categoryName : categoryNames) {
-                url.append("category=").append(categoryName).append("&");
+                try {
+                    url.append("category=").append(URLEncoder.encode(categoryName, "UTF-8")).append("&");
+                } catch (Exception ex) {
+                    log.warn("Can not encode for category=" + categoryName + " error=" + ex.getMessage());
+                    url.append("category=").append(categoryName).append("&");
+                }
             }
         }
         if (!url.toString().endsWith("&")) {

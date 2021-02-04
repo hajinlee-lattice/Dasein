@@ -23,6 +23,9 @@ public interface CDLLookupService {
     // using new account lookup method
     String lookupInternalAccountId(String customerSpace, DataCollection.Version version, String lookupIdKey, String lookupIdValue);
 
+    List<String> lookupInternalAccountIds(String customerSpace, DataCollection.Version version, String lookupIdKey,
+                                     List<String> lookupIdValues);
+
     boolean clearAccountLookupDUCache();
 
     List<Map<String, Object>> lookupContactsByInternalAccountId(String customerSpace, DataCollection.Version version,

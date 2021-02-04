@@ -5,18 +5,20 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName": "AccountId",
-      "displayName": "Account ID",
+      "displayName": "Lattice Account ID",
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -25,8 +27,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -35,8 +38,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -45,8 +49,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -55,8 +60,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -65,8 +71,9 @@
       "entity": "Account",
       "javaClass": "Long",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -75,8 +82,9 @@
       "entity": "Account",
       "javaClass": "Long",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -85,8 +93,9 @@
       "entity": "Account",
       "javaClass": "Double",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -95,8 +104,9 @@
       "entity": "Account",
       "javaClass": "Double",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -105,8 +115,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["ACCOUNTS", "CONTACTS"]
    },
    {
@@ -115,8 +126,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -125,8 +137,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -135,8 +148,9 @@
       "entity": "Account",
       "javaClass": "Double",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -145,8 +159,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -155,8 +170,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -165,8 +181,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -175,8 +192,9 @@
       "entity": "Account",
       "javaClass": "Boolean",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -185,8 +203,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -195,8 +214,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -205,8 +225,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -215,8 +236,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -225,8 +247,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":false,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -235,9 +258,10 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
-      "audienceType": ["CONTACTS"]
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    },
    {
       "attrName": "Email",
@@ -245,8 +269,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -255,8 +280,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -265,8 +291,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -275,8 +302,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -285,8 +313,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -295,8 +324,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -305,18 +335,20 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName": "ContactId",
-      "displayName": "Contact ID",
+      "displayName": "Lattice Contact ID",
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -325,8 +357,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -335,8 +368,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -345,28 +379,31 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName": "SFDC_CONTACT_ID",
-      "displayName": "Contact SFDC ID",
+      "displayName": "Contact ID",
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName": "SFDC_ACCOUNT_ID",
-      "displayName": "SFDC Account ID",
+      "displayName": "Account ID",
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField": false,
-      "exportEnabled": true,
-      "audienceType": ["CONTACTS"]
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    }
 ]

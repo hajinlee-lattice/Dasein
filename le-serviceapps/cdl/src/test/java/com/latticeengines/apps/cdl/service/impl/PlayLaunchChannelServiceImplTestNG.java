@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -9,7 +8,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -22,7 +20,6 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -92,7 +89,10 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
     private String CREATED_BY = "lattice@lattice-engines.com";
+    private String UPDATED_BY = "pls-super-admin-tester@lattice-engines.com";
     private String CRON_EXPRESSION = "0 0 12 ? * WED *";
+    private String current = "CURRENT";
+    private String previous = "PREVIOUS";
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
@@ -154,6 +154,8 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         playLaunchChannel2.setIsAlwaysOn(false);
         playLaunchChannel2.setChannelConfig(new MarketoChannelConfig());
 
+        createTable(current);
+        createTable(previous);
     }
 
     @Test(groups = "deployment-app")
@@ -233,7 +235,6 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         playLaunchChannelService.updateNextScheduledDate(play.getName(), playLaunchChannel1.getId());
         Assert.assertTrue(emailProxy.sendPlayLaunchChannelExpiringEmail(MultiTenantContext.getTenant().getId(),
                 playLaunchChannel1));
-
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testEmailSentOnSecondToLastLaunch" })
@@ -250,31 +251,45 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testUpdate" })
     public void testRecoverLaunchUniverses() throws InterruptedException {
-        String current = "CURRENT";
-        String previous = "PREVIOUS";
-
         playLaunchChannel1.setCurrentLaunchedAccountUniverseTable(current);
         playLaunchChannel1.setPreviousLaunchedAccountUniverseTable(previous);
-        playLaunchChannelService.updateCurrentLaunchedAccountUniverseWithPrevious(playLaunchChannel1);
 
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5, Collections.singleton(AssertionError.class), null);
-        retry.execute(ctx -> {
-            Assert.assertNotNull(playLaunchChannel1);
-            Assert.assertEquals(playLaunchChannel1.getCurrentLaunchedAccountUniverseTable(), previous);
-            Assert.assertEquals(playLaunchChannel1.getPreviousLaunchedAccountUniverseTable(), previous);
-            return true;
-        });
+        PlayLaunchChannel retrievedChannel = playLaunchChannelService.recoverLaunchUniverse(playLaunchChannel1);
 
-        // Remove test launch universe IDs since they don't actually exist
+        Assert.assertNotNull(retrievedChannel);
+        Assert.assertEquals(retrievedChannel.getCurrentLaunchedAccountUniverseTable(), previous);
+        Assert.assertNull(retrievedChannel.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(retrievedChannel.getCurrentLaunchedContactUniverseTable());
+        Assert.assertNull(retrievedChannel.getPreviousLaunchedContactUniverseTable());
+
+        playLaunchChannel1.setCurrentLaunchedContactUniverseTable(current);
+        playLaunchChannel1.setPreviousLaunchedContactUniverseTable(previous);
+
+        retrievedChannel = playLaunchChannelService.recoverLaunchUniverse(playLaunchChannel1);
+
+        Assert.assertNotNull(retrievedChannel);
+        Assert.assertEquals(retrievedChannel.getCurrentLaunchedAccountUniverseTable(), previous);
+        Assert.assertNull(retrievedChannel.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertEquals(retrievedChannel.getCurrentLaunchedContactUniverseTable(), previous);
+        Assert.assertNull(retrievedChannel.getPreviousLaunchedContactUniverseTable());
+
+        // This should not go through b/c UI has access to this call and lazily
+        // populates data
         playLaunchChannel1.setCurrentLaunchedAccountUniverseTable(null);
         playLaunchChannel1.setPreviousLaunchedAccountUniverseTable(null);
-        playLaunchChannelService.update(play.getName(), playLaunchChannel1);
+        playLaunchChannel1.setCurrentLaunchedContactUniverseTable(null);
+        playLaunchChannel1.setPreviousLaunchedContactUniverseTable(null);
+        retrievedChannel = playLaunchChannelService.update(play.getName(), playLaunchChannel1);
 
-        retry.execute(ctx -> {
-            Assert.assertNull(playLaunchChannel1.getCurrentLaunchedAccountUniverseTable());
-            Assert.assertNull(playLaunchChannel1.getPreviousLaunchedAccountUniverseTable());
-            return true;
-        });
+        Assert.assertEquals(retrievedChannel.getCurrentLaunchedAccountUniverseTable(), previous);
+        Assert.assertEquals(retrievedChannel.getCurrentLaunchedContactUniverseTable(), previous);
+
+        retrievedChannel = playLaunchChannelService.recoverLaunchUniverse(playLaunchChannel1);
+        Assert.assertNotNull(retrievedChannel);
+        Assert.assertNull(retrievedChannel.getCurrentLaunchedAccountUniverseTable());
+        Assert.assertNull(retrievedChannel.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(retrievedChannel.getCurrentLaunchedContactUniverseTable());
+        Assert.assertNull(retrievedChannel.getPreviousLaunchedContactUniverseTable());
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testRecoverLaunchUniverses" })
@@ -316,7 +331,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         playLaunchChannel.setPlay(play);
         playLaunchChannel.setLookupIdMap(lookupIdMap);
         playLaunchChannel.setCreatedBy(CREATED_BY);
-        playLaunchChannel.setUpdatedBy(CREATED_BY);
+        playLaunchChannel.setUpdatedBy(UPDATED_BY);
         playLaunchChannel.setLaunchType(LaunchType.FULL);
         playLaunchChannel.setId(NamingUtils.randomSuffix("pl", 16));
         playLaunchChannel.setLaunchUnscored(false);

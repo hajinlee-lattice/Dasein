@@ -112,4 +112,10 @@ public class ExternalSystemAuthenticationEntityMgrImpl
         return getReaderRepo().findAllAuths();
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly=true)
+    public List<ExternalSystemAuthentication> retrieveAuthenticationsByTrayAuthId(String trayAuthId) {
+        return getReaderRepo().retrieveAllByTrayAuthId(trayAuthId);
+    }
+
 }

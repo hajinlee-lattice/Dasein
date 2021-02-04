@@ -37,6 +37,7 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.util.CuratedAttributeUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -170,6 +171,7 @@ public class CuratedContactAttributes
                 .getTemplateToDataFeedTaskMap(customerSpace.toString());
         templateTypeMap = CuratedAttributeUtils.templateEntityTypeMap(templateFeedTaskMap);
         jobConfig.templateSystemMap = CuratedAttributeUtils.templateSourceMap(templateSystemMap, systemMap);
+        jobConfig.templateSystemTypeMap = CuratedAttributeUtils.templateSystemTypeMap(templateSystemMap, systemMap);
         jobConfig.templateTypeMap = templateTypeMap;
         jobConfig.attrsToMerge.put(0, CuratedAttributeUtils.attrsMergeFromMasterStore(MASTER_STORE_ENTITY));
 

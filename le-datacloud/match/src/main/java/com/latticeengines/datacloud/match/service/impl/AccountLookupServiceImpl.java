@@ -20,7 +20,6 @@ import com.latticeengines.datacloud.match.entitymgr.impl.AccountLookupEntryMgrIm
 import com.latticeengines.datacloud.match.entitymgr.impl.LatticeAccountMgrImpl;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
@@ -33,9 +32,6 @@ public class AccountLookupServiceImpl implements AccountLookupService {
 
     private Map<String, AccountLookupEntryMgr> lookupMgrs;
     private Map<String, LatticeAccountMgr> accountMgrs;
-
-    @Inject
-    private FabricMessageService messageService;
 
     @Inject
     private FabricDataService dataService;
@@ -125,7 +121,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
             String signature = dataCloudVersion.getDynamoTableSignatureLookup();
             String fullVersion = versionService.constructDynamoVersion(version, signature);
             log.info("Use " + fullVersion + " as full version of AccountLookup for " + version);
-            lookupMgr = new AccountLookupEntryMgrImpl(messageService, dataService, fullVersion);
+            lookupMgr = new AccountLookupEntryMgrImpl(dataService, fullVersion);
             lookupMgr.init();
             lookupMgrs.put(version, lookupMgr);
         }
@@ -154,7 +150,7 @@ public class AccountLookupServiceImpl implements AccountLookupService {
             String signature = dataCloudVersion.getDynamoTableSignature();
             String fullVersion = versionService.constructDynamoVersion(version, signature);
             log.info("Use " + fullVersion + " as full version of LatticeAccount for " + version);
-            accountMgr = new LatticeAccountMgrImpl(messageService, dataService, fullVersion);
+            accountMgr = new LatticeAccountMgrImpl(dataService, fullVersion);
             accountMgr.init();
             accountMgrs.put(version, accountMgr);
         }

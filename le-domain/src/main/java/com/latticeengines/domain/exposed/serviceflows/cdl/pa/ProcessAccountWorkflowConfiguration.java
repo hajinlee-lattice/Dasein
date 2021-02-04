@@ -92,6 +92,11 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder eraseByNullEnabled(boolean eraseByNullEnabled) {
+            processAccountStepConfiguration.setEraseByNullEnabled(eraseByNullEnabled);
+            return this;
+        }
+
         public ProcessAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

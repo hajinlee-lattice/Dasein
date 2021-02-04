@@ -87,6 +87,12 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     private String orgId4 = "org4";
     private String orgName4 = "s3_org";
 
+    private String tableName1 = "table1";
+    private String tableName2 = "table2";
+    private String tableName3 = "table3";
+    private String tableName4 = "table4";
+    private String tableNameDoesntExist = "tableNameDoesntExist";
+
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
     private String NAME = "play" + CURRENT_TIME_MILLIS;
@@ -151,6 +157,12 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
         channel4.setCronScheduleExpression("0 0 12 ? * WED *");
         channel4.setExpirationPeriodString("P3M");
         channel4.setChannelConfig(s3ChannelConfig);
+
+        // Create tables
+        createTable(tableName1);
+        createTable(tableName2);
+        createTable(tableName3);
+        createTable(tableName4);
     }
 
     private LookupIdMap createLookupIdMap(CDLExternalSystemType externalSystemType, CDLExternalSystemName externalSystemName, String orgId, String orgName) {
@@ -383,6 +395,72 @@ public class PlayLaunchChannelEntityMgrImplTestNG extends CDLFunctionalTestNGBas
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
+    public void testCannotUpdateCurrentTablesToNull() {
+        PlayLaunchChannel retrieved = playLaunchChannelEntityMgr.findById(channel1.getId());
+        Assert.assertNull(retrieved.getCurrentLaunchedAccountUniverseTable());
+        Assert.assertNull(retrieved.getCurrentLaunchedContactUniverseTable());
+        Assert.assertNull(retrieved.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(retrieved.getPreviousLaunchedContactUniverseTable());
+
+        channel1.setCurrentLaunchedAccountUniverseTable(tableName1);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getCurrentLaunchedAccountUniverseTable(), tableName1);
+        Assert.assertNull(retrieved.getCurrentLaunchedContactUniverseTable());
+        Assert.assertNull(retrieved.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(retrieved.getPreviousLaunchedContactUniverseTable());
+
+        channel1.setCurrentLaunchedContactUniverseTable(tableName2);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getCurrentLaunchedAccountUniverseTable(), tableName1);
+        Assert.assertEquals(retrieved.getCurrentLaunchedContactUniverseTable(), tableName2);
+        Assert.assertNull(retrieved.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(retrieved.getPreviousLaunchedContactUniverseTable());
+
+        channel1.setPreviousLaunchedAccountUniverseTable(tableName3);
+        channel1.setPreviousLaunchedContactUniverseTable(tableName4);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getCurrentLaunchedAccountUniverseTable(), tableName1);
+        Assert.assertEquals(retrieved.getCurrentLaunchedContactUniverseTable(), tableName2);
+        Assert.assertNull(retrieved.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(retrieved.getPreviousLaunchedContactUniverseTable());
+
+        channel1.setCurrentLaunchedAccountUniverseTable(tableName3);
+        channel1.setCurrentLaunchedContactUniverseTable(tableName4);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getCurrentLaunchedAccountUniverseTable(), tableName3);
+        Assert.assertEquals(retrieved.getCurrentLaunchedContactUniverseTable(), tableName4);
+        Assert.assertNull(retrieved.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(retrieved.getPreviousLaunchedContactUniverseTable());
+
+        channel1.setCurrentLaunchedAccountUniverseTable(null);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getCurrentLaunchedAccountUniverseTable(), tableName3);
+        Assert.assertEquals(retrieved.getCurrentLaunchedContactUniverseTable(), tableName4);
+        Assert.assertNull(retrieved.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(retrieved.getPreviousLaunchedContactUniverseTable());
+
+        channel1.setCurrentLaunchedContactUniverseTable(null);
+        retrieved = playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        Assert.assertNotNull(retrieved);
+        Assert.assertEquals(retrieved.getCurrentLaunchedAccountUniverseTable(), tableName3);
+        Assert.assertEquals(retrieved.getCurrentLaunchedContactUniverseTable(), tableName4);
+        Assert.assertNull(retrieved.getPreviousLaunchedAccountUniverseTable());
+        Assert.assertNull(retrieved.getPreviousLaunchedContactUniverseTable());
+
+        try {
+            channel1.setCurrentLaunchedAccountUniverseTable(tableNameDoesntExist);
+            playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrieved, channel1);
+        } catch (LedpException e) {
+            Assert.assertEquals(e.getCode(), LedpCode.LEDP_32000);
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCannotUpdateCurrentTablesToNull" })
     public void testDelete() {
         playLaunchChannelEntityMgr.deleteByChannelId(channel1.getId(), true);
         playLaunchChannelEntityMgr.deleteByChannelId(channel2.getId(), true);

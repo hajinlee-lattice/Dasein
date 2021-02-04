@@ -16,4 +16,6 @@ public interface ExternalSystemAuthenticationService {
 
     List<ExternalSystemAuthentication> findAuthentications();
 
+    List<ExternalSystemAuthentication> findAuthenticationsByTrayAuthId(String trayAuthId);
+
 }

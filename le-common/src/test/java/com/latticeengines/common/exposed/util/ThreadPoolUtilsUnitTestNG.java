@@ -1,6 +1,7 @@
 package com.latticeengines.common.exposed.util;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,6 +33,17 @@ public class ThreadPoolUtilsUnitTestNG {
         List<Runnable> runnables = getRunnables(counter);
         ThreadPoolUtils.runInParallel(pool, runnables, 1, 1);
         Assert.assertEquals(counter.get(), 100L);
+    }
+
+    @Test(groups = "unit")
+    private void testBoundedQueueCallerThreadPool() throws InterruptedException {
+        AtomicLong counter = new AtomicLong(0L);
+        ExecutorService pool = ThreadPoolUtils.getBoundedQueueCallerThreadPool(1, 4, 1, 2);
+        List<Runnable> runnables = getRunnables(counter);
+        for (Runnable run : runnables) {
+            pool.submit(run);
+        }
+        ThreadPoolUtils.shutdownAndAwaitTermination(pool, 1);
     }
 
     private List<Runnable> getRunnables(AtomicLong counter) {

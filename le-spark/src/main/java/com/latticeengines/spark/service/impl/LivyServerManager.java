@@ -28,6 +28,9 @@ public class LivyServerManager {
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
+    @Value("${hadoop.use.defaultlivy:false}")
+    private Boolean useDefaultLivy;
+
     @Inject
     private EMRCacheService emrCacheService;
 
@@ -51,7 +54,8 @@ public class LivyServerManager {
     private Queue<String> serverQueue = new ConcurrentLinkedQueue<>();
 
     public String getLivyHost() {
-        return Boolean.TRUE.equals(useEmr) ? manager.getLivyServerUrl(emrClusterName) : "http://localhost:8998";
+        return Boolean.TRUE.equals(useEmr) ? (Boolean.TRUE.equals(useDefaultLivy) ? emrCacheService.getLivyUrl()
+                : manager.getLivyServerUrl(emrClusterName)) : "http://localhost:8998";
     }
 
     private String getLivyServerUrl(String emrClusterName) {
@@ -154,8 +158,14 @@ public class LivyServerManager {
                 if (state.equalsIgnoreCase("killed") || state.equalsIgnoreCase("dead")
                         || state.equalsIgnoreCase("success")) {
                     int sessionId = json.get("id").asInt();
-                    restTemplate.delete(url + sessionId);
-                    total--;
+                    try {
+                        restTemplate.delete(url + sessionId);
+                        total--;
+                    } catch (Exception e) {
+                        // Do nothing, suppress the exceptions coming from delete
+                        // as some sessions might already cleaned up by livy during deletion
+                        e.printStackTrace();
+                    }
                 }
             }
             // If remaining sessions already exceed upper limit, return false

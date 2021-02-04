@@ -131,6 +131,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
             EntityEmailBasedMicroEngineActor.class.getSimpleName(), //
             EntityNamePhoneBasedMicroEngineActor.class.getSimpleName(), //
             EntityIdAssociateMicroEngineActor.class.getSimpleName(), //
+            EntityIdResolveMicroEngineActor.class.getSimpleName(), //
     };
 
     private static final Map<String, String> DG_MAP = new HashMap<>();
@@ -218,7 +219,7 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
                 Queue<String> expectedTravelStops = parseTravelStops(entity, retries, anonymousAcct);
                 Assert.assertNotNull(result);
                 // Uncomment these lines for troubleshooting
-                /*
+                /*-
                 log.info(String.format("Retries = %d, Expected Stops = %s", retries,
                         String.join(",", expectedTravelStops)));
                 log.info("MatchTravelerHistory");
@@ -346,9 +347,9 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
 
             }
         } else if (BusinessEntity.Contact.name().equals(entity)) {
-            travelStops.addAll(getContactTravelStopsSingleRun(anonymousAcct));
+            travelStops.addAll(getContactTravelStopsSingleRun(anonymousAcct, retries == 1));
             for (int i = 2; i <= retries; i++) {
-                travelStops.addAll(getContactTravelStopsRetriedRun());
+                travelStops.addAll(getContactTravelStopsRetriedRun(retries == i));
             }
         } else {
             throw new IllegalArgumentException("Unhandled entity " + entity);
@@ -511,8 +512,11 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
     }
 
     // Contact: Only travel once or 1st run in multi-retries
-    private List<String> getContactTravelStopsSingleRun(boolean anonymousAccount) {
-        List<String> travelStops = new ArrayList<>(Arrays.asList(CONTACT_TRAVEL_STOPS));
+    private List<String> getContactTravelStopsSingleRun(boolean anonymousAccount, boolean lastRun) {
+        // Remove last EntityIdResolveMicroEngineActor because
+        // EntityIdAssociateMicroEngineActor already gets a match
+        List<String> travelStops = new ArrayList<>(
+                Arrays.asList(CONTACT_TRAVEL_STOPS).subList(0, CONTACT_TRAVEL_STOPS.length - (lastRun ? 1 : 0)));
         // Inject travel stops for account match decision graph
         int accountMatchJunctionIdx = travelStops.indexOf(ACCOUNT_MATCH_JUNCTION_ACTOR);
         //
@@ -521,7 +525,8 @@ public class MatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBase {
     }
 
     // Contact: If travel multiple times, for retried runs
-    private List<String> getContactTravelStopsRetriedRun() {
-        return new ArrayList<>(Arrays.asList(CONTACT_TRAVEL_STOPS));
+    private List<String> getContactTravelStopsRetriedRun(boolean lastRun) {
+        return new ArrayList<>(
+                Arrays.asList(CONTACT_TRAVEL_STOPS).subList(0, CONTACT_TRAVEL_STOPS.length - (lastRun ? 1 : 0)));
     }
 }

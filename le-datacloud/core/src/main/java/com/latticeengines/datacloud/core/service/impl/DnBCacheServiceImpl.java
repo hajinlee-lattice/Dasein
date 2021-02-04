@@ -22,7 +22,6 @@ import com.latticeengines.datacloud.core.entitymgr.DnBCacheEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.impl.DnBCacheEntityMgrImpl;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
@@ -47,9 +46,6 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     private double expireFactor;
 
     private Map<String, DnBCacheEntityMgr> cacheEntityMgrs = new HashMap<String, DnBCacheEntityMgr>();
-
-    @Inject
-    private FabricMessageService messageService;
 
     @Inject
     private FabricDataService dataService;
@@ -217,7 +213,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
 
         if (cacheEntityMgr == null) {
             log.info("Use " + cacheVersion + " as full version of DnBCache for " + cacheVersion);
-            cacheEntityMgr = new DnBCacheEntityMgrImpl(messageService, dataService, cacheVersion);
+            cacheEntityMgr = new DnBCacheEntityMgrImpl(dataService, cacheVersion);
             cacheEntityMgr.init();
             cacheEntityMgrs.put(cacheVersion, cacheEntityMgr);
         }

@@ -6,7 +6,7 @@
     <groupId>com.latticeengines</groupId>
     <artifactId>le-parent</artifactId>
     <packaging>pom</packaging>
-    <version>4.36.0-SNAPSHOT</version>
+    <version>4.38.0-SNAPSHOT</version>
     <name>le-parent</name>
     <description>Parent of all lattice engine maven projects.</description>
 
@@ -68,9 +68,8 @@
         <javax.ws.version>2.3.0</javax.ws.version> <!-- compile on java 11 -->
 
         <!-- dependencies with rigid version interlock, hard to upgrade -->
-        <hadoop.version>2.8.5</hadoop.version>
+        <hadoop.version>2.10.1</hadoop.version>
         <mortbay.jetty.version>6.1.26.hwx</mortbay.jetty.version>
-        <!--<spring.data.hdp.version>2.4.0.RELEASE-hdp23</spring.data.hdp.version> &lt;!&ndash; need ledp3 classifier &ndash;&gt;-->
         <spring.data.hdp.version>2.5.0.RELEASE</spring.data.hdp.version>
         <tez.version>0.9.1</tez.version>
         <netty.version>3.6.2.Final</netty.version> <!-- for hadoop 2.8.5 -->
@@ -78,16 +77,16 @@
         <tez.guava.version>11.0.2</tez.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
         <parquet.version>1.10.1</parquet.version>
-        <aws.version>1.11.759</aws.version> <!-- at least keep up with emr release -->
+        <aws.version>1.11.890</aws.version> <!-- at least keep up with emr release -->
         <aws.sqs.version>1.0.4</aws.sqs.version>
-        <spark.version>2.4.5</spark.version>
+        <spark.version>2.4.7</spark.version>
         <scala.version>2.11.12</scala.version>
         <jackson.fasterxml.version>2.10.1</jackson.fasterxml.version>
         <jackson.codehaus.version>1.9.13</jackson.codehaus.version> <!-- spring-security-oauth2 2.1.1.RELEASE -->
         <hibnerate.types52.version>2.0.0</hibnerate.types52.version>
         <hibernate.version>5.3.18.Final</hibernate.version>
         <redshift.jdbc.version>1.2.10.1009</redshift.jdbc.version> <!-- we upload to nexus -->
-        <joda.version>2.8.1</joda.version>
+        <joda.version>2.10.9</joda.version>
         <cronutils.version>4.1.2</cronutils.version> <!-- need to upgrade joda -->
         <marketo.soap.sdk.version>2.7</marketo.soap.sdk.version> <!-- uploaded to nexues ? -->
         <natty.version>0.11</natty.version> <!-- this is the latest update with date parser ? -->

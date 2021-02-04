@@ -32,6 +32,7 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DataOperationRequest;
 import com.latticeengines.domain.exposed.cdl.ListSegmentImportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
@@ -55,6 +56,7 @@ public class S3ImportServiceImpl implements S3ImportService {
 
     private static final String SOURCE = "File";
     private static final String TEMPLATES = "Templates";
+    private static final String DATA_OPERATION = "Data_Operation";
     private static final String DROPFOLDER = "dropfolder";
     private static final String STACK_INFO_URL = "/pls/health/stackinfo";
 
@@ -130,6 +132,14 @@ public class S3ImportServiceImpl implements S3ImportService {
             return parts[parts.length - 1].toLowerCase().endsWith(".csv");
         } else if (S3ImportMessageType.LISTSEGMENT.equals(messageType)) {
             return parts[parts.length - 1].toLowerCase().endsWith(".zip");
+        } else if (S3ImportMessageType.DATAOPERATION.equals(messageType)) {
+            if (!DROPFOLDER.equals(parts[0])) {
+                return false;
+            }
+            if (!DATA_OPERATION.equals(parts[2])) {
+                return false;
+            }
+            return parts[parts.length - 1].toLowerCase().endsWith(".csv");
         }
         else {
             return false;
@@ -165,6 +175,8 @@ public class S3ImportServiceImpl implements S3ImportService {
                     submitDCPImport(dropBoxSet, message);
                 } else if (S3ImportMessageType.LISTSEGMENT.equals(message.getMessageType())) {
                     submitListSegmentImport(dropBoxSet, message);
+                } else if (S3ImportMessageType.DATAOPERATION.equals(message.getMessageType())) {
+                    submitDataOperation(dropBoxSet, message);
                 }
             } catch (RuntimeException e) {
                 // Only log message instead of stack trace to reduce log.
@@ -187,7 +199,9 @@ public class S3ImportServiceImpl implements S3ImportService {
         } else {
             messageList = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.Atlas);
             List<S3ImportMessage> messageListSegment = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.LISTSEGMENT);
+            List<S3ImportMessage> messageDataOperation = s3ImportMessageService.getMessageWithoutHostUrlByType(S3ImportMessageType.DATAOPERATION);
             messageList.addAll(messageListSegment);
+            messageList.addAll(messageDataOperation);
         }
 
         if (CollectionUtils.isNotEmpty(messageList)) {
@@ -215,7 +229,8 @@ public class S3ImportServiceImpl implements S3ImportService {
 
     @SuppressWarnings("unchecked")
     private boolean shouldSet(String tenantId, S3ImportMessageType messageType) {
-        String url = (S3ImportMessageType.Atlas.equals(messageType) || S3ImportMessageType.LISTSEGMENT.equals(messageType)) ?
+        String url = (S3ImportMessageType.Atlas.equals(messageType) || S3ImportMessageType.LISTSEGMENT.equals(messageType)
+                || S3ImportMessageType.DATAOPERATION.equals(messageType)) ?
                 appPublicUrl + STACK_INFO_URL : dcpPublicUrl + STACK_INFO_URL;
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
         boolean currentActive = true;
@@ -365,5 +380,37 @@ public class S3ImportServiceImpl implements S3ImportService {
             return false;
         }
 
+    }
+
+    private void submitDataOperation(Set<String> dropBoxSet, S3ImportMessage message) {
+        Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
+        log.info("Tenant: " + tenant.getId());
+        String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
+        String dropPath = S3ImportMessageUtils.getDropPathFromMessage(message);
+        log.info("DropPath: " + dropPath);
+        log.info(String.format("S3 data operation for %s/%s", message.getBucket(), message.getKey()));
+        if (submitDataOperationApplication(tenantId, message.getBucket(), message.getKey(), dropPath, message.getHostUrl())) {
+            dropBoxSet.add(message.getDropBox().getDropBox());
+            s3ImportMessageService.deleteMessage(message);
+        }
+    }
+
+    private boolean submitDataOperationApplication(String tenantId, String bucket, String key, String dropPath, String hostUrl) {
+        DataOperationRequest dataOperationRequest = new DataOperationRequest();
+        dataOperationRequest.setS3Bucket(bucket);
+        dataOperationRequest.setS3DropPath(dropPath);
+        dataOperationRequest.setS3FileKey(key);
+        try {
+            CDLProxy cdlProxy = new CDLProxy(hostUrl);
+            ApplicationId applicationId =  cdlProxy.submitDataOperationJob(tenantId, dataOperationRequest);
+            log.info("Start data operation job by applicationId : " + applicationId.toString());
+            return true;
+        } catch(LedpException e) {
+            log.error("Data operation file validation failed!", e);
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to submit data operation job.", e);
+            return false;
+        }
     }
 }

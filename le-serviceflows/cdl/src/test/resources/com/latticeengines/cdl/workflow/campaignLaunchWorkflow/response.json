@@ -1,6 +1,6 @@
 [
   {
-    "AttrName": "SalesforceAccountID",
+    "AttrName": "SFDC_ACCOUNT_ID",
     "DisplayName": "SFDC Account ID",
     "Entity": "Account",
     "JavaClass": "String",
@@ -8,7 +8,7 @@
     "IsCoveredByOptionalRule": false,
     "IsCoveredByMandatoryRule": false,
     "IsCampaignDerivedField": true,
-    "ColumnId": "SalesforceAccountID"
+    "ColumnId": "SFDC_ACCOUNT_ID"
   },
   {
     "AttrName": "RATING_MODEL_ID",

@@ -20,7 +20,6 @@ import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.datafabric.entitymanager.GenericTableEntityMgr;
 import com.latticeengines.datafabric.entitymanager.impl.GenericTableEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
-import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.workflowapi.flows.testflows.dynamo.PrepareTestDynamoConfiguration;
 import com.latticeengines.workflowapi.flows.testflows.framework.TestFrameworkWrapperWorkflowConfiguration;
@@ -36,9 +35,6 @@ public class ExportToDynamoDeploymentTestNG extends
 
     @Inject
     private DynamoItemService dynamoItemService;
-
-    @Inject
-    private FabricMessageService messageService;
 
     @Inject
     private FabricDataService dataService;
@@ -135,7 +131,7 @@ public class ExportToDynamoDeploymentTestNG extends
     }
 
     private GenericTableEntityMgr genericTableEntityMgr() {
-        return new GenericTableEntityMgrImpl(messageService, dataService, signature);
+        return new GenericTableEntityMgrImpl(dataService, signature);
     }
 
 }

@@ -11,7 +11,7 @@ check_aws_creds_expiration
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping Spark ..."
 
-    SPARK_VERSION=2.4.5
+    SPARK_VERSION=2.4.7
     ARTIFACT_DIR="$WSHOME/le-dev/artifacts"
 
     if [[ ! -f "${ARTIFACT_DIR}/spark-${SPARK_VERSION}.tgz" ]]; then
@@ -29,27 +29,22 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     fi
     sudo mv "${ARTIFACT_DIR}/spark-${SPARK_VERSION}-bin-hadoop2.7" "${SPARK_HOME}"
 
-    if [[ ! -f "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar" ]]; then
-        MAVEN_URL="https://repo1.maven.org/maven2/com/sun/jersey/jersey-bundle/1.19.1/jersey-bundle-1.19.1.jar"
-        wget --no-check-certificate ${MAVEN_URL} -O "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar"
-    fi
-    sudo cp "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar" "${SPARK_HOME}/jars"
-
-    # match spark build dependency
-    AWS_SDK_VERSION=1.7.4
-    if [[ ! -f "${ARTIFACT_DIR}/aws-java-sdk-${AWS_SDK_VERSION}.jar" ]]; then
-        MAVEN_URL="https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/${AWS_SDK_VERSION}/aws-java-sdk-${AWS_SDK_VERSION}.jar"
-        wget --no-check-certificate ${MAVEN_URL} -O "${ARTIFACT_DIR}/aws-java-sdk-${AWS_SDK_VERSION}.jar"
-    fi
-    sudo cp "${ARTIFACT_DIR}/aws-java-sdk-${AWS_SDK_VERSION}.jar" "${SPARK_HOME}/jars"
-
-    # match spark build dependency
+    # match spark build dependency: $SPARK_HOME/jars
     HADOOP_AWS_VERSION="2.7.3"
     if [[ ! -f "${ARTIFACT_DIR}/hadoop-aws-${HADOOP_AWS_VERSION}.jar" ]]; then
         MAVEN_URL="https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar"
         wget --no-check-certificate ${MAVEN_URL} -O "${ARTIFACT_DIR}/hadoop-aws-${HADOOP_AWS_VERSION}.jar"
     fi
     sudo cp "${ARTIFACT_DIR}/hadoop-aws-${HADOOP_AWS_VERSION}.jar" "${SPARK_HOME}/jars"
+
+    # match hadoop-aws version
+    # https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-aws/2.7.3
+    AWS_SDK_VERSION=1.7.4
+    if [[ ! -f "${ARTIFACT_DIR}/aws-java-sdk-${AWS_SDK_VERSION}.jar" ]]; then
+        MAVEN_URL="https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/${AWS_SDK_VERSION}/aws-java-sdk-${AWS_SDK_VERSION}.jar"
+        wget --no-check-certificate ${MAVEN_URL} -O "${ARTIFACT_DIR}/aws-java-sdk-${AWS_SDK_VERSION}.jar"
+    fi
+    sudo cp "${ARTIFACT_DIR}/aws-java-sdk-${AWS_SDK_VERSION}.jar" "${SPARK_HOME}/jars"
 
     PARANAMER_PATH="${HOME}/.m2/repository/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar"
     if [[ ! -f "${PARANAMER_PATH}" ]]; then

@@ -159,10 +159,9 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         log.info(String.format("actionIds=%s", list));
 
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
-        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.size(), 2);
         Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
         Assert.assertEquals(list.get(1), COMPLETE_ACTION_1_PID);
-        Assert.assertEquals(list.get(2), COMPLETE_ACTION_2_PID);
     }
 
     @Test(groups = "functional", dependsOnMethods = {"testGetFullActionAndJobIds"})
@@ -177,10 +176,9 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertNotNull(list);
         log.info(String.format("actionIds=%s", list));
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
-        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.size(), 2);
         Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
         Assert.assertEquals(list.get(1), COMPLETE_ACTION_1_PID);
-        Assert.assertEquals(list.get(2), COMPLETE_ACTION_2_PID);
     }
 
     @Test(groups = "functional", dependsOnMethods = {"testGetMetadataOnlyActionAndJobIds"})
@@ -215,11 +213,10 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         log.info("needDeletedEntities={}", JsonUtils.serialize(needDeletedEntities));
 
         Assert.assertTrue(CollectionUtils.isNotEmpty(list));
-        Assert.assertEquals(list.size(), 4);
+        Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.get(0), METADATA_ACTION_PID);
         Assert.assertEquals(list.get(1), COMPLETE_ACTION_1_PID);
-        Assert.assertEquals(list.get(2), COMPLETE_ACTION_2_PID);
-        Assert.assertEquals(list.get(3), NEW_DELETE_ACTION_PID);
+        Assert.assertEquals(list.get(2), NEW_DELETE_ACTION_PID);
         Assert.assertEquals(needDeletedEntities.size(), 1);
         Assert.assertTrue(needDeletedEntities.contains(BusinessEntity.Account));
     }

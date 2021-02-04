@@ -51,7 +51,6 @@ public final class ActivityStoreConstants {
         public static final String ANONYMOUS_WEB_VISITS = "AnonymousWebVisits";
         public static final String RE_ENGAGED_ACTIVITY = "ReEngagedActivity";
         public static final String HIGH_ENGAGEMENT_IN_ACCOUNT = "HighEngagementInAccount";
-        public static final String KNOWN_WEB_VISITS = "KnownWebVisits";
         public static final String ACTIVE_CONTACT_WEB_VISITS = "AcitiveContactsAndWebVisits";
         public static final String BUYING_INTENT_AROUND_PRODUCT_PAGES = "BuyingIntentAroundProductPages";
         public static final String RESEARCHING_INTENT_AROUND_PRODUCT_PAGES = "ResearchingIntentAroundProductPages";
@@ -62,8 +61,6 @@ public final class ActivityStoreConstants {
         public static final String COL_PAGE_VISITS = "PageVisits";
         public static final String COL_PAGE_NAME = "PageName";
         public static final String COL_ACTIVE_CONTACTS = "ActiveContacts";
-        public static final String COL_PAGE_VISIT_TIME = "PageVisitTime";
-        public static final String COL_PREV_PAGE_VISIT_TIME = "PrevPageVisitTime";
         public static final String COL_NUM_RESEARCH_INTENTS = "NumResearchIntents";
         public static final String COL_NUM_BUY_INTENTS = "NumBuyIntents";
         public static final String COL_RE_ENGAGED_CONTACTS = "ReEngagedContacts";

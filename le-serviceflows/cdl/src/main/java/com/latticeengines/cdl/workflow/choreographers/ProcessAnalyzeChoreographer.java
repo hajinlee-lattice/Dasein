@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.IS_CDL_TENANT;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.IS_SSVI_TENANT;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_DYNAMO;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_REDSHIFT;
 
@@ -8,29 +10,34 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.ConvertBatchStoreToDataTableWorkflow;
-import com.latticeengines.cdl.workflow.LegacyDeleteWorkFlow;
+import com.latticeengines.cdl.workflow.GenerateVisitReportWorkflow;
 import com.latticeengines.cdl.workflow.MatchEntityWorkflow;
 import com.latticeengines.cdl.workflow.ProcessAccountWorkflow;
+import com.latticeengines.cdl.workflow.ProcessCatalogWorkflow;
 import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
 import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
 import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
+import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
+import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.serviceflows.workflow.export.ExportProcessAnalyzeToS3;
 import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
+import com.latticeengines.serviceflows.workflow.export.ImportProcessAnalyzeFromS3;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.BaseChoreographer;
@@ -60,9 +67,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private ProcessRatingChoreographer ratingChoreographer;
 
     @Inject
-    private ConvertBatchStoreToDataTableWorkflow convertBatchStoreToDataTableWorkflow;
-
-    @Inject
     private MatchEntityWorkflow matchEntityWorkflow;
 
     @Inject
@@ -81,7 +85,22 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private ProcessRatingWorkflow ratingWorkflow;
 
     @Inject
-    private LegacyDeleteWorkFlow legacyDeleteWorkFlow;
+    private StartProcessing startProcessing;
+
+    @Inject
+    private ImportProcessAnalyzeFromS3 importProcessAnalyzeFromS3;
+
+    @Inject
+    private ProcessCatalogWorkflow processCatalogWorkflow;
+
+    @Inject
+    private ExportProcessAnalyzeToS3 exportProcessAnalyzeToS3;
+
+    @Inject
+    private FinishProcessing finishProcessing;
+
+    @Inject
+    private GenerateVisitReportWorkflow generateVisitReportWorkflow;
 
     @Inject
     private AwsApsGeneratorStep awsApsGeneratorStep;
@@ -123,7 +142,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
         } else if (isRatingStep(seq)) {
             skip = ratingChoreographer.skipStep(step, seq);
         }
-        return super.skipStep(step, seq) || skip;
+        return super.skipStep(step, seq) || skip || isSSVINeedSkipStep(step, seq);
     }
 
     @Override
@@ -165,6 +184,35 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
         String namespace = getStepNamespace(seq);
         return workflow.name().equals(namespace) || namespace.startsWith(workflow.name() + ".")
                 || namespace.contains("." + workflow.name() + ".") || namespace.endsWith("." + workflow.name());
+    }
+
+    private boolean isSSVINeedSkipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+        if (inWorkflow(seq, generateVisitReportWorkflow)) {
+            // only SSVI tenant execute this workflow
+            return BooleanUtils.isNotTrue(step.getObjectFromContext(IS_SSVI_TENANT, Boolean.class));
+        }
+        if (BooleanUtils.isTrue(step.getObjectFromContext(IS_SSVI_TENANT, Boolean.class))
+                && BooleanUtils.isNotTrue(step.getObjectFromContext(IS_CDL_TENANT, Boolean.class))) {
+            return !isStartProcessingStep(step) && !isImportProcessAnalyzeFromS3(step) && !inWorkflow(seq,
+                    processCatalogWorkflow) && !isExportProcessAnalyzeToS3(step) && !isFinishProcessing(step);
+        }
+        return false;
+    }
+
+    private boolean isStartProcessingStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(startProcessing.name());
+    }
+
+    private boolean isImportProcessAnalyzeFromS3(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(importProcessAnalyzeFromS3.name());
+    }
+
+    private boolean isExportProcessAnalyzeToS3(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(exportProcessAnalyzeToS3.name());
+    }
+
+    private boolean isFinishProcessing(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(finishProcessing.name());
     }
 
     private boolean isExportToRedshiftStep(AbstractStep<? extends BaseStepConfiguration> step) {

@@ -18,7 +18,7 @@ public class UploadConfig {
     private String dropFilePath;
 
     @JsonProperty("uploadTsPrefix")
-    private String uploadTSPrefix;
+    private String uploadTimestamp;
 
     @JsonProperty("uploadRawFilePath")
     private String uploadRawFilePath;
@@ -52,12 +52,12 @@ public class UploadConfig {
         this.dropFilePath = dropFilePath;
     }
 
-    public String getUploadTSPrefix() {
-        return uploadTSPrefix;
+    public String getUploadTimestamp() {
+        return uploadTimestamp;
     }
 
-    public void setUploadTSPrefix(String uploadTSPrefix) {
-        this.uploadTSPrefix = uploadTSPrefix;
+    public void setUploadTimestamp(String uploadTimestamp) {
+        this.uploadTimestamp = uploadTimestamp;
     }
 
     public String getUploadRawFilePath() {

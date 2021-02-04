@@ -2,6 +2,7 @@ package com.latticeengines.apps.core.service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
+import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -26,4 +27,10 @@ public interface ZKConfigService {
     String getCampaignLaunchEndPointUrl(CustomerSpace customerSpace, String componentName);
 
     boolean isRollupDisabled(CustomerSpace customerSpace, String componentName);
+
+    String getStack(CustomerSpace customerSpace);
+
+    S3ImportMessageType getTriggerName(CustomerSpace customerSpace);
+
+    Integer getLookupIdLimit(CustomerSpace customerSpace);
 }

@@ -19,7 +19,8 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
     
     val config: UpsertConfig = lattice.config
     val discardAttrs: List[String] = if (config.getExcludeAttrs == null) List() else config.getExcludeAttrs.asScala.toList
-    
+    val eraseByNull = config.isEraseByNullEnabled != null && config.isEraseByNullEnabled
+
     if (lattice.input.length == 1) {
       var result =
         if (!config.isAddInputSystemBatch) {
@@ -31,6 +32,7 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
               addTemplatePrefix(lattice.input.head, config.getBatchTemplateName,  Seq(config.getJoinKey))
             }
           }
+      result = MergeUtils.dropEraseColumn(result, eraseByNull)
       if (discardAttrs.nonEmpty) {
         result = result.drop(discardAttrs: _*)
       }
@@ -47,10 +49,10 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
 
       var merged =
         if (!config.isAddInputSystemBatch) {
-          MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull = overwriteByNull)
+          MergeUtils.mergeWithEraseByNull(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull = overwriteByNull , eraseByNull = eraseByNull)
         } else {
           val templates = rhsDf.select(templateColumn).as[String].collect.toSet.toList
-          upsertSystemBatch(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull, config.getBatchTemplateName, templates)
+          upsertSystemBatch(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull, config.getBatchTemplateName, templates, eraseByNull)
         }
       if (discardAttrs.nonEmpty) {
         merged = merged.drop(discardAttrs: _*)
@@ -58,9 +60,11 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
       lattice.output = merged :: Nil
     }
   }
-  
-  private def upsertSystemBatch(lhsDf: DataFrame, rhsDf: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
-             overwriteByNull: Boolean, templateName: String, templates: List[String]): DataFrame = {
+
+  private def upsertSystemBatch(origLhsDf: DataFrame, origRhsDf: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
+             overwriteByNull: Boolean, templateName: String, templates: List[String], eraseByNull: Boolean): DataFrame = {
+    var lhsDf = origLhsDf.repartition(joinKeys map col: _*)
+    var rhsDf = origRhsDf.repartition(joinKeys map col: _*)
     var merged = 
       if (templateName != null) addTemplatePrefix(lhsDf, templateName, joinKeys) else lhsDf
     for (i <- 0 to templates.length-1) {
@@ -68,7 +72,7 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
       var newRhsDf = filterByTemplate(rhsDf, template)
       newRhsDf = addTemplatePrefix(newRhsDf, template, joinKeys)
       var newColsFromLhs = colsFromLhs map (c => template + "__" + c)
-      merged = MergeUtils.merge2(merged, newRhsDf, joinKeys, colsFromLhs.toSet, overwriteByNull = overwriteByNull)
+      merged = MergeUtils.mergeWithEraseByNull(merged, newRhsDf, joinKeys, colsFromLhs.toSet, overwriteByNull = overwriteByNull, eraseByNull = eraseByNull)
    }
    merged
   }

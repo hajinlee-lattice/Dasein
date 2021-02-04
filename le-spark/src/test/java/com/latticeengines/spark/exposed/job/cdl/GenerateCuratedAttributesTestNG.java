@@ -7,6 +7,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyNa
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedSource;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedSystemType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityLastUpdatedDate;
@@ -83,6 +84,7 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
             Pair.of(AccountId.name(), String.class), //
             Pair.of(ENTITY_ATTR_PREFIX + EntityCreatedSource.name(), String.class), //
             Pair.of(ENTITY_ATTR_PREFIX + EntityCreatedType.name(), String.class), //
+            Pair.of(EntityCreatedSystemType.name(), String.class), //
             Pair.of(LastActivityDate.name(), Long.class), //
             Pair.of(EntityLastUpdatedDate.name(), Long.class), //
             Pair.of(TEMPLATE_UPDATE_TIME_FIELD.replace(CDLUpdatedTime.name(), EntityLastUpdatedDate.name()),
@@ -209,6 +211,9 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
         Map<String, String> templateEntityTypeMap = new HashMap<>();
         templateEntityTypeMap.put("tmpl1", "Account");
         templateEntityTypeMap.put("tmpl2", "Contact");
+        Map<String, String> templateSystemTypeMap = new HashMap<>();
+        templateSystemTypeMap.put("tmpl1", "Pardot");
+        templateSystemTypeMap.put("tmpl2", "Marketo");
         Map<String, String> accBatchStoreAttrs = new HashMap<>();
         accBatchStoreAttrs.put(CDLUpdatedTime.name(), EntityLastUpdatedDate.name());
         accBatchStoreAttrs.put(CDLCreatedTemplate.name(), ENTITY_ATTR_PREFIX);
@@ -219,6 +224,7 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
         config.joinKeys.put(3, EntityId.name());
         config.templateSystemMap.putAll(templateSystemMap);
         config.templateTypeMap.putAll(templateEntityTypeMap);
+        config.templateSystemTypeMap.putAll(templateSystemTypeMap);
         return config;
     }
 

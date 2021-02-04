@@ -19,6 +19,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExp
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.CopyListSegmentCSVConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ExportListSegmentCSVToS3Configuration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ExtractListSegmentCSVConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.integration.AggregateBrokerFileConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.integration.BrokerDataFullLoadConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.SparkJobStepConfiguration;
@@ -59,7 +61,10 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = SendIntentAlertEmailStepConfiguration.class, name = "SendIntentAlertEmailStepConfiguration"), //
         @Type(value = ExtractListSegmentCSVConfiguration.class, name = "ExtractListSegmentCSVConfiguration"), //
         @Type(value = CopyListSegmentCSVConfiguration.class, name = "CopyListSegmentCSVConfiguration"), //
-        @Type(value = ExportListSegmentCSVToS3Configuration.class, name = "ExportListSegmentCSVToS3Configuration")})
+        @Type(value = ExportListSegmentCSVToS3Configuration.class, name = "ExportListSegmentCSVToS3Configuration"),
+        @Type(value = BaseMultiTransformationStepConfiguration.class, name = "BaseMultiTransformationStepConfiguration"), //
+        @Type(value = BrokerDataFullLoadConfiguration.class, name = "InitialLoadBrokerDataConfiguration"), //
+        @Type(value = AggregateBrokerFileConfiguration.class, name = "AggregateBrokerFileConfiguration")})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseStepConfiguration {
 

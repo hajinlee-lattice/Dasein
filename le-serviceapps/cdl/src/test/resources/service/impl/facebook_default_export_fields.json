@@ -5,8 +5,9 @@
       "entity": "Account",
       "javaClass": "Long",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -15,8 +16,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -25,8 +27,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": false,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -35,8 +38,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -45,8 +49,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -55,8 +60,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -65,8 +71,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -75,8 +82,9 @@
       "entity": "Account",
       "javaClass": "Long",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -85,8 +93,9 @@
       "entity": "Account",
       "javaClass": "Long",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -95,8 +104,9 @@
       "entity": "Account",
       "javaClass": "Double",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -105,8 +115,9 @@
       "entity": "Account",
       "javaClass": "Double",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -115,8 +126,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": false,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -125,8 +137,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -135,8 +148,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -145,8 +159,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -155,8 +170,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -165,8 +181,9 @@
       "entity": "Account",
       "javaClass": "Double",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -175,8 +192,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -185,8 +203,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -195,8 +214,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -205,8 +225,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -215,8 +236,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -225,8 +247,9 @@
       "entity": "Account",
       "javaClass": "Long",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -235,8 +258,9 @@
       "entity": "Account",
       "javaClass": "Boolean",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -245,8 +269,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": false,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -255,8 +280,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -265,8 +291,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -275,8 +302,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -285,8 +313,9 @@
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -295,8 +324,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -305,8 +335,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": false,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -315,8 +346,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -325,8 +357,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": false,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -335,8 +368,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -345,8 +379,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": false,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -355,8 +390,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -365,8 +401,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": false,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -375,8 +412,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -385,8 +423,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -395,8 +434,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -405,8 +445,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": false,
-      "exportEnabled": false,
+      "standardField":false,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -415,8 +456,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": false,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -425,18 +467,20 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName": "ContactId",
-      "displayName": "Contact ID",
+      "displayName": "Lattice Contact ID",
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -445,8 +489,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": false,
+      "standardField":true,
+      "exportEnabled":false,
+      "forcePopulate":false,
       "audienceType": []
    },
    {
@@ -455,8 +500,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    },
    {
@@ -465,8 +511,9 @@
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Facebook",
-      "standardField": true,
-      "exportEnabled": true,
+      "standardField":true,
+      "exportEnabled":true,
+      "forcePopulate":true,
       "audienceType": ["CONTACTS"]
    }
 ]

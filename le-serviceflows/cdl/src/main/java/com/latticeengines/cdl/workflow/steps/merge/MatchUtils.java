@@ -50,7 +50,8 @@ public final class MatchUtils {
         return newEntityCounts.getOrDefault(entity, 0L) > 0;
     }
 
-    static String getLegacyMatchConfigForAccount(String customer, MatchInput baseMatchInput, Set<String> columnNames) {
+    public static String getLegacyMatchConfigForAccount(String customer, MatchInput baseMatchInput,
+                                                   Set<String> columnNames) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setOperationalMode(OperationalMode.LDC_MATCH);
@@ -233,7 +234,7 @@ public final class MatchUtils {
      * the list in the keyMap (for the specified match key). a new list will be
      * created if not exist.
      */
-    private static void addMatchKeyIfExists(Set<String> cols, Map<MatchKey, List<String>> keyMap, MatchKey key,
+    public static void addMatchKeyIfExists(Set<String> cols, Map<MatchKey, List<String>> keyMap, MatchKey key,
             String columnName) {
         if (cols.contains(columnName)) {
             keyMap.putIfAbsent(key, new ArrayList<>());
@@ -241,7 +242,7 @@ public final class MatchUtils {
         }
     }
 
-    private static Set<String> getSkippedMatchFields(MatchInput matchInput, @NotNull String entity) {
+    public static Set<String> getSkippedMatchFields(MatchInput matchInput, @NotNull String entity) {
         if (matchInput == null || matchInput.getEntityMatchConfiguration() == null) {
             return null;
         }

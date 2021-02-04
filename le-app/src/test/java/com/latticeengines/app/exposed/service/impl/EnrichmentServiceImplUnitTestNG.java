@@ -1,5 +1,8 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,6 +13,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.service.EnrichmentService;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.TestDataGenerator;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
@@ -28,6 +33,7 @@ public class EnrichmentServiceImplUnitTestNG {
     private static final TopNTree TEST_TREE = TestDataGenerator.generateTopNTree(TEST_COLUMNS);
     private static final TopNTree TEST_EXTERNAL_TREE = TestDataGenerator.generateTopNTree(TEST_EXTERNAL_COLUMNS);
     private ColumnMetadataProxy testProxy;
+    private BatonService batonService;
 
     private EnrichmentService svc;
 
@@ -39,9 +45,12 @@ public class EnrichmentServiceImplUnitTestNG {
         Mockito.when(testProxy.columnSelection(ColumnSelection.Predefined.Enrichment)).thenReturn(TEST_COLUMNS);
         Mockito.when(testProxy.getTopNTree()).thenReturn(TEST_TREE);
         Mockito.when(testProxy.getTopNTree(true)).thenReturn(TEST_EXTERNAL_TREE);
+        batonService = Mockito.mock(BatonService.class);
+        Mockito.when(batonService.getMaxDataLicense(any(Category.class), anyString())).thenReturn(1);
         svc = new EnrichmentServiceImpl();
         // replace with the mock proxy
         ReflectionTestUtils.setField(svc, "columnMetadataProxy", testProxy);
+        ReflectionTestUtils.setField(svc, "batonService", batonService);
     }
 
     /**

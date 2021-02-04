@@ -118,7 +118,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         }
 
         if (CollectionUtils.isNotEmpty(accountIds)) {
-            internalAccountIds = accountIds;
+            internalAccountIds = matchProxy.lookupInternalAccountIds(customerSpace, lookupIdColumn, accountIds, null);
         } else if (recStart > 0L) { // special case for query with
                                     // recommendation launch time.
             return getAccountExtensionsByLaunch(recStart, offset, maximum, orgInfo, customerSpace, attributes,

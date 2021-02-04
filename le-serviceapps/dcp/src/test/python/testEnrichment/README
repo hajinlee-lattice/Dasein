@@ -1,0 +1,23 @@
+Setup:
+- Setup newman
+- Get the env of your test
+- Modify the env json to have the value for sourceId and tenantName to have your test tenant name
+
+Usage:
+
+python checkEntitlementCounts.py -i <inputfile> -m <matchfile>
+With the input file and the result matched file
+
+- Will return SUCCESS if the input elements in the enriched file matched the input file 
+- will return SUCCESS if the result Matched file has all the data block elements selected in source setup - compared with the result of the API Get data block entitlement
+- will return SUCCESS if the result Matched file has all the data block elements grouped together for each block
+
+Success Result output example:
+
+SUCCESS: Data Block Element counts in the source and the matched file match - Total elements -  116
+SUCCESS: All the fields in Enrichment layout exist in the matched result file 
+SUCCESS: All elements are grouped together within its block
+SUCCESS: Entity Resolution Element counts in the source and the matched file match - Total elements -  9
+SUCCESS: All the fields in Company Entity Resolution list exist in the matched result file 
+SUCCESS: Input Element counts in the source and the matched file match - Total elements -  15
+SUCCESS: All the fields in Input list exist in the matched result file 

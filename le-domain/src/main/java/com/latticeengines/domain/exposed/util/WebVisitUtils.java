@@ -4,22 +4,18 @@ package com.latticeengines.domain.exposed.util;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
-import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -32,14 +28,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
  */
 public final class WebVisitUtils {
 
+    private WebVisitUtils() {
+    }
+
     private static final Logger log = LoggerFactory.getLogger(WebVisitUtils.class);
 
     public static final String TOTAL_VISIT_GROUPNAME = "Total Web Visits";
     public static final String SOURCE_MEDIUM_GROUPNAME = "Web Visits By Source Medium";
-
-    protected WebVisitUtils() {
-        throw new UnsupportedOperationException();
-    }
 
     /*
      * all dimensions for web visit
@@ -153,33 +148,5 @@ public final class WebVisitUtils {
         stream.setPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name()));
         stream.setRetentionDays(365);
         return stream;
-    }
-
-    /*-
-     * Only show total visit attrs that belongs to default time range
-     */
-    public static boolean shouldHideInCategoryTile(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group,
-            @NotNull String timeRange) {
-        return !TOTAL_VISIT_GROUPNAME.equals(group.getGroupName()) || !ActivityStoreUtils.isDefaultPeriodRange(timeRange);
-    }
-
-    public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group,
-            @NotNull String timeRange, @NotNull Map<String, Object> params) {
-        // any tag for filtering all attrs
-        cm.setFilterTags(ActivityStoreUtils.getFilterTagsFromTimeRange(timeRange));
-        if (shouldHideInCategoryTile(cm, group, timeRange)) {
-            // leave null for not hidden attrs to save some space
-            cm.setIsHiddenInCategoryTile(true);
-        }
-
-        String pathPtn = ActivityStoreUtils.getDimensionValueAsString(params, InterfaceName.PathPatternId.name(),
-                InterfaceName.PathPattern.name(), group.getTenant());
-        if (StringUtils.isNotBlank(pathPtn)) {
-            cm.setSecondarySubCategoryDisplayName(pathPtn);
-        } else {
-            String tenantId = group.getTenant() == null ? null : group.getTenant().getId();
-            log.warn("Failed to retrieve path pattern for attribute {} in group {} for tenant {}", cm.getAttrName(),
-                    group.getGroupId(), tenantId);
-        }
     }
 }

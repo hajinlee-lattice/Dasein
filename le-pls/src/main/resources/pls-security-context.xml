@@ -651,12 +651,22 @@
         <security:custom-filter ref="internalRestServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
-                   pattern="/pls/vidashboards/**"
+                   pattern="/pls/ssvi/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
         <security:csrf disabled="true"/>
         <security:intercept-url pattern="/pls/datamapping/**" access="hasRole('View_PLS_Data')"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+    </security:http>
+
+    <security:http use-expressions="true"
+                   pattern="/pls/enrichment-template/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:intercept-url pattern="/pls/enrichment-template/**" access="hasRole('View_DCP_Projects')"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 

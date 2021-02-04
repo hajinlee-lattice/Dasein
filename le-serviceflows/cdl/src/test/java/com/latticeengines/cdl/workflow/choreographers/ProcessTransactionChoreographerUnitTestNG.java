@@ -27,7 +27,7 @@ public class ProcessTransactionChoreographerUnitTestNG {
         choreographer.setHasRawStore(true);
         choreographer.setHasProducts(true);
         choreographer.setHasProductChange(false);
-        Assert.assertTrue(choreographer.shouldRebuild(null));
+        Assert.assertFalse(choreographer.shouldRebuild(null));
 
         choreographer.setHasRawStore(false);
         choreographer.setHasProducts(true);
@@ -37,7 +37,7 @@ public class ProcessTransactionChoreographerUnitTestNG {
         choreographer.setHasRawStore(true);
         choreographer.setHasProducts(false);
         choreographer.setHasProductChange(true);
-        Assert.assertTrue(choreographer.shouldRebuild(null));
+        Assert.assertFalse(choreographer.shouldRebuild(null));
 
         choreographer.setHasRawStore(true);
         choreographer.setHasProducts(true);

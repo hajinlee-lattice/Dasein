@@ -1,0 +1,203 @@
+{
+	"info": {
+		"_postman_id": "f9d0b563-a356-4bf0-99d1-2b99b69d6166",
+		"name": "GetSourceEntitlements",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "DRTest-Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.test(\"Login \", function () {",
+							"    pm.response.to.have.status(200); // written to fail",
+							"});",
+							"",
+							"if(pm.response.code !== 200) {",
+							"    postman.setNextRequest(null)",
+							"}",
+							"",
+							"console.log(pm.environment.get(\"tenantName\"))",
+							"console.log(pm.environment.get(\"test\"))",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"var authorization = jsonData.Uniqueness + \".\" + jsonData.Randomness;",
+							"pm.environment.set(\"token\", authorization);",
+							"pm.environment.set(\"test\", \"valid\");",
+							"for(i = 0; i < jsonData.Result.Tenants.length; i++){",
+							"    if (jsonData.Result.Tenants[i].DisplayName == pm.environment.get(\"tenantName\")){",
+							"        pm.environment.set(\"tenant\", JSON.stringify(jsonData.Result.Tenants[i]));",
+							"    }",
+							"}",
+							"console.log(pm.environment.get(\"tenant\"))",
+							"postman.setNextRequest(\"DRTest-AttachToTenant\");",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"user\", \"dcp_dev@lattice-engines.com\");",
+							"pm.environment.set(\"testrail_id\", \"C287574\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Username\": \"{{user}}\",\n    \"Password\": \"Lattice124!\"\n}"
+				},
+				"url": {
+					"raw": "{{plsUrl}}/pls/idaas-login",
+					"host": [
+						"{{plsUrl}}"
+					],
+					"path": [
+						"pls",
+						"idaas-login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DRTest-AttachToTenant",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Attached to tenant\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"/* pm.environment.set(\"source_id\", \"Source_oap0y5vh\"); */",
+							"if(pm.response.code !== 200) {",
+							"    postman.setNextRequest(null)",
+							"}",
+							"else {",
+							"     postman.setNextRequest(\"GetEntitlementForSource\"); ",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{tenant}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{plsUrl}}/pls/attach",
+					"host": [
+						"{{plsUrl}}"
+					],
+					"path": [
+						"pls",
+						"attach"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetEntitlementForSource",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"/* var jsonData = JSON.parse(responseBody); ",
+							"console.log(responseBody)*/",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{token}}"
+					}
+				],
+				"url": {
+					"raw": "{{plsUrl}}/pls/enrichment-layouts/sourceId/:source_id",
+					"host": [
+						"{{plsUrl}}"
+					],
+					"path": [
+						"pls",
+						"enrichment-layouts",
+						"sourceId",
+						":source_id"
+					],
+					"variable": [
+						{
+							"key": "source_id",
+							"value": "{{sourceId}}",
+							"type": "string"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "curr_time",
+			"value": "{{$timestamp}}"
+		}
+	]
+}

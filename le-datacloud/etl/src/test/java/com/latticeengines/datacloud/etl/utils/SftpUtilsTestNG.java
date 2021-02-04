@@ -43,9 +43,9 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
     // Expected returned Bombora files based on files on SFTP and prepared SFTP
     // config and calendar
     private static final List<String> BOMBORA_FILES = Arrays.asList( //
-            "20200921/AllDomainsAllTopicsZips_20190714_1.csv.gz", //
-            "20200928/AllDomainsAllTopicsZips_20190721_1.csv.gz", //
-            "20200928/AllDomainsAllTopicsZips_20190721_2.csv.gz" //
+            "20210114/AllDomainsAllTopicsZips_20190714_1.csv.gz", //
+            "20210121/AllDomainsAllTopicsZips_20190721_1.csv.gz", //
+            "20210121/AllDomainsAllTopicsZips_20190721_2.csv.gz" //
     );
 
     private static final Calendar DNB_CALENDAR = getDnBCalendar();

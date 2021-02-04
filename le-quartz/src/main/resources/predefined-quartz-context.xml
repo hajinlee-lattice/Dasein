@@ -272,13 +272,24 @@
 
     <bean name="plsActivityAlertsCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="alertCleanupJob"/>
-        <property name="cronTrigger" value="${quartz.pls.altercleanup.job.cron:0 0 0/6 * * ?}"/>
+        <property name="cronTrigger" value="${quartz.pls.altercleanup.job.cron:0 0 0 1/2 * ? *}"/>
         <property name="destUrl" value="${quartz.pls.predefined.job.primary.url:}"/>
         <property name="secondaryDestUrl" value="${quartz.pls.predefined.job.secondary.url:}"/>
         <property name="queryApi" value="${quartz.pls.predefined.job.query.api:}"/>
         <property name="checkJobBeanUrl" value="${quartz.pls.predefined.job.check.bean.url:}"/>
         <property name="jobArguments" value="{&quot;jobType&quot;:&quot;alertCleanupJob&quot;}"/>
         <property name="jobTimeout" value="${quartz.pls.alertcleanup.job.timeout:3600}"/>
+    </bean>
+
+    <bean name="cdlMockBrokerJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="cdlMockBrokerJob"/>
+        <property name="cronTrigger" value="${quartz.cdl.mock.broker.job.cron}"/>
+        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url}"/>
+        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url}"/>
+        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api}"/>
+        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url}"/>
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlMockBrokerJob&quot;}"/>
+        <property name="jobTimeout" value="${quartz.cdl.mock.broker.job.timeout}"/>
     </bean>
 
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
@@ -307,6 +318,7 @@
         <ref bean="metadataMigrateDynamoJob"/>
         <ref bean="dcpRollupDataReportJob"/>
         <ref bean="submitVboUsageReportJob"/>
+        <ref bean="cdlMockBrokerJob"/>
     </util:list>
 
 </beans>

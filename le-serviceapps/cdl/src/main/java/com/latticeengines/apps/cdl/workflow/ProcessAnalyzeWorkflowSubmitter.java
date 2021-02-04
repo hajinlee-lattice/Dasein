@@ -38,6 +38,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.CDLExternalSystemEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.CatalogEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
@@ -59,8 +60,10 @@ import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.common.exposed.yarn.LedpQueueAssigner;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeModule;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
@@ -70,6 +73,7 @@ import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -100,6 +104,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component
@@ -141,6 +146,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final DataFeedService dataFeedService;
 
+    private final MatchProxy matchProxy;
+
     private final WorkflowProxy workflowProxy;
 
     private final CatalogEntityMgr catalogEntityMgr;
@@ -165,6 +172,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final TimeLineService timeLineService;
 
+    private final CDLExternalSystemEntityMgr cdlExternalSystemEntityMgr;
+
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService,
                                            DataCollectionService dataCollectionService, DataFeedTaskService dataFeedTaskService,
@@ -173,9 +182,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                                            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr,
                                            ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
                                            CDLAttrConfigProxy cdlAttrConfigProxy,
-                                           S3ImportSystemService s3ImportSystemService, TimeLineService timeLineService) {
+                                           S3ImportSystemService s3ImportSystemService, TimeLineService timeLineService, MatchProxy matchProxy,
+                                           CDLExternalSystemEntityMgr cdlExternalSystemEntityMgr) {
         this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
+        this.matchProxy = matchProxy;
         this.workflowProxy = workflowProxy;
         this.catalogEntityMgr = catalogEntityMgr;
         this.streamEntityMgr = streamEntityMgr;
@@ -188,6 +199,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.s3ImportSystemService = s3ImportSystemService;
         this.dataFeedTaskService = dataFeedTaskService;
         this.timeLineService = timeLineService;
+        this.cdlExternalSystemEntityMgr = cdlExternalSystemEntityMgr;
     }
 
     @WithWorkflowJobPid
@@ -197,6 +209,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
         Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        if (lookupIdLimitPassed(tenant)) {
+            throw new IllegalStateException(String.format("Tenant %s has too many lookup IDs configured.", tenant.getName()));
+        }
         boolean tenantInMigration = migrationTrackEntityMgr.tenantInMigration(tenant);
         if (!request.skipMigrationCheck && tenantInMigration) {
             log.error("Tenant {} is in migration and should not kickoff PA.", customerSpace);
@@ -306,6 +321,21 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
+    private boolean lookupIdLimitPassed(Tenant tenant) {
+        CDLExternalSystem system = cdlExternalSystemEntityMgr.findExternalSystem(BusinessEntity.Account);
+        if (system != null) {
+            Set<String> allIds = new HashSet<>();
+            allIds.addAll(system.getCRMIdList());
+            allIds.addAll(system.getMAPIdList());
+            allIds.addAll(system.getERPIdList());
+            allIds.addAll(system.getOtherIdList());
+            log.info("Found lookup id count: {}", allIds.size());
+            return allIds.size() > zkConfigService.getLookupIdLimit(CustomerSpace.parse(tenant.getId()));
+        }
+        log.info("No external system found.");
+        return false;
+    }
+
     private Status getInitialDataFeedStatus(Status status) {
         if (status.equals(Status.ProcessAnalyzing) || status.equals(Status.Deleting)) {
             return Status.Active;
@@ -327,7 +357,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     /*-
      * table names in current active version for stream
      */
-    private Map<String, String> getActiveActivityStreamTables(@NotNull String customerSpace,
+    private Map<String, String>  getActiveActivityStreamTables(@NotNull String customerSpace,
             List<AtlasStream> streams) {
         return getActiveTables(customerSpace, ActivityStream, streams, AtlasStream::getStreamId,
                 ConsolidatedActivityStream);
@@ -506,7 +536,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ? Collections.emptyList()
                 : importAndDeleteJobs.stream().filter(
                         job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING
-                                && job.getJobStatus() != JobStatus.ENQUEUED)
+                                && job.getJobStatus() != JobStatus.ENQUEUED
+                                && job.getJobStatus() != JobStatus.FAILED
+                                && job.getJobStatus() != JobStatus.CANCELLED)
                 .map(Job::getPid).collect(Collectors.toList());
         log.info(String.format("Job pids that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobPids));
@@ -720,6 +752,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         boolean entityMatchGAOnly = FeatureFlagUtils.isEntityMatchGAOnly(flags);
         boolean internalEnrichEnabled = zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(customerSpace));
+        boolean eraseByNullEnabled = FeatureFlagUtils.isImportEraseByNullEnabled(flags);
         int maxIteration = request.getMaxRatingIterations() != null ? request.getMaxRatingIterations()
                 : defaultMaxIteration;
         String apsRollingPeriod = zkConfigService
@@ -811,6 +844,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .catalogPrimaryKeyColumns(getCatalogPrimaryKeyColumns(customerSpace, catalogs)) //
                 .catalogIngestionBehaivors(getCatalogIngestionBehavior(customerSpace, catalogs)) //
                 .catalogImports(getCatalogImports(tenant, completedActions, catalogs)) //
+                .setCatalog(catalogs)
                 .activityStreams(streams) //
                 .activityMetricsGroups(groups) //
                 .activeRawStreamTables(getActiveActivityStreamTables(customerSpace, new ArrayList<>(streams.values()))) //
@@ -822,7 +856,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .entityMatchGAOnly(entityMatchGAOnly) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
-                .entityMatchConfiguration(request.getEntityMatchConfiguration()) //
+                .entityMatchConfiguration(getMatchConfiguration(customerSpace, request)) //
+                .eraseByNullEnabled(eraseByNullEnabled) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
                 .fullProfile(Boolean.TRUE.equals(request.getFullProfile())) //
                 .skipEntities(request.getSkipEntities()) //
@@ -832,6 +867,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .setConvertServiceConfig(needConvertBatchStoreMap)
                 .activeTimelineList(timeLineList)
                 .templateToSystemTypeMap(templateToSystemTypeMap)
+                .isSSVITenant(judgeTenantType(tenant.getId(), LatticeModule.SSVI))
+                .isCDLTenant(judgeTenantType(tenant.getId(), LatticeModule.CDL))
                 .build();
     }
 
@@ -872,6 +909,19 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             dataFeedService.failExecution(customerSpace, "", datafeed.getStatus().getName());
             throw new RuntimeException(String.format("Failed to retry %s's P&A workflow", customerSpace));
         }
+    }
+
+    private EntityMatchConfiguration getMatchConfiguration(@NotNull String customerSpace,
+            @NotNull ProcessAnalyzeRequest request) {
+        EntityMatchConfiguration configFromReq = request.getEntityMatchConfiguration();
+        EntityMatchConfiguration savedConfig = matchProxy.getEntityMatchConfiguration(customerSpace);
+        log.info("Match config from request = {}, saved match config = {}, tenant = {}", configFromReq, savedConfig,
+                customerSpace);
+        if (configFromReq == null || savedConfig == null) {
+            return configFromReq != null ? configFromReq : savedConfig;
+        }
+
+        return configFromReq.mergeWith(savedConfig);
     }
 
     /*-
@@ -1297,5 +1347,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             }
         });
         return entitySet;
+    }
+
+    private boolean judgeTenantType(@NotNull String tenantId, LatticeModule latticeModule) {
+        try {
+            return batonService.hasModule(CustomerSpace.parse(tenantId), latticeModule);
+        } catch (Exception e) {
+            log.error("Failed to verify whether {} is a {}} tenant. error = {}", tenantId, latticeModule, e);
+            return false;
+        }
     }
 }

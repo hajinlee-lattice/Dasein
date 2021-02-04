@@ -13,6 +13,7 @@ class GenerateAccountLookupJob extends AbstractSparkJob[GenerateAccountLookupCon
 
     private val accountId = InterfaceName.AccountId.name
     private val lookupKey = InterfaceName.AtlasLookupKey.name
+    private val customerAccountId = InterfaceName.CustomerAccountId.name
 
     override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateAccountLookupConfig]): Unit = {
         val config: GenerateAccountLookupConfig = lattice.config
@@ -22,8 +23,11 @@ class GenerateAccountLookupJob extends AbstractSparkJob[GenerateAccountLookupCon
           .filter(col(accountId).isNotNull)
           .withColumn(lookupKey, getLookupKeyUdf(accountId)(col(accountId)))
 
-        val lookupIds: List[String] = if (config.getLookupIds == null) List() else config.getLookupIds.asScala.toList
-        val byLookupIds: List[DataFrame] = lookupIds.map(lookupId => {
+        var lookupIds: Set[String] = if (config.getLookupIds == null) Set() else config.getLookupIds.asScala.toSet
+        if (input.columns.contains(customerAccountId)) {
+            lookupIds += customerAccountId
+        }
+        val byLookupIds: Set[DataFrame] = lookupIds.map(lookupId => {
             input.select(accountId, lookupId).filter(col(lookupId).isNotNull) //
                     .withColumn(lookupKey, getLookupKeyUdf(lookupId)(col(lookupId))) //
                     .select(accountId, lookupKey)
