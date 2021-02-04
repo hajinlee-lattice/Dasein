@@ -166,12 +166,9 @@ public class ActivityTimelineServiceImpl implements ActivityTimelineService {
         int newEngagementsCount = dataFilter(data, AtlasStream.StreamType.Opportunity, null).size()
                 + dataFilter(data, AtlasStream.StreamType.MarketingActivity, null).size();
         int newOpportunitiesCount = deduplicateOpportunityData(
-                dataFilter(data, AtlasStream.StreamType.Opportunity, null))
-                        .stream()
-                        .filter(t -> !t.get(InterfaceName.Detail1.name()).equals("Closed")
-                                && !t.get(InterfaceName.Detail1.name()).equals("Closed Won")
-                                && !t.get(InterfaceName.Detail1.name()).equals("Closed Lost"))
-                        .collect(Collectors.toList()).size();
+                dataFilter(data, AtlasStream.StreamType.Opportunity, null)).stream()
+                        .filter(t -> !STAGES.contains(t.get(InterfaceName.Detail1.name()))).collect(Collectors.toList())
+                        .size();
 
         List<AtlasStream> streams = activityStoreProxy.getStreams(customerSpace);
         int days = timelinePeriod.getDays();
