@@ -105,19 +105,22 @@ public class LivySessionServiceImpl implements LivySessionService {
         }
         String host = livyServerManager.getLivyHost();
         String url = host + URI_SESSIONS;
-        String resp;
-        try {
-            resp = restTemplate.postForObject(url, payLoad, String.class);
-        } catch (HttpClientErrorException e) {
-            log.error("HttpClientErrorException: " + e.getResponseBodyAsString());
-            throw e;
-        }
-        log.info("Starting new livy session on " + host + ": " + resp);
-        int sessionId = parseSessionId(resp);
-        LivySession session = new LivySession(host, sessionId);
-        session = waitForSessionState(session, LivySession.STATE_IDLE);
-        log.info("Livy session started: " + JsonUtils.serialize(session));
-        return session;
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> {
+            String resp;
+            try {
+                resp = restTemplate.postForObject(url, payLoad, String.class);
+            } catch (HttpClientErrorException e) {
+                log.error("HttpClientErrorException: " + e.getResponseBodyAsString());
+                throw e;
+            }
+            log.info("Starting new livy session on " + host + ": " + resp);
+            int sessionId = parseSessionId(resp);
+            LivySession session = new LivySession(host, sessionId);
+            session = waitForSessionState(session, LivySession.STATE_IDLE);
+            log.info("Livy session started: " + JsonUtils.serialize(session));
+            return session;
+        });
     }
 
     @Override

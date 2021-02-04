@@ -66,7 +66,7 @@ public class PivotScoreAndEventDataFlow
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
-    @Value("${cdl.spark.driver.maxResultSize:4g}")
+    @Value("${cdl.spark.driver.maxResultSize}")
     private String sparkMaxResultSize;
 
     private boolean multiModel = false;

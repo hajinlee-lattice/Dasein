@@ -47,7 +47,7 @@ public class RecalculatePercentileScoreJobDataFlow
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
-    @Value("${cdl.spark.driver.maxResultSize:4g}")
+    @Value("${cdl.spark.driver.maxResultSize}")
     private String sparkMaxResultSize;
 
     @Value("${cdl.scoring.batch.model.size:20}")

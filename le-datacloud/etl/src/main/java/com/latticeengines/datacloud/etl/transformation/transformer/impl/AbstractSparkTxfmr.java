@@ -345,7 +345,6 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
         String secondaryJobName = getSecondaryJobName(progress, step);
         String jobName = StringUtils.isNotBlank(secondaryJobName) //
                 ? primaryJobName + "~" + secondaryJobName : primaryJobName;
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         LivyConfigurer configurer = new LivyConfigurer() //
                 .withDriverMem(driverMem).withDriverCores(driverCores) //
                 .withExecutorMem(executorMem).withExecutorCores(executorCores) //
@@ -354,8 +353,7 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
         if (MapUtils.isNotEmpty(sparkProps)) {
             sparkConf.putAll(sparkProps);
         }
-        return retry.execute(context -> livySessionService.startSession(jobName, //
-                configurer.getLivyConf(scalingConfig), sparkConf));
+        return livySessionService.startSession(jobName, configurer.getLivyConf(scalingConfig), sparkConf);
     }
 
     @Override
