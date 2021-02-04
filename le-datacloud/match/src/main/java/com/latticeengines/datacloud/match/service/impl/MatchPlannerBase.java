@@ -216,9 +216,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         // set elastic search data unit
         boolean enabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
                 LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH);
-        ElasticSearchDataUnit elasticSearchDataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
-                BusinessEntity.Account.name(), DataUnit.StorageType.ElasticSearch);
         if (enabled) {
+            ElasticSearchDataUnit elasticSearchDataUnit =
+                    (ElasticSearchDataUnit) dataUnitProxy.getByNameAndTypeInCache(customerSpace,
+                BusinessEntity.Account.name(), DataUnit.StorageType.ElasticSearch);
             context.setElasticSearchDataUnit(elasticSearchDataUnit);
         }
         return Pair.of(columnSelection, metadatas);

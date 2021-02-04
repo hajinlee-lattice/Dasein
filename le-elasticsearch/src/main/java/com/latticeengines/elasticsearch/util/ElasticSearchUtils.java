@@ -149,7 +149,7 @@ public final class ElasticSearchUtils {
                             .startObject()
                             .startObject("analysis")
                             .startObject("normalizer")
-                            .startObject("my_normalizer")
+                            .startObject("lowercase_normalizer")
                             .field("type", "custom")
                             .field("filter", new String[]{"lowercase"})
                             .endObject()
@@ -267,7 +267,7 @@ public final class ElasticSearchUtils {
             for (String lookupId : lookupIds)
                 builder.startObject(lookupId)
                         .field("type", subType)
-                        .field("normalizer", "my_normalizer")
+                        .field("normalizer", "lowercase_normalizer")
                         .endObject();
         }
         builder.endObject().endObject().endObject().endObject();
@@ -446,7 +446,7 @@ public final class ElasticSearchUtils {
             SearchRequest searchRequest = new SearchRequest(indexName);
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             TermQueryBuilder queryBuilder = QueryBuilders.termQuery(
-                    AccountLookup.name() + "." + lookupIdKey, lookupIdValue.toLowerCase());
+                    AccountLookup.name() + "." + lookupIdKey, lookupIdValue);
             NestedQueryBuilder nestedQueryBuilder = QueryBuilders.nestedQuery(AccountLookup.name(), queryBuilder,
                     ScoreMode.Max);
             searchSourceBuilder.query(nestedQueryBuilder);

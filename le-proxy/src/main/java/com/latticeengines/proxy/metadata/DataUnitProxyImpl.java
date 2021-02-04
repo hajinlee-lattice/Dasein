@@ -16,6 +16,7 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 
 
+
 @Component("dataUnitProxy")
 public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataUnitProxy {
 
@@ -44,9 +45,19 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
     }
 
     @Override
+    public DataUnit getByNameAndType(String customerSpace, String name, DataUnit.StorageType type) {
+        List<DataUnit> units = getDataUnits(customerSpace, name, type);
+        if (CollectionUtils.isNotEmpty(units)) {
+            return units.get(0);
+        } else {
+            return null;
+        }
+    }
+
     @Cacheable(cacheNames = CacheName.Constants.DataUnitCacheName, key = "T(java.lang.String).format" +
             "(\"%s|%s|%s|unit\", #customerSpace, #name, #type)", unless = "#result == null")
-    public DataUnit getByNameAndType(String customerSpace, String name, DataUnit.StorageType type) {
+    @Override
+    public DataUnit getByNameAndTypeInCache(String customerSpace, String name, DataUnit.StorageType type) {
         List<DataUnit> units = getDataUnits(customerSpace, name, type);
         if (CollectionUtils.isNotEmpty(units)) {
             return units.get(0);

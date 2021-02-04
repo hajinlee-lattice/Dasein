@@ -162,6 +162,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO = "ATLAS_ACCOUNT_LOOKUP_TO_DYNAMO";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
     public static final String TABLES_GOING_TO_ES = "TABLES_GOING_TO_ES";
+    public static final String ACCOUNT_LOOKUP_TO_ES = "ACCOUNT_LOOKUP_TO_ES";
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     public static final String RATING_MODELS = "RATING_MODELS";

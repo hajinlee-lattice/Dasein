@@ -43,6 +43,7 @@ public class PublishTableToElasticSearchWorkflowSubmitter extends WorkflowSubmit
                         .signature(request.getSignature())
                         .exportConfigs(request.getExportConfigs())
                         .esConfigs(request.getEsConfig())
+                        .lookupIds(request.getLookupIds())
                         .build();
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }

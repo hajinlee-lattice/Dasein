@@ -119,7 +119,7 @@ public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQuerySe
                 LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH);
         ElasticSearchDataUnit dataUnit;
 
-        if (isEnabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+        if (isEnabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndTypeInCache(customerSpace,
                 TableRoleInCollection.TimelineProfile.name(), DataUnit.StorageType.ElasticSearch)) != null) {
                 log.info("{} query form elastic search.", customerSpace);
                 String signature = dataUnit.getSignature();

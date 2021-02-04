@@ -25,6 +25,10 @@ public class PublishTableToESRequest {
     @JsonProperty("Signature")
     private String signature;
 
+    // optional parameter, only use when account lookup role exists
+    @JsonProperty("LookupIds")
+    private List<String> lookupIds;
+
 
     public List<ElasticSearchExportConfig> getExportConfigs() {
         return exportConfigs;
@@ -48,5 +52,13 @@ public class PublishTableToESRequest {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public List<String> getLookupIds() {
+        return lookupIds;
+    }
+
+    public void setLookupIds(List<String> lookupIds) {
+        this.lookupIds = lookupIds;
     }
 }

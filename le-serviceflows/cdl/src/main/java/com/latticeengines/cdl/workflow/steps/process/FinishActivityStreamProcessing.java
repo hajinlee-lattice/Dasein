@@ -92,7 +92,7 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
                     configuration.getCustomerSpace());
             return ;
         }
-        DataUnit unit = dataUnitProxy.getByNameAndType(configuration.getCustomerSpace().toString(),
+        DataUnit unit = dataUnitProxy.getByNameAndTypeInCache(configuration.getCustomerSpace().toString(),
                 TableRoleInCollection.TimelineProfile.name(), DataUnit.StorageType.ElasticSearch);
         Boolean rebuild = getObjectFromContext(TIMELINE_REBUILD, Boolean.class);
         boolean isNull = unit == null;

@@ -200,7 +200,7 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         boolean enabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
                 LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH);
         ElasticSearchDataUnit dataUnit;
-        if (enabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+        if (enabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndTypeInCache(customerSpace,
                 BusinessEntity.Account.name(),
                 DataUnit.StorageType.ElasticSearch)) != null) {
             log.info("feature flag is enabled and data unit is not null for {}", customerSpace);
@@ -371,14 +371,15 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         boolean enabled = batonService.isEnabled(CustomerSpace.parse(customerSpace),
                 LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH);
         ElasticSearchDataUnit dataUnit;
-        if (enabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace, BusinessEntity.Contact.name(),
+        if (enabled && (dataUnit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndTypeInCache(customerSpace,
+                BusinessEntity.Contact.name(),
                 DataUnit.StorageType.ElasticSearch)) != null) {
             log.info("feature flag is enabled and data unit is not null for {}", customerSpace);
             String signature = dataUnit.getSignature();
             String indexName = ElasticSearchUtils.constructIndexName(customerSpace, BusinessEntity.Contact.name(),
                     signature);
             ElasticSearchDataUnit accountDataUnit =
-                    (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+                    (ElasticSearchDataUnit) dataUnitProxy.getByNameAndTypeInCache(customerSpace,
                             BusinessEntity.Account.name(), DataUnit.StorageType.ElasticSearch);
             String accountIndexName = null;
             if (accountDataUnit != null) {
@@ -560,24 +561,24 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         return data;
     }
 
+    /**
+     * use case for bulk match, not generating traces
+     * @param customerSpace
+     * @param indexName
+     * @param lookupIdKey
+     * @param lookupIdValue
+     * @return
+     */
     @Override
     public Map<String, Object> lookup(@NotNull String customerSpace, String indexName,
                                       String lookupIdKey, String lookupIdValue) {
         String idxName = indexName.toLowerCase();
-        Tracer tracer = GlobalTracer.get();
-        Span workflowSpan = null;
-        long start = System.currentTimeMillis() * 1000;
-        try (Scope scope = startSpan("lookup",  start)) {
-            workflowSpan = tracer.activeSpan();
-            workflowSpan.log(String.format("customerspace=%s, %s:%s,%s:%s", customerSpace,
-                    "lookupIdKey", lookupIdKey, "lookupIdValue", lookupIdValue));
-            if (InterfaceName.AccountId.name().equals(lookupIdKey)) {
-                return elasticSearchService.searchByAccountId(idxName, lookupIdValue);
-            }
-            return elasticSearchService.searchByLookupId(idxName, lookupIdKey, lookupIdValue);
-        } finally {
-            finish(workflowSpan);
+        log.debug(String.format("customerspace=%s, %s:%s,%s:%s", customerSpace,
+                "lookupIdKey", lookupIdKey, "lookupIdValue", lookupIdValue));
+        if (InterfaceName.AccountId.name().equals(lookupIdKey)) {
+            return elasticSearchService.searchByAccountId(idxName, lookupIdValue);
         }
+        return elasticSearchService.searchByLookupId(idxName, lookupIdKey, lookupIdValue);
     }
 
     private String constructAccountLookupKey(String tenantId, Integer version, String lookupIdKey,

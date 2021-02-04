@@ -23,13 +23,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.ElasticSearchDataUnit;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.publish.PublishTableToElasticSearchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ElasticSearchExportConfig;
@@ -72,6 +69,7 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
 
     private List<ElasticSearchExportConfig> configs;
 
+    private List<String> lookupIds;
 
 
     @Override
@@ -87,6 +85,7 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
             return null;
         }
         String customizedSignature = stepConfiguration.getSignature();
+        lookupIds = stepConfiguration.getLookupIds();
 
         List<DataUnit> units = new ArrayList<>();
         Map<Integer, TableRoleInCollection> indexToRole = new HashMap<>();
@@ -144,7 +143,8 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
                 continue;
             }
             String tableName = ElasticSearchUtils.getEntityFromTableRole(role);
-            ElasticSearchDataUnit unit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), tableName,
+            ElasticSearchDataUnit unit =
+                    (ElasticSearchDataUnit) dataUnitProxy.getByNameAndTypeInCache(customerSpace.toString(), tableName,
                     DataUnit.StorageType.ElasticSearch);
             if (unit == null || !config.getSignature().equals(unit.getSignature())) {
                 log.info("elastic search data unit will be updated to {}", config.getSignature());
@@ -183,14 +183,7 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
         if (TimelineProfile.name().equals(role.name())) {
             log.info("no column for timeline profile");
         } else if (AccountLookup.name().equals(role.name())) {
-            log.info("set nested to fieldName {}", role.name());
-
-            List<String> lookupIds = servingStoreProxy
-                    .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account,
-                            Collections.singletonList(ColumnSelection.Predefined.LookupId), null)
-                    .map(ColumnMetadata::getAttrName).collectList().block();
-            lookupIds.add(InterfaceName.AccountId.name());
-            log.info("lookup id is : " + JsonUtils.serialize(lookupIds));
+            log.info("set nested to fieldName {}, lookup ids are {}", role.name(), JsonUtils.serialize(lookupIds));
             elasticSearchService.updateAccountIndexMapping(idxName, role.name(), "nested", lookupIds, "keyword");
         } else {
             log.info("set binary to fieldName {}", role.name());

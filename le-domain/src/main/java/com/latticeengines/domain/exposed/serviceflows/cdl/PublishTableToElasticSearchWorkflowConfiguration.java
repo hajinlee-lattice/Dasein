@@ -45,6 +45,11 @@ public class PublishTableToElasticSearchWorkflowConfiguration extends BaseCDLWor
             return this;
         }
 
+        public Builder lookupIds(List<String> lookupIds) {
+            publishTableToElasticSearchStepConfiguration.setLookupIds(lookupIds);
+            return this;
+        }
+
         public PublishTableToElasticSearchWorkflowConfiguration build() {
             configuration.setContainerConfiguration(WORKFLOW_NAME, configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
