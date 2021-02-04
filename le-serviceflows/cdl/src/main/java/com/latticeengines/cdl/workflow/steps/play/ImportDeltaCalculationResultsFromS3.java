@@ -70,7 +70,7 @@ public class ImportDeltaCalculationResultsFromS3
         String completeContacts = playLaunch.getCompleteContactsTable();
         AudienceType audienceType = channelConfig.getAudienceType();
         CDLExternalSystemName systemName = playLaunch.getDestinationSysName();
-        boolean launchToDb = CDLExternalSystemName.Salesforce.equals(systemName) || CDLExternalSystemName.Eloqua.equals(systemName);
+        boolean launchToDb = CDLExternalSystemName.LAUNCH_TO_DB.contains(systemName);
         boolean isLiveRampLaunch = channelConfig instanceof LiveRampChannelConfig;
         boolean hasOutreachTaskDescription = hasOutreachTaskDescription(channelConfig);
 

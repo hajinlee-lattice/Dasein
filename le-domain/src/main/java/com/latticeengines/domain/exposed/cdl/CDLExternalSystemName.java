@@ -33,6 +33,9 @@ public enum CDLExternalSystemName {
             ImmutableList.of(CDLExternalSystemName.Adobe_Audience_Mgr, CDLExternalSystemName.MediaMath,
                     CDLExternalSystemName.TradeDesk, CDLExternalSystemName.Verizon_Media,
                     CDLExternalSystemName.Google_Display_N_Video_360, CDLExternalSystemName.AppNexus);
+    
+    public static final ImmutableList<CDLExternalSystemName> LAUNCH_TO_DB = //
+            ImmutableList.of(CDLExternalSystemName.Salesforce, CDLExternalSystemName.Eloqua);
 
     private static Map<String, CDLExternalSystemName> map = new HashMap<>();
 
