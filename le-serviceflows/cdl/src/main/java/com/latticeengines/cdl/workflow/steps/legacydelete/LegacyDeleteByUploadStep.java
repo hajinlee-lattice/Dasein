@@ -497,6 +497,7 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
         Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
         if (activeTable == null) {
             isSkipStep = true;
+            return;
         }
         String cloneName = NamingUtils.timestamp(role.name());
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
