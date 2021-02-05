@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.domain.exposed.cdl.AcxiomCompleted;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
@@ -23,18 +22,13 @@ public class AcxiomCompletedWorkflowStatusHandler implements WorkflowStatusHandl
     @Inject
     private PlayLaunchService playLaunchService;
 
-    @Inject
-    private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
-
     @Override
     public DataIntegrationEventType getEventType() {
-        return DataIntegrationEventType.AudienceSizeUpdate;
+        return DataIntegrationEventType.AcxiomCompleted;
     }
 
-    public AcxiomCompletedWorkflowStatusHandler(PlayLaunchService playLaunchService,
-            DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr) {
+    public AcxiomCompletedWorkflowStatusHandler(PlayLaunchService playLaunchService) {
         this.playLaunchService = playLaunchService;
-        this.dataIntegrationStatusMonitoringEntityMgr = dataIntegrationStatusMonitoringEntityMgr;
     }
 
     @Override
@@ -42,8 +36,6 @@ public class AcxiomCompletedWorkflowStatusHandler implements WorkflowStatusHandl
             DataIntegrationStatusMonitorMessage status) {
 
         checkStatusMonitorExists(statusMonitor, status);
-
-        statusMonitor.setStatus(DataIntegrationEventType.AcxiomCompleted.toString());
 
         AcxiomCompleted eventDetail = (AcxiomCompleted) status.getEventDetail();
 
@@ -67,7 +59,7 @@ public class AcxiomCompletedWorkflowStatusHandler implements WorkflowStatusHandl
             playLaunchService.update(playLaunch);
         }
 
-        return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
+        return statusMonitor;
     }
 
 }

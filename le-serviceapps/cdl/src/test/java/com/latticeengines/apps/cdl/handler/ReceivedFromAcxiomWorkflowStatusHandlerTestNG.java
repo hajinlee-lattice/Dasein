@@ -8,7 +8,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.domain.exposed.cdl.AcxiomReceived;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
@@ -22,9 +21,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 public class ReceivedFromAcxiomWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ReceivedFromAcxiomWorkflowStatusHandlerTestNG.class);
-
-    @Inject
-    private DataIntegrationStatusMonitoringEntityMgr dataIntegrationStatusMonitoringEntityMgr;
 
     @Inject
     private PlayLaunchService playLaunchService;
@@ -48,14 +44,14 @@ public class ReceivedFromAcxiomWorkflowStatusHandlerTestNG extends StatusHandler
         Long receivedCount = 10000L;
         createEventDetail(statusMessage, receivedCount);
 
-        ReceivedFromAcxiomWorkflowStatusHandler handler = new ReceivedFromAcxiomWorkflowStatusHandler(playLaunchService,
-                                                                                    dataIntegrationStatusMonitoringEntityMgr);
+        ReceivedFromAcxiomWorkflowStatusHandler handler = new ReceivedFromAcxiomWorkflowStatusHandler(
+                playLaunchService);
         handler.handleWorkflowState(statusMonitor, statusMessage);
 
         String launchId = playLaunch.getLaunchId();
         playLaunch = playLaunchService.findByLaunchId(launchId, false);
 
-        Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.ReceivedFromAcxiom.toString());
+        Assert.assertNotNull(playLaunch.getRecordsStats());
         Assert.assertEquals(playLaunch.getRecordsStats().getRecordsReceivedFromAcxiom(), receivedCount);
         teardown(launchId, channel.getId(), play.getName());
     }
