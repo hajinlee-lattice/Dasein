@@ -47,6 +47,8 @@ class GenerateChangeTableJob extends AbstractSparkJob[GenerateChangeTableConfig]
           schema.fieldNames map (name =>
             if (tColPos.contains(name))
               row.get(tColPos(name))
+            else if (fColPos.contains(name))
+              row.get(fColPos(name))
             else
               null
             )
@@ -64,6 +66,8 @@ class GenerateChangeTableJob extends AbstractSparkJob[GenerateChangeTableConfig]
             schema.fieldNames map (name =>
               if (tColPos.contains(name))
                 row.get(tColPos(name))
+              else if (fColPos.contains(name)) // special join key pos is on the left side
+                row.get(fColPos(name))
               else
                 null
               )
@@ -76,6 +80,8 @@ class GenerateChangeTableJob extends AbstractSparkJob[GenerateChangeTableConfig]
               schema.fieldNames map (name =>
                 if (tColPos.contains(name))
                   row.get(tColPos(name))
+                else if (fColPos.contains(name))
+                  row.get(fColPos(name))
                 else
                   null
                 )
