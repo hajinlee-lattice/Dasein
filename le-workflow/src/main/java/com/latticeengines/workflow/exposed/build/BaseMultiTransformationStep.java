@@ -61,13 +61,16 @@ public abstract class BaseMultiTransformationStep<T extends BaseMultiTransformat
         intializeConfiguration();
         int index = 0;
         TransformationProgress progress = null;
-        PipelineTransformationRequest request = null;
+        PipelineTransformationRequest request;
+        if (needSkipStep()) {
+            return;
+        }
         do {
             request = generateRequest(progress, index);
             progress = transformationProxy.transform(request, configuration.getPodId());
             log.info("progress: {}", progress);
             waitForProgressStatus(progress.getRootOperationUID());
-        } while (shouldContinue(progress, request, index++));
+        } while (shouldContinue(progress, request, ++index));
         onPostTransformationCompleted();
     }
 
@@ -173,4 +176,6 @@ public abstract class BaseMultiTransformationStep<T extends BaseMultiTransformat
                                               int currentIndex);
 
     protected abstract void onPostTransformationCompleted();
+
+    protected abstract boolean needSkipStep();
 }
