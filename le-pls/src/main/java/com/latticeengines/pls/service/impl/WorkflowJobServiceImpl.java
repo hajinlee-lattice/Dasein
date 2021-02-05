@@ -714,7 +714,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         boolean allowAutoSchedule = false;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-            allowAutoSchedule = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+            allowAutoSchedule = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE) && !schedulingStatus.isHandHoldPATenant();
         } catch (Exception e) {
             log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
         }
