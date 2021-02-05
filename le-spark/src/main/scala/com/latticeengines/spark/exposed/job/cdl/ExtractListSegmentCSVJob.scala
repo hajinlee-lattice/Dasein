@@ -18,7 +18,11 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     val config: ExtractListSegmentCSVConfig = lattice.config
     val csvAdaptor: CSVAdaptor = config.getCsvAdaptor
     val accountAttributes: Seq[String] = config.getAccountAttributes.asScala
-    val contactAttributes: Seq[String] = config.getContactAttributes.asScala
+    val contactAttributes: Seq[String] = if (config.getContactAttributes == null) {
+      Seq.empty[String]
+    } else {
+      config.getContactAttributes.asScala
+    }
     val fieldMappings: Buffer[ImportFieldMapping] = csvAdaptor.getImportFieldMappings.asScala
     var importCSVDf: DataFrame = lattice.input.head
     val finalDfs = new ListBuffer[DataFrame]()
