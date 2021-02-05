@@ -546,7 +546,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     }
 
     private void testLDCTechProfile() {
-        checkAndVerifyCategory(Category.TECHNOLOGY_PROFILE, (config) -> {
+        checkAndVerifyEmptyCategory(Category.TECHNOLOGY_PROFILE, (config) -> {
             AttrState initialState = AttrState.Inactive;
             boolean[] flags = new boolean[] { true, // life cycle change
                     true, true, // segment
