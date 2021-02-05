@@ -67,7 +67,16 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
 
         EnrichmentTemplate enrichmentTemplate = new EnrichmentTemplate(enrichmentLayout);
 
-        enrichmentTemplate.setCreatedBy(MultiTenantContext.getUser().getEmail());
+        try {
+            enrichmentTemplate.setCreatedBy(MultiTenantContext.getUser().getEmail());
+        } catch (Exception exception) {
+            log.error("Unexpected exception assigning user to template: " + exception.getMessage());
+            log.error(ExceptionUtils.getStackTrace(exception));
+            log.error("Assigning enrichment template creator to base enrichment layout creator: "
+                    + enrichmentLayout.getCreatedBy());
+            enrichmentTemplate.setCreatedBy(MultiTenantContext.getUser().getEmail());
+        }
+
         enrichmentTemplate.setTemplateName(templateName);
         enrichmentTemplate.setTenant(tenant);
 
