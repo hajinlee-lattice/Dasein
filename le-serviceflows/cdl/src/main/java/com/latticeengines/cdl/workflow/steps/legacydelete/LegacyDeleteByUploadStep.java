@@ -450,6 +450,9 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
             otherActions.addAll(JsonUtils.convertSet(actionSet, Action.class));
         }
         cycleCount += otherActions.size();
+        if (cycleCount == 0) {
+            isSkipStep = true;
+        }
     }
 
     protected void addBaseTables(TransformationStepConfig step, String... sourceTableNames) {
