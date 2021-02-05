@@ -64,7 +64,7 @@ private[spark] object DeltaCampaignLaunchUtils {
     var priorityDisplayName: String = null
     var launchTime: Option[Long] = None
     var sfdcAccountId: String = null
-    var externalAccountId: String = ""
+    var externalAccountId: String = accountId
 
     if (playLaunchContext.getCreated != null) {
       launchTime = Some(playLaunchContext.getCreated.getTime)
@@ -73,13 +73,19 @@ private[spark] object DeltaCampaignLaunchUtils {
     }
 
     if (playLaunchContext.getSfdcAccountID == null) {
-      sfdcAccountId = checkAndGet(account, getAccountId(playLaunchContext.getIsEntityMatch))
+      if (playLaunchContext.getShouldDefaultPopulateIds) {
+        sfdcAccountId = checkAndGet(account, getAccountId(playLaunchContext.getIsEntityMatch))
+      }
     } else {
       sfdcAccountId = checkAndGet(account, playLaunchContext.getSfdcAccountID)
     }
 
-    if (sfdcAccountId != null) {
-      externalAccountId = sfdcAccountId
+    if (playLaunchContext.getShouldDefaultPopulateIds) {
+      if (sfdcAccountId != null) {
+        externalAccountId = sfdcAccountId
+      } else {
+        externalAccountId = ""
+      }
     }
 
     var companyName: String = checkAndGet(account, InterfaceName.CompanyName.name)

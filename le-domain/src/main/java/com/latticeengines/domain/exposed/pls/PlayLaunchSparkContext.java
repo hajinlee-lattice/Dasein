@@ -126,6 +126,9 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("isEntityMatch")
     private boolean isEntityMatch;
 
+    @JsonProperty("shouldDefaultPopulateIds")
+    private boolean shouldDefaultPopulateIds;
+
     public PlayLaunchSparkContext() {
     }
 
@@ -392,6 +395,14 @@ public class PlayLaunchSparkContext implements Serializable {
 
     public void setIsEntityMatch(boolean isEntityMatch) {
         this.isEntityMatch = isEntityMatch;
+    }
+
+    public boolean getShouldDefaultPopulateIds() {
+        return shouldDefaultPopulateIds;
+    }
+
+    public void setShouldDefaultPopulateIds(boolean shouldDefaultPopulateIds) {
+        this.shouldDefaultPopulateIds = shouldDefaultPopulateIds;
     }
 
     private void setSyncDestination(PlayLaunch playLaunch) {

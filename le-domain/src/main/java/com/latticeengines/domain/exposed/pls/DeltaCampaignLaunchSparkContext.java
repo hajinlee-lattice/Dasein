@@ -144,6 +144,9 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("isEntityMatch")
     private boolean isEntityMatch;
 
+    @JsonProperty("shouldDefaultPopulateIds")
+    private boolean shouldDefaultPopulateIds;
+
     public DeltaCampaignLaunchSparkContext() {
     }
 
@@ -500,6 +503,14 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
 
     public void setIsEntityMatch(boolean isEntityMatch) {
         this.isEntityMatch = isEntityMatch;
+    }
+
+    public boolean getShouldDefaultPopulateIds() {
+        return shouldDefaultPopulateIds;
+    }
+
+    public void setShouldDefaultPopulateIds(boolean shouldDefaultPopulateIds) {
+        this.shouldDefaultPopulateIds = shouldDefaultPopulateIds;
     }
 
     public static class DeltaCampaignLaunchSparkContextBuilder {

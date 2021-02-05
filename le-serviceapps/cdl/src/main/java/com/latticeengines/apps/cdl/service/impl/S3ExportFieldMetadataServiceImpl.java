@@ -61,7 +61,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
         log.info("S3 accountId " + accountId);
         if (!StringUtils.isEmpty(accountId)) {
             remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, accountId);
-        } else {
+        } else if (isDefaultIdFeatureFlagForS3AndSalesforceEnabled(customerSpace)) {
             remappingMap.put(SFDC_ACCOUNT_ID_INTERNAL_NAME, getDefaultAccountIdForTenant(customerSpace));
         }
 
@@ -69,7 +69,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
         log.info("S3 contactId " + contactId);
         if (!StringUtils.isEmpty(contactId)) {
             remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, contactId);
-        } else {
+        } else if (isDefaultIdFeatureFlagForS3AndSalesforceEnabled(customerSpace)) {
             remappingMap.put(SFDC_CONTACT_ID_INTERNAL_NAME, getDefaultContactIdForTenant(customerSpace));
         }
         return remappingMap;

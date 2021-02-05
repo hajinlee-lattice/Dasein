@@ -19,6 +19,7 @@ import com.latticeengines.apps.cdl.service.ExportFieldMetadataService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -258,6 +259,10 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
             return getServingMetadata(customerSpace, entities, attributeSetName)
                     .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm)).block();
         }
+    }
+
+    protected boolean isDefaultIdFeatureFlagForS3AndSalesforceEnabled(String customerSpace) {
+        return batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS);
     }
 
     protected String getDefaultAccountIdForTenant(String customerSpace) {

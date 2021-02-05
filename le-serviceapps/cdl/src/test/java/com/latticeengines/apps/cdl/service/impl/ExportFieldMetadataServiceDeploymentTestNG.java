@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 
@@ -37,6 +38,7 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
@@ -137,6 +139,11 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
     private static final String LATTICE_ACCOUNT_ID_DISPLAY_NAME = "Lattice Account ID";
     private static final String LATTICE_CONTACT_ID_DISPLAY_NAME = "Lattice Contact ID";
     private static final String SDR_EMAIL_DISPLAY_NAME = "SDR Email";
+
+    private static final String S3_ACCOUNT_ID_DISPLAY_NAME = "SFDC Account ID";
+    private static final String S3_CONTACT_ID_DISPLAY_NAME = "SFDC Contact ID";
+    private static final String S3_LATTICE_ACCOUNT_ID_DISPLAY_NAME = "Account ID";
+    private static final String S3_LATTICE_CONTACT_ID_DISPLAY_NAME = "Contact ID";
 
     private List<CDLExternalSystemName> systemsToCheck = Arrays.asList(
             CDLExternalSystemName.Marketo, //
@@ -294,47 +301,80 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         PlayLaunchChannel channelWithMappedSfdcIds = createPlayLaunchChannel(new S3ChannelConfig(),
                 lookupIdMapWithMappedSfdcIds, play);
 
+        Mockito.doReturn(false).when(batonService).isEnabled(any(), eq(LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS));
+        Mockito.doReturn(false).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> featureFlagDisabledColumnMetadata = S3ExportFieldMetadataServiceImpl
+                .getExportEnabledFields(mainCustomerSpace, channel);
+        Map<String, ColumnMetadata> featureFlagDisabledColumnMetadataMap = featureFlagDisabledColumnMetadata
+                .stream()
+                .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
+        
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME,
+                S3_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME,
+                S3_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, InterfaceName.AccountId.name(),
+                S3_LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, InterfaceName.ContactId.name(),
+                S3_LATTICE_CONTACT_ID_DISPLAY_NAME);
+
+        Mockito.doReturn(true).when(batonService).isEntityMatchEnabled(any());
+        featureFlagDisabledColumnMetadata = S3ExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace,
+                channel);
+        featureFlagDisabledColumnMetadataMap = featureFlagDisabledColumnMetadata.stream()
+                .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
+
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME,
+                S3_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME,
+                S3_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, InterfaceName.AccountId.name(),
+                S3_LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, InterfaceName.ContactId.name(),
+                S3_LATTICE_CONTACT_ID_DISPLAY_NAME);
+
+        Mockito.doReturn(true).when(batonService).isEnabled(any(), eq(LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS));
         Mockito.doReturn(false).when(batonService).isEntityMatchEnabled(any());
         List<ColumnMetadata> legacyTenantColumnMetadata = S3ExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, CONTACT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, S3_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, S3_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), S3_LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), S3_LATTICE_CONTACT_ID_DISPLAY_NAME);
 
         legacyTenantColumnMetadata = S3ExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace,
                 channelWithMappedSfdcIds);
         legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.Website.name(), ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactCity.name(), CONTACT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.Website.name(), S3_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactCity.name(), S3_CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.AccountId.name(), S3_LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(legacyColumnMetadataMap, InterfaceName.ContactId.name(), S3_LATTICE_CONTACT_ID_DISPLAY_NAME);
 
         Mockito.doReturn(true).when(batonService).isEntityMatchEnabled(any());
         List<ColumnMetadata> entityMatchTenantColumnMetadata = S3ExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerAccountId.name(),
-                ACCOUNT_ID_DISPLAY_NAME);
+                S3_ACCOUNT_ID_DISPLAY_NAME);
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.CustomerContactId.name(),
-                CONTACT_ID_DISPLAY_NAME);
+                S3_CONTACT_ID_DISPLAY_NAME);
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(),
-                LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+                S3_LATTICE_ACCOUNT_ID_DISPLAY_NAME);
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(),
-                LATTICE_CONTACT_ID_DISPLAY_NAME);
+                S3_LATTICE_CONTACT_ID_DISPLAY_NAME);
 
         entityMatchTenantColumnMetadata = S3ExportFieldMetadataServiceImpl
                 .getExportEnabledFields(mainCustomerSpace, channelWithMappedSfdcIds);
         entityMatchColumnMetadataMap = entityMatchTenantColumnMetadata.stream()
                 .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.Website.name(), ACCOUNT_ID_DISPLAY_NAME);
-        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactCity.name(), CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.Website.name(), S3_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactCity.name(), S3_CONTACT_ID_DISPLAY_NAME);
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.AccountId.name(),
-                LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+                S3_LATTICE_ACCOUNT_ID_DISPLAY_NAME);
         testRemappedValues(entityMatchColumnMetadataMap, InterfaceName.ContactId.name(),
-                LATTICE_CONTACT_ID_DISPLAY_NAME);
+                S3_LATTICE_CONTACT_ID_DISPLAY_NAME);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
@@ -779,7 +819,33 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
                 InterfaceName.Website.name(), null, InterfaceName.ContactCity.name());
         PlayLaunchChannel channelWithMappedSfdcIds = createPlayLaunchChannel(new SalesforceChannelConfig(), lookupIdMapWithMappedSfdcIds,
                 play);
+        
+        Mockito.doReturn(false).when(batonService).isEnabled(any(), eq(LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS));
+        Mockito.doReturn(false).when(batonService).isEntityMatchEnabled(any());
+        List<ColumnMetadata> featureFlagDisabledColumnMetadata = salesforceExportFieldMetadataServiceImpl
+                .getExportEnabledFields(mainCustomerSpace, channel);
+        Map<String, ColumnMetadata> featureFlagDisabledColumnMetadataMap = featureFlagDisabledColumnMetadata
+                .stream()
+                .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
+        
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
 
+        Mockito.doReturn(true).when(batonService).isEntityMatchEnabled(any());
+        featureFlagDisabledColumnMetadata = salesforceExportFieldMetadataServiceImpl
+                .getExportEnabledFields(mainCustomerSpace, channel);
+        featureFlagDisabledColumnMetadataMap = featureFlagDisabledColumnMetadata
+                .stream()
+                .collect(Collectors.toMap(ColumnMetadata::getDisplayName, Function.identity()));
+        
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, SFDC_ACCOUNT_ID_INTERNAL_NAME, ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, SFDC_CONTACT_ID_INTERNAL_NAME, CONTACT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, InterfaceName.AccountId.name(), LATTICE_ACCOUNT_ID_DISPLAY_NAME);
+        testRemappedValues(featureFlagDisabledColumnMetadataMap, InterfaceName.ContactId.name(), LATTICE_CONTACT_ID_DISPLAY_NAME);
+
+        Mockito.doReturn(true).when(batonService).isEnabled(any(), eq(LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS));
         Mockito.doReturn(false).when(batonService).isEntityMatchEnabled(any());
         List<ColumnMetadata> legacyTenantColumnMetadata = salesforceExportFieldMetadataServiceImpl.getExportEnabledFields(mainCustomerSpace, channel);
         Map<String, ColumnMetadata> legacyColumnMetadataMap = legacyTenantColumnMetadata.stream()

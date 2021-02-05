@@ -261,7 +261,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
   private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String, joinKey: String): DataFrame = {
       val contactWithoutJoinKey = contactTable.drop(joinKey)
-      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId, false, false)
+      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId, false, false, false)
       val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
         flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
         count(lit(1)).as("CONTACT_NUM") //

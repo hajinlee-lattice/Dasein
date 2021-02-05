@@ -44,6 +44,7 @@ public enum LatticeFeatureFlag {
     ENABLE_GOOGLE_INTEGRATION("EnableGoogleIntegration", "Enable Google integration"), //
     ENABLE_LIVERAMP_INTEGRATION("EnableLiveRampIntegration", "Enable LiveRamp integration"), //
     ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
+    ENABLE_IR_DEFAULT_IDS("EnableIrDefaultIds", "Enable Legacy/IR tenant default values of SFDC ids for Salesforce and S3"), //
     ENABLE_ACCOUNT360("EnableAccount360", "Enable Account360 features"), //
     ATTRIBUTE_TOGGLING("AttributeToggling", "Allow multi click behavior for Attributes during query building"), //
     ENABLE_ACXIOM("EnableAcxiom", "Enable Acxiom in ads platform integrations"), //
