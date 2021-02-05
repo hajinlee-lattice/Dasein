@@ -102,16 +102,7 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
         this.createTime = enrichmentLayout.getCreated();
         this.updated = enrichmentLayout.getUpdated();
         this.createdBy = enrichmentLayout.getCreatedBy();
-    }
-
-    public EnrichmentTemplate(EnrichmentLayoutDetail enrichmentLayoutDetail) {
-        this.templateId = NamingUtils.uuid("Template");
-        this.domain = enrichmentLayoutDetail.getDomain();
-        this.recordType = enrichmentLayoutDetail.getRecordType();
-        this.elements = enrichmentLayoutDetail.getElements();
-        this.createTime = enrichmentLayoutDetail.getCreated();
-        this.updated = enrichmentLayoutDetail.getUpdated();
-        this.createdBy = enrichmentLayoutDetail.getCreatedBy();
+        this.archived = false;
     }
 
     @Override
@@ -181,4 +172,5 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
     public Boolean getArchived() {
         return archived;
     }
+
 }
