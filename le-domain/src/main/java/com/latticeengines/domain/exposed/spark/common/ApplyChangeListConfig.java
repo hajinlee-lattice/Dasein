@@ -51,5 +51,4 @@ public class ApplyChangeListConfig extends SparkJobConfig {
     public void setIncludeAttrs(List<String> includeAttrs) {
         this.includeAttrs = includeAttrs;
     }
-
 }

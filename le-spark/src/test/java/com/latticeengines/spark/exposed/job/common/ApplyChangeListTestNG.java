@@ -197,5 +197,4 @@ public class ApplyChangeListTestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertEquals(rows, 4);
         return true;
     }
-
 }

@@ -18,13 +18,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.kitesdk.shaded.com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -155,8 +155,6 @@ public class GenerateChangeTable extends BaseProcessAnalyzeSparkStep<GenerateCha
             // account lookup doesn't have entity id
             joinKey = entityKey;
         } else {
-            // need to use AccountId/ContactId because legacy
-            // won't have EntityId column
             joinKey = configuration.isEntityMatchEnabled() ? InterfaceName.EntityId.name() :
                     entityKey;
         }
