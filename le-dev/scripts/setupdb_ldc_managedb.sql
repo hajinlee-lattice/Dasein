@@ -239,7 +239,7 @@ SET
   `AccountMasterHdfsVersion` = '2021-01-29_08-03-39_UTC',
   `AccountLookupHdfsVersion` = '2021-01-24_18-07-55_UTC',
   `DunsGuideBookHdfsVersion` = '2021-01-24_19-27-09_UTC',
-  `EnrichmentStatsVersion`   = '2020-11-11_17-31-47_UTC'
+  `EnrichmentStatsVersion`   = '2021-02-01_08-38-31_UTC'
 WHERE `Version` = '2.0.27';
 
 UPDATE SourceColumn
