@@ -164,6 +164,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         UploadDetails upload = uploads.get(0);
         uploadId = upload.getUploadId();
         Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_STARTED);
+        logger.info(JsonUtils.pprint(upload));
 
         StringInputStream sis = new StringInputStream("file1");
 
