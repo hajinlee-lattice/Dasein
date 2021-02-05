@@ -359,6 +359,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         } else {
             deltaCampaignLaunchSparkContext.setContactCols(CampaignLaunchUtils.generateContactColsForS3());
         }
+        deltaCampaignLaunchSparkContext.setShouldDefaultPopulateIds(true);
         deltaCampaignLaunchSparkContext.setCreateRecommendationDataFrame(createRecommendationDataFrame);
         deltaCampaignLaunchSparkContext.setCreateAddCsvDataFrame(createAddCsvDataFrame);
         deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataFrame(createDeleteCsvDataFrame);
