@@ -213,7 +213,6 @@ public class ExtractListSegmentCSV
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(true);
         matchInput.setMatchDebugEnabled(false);
-        matchInput.setReturnAnonymousWhenUnmatched(true);
         matchInput.setUseDirectPlus(useDirectPlus);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
