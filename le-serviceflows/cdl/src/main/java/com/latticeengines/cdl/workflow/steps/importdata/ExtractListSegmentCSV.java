@@ -60,7 +60,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.ImportListSegmentWorkf
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ExtractListSegmentCSVConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ExtractListSegmentCSVConfig;
-import com.latticeengines.domain.exposed.spark.common.ConvertMatchResultConfig;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.util.SegmentUtils;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -68,7 +68,7 @@ import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
 import com.latticeengines.serviceflows.workflow.match.BulkMatchService;
 import com.latticeengines.spark.exposed.job.cdl.ExtractListSegmentCSVJob;
-import com.latticeengines.spark.exposed.job.common.ConvertMatchResultJob;
+import com.latticeengines.spark.exposed.job.common.CopyJob;
 
 @Component("extractListSegmentCSV")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -132,12 +132,13 @@ public class ExtractListSegmentCSV
         if (s3DataUnit != null) {
             MetadataSegment segment = segmentProxy.getListSegmentByName(tenantId, segmentName);
             if (SegmentUtils.hasListSegment(segment)) {
+                ListSegment listSegment = segment.getListSegment();
                 ExtractListSegmentCSVConfig extractListSegmentCSVConfig = new ExtractListSegmentCSVConfig();
-                extractListSegmentCSVConfig.setCsvAdaptor(segment.getListSegment().getCsvAdaptor());
+                extractListSegmentCSVConfig.setCsvAdaptor(listSegment.getCsvAdaptor());
                 String hdfsPath = s3DataUnit.getLinkedHdfsPath();
                 extractListSegmentCSVConfig.setInput(Collections.singletonList(getInputCSVDataUnit(hdfsPath, dataUnitName)));
-                boolean needMatch = needMatch(segment.getListSegment());
-                CSVAdaptor csvAdaptor = segment.getListSegment().getCsvAdaptor();
+                boolean needMatch = needMatch(listSegment);
+                CSVAdaptor csvAdaptor = listSegment.getCsvAdaptor();
                 Map<String, ImportFieldMapping> fieldMap = csvAdaptor.getImportFieldMappings().stream()
                         .collect(Collectors.toMap(importFieldMapping -> importFieldMapping.getFieldName(), importFieldMapping -> importFieldMapping));
                 if (needMatch) {
@@ -150,8 +151,8 @@ public class ExtractListSegmentCSV
                     log.info("Bulk match input is {}", JsonUtils.serialize(matchInput));
                     MatchCommand command = bulkMatchService.match(matchInput, null);
                     log.info("Bulk match finished: {}", JsonUtils.serialize(command));
-                    ConvertMatchResultConfig convertMatchResultConfig = getConvertMatchResultConfig(command);
-                    result = runSparkJob(ConvertMatchResultJob.class, convertMatchResultConfig);
+                    CopyConfig copyConfig = getCopyConfig(command, listSegment);
+                    result = runSparkJob(CopyJob.class, copyConfig);
                     accountDataUnit = result.getTargets().get(0);
                     processImportResult(BusinessEntity.Account, accountDataUnit, ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME, fieldMap);
                     segment.setAccounts(accountDataUnit.getCount());
@@ -188,19 +189,17 @@ public class ExtractListSegmentCSV
         extractListSegmentCSVConfig.setSpecialTargets(specialTargets);
     }
 
-    private ConvertMatchResultConfig getConvertMatchResultConfig(MatchCommand command) {
+    private CopyConfig getCopyConfig(MatchCommand command, ListSegment listSegment) {
         String outputDir = PathUtils.toParquetOrAvroDir(command.getResultLocation());
-        ConvertMatchResultConfig convertMatchResultConfig = new ConvertMatchResultConfig();
+        CopyConfig copyConfig = new CopyConfig();
         Map<Integer, DataUnit.DataFormat> specialTargets = new HashMap<>();
         specialTargets.put(0, DataUnit.DataFormat.PARQUET);
-        convertMatchResultConfig.setSpecialTargets(specialTargets);
+        copyConfig.setSpecialTargets(specialTargets);
         HdfsDataUnit input = new HdfsDataUnit();
         input.setPath(outputDir);
-        convertMatchResultConfig.setInput(Lists.newArrayList(input));
-        Map<String, String> names = new HashMap<>();
-        names.put(ATTR_LDC_DUNS, InterfaceName.AccountId.name());
-        convertMatchResultConfig.setDisplayNames(names);
-        return convertMatchResultConfig;
+        copyConfig.setInput(Lists.newArrayList(input));
+        copyConfig.setRenameAttrs(getDisplayName(listSegment));
+        return copyConfig;
     }
 
     private MatchInput getBaseMatchInput(String avroDir) {
@@ -271,6 +270,15 @@ public class ExtractListSegmentCSV
         String avroGlob = PathUtils.toAvroGlob(avroDir);
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
         return schema.getFields().stream().map(Schema.Field::name).collect(Collectors.toSet());
+    }
+
+    private Map<String, String> getDisplayName(ListSegment listSegment) {
+        ListSegmentConfig listSegmentConfig = listSegment.getConfig();
+        if (listSegmentConfig != null) {
+            return listSegmentConfig.getDisplayNames();
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
     private boolean needMatch(ListSegment listSegment) {

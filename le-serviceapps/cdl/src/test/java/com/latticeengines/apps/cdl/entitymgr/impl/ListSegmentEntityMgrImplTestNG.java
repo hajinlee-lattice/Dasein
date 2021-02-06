@@ -95,6 +95,10 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(importFieldMapping.getUserFieldName(), "Company Name");
         assertNotNull(listSegment.getConfig());
         assertTrue(listSegment.getConfig().isNeedToMatch());
+        Map<String, String> displayNames = listSegment.getConfig().getDisplayNames();
+        assertNotNull(displayNames);
+        assertEquals(displayNames.get("attr1"), "displayName1");
+        assertEquals(displayNames.get("attr2"), "displayName2");
     }
 
     private Map<String, String> getDataTemplates() {
@@ -117,6 +121,10 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         listSegment.setS3DropFolder(s3DropFolder);
         ListSegmentConfig listSegmentConfig = new ListSegmentConfig();
         listSegmentConfig.setNeedToMatch(true);
+        Map<String, String> displayNames = new HashMap<>();
+        displayNames.put("attr1", "displayName1");
+        displayNames.put("attr2", "displayName2");
+        listSegmentConfig.setDisplayNames(displayNames);
         listSegment.setConfig(listSegmentConfig);
         return listSegment;
     }
