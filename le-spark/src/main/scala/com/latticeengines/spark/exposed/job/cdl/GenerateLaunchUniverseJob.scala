@@ -25,19 +25,19 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
 
     var trimmedData = input
 
-    if (config.getContactsData != null) {
-      val contactsDf = loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit])
-      trimmedData = contactsDf.join(input, Seq(contactId), "inner")
-    }
-
-    logSpark("Input schema is as follows:")
-    trimmedData.printSchema
-
     if (contactAccountRatioThreshold != null && (maxContactsPerAccount == null || contactAccountRatioThreshold < maxContactsPerAccount)) {
       checkContactAccountRatio(trimmedData, accountId, contactAccountRatioThreshold)
     }
 
     if (maxContactsPerAccount != null) {
+      if (config.getContactsData != null) {
+        val contactsDf = loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit])
+        trimmedData = contactsDf.join(input, Seq(contactId), "right")
+      }
+
+      logSpark("Input schema is as follows:")
+      trimmedData.printSchema
+
       trimmedData = limitContactsPerAccount(trimmedData, accountId, contactId, sortAttr, sortDir, maxContactsPerAccount)
       if (maxEntitiesToLaunch != null) {
         trimmedData = trimmedData.limit(maxEntitiesToLaunch.toInt)
