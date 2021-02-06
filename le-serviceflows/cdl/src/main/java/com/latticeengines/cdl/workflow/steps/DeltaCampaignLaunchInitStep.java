@@ -181,7 +181,7 @@ public class DeltaCampaignLaunchInitStep
 
     @VisibleForTesting
     List<DataUnit> processTableNames(List<String> tableNames) {
-        return tableNames.stream().map(tableName -> getS3DataUnit(false, customerSpace, tableName)).collect(Collectors.toList());
+        return tableNames.stream().map(tableName -> getDataUnit(false, customerSpace, tableName)).collect(Collectors.toList());
     }
 
     private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {

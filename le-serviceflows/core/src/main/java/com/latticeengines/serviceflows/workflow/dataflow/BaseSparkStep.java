@@ -123,7 +123,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         }
     }
 
-    protected DataUnit getS3DataUnit(boolean queryDataUnit, CustomerSpace customerSpace, String unitName) {
+    protected DataUnit getDataUnit(boolean queryDataUnit, CustomerSpace customerSpace, String unitName) {
         if (unitName == null) {
             return null;
         } else if (queryDataUnit) {
@@ -138,7 +138,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
                 throw new RuntimeException("Table " + unitName + " for customer " + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
                         + " does not exists.");
             }
-            return table.toS3DataUnit(unitName, s3Bucket, customerSpace.getTenantId());
+            return table.toHdfsDataUnit(unitName);
         }
     }
 
@@ -237,7 +237,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     private void clearAllWorkspaces() {
         List<String> toBeRemoved = new ArrayList<>();
-        for (String workSpace: workSpaces) {
+        for (String workSpace : workSpaces) {
             try {
                 if (HdfsUtils.isDirectory(yarnConfiguration, workSpace)) {
                     HdfsUtils.rmdir(yarnConfiguration, workSpace);
