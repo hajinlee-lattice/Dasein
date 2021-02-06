@@ -201,7 +201,6 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   def logDataFrame(dfName: String, df: DataFrame, sortKey: String, selection: Seq[String], limit: Int) = {
     logSpark("==========" + dfName + "==========")
     logSpark(selection mkString ",")
-    df.orderBy(sortKey).select(selection map col: _*).limit(limit).collect().foreach(r => logSpark(r.toString))
     logSpark("==========" + dfName + "==========")
   }
 
