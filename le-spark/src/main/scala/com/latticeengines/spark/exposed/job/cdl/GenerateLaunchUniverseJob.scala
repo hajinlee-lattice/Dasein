@@ -32,7 +32,7 @@ class GenerateLaunchUniverseJob extends AbstractSparkJob[GenerateLaunchUniverseJ
     if (maxContactsPerAccount != null) {
       if (config.getContactsData != null) {
         val contactsDf = loadHdfsUnit(spark, config.getContactsData.asInstanceOf[HdfsDataUnit])
-        trimmedData = contactsDf.join(input, Seq(contactId), "inner")
+        trimmedData = contactsDf.join(input, Seq(contactId), "right")
       }
 
       logSpark("Input schema is as follows:")
