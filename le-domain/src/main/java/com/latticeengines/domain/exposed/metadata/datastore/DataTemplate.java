@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MasterSchema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -43,12 +42,6 @@ public class DataTemplate {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public static void main(String[] args){
-        DataTemplate dataTemplate = new DataTemplate();
-        System.out.println(JsonUtils.serialize(dataTemplate));
-
     }
 
 }
