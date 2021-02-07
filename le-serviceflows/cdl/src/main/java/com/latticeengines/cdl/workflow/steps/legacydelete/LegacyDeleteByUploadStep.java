@@ -97,6 +97,8 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
     private DataCollection.Version active;
     private DataCollection.Version inactive;
 
+    private boolean isSkipStep = false;
+
     private int cycleCount = 0;// this transformationStep loop limit
 
     @Override
@@ -416,6 +418,11 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
     protected void onPostTransformationCompleted() {
     }
 
+    @Override
+    protected boolean needSkipStep() {
+        return isSkipStep;
+    }
+
     private TargetTable getTargetTable() {
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -443,6 +450,9 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
             otherActions.addAll(JsonUtils.convertSet(actionSet, Action.class));
         }
         cycleCount += otherActions.size();
+        if (cycleCount == 0) {
+            isSkipStep = true;
+        }
     }
 
     protected void addBaseTables(TransformationStepConfig step, String... sourceTableNames) {
@@ -485,6 +495,10 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
+        if (activeTable == null) {
+            isSkipStep = true;
+            return;
+        }
         String cloneName = NamingUtils.timestamp(role.name());
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
         queue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
