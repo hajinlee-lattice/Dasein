@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
 import com.latticeengines.domain.exposed.dcp.ListEnrichmentTemplateRequest;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class EnrichmentTemplateServiceImplTestNG extends DCPDeploymentTestNGBase {
+public class EnrichmentTemplateServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private EnrichmentLayoutService enrichmentLayoutService;
