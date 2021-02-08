@@ -173,4 +173,27 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
         return archived;
     }
 
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public void setTemplateId(String templateId) {
+        this.templateId = templateId;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
 }
