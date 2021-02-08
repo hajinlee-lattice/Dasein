@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -24,6 +26,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.PrimeColumn;
 
 public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(PrimeMetadataServiceImpl.class);
+
     @Inject
     private PrimeMetadataService primeMetadataService;
 
@@ -31,7 +35,6 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     private void testGetBlocks() {
         List<DataBlock> blocks = primeMetadataService.getDataBlocks();
-        // System.out.println(JsonUtils.pprint(blocks));
         Assert.assertEquals(blocks.size(), 18);
         DataBlock compInfoBlock = blocks.stream() //
                 .filter(b -> "companyinfo".equals(b.getBlockId())).findFirst().orElse(null);
@@ -42,7 +45,6 @@ public class PrimeMetadataServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     private void testGetDataBlockMetadata() {
         DataBlockMetadataContainer container = primeMetadataService.getDataBlockMetadata();
-        // System.out.println(JsonUtils.serialize(container));
         Assert.assertNotNull(container);
         Assert.assertTrue(container.getBlocks().containsKey(BLOCK_BASE_INFO));
         Assert.assertTrue(container.getBlocks().containsKey(BLOCK_ENTITY_RESOLUTION));

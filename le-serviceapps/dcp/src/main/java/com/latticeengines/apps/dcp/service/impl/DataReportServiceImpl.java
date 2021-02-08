@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.dataReport.DataReportRollupStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
@@ -408,6 +409,17 @@ public class DataReportServiceImpl implements DataReportService {
                 dataReportEntityMgr.updateReadyForRollupToFalse(Collections.singleton(tenantPid));
             }
         }
+    }
+
+    @Override
+    public void updateRollupStatus(String customerSpace, DataReportRollupStatus rollupStatus) {
+        DataReportRecord.Level level = DataReportRecord.Level.Tenant;
+        String ownerId = CustomerSpace.shortenCustomerSpace(customerSpace);
+        if (rollupStatus.getStatus() == DataReportRecord.RollupStatus.FAILED_NO_RETRY) {
+            log.error(String.format("DataReportRollup for %s failed. Status code %s, message %s", customerSpace,
+                    rollupStatus.getStatusCode(), rollupStatus.getStatusMessage()));
+        }
+        dataReportEntityMgr.updateDataReportRollupStatus(rollupStatus.getStatus(), level, ownerId);
     }
 
     private Set<Long> getDataReportUnderOwnerId(DataReportRecord.Level level, String ownerId){

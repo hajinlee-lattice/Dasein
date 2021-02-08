@@ -15,6 +15,9 @@ CREATE PROCEDURE `RollbackSchema`()
     -- User input section (DDL/DML). This is just a template, developer can modify based on need.
 
 
+    -- DCP-1838, author: lucascl@dnb.com product: D&B Connect
+    ALTER TABLE `DCP_DATA_REPORT`
+        DROP COLUMN `ROLLUP_STATUS` VARCHAR(255);
 
 
   END //

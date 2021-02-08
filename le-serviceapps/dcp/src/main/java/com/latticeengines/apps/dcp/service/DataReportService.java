@@ -6,6 +6,7 @@ import java.util.Set;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.domain.exposed.dcp.dataReport.DataReportRollupStatus;
 
 public interface DataReportService {
 
@@ -49,4 +50,6 @@ public interface DataReportService {
     void deleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
 
     void hardDeleteDataReportUnderOwnerId(String customerSpace, DataReportRecord.Level level, String ownerId);
+
+    void updateRollupStatus(String customerSpace, DataReportRollupStatus rollupStatus);
 }

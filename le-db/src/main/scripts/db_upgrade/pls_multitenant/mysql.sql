@@ -18,6 +18,11 @@ CREATE PROCEDURE `UpdateSchema`()
     
     ALTER TABLE `PLS_MultiTenant`.`METADATA_LIST_SEGMENT` ADD COLUMN `CONFIG` JSON;
 
+    -- DCP-1838, author: lucascl@dnb.com product: D&B Connect
+    ALTER TABLE `DCP_DATA_REPORT`
+        ADD COLUMN `ROLLUP_STATUS` VARCHAR(255);
+
+
 
 
 
