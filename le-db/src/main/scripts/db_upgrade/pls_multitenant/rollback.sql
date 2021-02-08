@@ -19,6 +19,10 @@ CREATE PROCEDURE `RollbackSchema`()
     ALTER TABLE `DCP_DATA_REPORT`
         DROP COLUMN `ROLLUP_STATUS` VARCHAR(255);
 
+    -- DCP-2131 author: LizotteN@dnb.com product: D&B Connect
+    ALTER TABLE `PLS_MultiTenant`.`DCP_ENRICHMENT_TEMPLATE`
+           DROP COLUMN `ELEMENTS`;
+
 
   END //
 -- ##############################################################

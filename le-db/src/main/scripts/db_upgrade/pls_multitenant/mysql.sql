@@ -25,7 +25,7 @@ CREATE PROCEDURE `UpdateSchema`()
 
 
 
-
+    -- DCP-2131 author: WuH@dnb.com product: D&B Connect
     ALTER TABLE `PLS_MultiTenant`.`DCP_ENRICHMENT_TEMPLATE`
           ADD COLUMN `ELEMENTS` JSON;
 
