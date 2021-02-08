@@ -117,7 +117,9 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
             TransformationStepConfig concatenateImportContactName = concatenateContactName(steps.size() - 1, null);
             steps.add(concatenateImportContactName);
             if (CollectionUtils.isNotEmpty(rematchInputTableNames)) {
-                TransformationStepConfig entityMatchImport = matchContact(steps.size() - 1, null, null);
+                // only try to lookup existing account ID for imports, don't care about new
+                // account since later match step will take care of that
+                TransformationStepConfig entityMatchImport = matchContact(steps.size() - 1, null, null, false);
                 steps.add(entityMatchImport);
             }
         }
@@ -133,7 +135,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
             steps.add(filterImports);
         }
         TransformationStepConfig entityMatch = matchContact(steps.size() - 1, matchTargetTablePrefix,
-                rematchInputTableNames);
+                rematchInputTableNames, true);
         steps.add(entityMatch);
         log.info("steps are {}.", steps);
         return steps;
@@ -165,7 +167,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
     }
 
     private TransformationStepConfig matchContact(int inputStep, String targetTableName,
-            List<String> convertedRematchTableNames) {
+            List<String> convertedRematchTableNames, boolean registerNewAccountTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         setTargetTable(step, targetTableName);
@@ -194,7 +196,8 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         } else {
             matchRootOperationUid = UUID.randomUUID().toString();
             configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput, columnNames,
-                    getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact), newAccountTableName,
+                    getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact),
+                    registerNewAccountTable ? newAccountTableName : null,
                     hasConvertedRematchTables, ignoreDomainMatchKeyInContact, matchRootOperationUid);
             log.info("Set match RootOperationUID to {}", matchRootOperationUid);
         }
