@@ -28,7 +28,11 @@ var finalTargets: List[JsonNode] = targets.zip(output).par.map { t =>
   val partitionKeys = if (tgt.get("PartitionKeys") == null) List() //
   else tgt.get("PartitionKeys").elements.asScala.map(_.asText()).toList
   if (partitionKeys.isEmpty) {
-    df.write.format(fmt).save(path)
+    if (df.rdd.getNumPartitions > 200) {
+      df.repartition(200).write.format(fmt).save(path)
+    } else {
+      df.write.format(fmt).save(path)
+    }
   } else {
     df.write.partitionBy(partitionKeys: _*).format(fmt).save(path)
   }
