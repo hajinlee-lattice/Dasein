@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 import com.latticeengines.domain.exposed.metadata.template.ImportFieldMapping;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -69,6 +70,8 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Value("${pls.looker.ssvi.usergroup.id}")
     private Integer ssviUserGroupId;
+    @Value("${aws.customer.s3.bucket}")
+    protected String s3Bucket;
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -81,6 +84,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private HdfsToS3PathBuilder pathBuilder;
 
     @Override
     public DashboardResponse getDashboardList(String customerSpace) {
@@ -160,7 +166,8 @@ public class DashboardServiceImpl implements DashboardService {
                 dataUnit.getName(), DataUnit.StorageType.Athena);
         S3DataUnit dataUnit1 = (S3DataUnit) dataUnit;
         targetAccountList.setTableName(dataUnit1.getName());
-        targetAccountList.setS3Path(dataUnit1.getLinkedDir());
+        targetAccountList.setS3Path(pathBuilder.getS3AtlasDataUnitPrefix(s3Bucket, customerSpace,
+                dataUnit1.getDataTemplateId(), dataUnit1.getName()));
         targetAccountList.setHdfsPath(dataUnit1.getLinkedHdfsPath());
         targetAccountList.setAthenaTableName(athenaDataUnit == null ? null : athenaDataUnit.getAthenaTable());
         return targetAccountList;
