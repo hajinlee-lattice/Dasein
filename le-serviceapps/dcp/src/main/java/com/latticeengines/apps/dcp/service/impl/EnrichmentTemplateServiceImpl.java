@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
-import com.latticeengines.security.exposed.service.UserService;
 
 @Service("enrichmentTemplateService")
 public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements EnrichmentTemplateService {
@@ -55,9 +54,6 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private UserService userService;
 
     @Override
     public ResponseDocument<String> create(String customerSpace, String layoutId, String templateName) {

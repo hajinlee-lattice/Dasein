@@ -47,11 +47,67 @@ public class EnrichmentTemplateSummary {
         this.updateTime = enrichmentTemplate.getUpdated();
     }
 
+    public String getTemplateId() {
+        return templateId;
+    }
+
+    public void setTemplateId(String templateId) {
+        this.templateId = templateId;
+    }
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+    }
+
+    public DataDomain getDomain() {
+        return domain;
+    }
+
+    public void setDomain(DataDomain domain) {
+        this.domain = domain;
+    }
+
+    public DataRecordType getRecordType() {
+        return recordType;
+    }
+
+    public void setRecordType(DataRecordType recordType) {
+        this.recordType = recordType;
+    }
+
     public String getCreatedBy() {
         return createdBy;
     }
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public List<String> getElements() {
+        return elements;
+    }
+
+    public void setElements(List<String> elements) {
+        this.elements = elements;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }
