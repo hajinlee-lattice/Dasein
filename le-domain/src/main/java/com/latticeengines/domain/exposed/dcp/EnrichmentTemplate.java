@@ -173,4 +173,11 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
         return archived;
     }
 
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
 }
