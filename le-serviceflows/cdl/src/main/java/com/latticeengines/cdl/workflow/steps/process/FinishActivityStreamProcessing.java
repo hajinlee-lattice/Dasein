@@ -117,6 +117,9 @@ public class FinishActivityStreamProcessing extends BaseWorkflowStep<ProcessActi
         if (StringUtils.isNotBlank(tableName) && StringUtils.isNotBlank(version)) {
             log.info("table name {}, version {}", tableName, version);
             exportToES(tableName, version);
+            log.info("remove table {} from temporary list if needed", tableName);
+            removeFromListInContext(TEMPORARY_CDL_TABLES, tableName, String.class);
+
         } else {
             log.info("empty table name or version");
         }
