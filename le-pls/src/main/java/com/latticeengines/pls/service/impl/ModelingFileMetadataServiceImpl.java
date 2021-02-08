@@ -1198,15 +1198,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         List<String> ignoredFields = ListUtils.emptyIfNull(fieldMappingDocument.getIgnoredFields());
         // 2.check if there's multiple mapping to standard field
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (ignoredFields.contains(fieldMapping.getUserField())) {
-                continue;
-            }
             if (fieldMapping.getMappedField() == null) {
                 pendingUserFieldName.add(fieldMapping.getUserField());
             } else {
                 mappedUserFieldName.add(fieldMapping.getUserField());
                 if (reservedName.contains(fieldMapping.getMappedField())) {
-                    if (mappedFieldName.contains(fieldMapping.getMappedField())) {
+                    if (!ignoredFields.contains(fieldMapping.getUserField()) &&
+                            mappedFieldName.contains(fieldMapping.getMappedField())) {
                         throw new LedpException(LedpCode.LEDP_18196, new String[] { fieldMapping.getMappedField() });
                     } else {
                         fieldMapping.setMappedToLatticeField(true);
