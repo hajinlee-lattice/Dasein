@@ -70,8 +70,12 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Value("${pls.looker.ssvi.usergroup.id}")
     private Integer ssviUserGroupId;
+
     @Value("${aws.customer.s3.bucket}")
     protected String s3Bucket;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -84,9 +88,6 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Inject
     private BatonService batonService;
-
-    @Inject
-    private HdfsToS3PathBuilder pathBuilder;
 
     @Override
     public DashboardResponse getDashboardList(String customerSpace) {
@@ -166,6 +167,7 @@ public class DashboardServiceImpl implements DashboardService {
                 dataUnit.getName(), DataUnit.StorageType.Athena);
         S3DataUnit dataUnit1 = (S3DataUnit) dataUnit;
         targetAccountList.setTableName(dataUnit1.getName());
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         targetAccountList.setS3Path(pathBuilder.getS3AtlasDataUnitPrefix(s3Bucket, customerSpace,
                 dataUnit1.getDataTemplateId(), dataUnit1.getName()));
         targetAccountList.setHdfsPath(dataUnit1.getLinkedHdfsPath());
