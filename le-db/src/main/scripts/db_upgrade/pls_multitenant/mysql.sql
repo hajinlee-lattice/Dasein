@@ -20,6 +20,12 @@ CREATE PROCEDURE `UpdateSchema`()
 
 
 
+
+    ALTER TABLE `PLS_MultiTenant`.`DCP_ENRICHMENT_TEMPLATE`
+          ADD COLUMN `ELEMENTS` JSON;
+
+
+
   END //
 -- ##############################################################
 

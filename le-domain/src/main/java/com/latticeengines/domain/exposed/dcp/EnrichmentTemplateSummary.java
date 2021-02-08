@@ -9,22 +9,22 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
 public class EnrichmentTemplateSummary {
 
     @JsonProperty("templateId")
-    private String templateId;
+    public String templateId;
 
     @JsonProperty("templateName")
-    private String templateName;
+    public String templateName;
 
     @JsonProperty("domain")
-    private DataDomain domain;
+    public DataDomain domain;
 
     @JsonProperty("recordType")
-    private DataRecordType recordType;
+    public DataRecordType recordType;
 
     @JsonProperty("createdBy")
-    private String createdBy;
+    public String createdBy;
 
     @JsonProperty("elements")
-    private List<String> elements;
+    public List<String> elements;
 
     public EnrichmentTemplateSummary() {
     }

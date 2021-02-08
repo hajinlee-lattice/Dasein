@@ -20,13 +20,13 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
     private EnrichmentTemplateProxy enrichmentTemplateProxy;
 
     @Override
-    public ResponseDocument<String> createEnrichmentTemplate(String layoutId, String templateName) {
+    public ResponseDocument<EnrichmentTemplateSummary> createEnrichmentTemplate(String layoutId, String templateName) {
         return enrichmentTemplateProxy.createEnrichmentTemplate(MultiTenantContext.getShortTenantId(), layoutId,
                 templateName);
     }
 
     @Override
-    public ResponseDocument<String> createEnrichmentTemplate(EnrichmentTemplate enrichmentTemplate) {
+    public ResponseDocument<EnrichmentTemplateSummary> createEnrichmentTemplate(EnrichmentTemplate enrichmentTemplate) {
         return enrichmentTemplateProxy.createEnrichmentTemplate(MultiTenantContext.getShortTenantId(),
                 enrichmentTemplate);
     }
@@ -36,5 +36,10 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
             Boolean includeArchived, String createdBy) {
         return enrichmentTemplateProxy.getEnrichmentTemplates(MultiTenantContext.getShortTenantId(), domain, recordType,
                 includeArchived, createdBy);
+    }
+
+    @Override
+    public EnrichmentTemplateSummary getEnrichmentTemplate(String customerSpace, String templateId) {
+        return enrichmentTemplateProxy.getEnrichmentTemplate(customerSpace, templateId);
     }
 }

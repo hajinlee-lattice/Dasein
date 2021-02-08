@@ -59,4 +59,10 @@ public class EnrichmentTemplateEntityMgrImpl
     public List<EnrichmentTemplate> findAll(Pageable pageable) {
         return getReadOrWriteRepository().findAllEnrichmentTemplates(pageable);
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public EnrichmentTemplate find(String templateId) {
+        return getReadOrWriteRepository().findByTemplateId(templateId);
+    }
 }

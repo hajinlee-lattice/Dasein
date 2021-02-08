@@ -8,10 +8,12 @@ import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
 
 public interface EnrichmentTemplateService {
 
-    ResponseDocument<String> createEnrichmentTemplate(String layoutId, String templateName);
+    ResponseDocument<EnrichmentTemplateSummary> createEnrichmentTemplate(String layoutId, String templateName);
 
-    ResponseDocument<String> createEnrichmentTemplate(EnrichmentTemplate enrichmentTemplate);
+    ResponseDocument<EnrichmentTemplateSummary> createEnrichmentTemplate(EnrichmentTemplate enrichmentTemplate);
 
     List<EnrichmentTemplateSummary> getEnrichmentTemplates(String domain, String recordType, Boolean includeArchived,
             String createdBy);
+
+    EnrichmentTemplateSummary getEnrichmentTemplate(String customerSpace, String templateId);
 }

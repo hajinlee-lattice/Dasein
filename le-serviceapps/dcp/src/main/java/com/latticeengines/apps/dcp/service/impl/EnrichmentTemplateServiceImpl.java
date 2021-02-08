@@ -39,6 +39,7 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
 
     private static final Logger log = LoggerFactory.getLogger(EnrichmentTemplateServiceImpl.class);
     private static final int MAX_PAGE_SIZE = 100;
+    private static final int MAX_RETRY = 3;
 
     @Inject
     private EnrichmentTemplateEntityMgr enrichmentTemplateEntityMgr;
@@ -56,7 +57,7 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
     private EntitlementService entitlementService;
 
     @Override
-    public ResponseDocument<String> create(String customerSpace, String layoutId, String templateName) {
+    public EnrichmentTemplateSummary create(String customerSpace, String layoutId, String templateName) {
         Tenant tenant = MultiTenantContext.getTenant();
         EnrichmentLayout enrichmentLayout = enrichmentLayoutService.findByLayoutId(customerSpace, layoutId);
 
@@ -92,14 +93,14 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
                 throw new LedpException(LedpCode.LEDP_60015,
                         new String[] { enrichmentTemplate.getTemplateId(), exception.getMessage() });
             }
-            return result;
+            return new EnrichmentTemplateSummary(enrichmentTemplate);
         } else {
             throw new LedpException(LedpCode.LEDP_60016, new String[] { String.join("\n", result.getErrors()) });
         }
     }
 
     @Override
-    public ResponseDocument<String> create(EnrichmentTemplate enrichmentTemplate) {
+    public EnrichmentTemplateSummary create(EnrichmentTemplate enrichmentTemplate) {
         Tenant tenant = MultiTenantContext.getTenant();
         enrichmentTemplate.setTenant(tenant);
 
@@ -113,14 +114,14 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
                 throw new LedpException(LedpCode.LEDP_60015,
                         new String[] { enrichmentTemplate.getTemplateId(), exception.getMessage() });
             }
-            return result;
+            return new EnrichmentTemplateSummary(enrichmentTemplate);
         } else {
             throw new LedpException(LedpCode.LEDP_60016, new String[] { String.join("\n", result.getErrors()) });
         }
     }
 
     @Override
-    public List<EnrichmentTemplateSummary> getEnrichmentTemplates(
+    public List<EnrichmentTemplateSummary> listEnrichmentTemplates(
             ListEnrichmentTemplateRequest listEnrichmentTemplateRequest) {
         PageRequest pageRequest = getPageRequest(0, MAX_PAGE_SIZE);
         try {
@@ -137,16 +138,22 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
         }
     }
 
+    @Override
+    public EnrichmentTemplateSummary getEnrichmentTemplate(String templateId) {
+        EnrichmentTemplate template = enrichmentTemplateEntityMgr.find(templateId);
+        return template == null ? null : new EnrichmentTemplateSummary(template);
+    }
+
     private boolean includeEnrichmentTemplate(ListEnrichmentTemplateRequest listEnrichmentTemplateRequest,
             EnrichmentTemplate enrichmentTemplate) {
         boolean matchesDomain = "ALL".equals(listEnrichmentTemplateRequest.getDomain())
-                || listEnrichmentTemplateRequest.getDomain() == enrichmentTemplate.getDomain().name();
+                || listEnrichmentTemplateRequest.getDomain().equals(enrichmentTemplate.getDomain().name());
 
         boolean matchesRecordType = "ALL".equals(listEnrichmentTemplateRequest.getRecordType())
-                || listEnrichmentTemplateRequest.getRecordType() == enrichmentTemplate.getRecordType().name();
+                || listEnrichmentTemplateRequest.getRecordType().equals(enrichmentTemplate.getRecordType().name());
 
         boolean matchesCreatedBy = "ALL".equals(listEnrichmentTemplateRequest.getCreatedBy())
-                || listEnrichmentTemplateRequest.getCreatedBy() == enrichmentTemplate.getCreatedBy();
+                || listEnrichmentTemplateRequest.getCreatedBy().equals(enrichmentTemplate.getCreatedBy());
 
         boolean matchesArchived = listEnrichmentTemplateRequest.getIncludeArchived()
                 || !enrichmentTemplate.getArchived();
