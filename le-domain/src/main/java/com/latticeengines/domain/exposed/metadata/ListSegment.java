@@ -69,7 +69,7 @@ public class ListSegment implements HasPid {
     @Type(type = "json")
     private Map<String, String> dataTemplates;
 
-    @JsonProperty("csvAdaptorStr")
+    @JsonIgnore
     @Column(name = "CSV_ADAPTOR")
     @Type(type = "text")
     private String csvAdaptorStr;

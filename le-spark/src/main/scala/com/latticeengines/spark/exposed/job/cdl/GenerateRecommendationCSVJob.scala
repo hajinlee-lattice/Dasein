@@ -9,8 +9,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.GenerateRecommendationCSVConfig
 import com.latticeengines.domain.exposed.util.ExportUtils
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.CSVUtils
-import org.apache.commons.collections4.MapUtils
+import com.latticeengines.spark.util.{CSVUtils, DisplayNameUtils}
 import org.apache.spark.sql.functions.{col, lit, udf}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -34,7 +33,7 @@ class GenerateRecommendationCSVJob extends AbstractSparkJob[GenerateRecommendati
         finalCSVDf = finalCSVDf.withColumn(colName, lit(null).cast(StringType))
       }
       finalCSVDf = finalCSVDf.select(fields.map(name => col(name)): _*)
-      finalCSVDf = changeToDisplayName(finalCSVDf, generateRecommendationCSVContext)
+      finalCSVDf = DisplayNameUtils.changeToDisplayName(finalCSVDf, generateRecommendationCSVContext.getDisplayNames)
       if (generateRecommendationCSVContext.getAddExportTimestamp) {
         val tz = TimeZone.getTimeZone("UTC")
         val now = System.currentTimeMillis
@@ -46,17 +45,6 @@ class GenerateRecommendationCSVJob extends AbstractSparkJob[GenerateRecommendati
       finalCSVDf
     })
     lattice.output = finalDfs
-  }
-
-  private def changeToDisplayName(input: DataFrame, generateRecommendationCSVContext: GenerateRecommendationCSVContext): DataFrame = {
-    if (MapUtils.isEmpty(generateRecommendationCSVContext.getDisplayNames)) {
-      input
-    } else {
-      val attrsToRename: Map[String, String] = generateRecommendationCSVContext.getDisplayNames.asScala.toMap
-        .filterKeys(input.columns.contains(_))
-      val newAttrs = input.columns.map(c => attrsToRename.getOrElse(c, c))
-      input.toDF(newAttrs: _*)
-    }
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[GenerateRecommendationCSVConfig]): List[HdfsDataUnit] = {
