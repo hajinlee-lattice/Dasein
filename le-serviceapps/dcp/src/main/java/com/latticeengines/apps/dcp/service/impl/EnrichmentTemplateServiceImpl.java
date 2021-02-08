@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,6 @@ import com.latticeengines.domain.exposed.dcp.ListEnrichmentTemplateRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.proxy.exposed.matchapi.PrimeMetadataProxy;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -125,29 +123,6 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
         }
     }
 
-    private List<EnrichmentTemplateSummary> enrichWithUserName(
-            Map<String, List<EnrichmentTemplateSummary>> userToSummaries) {
-        List<EnrichmentTemplateSummary> enrichedSummaries = new ArrayList<EnrichmentTemplateSummary>();
-        for (String userId : userToSummaries.keySet()) {
-            try {
-                User user = userService.findByEmail(userId);
-                for (EnrichmentTemplateSummary summary : userToSummaries.get(userId)) {
-                    if (!user.getFirstName().isEmpty() && !user.getLastName().isEmpty()) {
-                        summary.setCreatedBy(user.getFirstName() + " " + user.getLastName());
-                    }
-                    enrichedSummaries.add(summary);
-                }
-            } catch (Exception exception) {
-                log.error("Could not find user for ID: " + userId);
-                log.error(ExceptionUtils.getStackTrace(exception));
-                log.error("Using original user ID instead.");
-                userToSummaries.get(userId).stream().forEach(ets -> enrichedSummaries.add(ets));
-            }
-        }
-
-        return enrichedSummaries;
-    }
-
     @Override
     public List<EnrichmentTemplateSummary> getEnrichmentTemplates(
             ListEnrichmentTemplateRequest listEnrichmentTemplateRequest) {
@@ -158,13 +133,7 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
             templates = templates.stream().filter(et -> includeEnrichmentTemplate(listEnrichmentTemplateRequest, et))
                     .collect(Collectors.toList());
 
-            List<EnrichmentTemplateSummary> summaries = templates.stream().map(EnrichmentTemplateSummary::new)
-                    .collect(Collectors.toList());
-
-            Map<String, List<EnrichmentTemplateSummary>> userToSummaries = summaries.stream()
-                    .collect(Collectors.groupingBy(ets -> ets.getCreatedBy()));
-
-            return enrichWithUserName(userToSummaries);
+            return templates.stream().map(EnrichmentTemplateSummary::new).collect(Collectors.toList());
         } catch (Exception exception) {
             log.error(ExceptionUtils.getStackTrace(exception));
             log.error(String.format("Error querying for enrichment templates: %s", exception.getMessage()));
