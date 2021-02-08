@@ -1,6 +1,5 @@
 package com.latticeengines.dcp.workflow.listeners;
 
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
+import com.latticeengines.domain.exposed.dcp.dataReport.DataReportRollupStatus;
 import com.latticeengines.proxy.exposed.dcp.DataReportProxy;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -25,7 +25,8 @@ public class DataReportListener extends LEJobListener {
     public void beforeJobExecution(JobExecution jobExecution) {
         log.info("Before job execution, set status to RUNNING");
         String customerSpace = jobExecution.getJobParameters().getString("CustomerSpace");
-        dataReportProxy.updateRollupStatus(customerSpace, DataReportRecord.RollupStatus.RUNNING);
+        dataReportProxy.updateRollupStatus(customerSpace,
+                new DataReportRollupStatus(DataReportRecord.RollupStatus.RUNNING));
     }
 
     @Override
@@ -34,8 +35,7 @@ public class DataReportListener extends LEJobListener {
         ExitStatus exitStatus = jobExecution.getExitStatus();
         if (ExitStatus.FAILED.getExitCode().equals(exitStatus.getExitCode())) {
             failTheWorkflowAndUpdateDataReport(jobExecution);
-        }
-        else {
+        } else {
             successUpdateDataReport(jobExecution);
         }
         log.info("Finish roll up data report");
@@ -43,13 +43,18 @@ public class DataReportListener extends LEJobListener {
 
     private void failTheWorkflowAndUpdateDataReport(JobExecution jobExecution) {
         String customerSpace = jobExecution.getJobParameters().getString("CustomerSpace");
-        dataReportProxy.updateRollupStatus(customerSpace, DataReportRecord.RollupStatus.FAILED_NO_RETRY);
-        log.warn("Failed data report job. Exit status {}", jobExecution.getExitStatus());
+        ExitStatus exitStatus = jobExecution.getExitStatus();
+        String msg = String.format("%s -- %s", exitStatus.getExitCode(),
+                exitStatus.getExitDescription());
+        dataReportProxy.updateRollupStatus(customerSpace,
+                new DataReportRollupStatus(DataReportRecord.RollupStatus.FAILED_NO_RETRY, exitStatus.getExitCode(), exitStatus.getExitDescription()));
+        log.warn("Failed data report job. Exit status {}", msg);
     }
 
     private void successUpdateDataReport(JobExecution jobExecution) {
         String customerSpace = jobExecution.getJobParameters().getString("CustomerSpace");
-        dataReportProxy.updateRollupStatus(customerSpace, DataReportRecord.RollupStatus.READY);
+        dataReportProxy.updateRollupStatus(customerSpace,
+                new DataReportRollupStatus(DataReportRecord.RollupStatus.READY));
         log.info("Successful finish of Data Report job.");
     }
 }

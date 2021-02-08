@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.dcp.DCPReportRequest;
 import com.latticeengines.domain.exposed.dcp.DataReport;
 import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.dcp.DunsCountCache;
+import com.latticeengines.domain.exposed.dcp.dataReport.DataReportRollupStatus;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -190,7 +191,7 @@ public class DataReportResource {
 
     @PutMapping("/rollup_status")
     @ApiOperation(value = "Update the value of RollupStatus")
-    public void updateRollupStatus(@PathVariable String customerSpace, @RequestParam DataReportRecord.RollupStatus rollupStatus) {
+    public void updateRollupStatus(@PathVariable String customerSpace, @RequestParam DataReportRollupStatus rollupStatus) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataReportService.updateRollupStatus(customerSpace, rollupStatus);
     }
