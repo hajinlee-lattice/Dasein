@@ -59,8 +59,8 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     private static final String PROD_MAP = "PROD_MAP";
 
     private static final Map<String, Map<CDLExternalSystemName, String>> SOLUTION_INSTANCE_ID_MAP = new HashMap<>();
-    private static final Map<CDLExternalSystemName, String>> SOLUTION_INSTANCE_ID_QA_MAP = new HashMap<>();
-    private static final Map<CDLExternalSystemName, String>> SOLUTION_INSTANCE_ID_PROD_MAP = new HashMap<>();
+    private static final Map<CDLExternalSystemName, String> SOLUTION_INSTANCE_ID_QA_MAP = new HashMap<>();
+    private static final Map<CDLExternalSystemName, String> SOLUTION_INSTANCE_ID_PROD_MAP = new HashMap<>();
 
     static {
         SOLUTION_INSTANCE_ID_QA_MAP.put(CDLExternalSystemName.Facebook, "d01b9af1-e773-42a9-b660-f42378cbc747");
@@ -391,7 +391,8 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
         messageBody.setWorkflowRequestId(workflowRequestId);
 
-        String solutionInstanceId = SOLUTION_INSTANCE_ID_MAP.get(trayTestSolutionInstanceMap).get(externalSystemName);
+        Map<CDLExternalSystemName, String> solutionMap = SOLUTION_INSTANCE_ID_MAP.get(trayTestSolutionInstanceMap);
+        String solutionInstanceId = solutionMap.get(externalSystemName);
         messageBody.setSolutionInstanceId(solutionInstanceId);
 
         // TODO may need to set solutionInstanceId and externalAudienceId
