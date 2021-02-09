@@ -13,9 +13,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
+import com.latticeengines.domain.exposed.dcp.CreateEnrichmentTemplateRequest;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
@@ -77,7 +79,7 @@ public class EnrichmentTemplateServiceImplDeploymentTestNG extends DCPDeployment
 
         String templateName = "Test_Enrichment_Template";
 
-        EnrichmentTemplateSummary createTemplateResult = enrichmentTemplateService.create(tenantId, layoutId, templateName);
+        EnrichmentTemplateSummary createTemplateResult = enrichmentTemplateService.create(tenantId, new CreateEnrichmentTemplateRequest(layoutId, templateName, MultiTenantContext.getEmailAddress()));
 
         Assert.assertNotNull(createTemplateResult, "Template creation from layout failed");
     }
@@ -103,13 +105,13 @@ public class EnrichmentTemplateServiceImplDeploymentTestNG extends DCPDeployment
         EnrichmentLayout layout2 = createLayout(DataDomain.SalesMarketing, DataRecordType.Domain);
         String tenantId = "PropDataService.PropDataService.Production";
 
-        EnrichmentTemplateSummary createTemplateResult1 = enrichmentTemplateService.create(tenantId, layout1.getLayoutId(),
-                "template1");
+        EnrichmentTemplateSummary createTemplateResult1 = enrichmentTemplateService.create(tenantId, new CreateEnrichmentTemplateRequest(layout1.getLayoutId(),
+                "template1", MultiTenantContext.getEmailAddress()));
 
         Assert.assertNotNull(createTemplateResult1);
 
-        EnrichmentTemplateSummary createTemplateResult2 = enrichmentTemplateService.create(tenantId, layout2.getLayoutId(),
-                "template2");
+        EnrichmentTemplateSummary createTemplateResult2 = enrichmentTemplateService.create(tenantId, new CreateEnrichmentTemplateRequest(layout2.getLayoutId(),
+                "template2", MultiTenantContext.getEmailAddress()));
 
         Assert.assertNotNull(createTemplateResult2);
 
@@ -130,14 +132,14 @@ public class EnrichmentTemplateServiceImplDeploymentTestNG extends DCPDeployment
 
     @Test(groups = "deployment-dcp", dependsOnMethods = "testCreateTemplate")
     public void testGetTemplate() {
-        EnrichmentTemplateSummary result = enrichmentTemplateService.getEnrichmentTemplate(summary.templateId);
+        EnrichmentTemplateSummary result = enrichmentTemplateService.getEnrichmentTemplate(summary.getTemplateId());
 
         Assert.assertNotNull(result, "Could not find the stored template");
-        Assert.assertEquals(result.elements, summary.elements, "Did not find correct template");
-        Assert.assertEquals(result.templateId, summary.templateId, "Did not find correct template");
-        Assert.assertEquals(result.templateName, summary.templateName, "Did not find correct template");
-        Assert.assertEquals(result.createdBy, summary.createdBy, "Did not find correct template");
-        Assert.assertEquals(result.domain, summary.domain, "Did not find correct template");
-        Assert.assertEquals(result.recordType, summary.recordType, "Did not find correct template");
+        Assert.assertEquals(result.getElements(), summary.getElements(), "Did not find correct template");
+        Assert.assertEquals(result.getTemplateId(), summary.getTemplateId(), "Did not find correct template");
+        Assert.assertEquals(result.getTemplateName(), summary.getTemplateName(), "Did not find correct template");
+        Assert.assertEquals(result.getCreatedBy(), summary.getCreatedBy(), "Did not find correct template");
+        Assert.assertEquals(result.getDomain(), summary.getDomain(), "Did not find correct template");
+        Assert.assertEquals(result.getRecordType(), summary.getRecordType(), "Did not find correct template");
     }
 }

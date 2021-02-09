@@ -21,10 +21,12 @@ import com.latticeengines.apps.dcp.entitymgr.EnrichmentTemplateEntityMgr;
 import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
 import com.latticeengines.apps.dcp.service.EntitlementService;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockEntitlementContainer;
 import com.latticeengines.domain.exposed.datacloud.manage.DataBlockLevel;
+import com.latticeengines.domain.exposed.dcp.CreateEnrichmentTemplateRequest;
 import com.latticeengines.domain.exposed.dcp.EnrichmentLayout;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
@@ -57,8 +59,9 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
     private EntitlementService entitlementService;
 
     @Override
-    public EnrichmentTemplateSummary create(String customerSpace, String layoutId, String templateName) {
+    public EnrichmentTemplateSummary create(String customerSpace, CreateEnrichmentTemplateRequest request) {
         Tenant tenant = MultiTenantContext.getTenant();
+        String layoutId = request.getLayoutId();
         EnrichmentLayout enrichmentLayout = enrichmentLayoutService.findByLayoutId(customerSpace, layoutId);
 
         if (enrichmentLayout == null) {
@@ -66,19 +69,9 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
             throw new LedpException(LedpCode.LEDP_60014, new String[] { layoutId });
         }
 
-        EnrichmentTemplate enrichmentTemplate = new EnrichmentTemplate(enrichmentLayout);
+        EnrichmentTemplate enrichmentTemplate = new EnrichmentTemplate(generateTemplateId(), enrichmentLayout);
 
-        try {
-            enrichmentTemplate.setCreatedBy(MultiTenantContext.getUser().getEmail());
-        } catch (Exception exception) {
-            log.error("Unexpected exception assigning user to template: " + exception.getMessage());
-            log.error(ExceptionUtils.getStackTrace(exception));
-            log.error("Assigning enrichment template creator to base enrichment layout creator: "
-                    + enrichmentLayout.getCreatedBy());
-            enrichmentTemplate.setCreatedBy(MultiTenantContext.getUser().getEmail());
-        }
-
-        enrichmentTemplate.setTemplateName(templateName);
+        enrichmentTemplate.setTemplateName(request.getTemplateName());
         enrichmentTemplate.setTenant(tenant);
 
         ResponseDocument<String> result = validateEnrichmentTemplate(enrichmentTemplate);
@@ -103,6 +96,7 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
     public EnrichmentTemplateSummary create(EnrichmentTemplate enrichmentTemplate) {
         Tenant tenant = MultiTenantContext.getTenant();
         enrichmentTemplate.setTenant(tenant);
+        enrichmentTemplate.setTemplateId(generateTemplateId());
 
         ResponseDocument<String> result = validateEnrichmentTemplate(enrichmentTemplate);
         if (result.isSuccess()) {
@@ -276,5 +270,14 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
                     "Could not validate entitlements while creating enrichment template for tenant %s", tenantId)));
         }
         return response;
+    }
+
+    private String generateTemplateId() {
+        String result = NamingUtils.uuid("Template");
+
+        // In the rare case of a collision
+        while (enrichmentTemplateEntityMgr.find(result) != null)
+            result = NamingUtils.uuid("Template");
+        return result;
     }
 }
