@@ -55,15 +55,28 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
     private static final String CSV = "csv";
     private static final String URL = "Url";
     private static final String MAPPING = "Mapping";
+    private static final String QA_MAP = "QA_MAP";
+    private static final String PROD_MAP = "PROD_MAP";
 
-    private static final Map<CDLExternalSystemName, String> SOLUTION_INSTANCE_ID_MAP = new HashMap<>();
+    private static final Map<String, Map<CDLExternalSystemName, String>> SOLUTION_INSTANCE_ID_MAP = new HashMap<>();
+    private static final Map<CDLExternalSystemName, String> SOLUTION_INSTANCE_ID_QA_MAP = new HashMap<>();
+    private static final Map<CDLExternalSystemName, String> SOLUTION_INSTANCE_ID_PROD_MAP = new HashMap<>();
 
     static {
-        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Facebook, "d01b9af1-e773-42a9-b660-f42378cbc747");
-        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.GoogleAds, "e089a0e4-9b89-45ff-ac9d-d75e643ac212");
-        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.LinkedIn, "add0a7c7-4342-42cb-a726-63e488aa23a3");
-        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Outreach, "8a290053-5a9c-418f-a89e-24ebf82a4ff2");
-        SOLUTION_INSTANCE_ID_MAP.put(CDLExternalSystemName.Marketo, "64497731-1be1-4b25-8830-56fcb1ffcf82");
+        SOLUTION_INSTANCE_ID_QA_MAP.put(CDLExternalSystemName.Facebook, "d01b9af1-e773-42a9-b660-f42378cbc747");
+        SOLUTION_INSTANCE_ID_QA_MAP.put(CDLExternalSystemName.GoogleAds, "e089a0e4-9b89-45ff-ac9d-d75e643ac212");
+        SOLUTION_INSTANCE_ID_QA_MAP.put(CDLExternalSystemName.LinkedIn, "add0a7c7-4342-42cb-a726-63e488aa23a3");
+        SOLUTION_INSTANCE_ID_QA_MAP.put(CDLExternalSystemName.Outreach, "8a290053-5a9c-418f-a89e-24ebf82a4ff2");
+        SOLUTION_INSTANCE_ID_QA_MAP.put(CDLExternalSystemName.Marketo, "64497731-1be1-4b25-8830-56fcb1ffcf82");
+
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.Facebook, "76256ca8-b77f-415d-b41a-c901aece2160");
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.GoogleAds, "c669295f-7eab-47c6-8abe-f515976992bd");
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.LinkedIn, "6c50ff85-e44b-4af1-8d84-6ab90a4d45c3");
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.Outreach, "f08be164-7802-4cf6-9c5b-2893289172ef");
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.Marketo, "8e3603b3-8c20-428f-9860-d95448f1cce1");
+
+        SOLUTION_INSTANCE_ID_MAP.put(QA_MAP, SOLUTION_INSTANCE_ID_QA_MAP);
+        SOLUTION_INSTANCE_ID_MAP.put(PROD_MAP, SOLUTION_INSTANCE_ID_PROD_MAP);
     }
 
     @Inject
@@ -98,6 +111,9 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
     @Value("${cdl.tray.test.data.bucket}")
     private String trayTestDataBucket;
+
+    @Value("${cdl.tray.test.solutionInstanceMap}")
+    private String trayTestSolutionInstanceMap;
 
     @Value("${cdl.atlas.export.dropfolder.tag}")
     private String expire30dTag;
@@ -375,7 +391,8 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
 
         messageBody.setWorkflowRequestId(workflowRequestId);
 
-        String solutionInstanceId = SOLUTION_INSTANCE_ID_MAP.get(externalSystemName);
+        Map<CDLExternalSystemName, String> solutionMap = SOLUTION_INSTANCE_ID_MAP.get(trayTestSolutionInstanceMap);
+        String solutionInstanceId = solutionMap.get(externalSystemName);
         messageBody.setSolutionInstanceId(solutionInstanceId);
 
         // TODO may need to set solutionInstanceId and externalAudienceId
