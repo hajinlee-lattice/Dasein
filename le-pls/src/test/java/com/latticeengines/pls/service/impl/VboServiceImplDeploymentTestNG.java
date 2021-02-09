@@ -15,8 +15,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
-import org.testng.Assert;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -49,14 +48,10 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String SUBSCRIBER_NUMBER_OPEN = "500118856";
     private static final String SUBSCRIBER_NUMBER_FULL = "500118852";
-    private static final String SUBSCRIBER_NUMBER_OVERFLOW = "500118852";
     private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
     private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";
-    private static final String EXTERNAL_USER_EMAIL2 = "test_user_usageevent2@gmail.com";
-    private static final String TEST_SUBSCRIBER_EMAIL = "testDCP1@outlook.com";
 
     private static final String FORBIDDEN_MSG = "403 FORBIDDEN";
-    private static final Date CURRENT_DATE = new Date();
 
     @Inject
     private TenantService tenantService;
@@ -73,15 +68,13 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         MultiTenantContext.setTenant(mainTestTenant);
         userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
         userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
-        userService.deleteUserByEmail(EXTERNAL_USER_EMAIL2);
         ensureSubscriberSeatState();
     }
 
-    @AfterTest(groups = "deployment")
+    @AfterMethod(groups = "deployment")
     public void cleanupUsers() {
         userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
         userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
-        userService.deleteUserByEmail(EXTERNAL_USER_EMAIL2);
     }
 
     @Test(groups = "deployment")
@@ -149,20 +142,19 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
         switchSubscriber(SUBSCRIBER_NUMBER_FULL);
 
-        register(EXTERNAL_USER_EMAIL2, false);
+        register(EXTERNAL_USER_EMAIL, false);
 
-        int available = getAvailableSeats( SUBSCRIBER_NUMBER_FULL);
+        int available = getAvailableSeats(SUBSCRIBER_NUMBER_FULL);
 
-        while ( available <1 ) {
+        while (available <1) {
             sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STDEC, SUBSCRIBER_NUMBER_FULL);
             available++;
         }
         Thread.sleep(3000);
-        int open = getAvailableSeats( SUBSCRIBER_NUMBER_FULL);
 
-        register(EXTERNAL_USER_EMAIL2, true);
-        delete(EXTERNAL_USER_EMAIL2, true);
-
+        register(EXTERNAL_USER_EMAIL, true);
+        delete(EXTERNAL_USER_EMAIL, true);
+        sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STCT, SUBSCRIBER_NUMBER_FULL);
     }
 
     private void switchSubscriber(String subscriberNumber) {
@@ -192,11 +184,8 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         int currCount = getSeatCount();
 
         if (expectSuccess && !EmailUtils.isInternalUser(email)) {
-//            assertEquals(currCount, initialCount + 1);
-            System.out.println( " status is false ");
-            assertTrue( currCount > initialCount);
+            assertEquals(currCount, initialCount + 1);
         } else {
-            System.out.println( " status is true ");
             assertEquals(currCount, initialCount);
         }
     }
@@ -268,17 +257,14 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         }
         openSeats = getAvailableSeats(SUBSCRIBER_NUMBER_FULL);
 
-
         while (openSeats < 0) {
             sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STDEC, SUBSCRIBER_NUMBER_FULL);
             openSeats++;
         }
-        openSeats = getAvailableSeats(SUBSCRIBER_NUMBER_FULL);
 
         Thread.sleep(3000);
         assertTrue(getAvailableSeats(SUBSCRIBER_NUMBER_OPEN) >= 1);
         assertTrue (getAvailableSeats(SUBSCRIBER_NUMBER_FULL) == 0);
-
     }
 
     private int getAvailableSeats(String subscriberNumber) {
@@ -288,7 +274,6 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertTrue(meter.has("limit"));
         assertNotNull(meter.get("current_usage"));
         assertNotNull(meter.get("limit"));
-        int seat = meter.get("limit").asInt() - meter.get("current_usage").asInt();
 
         return meter.get("limit").asInt() - meter.get("current_usage").asInt();
     }
