@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
-import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
