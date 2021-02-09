@@ -69,11 +69,11 @@ public class TrayConnectorTestServiceImpl implements TrayConnectorTestService {
         SOLUTION_INSTANCE_ID_QA_MAP.put(CDLExternalSystemName.Outreach, "8a290053-5a9c-418f-a89e-24ebf82a4ff2");
         SOLUTION_INSTANCE_ID_QA_MAP.put(CDLExternalSystemName.Marketo, "64497731-1be1-4b25-8830-56fcb1ffcf82");
 
-        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.Facebook, "07a65fa5-a57c-4e06-a635-9f4f9cf07bb8");
-        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.GoogleAds, "3ad98389-e8a8-4dbd-8514-7eddca59fecc");
-        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.LinkedIn, "a3d54317-2821-46fe-afaf-3ce7e9b38741");
-        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.Outreach, "654a3337-9636-4aa9-b11c-eb1eb7b88b39");
-        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.Marketo, "6258465e-1d57-4c0c-8d7f-bfa070c063fb");
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.Facebook, "76256ca8-b77f-415d-b41a-c901aece2160");
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.GoogleAds, "c669295f-7eab-47c6-8abe-f515976992bd");
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.LinkedIn, "6c50ff85-e44b-4af1-8d84-6ab90a4d45c3");
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.Outreach, "f08be164-7802-4cf6-9c5b-2893289172ef");
+        SOLUTION_INSTANCE_ID_PROD_MAP.put(CDLExternalSystemName.Marketo, "8e3603b3-8c20-428f-9860-d95448f1cce1");
 
         SOLUTION_INSTANCE_ID_MAP.put(QA_MAP, SOLUTION_INSTANCE_ID_QA_MAP);
         SOLUTION_INSTANCE_ID_MAP.put(PROD_MAP, SOLUTION_INSTANCE_ID_PROD_MAP);
