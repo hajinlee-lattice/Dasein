@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.GenerateChangeTableConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -26,7 +27,10 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
         @Type(value = CuratedAccountAttributesStepConfiguration.class, name = "CuratedAccountAttributesStepConfiguration"),
         @Type(value = ProcessRatingStepConfiguration.class, name = "ProcessRatingStepConfiguration"),
         @Type(value = ProfileAccountActivityMetricsStepConfiguration.class, name = "ProfileAccountActivityMetricsStepConfiguration"),
-        @Type(value = ProfileContactActivityMetricsStepConfiguration.class, name = "ProfileContactActivityMetricsStepConfiguration") })
+        @Type(value = ProfileContactActivityMetricsStepConfiguration.class, name =
+                "ProfileContactActivityMetricsStepConfiguration"),
+        @Type(value = GenerateChangeTableConfiguration.class, name = "GenerateChangeTableConfiguration")})
+
 public abstract class BaseProcessEntityStepConfiguration extends BaseWrapperStepConfiguration {
 
     @JsonProperty("rebuild")

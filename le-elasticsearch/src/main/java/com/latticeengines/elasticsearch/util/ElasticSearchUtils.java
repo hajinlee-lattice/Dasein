@@ -3,7 +3,7 @@ package com.latticeengines.elasticsearch.util;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitDate;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountLookup;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.TimelineProfile;
 import static com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn.EventDate;
 
@@ -12,7 +12,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
@@ -35,11 +37,13 @@ import org.elasticsearch.client.indices.GetMappingsResponse;
 import org.elasticsearch.client.indices.PutMappingRequest;
 import org.elasticsearch.cluster.health.ClusterIndexHealth;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.rest.RestStatus;
@@ -140,7 +144,18 @@ public final class ElasticSearchUtils {
             request.settings(Settings.builder() //
                     .put("index.number_of_shards", esConfig.getShards()) //
                     .put("index.number_of_replicas", esConfig.getReplicas()) //
-                    .put("index.refresh_interval", "60s"));
+                    .put("index.refresh_interval", "60s")
+                    .loadFromSource(Strings.toString(XContentFactory.jsonBuilder()
+                            .startObject()
+                            .startObject("analysis")
+                            .startObject("normalizer")
+                            .startObject("lowercase_normalizer")
+                            .field("type", "custom")
+                            .field("filter", new String[]{"lowercase"})
+                            .endObject()
+                            .endObject()
+                            .endObject()
+                            .endObject()), XContentType.JSON));
             request.mapping(builder);
 
             CreateIndexResponse response = client.indices().create(request, RequestOptions.DEFAULT);
@@ -211,13 +226,51 @@ public final class ElasticSearchUtils {
             log.info("field {} exists in the index {}", fieldName, indexName);
             return false;
         }
-        log.info("set field name {} with type {} for index {}", fieldName, indexName, type);
+        log.info("set field name {} with type {} for index {}", fieldName, type, indexName);
         PutMappingRequest request = new PutMappingRequest(indexName);
         XContentBuilder builder = XContentFactory.jsonBuilder().startObject()
                 .startObject(PROPERTIES)
                 .startObject(fieldName)
                 .field("type", type)
         .endObject().endObject().endObject();
+        request.source(builder);
+
+        client.indices().putMapping(request, RequestOptions.DEFAULT);
+        return true;
+    }
+
+    /**
+     * update nested mapping for account
+     * @param client
+     * @param indexName
+     * @param fieldName
+     * @param type
+     * @param lookupIds
+     * @return
+     * @throws IOException
+     */
+    public static boolean updateAccountIndexMapping(RestHighLevelClient client, String indexName, String fieldName,
+                                                    String type, List<String> lookupIds, String subType) throws IOException {
+        if (checkFieldExist(client, indexName, fieldName)) {
+            log.info("field {} exists in the index {}", fieldName, indexName);
+            return false;
+        }
+        log.info("set field name {} with type {} for index {}", fieldName, type, indexName);
+
+        PutMappingRequest request = new PutMappingRequest(indexName);
+        XContentBuilder builder = XContentFactory.jsonBuilder().startObject()
+                .startObject(PROPERTIES)
+                .startObject(fieldName)
+                .field("type", type)
+                .startObject(PROPERTIES);
+        if (CollectionUtils.isNotEmpty(lookupIds)) {
+            for (String lookupId : lookupIds)
+                builder.startObject(lookupId)
+                        .field("type", subType)
+                        .field("normalizer", "lowercase_normalizer")
+                        .endObject();
+        }
+        builder.endObject().endObject().endObject().endObject();
         request.source(builder);
 
         client.indices().putMapping(request, RequestOptions.DEFAULT);
@@ -275,7 +328,7 @@ public final class ElasticSearchUtils {
         if (lookupIds != null) {
             for (String lookupId : lookupIds) {
                 accountBuilder //
-                        .startObject(BucketedAccount.name() + ":" + lookupId) //
+                        .startObject(lookupId) //
                         .field("type", "keyword") //
                         .endObject();
             }
@@ -393,8 +446,10 @@ public final class ElasticSearchUtils {
             SearchRequest searchRequest = new SearchRequest(indexName);
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             TermQueryBuilder queryBuilder = QueryBuilders.termQuery(
-                    TableRoleInCollection.BucketedAccount.ordinal() + ":" + lookupIdKey, lookupIdValue.toLowerCase());
-            searchSourceBuilder.query(queryBuilder);
+                    AccountLookup.name() + "." + lookupIdKey, lookupIdValue);
+            NestedQueryBuilder nestedQueryBuilder = QueryBuilders.nestedQuery(AccountLookup.name(), queryBuilder,
+                    ScoreMode.Max);
+            searchSourceBuilder.query(nestedQueryBuilder);
             log.info("accountByLookup query is {}.", searchSourceBuilder);
             workflowSpan.log(String.format("indexName : %s, accountByLookup query : %s",
                     indexName, queryBuilder.toString()));
@@ -421,13 +476,15 @@ public final class ElasticSearchUtils {
             workflowSpan = tracer.activeSpan();
             SearchRequest request = new SearchRequest(indexName);
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-            TermQueryBuilder queryBuilder = QueryBuilders.termQuery(
-                    TableRoleInCollection.BucketedAccount.ordinal() + ":" + lookupIdKey, lookupIdValue.toLowerCase());
-            searchSourceBuilder.query(queryBuilder);
+            TermQueryBuilder queryBuilder = QueryBuilders.termQuery(AccountLookup.name() + "." + lookupIdKey,
+                    lookupIdValue);
+            NestedQueryBuilder nestedQueryBuilder = QueryBuilders.nestedQuery(AccountLookup.name(), queryBuilder,
+                    ScoreMode.Max);
+            searchSourceBuilder.query(nestedQueryBuilder);
             searchSourceBuilder.fetchSource(false);
-            searchSourceBuilder.fetchSource(AccountId.name(), null);
+           // searchSourceBuilder.fetchSource(AccountId.name(), null);
             workflowSpan.log(String.format("indexName : %s, search account by lookupIdquery : %s", indexName,
-                    queryBuilder.toString()));
+                    nestedQueryBuilder.toString()));
             request.source(searchSourceBuilder);
             try {
                 SearchResponse response = client.search(request, RequestOptions.DEFAULT);

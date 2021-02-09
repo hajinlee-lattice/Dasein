@@ -3,11 +3,13 @@ package com.latticeengines.serviceflows.workflow.export;
 
 import static com.latticeengines.domain.exposed.admin.LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,11 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.elasticsearch.ElasticSearchConfig;
 import com.latticeengines.domain.exposed.elasticsearch.PublishTableToESRequest;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ElasticSearchExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.PublishToElasticSearchConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PublishTableProxy;
@@ -88,6 +95,18 @@ public class PublishToElasticSearch extends BaseWorkflowStep<PublishToElasticSea
         request.setExportConfigs(configs);
         request.setEsConfig(generateCDLElasticSearchConfig());
 
+        Boolean exists = getObjectFromContext(ACCOUNT_LOOKUP_TO_ES, Boolean.class);
+
+        if (Boolean.TRUE.equals(exists)) {
+            log.info("There exists account lookup table, setting lookup id {}", configuration.getCustomerSpace());
+            DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+            List<String> lookupIds = ListUtils.emptyIfNull(servingStoreProxy
+                    .getDecoratedMetadata(configuration.getCustomerSpace().toString(), BusinessEntity.Account,
+                            Collections.singletonList(ColumnSelection.Predefined.LookupId), inactive)
+                    .map(ColumnMetadata::getAttrName).collectList().block());
+            lookupIds.add(InterfaceName.AccountId.name());
+            request.setLookupIds(lookupIds);
+        }
         String appId = publishTableProxy.publishTableToES(configuration.getCustomerSpace().toString(), request);
         log.info("appId is {}", appId);
     }

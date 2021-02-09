@@ -19,6 +19,9 @@ public class PublishTableToElasticSearchStepConfiguration extends SparkJobStepCo
     @JsonProperty("signature")
     private String signature;
 
+    @JsonProperty("lookup_ids")
+    private List<String> lookupIds;
+
     public List<ElasticSearchExportConfig> getExportConfigs() {
         return exportConfigs;
     }
@@ -41,5 +44,13 @@ public class PublishTableToElasticSearchStepConfiguration extends SparkJobStepCo
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public List<String> getLookupIds() {
+        return lookupIds;
+    }
+
+    public void setLookupIds(List<String> lookupIds) {
+        this.lookupIds = lookupIds;
     }
 }

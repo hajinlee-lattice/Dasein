@@ -68,7 +68,7 @@ class ApplyChangeListJob extends AbstractSparkJob[ApplyChangeListConfig] {
   }
 
   def pivotChangeList(spark: SparkSession, changeList: DataFrame, joinKey: String): DataFrame = {
-    val dataTypes = changeList.select(DataType).collect().map(r => r.getString(0))
+    val dataTypes = changeList.select(DataType).distinct.collect().map(r => r.getString(0))
     dataTypes.foldLeft(null: DataFrame)((result, dType) => {
       val changeOfType = changeList //
         .filter(col(DataType) === dType).select(RowId, ColumnId, s"$From$dType", s"$To$dType")

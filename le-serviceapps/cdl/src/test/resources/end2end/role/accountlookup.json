@@ -1,0 +1,57 @@
+{
+    "name": "QA_CDL_EntityMatch_jhao_Account360_24_AccountLookup_2020_11_12_15_09_17_UTC",
+    "display_name": "topLevelRecord",
+    "attributes": [
+        {
+            "name": "AccountId",
+            "display_name": "AccountId",
+            "nullable": false,
+            "physical_data_type": "string",
+            "enum_values": "",
+            "properties": {},
+            "validatorWrappers": []
+        },
+        {
+            "name": "AtlasLookupKey",
+            "display_name": "AtlasLookupKey",
+            "nullable": false,
+            "physical_data_type": "string",
+            "enum_values": "",
+            "properties": {},
+            "validatorWrappers": []
+        }
+    ],
+    "level_hierarchies": [],
+    "extracts": [
+        {
+            "name": "extract",
+            "path": "/Pods/QA/Contracts/QA_CDL_EntityMatch_jhao_Account360_24/Tenants/QA_CDL_EntityMatch_jhao_Account360_24/Spaces/Production/Data/Tables/QA_CDL_EntityMatch_jhao_Account360_24_AccountLookup_2020_11_12_15_09_17_UTC/*.avro",
+            "extraction_ts": 1605193747224,
+            "processed_records": 124
+        }
+    ],
+    "primary_key": {
+        "name": "AtlasLookupKey",
+        "display_name": "AtlasLookupKey",
+        "attributes": [
+            "AtlasLookupKey"
+        ]
+    },
+    "last_modified_key": null,
+    "interpretation": null,
+    "marked_for_purge": false,
+    "data_rules": [],
+    "storage_mechanism": {
+        "hdfsStorage": {
+            "name": "HDFS",
+            "table_name": "QA_CDL_EntityMatch_jhao_Account360_24_AccountLookup_2020_11_12_15_09_17_UTC"
+        }
+    },
+    "namespace": null,
+    "count": null,
+    "updatedby": null,
+    "created": 1605193757000,
+    "updated": 1610670440000,
+    "retentionPolicy": "KEEP_FOREVER",
+    "extracts_directory": "/Pods/QA/Contracts/QA_CDL_EntityMatch_jhao_Account360_24/Tenants/QA_CDL_EntityMatch_jhao_Account360_24/Spaces/Production/Data/Tables/QA_CDL_EntityMatch_jhao_Account360_24_AccountLookup_2020_11_12_15_09_17_UTC"
+}

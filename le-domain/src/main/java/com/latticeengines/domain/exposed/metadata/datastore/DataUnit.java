@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.metadata.datastore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -28,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public abstract class DataUnit {
+public abstract class DataUnit implements Serializable {
 
     @JsonProperty("PartitionKeys")
     private List<String> partitionKeys;

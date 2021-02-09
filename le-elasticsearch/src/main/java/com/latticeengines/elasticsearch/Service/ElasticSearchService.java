@@ -24,6 +24,9 @@ public interface ElasticSearchService {
 
     boolean updateIndexMapping(String indexName, String fieldName, String type);
 
+    boolean updateAccountIndexMapping(String indexName, String fieldName, String type, List<String> lookupIds,
+                                      String subType);
+
     boolean deleteIndex(String indexName);
 
     boolean indexExists(String indexName);

@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.GenerateChangeTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
@@ -87,6 +88,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
                 new PublishToElasticSearchConfiguration();
         private GenerateVisitReportWorkflowConfiguration.Builder generateVisitReportWorkflowBuilder =
                 new GenerateVisitReportWorkflowConfiguration.Builder();
+        private GenerateChangeTableConfiguration generateChangeTableConfiguration =
+                new GenerateChangeTableConfiguration();
 
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
@@ -120,6 +123,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             importExportS3.setCustomerSpace(customerSpace);
             publishToElasticSearchConfiguration.setCustomerSpace(customerSpace);
             generateVisitReportWorkflowBuilder.customer(customerSpace);
+            generateChangeTableConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -160,6 +164,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             importExportS3.setInternalResourceHostPort(internalResourceHostPort);
             publishToElasticSearchConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             generateVisitReportWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            generateChangeTableConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -363,6 +368,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             convertBatchStoreToDataTableWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             curatedAttributesWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            generateChangeTableConfiguration.setEntityMatchEnabled(entityMatchEnabled);
             return this;
         }
 
@@ -502,6 +508,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(importExportS3);
             configuration.add(generateVisitReportWorkflowBuilder.build());
             configuration.add(publishToElasticSearchConfiguration);
+            configuration.add(generateChangeTableConfiguration);
             return configuration;
         }
     }

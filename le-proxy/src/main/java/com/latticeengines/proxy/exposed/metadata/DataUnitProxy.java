@@ -15,6 +15,8 @@ public interface DataUnitProxy {
 
     DataUnit getByNameAndType(String customerSpace, String name, DataUnit.StorageType type);
 
+    DataUnit getByNameAndTypeInCache(String customerSpace, String name, DataUnit.StorageType type);
+
     DataUnit getByDataTemplateIdAndRole(String customerSpace, String dataTemplateId, DataUnit.Role role);
 
     Boolean renameTableName(String customerSpace, DataUnit dataUnit, String tableName);

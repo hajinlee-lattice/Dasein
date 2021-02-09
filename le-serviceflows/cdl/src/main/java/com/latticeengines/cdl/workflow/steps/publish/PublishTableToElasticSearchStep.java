@@ -69,6 +69,7 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
 
     private List<ElasticSearchExportConfig> configs;
 
+    private List<String> lookupIds;
 
 
     @Override
@@ -84,6 +85,7 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
             return null;
         }
         String customizedSignature = stepConfiguration.getSignature();
+        lookupIds = stepConfiguration.getLookupIds();
 
         List<DataUnit> units = new ArrayList<>();
         Map<Integer, TableRoleInCollection> indexToRole = new HashMap<>();
@@ -141,7 +143,8 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
                 continue;
             }
             String tableName = ElasticSearchUtils.getEntityFromTableRole(role);
-            ElasticSearchDataUnit unit = (ElasticSearchDataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), tableName,
+            ElasticSearchDataUnit unit =
+                    (ElasticSearchDataUnit) dataUnitProxy.getByNameAndTypeInCache(customerSpace.toString(), tableName,
                     DataUnit.StorageType.ElasticSearch);
             if (unit == null || !config.getSignature().equals(unit.getSignature())) {
                 log.info("elastic search data unit will be updated to {}", config.getSignature());
@@ -170,7 +173,8 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
         // create or update index according to role
         if (BusinessEntity.Account.name().equals(entity)) {
             // TODO get columns from account look up
-            elasticSearchService.createAccountIndexWithLookupIds(idxName, esConfig, Collections.EMPTY_LIST);
+            elasticSearchService.createAccountIndexWithLookupIds(idxName, esConfig,
+                    Collections.EMPTY_LIST);
         } else {
             elasticSearchService.createIndexWithSettings(idxName, esConfig, entity);
         }
@@ -179,11 +183,11 @@ public class PublishTableToElasticSearchStep extends RunSparkJob<PublishTableToE
         if (TimelineProfile.name().equals(role.name())) {
             log.info("no column for timeline profile");
         } else if (AccountLookup.name().equals(role.name())) {
-            log.info("set nested to fieldName {}", role.name());
-            elasticSearchService.updateIndexMapping(idxName, role.name(), "nested");
+            log.info("set nested to fieldName {}, lookup ids are {}", role.name(), JsonUtils.serialize(lookupIds));
+            elasticSearchService.updateAccountIndexMapping(idxName, role.name(), "nested", lookupIds, "keyword");
         } else {
             log.info("set binary to fieldName {}", role.name());
-            elasticSearchService.updateIndexMapping(idxName, role.name(), "nested");
+            elasticSearchService.updateIndexMapping(idxName, role.name(), "binary");
         }
         return true;
     }
