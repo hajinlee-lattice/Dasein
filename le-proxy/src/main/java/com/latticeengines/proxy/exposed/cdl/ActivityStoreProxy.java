@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
+import com.latticeengines.domain.exposed.cdl.activity.DeriveConfig;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.JourneyStage;
 import com.latticeengines.domain.exposed.cdl.activity.KeysWrapper;
@@ -105,9 +106,10 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
 
     @SuppressWarnings("unchecked")
     public Map<String, Map<String, DimensionMetadata>> getDimensionMetadata(@NotNull String customerSpace,
-                                                                            String signature, boolean withStreamName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/activities/dimensionMetadata?withStreamName" +
-                        "={withStreamName}", shortenCustomerSpace(customerSpace), withStreamName);
+            String signature, boolean withStreamName) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/activities/dimensionMetadata?withStreamName" + "={withStreamName}",
+                shortenCustomerSpace(customerSpace), withStreamName);
         if (StringUtils.isNotBlank(signature)) {
             url += "&signature=" + signature;
         }
@@ -162,6 +164,13 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
         return get("findGroupByGroupId", url, ActivityMetricsGroup.class);
     }
 
+    public List<ActivityMetricsGroup> findGroupsByTenant(@NotNull String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/metricsGroups",
+                shortenCustomerSpace(customerSpace));
+        List<?> list = get("findGroupsByTenant", url, List.class);
+        return JsonUtils.convertList(list, ActivityMetricsGroup.class);
+    }
+
     public List<JourneyStage> getJourneyStages(@NotNull String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/journeyStages", shortenCustomerSpace(customerSpace));
         List<?> list = get("get_all_journey_stages", url, List.class);
@@ -180,5 +189,11 @@ public class ActivityStoreProxy extends MicroserviceRestApiProxy implements Prox
                 shortenCustomerSpace(customerSpace));
         List<?> list = put("gen_default_activity_alerts_configuration", url, null, List.class);
         return JsonUtils.convertList(list, ActivityAlertsConfig.class);
+    }
+
+    public boolean addDerivedDimension(@NotNull String customerSpace, @NotNull String streamName, @NotNull DeriveConfig deriveConfig) {
+        String url = constructUrl("/customerspaces/{customerSpace}/activities/streams/{streamName}/dimensions/add/derivedDimension",
+                shortenCustomerSpace(customerSpace), streamName);
+        return post("addDerivedDimension", url, deriveConfig, Boolean.class);
     }
 }

@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -1194,6 +1195,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         Set<String> mappedFieldName = new HashSet<>();
         Set<String> pendingUserFieldName = new HashSet<>();
         Set<String> mappedUserFieldName = new HashSet<>();
+        List<String> ignoredFields = ListUtils.emptyIfNull(fieldMappingDocument.getIgnoredFields());
         // 2.check if there's multiple mapping to standard field
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -1201,7 +1203,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             } else {
                 mappedUserFieldName.add(fieldMapping.getUserField());
                 if (reservedName.contains(fieldMapping.getMappedField())) {
-                    if (mappedFieldName.contains(fieldMapping.getMappedField())) {
+                    if (!ignoredFields.contains(fieldMapping.getUserField()) &&
+                            mappedFieldName.contains(fieldMapping.getMappedField())) {
                         throw new LedpException(LedpCode.LEDP_18196, new String[] { fieldMapping.getMappedField() });
                     } else {
                         fieldMapping.setMappedToLatticeField(true);

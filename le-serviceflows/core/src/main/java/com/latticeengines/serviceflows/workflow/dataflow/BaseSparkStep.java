@@ -123,7 +123,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         }
     }
 
-    protected DataUnit getS3DataUnit(boolean queryDataUnit, CustomerSpace customerSpace, String unitName) {
+    protected DataUnit getDataUnit(boolean queryDataUnit, CustomerSpace customerSpace, String unitName) {
         if (unitName == null) {
             return null;
         } else if (queryDataUnit) {
@@ -138,7 +138,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
                 throw new RuntimeException("Table " + unitName + " for customer " + CustomerSpace.shortenCustomerSpace(customerSpace.toString()) //
                         + " does not exists.");
             }
-            return table.toS3DataUnit(unitName, s3Bucket, customerSpace.getTenantId());
+            return table.toHdfsDataUnit(unitName);
         }
     }
 
@@ -237,7 +237,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     private void clearAllWorkspaces() {
         List<String> toBeRemoved = new ArrayList<>();
-        for (String workSpace: workSpaces) {
+        for (String workSpace : workSpaces) {
             try {
                 if (HdfsUtils.isDirectory(yarnConfiguration, workSpace)) {
                     HdfsUtils.rmdir(yarnConfiguration, workSpace);
@@ -302,6 +302,10 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     }
 
     protected boolean exportToS3(Table table, boolean sync) {
+        return exportToS3(table, sync, null);
+    }
+
+    protected boolean exportToS3(Table table, boolean sync, DataUnit.DataFormat format) {
         String tableName = table.getName();
         boolean shouldSkip = Boolean.TRUE.equals(getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class));
         if (!shouldSkip) {
@@ -311,7 +315,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
             ImportExportRequest batchStoreRequest = ImportExportRequest.exportAtlasTable( //
                     customerSpace.toString(), table, //
                     pathBuilder, s3Bucket, podId, //
-                    yarnConfiguration, //
+                    yarnConfiguration, format, //
                     fileStatus -> true);
             if (batchStoreRequest == null) {
                 throw new IllegalArgumentException("Cannot construct proper export request for " + tableName);

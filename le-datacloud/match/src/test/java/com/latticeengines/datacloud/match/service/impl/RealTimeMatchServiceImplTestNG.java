@@ -237,7 +237,6 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         usageReportConfig.setEnabled(true);
         usageReportConfig.setPoaeIdField("ID");
         input.setDplusUsageReportConfig(usageReportConfig);
-
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         System.out.println(JsonUtils.pprint(output));
@@ -277,6 +276,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         columnSelection.setColumns(columns);
         input.setCustomSelection(columnSelection);
         input.setPredefinedSelection(null);
+        System.out.println(JsonUtils.pprint(input));
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         verifyOutputFieldsAlignment(columnSelection, output);
@@ -302,8 +302,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     public Object[][] provideUrlToDunsTestCases() {
         return new Object[][]{
                 // website, email, companyName, country, expectedDUNS, matchedByUrl
-                { "bp.com", null, null, null, "210042669", true }, //
-                { null, "a@bp.com", null, null, "210042669", true }, //
+                { "bp.com", null, null, null, "001344258", true }, //
+                { null, "a@bp.com", null, null, "001344258", true }, //
                 { null, "hello@gmail.com", null, null, null, false }, //
                 { "apple.com", "a@bp.com", null, null, "060704780", true }, //
                 { "apple.com", "a@bp.com", "BP", "UK", "210042669", false }, //
@@ -311,7 +311,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                 { "apple.com", null, "BP", null, "039596507", false }, //
                 { "apple.com", null, "BP", "UK", "210042669", false }, //
 
-                { "bp.com", null, null, "US", "039596507", true }, //
+                { "bp.com", null, null, "US", "001344258", true }, //
         };
     }
 

@@ -112,19 +112,19 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = CampaignDeltaCalculationWorkflowConfiguration.class, name = "CampaignDeltaCalculationWorkflowConfiguration"),
         @Type(value = PublishDynamoWorkflowConfiguration.class, name = "PublishDynamoWorkflowConfiguration"),
         @Type(value = MigrateDynamoWorkflowConfiguration.class, name = "MigrateDynamoWorkflowConfiguration"),
-        @Type(value = PublishAccountLookupWorkflowConfiguration.class, name =
-                PublishAccountLookupWorkflowConfiguration.NAME),
-        @Type(value = PublishElasticSearchWorkflowConfiguration.class, name =
-                "PublishElasticSearchWorkflowConfiguration"),
+        @Type(value = PublishAccountLookupWorkflowConfiguration.class, name = PublishAccountLookupWorkflowConfiguration.NAME),
+        @Type(value = PublishElasticSearchWorkflowConfiguration.class, name = "PublishElasticSearchWorkflowConfiguration"),
         @Type(value = PublishAccountLookupWorkflowConfiguration.class, name = PublishAccountLookupWorkflowConfiguration.NAME),
         @Type(value = GenerateIntentEmailAlertWorkflowConfiguration.class, name = GenerateIntentEmailAlertWorkflowConfiguration.NAME),
         @Type(value = ImportListSegmentWorkflowConfiguration.class, name = "ImportListSegmentWorkflowConfiguration"),
-        @Type(value = GenerateIntentEmailAlertWorkflowConfiguration.class, name =
-                GenerateIntentEmailAlertWorkflowConfiguration.NAME),
+
+        @Type(value = GenerateIntentEmailAlertWorkflowConfiguration.class, name = GenerateIntentEmailAlertWorkflowConfiguration.NAME),
         @Type(value = PublishVIDataWorkflowConfiguration.class, name = "PublishVIDataWorkflowConfiguration"),
-        @Type(value = GenerateVisitReportWorkflowConfiguration.class, name =
-                "GenerateVisitReportWorkflowConfiguration"),
-        @Type(value = PublishTableToElasticSearchWorkflowConfiguration.class, name = "PublishTableToElasticSearchWorkflowConfiguration")
+        @Type(value = GenerateVisitReportWorkflowConfiguration.class, name = "GenerateVisitReportWorkflowConfiguration"),
+        @Type(value = PublishTableToElasticSearchWorkflowConfiguration.class, name = "PublishTableToElasticSearchWorkflowConfiguration"),
+        @Type(value = PublishActivityAlertWorkflowConfiguration.class, name = PublishActivityAlertWorkflowConfiguration.NAME),
+        @Type(value = BrokerFullLoadWorkflowConfiguration.class, name = "BrokerFullLoadWorkflowConfiguration"),
+        @Type(value = BrokerAggregationWorkflowConfiguration.class, name = "BrokerAggregationWorkflowConfiguration")
 })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 

@@ -64,10 +64,10 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     @Value("${camille.zk.pod.id}")
     private String podId;
 
-    @Value("${dataflowapi.spark.driver.cores}")
+    @Value("${dataflowapi.spark.sql.driver.cores}")
     private int driverCores;
 
-    @Value("${dataflowapi.spark.driver.mem}")
+    @Value("${dataflowapi.spark.sql.driver.mem}")
     private String driverMem;
 
     @Value("${dataflowapi.spark.executor.cores}")
@@ -82,7 +82,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     @Value("${dataflowapi.spark.min.executors}")
     private int minExecutors;
 
-    @Value("${dataflowapi.spark.driver.sql.maxResultSize}")
+    @Value("${dataflowapi.spark.sql.driver.maxResultSize}")
     private String sparkMaxResultSize;
 
     @Override
@@ -139,7 +139,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         params.put("OUTPUT_MODE", "count");
         jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
         SparkJobResult result = sparkJobService.runScript(livySession, sparkScript, jobConfig);
-        return Long.valueOf(result.getOutput());
+        return Long.parseLong(result.getOutput());
     }
 
     @Override

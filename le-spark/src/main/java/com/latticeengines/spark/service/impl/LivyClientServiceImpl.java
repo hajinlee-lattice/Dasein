@@ -36,8 +36,8 @@ public class LivyClientServiceImpl implements LivyClientService {
                     .setURI(new URI(host)) //
                     .build();
             String version = versionManager.getCurrentVersion();
-            String shadedJar = String.format("/app/%s/%s/spark/lib/le-spark-%s-shaded.jar",
-                    stackName, version, version);
+            String shadedJar = String.format("/app/%s/%s/spark/lib/le-spark-%s-shaded.jar", stackName, version,
+                    version);
             log.info("Adding spark shaded jar to client " + host + ": " + shadedJar);
             javaClient.addJar(new URI("hdfs://" + shadedJar));
             if (extraJars != null) {
@@ -53,7 +53,7 @@ public class LivyClientServiceImpl implements LivyClientService {
             boolean sharedContext = m.matches();
             Runtime.getRuntime().addShutdownHook(new Thread(() -> javaClient.stop(!sharedContext)));
             if (sharedContext) { // wait for loading jars
-                Thread.sleep(30000L);
+                Thread.sleep(60000L);
             }
             return new LivyScalaClient(javaClient);
         } catch (IOException | URISyntaxException | InterruptedException e) {

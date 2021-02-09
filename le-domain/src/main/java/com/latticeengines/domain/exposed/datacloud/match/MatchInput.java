@@ -235,6 +235,11 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("AllocateId")
     private boolean allocateId;
 
+    // when not getting a match AND allocateId = false, return anonymous entity ID
+    // instead of null
+    @JsonProperty("ReturnAnonymousEntityUnMatched")
+    private boolean returnAnonymousWhenUnmatched;
+
     /*-
      * versions used for entity match, set to null to use current version
      */
@@ -713,6 +718,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setAllocateId(boolean allocateId) {
         this.allocateId = allocateId;
+    }
+
+    public boolean isReturnAnonymousWhenUnmatched() {
+        return returnAnonymousWhenUnmatched;
+    }
+
+    public void setReturnAnonymousWhenUnmatched(boolean returnAnonymousWhenUnmatched) {
+        this.returnAnonymousWhenUnmatched = returnAnonymousWhenUnmatched;
     }
 
     public Map<EntityMatchEnvironment, Integer> getEntityMatchVersionMap() {

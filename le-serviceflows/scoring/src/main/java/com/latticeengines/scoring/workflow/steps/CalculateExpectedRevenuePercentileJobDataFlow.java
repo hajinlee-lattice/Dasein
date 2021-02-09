@@ -26,7 +26,7 @@ public class CalculateExpectedRevenuePercentileJobDataFlow extends
 
     private static final Logger log = LoggerFactory.getLogger(CalculateExpectedRevenuePercentileJobDataFlow.class);
 
-    @Value("${cdl.spark.driver.maxResultSize:4g}")
+    @Value("${cdl.spark.driver.maxResultSize}")
     private String sparkMaxResultSize;
 
     @Override

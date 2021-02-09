@@ -214,12 +214,12 @@ public class EnrichWebVisitJobTestNG extends SparkJobFunctionalTestNGBase {
         config.selectedAttributes = getSelectedAttributes();
         config.matchedWebVisitInputIdx = matchedWebVisitInputIdx;
         config.catalogInputIdx = catalogInputIdx;
+        config.accountIdCol = EntityId.name();
         return config;
     }
 
     private static Map<String, String> getSelectedAttributes() {
         Map<String, String> selectedAttributes = new HashMap<>();
-        selectedAttributes.put("AccountId", "account_id");
         selectedAttributes.put("WebVisitDate", "visit_date");
         selectedAttributes.put("UserId", "user_id");
         selectedAttributes.put("WebVisitPageUrl", "page_url");

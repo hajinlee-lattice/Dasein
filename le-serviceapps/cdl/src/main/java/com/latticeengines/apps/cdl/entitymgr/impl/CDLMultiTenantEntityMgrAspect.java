@@ -98,7 +98,8 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.LookupIdMappingEntityMgrImpl.*(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.LookupIdMappingEntityMgrImpl.*(..)) && "
+            + "!execution(* com.latticeengines.apps.cdl.entitymgr.impl.LookupIdMappingEntityMgrImpl.retrieveLookupIdMapByExtSysAuth(..))")
     public void allLookupIdMappingMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
                 Arrays.asList(entityManager, entityManagerReader));

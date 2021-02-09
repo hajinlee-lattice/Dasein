@@ -1,11 +1,14 @@
 package com.latticeengines.datacloud.match.service;
 
 import java.time.Duration;
+import java.util.Map;
 
 import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
  * Central place to manage all entity match related configurations
@@ -119,19 +122,32 @@ public interface EntityMatchConfigurationService {
     RetryTemplate getRetryTemplate(@NotNull EntityMatchEnvironment env);
 
     /**
-     * Setter for isAllocateMode flag. See {@link this#isAllocateMode()} for the flag's meaning.
+     * Configure whether to allocate/create specific entity. This map will overwrite
+     * the global flag. E.g., Account -> true, Contact -> false means we will only
+     * match to existing contact but not creating new ones
+     *
+     * @param perEntityAllocationModes
+     *            map of entity -> allocateId flag (create new entity if true)
+     */
+    void setPerEntityAllocationModes(Map<String, Boolean> perEntityAllocationModes);
+
+    /**
+     * Setter for isAllocateMode flag. See {@link this#isAllocateMode(String)} for the flag's meaning.
      *
      * @param isAllocateMode input flag to be set
      */
     void setIsAllocateMode(boolean isAllocateMode);
 
     /**
-     * Return a flag to represent whether system is in allocate mode. True means we will allocate new entity ID and
-     * merge to existing entity. False means read only mode and will return no match in case of conflict.
+     * Return a flag to represent whether system is in allocate mode. True means we
+     * will allocate new entity ID and merge to existing entity. False means read
+     * only mode and will return no match in case of conflict.
      *
+     * @param entity
+     *            current entity that's being matched
      * @return current value of the flag
      */
-    boolean isAllocateMode();
+    boolean isAllocateMode(String entity);
 
     /**
      * Return a flag to indicate whether match should lazily copy seed/lookup from
@@ -149,4 +165,22 @@ public interface EntityMatchConfigurationService {
      *            true to lazily copy
      */
     void setShouldCopyToStagingLazily(boolean shouldCopyToStagingLazily);
+
+    /**
+     * Retrieve persisted configuration for target tenant.
+     *
+     * @param tenant
+     * @return config object, {@code null} if not configuration exists
+     */
+    EntityMatchConfiguration getConfiguration(@NotNull Tenant tenant);
+
+    /**
+     * Persist given configuration for target tenant
+     *
+     * @param tenant
+     *            tenant object
+     * @param configuration
+     *            config object
+     */
+    void saveConfiguration(@NotNull Tenant tenant, @NotNull EntityMatchConfiguration configuration);
 }

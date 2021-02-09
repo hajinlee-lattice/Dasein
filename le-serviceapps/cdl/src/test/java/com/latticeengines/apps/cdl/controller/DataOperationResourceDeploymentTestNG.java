@@ -36,8 +36,7 @@ public class DataOperationResourceDeploymentTestNG extends CDLDeploymentTestNGBa
     public void testCrud() {
         String tenantId = mainTestTenant.getId();
         DataDeleteOperationConfiguration configuration = new DataDeleteOperationConfiguration();
-        configuration.setEntity(BusinessEntity.Account);
-        configuration.setSystemName("DefaultSystem");
+        configuration.setIdEntity(BusinessEntity.Account);
         configuration.setDeleteType(DataDeleteOperationConfiguration.DeleteType.SOFT);
         String dropPath = cdlProxy.createDataOperation(tenantId, DataOperation.OperationType.DELETE, configuration);
         Assert.assertNotNull(dropPath);

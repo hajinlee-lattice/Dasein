@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
@@ -26,6 +27,7 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.ExportEntity;
@@ -84,6 +86,9 @@ public class DeltaCampaignLaunchInitStep
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private BatonService batonService;
 
     private PlayLaunchContext playLaunchContext;
 
@@ -148,13 +153,12 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setDataDbUser(dataDbUser);
         deltaCampaignLaunchSparkContext.setPublishRecommendationsToDB(campaignLaunchUtils
                 .shouldPublishRecommendationsToDB(customerSpace, playLaunch.getDestinationSysName()));
-        if (deltaCampaignLaunchSparkContext.getPublishRecommendationsToDB() &&
-                !CDLExternalSystemName.AWS_S3.name().equals(deltaCampaignLaunchSparkContext.getDestinationSysName())) {
-            deltaCampaignLaunchSparkContext.setContactCols(config.getContactDisplayNames().entrySet().stream().map(entry -> entry.getKey()).collect(Collectors.toList()));
-        } else {
-            deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
-        }
+        deltaCampaignLaunchSparkContext.setContactCols(processedFieldMappingMetadata.getContactCols());
         deltaCampaignLaunchSparkContext.setUseCustomerId(campaignLaunchUtils.getUseCustomerId(customerSpace, playLaunch.getDestinationSysName()));
+        deltaCampaignLaunchSparkContext
+                .setIsEntityMatch(batonService.isEntityMatchEnabled(customerSpace));
+        deltaCampaignLaunchSparkContext.setShouldDefaultPopulateIds(
+                shouldDefaultPopulateIds(customerSpace, playLaunch.getDestinationSysName()));
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();
@@ -177,7 +181,7 @@ public class DeltaCampaignLaunchInitStep
 
     @VisibleForTesting
     List<DataUnit> processTableNames(List<String> tableNames) {
-        return tableNames.stream().map(tableName -> getS3DataUnit(false, customerSpace, tableName)).collect(Collectors.toList());
+        return tableNames.stream().map(tableName -> getDataUnit(false, customerSpace, tableName)).collect(Collectors.toList());
     }
 
     private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {
@@ -299,5 +303,12 @@ public class DeltaCampaignLaunchInitStep
                 log.info("Will not update play launch data.");
         }
         log.info(String.format("Created table %s.", tableName));
+    }
+
+    private boolean shouldDefaultPopulateIds(CustomerSpace customerSpace, CDLExternalSystemName systemName) {
+        if (systemName.equals(CDLExternalSystemName.Salesforce) || systemName.equals(CDLExternalSystemName.AWS_S3)) {
+            return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS);
+        }
+        return true;
     }
 }

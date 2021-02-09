@@ -272,7 +272,7 @@
 
     <bean name="plsActivityAlertsCleanupJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
         <property name="jobName" value="alertCleanupJob"/>
-        <property name="cronTrigger" value="${quartz.pls.altercleanup.job.cron:0 0 0/6 * * ?}"/>
+        <property name="cronTrigger" value="${quartz.pls.altercleanup.job.cron:0 0 0 1/2 * ? *}"/>
         <property name="destUrl" value="${quartz.pls.predefined.job.primary.url:}"/>
         <property name="secondaryDestUrl" value="${quartz.pls.predefined.job.secondary.url:}"/>
         <property name="queryApi" value="${quartz.pls.predefined.job.query.api:}"/>

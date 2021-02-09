@@ -452,6 +452,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
 
     private static final String CASE_ALL_KEYS = "ALL_KEYS";
+    private static final String CASE_ALL_KEYS_LOOKUP = "ALL_KEYS_LOOKUP";
     private static final String CASE_PARTIAL_KEYS = "PARTIAL_KEYS";
     private static final String CASE_LEAD_TO_ACCT = "LEAD_TO_ACCT";
     private static final String CASE_LEAD_TO_ACCT_NOAID = "LEAD_TO_ACCT_NOAID";
@@ -542,6 +543,19 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         runAndVerify(input, CASE_INVALID_VALUE);
     }
 
+    @Test(groups = "deployment", priority = 9)
+    public void testAllKeysLookup() {
+        MatchInput input = prepareBulkMatchInput(CASE_ALL_KEYS_LOOKUP);
+        EntityMatchConfiguration oldConfig = input.getEntityMatchConfiguration();
+        EntityMatchConfiguration newConfig = new EntityMatchConfiguration(oldConfig.getNumStagingShards(),
+                oldConfig.getStagingTableName(), oldConfig.isLazyCopyToStaging(), oldConfig.getSkippedMatchFields(),
+                null, Collections.singletonMap(BusinessEntity.Account.name(),
+                        Collections.singletonMap(BusinessEntity.Account.name(), false)));
+        input.setReturnAnonymousWhenUnmatched(true);
+        input.setEntityMatchConfiguration(newConfig);
+        runAndVerify(input, CASE_ALL_KEYS_LOOKUP);
+    }
+
     private void publishBaseSet() {
         // No need to bump up version because test generates new test every time
         EntityPublishRequest request = new EntityPublishRequest();
@@ -560,7 +574,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         int numNewAccounts = CASE_ALL_KEYS.equals(scenario) ? DATA_ALL_KEYS.length : 0;
         validateNewlyAllocatedAcct(finalStatus.getNewEntitiesLocation(), numNewAccounts);
 
-        if (CASE_ALL_KEYS.equals(scenario) || CASE_PARTIAL_KEYS.equals(scenario)) {
+        if (CASE_ALL_KEYS.equals(scenario) || CASE_PARTIAL_KEYS.equals(scenario)
+                || CASE_ALL_KEYS_LOOKUP.equals(scenario)) {
             validateAllocateAcctResult(finalStatus.getResultLocation());
         } else if (CASE_LEAD_TO_ACCT.equals(scenario) || CASE_LEAD_TO_ACCT_NOAID.equals(scenario)) {
             validateLeadToAcctResult(finalStatus, scenario);
@@ -592,8 +607,10 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setInputBuffer(prepareBulkData(scenario));
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
+        Map<String, Map<String, Boolean>> allocationModes = Collections.singletonMap(BusinessEntity.Account.name(),
+                Collections.singletonMap(BusinessEntity.Account.name(), true));
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, allocationModes));
         return input;
     }
 
@@ -612,7 +629,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, null));
         return input;
     }
 
@@ -650,7 +667,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, null));
         return input;
     }
 
@@ -675,7 +692,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
         input.setInputBuffer(prepareBulkData(CASE_INVALID_VALUE));
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, null));
         return input;
     }
 
@@ -700,7 +717,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setEntityKeyMaps(Collections.singletonMap(BusinessEntity.Account.name(), map));
         input.setInputBuffer(prepareBulkData(CASE_PREFERRED_ID));
         input.setEntityMatchConfiguration(
-                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null));
+                new EntityMatchConfiguration(NUM_STAGING_SHARDS_FOR_TESTING, null, true, null, null, null));
         return input;
     }
 
@@ -765,6 +782,15 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             uploadAvroData(DATA_INVALID_VALUE, Arrays.asList(FIELDS_INVALID_VALUE), SCHEMA_INVALID_VALUE, avroDir,
                     CASE_INVALID_VALUE + ".avro");
             break;
+        case CASE_ALL_KEYS_LOOKUP:
+            Object[][] data = new Object[DATA_ALL_KEYS.length + 1][];
+            for (int i = 0; i < DATA_ALL_KEYS.length; i++) {
+                data[i] = DATA_ALL_KEYS[i];
+            }
+            data[DATA_ALL_KEYS.length] = new Object[SCHEMA.size()];
+            data[DATA_ALL_KEYS.length][0] = "C0_03"; // some random value that won't match anything
+            uploadAvroData(data, Arrays.asList(FIELDS), SCHEMA, avroDir, CASE_ALL_KEYS + ".avro");
+            break;
         default:
             throw new UnsupportedOperationException("Unknown test scenario " + scenario);
         }
@@ -796,6 +822,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
                 Assert.assertNotNull(record.get(InterfaceName.EntityId.name()).toString());
                 if ("C0_01".equals(record.get(TEST_ID).toString())) {
                     googleEntityId = record.get(InterfaceName.EntityId.name()).toString();
+                } else if ("C0_03".equals(record.get(TEST_ID).toString())) {
+                    Assert.assertEquals(record.get(InterfaceName.EntityId.name()).toString(), ENTITY_ANONYMOUS_ID);
                 }
             } else {
                 Assert.assertEquals(record.get(InterfaceName.EntityId.name()).toString(), googleEntityId);

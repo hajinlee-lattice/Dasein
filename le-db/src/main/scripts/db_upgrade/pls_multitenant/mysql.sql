@@ -1,8 +1,10 @@
 /*
 * script name - mysql.sql
-* purpose - 'Release/Hotfix/Patch' DB changes in production.
-* Ensure to maintain backward compatibility.
+* purpose - 'Release/Hotfix/Patch' DB upgrade script.
+* SQL should be backwards compatible.
 */
+
+-- *** DO NOT FORGET TO ADD rollback script to 'rollback.sql' file ***
 
 USE `PLS_MultiTenant`;
 
@@ -12,29 +14,9 @@ DELIMITER //
 -- ##############################################################
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
-      -- User input section (DDL/DML). This is just a template, developer can modify based on need.
-      ALTER TABLE `PLS_MultiTenant`.`EXPORT_FIELD_METADATA_DEFAULTS`
-               DROP `HISTORY_ENABLED`;
-
-      create table `DATA_OPERATION`
-          (
-              `PID`             bigint       not null auto_increment,
-              `DROP_PATH`       varchar(255),
-              `OPERATION_TYPE`  varchar(40),
-              `CONFIGURATION`   JSON,
-              `CREATED`     datetime,
-              `UPDATED`     datetime,
-              `FK_TENANT_ID`    bigint       not null,
-              primary key (`PID`)
-          ) engine = InnoDB;
-
-      ALTER TABLE `DATA_OPERATION`
-              ADD CONSTRAINT `FK_DATAOPERATION_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`)
-                  REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
-      CREATE INDEX IX_DROP_PATH ON `DATA_OPERATION` (`DROP_PATH`);
-
-      ALTER TABLE `PLS_MultiTenant`.`ACTIVITY_METRIC_GROUP`
-              ADD COLUMN `CSOverwrite` JSON NULL DEFAULT NULL;
+    -- User input section (DDL/DML). This is just a template, developer can modify based on need.
+    
+    ALTER TABLE `PLS_MultiTenant`.`METADATA_LIST_SEGMENT` ADD COLUMN `CONFIG` JSON;
 
       ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH`
               ADD COLUMN `RECORDS_STATS` LONGTEXT NULL DEFAULT NULL;
@@ -57,48 +39,18 @@ CREATE PROCEDURE `UpdateSchema`()
         DEFAULT CHARSET = utf8mb4
         COLLATE = utf8mb4_unicode_ci;
 
-      ALTER TABLE `DCP_ENRICHMENT_LAYOUT` ADD `TEMPLATE_ID` VARCHAR(255);
+    -- DCP-1838, author: lucascl@dnb.com product: D&B Connect
+    ALTER TABLE `DCP_DATA_REPORT`
+        ADD COLUMN `ROLLUP_STATUS` VARCHAR(255);
 
-      ALTER TABLE `DCP_ENRICHMENT_LAYOUT`
-        ADD CONSTRAINT `FK_DCPENRICHMENTTEMPLATE_FKTEMPLATEID_ENCRICHMENTTEMPLATE`
-          FOREIGN KEY (`TEMPLATE_ID`) REFERENCES `DCP_ENRICHMENT_TEMPLATE` (`TEMPLATE_ID`) ON DELETE CASCADE ;
 
-      ALTER TABLE `PLS_MultiTenant`.`EXPORT_FIELD_METADATA_DEFAULTS`
-              ADD `FORCE_POPULATE` bit not null;
 
-      CREATE TABLE `MOCK_BROKER_INSTANCE`
-          (
-              `PID` BIGINT NOT NULL AUTO_INCREMENT,
-              `ACTIVE` BIT NOT NULL,
-              `CREATED` DATETIME NOT NULL,
-              `DATA_STREAM_ID` VARCHAR(255),
-              `DISPLAY_NAME` VARCHAR(255) NOT NULL,
-              `DOCUMENT_TYPE` VARCHAR(255) NOT NULL,
-              `INGESTION_SCHEDULER` JSON,
-              `SELECTED_FIELDS` JSON,
-              `SOURCE_ID` VARCHAR(255) NOT NULL,
-              `UPDATED` DATETIME NOT NULL,
-              `NEXT_SCHEDULED_TIME` DATETIME,
-              `FK_TENANT_ID` BIGINT, PRIMARY KEY (`PID`)
-          ) engine = InnoDB;
 
-      ALTER TABLE `MOCK_BROKER_INSTANCE`
-          ADD CONSTRAINT `FK_MOCKBROKERINSTANCE_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`)
-              REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
-      ALTER TABLE `MOCK_BROKER_INSTANCE` ADD CONSTRAINT `UKgtyktm5yt7nblklq189u638fy` UNIQUE (`SOURCE_ID`, `FK_TENANT_ID`);
+    -- DCP-2131 author: WuH@dnb.com product: D&B Connect
+    ALTER TABLE `PLS_MultiTenant`.`DCP_ENRICHMENT_TEMPLATE`
+          ADD COLUMN `ELEMENTS` JSON;
 
-      CREATE TABLE `IMPORT_MESSAGE`
-          (
-              `PID` BIGINT NOT NULL AUTO_INCREMENT,
-              `BUCKET` VARCHAR(255),
-              `CREATED` DATETIME NOT NULL,
-              `KEY` VARCHAR(500) NOT NULL,
-              `MESSAGE_TYPE` VARCHAR(255),
-              `SOURCE_ID` VARCHAR(255) NOT NULL,
-              `UPDATED` DATETIME NOT NULL,
-              PRIMARY KEY (`PID`)
-          ) engine=InnoDB;
-      
+
 
   END //
 -- ##############################################################

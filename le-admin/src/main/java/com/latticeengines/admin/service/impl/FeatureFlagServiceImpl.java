@@ -169,6 +169,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ADVANCED_FILTERING, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ATTRIBUTE_TOGGLING, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ACXIOM, cg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_IMPORT_V2, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.SSVI_REPORT, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL, cg).setDefaultValue(false);
@@ -186,6 +187,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         // DCP only
         Collection<LatticeProduct> dcp = Collections.singleton(LatticeProduct.DCP);
         createDefaultFeatureFlag(LatticeFeatureFlag.DCP_ENRICHMENT_LIBRARY, dcp).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.MATCH_MAPPING_V2, dcp).setDefaultValue(false);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,

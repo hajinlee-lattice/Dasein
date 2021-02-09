@@ -39,9 +39,8 @@ public class DMXDataTechIndicatorsFlow extends ConfigurableFlowBase<TechIndicato
         config = getTransformerConfig(parameters);
         Node dmxDataClean = addSource(parameters.getBaseTables().get(0));
         List<SourceColumn> sourceColumns = parameters.getColumns();
-        Node srcColEncoded = BitEncodeUtils.encode(dmxDataClean, config.getGroupByFields(), sourceColumns)
-                .renamePipe("srcColEncoded");
-        return srcColEncoded;
+        Node srcColsEncoded = BitEncodeUtils.encode(dmxDataClean, config.getGroupByFields(), sourceColumns);
+        return srcColsEncoded;
     }
 
 }

@@ -109,8 +109,8 @@ alias ministack-ip='bash $WSHOME/le-dev/scripts/ministack_ip.sh'
 alias emr-log='python $WSHOME/le-dev/scripts/emr_log.py'
 alias dev-emr-ip='bash $WSHOME/le-dev/scripts/dev_emr_ip.sh'
 
-alias zk-qa='zk-shell 10.141.1.154,10.141.101.143,10.141.201.98'
-alias zk-prod='zk-shell 10.151.1.99,10.151.101.163,10.151.201.188'
+alias zk-qa='zk-shell 10.248.130.61,10.248.130.222,10.248.131.21'
+alias zk-prod='zk-shell zk1.prod.lat.dnb.net,zk2.prod.lat.dnb.net,zk3.prod.lat.dnb.net'
 
 alias hub-pr='bash $WSHOME/le-dev/scripts/hub_pr.sh'
 

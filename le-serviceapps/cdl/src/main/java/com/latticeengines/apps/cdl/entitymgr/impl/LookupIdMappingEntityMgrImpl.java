@@ -150,7 +150,9 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
         }
 
         lookupIdMap.setUpdated(new Date(System.currentTimeMillis()));
-        lookupIdMap.setTenant(tenant);
+        if (lookupIdMap.getTenant() == null) {
+            lookupIdMap.setTenant(tenant);
+        }
         getDao().update(lookupIdMap);
 
         return lookupIdMap;

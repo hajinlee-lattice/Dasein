@@ -1,11 +1,16 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.DerivedId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.DerivedName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.DerivedPattern;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMedium;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMediumId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.UserId;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,10 +25,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.activity.DeriveConfig;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -34,15 +42,15 @@ import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ProcessDimensionJobTestNG.class);
 
-    private static final List<Pair<String, Class<?>>> WEB_VISIT_PTN_FIELDS = Arrays.asList( //
-            Pair.of(PathPatternName.name(), String.class), //
-            Pair.of(SourceMedium.name(), String.class), //
-            Pair.of(PathPattern.name(), String.class));
+    private static final String DERIVED_NAME_1 = "user 1 visited content";
+    private static final String DERIVED_NAME_2 = "user 2 visited video content 1";
 
-    private static final List<Pair<String, Class<?>>> SOURCE_MEDIUM_FIELDS = Collections.singletonList( //
-            Pair.of(SourceMedium.name(), String.class));
+    private AtomicInteger counter;
 
-    private AtomicInteger counter = new AtomicInteger(0);
+    @BeforeGroups(groups = "functional")
+    private void resetCounter() {
+        counter = new AtomicInteger(0);
+    }
 
     @Test(groups = "functional")
     private void test() {
@@ -52,6 +60,26 @@ public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
                 getWorkspace());
         log.info("Result = {}", JsonUtils.serialize(result));
         verifyResult(result);
+    }
+
+    @Test(groups = "functional")
+    private void testDeriveDimension() {
+        counter = new AtomicInteger(0);
+        Pair<ProcessDimensionConfig, List<String>> testData = prepareDimensionDataWithDerivedDimensionConfig();
+        log.info("Config = {}", JsonUtils.serialize(testData.getLeft()));
+        SparkJobResult result = runSparkJob(ProcessDimensionJob.class, testData.getLeft(), testData.getRight(),
+                getWorkspace());
+        Map<?, ?> rawMap = JsonUtils.deserialize(result.getOutput(), Map.class);
+        Map<String, DimensionMetadata> dimMetadata = JsonUtils.convertMap(rawMap, String.class,
+                DimensionMetadata.class);
+        log.info("Dimension Metadata: {}", JsonUtils.serialize(dimMetadata));
+        Assert.assertNotNull(dimMetadata);
+        Assert.assertEquals(dimMetadata.size(), 3);
+        Assert.assertTrue(dimMetadata.containsKey(PathPatternId.name()));
+        Assert.assertTrue(dimMetadata.containsKey(SourceMediumId.name()));
+        Assert.assertTrue(dimMetadata.containsKey(DerivedId.name()));
+
+        Assert.assertEquals(dimMetadata.get(DerivedId.name()).getCardinality(), 2L);
     }
 
     @Override
@@ -98,6 +126,10 @@ public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     private Pair<ProcessDimensionConfig.Dimension, String> prepareWebVisitPtnData() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(PathPatternName.name(), String.class), //
+                Pair.of(SourceMedium.name(), String.class), //
+                Pair.of(PathPattern.name(), String.class));
         Object[][] ptnData = new Object[][] { //
                 /*-
                  * content ptn, freq = 2
@@ -140,10 +172,12 @@ public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
         dim.attrs = Sets.newHashSet(PathPattern.name(), PathPatternName.name(), PathPatternId.name());
         dim.dedupAttrs = Sets.newHashSet(PathPatternId.name());
         dim.valueLimit = 3;
-        return Pair.of(dim, uploadHdfsDataUnit(ptnData, WEB_VISIT_PTN_FIELDS));
+        return Pair.of(dim, uploadHdfsDataUnit(ptnData, fields));
     }
 
     private Pair<ProcessDimensionConfig.Dimension, String> prepareSourceMediumData() {
+        List<Pair<String, Class<?>>> fields = Collections.singletonList( //
+                Pair.of(SourceMedium.name(), String.class));
         Object[][] smData = new Object[][] { //
                 { "google/paid" }, //
                 { "google/paid" }, //
@@ -159,7 +193,55 @@ public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
         dim.attrs = Sets.newHashSet(SourceMedium.name(), SourceMediumId.name());
         dim.dedupAttrs = Collections.singleton(SourceMediumId.name());
         dim.valueLimit = null; // keep everything
-        return Pair.of(dim, uploadHdfsDataUnit(smData, SOURCE_MEDIUM_FIELDS));
+        return Pair.of(dim, uploadHdfsDataUnit(smData, fields));
+    }
+
+    private Pair<ProcessDimensionConfig.Dimension, String> prepareDerivedDimension() {
+        // derived from userId + pathPattern
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(UserId.name(), String.class), //
+                Pair.of(PathPattern.name(), String.class) //
+        );
+
+        Object[][] data = new Object[][] { //
+                { "u1", "https://google.com/contents" }, //
+                { "u2", "https://google.com/contents/videos/1?test=123" }, //
+                { "u999", "https://google.com/contents/videos/1?test=123" }, // ignored as userId not match to derive dimension config
+                { "u1", "https://someWebsite.com" } // ignored as userId not match to derive dimension config
+        };
+
+        ProcessDimensionConfig.DerivedDimension dim = new ProcessDimensionConfig.DerivedDimension();
+        dim.inputIdx = counter.getAndIncrement();
+        dim.deriveConfig = getDeriveConfig();
+        dim.attrs = Sets.newHashSet(DerivedName.name(), DerivedId.name(), DerivedPattern.name());
+        dim.dedupAttrs = Collections.singleton(DerivedId.name());
+        return Pair.of(dim, uploadHdfsDataUnit(data, fields));
+    }
+
+    private DeriveConfig getDeriveConfig() {
+        DeriveConfig config = new DeriveConfig();
+        config.sourceAttrs = Arrays.asList(UserId.name(), PathPattern.name());
+        config.patterns = new ArrayList<>();
+        config.patterns.add(Arrays.asList(DERIVED_NAME_1, "u1", "https://google.com/contents"));
+        config.patterns.add(Arrays.asList(DERIVED_NAME_2, "u2", "https://google.com/contents/videos/1.*"));
+        return config;
+    }
+
+    private Pair<ProcessDimensionConfig, List<String>> prepareDimensionDataWithDerivedDimensionConfig() {
+        Pair<ProcessDimensionConfig.Dimension, String> pathPatternCatalog = prepareWebVisitPtnData();
+        Pair<ProcessDimensionConfig.Dimension, String> sourceMediumCatalog = prepareSourceMediumData();
+        Pair<ProcessDimensionConfig.Dimension, String> rawStream = prepareDerivedDimension();
+
+        List<String> inputs = Arrays.asList(pathPatternCatalog.getRight(), sourceMediumCatalog.getRight(),
+                rawStream.getRight());
+        ProcessDimensionConfig config = new ProcessDimensionConfig();
+        config.dimensions = ImmutableMap.of(PathPatternId.name(), pathPatternCatalog.getLeft(), //
+                SourceMediumId.name(), sourceMediumCatalog.getLeft(), //
+                DerivedId.name(), rawStream.getLeft() //
+        );
+        config.collectMetadata = true;
+
+        return Pair.of(config, inputs);
     }
 
     private Pair<ProcessDimensionConfig, List<String>> prepareDimensionData() {

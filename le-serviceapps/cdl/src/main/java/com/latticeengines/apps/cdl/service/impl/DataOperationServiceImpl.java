@@ -1,9 +1,12 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataOperationEntityMgr;
 import com.latticeengines.apps.cdl.service.DataOperationService;
 import com.latticeengines.apps.core.service.DropBoxService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DataDeleteOperationConfiguration;
@@ -20,10 +24,14 @@ import com.latticeengines.domain.exposed.cdl.DataOperationRequest;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.metadata.DataOperation;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.FileProperty;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("dataOperationService")
 public class DataOperationServiceImpl implements DataOperationService {
@@ -32,7 +40,15 @@ public class DataOperationServiceImpl implements DataOperationService {
 
     private static final String FULL_PATH_PATTERN = "%s/%s/%s";
 
-    private static final String DATA_OPERATION_PATH_PATTERN = "Data_Operation/%s_By_%s_%s/";
+    private static final String COMMON_DATA_OPERATION_PATH_PATTERN = "Data_Operation/%s_By_%s_%s/";
+
+    private static final String DELETE_DATA_OPERATION_PATH_PATTERN = "Data_Operation/%s%s_%s_By_%s_%s/";
+
+    private static final String DEFAULT_SYSTEM = "DefaultSystem";
+
+    private static final String DEFAULT_DELETE_TYPE = "SOFT";
+
+    private static final String DEFAULT_DELETE_ENTITY_TYPE = "ALL";
 
     @Inject
     private DataOperationEntityMgr dataOperationEntityMgr;
@@ -45,6 +61,12 @@ public class DataOperationServiceImpl implements DataOperationService {
 
     @Inject
     private CDLDataCleanupServiceImpl cdlDataCleanupService;
+
+    @Inject
+    private BatonService batonService;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @Override
     public String createDataOperation(String customerSpace, DataOperation.OperationType operationType, DataOperationConfiguration configuration) {
@@ -70,10 +92,21 @@ public class DataOperationServiceImpl implements DataOperationService {
     }
 
     private String generateDropPath(DataOperation dataOperation) {
-        String idColumn = BusinessEntity.Account.equals(dataOperation.getConfiguration().getEntity()) ? InterfaceName.AccountId.name()
+        String idColumn = BusinessEntity.Account.equals(dataOperation.getConfiguration().getIdEntity()) ? InterfaceName.AccountId.name()
                 : InterfaceName.ContactId.name();
-        return String.format(DATA_OPERATION_PATH_PATTERN, dataOperation.getOperationType(),
-                dataOperation.getConfiguration().getSystemName(), idColumn);
+        String systemName = StringUtils.isEmpty(dataOperation.getConfiguration().getSystemName()) ? DEFAULT_SYSTEM
+                : dataOperation.getConfiguration().getSystemName();
+        DataOperationConfiguration configuration = dataOperation.getConfiguration();
+        if (configuration instanceof DataDeleteOperationConfiguration) {
+            DataDeleteOperationConfiguration deleteOperationConfiguration = (DataDeleteOperationConfiguration) configuration;
+            String deleteType = deleteOperationConfiguration.getDeleteType() == null ? DEFAULT_DELETE_TYPE
+                    : deleteOperationConfiguration.getDeleteType().name();
+            String deleteEntityType = deleteOperationConfiguration.getDeleteEntityType() == null ? DEFAULT_DELETE_ENTITY_TYPE
+                    : deleteOperationConfiguration.getDeleteEntityType().name();
+            return String.format(DELETE_DATA_OPERATION_PATH_PATTERN, deleteType, dataOperation.getOperationType(),
+                    deleteEntityType, systemName, idColumn);
+        }
+        return String.format(COMMON_DATA_OPERATION_PATH_PATTERN, dataOperation.getOperationType(), systemName, idColumn);
     }
 
     @Override
@@ -92,7 +125,7 @@ public class DataOperationServiceImpl implements DataOperationService {
     }
 
     @Override
-    public String submitJob(String customerSpace, DataOperationRequest dataOperationRequest) {
+    public ApplicationId submitJob(String customerSpace, DataOperationRequest dataOperationRequest) {
         try {
             DataOperation dataOperation = findDataOperationByDropPath(customerSpace, dataOperationRequest.getS3DropPath());
             String key = dataOperationRequest.getS3FileKey();
@@ -101,23 +134,39 @@ public class DataOperationServiceImpl implements DataOperationService {
             fileProperty.setFileName(fileName);
             fileProperty.setFilePath(dataOperationRequest.getS3Bucket() + "/" + key);
             fileProperty.setDirectory(false);
-            SourceFile sourceFile = sourceFileProxy.createSourceFileFromS3(customerSpace, fileProperty, dataOperation.getConfiguration().getEntity().name());
+            SchemaInterpretation schema = Account.equals(dataOperation.getConfiguration().getIdEntity()) ? SchemaInterpretation.DeleteByAccountTemplate
+                    : SchemaInterpretation.DeleteByContactTemplate;
+            SourceFile sourceFile = sourceFileProxy.createSourceFileFromS3(customerSpace, fileProperty, dataOperation.getConfiguration().getIdEntity().name(),
+                    schema.name());
+            resolveMetadata(customerSpace, sourceFile);
             DataOperationConfiguration configuration = dataOperation.getConfiguration();
             if (configuration instanceof DataDeleteOperationConfiguration) {
                 DataDeleteOperationConfiguration deleteOperationConfiguration = (DataDeleteOperationConfiguration) configuration;
                 DeleteRequest request = new DeleteRequest();
-                request.setIdEntity(deleteOperationConfiguration.getEntity());
+                request.setIdEntity(deleteOperationConfiguration.getIdEntity());
+                request.setDeleteEntityType(deleteOperationConfiguration.getDeleteEntityType());
                 request.setFilename(sourceFile.getName());
                 request.setHardDelete(DataDeleteOperationConfiguration.DeleteType.HARD.equals(deleteOperationConfiguration.getDeleteType()));
+                request.setIdSystem(dataOperation.getConfiguration().getSystemName());
                 customerSpace = CustomerSpace.parse(customerSpace).toString();
-                ApplicationId applicationId = cdlDataCleanupService.registerDeleteData(customerSpace, request);
-                return applicationId.toString();
+                return cdlDataCleanupService.registerDeleteData(customerSpace, request);
             } else {
-                return "unsupported data operation";
+                throw new UnsupportedOperationException("Unsupported data operation");
             }
         } catch (Exception e) {
             log.error("error:", e);
-            return e.getMessage();
+            throw e;
         }
+    }
+
+    private void resolveMetadata(String customerSpace, SourceFile sourceFile) {
+        log.info("Resolving metadata for modeling ...");
+        Table table = SchemaRepository.instance().getSchema(sourceFile.getSchemaInterpretation(), false,
+                batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)),
+                batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(customerSpace)));
+        table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
+        metadataProxy.createTable(customerSpace, table.getName(), table);
+        sourceFile.setTableName(table.getName());
+        sourceFileProxy.update(customerSpace, sourceFile);
     }
 }

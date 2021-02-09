@@ -112,6 +112,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
+import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
@@ -673,7 +674,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
         if (request.getEntityMatchConfiguration() == null) {
             request.setEntityMatchConfiguration(
-                    new EntityMatchConfiguration(TEST_NUM_STAGING_SHARDS, null, true, null));
+                    new EntityMatchConfiguration(TEST_NUM_STAGING_SHARDS, null, true, null, null, null));
         }
         log.info("Start processing and analyzing ... request = {}", JsonUtils.serialize(request));
         ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), request);
@@ -710,23 +711,23 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return Pair.of(fileName, is);
     }
 
-    void mockCSVImport(BusinessEntity entity, int fileIdx, String feedType) {
-        mockCSVImport(entity, null, fileIdx, feedType);
+    long mockCSVImport(BusinessEntity entity, int fileIdx, String feedType) {
+        return mockCSVImport(entity, null, fileIdx, feedType);
     }
 
     void mockVISIDBImport(BusinessEntity entity, int fileIdx, String feedType) {
         mockVISIDBImport(entity, null, fileIdx, feedType);
     }
 
-    void mockCSVImport(BusinessEntity entity, String suffix, int fileIdx, String feedType) {
-        mockImport(entity, suffix, fileIdx, feedType, SourceType.FILE);
+    long mockCSVImport(BusinessEntity entity, String suffix, int fileIdx, String feedType) {
+        return mockImport(entity, suffix, fileIdx, feedType, SourceType.FILE);
     }
 
     void mockVISIDBImport(BusinessEntity entity, String suffix, int fileIdx, String feedType) {
         mockImport(entity, suffix, fileIdx, feedType, SourceType.VISIDB);
     }
 
-    void mockImport(BusinessEntity entity, String suffix, int fileIdx, String feedType, SourceType sourceType) {
+    long mockImport(BusinessEntity entity, String suffix, int fileIdx, String feedType, SourceType sourceType) {
         List<String> strings = registerMockDataFeedTask(entity, suffix, feedType, sourceType);
         String feedTaskId = strings.get(0);
         String templateName = strings.get(1);
@@ -755,6 +756,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
                 extract);
         registerImportAction(feedTaskId, numRecords, tableNames,
                 sourceType == SourceType.VISIDB ? CDLConstants.DEFAULT_VISIDB_USER : INITIATOR);
+        return numRecords;
     }
 
     private Table getMockTemplate(BusinessEntity entity, String suffix, String feedType) {
@@ -1813,6 +1815,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(tableName);
         List<ColumnMetadata> cms = metadataProxy.getTableColumns(mainCustomerSpace, tableName);
         List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Model);
+        int hgLicense  = batonService.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                CustomerSpace.shortenCustomerSpace(mainCustomerSpace), DataLicense.HG.getDataLicense());
+        if (hgLicense == 0) {
+            amCols = amCols.stream().filter(
+                    c -> !DataLicense.HG.getDataLicense().equals(c.getDataLicense())).collect(Collectors.toList());
+        }
         String msg = String.format("AccountFeatures has %d columns while AM has %d columns in the Model group.", //
                 CollectionUtils.size(cms), CollectionUtils.size(amCols));
         Assert.assertTrue(CollectionUtils.size(cms) > CollectionUtils.size(amCols) + 1, msg);

@@ -22,7 +22,7 @@ public class EntityDunsBasedMicroEngineActor extends EntityMicroEngineActorBase<
 
     @Override
     protected boolean shouldProcess(@NotNull MatchTraveler traveler) {
-        return StringUtils.isNotBlank(getDuns(traveler));
+        return !matchFoundInLookupMode(traveler) && StringUtils.isNotBlank(getDuns(traveler));
     }
 
     @Override

@@ -91,6 +91,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_OUTREACH_INTEGRATION, //
                 LatticeFeatureFlag.ENABLE_GOOGLE_INTEGRATION, //
                 LatticeFeatureFlag.ENABLE_LIVERAMP_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS, //
                 LatticeFeatureFlag.ENABLE_DELTA_CALCULATION, //
                 LatticeFeatureFlag.ENABLE_ACCOUNT360, //
                 LatticeFeatureFlag.ADVANCED_MODELING, //
@@ -110,7 +111,10 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         );
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = EnumSet.noneOf(LatticeFeatureFlag.class);
-        Collection<LatticeFeatureFlag> expectedDcpFlags = EnumSet.of(LatticeFeatureFlag.DCP_ENRICHMENT_LIBRARY);
+        Collection<LatticeFeatureFlag> expectedDcpFlags = EnumSet.of(
+                LatticeFeatureFlag.DCP_ENRICHMENT_LIBRARY,
+                LatticeFeatureFlag.MATCH_MAPPING_V2
+        );
 
         Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = EnumSet.of( //
                 LatticeFeatureFlag.ALLOW_PIVOT_FILE, //
@@ -133,6 +137,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_OUTREACH_INTEGRATION, //
                 LatticeFeatureFlag.ENABLE_GOOGLE_INTEGRATION, //
                 LatticeFeatureFlag.ENABLE_LIVERAMP_INTEGRATION, //
+                LatticeFeatureFlag.ENABLE_IR_DEFAULT_IDS, //
                 LatticeFeatureFlag.ENABLE_ACCOUNT360, //
                 LatticeFeatureFlag.ADVANCED_MODELING, //
                 LatticeFeatureFlag.MIGRATION_TENANT, //
@@ -146,7 +151,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_IMPORT_ERASE_BY_NULL,
                 LatticeFeatureFlag.PUBLISH_TO_ELASTICSEARCH,
                 LatticeFeatureFlag.QUERY_FROM_ELASTICSEARCH,
-                LatticeFeatureFlag.DCP_ENRICHMENT_LIBRARY
+                LatticeFeatureFlag.DCP_ENRICHMENT_LIBRARY,
+                LatticeFeatureFlag.MATCH_MAPPING_V2
         );
 
         expectedNonLpiFlags.addAll(expectedLp2Flags);

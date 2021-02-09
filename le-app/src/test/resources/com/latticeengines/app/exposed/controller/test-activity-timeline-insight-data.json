@@ -143,6 +143,7 @@
     {
       "StreamType": "Opportunity",
       "Detail1": "Solution Development",
+      "Detail2": "Opp004",
       "AccountId": "0014P000028BlGMQA0",
       "EventTimestamp": 1596729600000,
       "EventType": "Opportunity Update",
@@ -154,6 +155,7 @@
     {
       "StreamType": "Opportunity",
       "Detail1": "Solution Development",
+      "Detail2": "Opp003",
       "AccountId": "0014P000028BlGMQA0",
       "EventTimestamp": 1596729600000,
       "EventType": "Opportunity Update",
@@ -165,6 +167,7 @@
     {
       "StreamType": "Opportunity",
       "Detail1": "Closed Lost",
+      "Detail2": "Opp003",
       "AccountId": "0014P000028BlGMQA0",
       "EventTimestamp": 1596643200000,
       "EventType": "Opportunity Update",
@@ -176,6 +179,7 @@
     {
       "StreamType": "Opportunity",
       "Detail1": "Closed Won",
+      "Detail2": "Opp004",
       "AccountId": "0014P000028BlGMQA0",
       "EventTimestamp": 1596643200000,
       "EventType": "Opportunity Update",

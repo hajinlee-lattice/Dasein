@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 
@@ -102,6 +103,23 @@ public class EntityMatchUtilsUnitTestNG {
         // restore is idempotent as well
         restoredInput = EntityMatchUtils.restoreInvalidMatchFieldCharacters(replacedInput);
         Assert.assertEquals(restoredInput, input);
+    }
+
+    @Test(groups = "unit", dataProvider = "isAllocateIdModeEntityMatch")
+    private void testIsAllocateIdModeEntityMatch(MatchInput input, boolean expectedResult) {
+        Assert.assertEquals(EntityMatchUtils.isAllocateIdModeEntityMatch(input), expectedResult);
+    }
+
+    @DataProvider(name = "isAllocateIdModeEntityMatch")
+    private Object[][] isAllocateIdModeEntityMatchTestData() {
+        return new Object[][] { //
+                { newEntityMatchInput(true, null), true }, //
+                { newEntityMatchInput(false, null), false }, //
+                { newEntityMatchInput(true, true), true }, //
+                { newEntityMatchInput(false, true), true }, //
+                { newEntityMatchInput(true, false), false }, //
+                { newEntityMatchInput(false, false), false }, //
+        }; //
     }
 
     @DataProvider(name = "replaceInvalidChars")
@@ -280,6 +298,17 @@ public class EntityMatchUtilsUnitTestNG {
         input.setAllocateId(true);
         input.setOutputNewEntities(true);
         input.setTargetEntity(entity);
+        return input;
+    }
+
+    private MatchInput newEntityMatchInput(boolean isAllocateId, Boolean isAllocateIdInConfig) {
+        MatchInput input = new MatchInput();
+        input.setOperationalMode(ENTITY_MATCH);
+        input.setAllocateId(isAllocateId);
+        if (isAllocateIdInConfig != null) {
+            input.setEntityMatchConfiguration(
+                    new EntityMatchConfiguration(null, null, null, null, isAllocateIdInConfig, null));
+        }
         return input;
     }
 

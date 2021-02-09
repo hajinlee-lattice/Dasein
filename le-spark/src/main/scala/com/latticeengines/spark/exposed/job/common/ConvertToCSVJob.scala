@@ -6,7 +6,7 @@ import java.util.TimeZone
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.CSVUtils
+import com.latticeengines.spark.util.{CSVUtils, DisplayNameUtils}
 import org.apache.commons.collections4.MapUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.functions.{col, lit, udf, when}
@@ -22,7 +22,7 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
 
     val withTimestamp = addTimestamp(input, config)
     val formatted = formatDateAttrs(withTimestamp, config)
-    val renamed = changeToDisplayName(formatted, config)
+    val renamed = DisplayNameUtils.changeToDisplayName(formatted, config.getDisplayNames)
 
     val result = renamed
     lattice.output = result :: Nil
@@ -59,17 +59,6 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
           df
         }
       })
-    }
-  }
-
-  private def changeToDisplayName(input: DataFrame, config: ConvertToCSVConfig): DataFrame = {
-    if (MapUtils.isEmpty(config.getDisplayNames)) {
-      input
-    } else {
-      val attrsToRename: Map[String, String] = config.getDisplayNames.asScala.toMap
-        .filterKeys(input.columns.contains(_))
-      val newAttrs = input.columns.map(c => attrsToRename.getOrElse(c, c))
-      input.toDF(newAttrs: _*)
     }
   }
 

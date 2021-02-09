@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.dcp.entitymgr.EnrichmentLayoutEntityMgr;
 import com.latticeengines.apps.dcp.entitymgr.EnrichmentTemplateEntityMgr;
+import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
 import com.latticeengines.apps.dcp.service.EntitlementService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -38,6 +39,7 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
 
     private static final Logger log = LoggerFactory.getLogger(EnrichmentTemplateServiceImpl.class);
     private static final int MAX_PAGE_SIZE = 100;
+    private static final int MAX_RETRY = 3;
 
     @Inject
     private EnrichmentTemplateEntityMgr enrichmentTemplateEntityMgr;
@@ -46,15 +48,18 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
     private EnrichmentLayoutEntityMgr enrichmentLayoutEntityMgr;
 
     @Inject
+    private EnrichmentLayoutService enrichmentLayoutService;
+
+    @Inject
     private PrimeMetadataProxy primeMetadataProxy;
 
     @Inject
     private EntitlementService entitlementService;
 
     @Override
-    public ResponseDocument<String> create(String layoutId, String templateName) {
+    public EnrichmentTemplateSummary create(String customerSpace, String layoutId, String templateName) {
         Tenant tenant = MultiTenantContext.getTenant();
-        EnrichmentLayout enrichmentLayout = enrichmentLayoutEntityMgr.findByLayoutId(layoutId);
+        EnrichmentLayout enrichmentLayout = enrichmentLayoutService.findByLayoutId(customerSpace, layoutId);
 
         if (enrichmentLayout == null) {
             log.error("Could not find an enrichment layout with layoutId " + layoutId);
@@ -63,7 +68,16 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
 
         EnrichmentTemplate enrichmentTemplate = new EnrichmentTemplate(enrichmentLayout);
 
-        enrichmentTemplate.setCreatedBy(MultiTenantContext.getUser().getEmail());
+        try {
+            enrichmentTemplate.setCreatedBy(MultiTenantContext.getUser().getEmail());
+        } catch (Exception exception) {
+            log.error("Unexpected exception assigning user to template: " + exception.getMessage());
+            log.error(ExceptionUtils.getStackTrace(exception));
+            log.error("Assigning enrichment template creator to base enrichment layout creator: "
+                    + enrichmentLayout.getCreatedBy());
+            enrichmentTemplate.setCreatedBy(MultiTenantContext.getUser().getEmail());
+        }
+
         enrichmentTemplate.setTemplateName(templateName);
         enrichmentTemplate.setTenant(tenant);
 
@@ -79,14 +93,14 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
                 throw new LedpException(LedpCode.LEDP_60015,
                         new String[] { enrichmentTemplate.getTemplateId(), exception.getMessage() });
             }
-            return result;
+            return new EnrichmentTemplateSummary(enrichmentTemplate);
         } else {
             throw new LedpException(LedpCode.LEDP_60016, new String[] { String.join("\n", result.getErrors()) });
         }
     }
 
     @Override
-    public ResponseDocument<String> create(EnrichmentTemplate enrichmentTemplate) {
+    public EnrichmentTemplateSummary create(EnrichmentTemplate enrichmentTemplate) {
         Tenant tenant = MultiTenantContext.getTenant();
         enrichmentTemplate.setTenant(tenant);
 
@@ -100,14 +114,14 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
                 throw new LedpException(LedpCode.LEDP_60015,
                         new String[] { enrichmentTemplate.getTemplateId(), exception.getMessage() });
             }
-            return result;
+            return new EnrichmentTemplateSummary(enrichmentTemplate);
         } else {
             throw new LedpException(LedpCode.LEDP_60016, new String[] { String.join("\n", result.getErrors()) });
         }
     }
 
     @Override
-    public List<EnrichmentTemplateSummary> getEnrichmentTemplates(
+    public List<EnrichmentTemplateSummary> listEnrichmentTemplates(
             ListEnrichmentTemplateRequest listEnrichmentTemplateRequest) {
         PageRequest pageRequest = getPageRequest(0, MAX_PAGE_SIZE);
         try {
@@ -124,16 +138,22 @@ public class EnrichmentTemplateServiceImpl extends ServiceCommonImpl implements 
         }
     }
 
+    @Override
+    public EnrichmentTemplateSummary getEnrichmentTemplate(String templateId) {
+        EnrichmentTemplate template = enrichmentTemplateEntityMgr.find(templateId);
+        return template == null ? null : new EnrichmentTemplateSummary(template);
+    }
+
     private boolean includeEnrichmentTemplate(ListEnrichmentTemplateRequest listEnrichmentTemplateRequest,
             EnrichmentTemplate enrichmentTemplate) {
         boolean matchesDomain = "ALL".equals(listEnrichmentTemplateRequest.getDomain())
-                || listEnrichmentTemplateRequest.getDomain() == enrichmentTemplate.getDomain().name();
+                || listEnrichmentTemplateRequest.getDomain().equals(enrichmentTemplate.getDomain().name());
 
         boolean matchesRecordType = "ALL".equals(listEnrichmentTemplateRequest.getRecordType())
-                || listEnrichmentTemplateRequest.getRecordType() == enrichmentTemplate.getRecordType().name();
+                || listEnrichmentTemplateRequest.getRecordType().equals(enrichmentTemplate.getRecordType().name());
 
         boolean matchesCreatedBy = "ALL".equals(listEnrichmentTemplateRequest.getCreatedBy())
-                || listEnrichmentTemplateRequest.getCreatedBy() == enrichmentTemplate.getCreatedBy();
+                || listEnrichmentTemplateRequest.getCreatedBy().equals(enrichmentTemplate.getCreatedBy());
 
         boolean matchesArchived = listEnrichmentTemplateRequest.getIncludeArchived()
                 || !enrichmentTemplate.getArchived();

@@ -30,6 +30,8 @@ import com.latticeengines.domain.exposed.spark.cdl.PublishActivityAlertsJobConfi
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase {
+    private static final String ALERT_VERSION = "version";
+
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
 
@@ -63,7 +65,8 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
         try {
             Connection conn = DriverManager.getConnection(dataDbUrl, dataDbUser, dataDbPassword);
             Statement stmt = conn.createStatement();
-            stmt.execute("DELETE FROM Data_MultiTenant.ActivityAlert WHERE TENANT_ID = -1");
+            stmt.execute(
+                    "DELETE FROM Data_MultiTenant.ActivityAlert WHERE TENANT_ID = -1 AND VERSION = " + ALERT_VERSION);
         } catch (Exception e) {
             log.warn("Failed to clean up possible existing data");
         }
@@ -81,7 +84,7 @@ public class PublishActivityAlertsJobTestNG extends SparkJobFunctionalTestNGBase
         config.setDbPassword(CipherUtils.encrypt(dataDbPassword, key, random));
         config.setDbRandomStr(random + key);
         config.setDbTableName(ActivityAlert.TABLE_NAME);
-        config.setAlertVersion("version");
+        config.setAlertVersion(ALERT_VERSION);
         config.setTenantId(-1L);
         Map<String, String> map = new HashMap<>();
         map.put(ActivityStoreConstants.Alert.INC_WEB_ACTIVITY, AlertCategory.PEOPLE.name());

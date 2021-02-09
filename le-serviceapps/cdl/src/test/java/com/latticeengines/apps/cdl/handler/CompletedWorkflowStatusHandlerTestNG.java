@@ -53,6 +53,8 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
     @Test(groups = "functional")
     public void testCompletedWorkflowStatusSynced() {
         createAll();
+        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_CONTACT_TABLE);
 
         Long totalRecords = 100L;
         Long processed = 100L;
@@ -71,16 +73,18 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
 
         Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Completed.toString());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Synced);
-        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), CURRENT_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_CONTACT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_CONTACT_TABLE);
         teardown(launchId, channel.getId(), play.getName());
     }
 
     @Test(groups = "functional")
     public void testCompletedWorkflowStatusPartialSync() {
         createAll();
+        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_CONTACT_TABLE);
 
         Long totalRecords = 100L;
         Long processed = 90L;
@@ -99,18 +103,18 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
 
         Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Completed.toString());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.PartialSync);
-        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), CURRENT_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_CONTACT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_CONTACT_TABLE);
         teardown(launchId, channel.getId(), play.getName());
     }
 
     @Test(groups = "functional")
     public void testCompletedWorkflowStatusSyncFailed() {
         createAll();
-        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_CONTACT_TABLE);
 
         Long totalRecords = 100L;
         Long processed = 0L;
@@ -129,16 +133,18 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
 
         Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Completed.toString());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.SyncFailed);
-        Assert.assertNull(channel.getPreviousLaunchedAccountUniverseTable());
-        Assert.assertNull(channel.getPreviousLaunchedContactUniverseTable());
-        Assert.assertNull(channel.getCurrentLaunchedAccountUniverseTable());
-        Assert.assertNull(channel.getCurrentLaunchedContactUniverseTable());
+        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_CONTACT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), PREVIOUS_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), PREVIOUS_CONTACT_TABLE);
         teardown(launchId, channel.getId(), play.getName());
     }
 
     @Test(groups = "functional")
     public void testCompletedWorkflowStatusSyncedWithNoProcessed() {
         createAll();
+        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), PREVIOUS_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), PREVIOUS_CONTACT_TABLE);
 
         Long totalRecords = 0L;
         Long processed = 0L;
@@ -158,10 +164,10 @@ public class CompletedWorkflowStatusHandlerTestNG extends StatusHandlerTestNGBas
 
         Assert.assertEquals(statusMonitor.getStatus(), DataIntegrationEventType.Completed.toString());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Synced);
-        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_TABLE);
-        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedAccountUniverseTable(), CURRENT_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getPreviousLaunchedContactUniverseTable(), CURRENT_CONTACT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedAccountUniverseTable(), CURRENT_ACCOUNT_TABLE);
+        Assert.assertEquals(channel.getCurrentLaunchedContactUniverseTable(), CURRENT_CONTACT_TABLE);
         teardown(launchId, channel.getId(), play.getName());
     }
 

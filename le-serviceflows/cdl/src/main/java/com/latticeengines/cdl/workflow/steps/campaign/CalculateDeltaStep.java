@@ -139,7 +139,7 @@ public class CalculateDeltaStep extends BaseSparkStep<CalculateDeltaStepConfigur
             processHDFSDataUnit(
                     String.format("Added%ss_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
                     positiveDelta, audienceType.getInterfaceName(),
-                    getAddDeltaTableContextKeyByAudienceType(audienceType), false);
+                    getAddDeltaTableContextKeyByAudienceType(audienceType));
         } else {
             log.info(String.format("No new Added %ss", audienceType.asBusinessEntity().name()));
         }
@@ -148,25 +148,19 @@ public class CalculateDeltaStep extends BaseSparkStep<CalculateDeltaStepConfigur
             processHDFSDataUnit(
                     String.format("Removed%ss_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
                     negativeDelta, audienceType.getInterfaceName(),
-                    getRemoveDeltaTableContextKeyByAudienceType(audienceType), false);
+                    getRemoveDeltaTableContextKeyByAudienceType(audienceType));
         } else {
             log.info(String.format("No %ss to be removed", audienceType.asBusinessEntity().name()));
         }
         HdfsDataUnit fullUniverse = deltaCalculationResult.getTargets().get(2);
         processHDFSDataUnit(
                 String.format("Full%sUniverse_%s", audienceType.asBusinessEntity().name(), config.getExecutionId()),
-                fullUniverse, audienceType.getInterfaceName(), getFullUniverseContextKeyByAudienceType(audienceType), true);
+                fullUniverse, audienceType.getInterfaceName(), getFullUniverseContextKeyByAudienceType(audienceType));
         log.info("Counts: " + JsonUtils.serialize(getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class)));
     }
 
-    private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey, boolean createTable) {
+    private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {
         log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
-        if (createTable) {
-            Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
-            metadataProxy.createTable(customerSpace.getTenantId(), dataUnitTable.getName(), dataUnitTable);
-            putObjectInContext(contextKey, tableName);
-            log.info("Created " + tableName + " at " + dataUnitTable.getExtracts().get(0).getPath());
-        }
         putObjectInContext(contextKey + ATLAS_EXPORT_DATA_UNIT, dataUnit);
         Map<String, Long> counts = getMapObjectFromContext(DELTA_TABLE_COUNTS, String.class, Long.class);
         if (MapUtils.isEmpty(counts)) {

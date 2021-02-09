@@ -101,7 +101,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     public void init() {
         if (isMatchHistoryEnabled) {
             log.info("MatchHistory is enabled.");
-            publishExecutor = ThreadPoolUtils.getBoundingQueueThreadPool(1, publishThreadPool, 1, queueSize);
+            publishExecutor = ThreadPoolUtils.getBoundedQueueCallerThreadPool(1, publishThreadPool, 1, queueSize);
         }
     }
 
@@ -109,7 +109,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     public void destroy() {
         if (isMatchHistoryEnabled) {
             log.info("Shutting down match history executors");
-            ThreadPoolUtils.awaitTermination(publishExecutor, 60);
+            ThreadPoolUtils.shutdownAndAwaitTermination(publishExecutor, 60);
             log.info("Completed shutting match history executors");
         }
     }
@@ -232,7 +232,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 log.warn("Failed to publish match history! error=" + ex.getMessage());
             }
         };
-        publishExecutor.execute(runnable);
+        try {
+            publishExecutor.execute(runnable);
+        } catch (Throwable t) {
+            log.warn("Failed to publish match history!", t);
+        }
 
     }
 

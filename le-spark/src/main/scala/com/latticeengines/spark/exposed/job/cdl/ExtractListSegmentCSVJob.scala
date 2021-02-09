@@ -18,7 +18,11 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     val config: ExtractListSegmentCSVConfig = lattice.config
     val csvAdaptor: CSVAdaptor = config.getCsvAdaptor
     val accountAttributes: Seq[String] = config.getAccountAttributes.asScala
-    val contactAttributes: Seq[String] = config.getContactAttributes.asScala
+    val contactAttributes: Seq[String] = if (config.getContactAttributes == null) {
+      Seq.empty[String]
+    } else {
+      config.getContactAttributes.asScala
+    }
     val fieldMappings: Buffer[ImportFieldMapping] = csvAdaptor.getImportFieldMappings.asScala
     var importCSVDf: DataFrame = lattice.input.head
     val finalDfs = new ListBuffer[DataFrame]()
@@ -29,7 +33,6 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     importCSVColumns.foreach { c =>
       logSpark("column :" + c)
     }
-    println(fieldMappings)
     fieldMappings.foreach { fieldMapping =>
       if (importCSVColumns.contains(fieldMapping.getUserFieldName)) {
         columnsExist += fieldMapping.getUserFieldName
@@ -40,7 +43,9 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
     val outputSchema = StructType(structFields)
     val transformedInput = spark.createDataFrame(importCSVDf.rdd, outputSchema)
     finalDfs += generateEntityDf(true, transformedInput, accountAttributes)
-    finalDfs += generateEntityDf(false, transformedInput, contactAttributes)
+    if (!contactAttributes.isEmpty) {
+      finalDfs += generateEntityDf(false, transformedInput, contactAttributes)
+    }
     lattice.output = finalDfs.toList
   }
 
@@ -71,7 +76,7 @@ class ExtractListSegmentCSVJob extends AbstractSparkJob[ExtractListSegmentCSVCon
         }
       }
     }
-    if (distinct) {
+    if (distinct && result.columns.contains(InterfaceName.AccountId.name())) {
       result = result.dropDuplicates(InterfaceName.AccountId.name())
     }
     result

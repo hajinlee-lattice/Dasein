@@ -109,6 +109,10 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "READY_FOR_ROLLUP", nullable = false)
     private boolean readyForRollup;
 
+    @Column(name = "ROLLUP_STATUS", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RollupStatus rollupStatus = RollupStatus.READY;
+
     @Override
     public Long getPid() {
         return pid;
@@ -245,6 +249,14 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
         this.readyForRollup = readyForRollup;
     }
 
+    public RollupStatus getRollupStatus() {
+        return rollupStatus;
+    }
+
+    public void setRollupStatus(RollupStatus rollupStatus) {
+        this.rollupStatus = rollupStatus;
+    }
+
     public enum Level {
         Tenant,
         Project {
@@ -269,5 +281,12 @@ public class DataReportRecord implements HasPid, HasTenant, HasAuditingFields {
         public Level getParentLevel() {
             return null;
         }
+    }
+
+    /**
+     * Statuses that the rollup can be in.
+     */
+    public enum RollupStatus {
+        READY, SUBMITTED, RUNNING, FAILED_NO_RETRY
     }
 }

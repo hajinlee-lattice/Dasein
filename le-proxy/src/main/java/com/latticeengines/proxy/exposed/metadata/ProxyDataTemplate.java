@@ -17,38 +17,38 @@ import reactor.core.scheduler.Schedulers;
 
 public class ProxyDataTemplate<N extends Namespace> implements DataUnitStore<N> {
 
-    private final DataTemplateProxy dataTemplateProxy;
+    private final NamedDataTemplateProxy namedDataTemplateProxy;
     private final String dtName;
     private static final Scheduler scheduler = Schedulers.newParallel("proxy-data-template");
 
-    private ProxyDataTemplate(DataTemplateProxy dataTemplateProxy, String dtName) {
-        this.dataTemplateProxy = dataTemplateProxy;
+    private ProxyDataTemplate(NamedDataTemplateProxy namedDataTemplateProxy, String dtName) {
+        this.namedDataTemplateProxy = namedDataTemplateProxy;
         this.dtName = dtName;
     }
 
-    public static <T extends Serializable> ProxyDataTemplate<Namespace1<T>> build(DataTemplateProxy dataTemplateProxy,
-            String dtName, Class<T> clz) {
-        return new ProxyDataTemplate<>(dataTemplateProxy, dtName);
+    public static <T extends Serializable> ProxyDataTemplate<Namespace1<T>> build(NamedDataTemplateProxy namedDataTemplateProxy,
+                                                                                  String dtName, Class<T> clz) {
+        return new ProxyDataTemplate<>(namedDataTemplateProxy, dtName);
     }
 
     public static <T1 extends Serializable, T2 extends Serializable> ProxyDataTemplate<Namespace2<T1, T2>> build(
-            DataTemplateProxy dataTemplateProxy, String dtName, Class<T1> clz1, Class<T2> clz2) {
-        return new ProxyDataTemplate<>(dataTemplateProxy, dtName);
+            NamedDataTemplateProxy namedDataTemplateProxy, String dtName, Class<T1> clz1, Class<T2> clz2) {
+        return new ProxyDataTemplate<>(namedDataTemplateProxy, dtName);
     }
 
     @Override
     public List<DataUnit> getData(N namespace) {
-        return dataTemplateProxy.getData(dtName, convertNamespace(namespace));
+        return namedDataTemplateProxy.getData(dtName, convertNamespace(namespace));
     }
 
     @Override
     public Flux<ColumnMetadata> getSchema(N namespace) {
-        return dataTemplateProxy.getSchema(dtName, convertNamespace(namespace));
+        return namedDataTemplateProxy.getSchema(dtName, convertNamespace(namespace));
     }
 
     @Override
     public ParallelFlux<ColumnMetadata> getUnorderedSchema(N namespace) {
-        return dataTemplateProxy.getUnorderedSchema(dtName, convertNamespace(namespace)) //
+        return namedDataTemplateProxy.getUnorderedSchema(dtName, convertNamespace(namespace)) //
                 .parallel().runOn(scheduler);
     }
 

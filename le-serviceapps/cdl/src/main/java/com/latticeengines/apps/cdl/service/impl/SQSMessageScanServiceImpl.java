@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -12,6 +13,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.curator.framework.CuratorFramework;
@@ -65,8 +67,8 @@ public class SQSMessageScanServiceImpl implements SQSMessageScanService {
 
     private ImportAggregateRunner runner;
 
-    private boolean active = true;
-    private String activeStackName = "";
+    private volatile boolean active = true;
+    private String activeStackName;
     private boolean isActiveStack = false;
 
     private static final String SQS_SCAN_LOCK = "sqsScanLock";
@@ -81,8 +83,8 @@ public class SQSMessageScanServiceImpl implements SQSMessageScanService {
             CuratorFramework client = CamilleEnvironment.getCamille().getCuratorClient();
             String lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(),
                     CamilleEnvironment.getDivision(), SQS_SCAN_LOCK).toString();
-            runner = new ImportAggregateRunner(client, lockPath, leStack, hostAddress);
-            runner.start();
+//            runner = new ImportAggregateRunner(client, lockPath, leStack, hostAddress);
+//            runner.start();
         }
     }
 
@@ -128,34 +130,54 @@ public class SQSMessageScanServiceImpl implements SQSMessageScanService {
 
         @Override
         public void takeLeadership(CuratorFramework curatorFramework) {
+            log.info(String.format("Instance with Ip %s in stack %s start to scan sqs message.", hostAddress, stackName));
             while (active) {
                 try {
-                    StopWatch stopWatch = StopWatch.createStarted();
                     long totalTime = scanPeriod * 1000;
-                    log.info(String.format("Instance with Ip %s in stack %s start to scan sqs message.", hostAddress, stackName));
-                    List<MockBrokerInstance> mockBrokerInstances = mockBrokerInstanceService.getAllValidInstance(new Date());
-                    if (CollectionUtils.isNotEmpty(mockBrokerInstances)) {
-                        for (MockBrokerInstance mockBrokerInstance : mockBrokerInstances) {
-                            Tenant tenant = mockBrokerInstance.getTenant();
-                            CustomerSpace space = CustomerSpace.parse(tenant.getId());
-                            String stackName = zkConfigService.getStack(space);
-                            S3ImportMessageType messageType = zkConfigService.getTriggerName(space);
-                            if (scheduleOnCurrentStack(stackName, messageType)) {
-                                inboundConnectionService.submitMockBrokerAggregationWorkflow();
+                    if (StringUtils.isNotEmpty(activeStackName) || successGetActiveStackInfo()) {
+                        StopWatch stopWatch = StopWatch.createStarted();
+                        List<MockBrokerInstance> mockBrokerInstances = mockBrokerInstanceService.getAllValidInstance(new Date());
+                        if (CollectionUtils.isNotEmpty(mockBrokerInstances)) {
+                            for (MockBrokerInstance mockBrokerInstance : mockBrokerInstances) {
+                                Tenant tenant = mockBrokerInstance.getTenant();
+                                CustomerSpace space = CustomerSpace.parse(tenant.getId());
+                                String stackName = zkConfigService.getStack(space);
+                                S3ImportMessageType messageType = zkConfigService.getTriggerName(space);
+                                if (scheduleOnCurrentStack(stackName, messageType)) {
+                                    inboundConnectionService.submitMockBrokerAggregationWorkflow();
+                                }
                             }
                         }
-                    }
-                    long executionTime = stopWatch.getTime();
-                    if (executionTime < totalTime) {
-                        long sleepTime = totalTime - executionTime;
-                        log.info("Aggregate task is done, need to sleep {} ms.", sleepTime);
-                        TimeUnit.MILLISECONDS.sleep(sleepTime);
+                        long executionTime = stopWatch.getTime();
+                        if (executionTime < totalTime) {
+                            long sleepTime = totalTime - executionTime;
+                            log.info("Aggregate task is done, need to sleep {} ms.", sleepTime);
+                            TimeUnit.MILLISECONDS.sleep(sleepTime);
+                        }
+                    } else {
+                        log.info("Can not get stack info, wait pls service to start up");
+                        TimeUnit.MILLISECONDS.sleep(totalTime);
                     }
                 } catch (Exception e) {
                     log.error(String.format("Instance with Ip %s in stack %s will lost leader ship with exception: ", hostAddress, stackName), e.getMessage());
                     break;
                 }
             }
+        }
+    }
+
+    private boolean successGetActiveStackInfo() {
+        try {
+            Map<String, String> stackInfo = plsHealthCheckProxy.getActiveStack();
+            if (MapUtils.isNotEmpty(stackInfo) && stackInfo.containsKey(CURRENT_STACK)) {
+                activeStackName = stackInfo.get(CURRENT_STACK);
+                isActiveStack = currentStack.equalsIgnoreCase(activeStackName);
+            }
+            log.info("activeStackName is {}, currentStack is {}, isActiveStack is {}.", activeStackName, currentStack, isActiveStack);
+            return true;
+        } catch (Exception e) {
+            log.error("Can't get active stack info:", e.getMessage());
+            return false;
         }
     }
 
@@ -167,10 +189,10 @@ public class SQSMessageScanServiceImpl implements SQSMessageScanService {
             } else {
                 return false;
             }
-        }
-        if (currentStack.equalsIgnoreCase(stackName) && S3ImportMessageType.INBOUND_CONNECTION.equals(messageType)) {
+        } else if (currentStack.equalsIgnoreCase(stackName) && S3ImportMessageType.INBOUND_CONNECTION.equals(messageType)) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 }

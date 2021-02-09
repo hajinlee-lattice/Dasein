@@ -14,6 +14,7 @@ private[spark] object DeltaCampaignLaunchUtils {
   case class Recommendation(PID: Option[Long], //
                             EXTERNAL_ID: String, //
                             AccountId: String, //
+                            CustomerAccountId: String, //
                             LE_ACCOUNT_EXTERNAL_ID: String, //
                             PLAY_ID: String, //
                             LAUNCH_ID: String, //
@@ -43,8 +44,8 @@ private[spark] object DeltaCampaignLaunchUtils {
     val playId: String = playLaunchContext.getPlayName
     val playLaunchId: String = playLaunchContext.getPlayLaunchId
     val tenantId: Long = playLaunchContext.getTenantPid
-    val accountId: String = checkAndGet(account, getAccountId(userCustomerId))
-    val externalAccountId: String = accountId
+    val accountId: String = checkAndGet(account, InterfaceName.AccountId.name)
+    val customerAccountId: String = checkAndGet(account, getAccountId(userCustomerId))
     val uuid: String = UUID.randomUUID().toString
     val description: String = playLaunchContext.getPlayDescription
     val ratingModelId: String = playLaunchContext.getModelId
@@ -62,6 +63,8 @@ private[spark] object DeltaCampaignLaunchUtils {
     var priorityId: String = null
     var priorityDisplayName: String = null
     var launchTime: Option[Long] = None
+    var sfdcAccountId: String = null
+    var externalAccountId: String = accountId
 
     if (playLaunchContext.getCreated != null) {
       launchTime = Some(playLaunchContext.getCreated.getTime)
@@ -69,11 +72,21 @@ private[spark] object DeltaCampaignLaunchUtils {
       launchTime = Some(launchTimestampMillis)
     }
 
-    val sfdcAccountId: String =
-      if (playLaunchContext.getSfdcAccountID == null)
-        null
-      else
-        checkAndGet(account, playLaunchContext.getSfdcAccountID)
+    if (playLaunchContext.getSfdcAccountID == null) {
+      if (playLaunchContext.getShouldDefaultPopulateIds) {
+        sfdcAccountId = checkAndGet(account, getAccountId(playLaunchContext.getIsEntityMatch))
+      }
+    } else {
+      sfdcAccountId = checkAndGet(account, playLaunchContext.getSfdcAccountID)
+    }
+
+    if (playLaunchContext.getShouldDefaultPopulateIds) {
+      if (sfdcAccountId != null) {
+        externalAccountId = sfdcAccountId
+      } else {
+        externalAccountId = ""
+      }
+    }
 
     var companyName: String = checkAndGet(account, InterfaceName.CompanyName.name)
     if (StringUtils.isBlank(companyName)) {
@@ -105,7 +118,8 @@ private[spark] object DeltaCampaignLaunchUtils {
 
     Recommendation(None, // PID
       uuid, // EXTERNAL_ID
-      accountId, // ACCOUNT_ID
+      accountId, // AccountId
+      customerAccountId, // CustomerAccountId
       externalAccountId, // LE_ACCOUNT_EXTERNAL_ID
       playId, // PLAY_ID
       playLaunchId, // LAUNCH_ID

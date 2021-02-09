@@ -39,11 +39,11 @@ public class DMXDataTechIndicatorsTestNG extends PipelineTransformationTestNGBas
     private final String TECH_PRD1 = "DMX_Prd_ACCELOPS";
     private final String TECH_PRD2 = "DMX_Prd_ACONEX";
 
-    private final String TECH_VEN1 = "DMX_Ven_012.NET";
-    private final String TECH_VEN2 = "DMX_Ven_013NETVISION.NET.IL";
+    private final String TECH_VEN1 = "DMX_Ven_bea.com";
+    private final String TECH_VEN2 = "DMX_Ven_bell.ca";
     
-    private final String TECH_SOL1 = "DMX_Sol_ERP SUITES SOLUTION";
-    private final String TECH_SOL2 = "DMX_Sol_DELIVERY SOLUTION";
+    private final String TECH_SOL1 = "DMX_Sol_SECURITY solution";
+    private final String TECH_SOL2 = "DMX_Sol_TIME TRACKING SOFTWARE solution";
     
     private int HAS_PRD1_POS = -1;
     private int HAS_PRD2_POS = -1;
@@ -113,24 +113,24 @@ public class DMXDataTechIndicatorsTestNG extends PipelineTransformationTestNGBas
     }
     
     private Object[][] dmxCleanData = new Object[][] { //
-        { "060902413", "Supplier", "ACCELOPS", "ACCELOPS" }, //
-        { "060902413", "Supplier", "ACONEX", "ACONEX" }, //
-        { "060902413", "012.NET", "Segment", "012.NET" }, //
-        { "060902413", "013NETVISION.NET.IL", "Segment", "013NETVISION.NET.IL" }, //
-        { "060902413", "012.NET", "012.NET", "Collection" }, //
-        { "060902413", "013NETVISION.NET.IL", "013NETVISION.NET.IL", "Collection" }, //
-        { "196337864", "Supplier", "ACCELOPS", "ACCELOPS" }, //
-        { "196337864", "Supplier", "ACONEX", "ACONEX" }, //
-        { "196337864", "012.NET", "Segment", "012.NET" }, //
-        { "196337864", "013NETVISION.NET.IL", "Segment", "013NETVISION.NET.IL" }, //
-        { "196337864", "012.NET", "012.NET", "Collection" }, //
-        { "196337864", "013NETVISION.NET.IL", "013NETVISION.NET.IL", "Collection" }, //
-        { "072148831", "Supplier", "ACCELOPS", "ACCELOPS" }, //
-        { "072148831", "Supplier", "ACONEX", "ACONEX" }, //
-        { "072148831", "012.NET", "Segment", "012.NET" }, //
-        { "072148831", "013NETVISION.NET.IL", "Segment", "013NETVISION.NET.IL" }, //
-        { "072148831", "012.NET", "012.NET", "Collection" }, //
-        { "072148831", "013NETVISION.NET.IL", "013NETVISION.NET.IL", "Collection" }, //
+        { "060902413", "Supplier", "ACCELOPS", "ACCELOPS", "High" }, //
+        { "060902413", "Supplier", "ACONEX", "ACONEX", "Medium" }, //
+        { "060902413", "bea.com", "Segment", "bea.com", "Low" }, //
+        { "060902413", "bell.ca", "Segment", "bell.ca", "High" }, //
+        { "060902413", "SECURITY solution", "SECURITY solution", "Collection", "Medium" }, //
+        { "060902413", "TIME TRACKING SOFTWARE solution", "TIME TRACKING SOFTWARE solution", "Collection", "Low" }, //
+        { "196337864", "Supplier", "ACCELOPS", "ACCELOPS", "High" }, //
+        { "196337864", "Supplier", "ACONEX", "ACONEX", "Medium" }, //
+        { "196337864", "bea.com", "Segment", "bea.com", "Low" }, //
+        { "196337864", "bell.ca", "Segment", "bell.ca", "Low" }, //
+        { "196337864", "SECURITY solution", "SECURITY solution", "Collection", "Medium" }, //
+        { "196337864", "TIME TRACKING SOFTWARE solution", "TIME TRACKING SOFTWARE solution", "Collection", "High" }, //
+        { "072148831", "Supplier", "ACCELOPS", "ACCELOPS", "Medium" }, //
+        { "072148831", "Supplier", "ACONEX", "ACONEX", "High" }, //
+        { "072148831", "bea.com", "Segment", "bea.com", "Low" }, //
+        { "072148831", "bell.ca", "Segment", "bell.ca", "Medium" }, //
+        { "072148831", "SECURITY solution", "SECURITY solution", "Collection", "High" }, //
+        { "072148831", "TIME TRACKING SOFTWARE solution", "TIME TRACKING SOFTWARE solution", "Collection", "Low" }, //
     };
 
     private void prepareDmxClean() {
@@ -139,6 +139,7 @@ public class DMXDataTechIndicatorsTestNG extends PipelineTransformationTestNGBas
         columns.add(Pair.of("Supplier_Name", String.class));
         columns.add(Pair.of("Segment_Name", String.class));
         columns.add(Pair.of("Collection_Name", String.class));
+        columns.add(Pair.of("intensity", String.class));
         uploadBaseSourceData(dmxClean.getSourceName(), baseSourceVersion, columns, dmxCleanData);
     }
     
@@ -164,7 +165,7 @@ public class DMXDataTechIndicatorsTestNG extends PipelineTransformationTestNGBas
                 boolean[] bits3 = BitCodecUtils.decode(record.get(SOLUTION_INDICATORS).toString(),
                         new int[] { HAS_SOL1_POS, HAS_SOL2_POS });
                 if ("060902413".equals(duns)) {
-                    Assert.assertFalse(bits[0]);
+                    Assert.assertTrue(bits[0]);
                     Assert.assertFalse(bits2[0]);
                     Assert.assertFalse(bits3[0]);
                     Assert.assertFalse(bits[1]);
@@ -172,7 +173,7 @@ public class DMXDataTechIndicatorsTestNG extends PipelineTransformationTestNGBas
                     Assert.assertFalse(bits3[1]);
                 }
                 if ("196337864".equals(duns)) {
-                    Assert.assertFalse(bits[0]);
+                    Assert.assertTrue(bits[0]);
                     Assert.assertFalse(bits2[0]);
                     Assert.assertFalse(bits3[0]);
                     Assert.assertFalse(bits[1]);
@@ -183,7 +184,7 @@ public class DMXDataTechIndicatorsTestNG extends PipelineTransformationTestNGBas
                     Assert.assertFalse(bits[0]);
                     Assert.assertFalse(bits2[0]);
                     Assert.assertFalse(bits3[0]);
-                    Assert.assertFalse(bits[1]);
+                    Assert.assertTrue(bits[1]);
                     Assert.assertFalse(bits2[1]);
                     Assert.assertFalse(bits3[1]);
                 }

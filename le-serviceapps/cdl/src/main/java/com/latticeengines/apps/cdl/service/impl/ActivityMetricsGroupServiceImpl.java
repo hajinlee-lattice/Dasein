@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.CategorizeDoubleConfig;
+import com.latticeengines.domain.exposed.cdl.activity.CreateActivityMetricsGroupRequest;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
@@ -107,6 +109,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     }
 
     @Override
+    @WithCustomerSpace
     public List<ActivityMetricsGroup> setupDefaultMarketingGroups(String customerSpace, String streamName) {
         Tenant tenant = MultiTenantContext.getTenant();
         AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
@@ -128,6 +131,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     }
 
     @Override
+    @WithCustomerSpace
     public List<ActivityMetricsGroup> setupDefaultDnbIntentGroups(String customerSpace, String streamName) {
         Tenant tenant = MultiTenantContext.getTenant();
         AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
@@ -140,6 +144,37 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         ActivityMetricsGroup buyingScoreGroup = setupBuyingStageGroup(tenant, stream);
 
         return Arrays.asList(hasIntentGroup, intentByTimeRangeGroup, intentByTimeRangeCurWeekGroup, buyingScoreGroup);
+    }
+
+    @Override
+    @WithCustomerSpace
+    public boolean createCustomizedGroup(String customerSpace, CreateActivityMetricsGroupRequest request) {
+        String streamName = request.streamName;
+        Tenant tenant = MultiTenantContext.getTenant();
+        AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
+        assert stream != null;
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> {
+            ActivityMetricsGroup group = new ActivityMetricsGroup();
+            group.setStream(stream);
+            group.setTenant(tenant);
+            group.setGroupName(request.groupName);
+            group.setGroupId(getGroupId(request.groupName));
+            group.setJavaClass(request.javaClass);
+            group.setEntity(request.entity);
+            group.setActivityTimeRange(request.timeRange);
+            group.setRollupDimensions(String.join(",", request.rollupDimensions));
+            group.setAggregation(request.aggregation);
+            group.setCategory(request.category);
+            group.setSubCategoryTmpl(getTemplate(request.subCategoryTmpl));
+            group.setDisplayNameTmpl(getTemplate(request.displayNameTmpl));
+            group.setDescriptionTmpl(StringUtils.isNotBlank(request.descriptionTmpl) ? getTemplate(request.descriptionTmpl) : null);
+            group.setSecondarySubCategoryTmpl(StringUtils.isNotBlank(request.secSubCategoryTmpl) ? getTemplate(request.secSubCategoryTmpl): null);
+            group.setNullImputation(request.nullImputation);
+            group.setReducer(request.reducer);
+            activityMetricsGroupEntityMgr.create(group);
+            return true;
+        });
     }
 
     private ActivityMetricsGroup setupWebVisitGroup(Tenant tenant, AtlasStream stream, ActivityTimeRange timeRange) {

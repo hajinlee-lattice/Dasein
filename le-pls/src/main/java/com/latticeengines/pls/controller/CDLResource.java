@@ -59,6 +59,7 @@ import com.latticeengines.domain.exposed.exception.UIActionUtils;
 import com.latticeengines.domain.exposed.exception.UIMessage;
 import com.latticeengines.domain.exposed.exception.View;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -580,6 +581,7 @@ public class CDLResource {
                             .collect(Collectors.toSet());
             List<TemplateFieldPreview> fieldPreviews = cdlService.getTemplatePreview(customerSpace.toString(),
                     dataFeedTask.getImportTemplate(), standardTable, matchingFields);
+            updateProductUniqueId(entity, fieldPreviews);
             if (CollectionUtils.isEmpty(fieldPreviews)) {
                 return fieldPreviews;
             }
@@ -614,6 +616,20 @@ public class CDLResource {
         } catch (RuntimeException e) {
             log.error("Get template preview Failed: " + e.toString());
             throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
+        }
+    }
+
+    /**
+     * hardcode the id logic the product previews
+     * @param entity
+     * @param previews
+     */
+    private void updateProductUniqueId(BusinessEntity entity, List<TemplateFieldPreview> previews) {
+
+        if (BusinessEntity.Product == entity && CollectionUtils.isNotEmpty(previews)) {
+            previews.stream()
+                    .filter(e -> InterfaceName.ProductId.name().equals(e.getNameInTemplate()))
+                    .findFirst().ifPresent(preview -> preview.setLatticeFieldCategory(LatticeFieldCategory.UniqueId));
         }
     }
 

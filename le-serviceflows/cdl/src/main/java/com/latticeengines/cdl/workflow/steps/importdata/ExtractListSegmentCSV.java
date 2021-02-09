@@ -1,16 +1,22 @@
 package com.latticeengines.cdl.workflow.steps.importdata;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ATTR_LDC_DUNS;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,14 +25,26 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.cdl.workflow.steps.merge.MatchUtils;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ParquetUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CreateDataTemplateRequest;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
+import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.metadata.ColumnField;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.ListSegment;
+import com.latticeengines.domain.exposed.metadata.ListSegmentConfig;
 import com.latticeengines.domain.exposed.metadata.MasterSchema;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
@@ -35,16 +53,22 @@ import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 import com.latticeengines.domain.exposed.metadata.template.ImportFieldMapping;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ImportListSegmentWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ExtractListSegmentCSVConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ExtractListSegmentCSVConfig;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.util.SegmentUtils;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
+import com.latticeengines.serviceflows.workflow.match.BulkMatchService;
 import com.latticeengines.spark.exposed.job.cdl.ExtractListSegmentCSVJob;
+import com.latticeengines.spark.exposed.job.common.CopyJob;
 
 @Component("extractListSegmentCSV")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -59,8 +83,23 @@ public class ExtractListSegmentCSV
     @Inject
     private DataUnitProxy dataUnitProxy;
 
+    @Inject
+    private BatonService batonService;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private BulkMatchService bulkMatchService;
+
     @Value("${camille.zk.pod.id:Default}")
     protected String podId;
+
+    @Value("${cdl.pa.use.directplus}")
+    private boolean useDirectPlus;
+
+    @Value("${pls.cdl.transform.cascading.partitions}")
+    protected int cascadingPartitions;
 
     private final List<String> accountAttributes = Lists.newArrayList(InterfaceName.CompanyName.name(),
             InterfaceName.Address_Street_1.name(), InterfaceName.Address_Street_2.name(), InterfaceName.City.name(),
@@ -79,6 +118,10 @@ public class ExtractListSegmentCSV
         return stepConfiguration.getCustomerSpace();
     }
 
+    private String getDataCloudVersion() {
+        return columnMetadataProxy.latestVersion("").getVersion();
+    }
+
     @Override
     public void execute() {
         customerSpace = parseCustomerSpace(configuration);
@@ -87,34 +130,47 @@ public class ExtractListSegmentCSV
         String dataUnitName = getStringValueFromContext(ImportListSegmentWorkflowConfiguration.IMPORT_DATA_UNIT_NAME);
         S3DataUnit s3DataUnit = (S3DataUnit) dataUnitProxy.getByNameAndType(tenantId, dataUnitName, DataUnit.StorageType.S3);
         if (s3DataUnit != null) {
-            ExtractListSegmentCSVConfig extractListSegmentCSVConfig = new ExtractListSegmentCSVConfig();
-            extractListSegmentCSVConfig.setAccountAttributes(accountAttributes);
-            extractListSegmentCSVConfig.setContactAttributes(contactAttributes);
             MetadataSegment segment = segmentProxy.getListSegmentByName(tenantId, segmentName);
             if (SegmentUtils.hasListSegment(segment)) {
-                extractListSegmentCSVConfig.setCsvAdaptor(segment.getListSegment().getCsvAdaptor());
+                ListSegment listSegment = segment.getListSegment();
+                ExtractListSegmentCSVConfig extractListSegmentCSVConfig = new ExtractListSegmentCSVConfig();
+                extractListSegmentCSVConfig.setCsvAdaptor(listSegment.getCsvAdaptor());
                 String hdfsPath = s3DataUnit.getLinkedHdfsPath();
                 extractListSegmentCSVConfig.setInput(Collections.singletonList(getInputCSVDataUnit(hdfsPath, dataUnitName)));
-                extractListSegmentCSVConfig.setTargetNums(2);
-                Map<Integer, DataUnit.DataFormat> specialTargets = new HashMap<>();
-                specialTargets.put(0, DataUnit.DataFormat.PARQUET);
-                specialTargets.put(1, DataUnit.DataFormat.PARQUET);
-                extractListSegmentCSVConfig.setSpecialTargets(specialTargets);
-                SparkJobResult result = runSparkJob(ExtractListSegmentCSVJob.class, extractListSegmentCSVConfig);
-                HdfsDataUnit accountDataUnit = result.getTargets().get(0);
-                log.info("account info data unit: {}.", JsonUtils.serialize(accountDataUnit));
-                CSVAdaptor csvAdaptor = segment.getListSegment().getCsvAdaptor();
+                boolean needMatch = needMatch(listSegment);
+                CSVAdaptor csvAdaptor = listSegment.getCsvAdaptor();
                 Map<String, ImportFieldMapping> fieldMap = csvAdaptor.getImportFieldMappings().stream()
                         .collect(Collectors.toMap(importFieldMapping -> importFieldMapping.getFieldName(), importFieldMapping -> importFieldMapping));
-                processImportResult(BusinessEntity.Account, accountDataUnit,
-                        ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME, fieldMap);
-                HdfsDataUnit contactUnit = result.getTargets().get(1);
-                log.info("contactUnit info data unit: {}.", JsonUtils.serialize(contactUnit));
-                processImportResult(BusinessEntity.Contact, contactUnit,
-                        ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME, fieldMap);
-                //update segment count
-                segment.setAccounts(accountDataUnit.getCount());
-                segment.setContacts(contactUnit.getCount());
+                if (needMatch) {
+                    setExtractListSegmentCSVConfig(extractListSegmentCSVConfig, 1,
+                            fieldMap.keySet().stream().collect(Collectors.toList()), Collections.emptyList(), Collections.emptyMap());
+                    SparkJobResult result = runSparkJob(ExtractListSegmentCSVJob.class, extractListSegmentCSVConfig);
+                    HdfsDataUnit accountDataUnit = result.getTargets().get(0);
+                    log.info("account data unit: {}.", JsonUtils.serialize(accountDataUnit));
+                    MatchInput matchInput = constructMatchInput(accountDataUnit.getPath());
+                    log.info("Bulk match input is {}", JsonUtils.serialize(matchInput));
+                    MatchCommand command = bulkMatchService.match(matchInput, null);
+                    log.info("Bulk match finished: {}", JsonUtils.serialize(command));
+                    CopyConfig copyConfig = getCopyConfig(command, listSegment);
+                    result = runSparkJob(CopyJob.class, copyConfig);
+                    accountDataUnit = result.getTargets().get(0);
+                    processImportResult(BusinessEntity.Account, accountDataUnit, ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME, fieldMap);
+                    segment.setAccounts(accountDataUnit.getCount());
+                } else {
+                    Map<Integer, DataUnit.DataFormat> specialTargets = new HashMap<>();
+                    specialTargets.put(0, DataUnit.DataFormat.PARQUET);
+                    specialTargets.put(1, DataUnit.DataFormat.PARQUET);
+                    setExtractListSegmentCSVConfig(extractListSegmentCSVConfig, 2, accountAttributes, contactAttributes, specialTargets);
+                    SparkJobResult result = runSparkJob(ExtractListSegmentCSVJob.class, extractListSegmentCSVConfig);
+                    HdfsDataUnit accountDataUnit = result.getTargets().get(0);
+                    log.info("account data unit: {}.", JsonUtils.serialize(accountDataUnit));
+                    processImportResult(BusinessEntity.Account, accountDataUnit, ImportListSegmentWorkflowConfiguration.ACCOUNT_DATA_UNIT_NAME, fieldMap);
+                    HdfsDataUnit contactUnit = result.getTargets().get(1);
+                    log.info("contact data unit: {}.", JsonUtils.serialize(contactUnit));
+                    processImportResult(BusinessEntity.Contact, contactUnit, ImportListSegmentWorkflowConfiguration.CONTACT_DATA_UNIT_NAME, fieldMap);
+                    segment.setAccounts(accountDataUnit.getCount());
+                    segment.setContacts(contactUnit.getCount());
+                }
                 segment.setCountsOutdated(false);
                 segmentProxy.createOrUpdateListSegment(tenantId, segment);
             } else {
@@ -122,6 +178,115 @@ public class ExtractListSegmentCSV
             }
         } else {
             throw new RuntimeException(String.format("S3 data unit {} doesn't exist.", dataUnitName));
+        }
+    }
+
+    private void setExtractListSegmentCSVConfig(ExtractListSegmentCSVConfig extractListSegmentCSVConfig, int targetNumber,
+                                                List<String> accountAttributes, List<String> contactAttributes, Map<Integer, DataUnit.DataFormat> specialTargets) {
+        extractListSegmentCSVConfig.setAccountAttributes(accountAttributes);
+        extractListSegmentCSVConfig.setContactAttributes(contactAttributes);
+        extractListSegmentCSVConfig.setTargetNums(targetNumber);
+        extractListSegmentCSVConfig.setSpecialTargets(specialTargets);
+    }
+
+    private CopyConfig getCopyConfig(MatchCommand command, ListSegment listSegment) {
+        String outputDir = PathUtils.toParquetOrAvroDir(command.getResultLocation());
+        CopyConfig copyConfig = new CopyConfig();
+        Map<Integer, DataUnit.DataFormat> specialTargets = new HashMap<>();
+        specialTargets.put(0, DataUnit.DataFormat.PARQUET);
+        copyConfig.setSpecialTargets(specialTargets);
+        HdfsDataUnit input = new HdfsDataUnit();
+        input.setPath(outputDir);
+        copyConfig.setInput(Lists.newArrayList(input));
+        copyConfig.setRenameAttrs(getDisplayName(listSegment));
+        return copyConfig;
+    }
+
+    private MatchInput getBaseMatchInput(String avroDir) {
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
+        matchInput.setExcludePublicDomain(false);
+        matchInput.setPublicDomainAsNormalDomain(false);
+        matchInput.setDataCloudVersion(getDataCloudVersion());
+        matchInput.setSkipKeyResolution(true);
+        matchInput.setUseDnBCache(true);
+        matchInput.setUseRemoteDnB(true);
+        matchInput.setMatchDebugEnabled(false);
+        matchInput.setUseDirectPlus(useDirectPlus);
+        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
+        AvroInputBuffer inputBuffer = new AvroInputBuffer();
+        inputBuffer.setAvroDir(avroDir);
+        matchInput.setInputBuffer(inputBuffer);
+        return matchInput;
+    }
+
+    protected List<String> getSystemIds(BusinessEntity entity) {
+        Map<String, List<String>> systemIdMap = configuration.getSystemIdMaps();
+        if (MapUtils.isEmpty(systemIdMap)) {
+            return Collections.emptyList();
+        }
+        return systemIdMap.getOrDefault(entity.name(), Collections.emptyList());
+    }
+
+    private MatchInput constructMatchInput(String avroDir) {
+        Boolean isCDLTenant = configuration.isCDLTenant();
+        MatchInput matchInput = getBaseMatchInput(avroDir);
+        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(customerSpace);
+        if (BooleanUtils.isTrue(isCDLTenant) && entityMatchEnabled) {
+            matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
+            matchInput.setTargetEntity(Account.name());
+            matchInput.setAllocateId(false);
+            matchInput.setOutputNewEntities(false);
+            matchInput.setIncludeLineageFields(false);
+            matchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
+            MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
+            Set<String> inputFields = getInputFields(avroDir);
+            entityKeyMap.setKeyMap(MatchUtils.getAccountMatchKeysAccount(inputFields, getSystemIds(BusinessEntity.Account), false, null));
+            Map<String, MatchInput.EntityKeyMap> entityKeyMaps = new HashMap<>();
+            entityKeyMaps.put(Account.name(), entityKeyMap);
+            matchInput.setEntityKeyMaps(entityKeyMaps);
+        } else {
+            matchInput.setOperationalMode(OperationalMode.LDC_MATCH);
+            matchInput.setTargetEntity(BusinessEntity.LatticeAccount.name());
+            matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
+            matchInput.setDataCloudOnly(true);
+            Set<String> inputFields = getInputFields(avroDir);
+            Map<MatchKey, List<String>> keyMap = MatchUtils.getAccountMatchKeysAccount(inputFields, null, false, null);
+            matchInput.setKeyMap(keyMap);
+            matchInput.setCustomSelection(getColumnSelection());
+            matchInput.setPartialMatchEnabled(true);
+        }
+        return matchInput;
+    }
+
+    private ColumnSelection getColumnSelection() {
+        List<Column> columns = Collections.singletonList(new Column(ATTR_LDC_DUNS));
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columns);
+        return columnSelection;
+    }
+
+    private Set<String> getInputFields(String avroDir) {
+        String avroGlob = PathUtils.toAvroGlob(avroDir);
+        Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
+        return schema.getFields().stream().map(Schema.Field::name).collect(Collectors.toSet());
+    }
+
+    private Map<String, String> getDisplayName(ListSegment listSegment) {
+        ListSegmentConfig listSegmentConfig = listSegment.getConfig();
+        if (listSegmentConfig != null) {
+            return listSegmentConfig.getDisplayNames();
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    private boolean needMatch(ListSegment listSegment) {
+        ListSegmentConfig listSegmentConfig = listSegment.getConfig();
+        if (listSegmentConfig != null) {
+            return listSegmentConfig.isNeedToMatch();
+        } else {
+            return false;
         }
     }
 
@@ -150,9 +315,15 @@ public class ExtractListSegmentCSV
                     ColumnField attribute = new ColumnField();
                     attribute.setAttrName(field.name());
                     if (BusinessEntity.Contact.equals(entity) && InterfaceName.PhoneNumber.name().equals(field.name())) {
-                        attribute.setDisplayName(fieldMap.get(ExtractListSegmentCSVConfiguration.Direct_Phone).getUserFieldName());
+                        ImportFieldMapping phoneMapping = fieldMap.get(ExtractListSegmentCSVConfiguration.Direct_Phone);
+                        if (phoneMapping != null) {
+                            attribute.setDisplayName(phoneMapping.getUserFieldName());
+                        }
                     } else {
-                        attribute.setDisplayName(fieldMap.get(field.name()).getUserFieldName());
+                        ImportFieldMapping importFieldMapping = fieldMap.get(field.name());
+                        if (importFieldMapping != null) {
+                            attribute.setDisplayName(fieldMap.get(field.name()).getUserFieldName());
+                        }
                     }
                     attributes.add(attribute);
                 }

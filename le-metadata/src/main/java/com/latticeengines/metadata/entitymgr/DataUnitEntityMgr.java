@@ -33,4 +33,5 @@ public interface DataUnitEntityMgr {
     DataUnit findByDataTemplateIdAndRoleFromReader(String tenantId, String dataTemplateId, DataUnit.Role role);
 
     List<DataUnit> findAllDataUnitEntitiesWithExpiredRetentionPolicy(int pageIndex, int pageSize);
+
 }

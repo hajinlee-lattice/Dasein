@@ -105,7 +105,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             "timelineexportworkflow", //
             "generateintentemailalertworkflow", //
             "campaigndeltacalculationworkflow", //
-            "deltacampaignlaunchworkflow" };
+            "deltacampaignlaunchworkflow", //
+            "importlistsegmentworkflow"};
     private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
             Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
@@ -713,7 +714,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         boolean allowAutoSchedule = false;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         try {
-            allowAutoSchedule = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+            allowAutoSchedule = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE) && !schedulingStatus.isHandHoldPATenant();
         } catch (Exception e) {
             log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
         }

@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTa
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ExportTimelineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.PublishVIDataStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.TimeLineSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.publish.PublishTableToElasticSearchStepConfiguration;
@@ -28,7 +27,6 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @JsonSubTypes.Type(value = PivotScoreAndEventConfiguration.class, name = "PivotScoreAndEventConfiguration"), //
         @JsonSubTypes.Type(value = CreateCdlEventTableFilterConfiguration.class, name = "CreateCdlEventTableFilterConfiguration"), //
         @JsonSubTypes.Type(value = CreateCdlEventTableConfiguration.class, name = "CreateCdlEventTableConfiguration"), //
-        @JsonSubTypes.Type(value = LegacyDeleteSparkStepConfiguration.class, name = "LegacyDeleteSparkStepConfiguration"), //
         @JsonSubTypes.Type(value = ActivityStreamSparkStepConfiguration.class, name =
                 "ActivityStreamSparkStepConfiguration"), //
         @JsonSubTypes.Type(value = TimeLineSparkStepConfiguration.class, name = "TimeLineSparkStepConfiguration"), //
@@ -39,7 +37,8 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @JsonSubTypes.Type(value = TimeLineSparkStepConfiguration.class, name = "TimeLineSparkStepConfiguration"), //
         @JsonSubTypes.Type(value = ExportToElasticSearchStepConfiguration.class, name =
                 "ExportToElasticSearchStepConfiguration"), //
-        @JsonSubTypes.Type(value = PublishTableToElasticSearchStepConfiguration.class, name = "PublishTableToElasticSearchStepConfiguration")
+        @JsonSubTypes.Type(value = PublishTableToElasticSearchStepConfiguration.class, name =
+                "PublishTableToElasticSearchStepConfiguration"),
 })
 public class SparkJobStepConfiguration extends BaseStepConfiguration {
 

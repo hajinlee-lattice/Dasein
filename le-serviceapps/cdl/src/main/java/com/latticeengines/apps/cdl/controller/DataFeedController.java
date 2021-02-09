@@ -32,6 +32,7 @@ import com.latticeengines.apps.cdl.workflow.GenerateIntentAlertWorkflowSubmitter
 import com.latticeengines.apps.cdl.workflow.MockActivityStoreWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.OrphanRecordsExportWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
+import com.latticeengines.apps.cdl.workflow.PublishActivityAlertWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.TimelineExportWorkflowSubmitter;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -69,6 +70,7 @@ public class DataFeedController {
     private final AtlasProfileReportWorkflowSubmitter atlasProfileReportWorkflowSubmitter;
     private final TimelineExportWorkflowSubmitter timelineExportWorkflowSubmitter;
     private final GenerateIntentAlertWorkflowSubmitter generateIntentAlertWorkflowSubmitter;
+    private final PublishActivityAlertWorkflowSubmitter publishActivityAlertWorkflowSubmitter;
     private final DataFeedService dataFeedService;
     private final PAValidationUtils paValidationUtils;
     private final AtlasExportService atlasExportService;
@@ -85,7 +87,8 @@ public class DataFeedController {
             TimelineExportWorkflowSubmitter timelineExportWorkflowSubmitter, DataFeedService dataFeedService,
             PAValidationUtils paValidationUtils, AtlasExportService atlasExportService,
             ServingStoreService servingStoreService,
-            GenerateIntentAlertWorkflowSubmitter generateIntentAlertWorkflowSubmitter) {
+            GenerateIntentAlertWorkflowSubmitter generateIntentAlertWorkflowSubmitter,
+            PublishActivityAlertWorkflowSubmitter publishActivityAlertWorkflowSubmitter) {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
         this.orphanRecordExportWorkflowSubmitter = orphanRecordExportWorkflowSubmitter;
         this.entityExportWorkflowSubmitter = entityExportWorkflowSubmitter;
@@ -95,6 +98,7 @@ public class DataFeedController {
         this.atlasProfileReportWorkflowSubmitter = atlasProfileReportWorkflowSubmitter;
         this.timelineExportWorkflowSubmitter = timelineExportWorkflowSubmitter;
         this.generateIntentAlertWorkflowSubmitter = generateIntentAlertWorkflowSubmitter;
+        this.publishActivityAlertWorkflowSubmitter = publishActivityAlertWorkflowSubmitter;
         this.dataFeedService = dataFeedService;
         this.paValidationUtils = paValidationUtils;
         this.atlasExportService = atlasExportService;
@@ -299,6 +303,22 @@ public class DataFeedController {
             ApplicationId appId = generateIntentAlertWorkflowSubmitter.submit(customerSpace,
                     new WorkflowPidWrapper(-1L));
             return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping("/publishactivityalerts")
+    @ResponseBody
+    @ApiOperation(value = "Publish activity alerts.")
+    public ResponseDocument<String> publishActivityAlerts(@PathVariable String customerSpace) {
+        customerSpace = MultiTenantContext.getCustomerSpace().toString();
+
+        try {
+            ApplicationId appId = publishActivityAlertWorkflowSubmitter.submit(customerSpace,
+                    new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(appId.toString());
+
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);
         }

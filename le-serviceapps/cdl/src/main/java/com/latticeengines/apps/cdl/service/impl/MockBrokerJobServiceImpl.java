@@ -86,7 +86,7 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
         String tenantId = space.getTenantId();
         String documentType = mockBrokerInstance.getDocumentType();
-        log.info(String.format("Generate mock file for documentType %s with source id %s.", documentType, mockBrokerInstance.getSourceId()));
+        log.info(String.format("Generate mock file for documentType %s with source id %s.", documentType, sourceId));
         String fileName = documentType + "_" + UUID.randomUUID().toString() + ".csv";
         String separator = HdfsToS3PathBuilder.PATH_SEPARATOR;
         String subDir = tenantId + separator + sourceId + separator + documentType;
@@ -98,6 +98,10 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
             log.info(String.format("Empty selected fields for documentType %s, skip generating CSV file.", documentType));
             return;
         }
+        uploadCSVFileToS3(documentType, csvFile, fieldNames, dataStageBucket, key);
+    }
+
+    private void uploadCSVFileToS3(String documentType, File csvFile, List<String> fieldNames, String bucket, String key) {
         try {
             BusinessEntity entity = BusinessEntity.valueOf(documentType);
             boolean successCreated = true;
@@ -118,13 +122,11 @@ public class MockBrokerJobServiceImpl implements MockBrokerJobService {
                 log.error("Error happened when create csv file: ", e);
             }
             if (successCreated) {
-                s3Service.uploadLocalFile(dataStageBucket, key, csvFile, true);
+                s3Service.uploadLocalFile(bucket, key, csvFile, true);
             }
         } finally {
-
             FileUtils.deleteQuietly(csvFile);
         }
-
     }
 
     private void addId(List<String> idList, String id) {

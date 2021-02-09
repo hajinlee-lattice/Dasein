@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.ListSegment;
+import com.latticeengines.domain.exposed.metadata.ListSegmentConfig;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
@@ -91,6 +93,12 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         assertEquals(importFieldMapping.getFieldName(), InterfaceName.CompanyName.name());
         assertEquals(importFieldMapping.getFieldType(), UserDefinedType.TEXT);
         assertEquals(importFieldMapping.getUserFieldName(), "Company Name");
+        assertNotNull(listSegment.getConfig());
+        assertTrue(listSegment.getConfig().isNeedToMatch());
+        Map<String, String> displayNames = listSegment.getConfig().getDisplayNames();
+        assertNotNull(displayNames);
+        assertEquals(displayNames.get("attr1"), "displayName1");
+        assertEquals(displayNames.get("attr2"), "displayName2");
     }
 
     private Map<String, String> getDataTemplates() {
@@ -111,6 +119,13 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         listSegment.setExternalSystem(externalSystem);
         listSegment.setExternalSegmentId(externalSegmentId);
         listSegment.setS3DropFolder(s3DropFolder);
+        ListSegmentConfig listSegmentConfig = new ListSegmentConfig();
+        listSegmentConfig.setNeedToMatch(true);
+        Map<String, String> displayNames = new HashMap<>();
+        displayNames.put("attr1", "displayName1");
+        displayNames.put("attr2", "displayName2");
+        listSegmentConfig.setDisplayNames(displayNames);
+        listSegment.setConfig(listSegmentConfig);
         return listSegment;
     }
 
@@ -120,7 +135,7 @@ public class ListSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             return classLoader.getResourceAsStream(documentPath);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_10011, e,
-                    new String[] { documentPath.replace(commonResourcePath, "") });
+                    new String[]{documentPath.replace(commonResourcePath, "")});
         }
     }
 }

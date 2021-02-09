@@ -61,8 +61,8 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         crmIds.add("TechIndicator_Squid");
         cdlExternalSystem.setCRMIdList(crmIds);
         cdlExternalSystem.setEntity(BusinessEntity.Account);
-        cdlExternalSystem.setMapIds("TechIndicator_CAVSAMAid" + "," + "TechIndicator_Candid");
-        cdlExternalSystem.setErpIds("TechIndicator_SysAid");
+        cdlExternalSystem.setMapIds("TechIndicator_ResponseTap" + "," + "TechIndicator_Candid");
+        cdlExternalSystem.setErpIds("TechIndicator_Veezi");
         cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(customerSpace, cdlExternalSystem);
 
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_ACCOUNT);
@@ -74,8 +74,8 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         Assert.assertEquals(system.getOtherIdList().size(), 0);
 
         Assert.assertTrue(system.getCrmIds().contains("TechIndicator_MarketGID"));
-        Assert.assertTrue(system.getMapIds().contains("TechIndicator_CAVSAMAid"));
-        Assert.assertTrue(system.getErpIds().contains("TechIndicator_SysAid"));
+        Assert.assertTrue(system.getMapIds().contains("TechIndicator_Candid"));
+        Assert.assertTrue(system.getErpIds().contains("TechIndicator_Veezi"));
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testCreateAndGet", enabled = true)
@@ -105,7 +105,7 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         Assert.assertEquals(mapping.size(), 3);
         List<CDLExternalSystemMapping> mapList = mapping.get(CDLExternalSystemType.ERP.name());
         Assert.assertEquals(mapList.size(), 1);
-        Assert.assertEquals(mapList.get(0).getFieldName(), "TechIndicator_SysAid");
+        Assert.assertEquals(mapList.get(0).getFieldName(), "TechIndicator_Veezi");
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testGetMapping")

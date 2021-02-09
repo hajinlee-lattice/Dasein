@@ -10,6 +10,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.DeriveConfig;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -138,6 +139,15 @@ public interface ActivityStoreService {
     ActivityMetricsGroup findGroupByGroupId(String customerSpace, String groupId);
 
     /**
+     * Retrieve a list of ActivityMetricsGroup for current tenant
+     * @param customerSpace
+     *          target tenant
+     * @return
+     *          A list of ActivityMetricsGroup for current tenant
+     */
+    List<ActivityMetricsGroup> findByTenant(String customerSpace);
+
+    /**
      * Wrapper for {@link DimensionMetadataService#allocateDimensionId(String, Set)}
      *
      * @return map of dimension value -> allocated ID
@@ -170,4 +180,6 @@ public interface ActivityStoreService {
     List<AtlasStream> getStreamsByStreamType(@NotNull String customerSpace, AtlasStream.StreamType streamType);
 
     Map<AtlasStream.StreamType, List<String>> getStreamTypeToStreamNamesMap(@NotNull String customerSpace);
+
+    boolean addDeriveDimensionConfig(@NotNull String customerSpace, String streamName, DeriveConfig config);
 }

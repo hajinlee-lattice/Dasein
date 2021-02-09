@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import static com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption.DERIVE;
 import static com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator.DimensionGeneratorOption.HASH;
 import static com.latticeengines.domain.exposed.cdl.activity.StreamDimension.Usage.Dedup;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.StreamDateId;
@@ -139,7 +140,7 @@ public class AggActivityStreamToDaily
                 List<String> additionalDimAttrs = new ArrayList<>(getEntityIds(stream));
                 stream.getDimensions().forEach(dimension -> {
                     calculatorMap.put(dimension.getName(), dimension.getCalculator());
-                    if (dimension.getGenerator().getOption() == HASH) {
+                    if (Arrays.asList(HASH, DERIVE).contains(dimension.getGenerator().getOption())) {
                         hashDimensions.add(dimension.getName());
                     } else if (dimension.getUsages() != null && dimension.getUsages().contains(Dedup)) {
                         additionalDimAttrs.add(dimension.getName());

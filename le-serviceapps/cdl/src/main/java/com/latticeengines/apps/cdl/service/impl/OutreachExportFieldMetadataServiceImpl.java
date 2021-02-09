@@ -29,7 +29,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
     }
 
     private static final String TRAY_PROSPECT_OWNER_COLUMN_NAME = "SDR Email";
-    private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "SFDC Account ID";
+    private static final String TRAY_ACCOUNT_ID_COLUMN_NAME = "Account ID";
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
@@ -37,7 +37,9 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
         OutreachChannelConfig channelConfig = (OutreachChannelConfig) channel.getChannelConfig();
         AudienceType audienceType = channelConfig.getAudienceType();
-        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrToServingStoreAttrRemap(channel);
+        Map<String, String> defaultFieldsAttrToServingStoreAttrRemap = getDefaultFieldsAttrNameToServingStoreAttrNameMap(
+                customerSpace,
+                channel);
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
                 channel.getLookupIdMap().getTenant().getPid());
         Play play = channel.getPlay();
@@ -51,7 +53,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
                     contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap, audienceType);
         } else if (mappedFieldNames != null && mappedFieldNames.size() != 0) {
             exportColumnMetadataList = enrichExportFieldMappings(CDLExternalSystemName.Outreach, mappedFieldNames,
-                    accountAttributesMap, contactAttributesMap);
+                    accountAttributesMap, contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
         } else {
             exportColumnMetadataList = enrichDefaultFieldsMetadata(CDLExternalSystemName.Outreach, accountAttributesMap,
                     contactAttributesMap, defaultFieldsAttrToServingStoreAttrRemap);
@@ -79,5 +81,4 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
         }
         return exportColumnMetadataList;
     }
-
 }

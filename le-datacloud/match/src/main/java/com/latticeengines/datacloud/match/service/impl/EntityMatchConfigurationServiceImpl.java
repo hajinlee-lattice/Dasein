@@ -1,9 +1,12 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.time.Duration;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,10 +22,19 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoRetryPolicy;
 import com.latticeengines.aws.dynamo.DynamoRetryUtils;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("entityMatchConfigurationService")
 public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigurationService {
@@ -61,6 +73,7 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     private volatile int maxAttempts;
     private volatile RetryTemplate retryTemplate;
     private volatile boolean isAllocateMode = false;
+    private volatile Map<String, Boolean> perEntityAllocationModes;
 
     @Lazy
     @Inject
@@ -148,13 +161,23 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     }
 
     @Override
+    public void setPerEntityAllocationModes(Map<String, Boolean> perEntityAllocationModes) {
+        this.perEntityAllocationModes = perEntityAllocationModes;
+    }
+
+    @Override
     public void setIsAllocateMode(boolean isAllocateMode) {
         this.isAllocateMode = isAllocateMode;
     }
 
     @Override
-    public boolean isAllocateMode() {
-        return isAllocateMode;
+    public boolean isAllocateMode(String entity) {
+        if (StringUtils.isBlank(entity) || perEntityAllocationModes == null) {
+            // no entity specified, return the global value
+            return isAllocateMode;
+        }
+        // default to global value if not set
+        return perEntityAllocationModes.getOrDefault(entity, isAllocateMode);
     }
 
     @Override
@@ -186,6 +209,47 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
     @Override
     public void setShouldCopyToStagingLazily(boolean shouldCopyToStagingLazily) {
         lazyCopyToStaging = shouldCopyToStagingLazily;
+    }
+
+    @Override
+    public EntityMatchConfiguration getConfiguration(@NotNull Tenant tenant) {
+        Preconditions.checkNotNull(tenant, "tenant object should not be null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(tenant.getId()), "Tenant ID should not be blank");
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+            Path path = PathBuilder.buildMatchConfigurationPath(CamilleEnvironment.getPodId(), customerSpace);
+            if (!camille.exists(path)) {
+                return null;
+            }
+
+            String data = camille.get(path).getData();
+            return JsonUtils.deserialize(data, EntityMatchConfiguration.class);
+        } catch (Exception e) {
+            log.error("Failed to retrieve match configuration for tenant " + tenant.getId(), e);
+            return null;
+        }
+    }
+
+    @Override
+    public void saveConfiguration(@NotNull Tenant tenant, @NotNull EntityMatchConfiguration configuration) {
+        Preconditions.checkNotNull(tenant, "tenant object should not be null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(tenant.getId()), "Tenant ID should not be blank");
+        Preconditions.checkNotNull(configuration, "Configuration object should not be null");
+
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
+            Path path = PathBuilder.buildMatchConfigurationPath(CamilleEnvironment.getPodId(), customerSpace);
+            String data = JsonUtils.serialize(configuration);
+            Document doc = new Document(data);
+            camille.upsert(path, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        } catch (Exception e) {
+            String msg = String.format("Failed to save match configuration (%s) for tenant %s",
+                    JsonUtils.serialize(configuration), tenant);
+            log.error(msg, e);
+            throw new RuntimeException(e);
+        }
     }
 
     /*

@@ -42,6 +42,14 @@ IGNORE 1 LINES
 (PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3,EOLVersion,DataLicense,RefreshFrequency)
 SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
 
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn2027.csv' INTO TABLE `AccountMasterColumn`
+CHARACTER SET UTF8
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,@var3,EOLVersion,DataLicense,RefreshFrequency)
+SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1), IsEOL = (@var3 = 'True' OR @var3 = 1);
+
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv' INTO TABLE `SourceColumn`
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
@@ -190,7 +198,8 @@ VALUES
   ('2.0.6', '2017-09-01', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.24', '2020-08-15', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.25', '2020-09-21', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.26', '2020-11-13', '2.0', 'APPROVED', 'FULL', NOW(), '0');
+  ('2.0.26', '2020-11-13', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
+  ('2.0.27', '2021-02-01', '2.0', 'APPROVED', 'FULL', NOW(), '0');
 
 UPDATE `DataCloudVersion`
 SET
@@ -224,6 +233,14 @@ SET
   `DunsGuideBookHdfsVersion` = '2020-11-07_04-09-53_UTC',
   `EnrichmentStatsVersion`   = '2020-11-11_17-31-47_UTC'
 WHERE `Version` = '2.0.26';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2021-01-29_08-03-39_UTC',
+  `AccountLookupHdfsVersion` = '2021-01-24_18-07-55_UTC',
+  `DunsGuideBookHdfsVersion` = '2021-01-24_19-27-09_UTC',
+  `EnrichmentStatsVersion`   = '2021-02-01_08-38-31_UTC'
+WHERE `Version` = '2.0.27';
 
 UPDATE SourceColumn
 SET Arguments = REPLACE(Arguments, 'Â', '')

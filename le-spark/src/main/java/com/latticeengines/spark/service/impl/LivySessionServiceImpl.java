@@ -105,19 +105,22 @@ public class LivySessionServiceImpl implements LivySessionService {
         }
         String host = livyServerManager.getLivyHost();
         String url = host + URI_SESSIONS;
-        String resp;
-        try {
-            resp = restTemplate.postForObject(url, payLoad, String.class);
-        } catch (HttpClientErrorException e) {
-            log.error("HttpClientErrorException: " + e.getResponseBodyAsString());
-            throw e;
-        }
-        log.info("Starting new livy session on " + host + ": " + resp);
-        int sessionId = parseSessionId(resp);
-        LivySession session = new LivySession(host, sessionId);
-        session = waitForSessionState(session, LivySession.STATE_IDLE);
-        log.info("Livy session started: " + JsonUtils.serialize(session));
-        return session;
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> {
+            String resp;
+            try {
+                resp = restTemplate.postForObject(url, payLoad, String.class);
+            } catch (HttpClientErrorException e) {
+                log.error("HttpClientErrorException: " + e.getResponseBodyAsString());
+                throw e;
+            }
+            log.info("Starting new livy session on " + host + ": " + resp);
+            int sessionId = parseSessionId(resp);
+            LivySession session = new LivySession(host, sessionId);
+            session = waitForSessionState(session, LivySession.STATE_IDLE);
+            log.info("Livy session started: " + JsonUtils.serialize(session));
+            return session;
+        });
     }
 
     @Override
@@ -250,7 +253,8 @@ public class LivySessionServiceImpl implements LivySessionService {
         return Arrays.asList( //
                 "org.apache.livy:livy-scala-api_2.11:0.7.0-incubating", //
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11:2.10.1", //
-                "org.apache.spark:spark-avro_2.11:2.4.7" //
+                "org.apache.spark:spark-avro_2.11:2.4.7", //
+                "commons-httpclient:commons-httpclient:3.1"
         );
     }
 

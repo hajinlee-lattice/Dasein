@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.CreateCatalogRequest;
+import com.latticeengines.domain.exposed.cdl.activity.DeriveConfig;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.KeysWrapper;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
@@ -103,6 +104,16 @@ public class ActivityStoreResource {
         return activityStoreService.updateStreamDimension(customerSpace, streamName, dimension);
     }
 
+    @PostMapping("/streams/{streamName}/dimensions/add/derivedDimension")
+    @ResponseBody
+    @ApiOperation("add a derived dimension to stream")
+    public boolean addDerivedDimension( //
+                                   @PathVariable(value = "customerSpace") String customerSpace, //
+                                   @PathVariable(value = "streamName") String streamName, //
+                                   @RequestBody DeriveConfig deriveConfig) {
+        return activityStoreService.addDeriveDimensionConfig(customerSpace, streamName, deriveConfig);
+    }
+
     @PostMapping("/dimensionMetadata")
     @ResponseBody
     @ApiOperation("Save dimension metadata with generated signature")
@@ -179,6 +190,13 @@ public class ActivityStoreResource {
     public ActivityMetricsGroup findGroupByGroupId(@PathVariable(value = "customerSpace") String customerSpace, //
             @PathVariable(value = "groupId") String groupId) {
         return activityStoreService.findGroupByGroupId(customerSpace, groupId);
+    }
+
+    @GetMapping("/metricsGroups")
+    @ResponseBody
+    @ApiOperation("Retrieve metricsGroup list by tenant")
+    public List<ActivityMetricsGroup> findGroupsByTenant(@PathVariable(value = "customerSpace") String customerSpace) {
+        return activityStoreService.findByTenant(customerSpace);
     }
 
     @DeleteMapping("/dimensionMetadata/{signature}")

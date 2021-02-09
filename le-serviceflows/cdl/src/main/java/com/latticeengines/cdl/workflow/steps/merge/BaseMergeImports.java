@@ -419,6 +419,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         matchInput.setUseRemoteDnB(true);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(false);
+        matchInput.setReturnAnonymousWhenUnmatched(true); // only affect lookup mode entity match
         matchInput.setUseDirectPlus(useDirectPlus);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
         return matchInput;

@@ -267,12 +267,16 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         }
         log.info("Set inputMasterTableName=" + inputMasterTableName);
 
-        systemBatchTable = dataCollectionProxy.getTable(customerSpace.toString(), systemBatchStore, inactive);
-        if (systemBatchTable == null) {
-            systemBatchTable = dataCollectionProxy.getTable(customerSpace.toString(), systemBatchStore, active);
-        }
-        if (systemBatchTable != null) {
-            systemBatchTableName = systemBatchTable.getName();
+        if (!Boolean.TRUE.equals(configuration.getNeedReplace())) {
+            systemBatchTable = dataCollectionProxy.getTable(customerSpace.toString(), systemBatchStore, inactive);
+            if (systemBatchTable == null) {
+                systemBatchTable = dataCollectionProxy.getTable(customerSpace.toString(), systemBatchStore, active);
+            }
+            if (systemBatchTable != null) {
+                systemBatchTableName = systemBatchTable.getName();
+            }
+        } else {
+            log.info("In replace mode, ignore current system batch.");
         }
         log.info("Set system batch name=" + systemBatchTableName);
     }

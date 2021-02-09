@@ -83,6 +83,7 @@ import com.latticeengines.domain.exposed.spark.cm.CMTpsLookupCreationConfig;
 import com.latticeengines.domain.exposed.spark.cm.CMTpsSourceCreationConfig;
 import com.latticeengines.domain.exposed.spark.common.ApplyChangeListConfig;
 import com.latticeengines.domain.exposed.spark.common.ChangeListConfig;
+import com.latticeengines.domain.exposed.spark.common.ConvertMatchResultConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
@@ -211,7 +212,8 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
                 PeriodTxnStreamPostAggregationConfig.NAME), //
         @JsonSubTypes.Type(value = EnrichWebVisitJobConfig.class, name = EnrichWebVisitJobConfig.NAME), //
         @JsonSubTypes.Type(value = PublishTableToElasticSearchJobConfiguration.class, name =
-                PublishTableToElasticSearchJobConfiguration.NAME)
+                PublishTableToElasticSearchJobConfiguration.NAME), //
+        @JsonSubTypes.Type(value = ConvertMatchResultConfig.class, name = ConvertMatchResultConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
 

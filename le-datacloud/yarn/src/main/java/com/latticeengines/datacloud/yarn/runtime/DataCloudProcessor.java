@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -22,6 +23,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.aspect.MatchStepAspect;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
@@ -145,6 +147,23 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
                         + "which looks up seed by EntityId in staging table or serving table (if no found in staging table)");
             }
             entityMatchConfigurationService.setIsAllocateMode(allocateMode);
+        }
+        if (input.getEntityMatchConfiguration() != null
+                && input.getEntityMatchConfiguration().getAllocateId() != null) {
+            boolean allocationModeInConfig = input.getEntityMatchConfiguration().getAllocateId();
+            logger.info("Overwrite allocate mode with value in entity match configuration. AllocateId = {}",
+                    allocationModeInConfig);
+            entityMatchConfigurationService.setIsAllocateMode(allocationModeInConfig);
+        }
+        if (input.getEntityMatchConfiguration() != null
+                && MapUtils.isNotEmpty(input.getEntityMatchConfiguration().getAllocationModes())) {
+            String srcEntity = input.getSourceEntity();
+            if (StringUtils.isBlank(srcEntity)) {
+                logger.info("Source entity is not set, use target entity {} instead", input.getTargetEntity());
+                srcEntity = input.getTargetEntity();
+            }
+            EntityMatchUtils.setPerEntityAllocationModes(entityMatchConfigurationService,
+                    input.getEntityMatchConfiguration(), srcEntity, true);
         }
     }
 

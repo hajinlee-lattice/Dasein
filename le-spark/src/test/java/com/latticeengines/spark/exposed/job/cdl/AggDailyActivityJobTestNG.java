@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Amount;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Cost;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.DerivedId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastModifiedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ModelName;
@@ -28,6 +29,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitP
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__Row_Count__;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,6 +51,8 @@ import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
+import com.latticeengines.domain.exposed.cdl.activity.CompositeDimensionCalculator;
+import com.latticeengines.domain.exposed.cdl.activity.DeriveConfig;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
@@ -127,6 +131,12 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final String MODEL_2 = "m2";
     private static final String MODEL_2_ID = "2";
     private static final String MODEL_2_HASH = DimensionGenerator.hashDimensionValue(MODEL_2);
+    private static final String DERIVED_NAME_1 = "derived Closed Won B1";
+    private static final String DERIVED_NAME_1_HASH = DimensionGenerator.hashDimensionValue(DERIVED_NAME_1);
+    private static final String DERIVED_NAME_1_ID = "11";
+    private static final String DERIVED_NAME_2 = "derived Closed Won B2";
+    private static final String DERIVED_NAME_2_HASH = DimensionGenerator.hashDimensionValue(DERIVED_NAME_2);
+    private static final String DERIVED_NAME_2_ID = "12";
 
     private static final Map<String, String> WEBVISIT_DIMENSION_HASH_ID_MAP = new HashMap<>();
     private static final Map<String, String> OPPORTUNITY_DIMENSION_HASH_ID_MAP = new HashMap<>();
@@ -153,6 +163,8 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         OPPORTUNITY_DIMENSION_HASH_ID_MAP.put(STAGE_CLOSE_HASH, STAGE_CLOSE_ID);
         OPPORTUNITY_DIMENSION_HASH_ID_MAP.put(STAGE_NEW_HASH, STAGE_NEW_ID);
         OPPORTUNITY_DIMENSION_HASH_ID_MAP.put(STAGE_OLD_HASH, STAGE_OLD_ID);
+        OPPORTUNITY_DIMENSION_HASH_ID_MAP.put(DERIVED_NAME_1_HASH, DERIVED_NAME_1_ID);
+        OPPORTUNITY_DIMENSION_HASH_ID_MAP.put(DERIVED_NAME_2_HASH, DERIVED_NAME_2_ID);
 
         INTENT_DIMENSION_HASH_ID_MAP.put(MODEL_1_HASH, MODEL_1_ID);
         INTENT_DIMENSION_HASH_ID_MAP.put(MODEL_2_HASH, MODEL_2_ID);
@@ -246,6 +258,15 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         log.info("Output metadata: {}", result.getOutput());
     }
 
+    @Test(groups = "functional")
+    private void testDeriveDimension() {
+        List<String> inputs = Collections.singletonList(setupRawStreamWithDerivedDimension());
+        AggDailyActivityConfig config = opportunityDeriveDimConfig();
+        SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        SparkIOMetadataWrapper outputMetadata = JsonUtils.deserialize(result.getOutput(), SparkIOMetadataWrapper.class);
+    }
+
     private AggDailyActivityConfig incrConfig(boolean withBatch) {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
@@ -265,6 +286,27 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         config.additionalDimAttrMap.put(STREAM_ID, Collections.singletonList(AccountId.name()));
         config.dimensionValueIdMap.putAll(WEBVISIT_DIMENSION_HASH_ID_MAP);
         config.incrementalStreams.add(STREAM_ID);
+        config.currentEpochMilli = DAY_0_EPOCH;
+
+        return config;
+    }
+
+    private AggDailyActivityConfig opportunityDeriveDimConfig() {
+        AggDailyActivityConfig config = new AggDailyActivityConfig();
+        SparkIOMetadataWrapper inputMetadata = new SparkIOMetadataWrapper();
+        Map<String, SparkIOMetadataWrapper.Partition> detailsMap = new HashMap<>();
+        SparkIOMetadataWrapper.Partition details = new SparkIOMetadataWrapper.Partition();
+        details.setStartIdx(0);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        config.streamDateAttrs.put(STREAM_ID, LastModifiedDate.name());
+        config.dimensionMetadataMap.put(STREAM_ID, opportunityMetadataWithDerivedDimension());
+        config.dimensionCalculatorMap.put(STREAM_ID, opportunityDimensionCalculatorsWithDerivedDimension());
+        config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(StageNameId.name(), DerivedId.name()));
+        config.additionalDimAttrMap.put(STREAM_ID, Collections.singletonList(AccountId.name()));
+        config.dimensionValueIdMap.putAll(OPPORTUNITY_DIMENSION_HASH_ID_MAP);
+        config.streamReducerMap.put(STREAM_ID, prepareReducer());
         config.currentEpochMilli = DAY_0_EPOCH;
 
         return config;
@@ -469,6 +511,23 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         Object[][] data = new Object[][]{
                 {"acc1", "opp1", STAGE_NEW, DAY_1_EPOCH_LATE}, // replacing record in batch
                 {"acc2", "opp2", STAGE_OLD, DAY_2_EPOCH_EARLY}, // will be replaced by batch
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupRawStreamWithDerivedDimension() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId.name(), String.class), //
+                Pair.of(UserId.name(), String.class), // simulating BU
+                Pair.of(OpportunityId.name(), String.class), //
+                Pair.of(StageName.name(), String.class), //
+                Pair.of(LastModifiedDate.name(), Long.class), //
+                Pair.of(__StreamDate.name(), String.class), //
+                Pair.of(StreamDateId.name(), Integer.class) //
+        );
+        Object[][] data = new Object[][]{
+                {"acc1", "bu1", "opp1", STAGE_WON, DAY_1_EPOCH, DAY_1, DAY_PERIOD_1}, // derived Closed Won B1
+                {"acc2", "bu2", "opp2", STAGE_WON, DAY_1_EPOCH_LATE, DAY_1, DAY_PERIOD_1} // derived Closed Won B2
         };
         return uploadHdfsDataUnit(data, fields);
     }
@@ -692,7 +751,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         return String.join("_", accId, userId, smId, ptnId, dateStr);
     }
 
-    private void prepareTestData() {
+    private String prepareTestData() {
         Object[][] data = new Object[][]{ //
                 /*-
                  * both url & source match
@@ -750,7 +809,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                 {"a1", "u2", null, "/hello", DAY_PERIOD_1, DAY_1}, //
                 {"a1", "u1", "Netflix/Paid", "/hello", DAY_PERIOD_2, DAY_2}, //
         };
-        uploadHdfsDataUnit(data, RAW_STREAM_FIELDS);
+        return uploadHdfsDataUnit(data, RAW_STREAM_FIELDS);
     }
 
     private AggDailyActivityConfig baseConfig() {
@@ -782,6 +841,13 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     private Map<String, DimensionMetadata> opportunityMetadata() {
         Map<String, DimensionMetadata> metadataMap = new HashMap<>();
         metadataMap.put(StageNameId.name(), stageMetadata());
+        return metadataMap;
+    }
+
+    private Map<String, DimensionMetadata> opportunityMetadataWithDerivedDimension() {
+        Map<String, DimensionMetadata> metadataMap = new HashMap<>();
+        metadataMap.put(StageNameId.name(), stageMetadata());
+        metadataMap.put(DerivedId.name(), new DimensionMetadata()); // no need for dimension metadata to calculate
         return metadataMap;
     }
 
@@ -879,6 +945,29 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         stageCalculator.setAttribute(StageName.name());
         calculatorMap.put(StageNameId.name(), stageCalculator);
         return calculatorMap;
+    }
+
+    private Map<String, DimensionCalculator> opportunityDimensionCalculatorsWithDerivedDimension() {
+        Map<String, DimensionCalculator> calculatorMap = new HashMap<>();
+
+        DimensionCalculator stageCalculator = new DimensionCalculator();
+        stageCalculator.setName(StageName.name());
+        stageCalculator.setAttribute(StageName.name());
+        calculatorMap.put(StageNameId.name(), stageCalculator);
+
+        CompositeDimensionCalculator derivedCalculator = new CompositeDimensionCalculator();
+        derivedCalculator.deriveConfig = getDeriveConfig();
+        calculatorMap.put(DerivedId.name(), derivedCalculator);
+        return calculatorMap;
+    }
+
+    private DeriveConfig getDeriveConfig() {
+        DeriveConfig config = new DeriveConfig();
+        config.sourceAttrs = Arrays.asList(UserId.name(), StageName.name());
+        config.patterns = new ArrayList<>();
+        config.patterns.add(Arrays.asList(DERIVED_NAME_1, "bu1", STAGE_WON));
+        config.patterns.add(Arrays.asList(DERIVED_NAME_2, "bu2", STAGE_WON));
+        return config;
     }
 
     private Map<String, DimensionCalculator> intentDimensionCalculators() {

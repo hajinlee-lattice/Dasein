@@ -1,7 +1,5 @@
 package com.latticeengines.spark.exposed.job
 
-import java.io.StringWriter
-
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
@@ -16,6 +14,7 @@ import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
+import java.io.StringWriter
 import scala.collection.JavaConverters._
 
 abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext => String) {
@@ -202,7 +201,6 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
   def logDataFrame(dfName: String, df: DataFrame, sortKey: String, selection: Seq[String], limit: Int) = {
     logSpark("==========" + dfName + "==========")
     logSpark(selection mkString ",")
-    df.orderBy(sortKey).select(selection map col: _*).limit(limit).collect().foreach(r => logSpark(r.toString))
     logSpark("==========" + dfName + "==========")
   }
 

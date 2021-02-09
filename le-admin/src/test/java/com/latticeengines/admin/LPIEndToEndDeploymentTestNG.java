@@ -32,7 +32,6 @@ import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -50,8 +49,6 @@ import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.dcp.vbo.VboStatus;
 import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.TenantEmailNotificationLevel;
 import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.vbo.VboRequestLog;
@@ -70,6 +67,9 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     private static final String HDFS_POD_PATH = "/Pods/%s/Contracts/%s";
     private static final String HDFS_MODELING_BASE_PATH = "/user/s-analytics/customers";
+
+    @Value("{admin.default.subscription.number}")
+    private static String subNumber;
 
     @Inject
     private TenantService tenantService;
@@ -146,15 +146,15 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testVboEnd2End() throws Exception {
-        String subNumber = String.valueOf(System.currentTimeMillis());
-        String traceId = provisionEndToEndVboTestTenants(subNumber);
+        String fakeSubNumber = String.valueOf(System.currentTimeMillis());
+        String traceId = provisionEndToEndVboTestTenants(fakeSubNumber);
         log.info("Verify installation");
         verifyZKState();
         verifyPLSTenantExists();
         verifyIDaasUserExists();
         verifyVboCallback(traceId);
 
-        testExistingSubNumberViolation(subNumber);
+        testExistingSubNumberViolation();
 
         log.info("Uninstall again with wiping out ZK.");
         deleteTenant(contractId, tenantId);
@@ -166,7 +166,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertTrue(user.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT));
     }
 
-    private VboRequest generateVBORequest(String subNumber) {
+    private VboRequest generateVBORequest(String currSubNumber) {
         VboRequest req = new VboRequest();
         VboRequest.Product pro = new VboRequest.Product();
         VboRequest.User user = new VboRequest.User();
@@ -185,15 +185,15 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         VboRequest.Subscriber sub = new VboRequest.Subscriber();
         sub.setLanguage("English");
         sub.setName(tenantId);
-        sub.setSubscriberNumber(subNumber);
+        sub.setSubscriberNumber(currSubNumber);
         sub.setTenantType(TenantType.QA);
         req.setSubscriber(sub);
         return req;
     }
 
-    private String provisionEndToEndVboTestTenants(String subNumber) {
-        String url = getRestHostPort() + "/admin/tenants/vboadmin?useMock=true";
-        VboRequest req = generateVBORequest(subNumber);
+    private String provisionEndToEndVboTestTenants(String currSubNumber) {
+        String url = getRestHostPort() + "/admin/tenants/vboadmin";
+        VboRequest req = generateVBORequest(currSubNumber);
 
         VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);
         Assert.assertNotNull(result);
@@ -202,7 +202,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         return result.getAckReferenceId();
     }
 
-    private void testExistingSubNumberViolation(String subNumber) {
+    private void testExistingSubNumberViolation() {
         // test for vbo request
         VboRequest request = generateVBORequest(subNumber);
         VboResponse result = restTemplate.postForObject(getRestHostPort() + "/admin/tenants/vboadmin",
@@ -438,25 +438,12 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     private void verifyVboCallback(String traceId) throws Exception {
-        boolean verified = false;
-        Tenant tenant = null;
-        for(int i = 0; i < 30; ++i) {
-            log.info(tenantId);
-            tenant = secTenantService.findByTenantName(tenantId);
-            if (tenant != null) {
-                log.info(JsonUtils.serialize(tenant));
-                verified = tenant.getJobNotificationLevels().containsKey("mock@vbo");
-                if (verified)
-                    break;
-            }
-
+        VboRequestLog requestLog = null;
+        for (int i = 0; i < 30 && (requestLog == null || requestLog.getCallbackRequest() == null); ++i) {
             Thread.sleep(60000);
+            requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
+            Assert.assertNotNull(requestLog);
         }
-        Assert.assertTrue(verified);
-        Assert.assertEquals(tenant.getJobNotificationLevels().get("mock@vbo"), TenantEmailNotificationLevel.NONE);
-
-        VboRequestLog requestLog = vboRequestLogService.getVboRequestLogByTraceId(traceId);
-        Assert.assertNotNull(requestLog);
         Assert.assertNotNull(requestLog.getCallbackRequest());
         Assert.assertEquals(traceId, requestLog.getCallbackRequest().customerCreation.transactionDetail.ackRefId);
         Assert.assertEquals(requestLog.getCallbackRequest().customerCreation.transactionDetail.status, VboStatus.SUCCESS);

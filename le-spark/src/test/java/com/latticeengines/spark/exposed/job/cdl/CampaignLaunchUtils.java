@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +14,9 @@ import com.latticeengines.domain.exposed.playmakercore.NonStandardRecColumnName;
 import com.latticeengines.domain.exposed.playmakercore.RecommendationColumnName;
 
 public final class CampaignLaunchUtils {
+
+    public static final String SFDC_ACCOUNT_ID = "SFDC_ACCOUNT_ID";
+    public static final String SFDC_CONTACT_ID = "SFDC_CONTACT_ID";
 
     protected CampaignLaunchUtils() {
         throw new UnsupportedOperationException();
@@ -137,8 +141,9 @@ public final class CampaignLaunchUtils {
         return generateContactColsForS3();
     }
 
-    public static List<String> generateAccountColsRecIncludedForS3() {
-        return Arrays.asList(RecommendationColumnName.COMPANY_NAME.name(), RecommendationColumnName.ACCOUNT_ID.name(),
+    public static List<String> generateRecommendationOutputAccountCols() {
+        return new ArrayList<String>(
+                Arrays.asList(RecommendationColumnName.COMPANY_NAME.name(), InterfaceName.AccountId.name(),
                 RecommendationColumnName.DESCRIPTION.name(), RecommendationColumnName.PLAY_ID.name(),
                 RecommendationColumnName.LAUNCH_DATE.name(), RecommendationColumnName.LAUNCH_ID.name(),
                 RecommendationColumnName.DESTINATION_ORG_ID.name(),
@@ -146,7 +151,12 @@ public final class CampaignLaunchUtils {
                 RecommendationColumnName.LAST_UPDATED_TIMESTAMP.name(), RecommendationColumnName.MONETARY_VALUE.name(),
                 RecommendationColumnName.PRIORITY_ID.name(), RecommendationColumnName.PRIORITY_DISPLAY_NAME.name(),
                 RecommendationColumnName.LIKELIHOOD.name(), RecommendationColumnName.LIFT.name(),
-                RecommendationColumnName.RATING_MODEL_ID.name(), RecommendationColumnName.EXTERNAL_ID.name()).stream()
+                        RecommendationColumnName.RATING_MODEL_ID.name(), RecommendationColumnName.EXTERNAL_ID.name()));
+    }
+
+    public static List<String> generateAccountColsRecIncludedForS3() {
+        return generateRecommendationOutputAccountCols()
+                .stream()
                 .map(col -> RecommendationColumnName.RECOMMENDATION_COLUMN_TO_INTERNAL_NAME_MAP.getOrDefault(col, col))
                 .collect(Collectors.toList());
     }
@@ -162,12 +172,11 @@ public final class CampaignLaunchUtils {
     }
 
     public static List<String> generateContactColsForS3() {
-        return ImmutableList.<String> builder().add(InterfaceName.Email.name())
-                .add(InterfaceName.Address_Street_1.name()).add(InterfaceName.PhoneNumber.name())
-                .add(InterfaceName.State.name()).add(InterfaceName.PostalCode.name()).add(InterfaceName.Country.name())
-                .add(InterfaceName.SalesforceContactID.name()).add(InterfaceName.City.name())
-                .add(InterfaceName.ContactId.name()).add(InterfaceName.Name.name()).add(InterfaceName.FirstName.name())
-                .add(InterfaceName.LastName.name()).build();
+        return new ArrayList<String>(Arrays.asList(InterfaceName.Email.name(), InterfaceName.Address_Street_1.name(),
+                InterfaceName.PhoneNumber.name(), InterfaceName.State.name(), InterfaceName.PostalCode.name(),
+                InterfaceName.Country.name(), InterfaceName.SalesforceContactID.name(), InterfaceName.City.name(),
+                InterfaceName.ContactId.name(), InterfaceName.Name.name(), InterfaceName.FirstName.name(),
+                InterfaceName.LastName.name()));
     }
 
     // ---- end of S3 Account and Contact columns---
@@ -218,4 +227,24 @@ public final class CampaignLaunchUtils {
     }
 
     // ---- end of Marketo Account and Contact columns---
+
+    public static String generateExpectedSfdcAccountIdCol(String sfdcAccountId, boolean isEntityMatch) {
+        if (sfdcAccountId != null) {
+            return sfdcAccountId;
+        }
+        if (isEntityMatch) {
+            return InterfaceName.CustomerAccountId.name();
+        }
+        return SFDC_ACCOUNT_ID;
+    }
+
+    public static String generateExpectedSfdcContactIdCol(String sfdcContactId, boolean isEntityMatch) {
+        if (sfdcContactId != null) {
+            return sfdcContactId;
+        }
+        if (isEntityMatch) {
+            return InterfaceName.CustomerContactId.name();
+        }
+        return SFDC_CONTACT_ID;
+    }
 }

@@ -131,7 +131,7 @@ private[spark] object MergeUtils {
 
   def dropEraseColumn(df: DataFrame, eraseByNull: Boolean): DataFrame = {
     if (eraseByNull) {
-      val selectedColumns = df.columns.filter(isEraseColumn(_))
+      val selectedColumns = df.columns.filter(isEraseColumn)
       df.drop(selectedColumns: _*)
     } else {
       df

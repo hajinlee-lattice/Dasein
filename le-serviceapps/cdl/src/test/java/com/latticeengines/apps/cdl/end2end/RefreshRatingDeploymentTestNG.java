@@ -85,23 +85,23 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private RatingEngine ai1;
     private RatingEngine ai2;
     private RatingEngine ai3;
-    private RatingEngine ai4;
-    private RatingEngine ai5;
-    private RatingEngine ai6;
+//    private RatingEngine ai4;
+//    private RatingEngine ai5;
+//    private RatingEngine ai6;
 
     private String uuid1;
     private String uuid2;
     private String uuid3;
-    private String uuid4;
-    private String uuid5;
-    private String uuid6;
+//    private String uuid4;
+//    private String uuid5;
+//    private String uuid6;
 
     private ModelSummary modelSummary1;
     private ModelSummary modelSummary2;
     private ModelSummary modelSummary3;
-    private ModelSummary modelSummary4;
-    private ModelSummary modelSummary5;
-    private ModelSummary modelSummary6;
+//    private ModelSummary modelSummary4;
+//    private ModelSummary modelSummary5;
+//    private ModelSummary modelSummary6;
 
     @BeforeClass(groups = "end2end")
     public void setup() throws Exception {
@@ -163,23 +163,23 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 Assert.assertNotNull(ai3.getSegment());
                 activateRatingEngine(ai3.getId());
 
-                ai4 = createCrossSellEngine(segment, modelSummary4, PredictionType.EXPECTED_VALUE);
-                targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
-                        ai4.getId(), ai4.getLatestIteration().getId(), ModelingQueryType.TARGET);
-                Assert.assertTrue(targetCount > 100);
-                Assert.assertNotNull(ai4.getSegment());
-                activateRatingEngine(ai4.getId());
-
-                ai5 = createCrossSellEngine(segment, modelSummary5, PredictionType.PROPENSITY);
-                targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai5.getId(),
-                        ai5.getLatestIteration().getId(), ModelingQueryType.TARGET);
-                Assert.assertTrue(targetCount > 100);
-                Assert.assertNotNull(ai5.getSegment());
-                activateRatingEngine(ai5.getId());
-
-                ai6 = createCustomEventEngine(segment, modelSummary6);
-                Assert.assertNotNull(ai6.getSegment());
-                activateRatingEngine(ai6.getId());
+//                ai4 = createCrossSellEngine(segment, modelSummary4, PredictionType.EXPECTED_VALUE);
+//                targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
+//                        ai4.getId(), ai4.getLatestIteration().getId(), ModelingQueryType.TARGET);
+//                Assert.assertTrue(targetCount > 100);
+//                Assert.assertNotNull(ai4.getSegment());
+//                activateRatingEngine(ai4.getId());
+//
+//                ai5 = createCrossSellEngine(segment, modelSummary5, PredictionType.PROPENSITY);
+//                targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai5.getId(),
+//                        ai5.getLatestIteration().getId(), ModelingQueryType.TARGET);
+//                Assert.assertTrue(targetCount > 100);
+//                Assert.assertNotNull(ai5.getSegment());
+//                activateRatingEngine(ai5.getId());
+//
+//                ai6 = createCustomEventEngine(segment, modelSummary6);
+//                Assert.assertNotNull(ai6.getSegment());
+//                activateRatingEngine(ai6.getId());
 
                 // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
             }
@@ -203,21 +203,22 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                     modelSummary2 = summary;
                 } else if (summary.getId().contains(uuid3)) {
                     modelSummary3 = summary;
-                } else if (summary.getId().contains(uuid4)) {
-                    modelSummary4 = summary;
-                } else if (summary.getId().contains(uuid5)) {
-                    modelSummary5 = summary;
-                } else if (summary.getId().contains(uuid6)) {
-                    modelSummary6 = summary;
                 }
+//                else if (summary.getId().contains(uuid4)) {
+//                    modelSummary4 = summary;
+//                } else if (summary.getId().contains(uuid5)) {
+//                    modelSummary5 = summary;
+//                } else if (summary.getId().contains(uuid6)) {
+//                    modelSummary6 = summary;
+//                }
             }
         }
         Assert.assertNotNull(modelSummary1);
         Assert.assertNotNull(modelSummary2);
         Assert.assertNotNull(modelSummary3);
-        Assert.assertNotNull(modelSummary4);
-        Assert.assertNotNull(modelSummary5);
-        Assert.assertNotNull(modelSummary6);
+//        Assert.assertNotNull(modelSummary4);
+//        Assert.assertNotNull(modelSummary5);
+//        Assert.assertNotNull(modelSummary6);
     }
 
     private void setupAIModels() {
@@ -226,9 +227,9 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         uuid1 = uploadModel(MODELS_RESOURCE_ROOT + "/ev_model_p3.tar.gz");
         uuid2 = uploadModel(MODELS_RESOURCE_ROOT + "/propensity_model_p3.tar.gz");
         uuid3 = uploadModel(MODELS_RESOURCE_ROOT + "/ce_model_p3.tar.gz");
-        uuid4 = uploadModel(MODELS_RESOURCE_ROOT + "/ev_model_p2.tar.gz");
-        uuid5 = uploadModel(MODELS_RESOURCE_ROOT + "/propensity_model_p2.tar.gz");
-        uuid6 = uploadModel(MODELS_RESOURCE_ROOT + "/ce_model_p2.tar.gz");
+//        uuid4 = uploadModel(MODELS_RESOURCE_ROOT + "/ev_model_p2.tar.gz");
+//        uuid5 = uploadModel(MODELS_RESOURCE_ROOT + "/propensity_model_p2.tar.gz");
+//        uuid6 = uploadModel(MODELS_RESOURCE_ROOT + "/ce_model_p2.tar.gz");
     }
 
     private RatingEngine createCrossSellEngine(MetadataSegment segment, ModelSummary modelSummary,
@@ -306,9 +307,9 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
             verifyAIModelPublication(ai1);
             verifyAIModelPublication(ai2);
             verifyAIModelPublication(ai3);
-            verifyAIModelPublication(ai4);
-            verifyAIModelPublication(ai5);
-            verifyAIModelPublication(ai6);
+//            verifyAIModelPublication(ai4);
+//            verifyAIModelPublication(ai5);
+//            verifyAIModelPublication(ai6);
         }
     }
 
@@ -325,9 +326,9 @@ public class RefreshRatingDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         ai1 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai1.getId());
         ai2 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai2.getId());
         ai3 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai3.getId());
-        ai4 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai4.getId());
-        ai5 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai5.getId());
-        ai6 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai6.getId());
+//        ai4 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai4.getId());
+//        ai5 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai5.getId());
+//        ai6 = ratingEngineProxy.getRatingEngine(mainCustomerSpace, ai6.getId());
     }
 
     private void verifyPublishedIterations(RatingEngine ratingEngine) {

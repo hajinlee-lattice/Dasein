@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.dcp.repository.DataReportRepository;
 import com.latticeengines.domain.exposed.dcp.DataReport;
+import com.latticeengines.domain.exposed.dcp.DataReportRecord;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface DataReportWriterRepository extends DataReportRepository {
@@ -91,4 +92,9 @@ public interface DataReportWriterRepository extends DataReportRepository {
     @Query("UPDATE DataReportRecord d SET d.dunsCount = ?4, d.refreshTime = ?2, d.dataSnapshotTime=?3 WHERE d.pid = " +
             "?1 and d.dunsCount IS NULL")
     int updateDataReportIfNull(Long pid, Date refreshTime, Date snapshotTime, Table dunsCount);
+
+    @Transactional(transactionManager = "jpaTransactionManager")
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE DataReportRecord d SET d.rollupStatus = ?1 WHERE d.ownerId = ?3 AND d.level = ?2")
+    int updateDataReportRollupStatus (DataReportRecord.RollupStatus status, DataReportRecord.Level level, String ownerId);
 }

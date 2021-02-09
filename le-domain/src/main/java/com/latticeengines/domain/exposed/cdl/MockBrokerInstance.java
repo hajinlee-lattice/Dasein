@@ -91,12 +91,16 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
 
     @JsonProperty("active")
     @Column(name = "ACTIVE", nullable = false)
-    private boolean active;
+    private Boolean active = false;
 
     @Temporal(TIMESTAMP)
     @Column(name = "NEXT_SCHEDULED_TIME")
     @JsonProperty("nextScheduledTime")
     private Date nextScheduledTime;
+
+    @JsonProperty("lastAggregationWorkflowId")
+    @Column(name = "LAST_AGGREGATION_WORKFLOW_ID")
+    private Long lastAggregationWorkflowId;
 
     @Override
     public Long getPid() {
@@ -201,5 +205,13 @@ public class MockBrokerInstance implements HasPid, HasAuditingFields, HasTenant,
 
     public void setNextScheduledTime(Date nextScheduledTime) {
         this.nextScheduledTime = nextScheduledTime;
+    }
+
+    public Long getLastAggregationWorkflowId() {
+        return lastAggregationWorkflowId;
+    }
+
+    public void setLastAggregationWorkflowId(Long lastAggregationWorkflowId) {
+        this.lastAggregationWorkflowId = lastAggregationWorkflowId;
     }
 }

@@ -21,7 +21,7 @@ public class EntityNameCountryBasedMicroEngineActor extends EntityMicroEngineAct
 
     @Override
     protected boolean shouldProcess(@NotNull MatchTraveler traveler) {
-        return StringUtils.isNotBlank(traveler.getMatchKeyTuple().getName());
+        return !matchFoundInLookupMode(traveler) && StringUtils.isNotBlank(traveler.getMatchKeyTuple().getName());
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.metadata.MasterSchema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DataTemplate {
+
     @JsonProperty("masterSchema")
     private MasterSchema masterSchema;
 

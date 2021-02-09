@@ -35,6 +35,7 @@ public final class PathConstants {
     public static final String TENANT_PA_QUOTA = "PAQuota";
     public static final String TIMEZONE = "Timezone";
     public static final String DEFAULT_TIMEZONE = "DefaultTimezone";
+    public static final String MATCH_CONFIGURATION = "MatchConfiguration";
 
     public static final String PROPERTIES_FILE = "properties.json";
     public static final String FEATURE_FLAGS_FILE = "feature-flags.json";
@@ -72,6 +73,8 @@ public final class PathConstants {
     public static final String WORKFLOW_THROTTLING_FLAG = "workflowThrottlingFlag";
 
     public static final String ACTIVITY_UPLOAD_QUOTA = "activityUploadQuota";
+
+    public static final String LOOKUP_ID_LIMIT = "lookupIdLimit";
 
     public static final String PLS = "PLS";
     public static final String CDL = "CDL";

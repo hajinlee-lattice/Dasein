@@ -69,7 +69,7 @@ public class ListSegment implements HasPid {
     @Type(type = "json")
     private Map<String, String> dataTemplates;
 
-    @JsonProperty("csvAdaptorStr")
+    @JsonIgnore
     @Column(name = "CSV_ADAPTOR")
     @Type(type = "text")
     private String csvAdaptorStr;
@@ -83,6 +83,11 @@ public class ListSegment implements HasPid {
     @JoinColumn(name = "FK_SEGMENT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MetadataSegment metadataSegment;
+
+    @JsonProperty("config")
+    @Column(name = "CONFIG", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    private ListSegmentConfig config;
 
     @Override
     public Long getPid() {
@@ -165,6 +170,14 @@ public class ListSegment implements HasPid {
 
     public void setCsvAdaptorStr(String csvAdaptorStr) {
         this.csvAdaptorStr = csvAdaptorStr;
+    }
+
+    public ListSegmentConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(ListSegmentConfig config) {
+        this.config = config;
     }
 
     public String getTemplateId(String templateKey) {

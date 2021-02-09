@@ -61,6 +61,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       .toDF("PID", //
       "EXTERNAL_ID", //
       "AccountId", //
+      "CustomerAccountId", //
       "LE_ACCOUNT_EXTERNAL_ID", //
       "PLAY_ID", //
       "LAUNCH_ID", //
@@ -81,7 +82,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
       "DESTINATION_ORG_ID", //
       "DESTINATION_SYS_TYPE", //
       "TENANT_ID", //
-      "DELETED")
+      "DELETED").drop("CustomerAccountId")
 
     // add log
     logSpark("Before joining, the derivedAccounts is:")
@@ -260,7 +261,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
 
   private def aggregateContacts(contactTable: DataFrame, contactCols: Seq[String], sfdcContactId: String, joinKey: String): DataFrame = {
       val contactWithoutJoinKey = contactTable.drop(joinKey)
-      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId, false)
+      val flattenUdf = new Flatten(contactWithoutJoinKey.schema, contactCols, sfdcContactId, false, false, false)
       val aggregatedContacts = contactTable.groupBy(joinKey).agg( //
         flattenUdf(contactWithoutJoinKey.columns map col: _*).as("CONTACTS"), //
         count(lit(1)).as("CONTACT_NUM") //

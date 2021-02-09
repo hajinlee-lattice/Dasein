@@ -112,7 +112,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         // update config
         config.setUploadRawFilePath(rawPath);
         config.setUploadMatchResultPrefix(resultsPath);
-        config.setUploadTSPrefix(uploadTS);
+        config.setUploadTimestamp(uploadTS);
         uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(5,  Collections.singleton(AssertionError.class), null);
@@ -124,7 +124,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
             UploadDetails retrievedUpload = uploads.get(0);
             UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
             Assert.assertEquals(retrievedConfig.getUploadMatchResultPrefix(), resultsPath);
-            Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), uploadTS);
+            Assert.assertEquals(retrievedConfig.getUploadTimestamp(), uploadTS);
             Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
             Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
             return true;
@@ -164,6 +164,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         UploadDetails upload = uploads.get(0);
         uploadId = upload.getUploadId();
         Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_STARTED);
+        logger.info(JsonUtils.pprint(upload));
 
         StringInputStream sis = new StringInputStream("file1");
 

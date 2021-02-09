@@ -1,8 +1,10 @@
 /*
 * script name - mysql.sql
-* purpose - 'Release/Hotfix/Patch' DB changes in production.
-* Ensure to maintain backward compatibility.
+* purpose - 'Release/Hotfix/Patch' DB upgrade script.
+* SQL should be backwards compatible.
 */
+
+-- *** DO NOT FORGET TO ADD rollback script to 'rollback.sql' file ***
 
 USE `oauth2DB`;
 
@@ -12,7 +14,11 @@ DELIMITER //
 -- ##############################################################
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
-      -- User input section (DDL/DML). This is just a template, developer can modify based on need.
+    -- User input section (DDL/DML). This is just a template, developer can modify based on need.
+
+
+
+
 
   END //
 -- ##############################################################

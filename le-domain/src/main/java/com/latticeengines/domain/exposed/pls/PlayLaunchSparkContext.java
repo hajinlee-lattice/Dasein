@@ -123,6 +123,12 @@ public class PlayLaunchSparkContext implements Serializable {
     @JsonProperty("EncryptionKey")
     private String encryptionKey;
 
+    @JsonProperty("isEntityMatch")
+    private boolean isEntityMatch;
+
+    @JsonProperty("shouldDefaultPopulateIds")
+    private boolean shouldDefaultPopulateIds;
+
     public PlayLaunchSparkContext() {
     }
 
@@ -381,6 +387,22 @@ public class PlayLaunchSparkContext implements Serializable {
 
     public void setEncryptionKey(String encryptionKey) {
         this.encryptionKey = encryptionKey;
+    }
+
+    public boolean getIsEntityMatch() {
+        return isEntityMatch;
+    }
+
+    public void setIsEntityMatch(boolean isEntityMatch) {
+        this.isEntityMatch = isEntityMatch;
+    }
+
+    public boolean getShouldDefaultPopulateIds() {
+        return shouldDefaultPopulateIds;
+    }
+
+    public void setShouldDefaultPopulateIds(boolean shouldDefaultPopulateIds) {
+        this.shouldDefaultPopulateIds = shouldDefaultPopulateIds;
     }
 
     private void setSyncDestination(PlayLaunch playLaunch) {

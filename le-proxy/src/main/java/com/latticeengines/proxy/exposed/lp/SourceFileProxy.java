@@ -23,5 +23,5 @@ public interface SourceFileProxy {
 
     SourceFile findByTableNameCrossTenant(String tableName);
 
-    SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty, String entity);
+    SourceFile createSourceFileFromS3(String customerSpace, FileProperty fileProperty, String entity, String schema);
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.StreamUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +33,9 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.provider.AbstractAuthenticationTokenFilter;
 
 public class RestActiveDirectoryFilter extends AbstractAuthenticationTokenFilter {
+
+    @Value("${common.le.environment}")
+    private String leEnv;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
@@ -62,28 +67,36 @@ public class RestActiveDirectoryFilter extends AbstractAuthenticationTokenFilter
             UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username.trim(),
                     password);
 
-            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) getAuthenticationManager()
-                    .authenticate(authRequest);
+            UsernamePasswordAuthenticationToken auth;
+
+            String token;
+            if ("dev".equals(leEnv) && "testuser1".equals(username)) {
+                auth = new UsernamePasswordAuthenticationToken("testuser1", "Lattice1", Collections.singletonList(new SimpleGrantedAuthority("adminconsole")));
+                token = buildFakeToken(auth);
+            } else {
+                auth = (UsernamePasswordAuthenticationToken) getAuthenticationManager()
+                        .authenticate(authRequest);
+                token = buildToken(auth);
+            }
 
             try {
-                String token = buildToken(auth);
                 response.setContentType("application/json; charset=UTF-8");
                 response.getOutputStream().write(token.getBytes());
                 response.getOutputStream().flush();
             } catch (Exception e) {
-                throw new BadCredentialsException("Unauthorized.");
+                throw new BadCredentialsException("Unauthorized.", e);
             }
             return auth;
         } else {
             try {
                 return buildAuth(ticket);
             } catch (Exception e) {
-                throw new BadCredentialsException("Unauthorized.");
+                throw new BadCredentialsException("Unauthorized.", e);
             }
         }
     }
 
-    private String buildToken(UsernamePasswordAuthenticationToken auth) throws Exception {
+    private String buildToken(UsernamePasswordAuthenticationToken auth){
         LdapUserDetailsImpl ldapDetails = (LdapUserDetailsImpl) auth.getPrincipal();
         StringBuilder token = new StringBuilder(ldapDetails.getUsername());
         token.append("|").append(System.currentTimeMillis()).append("|");
@@ -101,6 +114,26 @@ public class RestActiveDirectoryFilter extends AbstractAuthenticationTokenFilter
         }
         return oNode.toString();
     }
+
+    private String buildFakeToken(UsernamePasswordAuthenticationToken auth) {
+        StringBuilder token = new StringBuilder("testuser1");
+        token.append("|").append(System.currentTimeMillis()).append("|");
+        Collection<? extends GrantedAuthority> rights = auth.getAuthorities();
+        token.append(StringUtils.join(rights, "|"));
+        String encrypted = CipherUtils.encrypt(token.toString());
+        encrypted = encrypted.replaceAll("[\\r\\n\\t]+", "");
+        ObjectNode oNode = new ObjectMapper().createObjectNode();
+        oNode.put("Token", encrypted);
+        oNode.put("Principal", "testuser1");
+        oNode.putArray("Roles");
+        ArrayNode aNode = (ArrayNode) oNode.get("Roles");
+        for (GrantedAuthority right : rights) {
+            aNode.add(removeRolePrefix(right.getAuthority()));
+        }
+        return oNode.toString();
+    }
+
+
 
     private UsernamePasswordAuthenticationToken buildAuth(String ticket) throws Exception {
         String decrypted = CipherUtils.decrypt(ticket);

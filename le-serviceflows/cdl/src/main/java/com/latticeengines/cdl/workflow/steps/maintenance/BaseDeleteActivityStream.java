@@ -1,9 +1,11 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_FILTER_BY_JOIN_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +32,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
+import com.latticeengines.domain.exposed.spark.common.FilterByJoinConfig;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -51,6 +54,7 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
     protected DataCollection.Version inactive;
     protected BusinessEntity entity;
     protected TableRoleInCollection batchStore;
+    protected String consolidatedContactTable;
 
     protected abstract List<Action> deleteActions();
 
@@ -66,6 +70,13 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
         batchStore = entity.getBatchStore();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+
+        consolidatedContactTable = dataCollectionProxy.getTableName(customerSpace.getTenantId(),
+                TableRoleInCollection.ConsolidatedContact, inactive);
+        if (StringUtils.isBlank(consolidatedContactTable)) {
+            consolidatedContactTable = dataCollectionProxy.getTableName(customerSpace.getTenantId(),
+                    TableRoleInCollection.ConsolidatedContact, active);
+        }
     }
 
     protected TransformationWorkflowConfiguration generateWorkflowConf() {
@@ -129,6 +140,15 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
                 steps.add(mergeSoftDelete);
                 int mergeDeleteStep = steps.size() - 1;
                 String rawStreamTablePrefix = String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId);
+                List<String> matchEntities = configuration.getActivityStreamMap().get(streamId).getMatchEntities();
+                if (BusinessEntity.Account.equals(idEntity) && matchEntities!=null && matchEntities.contains(BusinessEntity.Contact)) {
+                    List<String> selectColumns = Arrays.asList(InterfaceName.AccountId.name(),
+                            InterfaceName.ContactId.name());
+                    TransformationStepConfig joinStep = joinTable(mergeDeleteStep, consolidatedContactTable, idColumn,
+                            selectColumns);
+                    steps.add(joinStep);
+                    mergeDeleteStep = steps.size() - 1;
+                }
                 TransformationStepConfig softDelete = softDelete(mergeDeleteStep, tableName, idColumn, rawStreamTablePrefix);
                 steps.add(softDelete);
                 log.info("Add steps to delete from stream {} via {}", streamId, idColumn);
@@ -156,6 +176,25 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
         config.setJoinKey(joinKey);
         config.setAddTimestamps(false);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    TransformationStepConfig joinTable(int preStep, String joinTableName, String key, List<String> selectColumns) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_FILTER_BY_JOIN_TXFMR);
+        step.setInputSteps(Collections.singletonList(preStep));
+        if (StringUtils.isNotEmpty(joinTableName)) {
+            log.info("Add join Table=" + joinTableName);
+            addBaseTables(step, joinTableName);
+        } else {
+            throw new IllegalArgumentException("The join table is empty for delete!");
+        }
+        FilterByJoinConfig FilterByJoinConfig = new FilterByJoinConfig();
+        FilterByJoinConfig.setKey(key);
+        FilterByJoinConfig.setJoinType("inner");
+        FilterByJoinConfig.setSelectColumns(selectColumns);
+        FilterByJoinConfig.setSwitchSide(true);
+        step.setConfiguration(appendEngineConf(FilterByJoinConfig, lightEngineConfig()));
         return step;
     }
 

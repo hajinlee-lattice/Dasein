@@ -179,7 +179,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     public EntityRawSeed getOrCreateAnonymousSeed(@NotNull Tenant tenant, @NotNull String entity,
             Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, entity);
-        if (!isAllocateMode()) {
+        if (!isAllocateMode(entity)) {
             throw new UnsupportedOperationException("Not allowed to create anonymous seed in lookup mode");
         }
 
@@ -216,7 +216,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     public String allocateId(@NotNull Tenant tenant, @NotNull String entity, String preferredId,
             Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, entity);
-        if (!isAllocateMode()) {
+        if (!isAllocateMode(entity)) {
             throw new UnsupportedOperationException("Not allowed to allocate ID in lookup mode");
         }
         EntityMatchEnvironment env = EntityMatchEnvironment.SERVING;
@@ -263,7 +263,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             Map<EntityMatchEnvironment, Integer> versionMap) {
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
         checkNotNull(tenant, change);
-        if (!isAllocateMode()) {
+        if (!isAllocateMode(change.getEntity())) {
             throw new UnsupportedOperationException("Not allowed to associate entity in lookup mode");
         }
 
@@ -304,7 +304,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             Map<EntityMatchEnvironment, Integer> versionMap) {
         EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
         checkNotNull(tenant, change);
-        if (!isAllocateMode()) {
+        if (!isAllocateMode(change.getEntity())) {
             throw new UnsupportedOperationException("Not allowed to associate entity in lookup mode");
         }
         int version = getMatchVersion(env, tenant, versionMap);
@@ -634,7 +634,10 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      */
     private Map<EntityLookupEntry, String> getIdsStaging(@NotNull Tenant tenant, @NotNull Set<EntityLookupEntry> keys,
             Map<EntityMatchEnvironment, Integer> versionMap) {
-        if (!isAllocateMode()) {
+        // TODO currently assuming all entries are from the same entity
+        EntityLookupEntry first = CollectionUtils.isEmpty(keys) ? null : keys.iterator().next();
+        String entity = first == null ? null : first.getEntity();
+        if (!isAllocateMode(entity)) {
             // in lookup mode, skip staging layer
             return getIdsServing(tenant, keys, versionMap);
         }
@@ -702,7 +705,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
         Set<String> uniqueSeedIds = new HashSet<>(seedIds);
         // only allow to cache seed in serving
         int servingVersion = getMatchVersion(SERVING, tenant, versionMap);
-        if (isAllocateMode()) {
+        if (isAllocateMode(entity)) {
             // in allocate mode, does not cache seed in-memory because seed will be updated and invalidating cache
             // for multiple processes will be difficult to do.
             return getSeedsStaging(tenant, entity, uniqueSeedIds, versionMap);
@@ -731,7 +734,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private Map<String, EntityRawSeed> getSeedsStaging(
             @NotNull Tenant tenant, @NotNull String entity, @NotNull Set<String> seedIds,
             Map<EntityMatchEnvironment, Integer> versionMap) {
-        if (!isAllocateMode()) {
+        if (!isAllocateMode(entity)) {
             throw new IllegalStateException("Should not reach here in lookup mode.");
         }
 
@@ -968,7 +971,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
                         .recordStats() //
                         .build();
                 entityMatchMetricService.registerLookupCache(lookupCache,
-                        entityMatchConfigurationService.isAllocateMode());
+                        entityMatchConfigurationService.isAllocateMode(null));
             }
         }
     }
@@ -994,7 +997,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * Lazily instantiate thread pools and runnables for populating staging seed/lookup table
      */
     private void initStagingWorkers() {
-        if (!isAllocateMode()) {
+        if (!isAllocateMode(null)) {
             // NOTE only need to populate staging table in allocate mode
             return;
         }
@@ -1019,8 +1022,8 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
      * isAllocateMode = true means
      *   (a) has allocation, (b) not caching seed, (c) lookup from cache, staging and serving table
      */
-    private boolean isAllocateMode() {
-        return entityMatchConfigurationService.isAllocateMode();
+    private boolean isAllocateMode(String entity) {
+        return entityMatchConfigurationService.isAllocateMode(entity);
     }
 
     /*

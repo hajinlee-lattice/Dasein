@@ -61,7 +61,9 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
                         ETLEngineLoad.LIGHT, null, -1);
                 steps.add(mergeImport);
                 if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
-                    TransformationStepConfig matchImport = matchTransaction(steps.size() - 1, null, null);
+                    // only try to lookup existing account ID for imports, don't care about new
+                    // account since later match step will take care of that
+                    TransformationStepConfig matchImport = matchTransaction(steps.size() - 1, null, null, false);
                     steps.add(matchImport);
                 }
             }
@@ -76,7 +78,7 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
                 steps.add(filterImports);
             }
             TransformationStepConfig matchImportAndBatchStore = matchTransaction(steps.size() - 1,
-                    matchTargetTablePrefix, convertedRematchTableNames);
+                    matchTargetTablePrefix, convertedRematchTableNames, true);
             steps.add(matchImportAndBatchStore);
         } else {
             // legacy tenants, just merge imports
@@ -106,18 +108,18 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
     }
 
     private TransformationStepConfig matchTransaction(int inputStep, String matchTargetTable,
-            List<String> convertedRematchTableNames) {
+            List<String> convertedRematchTableNames, boolean registerNewAccountTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         if (matchTargetTable != null) {
             setTargetTable(step, matchTargetTable);
         }
         step.setTransformer(TRANSFORMER_MATCH);
-        step.setConfiguration(getMatchConfig(convertedRematchTableNames));
+        step.setConfiguration(getMatchConfig(convertedRematchTableNames, registerNewAccountTable));
         return step;
     }
 
-    private String getMatchConfig(List<String> convertedRematchTableNames) {
+    private String getMatchConfig(List<String> convertedRematchTableNames, boolean registerNewAccountTable) {
         // NOTE get all imports just to be safe, currently txn should only have one
         // template
         Set<String> columnNames = getInputTableColumnNames();
@@ -141,7 +143,7 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
                     getSystemIds(BusinessEntity.Account), null, hasConvertedRematchTables, null);
         } else {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    getSystemIds(BusinessEntity.Account), newAccountTableName,
+                    getSystemIds(BusinessEntity.Account), registerNewAccountTable ? newAccountTableName : null,
                     hasConvertedRematchTables, null);
         }
     }

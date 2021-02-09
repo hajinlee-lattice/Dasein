@@ -20,16 +20,11 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 
 class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
-
-  val partitionKey: String = StreamDateId.name()
+  private val outputAccountIdCol = "account_id"
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[EnrichWebVisitJobConfig]): Unit = {
     val config: EnrichWebVisitJobConfig = lattice.config
-    val catalogTable: DataFrame = lattice.input(config.catalogInputIdx)
     val selectedAttributes = config.selectedAttributes.asScala
-
-    val pathPatternMap = catalogTable.select(PathPattern.name(), PathPatternName.name).rdd.map(row => ActivityStoreUtils.modifyPattern(row.getAs
-    (PathPattern.name()).toString).r.pattern -> row.getAs(PathPatternName.name()).toString).collectAsMap()
 
     var matchedTable: DataFrame = null
     if (config.matchedWebVisitInputIdx != null) {
@@ -39,18 +34,24 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
         matchedTable = matchedTable.join(latticeAccountTable, Seq(AccountId.name), "left")
       }
 
-      matchedTable = selectedAttributes.foldLeft(matchedTable) {
+      matchedTable = selectedAttributes.foldLeft(matchedTable
+        .withColumn(outputAccountIdCol, col(config.accountIdCol))) {
         case (df, (columnName, displayName)) => addAllNullsIfMissingAndRename(df, columnName, displayName)
       }
-      matchedTable = matchedTable.select(selectedAttributes.values.toList.map(columnName =>
+      matchedTable = matchedTable.select(col(outputAccountIdCol) :: selectedAttributes.values.toList.map(columnName =>
         matchedTable.col(columnName)): _*)
     }
     if (config.masterInputIdx != null) {
       val masterTable: DataFrame = lattice.input(config.masterInputIdx)
       matchedTable = merge(masterTable, matchedTable)
     }
-    matchedTable = matchedTable.drop("page_groups")
-    matchedTable = populateProductPatternNames(matchedTable, pathPatternMap, "page_url","page_groups", lattice)
+    if (config.catalogInputIdx != null) {
+      val catalogTable: DataFrame = lattice.input(config.catalogInputIdx)
+      val pathPatternMap = catalogTable.select(PathPattern.name(), PathPatternName.name).rdd.map(row => ActivityStoreUtils.modifyPattern(row.getAs
+      (PathPattern.name()).toString).r.pattern -> row.getAs(PathPatternName.name()).toString).collectAsMap()
+      matchedTable.drop("page_groups")
+      matchedTable = populateProductPatternNames(matchedTable, pathPatternMap, "page_url", "page_groups", lattice)
+    }
     matchedTable = parseUtmCodes(matchedTable)
     lattice.output = matchedTable :: Nil
   }
@@ -58,7 +59,7 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
   // hard-code parsing utm code (from google analytics) on web visit url for now
   // since we only have one url column and one vendor
   private def parseUtmCodes(df: DataFrame): DataFrame = {
-    val urlCol = WebVisitPageUrl.name
+    val urlCol = "page_url"
     if (!df.columns.contains(urlCol)) {
       df
     } else {
@@ -79,7 +80,7 @@ class EnrichWebVisitJob extends AbstractSparkJob[EnrichWebVisitJobConfig] {
         } else None
     }
     val queryParam = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, col.name)
-    df.withColumn(col.name, urlDecode(callUDF("parse_url", df.col(urlCol), lit("QUERY"), lit(queryParam))))
+    df.withColumn(queryParam, urlDecode(callUDF("parse_url", df.col(urlCol), lit("QUERY"), lit(queryParam))))
   }
 
   def addAllNullsIfMissingAndRename(df: DataFrame, requiredCol: String, displayName: String): DataFrame = {

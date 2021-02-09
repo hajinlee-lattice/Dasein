@@ -10,18 +10,18 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
         @JsonSubTypes.Type(value = DataDeleteOperationConfiguration.class, name = "DataDeleteOperationConfiguration")})
 public class DataOperationConfiguration {
 
-    @JsonProperty("entity")
-    private BusinessEntity entity;
+    @JsonProperty("idEntity")
+    private BusinessEntity idEntity;
 
     @JsonProperty("systemName")
     private String systemName;
 
-    public BusinessEntity getEntity() {
-        return entity;
+    public BusinessEntity getIdEntity() {
+        return idEntity;
     }
 
-    public void setEntity(BusinessEntity entity) {
-        this.entity = entity;
+    public void setIdEntity(BusinessEntity idEntity) {
+        this.idEntity = idEntity;
     }
 
     public String getSystemName() {

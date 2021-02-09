@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.service.MockBrokerInstanceService;
 import com.latticeengines.domain.exposed.cdl.MockBrokerInstance;
 import com.latticeengines.domain.exposed.cdl.integration.BrokerReference;
-import com.latticeengines.domain.exposed.cdl.integration.BrokerSetupInfo;
 import com.latticeengines.domain.exposed.cdl.integration.InboundConnectionType;
 
 @Component("brokerFactory")
@@ -21,19 +20,16 @@ public class BrokerFactoryImpl implements BrokerFactory {
     private MockBrokerInstanceService mockBrokerInstanceService;
 
     @Override
-    public BrokerReference setUpBroker(BrokerSetupInfo brokerSetupInfo) {
-        InboundConnectionType connectionType = brokerSetupInfo.getConnectionType();
+    public BrokerReference setUpBroker(BrokerReference brokerReference) {
+        InboundConnectionType connectionType = brokerReference.getConnectionType();
         if (connectionType != null) {
             switch (connectionType) {
                 case Mock:
                     MockBrokerInstance mockBrokerInstance = new MockBrokerInstance();
-                    mockBrokerInstance.setSelectedFields(brokerSetupInfo.getSelectedFields());
+                    mockBrokerInstance.setSelectedFields(brokerReference.getSelectedFields());
+                    mockBrokerInstance.setDocumentType(brokerReference.getDocumentType());
                     mockBrokerInstance = mockBrokerInstanceService.createOrUpdate(mockBrokerInstance);
-                    BrokerReference brokerReference = new BrokerReference();
-                    brokerReference.setSelectedFields(mockBrokerInstance.getSelectedFields());
                     brokerReference.setSourceId(mockBrokerInstance.getSourceId());
-                    brokerReference.setDataStreamId(mockBrokerInstance.getDataStreamId());
-                    brokerReference.setConnectionType(brokerSetupInfo.getConnectionType());
                     return brokerReference;
                 default:
                     throw new RuntimeException("Inbound connection type is wrong, can't setup broker.");
@@ -51,10 +47,10 @@ public class BrokerFactoryImpl implements BrokerFactory {
                 case Mock:
                     return applicationContext.getBean(MockBroker.class, brokerReference);
                 default:
-                    return null;
+                    throw new RuntimeException("Broker reference info is wrong, can't get broker.");
             }
         } else {
-            return null;
+            throw new RuntimeException("Broker reference info is wrong, can't get broker.");
         }
     }
 

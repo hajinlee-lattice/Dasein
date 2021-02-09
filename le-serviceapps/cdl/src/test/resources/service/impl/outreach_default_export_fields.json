@@ -12,7 +12,7 @@
    },
    {
       "attrName": "AccountId",
-      "displayName": "Account ID",
+      "displayName": "Lattice Account ID",
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
@@ -259,9 +259,9 @@
       "javaClass": "String",
       "externalSystemName": "Outreach",
       "standardField":true,
-      "exportEnabled":true,
+      "exportEnabled":false,
       "forcePopulate":false,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    },
    {
       "attrName": "Email",
@@ -342,12 +342,12 @@
    },
    {
       "attrName": "ContactId",
-      "displayName": "Contact ID",
+      "displayName": "Lattice Contact ID",
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
       "standardField":true,
-      "exportEnabled":true,
+      "exportEnabled":false,
       "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
@@ -386,24 +386,24 @@
    },
    {
       "attrName": "SFDC_CONTACT_ID",
-      "displayName": "Contact SFDC ID",
+      "displayName": "Contact ID",
       "entity": "Contact",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField":false,
-      "exportEnabled":true,
+      "standardField":true,
+      "exportEnabled":false,
       "forcePopulate":false,
       "audienceType": ["CONTACTS"]
    },
    {
       "attrName": "SFDC_ACCOUNT_ID",
-      "displayName": "SFDC Account ID",
+      "displayName": "Account ID",
       "entity": "Account",
       "javaClass": "String",
       "externalSystemName": "Outreach",
-      "standardField":false,
-      "exportEnabled":true,
+      "standardField":true,
+      "exportEnabled":false,
       "forcePopulate":false,
-      "audienceType": ["CONTACTS"]
+      "audienceType": ["ACCOUNTS", "CONTACTS"]
    }
 ]

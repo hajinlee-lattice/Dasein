@@ -11,14 +11,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.ConsulUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
 @Component("livyServerManager")
@@ -27,6 +28,9 @@ public class LivyServerManager {
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
+
+    @Value("${hadoop.use.defaultlivy:false}")
+    private Boolean useDefaultLivy;
 
     @Inject
     private EMRCacheService emrCacheService;
@@ -42,7 +46,7 @@ public class LivyServerManager {
 
     // Define the upper limit for livy sessions on each server
     // for load balance and performance purpose
-    private static final int MAX_SESSION_PER_SERVER = 8;
+    private static final int MAX_SESSION_PER_SERVER = 15;
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
@@ -51,37 +55,46 @@ public class LivyServerManager {
     private Queue<String> serverQueue = new ConcurrentLinkedQueue<>();
 
     public String getLivyHost() {
-        return Boolean.TRUE.equals(useEmr) ? manager.getLivyServerUrl(emrClusterName) : "http://localhost:8998";
+        return Boolean.TRUE.equals(useEmr) ? (Boolean.TRUE.equals(useDefaultLivy) ? emrCacheService.getLivyUrl()
+                : manager.getLivyServerUrl(emrClusterName)) : "http://localhost:8998";
     }
 
     private String getLivyServerUrl(String emrClusterName) {
+        // If using EMR, but no external livy configured, i.e, devcluster,
+        // using default livy on EMR
         if (!isExternalLivyExists(emrClusterName)) {
             log.info("No external livy server configured for this EMR, use the EMR livy server");
             return emrCacheService.getLivyUrl();
         }
 
-        // If livy server queue is empty, reload it
-        if (serverQueue.size() == 0) {
-            // Note that newly added server will be loaded here, if any
-            if (!populateServerQueue(emrClusterName)) {
-                throw new RuntimeException("Reload livy server queue failed");
+        // Find a good livy server to use with retries
+        RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(3, 30000L, 2.0D, null);
+        return retry.execute(context -> {
+            if (context.getRetryCount() > 0) {
+                log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry to find a livy server to use");
             }
-        }
-
-        // Loop through the livy server queue to find an available livy server
-        while (serverQueue.size() != 0) {
-            String nextServerUrl = serverQueue.poll();
-
-            if (isLivyServerGoodForUse(nextServerUrl)) {
-                log.info("Picked livy server " + nextServerUrl);
-                return nextServerUrl;
-            } else {
-                log.warn("Livy server " + nextServerUrl + " is not reachable...");
+            // If livy server queue is empty, reload it
+            if (serverQueue.size() == 0) {
+                // Note that newly added server will be loaded here, if any
+                if (!populateServerQueue(emrClusterName)) {
+                    throw new RuntimeException("Reload livy server queue failed");
+                }
             }
-        }
 
-        // No external livy server available, throw exception
-        throw new RuntimeException("Can't find a good livy server to use...");
+            // Loop through the livy server queue to find an available livy server
+            while (serverQueue.size() != 0) {
+                String nextServerUrl = serverQueue.poll();
+
+                if (isLivyServerGoodForUse(nextServerUrl)) {
+                    log.info("Picked livy server " + nextServerUrl);
+                    return nextServerUrl;
+                } else {
+                    log.warn("Livy server " + nextServerUrl + " is not reachable...");
+                }
+            }
+
+            throw new RuntimeException("Failed to find a good livy server to use");
+        });
     }
 
     private boolean isExternalLivyExists(String emrClusterName) {
@@ -120,60 +133,52 @@ public class LivyServerManager {
     }
 
     private boolean isLivyServerGoodForUse(String serverUrl) {
-        String url = serverUrl + "/sessions";
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(context -> {
+            if (context.getRetryCount() > 0) {
+                log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry checking livy server status");
+            }
 
-        // First, GET all the current sessions on this server
-        String resp;
-        try {
-            resp = restTemplate.getForObject(url, String.class);
-        } catch (RestClientException e) {
-            log.error("GET livy session failed on " + url, e);
-            return false;
-        }
+            try {
+                String url = serverUrl + "/sessions";
+                // First, GET all the current sessions on this server
+                String resp = restTemplate.getForObject(url, String.class);
 
-        // Loop through the sessions:
-        // 1: delete all sessions that are in bad state (save resource)
-        // 2: check against max session upper limit
-        ObjectMapper om = new ObjectMapper();
-        try {
-            JsonNode root = om.readTree(resp);
-            int total = root.get("total").asInt();
-            JsonNode sessions = root.get("sessions");
-            Iterator<JsonNode> iter = sessions.elements();
-            while (iter.hasNext()) {
-                JsonNode json = iter.next();
-                String state = json.get("state").asText();
-                // Based on our current test results,
-                // once livy server has a session in error state, that server is pretty much
-                // dead. Skip that server for now
-                if (state.equalsIgnoreCase("error")) {
-                    log.info(serverUrl + " has session in error state, skip it for now");
-                    return false;
-                }
-                // For other non-active states, try to delete those sessions to save resource
-                if (state.equalsIgnoreCase("killed") || state.equalsIgnoreCase("dead")
-                        || state.equalsIgnoreCase("success")) {
-                    int sessionId = json.get("id").asInt();
-                    try {
-                        restTemplate.delete(url + sessionId);
-                        total--;
-                    } catch (Exception e) {
-                        // Do nothing, suppress the exceptions coming from delete
-                        // as some sessions might already cleaned up by livy during deletion
-                        e.printStackTrace();
+                // Loop through the sessions:
+                // 1: delete all sessions that are in bad state (save resource)
+                // 2: check against max session upper limit
+                ObjectMapper om = new ObjectMapper();
+                JsonNode root = om.readTree(resp);
+                int total = root.get("total").asInt();
+                JsonNode sessions = root.get("sessions");
+                Iterator<JsonNode> iter = sessions.elements();
+                while (iter.hasNext()) {
+                    JsonNode json = iter.next();
+                    String state = json.get("state").asText();
+                    // For non-active states, try to delete those sessions to save resource
+                    if (state.equalsIgnoreCase("killed") || state.equalsIgnoreCase("dead")
+                            || state.equalsIgnoreCase("success") || state.equalsIgnoreCase("error")) {
+                        int sessionId = json.get("id").asInt();
+                        try {
+                            restTemplate.delete(url + "/" + sessionId);
+                            total--;
+                        } catch (Exception e) {
+                            // Do nothing, suppress the exceptions coming from delete
+                            // as some sessions might already cleaned up by livy during deletion
+                            log.info("Failed to delete session " + url + "/" + sessionId, e);
+                        }
                     }
                 }
+                // If remaining sessions already exceed upper limit, return false
+                if (total >= MAX_SESSION_PER_SERVER) {
+                    log.info(serverUrl + " is already loaded");
+                    return false;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to check livy server " + serverUrl, e);
             }
-            // If remaining sessions already exceed upper limit, return false
-            if (total >= MAX_SESSION_PER_SERVER) {
-                log.info(serverUrl + " is already loaded");
-                return false;
-            }
-        } catch (Exception e) {
-            log.error("Failed while loop through sessions on " + url, e);
-            return false;
-        }
 
-        return true;
+            return true;
+        });
     }
 }

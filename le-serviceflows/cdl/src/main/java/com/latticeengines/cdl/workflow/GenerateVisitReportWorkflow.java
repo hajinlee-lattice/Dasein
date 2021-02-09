@@ -1,10 +1,14 @@
 package com.latticeengines.cdl.workflow;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.EnrichWebVisitWrapper;
+import com.latticeengines.cdl.workflow.steps.process.FinishReportGenerationStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateVisitReportWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -17,9 +21,17 @@ public class GenerateVisitReportWorkflow extends AbstractWorkflow<GenerateVisitR
 
     static final String WORKFLOW_NAME = "generateVisitReportWorkflow";
 
+    @Inject
+    private EnrichWebVisitWrapper enrichWebVisitWrapper;
+
+    @Inject
+    private FinishReportGenerationStep finishReportGenerationStep;
+
     @Override
     public Workflow defineWorkflow(GenerateVisitReportWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig) //
+                .next(enrichWebVisitWrapper) //
+                .next(finishReportGenerationStep) //
                 .build();
     }
 }

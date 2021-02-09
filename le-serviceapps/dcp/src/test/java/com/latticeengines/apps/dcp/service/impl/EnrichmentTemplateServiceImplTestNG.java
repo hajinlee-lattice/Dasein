@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.dcp.service.EnrichmentLayoutService;
 import com.latticeengines.apps.dcp.service.EnrichmentTemplateService;
-import com.latticeengines.apps.dcp.testframework.DCPFunctionalTestNGBase;
+import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.datacloud.manage.DataDomain;
 import com.latticeengines.domain.exposed.datacloud.manage.DataRecordType;
@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
 import com.latticeengines.domain.exposed.dcp.ListEnrichmentTemplateRequest;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase {
+public class EnrichmentTemplateServiceImplTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private EnrichmentLayoutService enrichmentLayoutService;
@@ -35,7 +35,9 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
 
     private static final String sourceIdTemplate = "Source_%s";
 
-    @BeforeClass(groups = "functional")
+    private EnrichmentTemplateSummary summary;
+
+    @BeforeClass(groups = "deployment-dcp")
     public void setup() {
         setupTestEnvironment();
         mainTestTenant.setSubscriberNumber(SUBSRIBER_NUMBER_MANY_DOMAINS);
@@ -62,7 +64,7 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
         return layout;
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment-dcp")
     public void testCreateTemplateFromLayout() {
         String layoutId = RandomStringUtils.randomAlphanumeric(4);
         String tenantId = "PropDataService.PropDataService.Production";
@@ -75,13 +77,12 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
 
         String templateName = "Test_Enrichment_Template";
 
-        ResponseDocument<String> createTemplateResult = enrichmentTemplateService.create(layoutId, templateName);
+        EnrichmentTemplateSummary createTemplateResult = enrichmentTemplateService.create(tenantId, layoutId, templateName);
 
-        Assert.assertNotNull(createTemplateResult);
-        Assert.assertTrue(createTemplateResult.isSuccess(), "Enrichment Template is not valid");
+        Assert.assertNotNull(createTemplateResult, "Template creation from layout failed");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment-dcp")
     public void testCreateTemplate() {
         EnrichmentTemplate template = new EnrichmentTemplate();
         template.setDomain(DataDomain.SalesMarketing);
@@ -91,41 +92,52 @@ public class EnrichmentTemplateServiceImplTestNG extends DCPFunctionalTestNGBase
         template.setElements(elements);
         template.setCreatedBy("testUser@dnb.com");
 
-        ResponseDocument<String> createTemplateResult = enrichmentTemplateService.create(template);
+        summary = enrichmentTemplateService.create(template);
 
-        Assert.assertNotNull(createTemplateResult);
-        Assert.assertTrue(createTemplateResult.isSuccess(), "Enrichment Template is not valid");
+        Assert.assertNotNull(summary, "Template creation failed");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment-dcp")
     public void testListTemplates() {
         EnrichmentLayout layout1 = createLayout(DataDomain.Finance, DataRecordType.Analytical);
         EnrichmentLayout layout2 = createLayout(DataDomain.SalesMarketing, DataRecordType.Domain);
+        String tenantId = "PropDataService.PropDataService.Production";
 
-        ResponseDocument<String> createTemplateResult1 = enrichmentTemplateService.create(layout1.getLayoutId(),
+        EnrichmentTemplateSummary createTemplateResult1 = enrichmentTemplateService.create(tenantId, layout1.getLayoutId(),
                 "template1");
 
         Assert.assertNotNull(createTemplateResult1);
-        Assert.assertTrue(createTemplateResult1.isSuccess(), "Enrichment Template is not valid");
 
-        ResponseDocument<String> createTemplateResult2 = enrichmentTemplateService.create(layout2.getLayoutId(),
+        EnrichmentTemplateSummary createTemplateResult2 = enrichmentTemplateService.create(tenantId, layout2.getLayoutId(),
                 "template2");
 
         Assert.assertNotNull(createTemplateResult2);
-        Assert.assertTrue(createTemplateResult2.isSuccess(), "Enrichment Template is not valid");
 
         List<EnrichmentTemplateSummary> summaries1 = enrichmentTemplateService
-                .getEnrichmentTemplates(new ListEnrichmentTemplateRequest(mainTestTenant.getId(),
+                .listEnrichmentTemplates(new ListEnrichmentTemplateRequest(mainTestTenant.getId(),
                         DataDomain.Finance.getDisplayName(), DataRecordType.Analytical.getDisplayName(), false, "ALL"));
         Assert.assertEquals(summaries1.size(), 1);
 
-        List<EnrichmentTemplateSummary> summaries2 = enrichmentTemplateService.getEnrichmentTemplates(
+        List<EnrichmentTemplateSummary> summaries2 = enrichmentTemplateService.listEnrichmentTemplates(
                 new ListEnrichmentTemplateRequest(mainTestTenant.getId(), "ALL", "ALL", false, "testUser@dnb.com"));
         Assert.assertEquals(summaries2.size(), 2);
 
         List<EnrichmentTemplateSummary> summaries3 = enrichmentTemplateService
-                .getEnrichmentTemplates(new ListEnrichmentTemplateRequest(mainTestTenant.getId(),
+                .listEnrichmentTemplates(new ListEnrichmentTemplateRequest(mainTestTenant.getId(),
                         DataDomain.Compliance.getDisplayName(), "ALL", false, "ALL"));
         Assert.assertEquals(summaries3.size(), 0);
+    }
+
+    @Test(groups = "deployment-dcp", dependsOnMethods = "testCreateTemplate")
+    public void testGetTemplate() {
+        EnrichmentTemplateSummary result = enrichmentTemplateService.getEnrichmentTemplate(summary.templateId);
+
+        Assert.assertNotNull(result, "Could not find the stored template");
+        Assert.assertEquals(result.elements, summary.elements, "Did not find correct template");
+        Assert.assertEquals(result.templateId, summary.templateId, "Did not find correct template");
+        Assert.assertEquals(result.templateName, summary.templateName, "Did not find correct template");
+        Assert.assertEquals(result.createdBy, summary.createdBy, "Did not find correct template");
+        Assert.assertEquals(result.domain, summary.domain, "Did not find correct template");
+        Assert.assertEquals(result.recordType, summary.recordType, "Did not find correct template");
     }
 }

@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 @Component("mockBrokerAggregationListener")
-public class MockBrokerAggregationListener extends LEJobListener {
+public class BrokerAggregationListener extends LEJobListener {
 
-    private static final Logger log = LoggerFactory.getLogger(MockBrokerAggregationListener.class);
+    private static final Logger log = LoggerFactory.getLogger(BrokerAggregationListener.class);
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
