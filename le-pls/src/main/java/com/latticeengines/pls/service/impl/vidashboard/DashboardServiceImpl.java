@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.domain.exposed.metadata.template.CSVAdaptor;
 import com.latticeengines.domain.exposed.metadata.template.ImportFieldMapping;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.pls.service.vidashboard.DashboardService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -69,6 +70,24 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Value("${pls.looker.ssvi.usergroup.id}")
     private Integer ssviUserGroupId;
+
+    @Value("${aws.customer.s3.bucket}")
+    protected String s3Bucket;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Value("${pls.looker.db.host.port}")
+    private String dbHost;
+
+    @Value("${pls.looker.db.name}")
+    private String dbName;
+
+    @Value("${pls.looker.db.username}")
+    private String dbUserName;
+
+    @Value("${pls.looker.db.password.encrypted}")
+    private String dbPassword;
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -160,7 +179,10 @@ public class DashboardServiceImpl implements DashboardService {
                 dataUnit.getName(), DataUnit.StorageType.Athena);
         S3DataUnit dataUnit1 = (S3DataUnit) dataUnit;
         targetAccountList.setTableName(dataUnit1.getName());
-        targetAccountList.setS3Path(dataUnit1.getLinkedDir());
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+        String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
+        targetAccountList.setS3Path(pathBuilder.getS3AtlasDataUnitPrefix(s3Bucket, tenantId,
+                dataUnit1.getDataTemplateId(), dataUnit1.getName()));
         targetAccountList.setHdfsPath(dataUnit1.getLinkedHdfsPath());
         targetAccountList.setAthenaTableName(athenaDataUnit == null ? null : athenaDataUnit.getAthenaTable());
         return targetAccountList;
@@ -197,6 +219,10 @@ public class DashboardServiceImpl implements DashboardService {
             data.setSessionLength(lookerSessionLengthInSeconds);
             data.setEmbedUrl(EmbedUrlUtils.embedUrl(ssviLookerModelName, dashboard));
             data.setForceLogoutLogin(true);
+            data.setDbHost(dbHost);
+            data.setDbName(dbName);
+            data.setDbUserName(dbUserName);
+            data.setDbPassword(dbPassword);
             data.setUserAttributes(getUserAttributes(customerSpace, webVisitTableName));
             return Pair.of(dashboard, EmbedUrlUtils.signEmbedDashboardUrl(data));
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
