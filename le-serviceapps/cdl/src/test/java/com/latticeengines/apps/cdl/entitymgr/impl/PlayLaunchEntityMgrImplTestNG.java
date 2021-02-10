@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.PlayType;
+import com.latticeengines.domain.exposed.pls.RecordsStats;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -455,6 +456,27 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCumulativeStatsDashboard" })
+    public void testUpdateRecordsStats() {
+
+        PlayLaunch oldPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch1.getLaunchId(), false);
+        RecordsStats recordsStats = oldPlayLaunch.getRecordsStats();
+
+        if (recordsStats == null) {
+            recordsStats = new RecordsStats();
+        }
+
+        recordsStats.setRecordsReceivedFromAcxiom(1000L);
+        oldPlayLaunch.setRecordsStats(recordsStats);
+        playLaunchEntityMgr.update(oldPlayLaunch);
+
+        PlayLaunch updatedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch1.getLaunchId(), false);
+
+        Assert.assertNotNull(updatedPlayLaunch);
+        Assert.assertNotNull(updatedPlayLaunch.getRecordsStats());
+        Assert.assertEquals(updatedPlayLaunch.getRecordsStats().getRecordsReceivedFromAcxiom().longValue(), 1000L);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testUpdateRecordsStats" })
     public void testDelete() {
         playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         playLaunchEntityMgr.deleteByLaunchId(playLaunch2.getLaunchId(), false);

@@ -8,7 +8,7 @@ import java.util.Set;
 
 public enum DataIntegrationEventType {
     WorkflowSubmitted, ExportStart, Initiated, InProgress, Completed, Failed, AudienceCreation, //
-    AudienceSizeUpdate, DestinationAccountCreation, AuthInvalidated;
+    AudienceSizeUpdate, DestinationAccountCreation, AuthInvalidated, ReceivedFromAcxiom, AcxiomCompleted;
 
     private static Map<DataIntegrationEventType, Collection<DataIntegrationEventType>> transitionMap = new HashMap<>();
 

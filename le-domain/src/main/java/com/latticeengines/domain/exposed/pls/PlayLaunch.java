@@ -342,7 +342,12 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Enumerated(EnumType.STRING)
     @Column(name = "TAP_TYPE")
     private Play.TapType tapType;
-    
+
+    @JsonProperty("recordsStats")
+    @Column(name = "RECORDS_STATS")
+    @Lob
+    private String recordsStats;
+
     public PlayLaunch() {
     }
 
@@ -860,6 +865,18 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.destinationSysName = destinationSysName;
     }
 
+    public RecordsStats getRecordsStats() {
+        RecordsStats newRecordStats = null;
+        if (recordsStats != null) {
+            newRecordStats = JsonUtils.deserialize(recordsStats, RecordsStats.class);
+        }
+        return newRecordStats;
+    }
+
+    public void setRecordsStats(RecordsStats recordsStats) {
+        this.recordsStats = JsonUtils.serialize(recordsStats);
+    }
+
     public void merge(PlayLaunch playLaunch) {
         if (playLaunch.getLaunchState() != null) {
             this.setLaunchState(playLaunch.getLaunchState());
@@ -999,6 +1016,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         }
         if (playLaunch.getTapType() != null) {
             this.setTapType(playLaunch.getTapType());
+        }
+
+        // Records Stats
+        if (playLaunch.getRecordsStats() != null) {
+            this.setRecordsStats(playLaunch.getRecordsStats());
         }
     }
 
