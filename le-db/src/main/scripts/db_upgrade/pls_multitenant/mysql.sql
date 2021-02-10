@@ -16,8 +16,6 @@ CREATE PROCEDURE `UpdateSchema`()
   BEGIN
     -- User input section (DDL/DML). This is just a template, developer can modify based on need.
     
-    ALTER TABLE `PLS_MultiTenant`.`METADATA_LIST_SEGMENT` ADD COLUMN `CONFIG` JSON;
-
       ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH`
               ADD COLUMN `RECORDS_STATS` LONGTEXT NULL DEFAULT NULL;
               
@@ -38,19 +36,6 @@ CREATE PROCEDURE `UpdateSchema`()
       ) ENGINE = InnoDB
         DEFAULT CHARSET = utf8mb4
         COLLATE = utf8mb4_unicode_ci;
-
-    -- DCP-1838, author: lucascl@dnb.com product: D&B Connect
-    ALTER TABLE `DCP_DATA_REPORT`
-        ADD COLUMN `ROLLUP_STATUS` VARCHAR(255);
-
-
-
-
-    -- DCP-2131 author: WuH@dnb.com product: D&B Connect
-    ALTER TABLE `PLS_MultiTenant`.`DCP_ENRICHMENT_TEMPLATE`
-          ADD COLUMN `ELEMENTS` JSON;
-
-
 
   END //
 -- ##############################################################

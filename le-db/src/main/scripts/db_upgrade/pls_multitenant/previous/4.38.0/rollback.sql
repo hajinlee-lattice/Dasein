@@ -14,7 +14,14 @@ CREATE PROCEDURE `RollbackSchema`()
   BEGIN
     -- User input section (DDL/DML). This is just a template, developer can modify based on need.
 
-    
+    ALTER TABLE `PLS_MultiTenant`.`METADATA_LIST_SEGMENT` DROP COLUMN `CONFIG`; 
+
+	  -- DCP-1838, author: lucascl@dnb.com product: D&B Connect
+    ALTER TABLE `DCP_DATA_REPORT` DROP COLUMN `ROLLUP_STATUS`;
+
+    -- DCP-2131 author: LizotteN@dnb.com product: D&B Connect
+    ALTER TABLE `PLS_MultiTenant`.`DCP_ENRICHMENT_TEMPLATE` DROP COLUMN `ELEMENTS`;
+
   END //
 -- ##############################################################
 
