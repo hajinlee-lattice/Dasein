@@ -141,11 +141,8 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         // subscriber at limit: assert fail, no meter change
         VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
         switchSubscriber(SUBSCRIBER_NUMBER_FULL);
-
         register(EXTERNAL_USER_EMAIL, false);
-
         int available = getAvailableSeats(SUBSCRIBER_NUMBER_FULL);
-
         while (available <1) {
             sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STDEC, SUBSCRIBER_NUMBER_FULL);
             available++;
@@ -164,9 +161,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private void register(String email, boolean expectSuccess) throws InterruptedException {
         int initialCount = getSeatCount();
-
         UserRegistration uReg = createUserReg(email);
-
         try {
             String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users/", uReg, String.class);
             ResponseDocument<RegistrationResult> response = ResponseDocument.
@@ -182,7 +177,6 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         }
         Thread.sleep(3000);
         int currCount = getSeatCount();
-
         if (expectSuccess && !EmailUtils.isInternalUser(email)) {
             assertEquals(currCount, initialCount + 1);
         } else {
@@ -243,20 +237,17 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     private void ensureSubscriberSeatState() throws InterruptedException {
         // ensure open
         int openSeats = getAvailableSeats(SUBSCRIBER_NUMBER_OPEN);
-
         while (openSeats < 1) {
             sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STDEC, SUBSCRIBER_NUMBER_OPEN);
             openSeats++;
         }
         // ensure full
         openSeats = getAvailableSeats(SUBSCRIBER_NUMBER_FULL);
-
         while (openSeats > 0) {
             sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STCT, SUBSCRIBER_NUMBER_FULL);
             openSeats--;
         }
         openSeats = getAvailableSeats(SUBSCRIBER_NUMBER_FULL);
-
         while (openSeats < 0) {
             sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STDEC, SUBSCRIBER_NUMBER_FULL);
             openSeats++;
@@ -315,5 +306,4 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         return userReg;
     }
-
 }
