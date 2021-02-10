@@ -29,6 +29,14 @@ public class EmbedUrlData {
 
     private boolean forceLogoutLogin;
 
+    private String dbHost;
+
+    private String dbName;
+
+    private String dbUserName;
+
+    private String dbPassword;
+
     public String getHost() {
         return host;
     }
@@ -132,5 +140,37 @@ public class EmbedUrlData {
                 + ", groupIds=" + groupIds + ", permissions=" + permissions + ", models=" + models + ", userAttributes="
                 + userAttributes + ", sessionLength=" + sessionLength + ", embedUrl='" + embedUrl + '\''
                 + ", forceLogoutLogin=" + forceLogoutLogin + '}';
+    }
+
+    public String getDbHost() {
+        return dbHost;
+    }
+
+    public void setDbHost(String dbHost) {
+        this.dbHost = dbHost;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+    }
+
+    public String getDbUserName() {
+        return dbUserName;
+    }
+
+    public void setDbUserName(String dbUserName) {
+        this.dbUserName = dbUserName;
+    }
+
+    public String getDbPassword() {
+        return dbPassword;
+    }
+
+    public void setDbPassword(String dbPassword) {
+        this.dbPassword = dbPassword;
     }
 }

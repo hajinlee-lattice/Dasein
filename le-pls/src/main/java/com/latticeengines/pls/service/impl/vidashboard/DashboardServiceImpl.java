@@ -77,6 +77,18 @@ public class DashboardServiceImpl implements DashboardService {
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
+    @Value("${pls.looker.db.host.port}")
+    private String dbHost;
+
+    @Value("${pls.looker.db.name}")
+    private String dbName;
+
+    @Value("${pls.looker.db.username}")
+    private String dbUserName;
+
+    @Value("${pls.looker.db.password.encrypted}")
+    private String dbPassword;
+
     @Inject
     private SegmentProxy segmentProxy;
 
@@ -207,6 +219,10 @@ public class DashboardServiceImpl implements DashboardService {
             data.setSessionLength(lookerSessionLengthInSeconds);
             data.setEmbedUrl(EmbedUrlUtils.embedUrl(ssviLookerModelName, dashboard));
             data.setForceLogoutLogin(true);
+            data.setDbHost(dbHost);
+            data.setDbName(dbName);
+            data.setDbUserName(dbUserName);
+            data.setDbPassword(dbPassword);
             data.setUserAttributes(getUserAttributes(customerSpace, webVisitTableName));
             return Pair.of(dashboard, EmbedUrlUtils.signEmbedDashboardUrl(data));
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
