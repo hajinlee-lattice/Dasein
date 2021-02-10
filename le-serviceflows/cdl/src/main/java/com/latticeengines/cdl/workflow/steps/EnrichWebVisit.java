@@ -145,7 +145,7 @@ public class EnrichWebVisit extends BaseTransformWrapperStep<EnrichWebVisitStepC
             }
             latticeAccountTableName = latticeAccountTable.getName();
         }
-        if ((StringUtils.isEmpty(matchedTableName) || mergeWebVisitStep == -1) && !configuration.isRebuildMode() && !hasCatalogImport(webVisitStream, configuration.getCatalogImports().keySet())) {
+        if (StringUtils.isEmpty(matchedTableName) && mergeWebVisitStep == -1 && !configuration.isRebuildMode() && !hasCatalogImport(webVisitStream, configuration.getCatalogImports().keySet())) {
             log.info("no import data, no need rebuild, no new catalog import, will skip this step.");
             return null;
         }
