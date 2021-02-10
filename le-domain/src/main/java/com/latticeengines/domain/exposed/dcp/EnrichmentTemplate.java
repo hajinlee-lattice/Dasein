@@ -91,11 +91,14 @@ public class EnrichmentTemplate implements HasPid, HasTenant {
     private Tenant tenant;
 
     public EnrichmentTemplate() {
-        this.templateId = NamingUtils.uuid("Template");
     }
 
-    public EnrichmentTemplate(EnrichmentLayout enrichmentLayout) {
-        this.templateId = NamingUtils.uuid("Template");
+    public EnrichmentTemplate(String templateId) {
+        this.templateId = templateId;
+    }
+
+    public EnrichmentTemplate(String templateId, EnrichmentLayout enrichmentLayout) {
+        this.templateId = templateId;
         this.domain = enrichmentLayout.getDomain();
         this.recordType = enrichmentLayout.getRecordType();
         this.elements = enrichmentLayout.getElements();

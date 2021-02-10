@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.dcp.CreateEnrichmentTemplateRequest;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplate;
 import com.latticeengines.domain.exposed.dcp.EnrichmentTemplateSummary;
 import com.latticeengines.pls.service.dcp.EnrichmentTemplateService;
@@ -21,8 +22,8 @@ public class EnrichmentTemplateServiceImpl implements EnrichmentTemplateService 
 
     @Override
     public ResponseDocument<EnrichmentTemplateSummary> createEnrichmentTemplate(String layoutId, String templateName) {
-        return enrichmentTemplateProxy.createEnrichmentTemplate(MultiTenantContext.getShortTenantId(), layoutId,
-                templateName);
+        CreateEnrichmentTemplateRequest request = new CreateEnrichmentTemplateRequest(layoutId, templateName, MultiTenantContext.getEmailAddress());
+        return enrichmentTemplateProxy.createEnrichmentTemplate(MultiTenantContext.getShortTenantId(), request);
     }
 
     @Override

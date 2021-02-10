@@ -42,8 +42,7 @@ public class EnrichmentTemplateResource {
     public ResponseDocument<EnrichmentTemplateSummary> create(@PathVariable String customerSpace,
             @RequestBody CreateEnrichmentTemplateRequest request) {
         try {
-            return ResponseDocument.successResponse(enrichmentTemplateService.create(customerSpace, request.getLayoutId(),
-                    request.getTemplateName()));
+            return ResponseDocument.successResponse(enrichmentTemplateService.create(customerSpace, request));
         } catch (LedpException exception) {
             log.error(String.format("Failed to create enrichment template from existing layout %s: %s",
                     request.getLayoutId(), exception.getMessage()));
