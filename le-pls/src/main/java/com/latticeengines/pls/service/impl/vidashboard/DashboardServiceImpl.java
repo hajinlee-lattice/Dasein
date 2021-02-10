@@ -168,7 +168,8 @@ public class DashboardServiceImpl implements DashboardService {
         S3DataUnit dataUnit1 = (S3DataUnit) dataUnit;
         targetAccountList.setTableName(dataUnit1.getName());
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-        targetAccountList.setS3Path(pathBuilder.getS3AtlasDataUnitPrefix(s3Bucket, customerSpace,
+        String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
+        targetAccountList.setS3Path(pathBuilder.getS3AtlasDataUnitPrefix(s3Bucket, tenantId,
                 dataUnit1.getDataTemplateId(), dataUnit1.getName()));
         targetAccountList.setHdfsPath(dataUnit1.getLinkedHdfsPath());
         targetAccountList.setAthenaTableName(athenaDataUnit == null ? null : athenaDataUnit.getAthenaTable());
