@@ -15,7 +15,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -71,7 +71,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         ensureSubscriberSeatState();
     }
 
-    @AfterTest(groups = "deployment")
+    @AfterMethod(groups = "deployment")
     public void cleanupUsers() {
         userService.deleteUserByEmail(INTERNAL_USER_EMAIL);
         userService.deleteUserByEmail(EXTERNAL_USER_EMAIL);
@@ -136,6 +136,24 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         delete(EXTERNAL_USER_EMAIL, false);
     }
 
+    @Test(groups = "deployment", dependsOnMethods = {"testUpdateExternalEmail"})
+    public void testRegisterExternalEmailAfterDecrement() throws InterruptedException {
+        // subscriber at limit: assert fail, no meter change
+        VboUserSeatUsageEvent usageEvent = new VboUserSeatUsageEvent();
+        switchSubscriber(SUBSCRIBER_NUMBER_FULL);
+        register(EXTERNAL_USER_EMAIL, false);
+        int available = getAvailableSeats(SUBSCRIBER_NUMBER_FULL);
+        while (available <1) {
+            sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STDEC, SUBSCRIBER_NUMBER_FULL);
+            available++;
+        }
+        Thread.sleep(3000);
+
+        register(EXTERNAL_USER_EMAIL, true);
+        delete(EXTERNAL_USER_EMAIL, true);
+        sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STCT, SUBSCRIBER_NUMBER_FULL);
+    }
+
     private void switchSubscriber(String subscriberNumber) {
         mainTestTenant.setSubscriberNumber(subscriberNumber);
         tenantService.updateTenant(mainTestTenant);
@@ -148,6 +166,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users/", uReg, String.class);
             ResponseDocument<RegistrationResult> response = ResponseDocument.
                     generateFromJSON(json, RegistrationResult.class);
+
             assertNotNull(response);
             assertEquals(response.isSuccess(), expectSuccess);
         } catch (RuntimeException e) {
@@ -228,9 +247,15 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STCT, SUBSCRIBER_NUMBER_FULL);
             openSeats--;
         }
+        openSeats = getAvailableSeats(SUBSCRIBER_NUMBER_FULL);
+        while (openSeats < 0) {
+            sendUsageEvent(VboUserSeatUsageEvent.FeatureURI.STDEC, SUBSCRIBER_NUMBER_FULL);
+            openSeats++;
+        }
+
         Thread.sleep(3000);
         assertTrue(getAvailableSeats(SUBSCRIBER_NUMBER_OPEN) >= 1);
-        assertEquals(getAvailableSeats(SUBSCRIBER_NUMBER_FULL), 0);
+        assertTrue (getAvailableSeats(SUBSCRIBER_NUMBER_FULL) == 0);
     }
 
     private int getAvailableSeats(String subscriberNumber) {
@@ -240,6 +265,7 @@ public class VboServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertTrue(meter.has("limit"));
         assertNotNull(meter.get("current_usage"));
         assertNotNull(meter.get("limit"));
+
         return meter.get("limit").asInt() - meter.get("current_usage").asInt();
     }
 
