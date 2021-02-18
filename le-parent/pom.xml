@@ -241,6 +241,11 @@
 <!--                <checksumPolicy>fail</checksumPolicy>-->
 <!--            </snapshots>-->
 <!--        </repository>-->
+        <!-- list of other repositories -->
+        <repository>
+            <id>SparkPackagesRepo</id>
+            <url>http://dl.bintray.com/spark-packages/maven</url>
+        </repository>
         <repository>
             <id>lattice-local</id>
             <name>Lattice local</name>
