@@ -6,9 +6,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
-public class ConvertToGraphJobConfig extends SparkJobConfig {
+public class ConvertAccountsToGraphJobConfig extends SparkJobConfig {
 
-    public static final String NAME = "convertToGraphJob";
+    public static final String NAME = "convertAccountsToGraphJob";
 
     @JsonProperty("InputDescriptors")
     private List<Map<String, String>> inputDescriptors;
