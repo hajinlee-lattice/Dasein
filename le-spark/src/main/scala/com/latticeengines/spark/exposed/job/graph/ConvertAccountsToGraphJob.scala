@@ -2,7 +2,7 @@ package com.latticeengines.spark.exposed.job.graph
 
 import java.util.Map
 
-import com.latticeengines.domain.exposed.spark.graph.ConvertToGraphJobConfig
+import com.latticeengines.domain.exposed.spark.graph.ConvertAccountsToGraphJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -12,7 +12,7 @@ import org.apache.spark.sql.types._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-class ConvertToGraphJob extends AbstractSparkJob[ConvertToGraphJobConfig] {
+class ConvertAccountsToGraphJob extends AbstractSparkJob[ConvertAccountsToGraphJobConfig] {
 
   private val VERTEX_ID = "VertexID"
   private val VERTEX_TYPE = "Type"
@@ -32,8 +32,8 @@ class ConvertToGraphJob extends AbstractSparkJob[ConvertToGraphJobConfig] {
   private val matchIds = "MatchIDs"
   private val uniqueId = "UniqueID"
 
-  override def runJob(spark: SparkSession, lattice: LatticeContext[ConvertToGraphJobConfig]): Unit = {
-    val config: ConvertToGraphJobConfig = lattice.config
+  override def runJob(spark: SparkSession, lattice: LatticeContext[ConvertAccountsToGraphJobConfig]): Unit = {
+    val config: ConvertAccountsToGraphJobConfig = lattice.config
     val inputs: List[DataFrame] = lattice.input
     val inputDescriptors: List[Map[String, String]] = config.getInputDescriptors.asScala.toList
 

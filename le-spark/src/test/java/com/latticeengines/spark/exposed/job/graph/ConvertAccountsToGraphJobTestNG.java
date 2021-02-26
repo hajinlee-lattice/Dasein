@@ -16,11 +16,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.graph.ConvertToGraphJobConfig;
+import com.latticeengines.domain.exposed.spark.graph.ConvertAccountsToGraphJobConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-public class ConvertToGraphJobTestNG extends SparkJobFunctionalTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(ConvertToGraphJobTestNG.class);
+public class ConvertAccountsToGraphJobTestNG extends SparkJobFunctionalTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(ConvertAccountsToGraphJobTestNG.class);
 
     private static final String ENTITY = "Entity";
     private static final String TEMPLATE_ID = "TemplateID";
@@ -41,10 +41,10 @@ public class ConvertToGraphJobTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void runTest() {
         prepareData();
-        ConvertToGraphJobConfig config = new ConvertToGraphJobConfig();
+        ConvertAccountsToGraphJobConfig config = new ConvertAccountsToGraphJobConfig();
         config.setInputDescriptors(inputDescriptors);
 
-        SparkJobResult result = runSparkJob(ConvertToGraphJob.class, config, inputs, getWorkspace());
+        SparkJobResult result = runSparkJob(ConvertAccountsToGraphJob.class, config, inputs, getWorkspace());
         log.info("Result = {}", JsonUtils.serialize(result));
 
         Assert.assertEquals(result.getTargets().size(), 2);
