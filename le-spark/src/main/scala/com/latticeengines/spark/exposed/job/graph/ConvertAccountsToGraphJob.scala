@@ -40,8 +40,8 @@ class ConvertAccountsToGraphJob extends AbstractSparkJob[ConvertAccountsToGraphJ
     var vertices: List[List[Any]] = List()
     var edges: List[List[Any]] = List()
 
-    for (input <- inputs) {
-      var descriptor = getDescriptor(input, inputDescriptors)
+    for ((input, idx) <- inputs.zipWithIndex) {
+      var descriptor = inputDescriptors(idx)
       val matchCols = descriptor.get(matchIds).split(",")
       val descriptorUniqueId = descriptor.get(uniqueId)
 
@@ -66,11 +66,6 @@ class ConvertAccountsToGraphJob extends AbstractSparkJob[ConvertAccountsToGraphJ
     val edgesDf = createEdgesDf(spark, edges)
 
     lattice.output = List(verticesDf, edgesDf)
-  }
-
-  private def getDescriptor(input: DataFrame, inputDescriptors: List[Map[String, String]]): Map[String, String] = {
-    val inputSystem = input.select(col(systemName)).first.getString(0)
-    inputDescriptors.filter(_.get(templateId) == inputSystem + accountId).head
   }
 
   private def createVerticesDf(spark: SparkSession, vertices: List[List[Any]]): DataFrame = {
