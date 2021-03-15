@@ -102,6 +102,7 @@ import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig;
 import com.latticeengines.domain.exposed.spark.graph.AssignEntityIdsJobConfig;
 import com.latticeengines.domain.exposed.spark.graph.ConvertAccountsToGraphJobConfig;
 import com.latticeengines.domain.exposed.spark.graph.GraphPageRankJobConfig;
+import com.latticeengines.domain.exposed.spark.graph.MergeGraphsJobConfig;
 import com.latticeengines.domain.exposed.spark.stats.AdvancedCalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
@@ -221,6 +222,7 @@ import com.latticeengines.domain.exposed.spark.stats.UpdateProfileConfig;
         @JsonSubTypes.Type(value = GenerateChangeTableConfig.class, name = GenerateChangeTableConfig.NAME), //
         @JsonSubTypes.Type(value = GraphPageRankJobConfig.class, name = GraphPageRankJobConfig.NAME), //
         @JsonSubTypes.Type(value = ConvertAccountsToGraphJobConfig.class, name = ConvertAccountsToGraphJobConfig.NAME), //
+        @JsonSubTypes.Type(value = MergeGraphsJobConfig.class, name = MergeGraphsJobConfig.NAME), //
         @JsonSubTypes.Type(value = AssignEntityIdsJobConfig.class, name = AssignEntityIdsJobConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
