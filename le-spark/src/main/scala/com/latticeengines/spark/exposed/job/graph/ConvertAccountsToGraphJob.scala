@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.graph
 
 import java.util.Map
+import java.util.UUID
 
 import com.latticeengines.domain.exposed.spark.graph.ConvertAccountsToGraphJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -14,14 +15,14 @@ import scala.collection.mutable
 
 class ConvertAccountsToGraphJob extends AbstractSparkJob[ConvertAccountsToGraphJobConfig] {
 
-  private val VERTEX_ID = "VertexID"
-  private val VERTEX_TYPE = "Type"
-  private val VERTEX_SYSTEM_ID = "SystemID"
-  private val VERTEX_VALUE = "VertexValue"
+  private val VERTEX_ID = "id"
+  private val VERTEX_TYPE = "type"
+  private val VERTEX_SYSTEM_ID = "systemID"
+  private val VERTEX_VALUE = "vertexValue"
 
-  private val EDGE_SRC = "Src"
-  private val EDGE_DEST = "Dest"
-  private val EDGE_PROPERTY = "Property"
+  private val EDGE_SRC = "src"
+  private val EDGE_DEST = "dst"
+  private val EDGE_PROPERTY = "property"
 
   private val docV = "docV"
   private val idV = "IdV"
@@ -48,12 +49,12 @@ class ConvertAccountsToGraphJob extends AbstractSparkJob[ConvertAccountsToGraphJ
       input.collect().foreach(row => {
         val rowAccountId = row.getAs[String](accountId)
         val rowSystemName = row.getAs[String](systemName)
-        val docVId = descriptorUniqueId + "_" + rowAccountId
+        val docVId: Long = UUID.randomUUID().getMostSignificantBits() & Long.MaxValue
         vertices = vertices :+ List(docVId, docV, rowSystemName, rowAccountId)
 
         for (matchId <- matchCols) {
           val rowMatchId = row.getAs[String](matchId)
-          val idVId = descriptorUniqueId + "_" + rowMatchId
+          val idVId: Long = UUID.randomUUID().getMostSignificantBits() & Long.MaxValue
           vertices = vertices :+ List(idVId, idV, matchId, rowMatchId)
 
           val property = new mutable.HashMap[String, String]()
@@ -70,7 +71,7 @@ class ConvertAccountsToGraphJob extends AbstractSparkJob[ConvertAccountsToGraphJ
 
   private def createVerticesDf(spark: SparkSession, vertices: List[List[Any]]): DataFrame = {
     val verticesSchema = StructType(List( //
-        StructField(VERTEX_ID, StringType, nullable = false), //
+        StructField(VERTEX_ID, LongType, nullable = false), //
         StructField(VERTEX_TYPE, StringType, nullable = false), //
         StructField(VERTEX_SYSTEM_ID, StringType, nullable = false), //
         StructField(VERTEX_VALUE, StringType, nullable = false) //
@@ -81,8 +82,8 @@ class ConvertAccountsToGraphJob extends AbstractSparkJob[ConvertAccountsToGraphJ
 
     private def createEdgesDf(spark: SparkSession, edges: List[List[Any]]): DataFrame = {
     val edgesSchema = StructType(List( //
-        StructField(EDGE_SRC, StringType, nullable = false), //
-        StructField(EDGE_DEST, StringType, nullable = false), //
+        StructField(EDGE_SRC, LongType, nullable = false), //
+        StructField(EDGE_DEST, LongType, nullable = false), //
         StructField(EDGE_PROPERTY, StringType, nullable = false) //
     ))
     val data: RDD[Row] = spark.sparkContext.parallelize(edges.map(row => Row(row: _*)))
