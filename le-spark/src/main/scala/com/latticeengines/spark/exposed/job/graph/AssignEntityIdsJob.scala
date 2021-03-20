@@ -9,7 +9,7 @@ import org.apache.spark.sql.functions.{count, col}
 import org.apache.spark.sql.expressions.Window
 import org.graphframes.GraphFrame
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{HashMap, Set}
 
 class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
   private val componentId = "ConnectedComponentID"
@@ -63,81 +63,100 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     val graph = Graph(vrdd, erdd)
 
     // Step 3. Get all paths between conflicting pairs using pregel
-    val initialGraph: Graph[PregelVertexAttributes, String] = graph.mapVertices((id, _) => {
-      var messageBuffer: List[PathFinder] = List()
-      var initMessage: List[PathFinder] = List()
+    val initialGraph: Graph[PregelVertexAttr, String] = graph.mapVertices((id, _) => {
+      var messageList: List[VertexMessage] = List()
+      var initMessage = false
       if (fromToMap.contains(id)) {
-        val pf = new PathFinder(id, id, List())
-        initMessage = initMessage :+ pf
+        initMessage = true
       }
-      new PregelVertexAttributes(toFromMap.getOrElse(id, -1L), messageBuffer, initMessage, List())
+      new PregelVertexAttr(toFromMap.getOrElse(id, -1L), messageList, initMessage, List())
     })
 
-    val pregelGraph = runPregel(initialGraph, 1)
+    val pregelGraph: Graph[PregelVertexAttr, String] = runPregel(initialGraph, maxComponentSize)
+
+    var allConflictPaths: List[List[PathPair]] = List()
+    pregelGraph.mapVertices((_, attr) => {
+      if (!attr.foundPaths.isEmpty) {
+        for (foundPath <- attr.foundPaths) {
+          allConflictPaths = allConflictPaths :+ foundPath.path
+        }
+      }
+    })
 
     // Step 4. Cut conflicts
-    lattice.outputStr = pregelGraph.vertices.collect().mkString("\n")
+    
+
+    lattice.outputStr = allConflictPaths.mkString("\n")
     lattice.output = List(vertices, edges, conflictIdsDf)
   }
 
-  private def runPregel(graph: Graph[PregelVertexAttributes, String], maxIter: Int): Graph[PregelVertexAttributes, String] = {
-    val emptyPfList: List[PathFinder] = List()
-    graph.pregel(emptyPfList, maxIter, EdgeDirection.Either)(
+  private def runPregel(graph: Graph[PregelVertexAttr, String], maxIter: Int): Graph[PregelVertexAttr, String] = {
+    val emptyMessageList: List[VertexMessage] = List()
+    graph.pregel(emptyMessageList, maxIter, EdgeDirection.Either)(
       // Vertex Program
-      (id, prop, listOfPathFinders) => {
-        var messageBuffer: List[PathFinder] = prop.initMessage // contains initial messages at iteration 0
-        var initMessage: List[PathFinder] = List() // empty the init message
+      (id, attr, incomingMessages) => {
+        var messageList: List[VertexMessage] = List()
+        var initMessage: Boolean = attr.initMessage
+        if (initMessage) {
+          val m = new VertexMessage(id, id, List(), Set())
+          messageList = messageList :+ m
+          initMessage = false
+        }
 
-        var newFoundPaths = prop.foundPaths
-        listOfPathFinders.map(pf => {
-          // update path based on path size to always have docV ID first
-          var path = pf.path
+        var newFoundPaths = attr.foundPaths
+        incomingMessages.map(message => {
+          // Add the latest pair to the path
+          var path = message.path
           if (path.size % 2 == 1) {
-            path = path :+ new PathPair(pf.from, id)
+            path = path :+ new PathPair(message.from, id)
           } else {
-            path = path :+ new PathPair(id, pf.from)
+            path = path :+ new PathPair(id, message.from)
           }
-          val newPf = new PathFinder(pf.src, id, path)
+          val newMessage = new VertexMessage(message.src, id, path, Set())
 
-          // check if we are a "to" destination
-          if (prop.waitingFor == pf.src) {
-            // completed a path! Add it to the list of found paths
-            newFoundPaths = newFoundPaths :+ newPf
-            // send an emtpy message to the previous one to trigger vprogram
-            // val emptyPf = new PathFinder(id, id, List())
-            // messageBuffer = messageBuffer :+ emptyPf
-          } else if (pf.path.iterator.exists(pair => pair.docVId == id || pair.idVId == id)) {
+          // check if we are at destination
+          if (attr.waitingFor == message.src) {
+            // completed a path! Add it to the foundPaths
+            newFoundPaths = newFoundPaths :+ newMessage
+
+          } else if (message.path.iterator.exists(pair => pair.docVId == id || pair.idVId == id)) {
             // cycle: do not pass the message
           } else {
             // pass message to neighboring vertices
-            messageBuffer = messageBuffer :+ newPf // this will be sent this step
+            messageList = messageList :+ newMessage
           }
         })
-        new PregelVertexAttributes(prop.waitingFor, messageBuffer, initMessage, newFoundPaths)
+        new PregelVertexAttr(attr.waitingFor, messageList, initMessage, newFoundPaths)
       },
 
-      // Send Outgoing Messages
+      // Send outgoing messages
       triplet => {
         // Set iterator for sending messages to both directions src <-> dst
-        triplet.srcAttr.messageBuffer.iterator.map(pf => (triplet.dstId, List(pf)))
-          .++(triplet.dstAttr.messageBuffer.iterator.map(pf => (triplet.srcId, List(pf))))
+        // Sent check is to prevent sending the same message in multiple iterations
+        triplet.srcAttr.messageList.iterator.filter(m => !m.sent.contains(triplet.dstId)).map(m => {
+          m.sent.add(triplet.dstId)
+          (triplet.dstId, List(m))
+        }).++(triplet.dstAttr.messageList.iterator.filter(m => !m.sent.contains(triplet.srcId)).map(m => {
+          m.sent.add(triplet.srcId)
+          (triplet.srcId, List(m))
+        }))
       },
-      // Merge messages: just concatenate the lists of incoming PathFinders
+      // Merge messages: just concatenate the lists of incoming VertexMessages
       (a, b) => (a ++: b)
     )
   }
 }
 
-class PregelVertexAttributes(var waitingFor: Long, var messageBuffer: List[PathFinder], var initMessage: List[PathFinder],//
-                             var foundPaths: List[PathFinder]) extends Serializable {
+class PregelVertexAttr(var waitingFor: Long, var messageList: List[VertexMessage], var initMessage: Boolean,//
+                             var foundPaths: List[VertexMessage]) extends Serializable {
   override def toString(): String = {
-    "waitingFor: " + waitingFor + " foundPaths: " + foundPaths.toString() + " messageBuffer: " + messageBuffer.toString()
+    "waitingFor: " + waitingFor + " foundPaths: " + foundPaths.toString()
   } 
 }
 
-class PathFinder(val src: Long, var from: Long, var path: List[PathPair]) extends Serializable {
+class VertexMessage(var src: Long, var from: Long, var path: List[PathPair], var sent: Set[Long]) extends Serializable {
   override def toString(): String = {
-    "src: " + src + " path: " + path.toString()
+    "src: " + src + ", path: " + path.toString()
   }
 }
 
