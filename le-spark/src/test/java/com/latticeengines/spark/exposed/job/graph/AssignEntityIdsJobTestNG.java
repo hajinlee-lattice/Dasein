@@ -2,7 +2,9 @@ package com.latticeengines.spark.exposed.job.graph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
@@ -48,11 +50,14 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
     };
 
     List<String> inputs = new ArrayList<>();
+    Map<String, Integer> matchConfidenceScore = new HashMap<String, Integer>();
 
     @Test(groups = "functional")
     public void runTest() throws Exception {
         prepareData();
         AssignEntityIdsJobConfig config = new AssignEntityIdsJobConfig();
+        config.setMatchConfidenceScore(matchConfidenceScore);
+
         SparkJobResult result = runSparkJob(AssignEntityIdsJob.class, config, inputs, getWorkspace());
         log.info("Result = {}", JsonUtils.serialize(result));
         log.info("Output: " + result.getOutput());
@@ -68,17 +73,17 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
                 { 5L, docV, "DW1", "SF000045", "component03" }, //
                 { 6L, docV, "Salesforce", "SF000045", "component03" }, //
                 { 7L, docV, "DW2", "SF000045", "component03" }, //
-                { 8L, docV, "DW1", "SF000045", "component03" }, //
+                { 8L, docV, "Salesforce", "SF000015", "component03" }, //
                 { 11L, idV, "DW2AccountID", "DW2000778", "component01" }, //
                 { 12L, idV, "DW2AccountID", "DW2000790", "component01" }, //
                 { 13L, idV, "SalesforceAccountID", "SF000350", "component01" }, //
                 { 14L, idV, "SalesforceAccountID", "SF000165", "component02" }, //
                 { 15L, idV, "DW1AccountID", "DW1000118", "component02" }, //
-                { 16L, idV, "DW2AccountID", "DW2001290", "component03" }, //
-                { 17L, idV, "SalesforceAccountID", "SF004455", "component03" }, //
+                { 16L, idV, "SalesforceAccountID", "SF2001290", "component03" }, //
+                { 17L, idV, "DW2AccountID", "DW2004455", "component03" }, //
                 { 18L, idV, "DW1AccountID", "DW1000918", "component03" }, //
                 { 19L, idV, "DW1AccountID", "DW1004358", "component03" }, //
-                { 20L, idV, "DW2AccountID", "DW2000338", "component03" }
+                { 20L, idV, "SalesforceAccountID", "SF2000338", "component03" }
         };
         inputs.add(uploadHdfsDataUnit(vertices, VERTEX_FIELDS));
 
@@ -102,6 +107,18 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
                 { 8L, 20L, "{}" }
         };
         inputs.add(uploadHdfsDataUnit(edges, EDGE_FIELDS));
+
+        // docV-idV pair confidence score
+        // higher means more confident that it's accurate
+        matchConfidenceScore.put("Salesforce-SalesforceAccountID", 5);
+        matchConfidenceScore.put("Salesforce-DW1AccountID", 5);
+        matchConfidenceScore.put("Salesforce-DW2AccountID", 4);
+        matchConfidenceScore.put("DW2-DW2AccountID", 4);
+        matchConfidenceScore.put("DW2-DW1AccountID", 3);
+        matchConfidenceScore.put("DW1-DW1AccountID", 3);
+        matchConfidenceScore.put("DW1-DW2AccountID", 3);
+        matchConfidenceScore.put("DW2-SalesforceAccountID", 2);
+        matchConfidenceScore.put("DW1-SalesforceAccountID", 1);
     }
 
     private void printIds(String hdfsDir) throws Exception {
