@@ -3,8 +3,10 @@ package com.latticeengines.spark.exposed.job.graph;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
@@ -14,6 +16,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -60,8 +63,18 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
 
         SparkJobResult result = runSparkJob(AssignEntityIdsJob.class, config, inputs, getWorkspace());
         log.info("Result = {}", JsonUtils.serialize(result));
-        log.info("Output: " + result.getOutput());
-        //printIds(result.getTargets().get(1).getPath());
+
+        // Should have 14 edges because we should remove 3
+        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 14);
+
+        // Should have 6 rows in InconsitencyReport
+        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 6);
+
+        // Should have 5 unique entity IDs
+        // From 3 connected components, we split two of them into two
+        List<String> entityIds = getEntityIds(result.getTargets().get(0).getPath());
+        Set<String> uniqueEntityIds = new HashSet<>(entityIds);
+        Assert.assertEquals(uniqueEntityIds.size(), 5);
     }
 
     private void prepareData() {
@@ -121,19 +134,20 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
         matchConfidenceScore.put("DW1-SalesforceAccountID", 1);
     }
 
-    private void printIds(String hdfsDir) throws Exception {
+    private List<String> getEntityIds(String hdfsDir) throws Exception {
+        List<String> entityIds = new ArrayList<>();
         List avroFilePaths = HdfsUtils.onlyGetFilesForDir(yarnConfiguration, hdfsDir, avroFileFilter);
         for (Object filePath : avroFilePaths) {
             String filePathStr = filePath.toString();
 
             try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration, new Path(filePathStr))) {
                 for (GenericRecord record : reader) {
-                    String src = getString(record, "src");
-                    String dst = getString(record, "dst");
-                    log.info(String.format("src=%s, dst=%s", src, dst));
+                    String entityId = getString(record, "entityID");
+                    entityIds.add(entityId);
                 }
             }
         }
+        return entityIds;
     }
 
     private static String getString(GenericRecord record, String field) throws Exception {

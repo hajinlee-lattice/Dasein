@@ -1,14 +1,16 @@
 package com.latticeengines.spark.exposed.job.graph
 
-import java.util.Map;
+import java.util.Map
+import java.util.UUID
 
 import com.latticeengines.domain.exposed.spark.graph.AssignEntityIdsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.sql.functions.{count, col}
 import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql.functions.{col, count, udf}
+import org.apache.spark.sql.types._
 import org.graphframes.GraphFrame
 
 import scala.collection.mutable.{HashMap, ListBuffer, PriorityQueue, Set}
@@ -20,6 +22,15 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     StructField("src", LongType, nullable = false), //
     StructField("dst", LongType, nullable = false), //
     StructField("property", StringType, nullable = false)
+  ))
+
+  private val inconsistencyReportSchema = StructType(List( //
+    StructField("ConnectedComponentID", StringType, nullable = false), //
+    StructField("entityID", StringType, nullable = false), //
+    StructField("systemID", StringType, nullable = false), //
+    StructField("matchID", StringType, nullable = false), //
+    StructField("IdVID", LongType, nullable = false), //
+    StructField("otherIdVID", LongType, nullable = false)
   ))
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[AssignEntityIdsJobConfig]): Unit = {
@@ -118,23 +129,55 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       pairSet.map(pair => edgesToRemove += (pair.docVId -> pair.idVId))
     }
 
-    val updatedEdgeRdd = erdd.filter {
-      case Edge(src, dst, prop) => !(edgesToRemove.contains(src) && edgesToRemove.get(src).equals(dst))
+    val updatedEdgeRdd: RDD[Edge[String]] = erdd.filter {
+      case Edge(src, dst, prop) => !(edgesToRemove.contains(src) && edgesToRemove.getOrElse(src, -1L).equals(dst))
     }
 
     // Step 5. Run ConnectedComponents again to assign Entity ID
-    val edgeRows = updatedEdgeRdd.map(e => Row.fromSeq(Seq(e)))
+    val edgeRows: RDD[Row] = updatedEdgeRdd.map {
+      case Edge(src, dst, prop) => Row(src, dst, prop)
+    }
     val edgesDf: DataFrame = spark.createDataFrame(edgeRows, edgesSchema)
     val graphFrame = GraphFrame(vertices, edgesDf)
-    val entities: DataFrame = graphFrame.connectedComponents.run()
+    val entityDf: DataFrame = graphFrame.connectedComponents.run()
 
+    var seenCcId: HashMap[Long, String] = HashMap[Long, String]()
+    val entityIdFunc: Long => String = ccId => {
+      if (seenCcId.contains(ccId)) {
+        seenCcId.getOrElse(ccId, UUID.randomUUID().toString)
+      } else {
+        var newId: String = UUID.randomUUID().toString
+        seenCcId += (ccId -> newId)
+        newId
+      }
+    }
+    val entityIdUDF = udf(entityIdFunc)
+    val entityIdsDf = entityDf
+        .select("id", "component")
+        .withColumn("component", entityIdUDF(col("component")))
+        .withColumnRenamed("component", "entityID")
 
+    val verticesWithEntityIdsDf: DataFrame = vertices
+        .join(entityIdsDf, Seq("id"), "left")
 
     // Step 6. Generate Inconsistency Report
+    var inconsistencyRows: List[List[Any]] = List()
+    verticesWithEntityIdsDf.collect.map(row => {
+      val vertexId = row.getAs[Long](0)
+      if (fromToMap.contains(vertexId) || toFromMap.contains(vertexId)) {
+        val systemId = row.getAs[String](2)
+        val matchId = row.getAs[String](3)
+        val componentId = row.getAs[String](4)
+        val entityId = row.getAs[String](5)
+        val otherIdVId = ( if (fromToMap.contains(vertexId)) fromToMap.getOrElse(vertexId, -1L) else toFromMap.getOrElse(vertexId, -1L) )
+        inconsistencyRows = inconsistencyRows :+ List(componentId, entityId, systemId, matchId, vertexId, otherIdVId)
+      }
+    })
 
+    val inconsistencyData: RDD[Row] = spark.sparkContext.parallelize(inconsistencyRows.map(row => Row(row: _*)))
+    val inconsistencyReportDf: DataFrame = spark.createDataFrame(inconsistencyData, inconsistencyReportSchema)
 
-    lattice.outputStr = edgesToRemove.toString()
-    lattice.output = List(vertices, edges, conflictIdsDf)
+    lattice.output = List(verticesWithEntityIdsDf, edgesDf, inconsistencyReportDf)
   }
 
   private def runPregel(graph: Graph[PregelVertexAttr, String], maxIter: Int): Graph[PregelVertexAttr, String] = {
