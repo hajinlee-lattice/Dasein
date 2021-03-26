@@ -47,7 +47,7 @@ class MergeGraphsJob extends AbstractSparkJob[MergeGraphsJobConfig] {
     verticesDf.collect().map(row => {
       if (row.getAs[String](1) == "IdV") {
         val vertexId: Long = row.getAs[Long](0)
-        val property: String = row.getAs[String](2) + row.getAs[String](3)
+        val property: String = row.getAs[String](2) + "-" + row.getAs[String](3)
         if (vertexRef.contains(property)) {
           convertEdge += (vertexId -> vertexRef.getOrElse(property, 0L))
         } else {
