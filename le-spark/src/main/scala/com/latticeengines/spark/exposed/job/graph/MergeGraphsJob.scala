@@ -41,7 +41,7 @@ class MergeGraphsJob extends AbstractSparkJob[MergeGraphsJobConfig] {
     val edgesDf: DataFrame = edgeInputs
       .reduce((a,b) => a.union(b))
 
-    // Step 2. Find duplicate vertices and update vertices and edges
+    // Step 2. Find duplicate vertices and update both vertices and edges
     var vertexRef = new HashMap[String, Long]()
     var convertEdge = new HashMap[Long, Long]()
     verticesDf.collect().map(row => {
