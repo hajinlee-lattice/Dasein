@@ -2,26 +2,21 @@ package com.latticeengines.spark.exposed.job.graph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.graph.AssignEntityIdsJobConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
@@ -43,37 +38,19 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of("src", Long.class), //
             Pair.of("dst", Long.class), //
             Pair.of("property", String.class));
-    
-    private HdfsFileFilter avroFileFilter = new HdfsFileFilter() {
-        @Override
-        public boolean accept(FileStatus file) {
-            return file.getPath().getName().endsWith("avro");
-        }
-    };
 
-    List<String> inputs = new ArrayList<>();
-    Map<String, Integer> matchConfidenceScore = new HashMap<String, Integer>();
+    private final List<String> edgeRank = new ArrayList<>();
 
     @Test(groups = "functional")
     public void runTest() throws Exception {
         prepareData();
         AssignEntityIdsJobConfig config = new AssignEntityIdsJobConfig();
-        config.setMatchConfidenceScore(matchConfidenceScore);
+        config.setEdgeRank(edgeRank);
 
-        SparkJobResult result = runSparkJob(AssignEntityIdsJob.class, config, inputs, getWorkspace());
+        SparkJobResult result = runSparkJob(AssignEntityIdsJob.class, config);
         log.info("Result = {}", JsonUtils.serialize(result));
 
-        // Should have 14 edges because we should remove 3
-        Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 14);
-
-        // Should have 6 rows in InconsitencyReport
-        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 6);
-
-        // Should have 5 unique entity IDs
-        // From 3 connected components, we split two of them into two
-        List<String> entityIds = getEntityIds(result.getTargets().get(0).getPath());
-        Set<String> uniqueEntityIds = new HashSet<>(entityIds);
-        Assert.assertEquals(uniqueEntityIds.size(), 5);
+        verify(result, Arrays.asList(this::verifyVertices, this::verifyEdges, this::verifyReport));
     }
 
     private void prepareData() {
@@ -97,7 +74,7 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
                 { 19L, idV, "DW1AccountID", "DW1004358", "component03" }, //
                 { 20L, idV, "SalesforceAccountID", "SF2000338", "component03" }
         };
-        inputs.add(uploadHdfsDataUnit(vertices, VERTEX_FIELDS));
+        uploadHdfsDataUnit(vertices, VERTEX_FIELDS);
 
         Object[][] edges = new Object[][] { //
                 { 1L, 11L, "{}" }, //
@@ -118,44 +95,74 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
                 { 8L, 18L, "{}" }, //
                 { 8L, 20L, "{}" }
         };
-        inputs.add(uploadHdfsDataUnit(edges, EDGE_FIELDS));
+        uploadHdfsDataUnit(edges, EDGE_FIELDS);
 
-        // docV-idV pair confidence score
-        // higher means more confident that it's accurate
-        matchConfidenceScore.put("Salesforce-SalesforceAccountID", 5);
-        matchConfidenceScore.put("Salesforce-DW1AccountID", 5);
-        matchConfidenceScore.put("Salesforce-DW2AccountID", 4);
-        matchConfidenceScore.put("DW2-DW2AccountID", 4);
-        matchConfidenceScore.put("DW2-DW1AccountID", 3);
-        matchConfidenceScore.put("DW1-DW1AccountID", 3);
-        matchConfidenceScore.put("DW1-DW2AccountID", 3);
-        matchConfidenceScore.put("DW2-SalesforceAccountID", 2);
-        matchConfidenceScore.put("DW1-SalesforceAccountID", 1);
+        // docV-idV ranking, in descending confidence
+        edgeRank.add("Salesforce-SalesforceAccountID");
+        edgeRank.add("DW1-DW1AccountID");
+        edgeRank.add("DW2-DW2AccountID");
+        edgeRank.add("Salesforce-DW1AccountID");
+        edgeRank.add("Salesforce-DW2AccountID");
+        edgeRank.add("DW1-SalesforceAccountID");
+        edgeRank.add("DW1-DW2AccountID");
+        edgeRank.add("DW2-SalesforceAccountID");
+        edgeRank.add("DW2-DW1AccountID");
     }
 
-    private List<String> getEntityIds(String hdfsDir) throws Exception {
-        List<String> entityIds = new ArrayList<>();
-        List avroFilePaths = HdfsUtils.onlyGetFilesForDir(yarnConfiguration, hdfsDir, avroFileFilter);
-        for (Object filePath : avroFilePaths) {
-            String filePathStr = filePath.toString();
+    private Boolean verifyVertices(HdfsDataUnit df) {
+        Iterator<GenericRecord> iterator = verifyAndReadTarget(df);
+        AtomicInteger count = new AtomicInteger(0);
+        Set<String> entityIds = new HashSet<>();
+        iterator.forEachRemaining(record -> {
+            // System.out.println(record);
 
-            try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(yarnConfiguration, new Path(filePathStr))) {
-                for (GenericRecord record : reader) {
-                    String entityId = getString(record, "entityID");
-                    entityIds.add(entityId);
-                }
-            }
-        }
-        return entityIds;
+            String entityId = getString(record, "entityID");
+            entityIds.add(entityId);
+            count.incrementAndGet();
+        });
+
+        // Should have 18 vertices because we should remove none
+        Assert.assertEquals(count.get(), 18);
+
+        // Should have 5 unique entity IDs
+        // From 3 connected components, we split two of them into two:
+        // cut (7 -> 18) to split component03 into two entities
+        // cut (2 -> 12) to split component01 into two entities (one of them only have the IdV-DW2AccountID-DW2000790)
+        Assert.assertEquals(entityIds.size(), 5);
+
+        return true;
     }
 
-    private static String getString(GenericRecord record, String field) throws Exception {
-        String value;
-        try {
-            value = record.get(field).toString();
-        } catch (Exception e) {
-            value = "";
+    private Boolean verifyEdges(HdfsDataUnit df) {
+        Iterator<GenericRecord> iterator = verifyAndReadTarget(df);
+        AtomicInteger count = new AtomicInteger(0);
+        iterator.forEachRemaining(record -> {
+            // System.out.println(record);
+            count.incrementAndGet();
+        });
+        // Should have 15 edges because we should remove 2: (7 -> 18) and (2 -> 12)
+        Assert.assertEquals(count.get(), 15);
+        return true;
+    }
+
+    private Boolean verifyReport(HdfsDataUnit df) {
+        Iterator<GenericRecord> iterator = verifyAndReadTarget(df);
+        AtomicInteger count = new AtomicInteger(0);
+        iterator.forEachRemaining(record -> {
+            // System.out.println(record);
+            count.incrementAndGet();
+        });
+        // Should have 6 rows in InconsitencyReport
+        Assert.assertEquals(count.get(), 6);
+        return true;
+    }
+
+    private static String getString(GenericRecord record, String field) {
+        Object obj = record.get(field);
+        if (obj == null) {
+            return null;
+        } else {
+            return obj.toString();
         }
-        return value;
     }
 }

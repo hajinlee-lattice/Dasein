@@ -1,20 +1,17 @@
 package com.latticeengines.spark.exposed.job.graph
 
-import java.util.UUID
-
 import com.latticeengines.domain.exposed.spark.graph.AssignEntityIdsJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{col, count, max, udf}
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.graphframes.GraphFrame
 
-import scala.collection.mutable.{HashMap, Map, ListBuffer, PriorityQueue, Set}
 import scala.collection.JavaConverters._
-import scala.collection.Seq
+import scala.collection.mutable
 
 class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
   private val componentId = "ConnectedComponentID"
@@ -40,11 +37,11 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
 
   private var componentsWithConflicts: Set[String] = Set()
 
+  private type Path = List[PathPair]
+
   override def runJob(spark: SparkSession, lattice: LatticeContext[AssignEntityIdsJobConfig]): Unit = {
     val config: AssignEntityIdsJobConfig = lattice.config
-    // Key is "docV-idV" and the value is confidence score
-    // The higher the more confident that the pair is accurate
-    val matchConfidenceScore: Map[String, Integer] = config.getMatchConfidenceScore.asScala
+    val edgeRank: Seq[String] =  config.getEdgeRank.asScala
     val vertices: DataFrame = lattice.input.head
     val edges: DataFrame = lattice.input(1)
 
@@ -54,68 +51,89 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .first.getAs[Long](countCol).intValue()
 
     val conflictIdsDf: DataFrame = generateConflictIdsDf(vertices)
-    val fromToMap: Map[Long, Long] = collection.mutable.Map({
-      conflictIdsDf.rdd.map {
-        case Row(from: Long, to: Long) => (from, to)
-      }.collectAsMap.toSeq: _*
-    })
+    val fromToMap: Map[Long, Long] = conflictIdsDf.rdd.map {
+      case Row(from: Long, to: Long) => (from, to)
+    }.collect.toMap
     val toFromMap: Map[Long, Long] = fromToMap.map(_.swap)
 
     val graph = generateFilteredGraph(vertices, edges, componentsWithConflicts)
     val pregelGraph: Graph[PregelVertexAttr, String] = initiateGraphAndRunPregel(graph, maxComponentSize, fromToMap, toFromMap)
-    val edgesToRemove: HashMap[Long, Long] = calculateEdgesToRemove(pregelGraph, matchConfidenceScore)
+    val edgesToRemove: Map[Long, Long] = calculateEdgesToRemove(spark, pregelGraph, edgeRank)
 
-    val updatedEdgesDf: DataFrame = updateEdgesDf(spark, edges, edgesToRemove)
+    val updatedEdgesDf: DataFrame = removeConflictingEdges(spark, edges, edgesToRemove)
     val entityIdsDf = generateEntityIdsDf(updatedEdgesDf, vertices)
-    val verticesWithEntityIdsDf: DataFrame = vertices.join(entityIdsDf, Seq("id"), "left")
+    val verticesWithEntityIdsDf: DataFrame = vertices.join(entityIdsDf, Seq("id"), joinType="left")
 
-    val inconsistencyReportDf: DataFrame = generateInconsistencyReportDf(spark, verticesWithEntityIdsDf, fromToMap, toFromMap)
+    val inconsistencyReportDf: DataFrame = generateInconsistencyReportDf(verticesWithEntityIdsDf, fromToMap, toFromMap)
 
     lattice.output = List(verticesWithEntityIdsDf, updatedEdgesDf, inconsistencyReportDf)
   }
 
-  private def updateEdgesDf(spark: SparkSession, edges: DataFrame, edgesToRemove: HashMap[Long, Long]): DataFrame = {
+  private def removeConflictingEdges(spark: SparkSession, edges: DataFrame, edgesToRemove: Map[Long, Long]): DataFrame = {
+    val bcEdgesToRemove = spark.sparkContext.broadcast(edgesToRemove)
+    // FIXME: If edgesToRemove is a RDD, we can use left-anti join to filter out edges to be removed
     val updatedEdgeRdd: RDD[Row] = edges
-      .rdd.filter {
-        case Row(src, dst, prop) => {
-          !(edgesToRemove.contains(src.asInstanceOf[Long]) && edgesToRemove.getOrElse(src.asInstanceOf[Long], -1L).equals(dst.asInstanceOf[Long]))
-        }
-      }
+      .rdd.filter(edge => {
+      val map = bcEdgesToRemove.value
+      val src = edge.getLong(0)
+      val dst = edge.getLong(1)
+      !map.contains(src) || !dst.equals(map(src))
+    })
     spark.createDataFrame(updatedEdgeRdd, edgesSchema)
   }
 
-  private def calculateEdgesToRemove(pregelGraph: Graph[PregelVertexAttr, String], matchConfidenceScore: Map[String, Integer]): HashMap[Long, Long] = {
-    val allConflictPaths: RDD[List[PathPair]] = pregelGraph.vertices.flatMap(
-      { case (_, attr) => attr.foundPaths.map((p) => p.path) }
-    )
+  private def calculateEdgesToRemove(spark: SparkSession, pregelGraph: Graph[PregelVertexAttr, String],
+                                     edgeRank: Seq[String]): Map[Long, Long] = {
+    val bcEdgeRank = spark.sparkContext.broadcast(edgeRank)
 
-    var allPaths: List[List[PathPair]] = allConflictPaths.collect.toList
-    var allPairsByTypes: HashMap[String, Set[PathPair]] = HashMap[String, Set[PathPair]]()
-    allPaths.flatten.foreach(pathPair => {
-      if (allPairsByTypes.contains(pathPair.pairType)) {
-        allPairsByTypes.getOrElse(pathPair.pairType, Set()).add(pathPair)
-      } else {
-        allPairsByTypes += (pathPair.pairType -> Set(pathPair))
-      }
-    })
+    val pairsToRemove: RDD[(Long, Long)] = pregelGraph.vertices
+      .flatMap({
+        case (_, attr) => attr.foundPaths.map(p => (attr.componentId, p.path))
+      }) // convert to (componentId, Path)
+      .aggregateByKey(List[Path]())(
+        (paths, path) => path :: paths,
+        (paths1, paths2) => paths1 ::: paths2
+      ) // for each component, aggregate all paths
+      .flatMapValues(paths => { // assume all paths for a component fit in one executor's memory
+        // sort distinct pairs desc by confidence score
+        val edgeRank = bcEdgeRank.value
+        val sortedPairs: Seq[PathPair] = paths.flatten.distinct
+          .sortWith((pair1, pair2) => {
+            val confidence1 = edgeRank.indexOf(pair1.pairType)
+            val confidence2 = edgeRank.indexOf(pair2.pairType)
+            if (confidence1 == confidence2) {
+              pair1.pairHash < pair2.pairHash // sorting by composite key may handle arbitrary import order
+            } else {
+              confidence1 > confidence2
+            }
+          })
 
-    var removedTypes: Set[String] = Set()
-    val matchConfidenceRanking: PriorityQueue[TypeConfidence] = constructConfidenceQueue(matchConfidenceScore, allPairsByTypes)
-    while (!allPaths.isEmpty && !matchConfidenceRanking.isEmpty) {
-      val lowestType = matchConfidenceRanking.dequeue.name
-      removedTypes.add(lowestType)
-      allPaths = allPaths.filter(pathPair => !pathPair.exists(p => p.pairType == lowestType))
-    }
-
-    var edgesToRemove: HashMap[Long, Long] = HashMap[Long, Long]()
-    for (removedType <- removedTypes) {
-      val pairSet = allPairsByTypes.getOrElse(removedType, Set())
-      pairSet.map(pair => edgesToRemove += (pair.docVId -> pair.idVId))
-    }
+        // remove pairs from all paths one by one, until no more conflicting paths
+        val removedPairs: mutable.ListBuffer[PathPair] = mutable.ListBuffer()
+        def breakTies(): Option[List[Path]] = {
+          sortedPairs.foldLeft(Some(paths))((conflictingPaths, leastConfidentPair) => {
+            if (conflictingPaths.get.isEmpty) { // terminate fold if there are not conflicting paths
+              return None
+            }
+            if (conflictingPaths.get.exists(_.contains(leastConfidentPair))) {
+              removedPairs.append(leastConfidentPair)
+              Some(conflictingPaths.get.filterNot(_.contains(leastConfidentPair)))
+            } else {
+              conflictingPaths
+            }
+          })
+        }
+        breakTies()
+        removedPairs.toList
+      }) // convert to edges to be removed
+      .values.map(pair => (pair.docVId, pair.idVId))
+    // FIXME: I think even edgesToRemove should be a RDD instead of an in-memory map
+    val edgesToRemove: Map[Long, Long] = pairsToRemove.collect.toMap
     edgesToRemove
   }
 
-  private def generateFilteredGraph(vertices: DataFrame, edges: DataFrame, componentsWithConflicts: Set[String]) = {
+  private def generateFilteredGraph(vertices: DataFrame, edges: DataFrame, componentsWithConflicts: Set[String])
+  :Graph[(String, String, String, String), String] = {
     val conflictDocVs = vertices
       .filter(col(vertexType) === docV && col(componentId).isin(componentsWithConflicts.toList:_*))
       .select("id").rdd.map(r => r.getAs[Long](0)).collect
@@ -124,7 +142,13 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .filter(col("src").isin(conflictDocVs:_*))
       .rdd.map(row => Edge(row.getAs[VertexId](0), row.getAs[VertexId](1), row.getAs[String](2)))
 
-    val vrdd: RDD[(VertexId, (String /* type */, String /* systemID */, String /* VertexValue */, String /* ComponentID */))] = vertices
+    val vrdd: RDD[(VertexId,
+      (
+        String /* type */, //
+        String /* systemID */, //
+        String /* VertexValue */, //
+        String /* ComponentID */ //
+      ))] = vertices
       .rdd.map(row => (
         row.getAs[VertexId](0), (
           row.getAs[String](1),
@@ -141,22 +165,10 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     val graphFrame = GraphFrame(vertices, edgesDf)
     val entityDf: DataFrame = graphFrame.connectedComponents.run()
 
-    var seenCcId: HashMap[Long, String] = HashMap[Long, String]()
-    val entityIdFunc: Long => String = ccId => {
-      if (seenCcId.contains(ccId)) {
-        seenCcId.getOrElse(ccId, UUID.randomUUID().toString)
-      } else {
-        var newId: String = UUID.randomUUID().toString
-        seenCcId += (ccId -> newId)
-        newId
-      }
-    }
-    val entityIdUDF = udf(entityIdFunc)
+    val entityIdUDF = udf(() => java.util.UUID.randomUUID.toString)
+    val entityIds: DataFrame = entityDf.select(component).distinct.withColumn(entityId, entityIdUDF())
 
-    entityDf
-      .select("id", component)
-      .withColumn(component, entityIdUDF(col(component)))
-      .withColumnRenamed(component, entityId)
+    entityDf.join(entityIds, Seq(component), joinType = "inner").select("id", entityId)
   }
 
   private def generateConflictIdsDf(vertices: DataFrame): DataFrame = {
@@ -180,10 +192,10 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .drop(componentId, systemId)
   }
 
-  private def generateInconsistencyReportDf(spark: SparkSession, vertexDf: DataFrame, fromToMap: Map[Long, Long], //
+  private def generateInconsistencyReportDf(vertexDf: DataFrame, fromToMap: Map[Long, Long], //
       toFromMap: Map[Long, Long]): DataFrame = {
 
-    var ids: List[Long] = fromToMap.keys.toList ++ toFromMap.keys.toList
+    val ids: List[Long] = fromToMap.keys.toList ++ toFromMap.keys.toList
     val conflictVertices = vertexDf.filter(col("id").isin(ids:_*)).drop(vertexType)
     val otherVertices = conflictVertices.withColumnRenamed("id", otherIdVId).drop(entityId, vertexValue)
 
@@ -197,15 +209,13 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       fromToMap: Map[Long, Long], toFromMap: Map[Long, Long]): Graph[PregelVertexAttr, String] = {
 
     val initialGraph: Graph[PregelVertexAttr, String] = graph.mapVertices {
-      case (id, (_, system, _, _)) => {
-        var systemId: String = system
-        var messageList: List[VertexMessage] = List()
+      case (id, (_, system, value, componentId)) =>
         var initMessage = false
         if (fromToMap.contains(id)) {
           initMessage = true
         }
-        new PregelVertexAttr(toFromMap.getOrElse(id, -1L), messageList, initMessage, List(), systemId)
-      }
+        val vertexHash = s"$system-$value"
+        new PregelVertexAttr(toFromMap.getOrElse(id, -1L), List(), initMessage, List(), system, componentId, vertexHash)
     }
 
     runPregel(initialGraph, maxComponentSize)
@@ -216,28 +226,31 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     graph.pregel(emptyMessageList, maxIter, EdgeDirection.Either)(
       // Vertex Program
       (id, attr, incomingMessages) => {
-        var systemId: String = attr.systemId
+        val systemId: String = attr.systemId
         var messageList: List[VertexMessage] = List()
         var initMessage: Boolean = attr.initMessage
         if (initMessage) {
-          val m = new VertexMessage(id, id, systemId, List(), Set())
+          val m = new VertexMessage(id, id, systemId, attr.vertexHash, List(), mutable.Set())
           messageList = messageList :+ m
           initMessage = false
         }
 
         var newFoundPaths = attr.foundPaths
-        incomingMessages.map(message => {
+        incomingMessages.foreach(message => {
           // Add the latest pair to the path
           var path = message.path
+          val fromVertexHash = message.fromHash
+          val toVertexHash = attr.vertexHash
+          val pairHash = fromVertexHash + toVertexHash
           var pairType: String = ""
           if (path.size % 2 == 1) {
             pairType = message.fromSystem + "-" + systemId
-            path = path :+ new PathPair(message.from, id, pairType)
+            path = path :+ PathPair(message.from, id, pairType, pairHash)
           } else {
             pairType = systemId + "-" + message.fromSystem
-            path = path :+ new PathPair(id, message.from, pairType)
+            path = path :+ PathPair(id, message.from, pairType, pairHash)
           }
-          val newMessage = new VertexMessage(message.src, id, systemId, path, Set())
+          val newMessage = new VertexMessage(message.src, id, systemId, toVertexHash, path, mutable.Set())
 
           // check if we are at destination
           if (attr.waitingFor == message.src) {
@@ -252,7 +265,8 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
             messageList = messageList :+ newMessage
           }
         })
-        new PregelVertexAttr(attr.waitingFor, messageList, initMessage, newFoundPaths, systemId)
+        new PregelVertexAttr(attr.waitingFor, messageList, initMessage, newFoundPaths, //
+          systemId, attr.componentId, attr.vertexHash)
       },
 
       // Send outgoing messages
@@ -268,54 +282,32 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
         }))
       },
       // Merge messages: just concatenate the lists of incoming VertexMessages
-      (a, b) => (a ++: b)
+      (a, b) => a ++: b
     )
   }
 
-  private def constructConfidenceQueue(matchConfidenceScore: Map[String, Integer], //
-                                       allPairsByTypes: HashMap[String, Set[PathPair]]): PriorityQueue[TypeConfidence] = {
-    // Returns a priority queue in a way that least confident type gets dequeued first
-    // it first compares matchConfidenceScore, then the number of pairs found in each type (the fewer the less confident)
-    var typeList: ListBuffer[TypeConfidence] = ListBuffer()
-    for (key <- allPairsByTypes.keySet) {
-      val score: Int = matchConfidenceScore.getOrElse(key, 0).asInstanceOf[Int]
-      val confidence = new TypeConfidence(key, score, allPairsByTypes.getOrElse(key, Set()).size)
-      typeList += confidence
-    }
+}
 
-    var pq = new PriorityQueue[TypeConfidence]()(Ordering.by(t => (-t.score, -t.numPairs)))
-    typeList.map(t => pq.enqueue(t))
-    pq
+case class PregelVertexAttr(waitingFor: Long, messageList: List[VertexMessage], initMessage: Boolean, //
+                            foundPaths: List[VertexMessage], systemId: String, componentId: String, //
+                            vertexHash: String) extends Serializable {
+
+  override def toString: String = {
+    s"waitingFor: $waitingFor, foundPaths: ${foundPaths.mkString}"
   }
 }
 
-class PregelVertexAttr(var waitingFor: Long, var messageList: List[VertexMessage], var initMessage: Boolean,//
-                       var foundPaths: List[VertexMessage], var systemId: String) extends Serializable {
-  override def toString(): String = {
-    "waitingFor: " + waitingFor + " foundPaths: " + foundPaths.toString()
-  } 
-}
+case class VertexMessage(src: Long, from: Long, fromSystem: String, fromHash: String, //
+                         path: List[PathPair], sent: mutable.Set[Long]) extends Serializable {
 
-class VertexMessage(var src: Long, var from: Long, var fromSystem: String, var path: List[PathPair], var sent: Set[Long]) extends Serializable {
-  override def toString(): String = {
-    "src: " + src + ", path: " + path.toString()
+  override def toString: String = {
+    s"src: $src, path: ${path.mkString}"
   }
 }
 
-case class PathPair(var docVId: Long, var idVId: Long, var pairType: String) extends Serializable {
-  override def toString(): String = {
-    "(" + pairType + ", " + docVId + ", " + idVId + ")"
+case class PathPair(docVId: Long, idVId: Long, pairType: String, pairHash: String) extends Serializable {
+
+  override def toString: String = {
+    s"($pairType, $docVId, $idVId)"
   }
-
-  override def equals(that: Any): Boolean =
-    that match {
-      case that: PathPair => {
-        this.docVId.equals(that.docVId) &&
-        this.idVId.equals(that.idVId) &&
-        this.pairType.equals(that.pairType)
-      }
-      case _ => false
-    }
 }
-
-case class TypeConfidence(var name: String, var score: Int, var numPairs: Int)
