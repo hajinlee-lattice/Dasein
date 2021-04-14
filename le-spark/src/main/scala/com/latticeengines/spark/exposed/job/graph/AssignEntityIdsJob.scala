@@ -28,11 +28,18 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
   private val to = "to"
   private val toId = "toID"
   private val otherIdVId = "otherIdVID"
+  private val src = "src"
+  private val dst = "dst"
 
   private val edgesSchema = StructType(List( //
-    StructField("src", LongType, nullable = false), //
-    StructField("dst", LongType, nullable = false), //
+    StructField(src, LongType, nullable = false), //
+    StructField(dst, LongType, nullable = false), //
     StructField("property", StringType, nullable = false)
+  ))
+
+  private val edgePairSchema = StructType(List( //
+    StructField(src, LongType, nullable = false), //
+    StructField(dst, LongType, nullable = false)
   ))
 
   private var componentsWithConflicts: Set[String] = Set()
@@ -58,7 +65,7 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
 
     val graph = generateFilteredGraph(vertices, edges, componentsWithConflicts)
     val pregelGraph: Graph[PregelVertexAttr, String] = initiateGraphAndRunPregel(graph, maxComponentSize, fromToMap, toFromMap)
-    val edgesToRemove: Map[Long, Long] = calculateEdgesToRemove(spark, pregelGraph, edgeRank)
+    val edgesToRemove: RDD[Row] = calculateEdgesToRemove(spark, pregelGraph, edgeRank)
 
     val updatedEdgesDf: DataFrame = removeConflictingEdges(spark, edges, edgesToRemove)
     val entityIdsDf = generateEntityIdsDf(updatedEdgesDf, vertices)
@@ -69,24 +76,16 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     lattice.output = List(verticesWithEntityIdsDf, updatedEdgesDf, inconsistencyReportDf)
   }
 
-  private def removeConflictingEdges(spark: SparkSession, edges: DataFrame, edgesToRemove: Map[Long, Long]): DataFrame = {
-    val bcEdgesToRemove = spark.sparkContext.broadcast(edgesToRemove)
-    // FIXME: If edgesToRemove is a RDD, we can use left-anti join to filter out edges to be removed
-    val updatedEdgeRdd: RDD[Row] = edges
-      .rdd.filter(edge => {
-      val map = bcEdgesToRemove.value
-      val src = edge.getLong(0)
-      val dst = edge.getLong(1)
-      !map.contains(src) || !dst.equals(map(src))
-    })
-    spark.createDataFrame(updatedEdgeRdd, edgesSchema)
+  private def removeConflictingEdges(spark: SparkSession, edges: DataFrame, edgesToRemove: RDD[Row]): DataFrame = {
+    val edgesToRemoveDf = spark.createDataFrame(edgesToRemove, edgePairSchema)
+    edges.join(edgesToRemoveDf, Seq(src, dst), "leftanti")
   }
 
   private def calculateEdgesToRemove(spark: SparkSession, pregelGraph: Graph[PregelVertexAttr, String],
-                                     edgeRank: Seq[String]): Map[Long, Long] = {
+                                     edgeRank: Seq[String]): RDD[Row] = {
     val bcEdgeRank = spark.sparkContext.broadcast(edgeRank)
 
-    val pairsToRemove: RDD[(Long, Long)] = pregelGraph.vertices
+    val pairsToRemove: RDD[Row] = pregelGraph.vertices
       .flatMap({
         case (_, attr) => attr.foundPaths.map(p => (attr.componentId, p.path))
       }) // convert to (componentId, Path)
@@ -126,10 +125,9 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
         breakTies()
         removedPairs.toList
       }) // convert to edges to be removed
-      .values.map(pair => (pair.docVId, pair.idVId))
-    // FIXME: I think even edgesToRemove should be a RDD instead of an in-memory map
-    val edgesToRemove: Map[Long, Long] = pairsToRemove.collect.toMap
-    edgesToRemove
+      .values.map(pair => Row(pair.docVId, pair.idVId))
+
+    pairsToRemove
   }
 
   private def generateFilteredGraph(vertices: DataFrame, edges: DataFrame, componentsWithConflicts: Set[String])
@@ -139,7 +137,7 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .select("id").rdd.map(r => r.getAs[Long](0)).collect
 
     val erdd: RDD[Edge[String]] = edges
-      .filter(col("src").isin(conflictDocVs:_*))
+      .filter(col(src).isin(conflictDocVs:_*))
       .rdd.map(row => Edge(row.getAs[VertexId](0), row.getAs[VertexId](1), row.getAs[String](2)))
 
     val vrdd: RDD[(VertexId,
