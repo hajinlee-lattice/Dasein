@@ -42,8 +42,6 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     StructField(dst, LongType, nullable = false)
   ))
 
-  private var componentsWithConflicts: Set[String] = Set()
-
   private type Path = List[PathPair]
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[AssignEntityIdsJobConfig]): Unit = {
@@ -59,10 +57,11 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
 
     val conflictIdsDf: DataFrame = generateConflictIdsDf(vertices)
     val fromToMap: Map[Long, Long] = conflictIdsDf.rdd.map {
-      case Row(from: Long, to: Long) => (from, to)
+      case Row(_, from: Long, to: Long) => (from, to)
     }.collect.toMap
     val toFromMap: Map[Long, Long] = fromToMap.map(_.swap)
 
+    var componentsWithConflicts: Set[String] = getComponentsWithConflicts(conflictIdsDf)
     val graph = generateFilteredGraph(vertices, edges, componentsWithConflicts)
     val pregelGraph: Graph[PregelVertexAttr, String] = initiateGraphAndRunPregel(graph, maxComponentSize, fromToMap, toFromMap)
     val edgesToRemove: RDD[Row] = calculateEdgesToRemove(spark, pregelGraph, edgeRank)
@@ -179,15 +178,17 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .filter(col(countCol) > 1)
       .drop(countCol, vertexType, vertexValue)
 
-    val conflictComponents = conflictsDf.select(componentId).rdd.map(r => r.getAs[String](0)).collect
-    componentsWithConflicts = Set(conflictComponents:_*)
-
-    // conflictIdsDf should have columns - fromId, toId
+    // conflictIdsDf should have columns - fromId, toId, componentId
     // with each row representing a unique conflict pair
     conflictsDf.alias(from).withColumnRenamed("id", fromId)
       .join(conflictsDf.alias(to).withColumnRenamed("id", toId), Seq(componentId, systemId), "outer")
       .filter(col(fromId) < col(toId))
-      .drop(componentId, systemId)
+      .drop(systemId)
+  }
+
+  private def getComponentsWithConflicts(conflictsDf: DataFrame): Set[String] = {
+    val conflictComponents = conflictsDf.select(componentId).rdd.map(r => r.getAs[String](0)).collect
+    Set(conflictComponents:_*)
   }
 
   private def generateInconsistencyReportDf(vertexDf: DataFrame, fromToMap: Map[Long, Long], //
