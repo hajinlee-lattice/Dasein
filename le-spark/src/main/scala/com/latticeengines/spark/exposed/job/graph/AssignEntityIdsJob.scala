@@ -56,21 +56,17 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .first.getAs[Long](countCol).intValue()
 
     val conflictIdsDf: DataFrame = generateConflictIdsDf(vertices)
-    val fromToMap: Map[Long, Long] = conflictIdsDf.rdd.map {
-      case Row(_, from: Long, to: Long) => (from, to)
-    }.collect.toMap
-    val toFromMap: Map[Long, Long] = fromToMap.map(_.swap)
-
     var componentsWithConflicts: Set[String] = getComponentsWithConflicts(conflictIdsDf)
-    val graph = generateFilteredGraph(vertices, edges, componentsWithConflicts)
-    val pregelGraph: Graph[PregelVertexAttr, String] = initiateGraphAndRunPregel(graph, maxComponentSize, fromToMap, toFromMap)
-    val edgesToRemove: RDD[Row] = calculateEdgesToRemove(spark, pregelGraph, edgeRank)
 
+    val graph = generateFilteredGraph(vertices, edges, componentsWithConflicts, conflictIdsDf)
+    val pregelGraph: Graph[PregelVertexAttr, String] = initiateGraphAndRunPregel(graph, maxComponentSize)
+    val edgesToRemove: RDD[Row] = calculateEdgesToRemove(spark, pregelGraph, edgeRank)
     val updatedEdgesDf: DataFrame = removeConflictingEdges(spark, edges, edgesToRemove)
+
     val entityIdsDf = generateEntityIdsDf(updatedEdgesDf, vertices)
     val verticesWithEntityIdsDf: DataFrame = vertices.join(entityIdsDf, Seq("id"), joinType="left")
 
-    val inconsistencyReportDf: DataFrame = generateInconsistencyReportDf(verticesWithEntityIdsDf, fromToMap, toFromMap)
+    val inconsistencyReportDf: DataFrame = generateInconsistencyReportDf(verticesWithEntityIdsDf, conflictIdsDf)
 
     lattice.output = List(verticesWithEntityIdsDf, updatedEdgesDf, inconsistencyReportDf)
   }
@@ -129,8 +125,9 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     pairsToRemove
   }
 
-  private def generateFilteredGraph(vertices: DataFrame, edges: DataFrame, componentsWithConflicts: Set[String])
-  :Graph[(String, String, String, String), String] = {
+  private def generateFilteredGraph(vertices: DataFrame, edges: DataFrame, componentsWithConflicts: Set[String], //
+      conflictIdsDf: DataFrame):Graph[(String, String, String, String, Long), String] = {
+
     val conflictDocVs = vertices
       .filter(col(vertexType) === docV && col(componentId).isin(componentsWithConflicts.toList:_*))
       .select("id").rdd.map(r => r.getAs[Long](0)).collect
@@ -139,19 +136,24 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .filter(col(src).isin(conflictDocVs:_*))
       .rdd.map(row => Edge(row.getAs[VertexId](0), row.getAs[VertexId](1), row.getAs[String](2)))
 
+    val combinedVertices: DataFrame = vertices
+      .join(conflictIdsDf.drop(componentId).withColumnRenamed(fromId, "id"), Seq("id"), "left")
+
     val vrdd: RDD[(VertexId,
       (
         String /* type */, //
         String /* systemID */, //
         String /* VertexValue */, //
-        String /* ComponentID */ //
-      ))] = vertices
+        String /* ComponentID */,
+        Long /* toID */ //
+      ))] = combinedVertices
       .rdd.map(row => (
         row.getAs[VertexId](0), (
           row.getAs[String](1),
           row.getAs[String](2),
           row.getAs[String](3),
-          row.getAs[String](4)
+          row.getAs[String](4),
+          row.getAs[Long](5)
         ))
       )
 
@@ -191,30 +193,37 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     Set(conflictComponents:_*)
   }
 
-  private def generateInconsistencyReportDf(vertexDf: DataFrame, fromToMap: Map[Long, Long], //
-      toFromMap: Map[Long, Long]): DataFrame = {
+  private def generateInconsistencyReportDf(vertexDf: DataFrame, conflictIdsDf: DataFrame): DataFrame = {
+    val flipedConflictIdsDf = conflictIdsDf
+      .drop(componentId)
+      .withColumnRenamed(fromId, "temp")
+      .withColumnRenamed(toId, fromId)
+      .withColumnRenamed("temp", toId)
 
-    val ids: List[Long] = fromToMap.keys.toList ++ toFromMap.keys.toList
-    val conflictVertices = vertexDf.filter(col("id").isin(ids:_*)).drop(vertexType)
-    val otherVertices = conflictVertices.withColumnRenamed("id", otherIdVId).drop(entityId, vertexValue)
-
-    // inconsistencyReport columns: systemId, componentId, id, vertexValue, entityId, otherIdVId
-    conflictVertices
-      .join(otherVertices.alias("other"), Seq(systemId, componentId), "left")
-      .filter(col("id").notEqual(col(otherIdVId)))
+    val otherVertices = conflictIdsDf
+      .drop(componentId)
+      .union(flipedConflictIdsDf)
+      .withColumnRenamed(fromId, "id")
+      .withColumnRenamed(toId, otherIdVId)
+    
+    vertexDf
+      .drop(vertexType)
+      .join(otherVertices, Seq("id"), "inner")
   }
 
-  private def initiateGraphAndRunPregel(graph: Graph[(String, String, String, String), String], maxComponentSize: Int, //
-      fromToMap: Map[Long, Long], toFromMap: Map[Long, Long]): Graph[PregelVertexAttr, String] = {
+  private def initiateGraphAndRunPregel(graph: Graph[(String, String, String, String, Long), String], maxComponentSize: Int //
+      ): Graph[PregelVertexAttr, String] = {
 
     val initialGraph: Graph[PregelVertexAttr, String] = graph.mapVertices {
-      case (id, (_, system, value, componentId)) =>
+      case (id, (_, system, value, componentId, toVertex)) =>
         var initMessage = false
-        if (fromToMap.contains(id)) {
+        var waitingFor = -1L
+        if (toVertex != null) {
           initMessage = true
+          waitingFor = toVertex
         }
         val vertexHash = s"$system-$value"
-        new PregelVertexAttr(toFromMap.getOrElse(id, -1L), List(), initMessage, List(), system, componentId, vertexHash)
+        new PregelVertexAttr(waitingFor, List(), initMessage, List(), system, componentId, vertexHash)
     }
 
     runPregel(initialGraph, maxComponentSize)
