@@ -56,9 +56,9 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .first.getAs[Long](countCol).intValue()
 
     val conflictIdsDf: DataFrame = generateConflictIdsDf(vertices)
-    var componentsWithConflicts: Set[String] = getComponentsWithConflicts(conflictIdsDf)
+    var verticesWithoutConflicts: DataFrame = getVerticesWithoutConflicts(conflictIdsDf, vertices)
 
-    val graph = generateFilteredGraph(vertices, edges, componentsWithConflicts, conflictIdsDf)
+    val graph = generateFilteredGraph(vertices, edges, verticesWithoutConflicts, conflictIdsDf)
     val pregelGraph: Graph[PregelVertexAttr, String] = initiateGraphAndRunPregel(graph, maxComponentSize)
     val edgesToRemove: RDD[Row] = calculateEdgesToRemove(spark, pregelGraph, edgeRank)
     val updatedEdgesDf: DataFrame = removeConflictingEdges(spark, edges, edgesToRemove)
@@ -125,18 +125,18 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     pairsToRemove
   }
 
-  private def generateFilteredGraph(vertices: DataFrame, edges: DataFrame, componentsWithConflicts: Set[String], //
+  private def generateFilteredGraph(vertices: DataFrame, edges: DataFrame, verticesWithoutConflicts: DataFrame, //
       conflictIdsDf: DataFrame):Graph[(String, String, String, String, Long), String] = {
 
-    val conflictDocVs = vertices
-      .filter(col(vertexType) === docV && col(componentId).isin(componentsWithConflicts.toList:_*))
-      .select("id").rdd.map(r => r.getAs[Long](0)).collect
+    // verticesWithoutConflicts has one column "id"
+    val filteredEdges = edges
+      .join(verticesWithoutConflicts.withColumnRenamed("id", src), Seq(src), "leftanti")
 
-    val erdd: RDD[Edge[String]] = edges
-      .filter(col(src).isin(conflictDocVs:_*))
+    val erdd: RDD[Edge[String]] = filteredEdges
       .rdd.map(row => Edge(row.getAs[VertexId](0), row.getAs[VertexId](1), row.getAs[String](2)))
 
-    val combinedVertices: DataFrame = vertices
+    // conflictIdsDf has componentId, fromId, toId
+    val verticesWithToId: DataFrame = vertices
       .join(conflictIdsDf.drop(componentId).withColumnRenamed(fromId, "id"), Seq("id"), "left")
 
     val vrdd: RDD[(VertexId,
@@ -146,7 +146,7 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
         String /* VertexValue */, //
         String /* ComponentID */,
         Long /* toID */ //
-      ))] = combinedVertices
+      ))] = verticesWithToId
       .rdd.map(row => (
         row.getAs[VertexId](0), (
           row.getAs[String](1),
@@ -188,9 +188,11 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .drop(systemId)
   }
 
-  private def getComponentsWithConflicts(conflictsDf: DataFrame): Set[String] = {
-    val conflictComponents = conflictsDf.select(componentId).rdd.map(r => r.getAs[String](0)).collect
-    Set(conflictComponents:_*)
+  private def getVerticesWithoutConflicts(conflictsDf: DataFrame, vertices: DataFrame): DataFrame = {
+    vertices
+      .filter(col(vertexType) === docV)
+      .join(conflictsDf, Seq(componentId), "leftanti")
+      .select("id")
   }
 
   private def generateInconsistencyReportDf(vertexDf: DataFrame, conflictIdsDf: DataFrame): DataFrame = {
