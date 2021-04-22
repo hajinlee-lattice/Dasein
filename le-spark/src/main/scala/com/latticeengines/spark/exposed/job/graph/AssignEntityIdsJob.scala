@@ -5,7 +5,7 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions.{col, count, max, udf}
+import org.apache.spark.sql.functions.{col, count, lit, max, udf, row_number}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.graphframes.GraphFrame
@@ -27,9 +27,11 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
   private val fromId = "fromID"
   private val to = "to"
   private val toId = "toID"
-  private val otherIdVId = "otherIdVID"
   private val src = "src"
   private val dst = "dst"
+  private val tieBreakingProcess = "TieBreakingProcess"
+  private val garbageCollector = "GarbageCollector"
+  private val resolutionStrategy = "ResolutionStrategy"
 
   private val edgesSchema = StructType(List( //
     StructField(src, LongType, nullable = false), //
@@ -55,25 +57,41 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
       .orderBy(col(countCol).desc)
       .first.getAs[Long](countCol).intValue()
 
-    val conflictIdsDf: DataFrame = generateConflictIdsDf(vertices)
-    var verticesWithoutConflicts: DataFrame = getVerticesWithoutConflicts(conflictIdsDf, vertices)
+    val conflictOutputs: List[DataFrame] = generateConflictOutputs(vertices)
+    val conflictIdsDf: DataFrame = conflictOutputs.head // for TieBreakingProcess
+    val gcComponents: DataFrame = conflictOutputs.last // for GarbageCollecting
 
-    val graph = generateFilteredGraph(vertices, edges, verticesWithoutConflicts, conflictIdsDf)
+    var tieBreakingVertices: DataFrame = getTieBreakingVertices(conflictIdsDf, gcComponents, vertices)
+
+    val graph = generateFilteredGraph(vertices, edges, tieBreakingVertices, conflictIdsDf)
     val pregelGraph: Graph[PregelVertexAttr, String] = initiateGraphAndRunPregel(graph, maxComponentSize)
     val edgesToRemove: RDD[Row] = calculateEdgesToRemove(spark, pregelGraph, edgeRank)
-    val updatedEdgesDf: DataFrame = removeConflictingEdges(spark, edges, edgesToRemove)
+    val updatedEdgesDf: DataFrame = removeConflictingEdges(spark, edges, edgesToRemove, gcComponents, vertices)
 
-    val entityIdsDf = generateEntityIdsDf(updatedEdgesDf, vertices)
+    val entityIdsDf = generateEntityIdsDf(updatedEdgesDf, gcComponents, vertices)
     val verticesWithEntityIdsDf: DataFrame = vertices.join(entityIdsDf, Seq("id"), joinType="left")
 
-    val inconsistencyReportDf: DataFrame = generateInconsistencyReportDf(verticesWithEntityIdsDf, conflictIdsDf)
+    val inconsistencyReportDf: DataFrame = generateInconsistencyReportDf(verticesWithEntityIdsDf, conflictIdsDf, gcComponents)
 
     lattice.output = List(verticesWithEntityIdsDf, updatedEdgesDf, inconsistencyReportDf)
   }
 
-  private def removeConflictingEdges(spark: SparkSession, edges: DataFrame, edgesToRemove: RDD[Row]): DataFrame = {
+  private def removeConflictingEdges(spark: SparkSession, edges: DataFrame, //
+      edgesToRemove: RDD[Row], gcComponents: DataFrame, vertices: DataFrame): DataFrame = {
+
+    val gcVertices: DataFrame = vertices
+      .filter(col(vertexType) === docV)
+      .withColumnRenamed("id", src)
+      .join(gcComponents, Seq(componentId), joinType="right")
+      .select(src)
+
     val edgesToRemoveDf = spark.createDataFrame(edgesToRemove, edgePairSchema)
-    edges.join(edgesToRemoveDf, Seq(src, dst), "leftanti")
+
+    val edgesAfterTieBreaking = edges
+      .join(edgesToRemoveDf, Seq(src, dst), joinType="leftanti")
+    
+    edgesAfterTieBreaking
+      .join(gcVertices, Seq(src), joinType="leftanti")
   }
 
   private def calculateEdgesToRemove(spark: SparkSession, pregelGraph: Graph[PregelVertexAttr, String],
@@ -125,19 +143,19 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     pairsToRemove
   }
 
-  private def generateFilteredGraph(vertices: DataFrame, edges: DataFrame, verticesWithoutConflicts: DataFrame, //
+  private def generateFilteredGraph(vertices: DataFrame, edges: DataFrame, tieBreakingVertices: DataFrame, //
       conflictIdsDf: DataFrame):Graph[(String, String, String, String, Long), String] = {
 
-    // verticesWithoutConflicts has one column "id"
+    // tieBreakingVertices has one column "id"
     val filteredEdges = edges
-      .join(verticesWithoutConflicts.withColumnRenamed("id", src), Seq(src), "leftanti")
+      .join(tieBreakingVertices.withColumnRenamed("id", src), Seq(src), joinType="right")
 
     val erdd: RDD[Edge[String]] = filteredEdges
       .rdd.map(row => Edge(row.getAs[VertexId](0), row.getAs[VertexId](1), row.getAs[String](2)))
 
     // conflictIdsDf has componentId, fromId, toId
     val verticesWithToId: DataFrame = vertices
-      .join(conflictIdsDf.drop(componentId).withColumnRenamed(fromId, "id"), Seq("id"), "left")
+      .join(conflictIdsDf.drop(componentId).withColumnRenamed(fromId, "id"), Seq("id"), joinType="left")
 
     val vrdd: RDD[(VertexId,
       (
@@ -160,8 +178,11 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     Graph(vrdd, erdd)
   }
 
-  private def generateEntityIdsDf(edgesDf: DataFrame, vertices: DataFrame): DataFrame = {
-    val graphFrame = GraphFrame(vertices, edgesDf)
+  private def generateEntityIdsDf(edgesDf: DataFrame, gcComponents: DataFrame, vertices: DataFrame): DataFrame = {
+    val verticesWithoutGc: DataFrame = vertices
+      .join(gcComponents, Seq(componentId), joinType="leftanti")
+
+    val graphFrame = GraphFrame(verticesWithoutGc, edgesDf)
     val entityDf: DataFrame = graphFrame.connectedComponents.run()
 
     val entityIdUDF = udf(() => java.util.UUID.randomUUID.toString)
@@ -170,47 +191,71 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     entityDf.join(entityIds, Seq(component), joinType = "inner").select("id", entityId)
   }
 
-  private def generateConflictIdsDf(vertices: DataFrame): DataFrame = {
-    // conflictsDf should have columns - id, systemId, componentId
-    // with only rows that are conflicting IdVs
+  private def generateConflictOutputs(vertices: DataFrame): List[DataFrame] = {
     val w = Window.partitionBy(componentId, systemId)
-    val conflictsDf: DataFrame = vertices
-      .filter(col(vertexType) === idV)
+    val countedVertices: DataFrame = vertices
       .withColumn(countCol, count(systemId).over(w))
-      .filter(col(countCol) > 1)
-      .drop(countCol, vertexType, vertexValue)
 
-    // conflictIdsDf should have columns - fromId, toId, componentId
+    // Components with more than 4 conflicting values
+    // We only need one row per component
+    val rowNumber = "rowNumber"
+    val gcComponents: DataFrame = countedVertices
+      .filter(col(countCol) > 4)
+      .withColumn(rowNumber, row_number.over(Window.partitionBy(componentId).orderBy("id")))
+      .filter(col(rowNumber) === 1)
+      .select(componentId)
+
+    // Only contains rows that are conflicting IdVs
+    val conflictsDf: DataFrame = countedVertices
+      .filter(col(vertexType) === idV && col(countCol) > 1 && col(countCol) < 5)
+      .select("id", systemId, componentId)
+
+    // conflictIdsDf columns: fromId, toId, componentId
     // with each row representing a unique conflict pair
-    conflictsDf.alias(from).withColumnRenamed("id", fromId)
-      .join(conflictsDf.alias(to).withColumnRenamed("id", toId), Seq(componentId, systemId), "outer")
+    val conflictIdsDf: DataFrame = conflictsDf.alias(from).withColumnRenamed("id", fromId)
+      .join(conflictsDf.alias(to).withColumnRenamed("id", toId), Seq(componentId, systemId), joinType="outer")
       .filter(col(fromId) < col(toId))
       .drop(systemId)
+
+    List(conflictIdsDf, gcComponents)
   }
 
-  private def getVerticesWithoutConflicts(conflictsDf: DataFrame, vertices: DataFrame): DataFrame = {
-    vertices
+  private def getTieBreakingVertices(conflictsDf: DataFrame, gcComponents: DataFrame, //
+      vertices: DataFrame): DataFrame = {
+
+    val verticesAfterGc = vertices
+      .join(gcComponents.drop("id"), Seq(componentId), joinType="leftanti")
+
+    verticesAfterGc
       .filter(col(vertexType) === docV)
-      .join(conflictsDf, Seq(componentId), "leftanti")
+      .join(conflictsDf, Seq(componentId), joinType="right")
       .select("id")
   }
 
-  private def generateInconsistencyReportDf(vertexDf: DataFrame, conflictIdsDf: DataFrame): DataFrame = {
+  private def generateInconsistencyReportDf(vertexDf: DataFrame, conflictIdsDf: DataFrame, //
+      gcComponents: DataFrame): DataFrame = {
+
     val flipedConflictIdsDf = conflictIdsDf
-      .drop(componentId)
       .withColumnRenamed(fromId, "temp")
       .withColumnRenamed(toId, fromId)
       .withColumnRenamed("temp", toId)
 
-    val otherVertices = conflictIdsDf
-      .drop(componentId)
+    val allTieBreakingVertices = conflictIdsDf
       .union(flipedConflictIdsDf)
       .withColumnRenamed(fromId, "id")
-      .withColumnRenamed(toId, otherIdVId)
-    
-    vertexDf
-      .drop(vertexType)
-      .join(otherVertices, Seq("id"), "inner")
+      .withColumn(resolutionStrategy, lit(tieBreakingProcess))
+      .select("id", resolutionStrategy)
+
+    val tieBreakingReport = vertexDf.join(allTieBreakingVertices, Seq("id"), joinType="inner")
+
+    val gcVertices = vertexDf
+      .join(gcComponents, Seq(componentId), joinType="right")
+      .withColumn(resolutionStrategy, lit(garbageCollector))
+      .select("id", resolutionStrategy)
+
+    val gcReport = vertexDf.join(gcVertices, Seq("id"), joinType="inner")
+
+    tieBreakingReport.union(gcReport)
   }
 
   private def initiateGraphAndRunPregel(graph: Graph[(String, String, String, String, Long), String], maxComponentSize: Int //
