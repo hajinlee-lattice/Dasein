@@ -29,9 +29,10 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
   private val toId = "toID"
   private val src = "src"
   private val dst = "dst"
-  private val tieBreakingProcess = "TieBreakingProcess"
+  private val tieBreaking = "TieBreaking"
   private val garbageCollector = "GarbageCollector"
   private val resolutionStrategy = "ResolutionStrategy"
+  private val tieBreakingThreshold = 4
 
   private val edgesSchema = StructType(List( //
     StructField(src, LongType, nullable = false), //
@@ -200,14 +201,14 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     // We only need one row per component
     val rowNumber = "rowNumber"
     val gcComponents: DataFrame = countedVertices
-      .filter(col(countCol) > 4)
+      .filter(col(countCol) > tieBreakingThreshold)
       .withColumn(rowNumber, row_number.over(Window.partitionBy(componentId).orderBy("id")))
       .filter(col(rowNumber) === 1)
       .select(componentId)
 
     // Only contains rows that are conflicting IdVs
     val conflictsDf: DataFrame = countedVertices
-      .filter(col(vertexType) === idV && col(countCol) > 1 && col(countCol) < 5)
+      .filter(col(vertexType) === idV && col(countCol) > 1 && col(countCol) <= tieBreakingThreshold)
       .select("id", systemId, componentId)
 
     // conflictIdsDf columns: fromId, toId, componentId
@@ -243,7 +244,7 @@ class AssignEntityIdsJob extends AbstractSparkJob[AssignEntityIdsJobConfig] {
     val allTieBreakingVertices = conflictIdsDf
       .union(flipedConflictIdsDf)
       .withColumnRenamed(fromId, "id")
-      .withColumn(resolutionStrategy, lit(tieBreakingProcess))
+      .withColumn(resolutionStrategy, lit(tieBreaking))
       .select("id", resolutionStrategy)
 
     val tieBreakingReport = vertexDf.join(allTieBreakingVertices, Seq("id"), joinType="inner")
