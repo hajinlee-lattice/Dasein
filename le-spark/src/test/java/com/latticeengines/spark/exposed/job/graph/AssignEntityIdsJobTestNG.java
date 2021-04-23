@@ -72,7 +72,16 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
                 { 17L, idV, "DW2AccountID", "DW2004455", "component03" }, //
                 { 18L, idV, "DW1AccountID", "DW1000918", "component03" }, //
                 { 19L, idV, "DW1AccountID", "DW1004358", "component03" }, //
-                { 20L, idV, "SalesforceAccountID", "SF2000338", "component03" }
+                { 20L, idV, "SalesforceAccountID", "SF2000338", "component03" }, //
+                { 30L, docV, "Salesforce", "SF2000341", "component04" }, //
+                { 31L, docV, "Salesforce", "SF2001435", "component04" }, //
+                { 32L, docV, "Salesforce", "SF2003423", "component04" }, //
+                { 33L, docV, "Salesforce", "SF2000742", "component04" }, //
+                { 40L, idV, "DW2AccountID", "DW2000587", "component04" }, //
+                { 41L, idV, "DW2AccountID", "DW2000674", "component04" }, //
+                { 42L, idV, "DW2AccountID", "DW2000367", "component04" }, //
+                { 43L, idV, "DW2AccountID", "DW2000457", "component04" }, //
+                { 44L, idV, "DW2AccountID", "DW2000874", "component04" }, //
         };
         uploadHdfsDataUnit(vertices, VERTEX_FIELDS);
 
@@ -93,7 +102,15 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
                 { 7L, 17L, "{}" }, //
                 { 7L, 18L, "{}" }, //
                 { 8L, 18L, "{}" }, //
-                { 8L, 20L, "{}" }
+                { 8L, 20L, "{}" }, //
+                { 30L, 40L, "{}" }, //
+                { 30L, 41L, "{}" }, //
+                { 31L, 41L, "{}" }, //
+                { 31L, 42L, "{}" }, //
+                { 32L, 40L, "{}" }, //
+                { 32L, 43L, "{}" }, //
+                { 33L, 43L, "{}" }, //
+                { 33L, 44L, "{}" }
         };
         uploadHdfsDataUnit(edges, EDGE_FIELDS);
 
@@ -116,18 +133,21 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
         iterator.forEachRemaining(record -> {
             // System.out.println(record);
 
-            String entityId = getString(record, "entityID");
-            entityIds.add(entityId);
             count.incrementAndGet();
+            String entityId = getString(record, "entityID");
+            if (entityId != null) {
+                entityIds.add(entityId);
+            }
         });
 
-        // Should have 18 vertices because we should remove none
-        Assert.assertEquals(count.get(), 18);
+        // Should have 27 vertices because we should remove none
+        Assert.assertEquals(count.get(), 27);
 
         // Should have 5 unique entity IDs
-        // From 3 connected components, we split two of them into two:
+        // From 4 connected components, we split two of them into two:
         // cut (7 -> 18) to split component03 into two entities
         // cut (2 -> 12) to split component01 into two entities (one of them only have the IdV-DW2AccountID-DW2000790)
+        // Also, we don't assign entity ID to garbage collector components
         Assert.assertEquals(entityIds.size(), 5);
 
         return true;
@@ -140,7 +160,9 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
             // System.out.println(record);
             count.incrementAndGet();
         });
-        // Should have 15 edges because we should remove 2: (7 -> 18) and (2 -> 12)
+        // Should have 15 edges because we start with 25,
+        // remove 2: (7 -> 18) and (2 -> 12) in tie-breaking, and
+        // remove 8: all edges in component04 as garbage collector
         Assert.assertEquals(count.get(), 15);
         return true;
     }
@@ -152,8 +174,9 @@ public class AssignEntityIdsJobTestNG extends SparkJobFunctionalTestNGBase {
             // System.out.println(record);
             count.incrementAndGet();
         });
-        // Should have 6 rows in InconsitencyReport
-        Assert.assertEquals(count.get(), 6);
+        // 6 rows with TieBreakingProcess +
+        // 9 rows with GarbageCollector
+        Assert.assertEquals(count.get(), 15);
         return true;
     }
 
