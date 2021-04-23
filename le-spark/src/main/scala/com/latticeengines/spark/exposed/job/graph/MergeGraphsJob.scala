@@ -8,8 +8,10 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.spark.graphx._
 import org.apache.spark.graphx.lib.ConnectedComponents
 import org.apache.spark.graphx.PartitionStrategy.RandomVertexCut
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.sql.functions.{col, udf}
+import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql.functions.{col, count, min, udf}
 import org.apache.spark.sql.types._
 import org.apache.spark.rdd.RDD
 import org.graphframes.GraphFrame
@@ -19,13 +21,55 @@ import scala.collection.mutable.HashMap
 class MergeGraphsJob extends AbstractSparkJob[MergeGraphsJobConfig] {
   private val VERTEX_ID = "id"
   private val CONNECTED_COMPONENT_ID = "ConnectedComponentID"
+  private val SYSTEM_ID = "systemID"
+  private val VERTEX_VALUE = "vertexValue"
+
+  private val fromId = "fromID"
+  private val toId = "toID"
+  private val countCol = "count"
+  private val component = "component"
+
+  private val src = "src";
+  private val dst = "dst";
+  private val prop = "property";
+
+  private val edgesSchema = StructType(List( //
+    StructField(src, LongType, nullable = false), //
+    StructField(dst, LongType, nullable = false), //
+    StructField(prop, StringType, nullable = false)
+  ))
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[MergeGraphsJobConfig]): Unit = {
     val config: MergeGraphsJobConfig = lattice.config
     val inputs: List[DataFrame] = lattice.input
 
-    // Step 1. Seperate vertexInputs and edgeInputs
-    // and merge each of them into one dataframe
+    val combinedDfs = combineInputs(inputs)
+    val verticesDf = combinedDfs.head
+    val edgesDf = combinedDfs.last
+
+    val duplicateVertices: DataFrame = generateDuplicateVertices(verticesDf)
+    val updatedVerticesDf: DataFrame = updateVertices(duplicateVertices, verticesDf)
+    val updatedEdgesDf: DataFrame = updateEdges(spark, duplicateVertices, edgesDf)
+
+    val graphFrame = GraphFrame(updatedVerticesDf, updatedEdgesDf)
+    val components: DataFrame = graphFrame.connectedComponents.run()
+
+    val verticesWithCcDf = generateVerticesWithComponents(components, updatedVerticesDf)
+
+    lattice.output = List(verticesWithCcDf, updatedEdgesDf)
+  }
+
+  private def generateDuplicateVertices(vertices: DataFrame): DataFrame = {
+    val w = Window.partitionBy(SYSTEM_ID, VERTEX_VALUE)
+    vertices
+      .withColumnRenamed("id", fromId)
+      .withColumn(countCol, count(VERTEX_VALUE).over(w))
+      .withColumn(toId, min(col(fromId)).over(w))
+      .filter(col(countCol) > 1 && (col(fromId) !== col(toId)))
+      .select(fromId, toId)
+  }
+
+  private def combineInputs(inputs: List[DataFrame]): List[DataFrame] = {
     var vertexInputs: List[DataFrame] = List()
     var edgeInputs: List[DataFrame] = List()
     for (input <- inputs) {
@@ -41,29 +85,10 @@ class MergeGraphsJob extends AbstractSparkJob[MergeGraphsJobConfig] {
     val edgesDf: DataFrame = edgeInputs
       .reduce((a,b) => a.union(b))
 
-    // Step 2. Find duplicate vertices and update vertices and edges
-    var vertexRef = new HashMap[String, Long]()
-    var convertEdge = new HashMap[Long, Long]()
-    verticesDf.collect().map(row => {
-      if (row.getAs[String](1) == "IdV") {
-        val vertexId: Long = row.getAs[Long](0)
-        val property: String = row.getAs[String](2) + row.getAs[String](3)
-        if (vertexRef.contains(property)) {
-          convertEdge += (vertexId -> vertexRef.getOrElse(property, 0L))
-        } else {
-          vertexRef += (property -> vertexId)
-        }
-      }
-    })
+    List(verticesDf, edgesDf)
+  }
 
-    val updatedVerticesDf: DataFrame = updateVertices(convertEdge.keySet, verticesDf)
-    val updatedEdgesDf: DataFrame = updateEdges(convertEdge, edgesDf)
-
-    // Step 3. Create GraphFrame and run ConnectedComponents
-    val graphFrame = GraphFrame(updatedVerticesDf, updatedEdgesDf)
-    val components: DataFrame = graphFrame.connectedComponents.run()
-
-    // Step 4. Encode CC ID and add it to VerticesDF 
+  private def generateVerticesWithComponents(components: DataFrame, vertices: DataFrame): DataFrame = {
     val encodeIdFunc: Long => String = ccId => {
       val addZeros = "%09d".format(ccId).toString()
       val withMd5 = MessageDigest.getInstance("MD5").digest(addZeros.getBytes)
@@ -72,26 +97,35 @@ class MergeGraphsJob extends AbstractSparkJob[MergeGraphsJobConfig] {
     }
     val componentsIdUDF = udf(encodeIdFunc)
     val componentsDf = components
-        .select("id", "component")
-        .withColumn("component", componentsIdUDF(col("component")))
-        .withColumnRenamed("component", CONNECTED_COMPONENT_ID)
+      .select("id", component)
+      .withColumn(component, componentsIdUDF(col(component)))
+      .withColumnRenamed(component, CONNECTED_COMPONENT_ID)
 
-    val verticesWithCcDf: DataFrame = updatedVerticesDf
-        .join(componentsDf, Seq(VERTEX_ID), "left")
-
-    lattice.output = List(verticesWithCcDf, updatedEdgesDf)
+    vertices.join(componentsDf, Seq(VERTEX_ID), joinType="left")
   }
 
-  private def updateEdges(convertEdge: HashMap[Long, Long], edgesDf: DataFrame): DataFrame = {
-    val updateFunc: Long => Long = dst => {
-      if (convertEdge.contains(dst)) convertEdge.getOrElse(dst, dst) else dst
-    }
-    val updateEdge = udf(updateFunc)
-    edgesDf.withColumn("dst", updateEdge(col("dst")))
+  private def updateEdges(spark: SparkSession, duplicateVertices: DataFrame, edgesDf: DataFrame): DataFrame = {
+    val edgeRows: RDD[Row] = edgesDf
+      .join(duplicateVertices.withColumnRenamed(fromId, dst), Seq(dst), joinType="left")
+      .rdd.map(row => {
+        val dst = row.getLong(0)
+        val src = row.getLong(1)
+        val prop = row.getString(2)
+        val convertId = row(3) // long or null
+        if (convertId != null) {
+          Row(src, convertId, prop)
+        } else {
+          Row(src, dst, prop)
+        }
+      })
+
+    spark.createDataFrame(edgeRows, edgesSchema)
   }
 
-  private def updateVertices(duplicateVertices: Set[Long], verticesDf: DataFrame): DataFrame = {
-    val checkList = duplicateVertices.toList
-    verticesDf.filter(!col("id").isin(checkList:_*))
+  private def updateVertices(duplicateVertices: DataFrame, verticesDf: DataFrame): DataFrame = {
+    val dropVertices = duplicateVertices.withColumnRenamed(fromId, "id").drop(toId)
+
+    verticesDf
+      .join(dropVertices, Seq("id"), joinType="leftanti")
   }
 }
